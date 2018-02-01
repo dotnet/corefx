@@ -18,9 +18,9 @@ namespace System.Buffers
                 return false;
             }
 
-            var startIndex = start.Index;
-            var endIndex = end.Index;
-            var type = GetBufferType();
+            int startIndex = start.Index;
+            int endIndex = end.Index;
+            BufferType type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
             endIndex = GetIndex(endIndex);
@@ -29,7 +29,8 @@ namespace System.Buffers
             {
                 case BufferType.MemoryList:
                     var bufferSegment = (IMemoryList<T>) start.Segment;
-                    var currentEndIndex = bufferSegment.Memory.Length;
+                    Memory<T> bufferSegmentMemory = bufferSegment.Memory;
+                    int currentEndIndex = bufferSegmentMemory.Length;
 
                     if (bufferSegment == end.Segment)
                     {
@@ -38,7 +39,7 @@ namespace System.Buffers
                     }
                     else
                     {
-                        var nextSegment = bufferSegment.Next;
+                        IMemoryList<T> nextSegment = bufferSegment.Next;
                         if (nextSegment == null)
                         {
                             if (end.Segment != null)
@@ -54,34 +55,32 @@ namespace System.Buffers
                         }
                     }
 
-                    data = bufferSegment.Memory.Slice(startIndex, currentEndIndex - startIndex);
-
+                    data = bufferSegmentMemory.Slice(startIndex, currentEndIndex - startIndex);
                     return true;
 
-
                 case BufferType.OwnedMemory:
-                    var ownedMemory = (OwnedMemory<T>) start.Segment;
-                    data = ownedMemory.Memory.Slice(startIndex, endIndex - startIndex);
-
+                    var ownedMemory = (OwnedMemory<T>)start.Segment;
                     if (ownedMemory != end.Segment)
                     {
                         ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
                     }
 
+                    data = ownedMemory.Memory.Slice(startIndex, endIndex - startIndex);
                     next = default;
                     return true;
 
                 case BufferType.Array:
-                    var array = (T[]) start.Segment;
-                    data = new Memory<T>(array, startIndex, endIndex - startIndex);
+                    var array = (T[])start.Segment;
 
                     if (array != end.Segment)
                     {
                         ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
                     }
 
+                    data = new Memory<T>(array, startIndex, endIndex - startIndex);
                     next = default;
                     return true;
+
                 default:
                     ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
                     next = default;
@@ -93,9 +92,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal SequencePosition Seek(SequencePosition start, SequencePosition end, int count, bool checkEndReachable = true)
         {
-            var startIndex = start.Index;
-            var endIndex = end.Index;
-            var type = GetBufferType();
+            int startIndex = start.Index;
+            int endIndex = end.Index;
+            BufferType type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
             endIndex = GetIndex(endIndex);
@@ -107,8 +106,7 @@ namespace System.Buffers
                     {
                         return new SequencePosition(start.Segment, startIndex + count);
                     }
-                    return SeekMultiSegment((IMemoryList<byte>) start.Segment, startIndex, (IMemoryList<byte>) end.Segment, endIndex, count, checkEndReachable);
-
+                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count, checkEndReachable);
 
                 case BufferType.OwnedMemory:
                 case BufferType.Array:
@@ -134,9 +132,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal SequencePosition Seek(SequencePosition start, SequencePosition end, long count, bool checkEndReachable = true)
         {
-            var startIndex = start.Index;
-            var endIndex = end.Index;
-            var type = GetBufferType();
+            int startIndex = start.Index;
+            int endIndex = end.Index;
+            BufferType type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
             endIndex = GetIndex(endIndex);
@@ -146,17 +144,16 @@ namespace System.Buffers
                 case BufferType.MemoryList:
                     if (start.Segment == end.Segment && endIndex - startIndex >= count)
                     {
-                        // end.Index >= bytes + Index and end.Index is int
+                        // end.Index >= count + Index and end.Index is int
                         return new SequencePosition(start.Segment, startIndex + (int)count);
                     }
-                    return SeekMultiSegment((IMemoryList<byte>) start.Segment, startIndex, (IMemoryList<byte>) end.Segment, endIndex, count, checkEndReachable);
-
+                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count, checkEndReachable);
 
                 case BufferType.OwnedMemory:
                 case BufferType.Array:
                     if (endIndex - startIndex >= count)
                     {
-                        // end.Index >= bytes + Index and end.Index is int
+                        // end.Index >= count + Index and end.Index is int
                         return new SequencePosition(start.Segment, startIndex + (int)count);
                     }
 
@@ -173,9 +170,9 @@ namespace System.Buffers
         private static SequencePosition SeekMultiSegment(IMemoryList<byte> start, int startIndex, IMemoryList<byte> end, int endPosition, long count, bool checkEndReachable)
         {
             SequencePosition result = default;
-            var foundResult = false;
-            var current = start;
-            var currentIndex = startIndex;
+            bool foundResult = false;
+            IMemoryList<byte> current = start;
+            int currentIndex = startIndex;
 
             while (current != null)
             {
@@ -183,8 +180,8 @@ namespace System.Buffers
                 // if end is not trusted
                 if (!foundResult)
                 {
-                    var memory = current.Memory;
-                    var currentEnd = current == end ? endPosition : memory.Length;
+                    Memory<byte> memory = current.Memory;
+                    int currentEnd = current == end ? endPosition : memory.Length;
 
                     memory = memory.Slice(0, currentEnd - currentIndex);
                     // We would prefer to put position in the beginning of next segment
@@ -223,9 +220,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(SequencePosition start, SequencePosition end)
         {
-            var startIndex = start.Index;
-            var endIndex = end.Index;
-            var type = GetBufferType();
+            int startIndex = start.Index;
+            int endIndex = end.Index;
+            BufferType type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
             endIndex = GetIndex(endIndex);
@@ -233,11 +230,12 @@ namespace System.Buffers
             switch (type)
             {
                 case BufferType.MemoryList:
-                    return GetLength((IMemoryList<T>) start.Segment, startIndex, (IMemoryList<T>)end.Segment, endIndex);
+                    return GetLength((IMemoryList<T>)start.Segment, startIndex, (IMemoryList<T>)end.Segment, endIndex);
 
                 case BufferType.OwnedMemory:
                 case BufferType.Array:
                     return endIndex - startIndex;
+
                 default:
                     ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
                     return default;
@@ -264,9 +262,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void BoundsCheck(SequencePosition start, SequencePosition position)
         {
-            var startIndex = start.Index;
-            var endIndex = position.Index;
-            var type = GetBufferType();
+            int startIndex = start.Index;
+            int endIndex = position.Index;
+            BufferType type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
             endIndex = GetIndex(endIndex);
@@ -280,15 +278,17 @@ namespace System.Buffers
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
                     return;
+
                 case BufferType.MemoryList:
-                    var segment = (IMemoryList<T>)position.Segment;
-                    var memoryList = (IMemoryList<T>) start.Segment;
+                    IMemoryList<T> segment = (IMemoryList<T>)position.Segment;
+                    IMemoryList<T> memoryList = (IMemoryList<T>)start.Segment;
 
                     if (segment.RunningIndex - startIndex > memoryList.RunningIndex - endIndex)
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
                     return;
+
                 default:
                     ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
                     return;

@@ -14,9 +14,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
-    <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlyBufferFactory.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
@@ -65,6 +62,11 @@
     <Compile Include="Span\StartsWith.T.cs" />
     <Compile Include="Span\StartsWith.byte.cs" />
     <Compile Include="Span\ToArray.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlyBufferFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsBytes.cs" />

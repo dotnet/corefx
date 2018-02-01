@@ -28,6 +28,7 @@ namespace System.Buffers
         private readonly SequencePosition _bufferStart;
         private readonly SequencePosition _bufferEnd;
 
+
         /// <summary>
         /// Returns empty <see cref="ReadOnlyBuffer{T}"/>
         /// </summary>
@@ -55,7 +56,7 @@ namespace System.Buffers
         {
             get
             {
-                TryGetBuffer(_bufferStart, _bufferEnd, out var first, out _);
+                TryGetBuffer(_bufferStart, _bufferEnd, out ReadOnlyMemory<T> first, out _);
                 return first;
             }
         }
@@ -121,7 +122,7 @@ namespace System.Buffers
         /// </summary>
         public ReadOnlyBuffer(ReadOnlyMemory<T> readOnlyMemory)
         {
-            var segment = new ReadOnlyBufferSegment
+            ReadOnlyBufferSegment segment = new ReadOnlyBufferSegment
             {
                 Memory = MemoryMarshal.AsMemory(readOnlyMemory)
             };
@@ -136,8 +137,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlyBuffer<T> Slice(long start, long length)
         {
-            var begin = Seek(_bufferStart, _bufferEnd, start, false);
-            var end = Seek(begin, _bufferEnd, length, false);
+            SequencePosition begin = Seek(_bufferStart, _bufferEnd, start, false);
+            SequencePosition end = Seek(begin, _bufferEnd, length, false);
             return SliceImpl(begin, end);
         }
 
@@ -150,7 +151,7 @@ namespace System.Buffers
         {
             BoundsCheck(_bufferEnd, end);
 
-            var begin = Seek(_bufferStart, end, start);
+            SequencePosition begin = Seek(_bufferStart, end, start);
             return SliceImpl(begin, end);
         }
 
@@ -163,7 +164,7 @@ namespace System.Buffers
         {
             BoundsCheck(_bufferEnd, start);
 
-            var end = Seek(start, _bufferEnd, length, false);
+            SequencePosition end = Seek(start, _bufferEnd, length, false);
             return SliceImpl(start, end);
         }
 
@@ -174,8 +175,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlyBuffer<T> Slice(int start, int length)
         {
-            var begin = Seek(_bufferStart, _bufferEnd, start, false);
-            var end = Seek(begin, _bufferEnd, length, false);
+            SequencePosition begin = Seek(_bufferStart, _bufferEnd, start, false);
+            SequencePosition end = Seek(begin, _bufferEnd, length, false);
             return SliceImpl(begin, end);
         }
 
@@ -188,7 +189,7 @@ namespace System.Buffers
         {
             BoundsCheck(_bufferEnd, end);
 
-            var begin = Seek(_bufferStart, end, start);
+            SequencePosition begin = Seek(_bufferStart, end, start);
             return SliceImpl(begin, end);
         }
 
@@ -201,7 +202,7 @@ namespace System.Buffers
         {
             BoundsCheck(_bufferEnd, start);
 
-            var end = Seek(start, _bufferEnd, length, false);
+            SequencePosition end = Seek(start, _bufferEnd, length, false);
             return SliceImpl(start, end);
         }
 
@@ -237,7 +238,7 @@ namespace System.Buffers
         {
             if (start == 0) return this;
 
-            var begin = Seek(_bufferStart, _bufferEnd, start, false);
+            SequencePosition begin = Seek(_bufferStart, _bufferEnd, start, false);
             return SliceImpl(begin, _bufferEnd);
         }
 
@@ -248,8 +249,8 @@ namespace System.Buffers
             {
                 if (this is ReadOnlyBuffer<byte> bytes)
                 {
-                    var sb = new StringBuilder();
-                    foreach (var buffer in bytes)
+                    StringBuilder sb = new StringBuilder();
+                    foreach (ReadOnlyMemory<byte> buffer in bytes)
                     {
                         SpanLiteralExtensions.AppendAsLiteral(buffer.Span, sb);
                     }
@@ -262,10 +263,7 @@ namespace System.Buffers
         /// <summary>
         /// Returns an enumerator over the <see cref="ReadOnlyBuffer{T}"/>
         /// </summary>
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+        public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         /// Returns new <see cref="SequencePosition"/> that is offset by <paramref name="offset"/> starting with <paramref name="origin"/>
@@ -286,7 +284,7 @@ namespace System.Buffers
         /// </summary>
         public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> data, bool advance = true)
         {
-            var result = TryGetBuffer(position, End, out data, out var next);
+            bool result = TryGetBuffer(position, End, out data, out SequencePosition next);
             if (advance)
             {
                 position = next;
