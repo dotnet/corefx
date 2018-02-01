@@ -232,7 +232,7 @@ namespace System
                 unsafe
                 {
                     fixed (char* src = &Unsafe.As<T, char>(ref DangerousGetPinnableReference()))
-                        return new string(src, _length);
+                        return new string(src, 0, _length);
                 }
             }
             return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
