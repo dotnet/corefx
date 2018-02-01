@@ -10,10 +10,10 @@ namespace System.Memory.Tests
 {
     public abstract class ReadOnlyBufferFactory
     {
-        public static ReadOnlyBufferFactory Array { get; } = new ArrayTestBufferFactory();
-        public static ReadOnlyBufferFactory Memory { get; } = new MemoryTestBufferFactory();
-        public static ReadOnlyBufferFactory SingleSegment { get; } = new SingleSegmentTestBufferFactory();
-        public static ReadOnlyBufferFactory SegmentPerByte { get; } = new BytePerSegmentTestBufferFactory();
+        public static ReadOnlyBufferFactory ArrayFactory { get; } = new ArrayTestBufferFactory();
+        public static ReadOnlyBufferFactory MemoryFactory { get; } = new MemoryTestBufferFactory();
+        public static ReadOnlyBufferFactory SingleSegmentFactory { get; } = new SingleSegmentTestBufferFactory();
+        public static ReadOnlyBufferFactory SegmentPerByteFactory { get; } = new BytePerSegmentTestBufferFactory();
 
         public abstract ReadOnlyBuffer<byte> CreateOfSize(int size);
         public abstract ReadOnlyBuffer<byte> CreateWithContent(byte[] data);
@@ -33,7 +33,7 @@ namespace System.Memory.Tests
             public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
             {
                 var startSegment = new byte[data.Length + 20];
-                System.Array.Copy(data, 0, startSegment, 10, data.Length);
+                Array.Copy(data, 0, startSegment, 10, data.Length);
                 return new ReadOnlyBuffer<byte>(startSegment, 10, data.Length);
             }
         }
@@ -48,12 +48,12 @@ namespace System.Memory.Tests
             public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
             {
                 var startSegment = new byte[data.Length + 20];
-                System.Array.Copy(data, 0, startSegment, 10, data.Length);
+                Array.Copy(data, 0, startSegment, 10, data.Length);
                 return new ReadOnlyBuffer<byte>(new Memory<byte>(startSegment, 10, data.Length));
             }
         }
 
-        internal class SingleSegmentTestBufferFactory: ReadOnlyBufferFactory
+        internal class SingleSegmentTestBufferFactory : ReadOnlyBufferFactory
         {
             public override ReadOnlyBuffer<byte> CreateOfSize(int size)
             {
@@ -66,7 +66,7 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class BytePerSegmentTestBufferFactory: ReadOnlyBufferFactory
+        internal class BytePerSegmentTestBufferFactory : ReadOnlyBufferFactory
         {
             public override ReadOnlyBuffer<byte> CreateOfSize(int size)
             {
@@ -77,11 +77,11 @@ namespace System.Memory.Tests
             {
                 var segments = new List<byte[]>();
 
-                segments.Add(System.Array.Empty<byte>());
+                segments.Add(Array.Empty<byte>());
                 foreach (var b in data)
                 {
-                    segments.Add(new [] { b });
-                    segments.Add(System.Array.Empty<byte>());
+                    segments.Add(new[] { b });
+                    segments.Add(Array.Empty<byte>());
                 }
 
                 return CreateSegments(segments.ToArray());
@@ -95,16 +95,16 @@ namespace System.Memory.Tests
                 throw new InvalidOperationException();
             }
 
-            var i = 0;
+            int i = 0;
 
             BufferSegment last = null;
             BufferSegment first = null;
 
             do
             {
-                var s = inputs[i];
-                var length = s.Length;
-                var dataOffset = length;
+                byte[] s = inputs[i];
+                int length = s.Length;
+                int dataOffset = length;
                 var chars = new byte[length * 2];
 
                 for (int j = 0; j < length; j++)

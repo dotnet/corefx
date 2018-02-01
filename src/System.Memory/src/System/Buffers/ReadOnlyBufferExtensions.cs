@@ -2,13 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#pragma warning disable 1591
-
 namespace System.Buffers
 {
+    /// <summary>
+    /// Extension methods for <see cref="ReadOnlyBuffer{T}"/>
+    /// </summary>
     public static class ReadOnlyBufferExtensions
     {
-        public static SequencePosition? PositionOf<T>(this ReadOnlyBuffer<T> buffer, T value) where T: IEquatable<T>
+        /// <summary>
+        /// Returns position of first occurance of item in the <see cref="ReadOnlyBuffer{T}"/>
+        /// </summary>
+        public static SequencePosition? PositionOf<T>(this ReadOnlyBuffer<T> buffer, T value) where T : IEquatable<T>
         {
             SequencePosition position = buffer.Start;
             SequencePosition result = position;

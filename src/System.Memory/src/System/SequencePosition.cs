@@ -46,7 +46,7 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj) => obj is SequencePosition && this == (SequencePosition)obj;
+        public override bool Equals(object obj) => obj is SequencePosition other && this == other;
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]

@@ -10,24 +10,24 @@ namespace System.Memory.Tests
 {
     public abstract class ReadOnlyBufferFacts
     {
-        public class Array: ReadOnlyBufferFacts
+        public class Array : ReadOnlyBufferFacts
         {
-            public Array() : base(ReadOnlyBufferFactory.Array) { }
+            public Array() : base(ReadOnlyBufferFactory.ArrayFactory) { }
         }
 
-        public class OwnedMemory: ReadOnlyBufferFacts
+        public class OwnedMemory : ReadOnlyBufferFacts
         {
-            public OwnedMemory() : base(ReadOnlyBufferFactory.Memory) { }
+            public OwnedMemory() : base(ReadOnlyBufferFactory.MemoryFactory) { }
         }
 
-        public class SingleSegment: ReadOnlyBufferFacts
+        public class SingleSegment : ReadOnlyBufferFacts
         {
-            public SingleSegment() : base(ReadOnlyBufferFactory.SingleSegment) { }
+            public SingleSegment() : base(ReadOnlyBufferFactory.SingleSegmentFactory) { }
         }
 
-        public class SegmentPerByte: ReadOnlyBufferFacts
+        public class SegmentPerByte : ReadOnlyBufferFacts
         {
-            public SegmentPerByte() : base(ReadOnlyBufferFactory.SegmentPerByte) { }
+            public SegmentPerByte() : base(ReadOnlyBufferFactory.SegmentPerByteFactory) { }
         }
 
         internal ReadOnlyBufferFactory Factory { get; }
@@ -167,25 +167,25 @@ namespace System.Memory.Tests
         [Fact]
         public void Create_WorksWithArray()
         {
-            var buffer = new ReadOnlyBuffer<byte>(new byte[] {1, 2, 3, 4, 5}, 2, 3);
-            Assert.Equal(buffer.ToArray(), new byte[] {3, 4, 5});
+            var buffer = new ReadOnlyBuffer<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
+            Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
         }
 
         [Fact]
         public void Create_WorksWithMemory()
         {
-            var memory = new Memory<byte>(new byte[] {1, 2, 3, 4, 5});
+            var memory = new Memory<byte>(new byte[] { 1, 2, 3, 4, 5 });
             var buffer = new ReadOnlyBuffer<byte>(memory.Slice(2, 3));
-            Assert.Equal(new byte[] {3, 4, 5}, buffer.ToArray());
+            Assert.Equal(new byte[] { 3, 4, 5 }, buffer.ToArray());
         }
 
         [Fact]
         public void Create_WorksWithIEnumerableOfMemory()
         {
-            var memories = new Memory<byte>[] { new byte[] {1, 2, 3}, new byte[] {4, 5, 6}};
+            var memories = new Memory<byte>[] { new byte[] { 1, 2, 3 }, new byte[] { 4, 5, 6 } };
             var buffer = new ReadOnlyBuffer<byte>(memories);
 
-            Assert.Equal(new byte[] {1, 2, 3, 4, 5, 6}, buffer.ToArray());
+            Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6 }, buffer.ToArray());
         }
 
         [Fact]
