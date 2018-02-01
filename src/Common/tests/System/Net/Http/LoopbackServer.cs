@@ -322,6 +322,11 @@ namespace System.Net.Test.Common
                     lines.Add(line);
                 }
 
+                if (line == null)
+                {
+                    throw new Exception("BAD EOF");
+                }
+
                 return lines;
             }
 
