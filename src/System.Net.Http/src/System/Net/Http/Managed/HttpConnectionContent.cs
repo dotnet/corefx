@@ -54,6 +54,11 @@ namespace System.Net.Http
 
             protected internal override bool TryComputeLength(out long length)
             {
+                if (Headers.ContentLength != null)
+                {
+                    length = Headers.ContentLength.GetValueOrDefault();
+                    return true;
+                }
                 length = 0;
                 return false;
             }
