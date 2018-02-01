@@ -796,6 +796,7 @@ namespace System.ComponentModel
             {
                 currentReflectType = _componentClass;
                 Attribute[][] attributeStack = new Attribute[depth][];
+                int currentDepth = 0;
 
                 while (currentReflectType != null && currentReflectType != typeof(object))
                 {
@@ -831,7 +832,7 @@ namespace System.ComponentModel
                     //
                     if (memberInfo != null)
                     {
-                        attributeStack[--depth] = ReflectTypeDescriptionProvider.ReflectGetAttributes(memberInfo);
+                        attributeStack[currentDepth++] = ReflectTypeDescriptionProvider.ReflectGetAttributes(memberInfo);
                     }
 
                     // Ready for the next loop iteration.
