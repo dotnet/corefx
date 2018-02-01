@@ -215,6 +215,25 @@ namespace System.Tests
             Assert.Equal(Environment.GetEnvironmentVariable("HOME"), Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         }
 
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
+        [InlineData(Environment.SpecialFolder.ApplicationData)]
+        [InlineData(Environment.SpecialFolder.Desktop)]
+        [InlineData(Environment.SpecialFolder.DesktopDirectory)]
+        [InlineData(Environment.SpecialFolder.Fonts)]
+        [InlineData(Environment.SpecialFolder.MyMusic)]
+        [InlineData(Environment.SpecialFolder.MyPictures)]
+        [InlineData(Environment.SpecialFolder.MyVideos)]
+        [InlineData(Environment.SpecialFolder.Templates)]
+        public void GetFolderPath_Unix_SpecialFolderNotCreated_DoesNotThrow(Environment.SpecialFolder folder)
+        {
+            var path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.DoNotVerify);
+            Assert.False(System.IO.Directory.Exists(path));
+            path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.Create);
+            Assert.True(System.IO.Directory.Exists(path));
+            Directory.Delete(path);
+        }
+
         [Fact]
         public void GetSystemDirectory()
         {
