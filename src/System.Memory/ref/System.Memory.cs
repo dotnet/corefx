@@ -163,19 +163,15 @@ namespace System
     public readonly partial struct SequencePosition : System.IEquatable<System.SequencePosition>
     {
         private readonly object _dummy;
-        public SequencePosition(object segment) { throw null; }
         public SequencePosition(object segment, int index) { throw null; }
         public int Index { get { throw null; } }
         public object Segment { get { throw null; } }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public bool Equals(System.SequencePosition position) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.SequencePosition left, System.SequencePosition right) { throw null; }
         public static bool operator !=(System.SequencePosition left, System.SequencePosition right) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override string ToString() { throw null; }
     }
     public readonly ref partial struct Span<T>
@@ -281,10 +277,9 @@ namespace System.Buffers
         private readonly object _dummy;
         public static readonly System.Buffers.ReadOnlyBuffer<T> Empty;
         public ReadOnlyBuffer(System.Buffers.IMemoryList<T> startSegment, int startIndex, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
-        public ReadOnlyBuffer(System.Collections.Generic.IEnumerable<System.Memory<T>> buffers) { throw null; }
-        public ReadOnlyBuffer(System.Memory<T> memory) { throw null; }
         public ReadOnlyBuffer(T[] array) { throw null; }
         public ReadOnlyBuffer(T[] array, int offset, int length) { throw null; }
+        public ReadOnlyBuffer(System.ReadOnlyMemory<T> memory) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
         public bool IsEmpty { get { throw null; } }

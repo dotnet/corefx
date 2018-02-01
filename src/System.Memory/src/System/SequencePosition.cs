@@ -3,41 +3,56 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-#pragma warning disable 1591
 
 namespace System
 {
+    /// <summary>
+    /// Represents position in non-contiguous set of memory.
+    /// Properties of this type should not be interpreted by anything but the but the
+    /// type that created it.
+    /// </summary>
     public readonly struct SequencePosition : IEquatable<SequencePosition>
     {
-        readonly object _segment;
-        readonly int _index;
+        private readonly object _segment;
+        private readonly int _index;
 
+        /// <summary>
+        /// Creates new <see cref="SequencePosition"/>
+        /// </summary>
         public SequencePosition(object segment, int index)
         {
             _segment = segment;
             _index = index;
         }
 
-        public SequencePosition(object segment)
-        {
-            _segment = segment;
-            _index = 0;
-        }
-
+        /// <summary>
+        /// Segment of memory this <see cref="SequencePosition"/> points to.
+        /// </summary>
         public object Segment => _segment;
 
+        /// <summary>
+        /// Index inside segment of memory this <see cref="SequencePosition"/> points to.
+        /// </summary>
         public int Index => _index;
 
+        /// <summary>
+        /// Returns true if left and right point at the same segment and have the same index.
+        /// </summary>
         public static bool operator ==(SequencePosition left, SequencePosition right) => left._index == right._index && left._segment == right._segment;
-        public static bool operator !=(SequencePosition left, SequencePosition right) => left._index != right._index || left._segment != right._segment;
+        /// <summary>
+        /// Returns true if left and right do not point at the same segment and have the same index.
+        /// </summary>
+        public static bool operator !=(SequencePosition left, SequencePosition right) => !(left == right);
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        /// <inheritdoc />
         public bool Equals(SequencePosition position) => this == position;
 
+        /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override bool Equals(object obj) =>
             obj is SequencePosition ? this == (SequencePosition)obj : false;
 
+        /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
         {
@@ -48,7 +63,7 @@ namespace System
             return ((int)shift5 + h1) ^ h2;
         }
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        /// <inheritdoc />
         public override string ToString() =>
             this == default ? "(default)" : _segment == null ? $"{_index}" : $"{_segment}[{_index}]";
     }
