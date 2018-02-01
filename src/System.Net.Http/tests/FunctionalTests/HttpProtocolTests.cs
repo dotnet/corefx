@@ -558,8 +558,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendBeforeResponseReceived()
         {
-            // Netfx will drain, others will disconnect
-            bool shouldDrain = PlatformDetection.IsFullFramework;
+            bool shouldDrain = !IsWinHttpHandler;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -609,8 +608,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendAfterResponseReceived()
         {
-            // Netfx will drain, others will disconnect
-            bool shouldDrain = PlatformDetection.IsFullFramework;
+            bool shouldDrain = !IsWinHttpHandler;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
