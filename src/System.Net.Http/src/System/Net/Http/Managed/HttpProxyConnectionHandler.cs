@@ -81,7 +81,7 @@ namespace System.Net.Http
 
                         if (credential != null)
                         {
-                            // TBD: We should drain response before disposing so it goes back to connection pool.
+                            // TODO #23156: Drain response before disposing.
                             response.Dispose();
 
                             request.Headers.ProxyAuthorization = new AuthenticationHeaderValue(AuthenticationHelper.Basic,
@@ -106,8 +106,7 @@ namespace System.Net.Http
 
                             if (await AuthenticationHelper.TrySetDigestAuthToken(request, credential, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
                             {
-
-                                // TBD: We should drain response before disposing so it goes back to connection pool.
+                                // TODO #23156: Drain response before disposing
                                 response.Dispose();
 
                                 connection = await GetOrCreateConnection(request, proxyUri, cancellationToken).ConfigureAwait(false);
