@@ -100,6 +100,13 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            if (PlatformDetection.IsWindows7 && acceptedProtocol != SslProtocols.Tls && !requestOnlyThisProtocol)
+            {
+                // Windows 7 defaults to TLS 1.0 if not set explicitly, that case is covered when 
+                // requestOnlyThisProtocol is true.
+                return;
+            }
+
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
@@ -137,9 +144,10 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                if (PlatformDetection.IsRedHatFamily7)
+                if (PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsWindows7)
                 {
                     // Default protocol selection is always TLSv1 on Centos7 libcurl 7.29.0
+                    // and Windows 7.
                     // Hence, set the specific protocol on HttpClient that is required by test
                     handler.SslProtocols = sslProtocols;
                 }
