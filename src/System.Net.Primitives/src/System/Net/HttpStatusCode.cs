@@ -56,6 +56,9 @@ namespace System.Net
         ExpectationFailed = 417,
 
         UpgradeRequired = 426,
+        PreconditionRequired = 428,
+        TooManyRequests = 429,
+        RequestHeaderFieldsTooLarge = 431,
 
         // Server Error 5xx
         InternalServerError = 500,
@@ -64,5 +67,6 @@ namespace System.Net
         ServiceUnavailable = 503,
         GatewayTimeout = 504,
         HttpVersionNotSupported = 505,
+        NetworkAuthenticationRequired = 511,
     }
 }
