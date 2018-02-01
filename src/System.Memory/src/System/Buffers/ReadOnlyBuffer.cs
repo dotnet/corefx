@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace System.Buffers
 {
@@ -243,22 +242,7 @@ namespace System.Buffers
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            if (typeof(T) == typeof(byte))
-            {
-                if (this is ReadOnlyBuffer<byte> bytes)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (ReadOnlyMemory<byte> buffer in bytes)
-                    {
-                        SpanLiteralExtensions.AppendAsLiteral(buffer.Span, sb);
-                    }
-                    return sb.ToString();
-                }
-            }
-            return base.ToString();
-        }
+        public override string ToString() => string.Format("System.Buffers.ReadOnlyBuffer<{0}>[{1}]", typeof(T).Name, Length);
 
         /// <summary>
         /// Returns an enumerator over the <see cref="ReadOnlyBuffer{T}"/>
@@ -272,7 +256,7 @@ namespace System.Buffers
         {
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);
             }
             return Seek(origin, _bufferEnd, offset, false);
         }

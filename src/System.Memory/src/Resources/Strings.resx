@@ -154,6 +154,6 @@
     <value>End position was not reached during enumeration.</value>
   </data>
   <data name="UnexpectedSegmentType" xml:space="preserve">
-    <value>Unexpected segment type</value>
+    <value>Unexpected segment type.</value>
   </data>
 </root>

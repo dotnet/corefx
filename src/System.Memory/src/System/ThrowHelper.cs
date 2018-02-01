@@ -139,6 +139,7 @@ namespace System
         pointer,
         comparable,
         comparer,
-        destination
+        destination,
+        offset
     }
 }
