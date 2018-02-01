@@ -482,51 +482,8 @@ namespace System.Net.Http.Functional.Tests
         // Drain tests
 
             // CONSIDER: vary response size
-        [Fact]
-        public async Task DisposeTest_SendNever()
-        {
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClient client = CreateHttpClient())
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
-                    {
-                        // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
-
-                        Console.WriteLine("A");
-
-                        var response = await getResponseTask;
-
-                        Console.WriteLine("B");
-
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(10, response.Content.Headers.ContentLength);
-
-                        var responseStream = await response.Content.ReadAsStreamAsync();
-
-                        bool isReadReady;
-
-                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
-
-                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
-                        
-                        response.Dispose();
-
-                        // Client disconnected
-                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isReadReady);
-
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
-
-                        return null;
-                    });
-                }
-            });
-        }
+            // TODO: In cases where drain succeeds, issue another request and make sure it works
 
         [Fact]
         public async Task DisposeTest_SendUpFront()
@@ -553,20 +510,20 @@ namespace System.Net.Http.Functional.Tests
 
                         var responseStream = await response.Content.ReadAsStreamAsync();
 
-                        bool isReadReady;
+                        bool isDisconnected;
 
-                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
+                        isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
 
-                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isDisconnected}");
 
                         response.Dispose();
 
                         // Client *did not* disconnect
-                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
+                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
 
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
 
                         return null;
                     });
@@ -577,6 +534,9 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendBeforeResponseReceived()
         {
+            // Full framework will correctly drain
+            bool shouldDisconnect = !PlatformDetection.IsFullFramework;
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -607,20 +567,20 @@ namespace System.Net.Http.Functional.Tests
 
                         await writer.WriteAsync("ABCDEFGHIJ");
 
-                        bool isReadReady;
+                        bool isDisconnected;
 
-                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
+                        isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
 
-                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isDisconnected}");
 
                         response.Dispose();
 
                         // Client disconnected
-                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isReadReady);
+                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.Equal(shouldDisconnect, isDisconnected);
 
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
 
                         return null;
                     });
@@ -631,6 +591,9 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendAfterResponseReceived()
         {
+            // Full framework will correctly drain
+            bool shouldDisconnect = !PlatformDetection.IsFullFramework;
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -657,20 +620,20 @@ namespace System.Net.Http.Functional.Tests
 
                         await writer.WriteAsync("ABCDEFGHIJ");
 
-                        bool isReadReady;
+                        bool isDisconnected;
 
-                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
+                        isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
 
-                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isDisconnected}");
 
                         response.Dispose();
 
                         // Client disconnected
-                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isReadReady);
+                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.Equal(shouldDisconnect, isDisconnected);
 
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
 
                         return null;
                     });
@@ -706,12 +669,12 @@ namespace System.Net.Http.Functional.Tests
 
                         Console.WriteLine("C");
 
-                        bool isReadReady;
+                        bool isDisconnected;
 
-                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
-                        Assert.False(isReadReady);
+                        isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
 
-                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isDisconnected}");
 
                         response.Dispose();
 
@@ -720,10 +683,56 @@ namespace System.Net.Http.Functional.Tests
                         Console.WriteLine("D");
 
                         // Client disconnected
-                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isReadReady);
+                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isDisconnected);
 
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
+
+                        return null;
+                    });
+                }
+            });
+        }
+
+        [Fact]
+        public async Task DisposeTest_SendNever()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+
+                        Console.WriteLine("A");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        bool isDisconnected;
+
+                        isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isDisconnected);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isDisconnected}");
+
+                        response.Dispose();
+
+                        // Client disconnected
+                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isDisconnected);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
 
                         return null;
                     });
