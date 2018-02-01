@@ -288,11 +288,11 @@ namespace System.Buffers
         public System.SequencePosition Start { get { throw null; } }
         public System.Buffers.ReadOnlyBuffer<T>.Enumerator GetEnumerator() { throw null; }
         public System.SequencePosition GetPosition(System.SequencePosition origin, long offset) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(int offset, int length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(int offset, System.SequencePosition end) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long offset) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long offset, long length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long offset, System.SequencePosition end) { throw null; }
+        public System.Buffers.ReadOnlyBuffer<T> Slice(int start, int length) { throw null; }
+        public System.Buffers.ReadOnlyBuffer<T> Slice(int start, System.SequencePosition end) { throw null; }
+        public System.Buffers.ReadOnlyBuffer<T> Slice(long start) { throw null; }
+        public System.Buffers.ReadOnlyBuffer<T> Slice(long start, long length) { throw null; }
+        public System.Buffers.ReadOnlyBuffer<T> Slice(long start, System.SequencePosition end) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, int length) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, long length) { throw null; }
