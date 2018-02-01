@@ -13,14 +13,14 @@ namespace System.SpanTests
         {
             int[] a = { 91, 92, 93 };
             var span = new ReadOnlySpan<int>(a);
-            Assert.Equal("System.ReadOnlySpan<int>[3]", span.ToString());
+            Assert.Equal("System.ReadOnlySpan<Int32>[3]", span.ToString());
         }
 
         [Fact]
         public static void ToStringInt_Empty()
         {
             var span = new ReadOnlySpan<int>();
-            Assert.Equal("System.ReadOnlySpan<int>[0]", span.ToString());
+            Assert.Equal("System.ReadOnlySpan<Int32>[0]", span.ToString());
         }
 
         [Fact]
@@ -40,6 +40,14 @@ namespace System.SpanTests
         {
             var span = new ReadOnlySpan<char>();
             Assert.Equal("", span.ToString());
+        }
+
+        [Fact]
+        public static unsafe void ToStringForSpanOfString()
+        {
+            string[] a = { "a", "b", "c" };
+            var span = new ReadOnlySpan<string>(a);
+            Assert.Equal("System.ReadOnlySpan<String>[3]", span.ToString());
         }
     }
 }
