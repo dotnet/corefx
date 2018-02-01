@@ -18,7 +18,7 @@ namespace System
     {
         internal static readonly bool IsMac = Interop.Sys.GetUnixName() == "OSX";
         private static Func<string, IEnumerable<string>> s_fileReadLines;
-        private static Func<string,object> s_directoryCreateDirectory;
+        private static Func<string, object> s_directoryCreateDirectory;
 
         private static string CurrentDirectoryCore
         {

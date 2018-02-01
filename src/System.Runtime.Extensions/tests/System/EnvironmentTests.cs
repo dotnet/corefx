@@ -216,6 +216,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [OuterLoop]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         [InlineData(Environment.SpecialFolder.ApplicationData)]
         [InlineData(Environment.SpecialFolder.Desktop)]
@@ -225,12 +226,13 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.MyPictures)]
         [InlineData(Environment.SpecialFolder.MyVideos)]
         [InlineData(Environment.SpecialFolder.Templates)]
-        public void GetFolderPath_Unix_SpecialFolderNotCreated_DoesNotThrow(Environment.SpecialFolder folder)
+        public void GetFolderPath_Unix_SpecialFolderDoesNotExist_CreatesSuccessfully(Environment.SpecialFolder folder)
         {
-            var path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.DoNotVerify);
-            Assert.False(System.IO.Directory.Exists(path));
+            string path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.DoNotVerify);
+            if (Directory.Exists(path))
+                return;
             path = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.Create);
-            Assert.True(System.IO.Directory.Exists(path));
+            Assert.True(Directory.Exists(path));
             Directory.Delete(path);
         }
 
