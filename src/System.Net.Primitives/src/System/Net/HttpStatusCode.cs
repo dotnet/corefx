@@ -61,7 +61,10 @@ namespace System.Net
         UnsupportedMediaType = 415,
         RequestedRangeNotSatisfiable = 416,
         ExpectationFailed = 417,
-        // Removed status code: ImATeapot = 418.
+        // From the discussion thread on #4382:
+        // "It would be a mistake to add it to .NET now. See golang/go#21326,
+        // nodejs/node#14644, requests/requests#4238 and aspnet/HttpAbstractions#915".
+        // ImATeapot = 418
 
         MisdirectedRequest = 421,
         UnprocessableEntity = 422,
@@ -89,6 +92,6 @@ namespace System.Net
         LoopDetected = 508,
 
         NotExtended = 510,
-        NetworkAuthenticationRequired = 511,
+        NetworkAuthenticationRequired = 511
     }
 }
