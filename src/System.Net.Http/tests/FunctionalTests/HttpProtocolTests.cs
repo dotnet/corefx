@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Sockets;
 using Xunit;
 
 namespace System.Net.Http.Functional.Tests
@@ -485,6 +486,31 @@ namespace System.Net.Http.Functional.Tests
 
             // TODO: In cases where drain succeeds, issue another request and make sure it works
 
+        private async Task CheckDrain(bool shouldDrain, HttpClient client, Uri serverUrl, Socket s, StreamReader reader, StreamWriter writer)
+        {
+            bool isDisconnected = s.Poll(100, SelectMode.SelectRead);
+
+            if (shouldDrain)
+            {
+                Assert.False(isDisconnected);
+
+                // Issue another request and check that it comes through on the same connection.
+                var getResponse2Task = client.GetAsync(serverUrl);
+                var serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nABCDEFGHIJ");
+                await TestHelper.WhenAllCompletedOrAnyFailed(getResponse2Task, serverTask);
+
+                var response2 = await getResponse2Task;
+
+                Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
+                Assert.Equal(10, response2.Content.Headers.ContentLength);
+                Assert.Equal("ABCDEFGHIJ", await response2.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                Assert.True(isDisconnected);
+            }
+        }
+
         [Fact]
         public async Task DisposeTest_SendUpFront()
         {
@@ -519,9 +545,7 @@ namespace System.Net.Http.Functional.Tests
 
                         response.Dispose();
 
-                        // Client *did not* disconnect
-                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.False(isDisconnected);
+                        await CheckDrain(true, client, url, s, reader, writer);
 
                         Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
 
@@ -534,8 +558,8 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendBeforeResponseReceived()
         {
-            // Full framework will correctly drain
-            bool shouldDisconnect = !PlatformDetection.IsFullFramework;
+            // Netfx will drain, others will disconnect
+            bool shouldDrain = PlatformDetection.IsFullFramework;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -565,8 +589,6 @@ namespace System.Net.Http.Functional.Tests
 
                         Console.WriteLine("C");
 
-                        await writer.WriteAsync("ABCDEFGHIJ");
-
                         bool isDisconnected;
 
                         isDisconnected = s.Poll(0, Sockets.SelectMode.SelectRead);
@@ -576,11 +598,7 @@ namespace System.Net.Http.Functional.Tests
 
                         response.Dispose();
 
-                        // Client disconnected
-                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.Equal(shouldDisconnect, isDisconnected);
-
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
+                        await CheckDrain(shouldDrain, client, url, s, reader, writer);
 
                         return null;
                     });
@@ -591,8 +609,8 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task DisposeTest_SendAfterResponseReceived()
         {
-            // Full framework will correctly drain
-            bool shouldDisconnect = !PlatformDetection.IsFullFramework;
+            // Netfx will drain, others will disconnect
+            bool shouldDrain = PlatformDetection.IsFullFramework;
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -629,11 +647,7 @@ namespace System.Net.Http.Functional.Tests
 
                         response.Dispose();
 
-                        // Client disconnected
-                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.Equal(shouldDisconnect, isDisconnected);
-
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
+                        await CheckDrain(shouldDrain, client, url, s, reader, writer);
 
                         return null;
                     });
@@ -678,15 +692,16 @@ namespace System.Net.Http.Functional.Tests
 
                         response.Dispose();
 
-                        await writer.WriteAsync("ABCDEFGHIJ");
+                        // This may throw an IO error if the server sees the disconnect
+                        try
+                        {
+                            await writer.WriteAsync("ABCDEFGHIJ");
+                        }
+                        catch (IOException)
+                        {
+                        }
 
-                        Console.WriteLine("D");
-
-                        // Client disconnected
-                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isDisconnected);
-
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
+                        await CheckDrain(false, client, url, s, reader, writer);
 
                         return null;
                     });
@@ -728,11 +743,7 @@ namespace System.Net.Http.Functional.Tests
 
                         response.Dispose();
 
-                        // Client disconnected
-                        isDisconnected = s.Poll(100, Sockets.SelectMode.SelectRead);
-                        Assert.True(isDisconnected);
-
-                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isDisconnected}");
+                        await CheckDrain(false, client, url, s, reader, writer);
 
                         return null;
                     });
