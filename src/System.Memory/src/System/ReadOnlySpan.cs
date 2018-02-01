@@ -222,10 +222,21 @@ namespace System
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> with the name of the type and the number of elements
+        /// For <see cref="ReadOnlySpan{Char}"/>, returns a new instance of string that represents the characters pointed to by the span.
+        /// Otherwise, returns a <see cref="String"/> with the name of the type and the number of elements.
         /// </summary>
-        /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
-        public override string ToString() => string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char))
+            {
+                unsafe
+                {
+                    fixed (char* src = &Unsafe.As<T, char>(ref DangerousGetPinnableReference()))
+                        return new string(src, _length);
+                }
+            }
+            return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
+        }
 
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="ReadOnlySpan{T}"/>
