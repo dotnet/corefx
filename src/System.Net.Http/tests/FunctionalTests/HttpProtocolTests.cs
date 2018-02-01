@@ -478,6 +478,258 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
+
+        // Drain tests
+
+            // CONSIDER: vary response size
+        [Fact]
+        public async Task DisposeTest_SendNever()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+
+                        Console.WriteLine("A");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        bool isReadReady;
+
+                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+                        
+                        response.Dispose();
+
+                        // Client disconnected
+                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isReadReady);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+
+                        return null;
+                    });
+                }
+            });
+        }
+
+        [Fact]
+        public async Task DisposeTest_SendUpFront()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nABCDEFGHIJ");
+
+                        Console.WriteLine("A");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        bool isReadReady;
+
+                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+
+                        response.Dispose();
+
+                        // Client *did not* disconnect
+                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+
+                        return null;
+                    });
+                }
+            });
+        }
+
+        [Fact]
+        public async Task DisposeTest_SendBeforeResponseReceived()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+
+                        Console.WriteLine("A");
+
+                        await writer.WriteAsync("ABCDEFGHIJ");
+
+                        Console.WriteLine("A2");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        Console.WriteLine("C");
+
+                        await writer.WriteAsync("ABCDEFGHIJ");
+
+                        bool isReadReady;
+
+                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+
+                        response.Dispose();
+
+                        // Client disconnected
+                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isReadReady);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+
+                        return null;
+                    });
+                }
+            });
+        }
+
+        [Fact]
+        public async Task DisposeTest_SendAfterResponseReceived()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+
+                        Console.WriteLine("A");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+                        
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        Console.WriteLine("C");
+
+                        await writer.WriteAsync("ABCDEFGHIJ");
+
+                        bool isReadReady;
+
+                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+
+                        response.Dispose();
+
+                        // Client disconnected
+                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isReadReady);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+
+                        return null;
+                    });
+                }
+            });
+        }
+
+
+        [Fact]
+        public async Task DisposeTest_SendAfterDispose()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read request and send response header, but don't send body yet
+                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+
+                        Console.WriteLine("A");
+
+                        var response = await getResponseTask;
+
+                        Console.WriteLine("B");
+
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(10, response.Content.Headers.ContentLength);
+
+                        var responseStream = await response.Content.ReadAsStreamAsync();
+
+                        Console.WriteLine("C");
+
+                        bool isReadReady;
+
+                        isReadReady = s.Poll(0, Sockets.SelectMode.SelectRead);
+                        Assert.False(isReadReady);
+
+                        Console.WriteLine($"before dispose {DateTime.Now} readReady={isReadReady}");
+
+                        response.Dispose();
+
+                        await writer.WriteAsync("ABCDEFGHIJ");
+
+                        Console.WriteLine("D");
+
+                        // Client disconnected
+                        isReadReady = s.Poll(100, Sockets.SelectMode.SelectRead);
+                        Assert.True(isReadReady);
+
+                        Console.WriteLine($"after dispose {DateTime.Now} readReady={isReadReady}");
+
+                        return null;
+                    });
+                }
+            });
+        }
     }
 
     public class HttpProtocolTests_Dribble : HttpProtocolTests
