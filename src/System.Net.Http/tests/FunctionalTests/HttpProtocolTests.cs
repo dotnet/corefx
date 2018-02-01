@@ -497,7 +497,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
                         // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nABCDEFGHIJ");
+                        await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nABCDEFGHIJ");
 
                         Console.WriteLine("A");
 
@@ -546,7 +546,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
                         // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+                        await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
 
                         Console.WriteLine("A");
 
@@ -603,7 +603,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
                         // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+                        await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
 
                         Console.WriteLine("A");
 
@@ -654,7 +654,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
                         // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+                        await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
 
                         Console.WriteLine("A");
 
@@ -706,7 +706,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
                         // Read request and send response header, but don't send body yet
-                        var lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
+                        await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n");
 
                         Console.WriteLine("A");
 
