@@ -81,6 +81,7 @@ namespace System.Net.Http
 
                         if (credential != null)
                         {
+                            // TBD: We should drain response before disposing so it goes back to connection pool.
                             response.Dispose();
 
                             request.Headers.ProxyAuthorization = new AuthenticationHeaderValue(AuthenticationHelper.Basic,
@@ -100,13 +101,17 @@ namespace System.Net.Http
 
                         if (credential != null)
                         {
-                            // Update digest response with new parameter from Proxy-Authenticate
+                            // TBD: Update digest response with new parameter from Proxy-Authenticate
                             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(h.Parameter);
 
                             if (await AuthenticationHelper.TrySetDigestAuthToken(request, credential, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
                             {
+
+                                // TBD: We should drain response before disposing so it goes back to connection pool.
                                 response.Dispose();
-                                response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                                connection = await GetOrCreateConnection(request, proxyUri, cancellationToken).ConfigureAwait(false);
+                                response = await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
                                 // Retry in case of nonce timeout in server.
                                 if (response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
