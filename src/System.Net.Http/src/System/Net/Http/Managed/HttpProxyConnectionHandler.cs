@@ -101,7 +101,7 @@ namespace System.Net.Http
 
                         if (credential != null)
                         {
-                            // TBD: Update digest response with new parameter from Proxy-Authenticate
+                            // Update digest response with new parameter from Proxy-Authenticate
                             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(h.Parameter);
 
                             if (await AuthenticationHelper.TrySetDigestAuthToken(request, credential, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
