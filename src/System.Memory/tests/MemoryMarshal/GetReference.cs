@@ -4,9 +4,9 @@
 
 using Xunit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using static System.TestHelpers;
-using System.Runtime.InteropServices;
 
 namespace System.SpanTests
 {
@@ -44,16 +44,6 @@ namespace System.SpanTests
                 ref int pinnableReference = ref MemoryMarshal.GetReference(span);
                 Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
             }
-        }
-
-        [Fact]
-        public static void SpanGetReferencePointerDangerousCreate1()
-        {
-            TestClass testClass = new TestClass();
-            Span<char> span = Span<char>.DangerousCreate(testClass, ref testClass.C1, 3);
-
-            ref char pinnableReference = ref MemoryMarshal.GetReference(span);
-            Assert.True(Unsafe.AreSame(ref testClass.C1, ref pinnableReference));
         }
 
         [Fact]
@@ -99,16 +89,6 @@ namespace System.SpanTests
                 ref int pinnableReference = ref Unsafe.AsRef(in MemoryMarshal.GetReference(span));
                 Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
             }
-        }
-
-        [Fact]
-        public static void ReadOnlySpanGetReferencePointerDangerousCreate1()
-        {
-            TestClass testClass = new TestClass();
-            ReadOnlySpan<char> span = ReadOnlySpan<char>.DangerousCreate(testClass, ref testClass.C1, 3);
-
-            ref char pinnableReference = ref Unsafe.AsRef(in MemoryMarshal.GetReference(span));
-            Assert.True(Unsafe.AreSame(ref testClass.C1, ref pinnableReference));
         }
 
         [Fact]

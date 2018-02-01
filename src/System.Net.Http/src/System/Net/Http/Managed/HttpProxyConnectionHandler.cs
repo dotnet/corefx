@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    internal sealed class HttpProxyConnectionHandler : HttpMessageHandler
+    internal sealed partial class HttpProxyConnectionHandler : HttpMessageHandler
     {
         private readonly HttpMessageHandler _innerHandler;
         private readonly IWebProxy _proxy;
@@ -22,10 +22,9 @@ namespace System.Net.Http
         {
             Debug.Assert(innerHandler != null);
             Debug.Assert(settings._useProxy);
-            Debug.Assert(settings._proxy != null || s_proxyFromEnvironment.Value != null);
 
             _innerHandler = innerHandler;
-            _proxy = settings._proxy ?? new PassthroughWebProxy(s_proxyFromEnvironment.Value);
+            _proxy = settings._proxy ?? ConstructSystemProxy();
             _defaultCredentials = settings._defaultProxyCredentials;
             _connectionPools = new HttpConnectionPools(settings._maxConnectionsPerServer);
         }
@@ -74,7 +73,6 @@ namespace System.Net.Http
             {
                 foreach (AuthenticationHeaderValue h in response.Headers.ProxyAuthenticate)
                 {
-                    // We only support Basic auth, ignore others
                     if (h.Scheme == AuthenticationHelper.Basic)
                     {
                         NetworkCredential credential =
@@ -111,7 +109,7 @@ namespace System.Net.Http
                                 response = await _innerHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
                                 // Retry in case of nonce timeout in server.
-                                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                                if (response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
                                 {
                                     foreach (AuthenticationHeaderValue ahv in response.Headers.ProxyAuthenticate)
                                     {
@@ -162,27 +160,9 @@ namespace System.Net.Http
             base.Dispose(disposing);
         }
 
-        public static bool EnvironmentProxyConfigured => s_proxyFromEnvironment.Value != null;
+        public static bool DefaultProxyConfigured => s_DefaultProxy.Value != null;
 
-        private static readonly Lazy<Uri> s_proxyFromEnvironment = new Lazy<Uri>(() =>
-        {
-            // http_proxy is standard on Unix, used e.g. by libcurl.
-            // TODO #23150: We should support the full array of environment variables here,
-            // including no_proxy, all_proxy, etc.
-
-            string proxyString = Environment.GetEnvironmentVariable("http_proxy");
-            if (!string.IsNullOrWhiteSpace(proxyString))
-            {
-                Uri proxyFromEnvironment;
-                if (Uri.TryCreate(proxyString, UriKind.Absolute, out proxyFromEnvironment) ||
-                    Uri.TryCreate(Uri.UriSchemeHttp + Uri.SchemeDelimiter + proxyString, UriKind.Absolute, out proxyFromEnvironment))
-                {
-                    return proxyFromEnvironment;
-                }
-            }
-
-            return null;
-        });
+        private static readonly Lazy<IWebProxy> s_DefaultProxy = new Lazy<IWebProxy>(() => ConstructSystemProxy());
 
         private sealed class PassthroughWebProxy : IWebProxy
         {

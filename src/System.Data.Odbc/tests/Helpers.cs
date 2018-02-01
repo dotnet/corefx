@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +18,11 @@ namespace System.Data.Odbc.Tests
 
         public static bool CheckOdbcNotAvailable() => !CheckOdbcIsAvailable();
 
-        private static bool CheckOdbcIsAvailable() => 
-            PlatformDetection.IsWindows ?
-                !PlatformDetection.IsWindowsNanoServer && (!PlatformDetection.IsWindowsServerCore || Environment.Is64BitProcess) :
+        private static bool CheckOdbcIsAvailable() =>
+#if TargetsWindows
+                !PlatformDetection.IsWindowsNanoServer && (!PlatformDetection.IsWindowsServerCore || Environment.Is64BitProcess);
+#else
                 Interop.Libdl.dlopen(Interop.Libraries.Odbc32, Interop.Libdl.RTLD_NOW) != IntPtr.Zero;
+#endif
     }
 }

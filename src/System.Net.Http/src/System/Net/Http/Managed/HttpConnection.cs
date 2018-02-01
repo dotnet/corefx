@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +42,7 @@ namespace System.Net.Http
         private static readonly byte[] s_spaceHttp10NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.0\r\n");
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
+        private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
 
         private readonly HttpConnectionPool _pool;
         private readonly HttpConnectionKey _key;
@@ -202,7 +204,17 @@ namespace System.Net.Http
             _currentRequest = request;
             try
             {
-                bool isHttp10 = request.Version.Major == 1 && request.Version.Minor == 0;
+                // Our max supported version is 1.1, so if Version > 1.1, degrade to 1.1.
+                Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0);     // guaranteed by Version class
+                bool isHttp10 = false;
+                if (request.Version.Major == 0)
+                {
+                    throw new NotSupportedException(SR.net_http_unsupported_version);
+                }
+                else if (request.Version.Major == 1 && request.Version.Minor == 0)
+                {
+                    isHttp10 = true;
+                }
 
                 // Send the request.
                 if (NetEventSource.IsEnabled) Trace($"Sending request: {request}");
@@ -225,9 +237,16 @@ namespace System.Net.Http
                 // Write request line
                 await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
-                await WriteStringAsync(
-                    _usingProxy ? request.RequestUri.AbsoluteUri : request.RequestUri.PathAndQuery,
-                    cancellationToken).ConfigureAwait(false);
+
+                if (_usingProxy)
+                {
+                    // Proxied requests contain full URL
+                    Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
+                    await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
+                    await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                }
+
+                await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
 
                 // fall-back to 1.1 for all versions other than 1.0
                 await WriteBytesAsync(isHttp10 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
@@ -496,30 +515,37 @@ namespace System.Net.Http
 
         private void ParseStatusLine(Span<byte> line, HttpResponseMessage response)
         {
+            // We sent the request version as either 1.0 or 1.1.
+            // We expect a response version of the form 1.X, where X is a single digit as per RFC.
+
             if (line.Length < 14 || // "HTTP/1.1 123\r\n" with optional phrase before the crlf
                 line[0] != 'H' ||
                 line[1] != 'T' ||
                 line[2] != 'T' ||
                 line[3] != 'P' ||
                 line[4] != '/' ||
+                line[5] != '1' ||
+                line[6] != '.' ||
                 line[8] != ' ')
             {
                 ThrowInvalidHttpResponse();
             }
 
-            // Set the response HttpVersion and status code
-            byte majorVersion = line[5], minorVersion = line[7];
+            // Set the response HttpVersion
+            byte minorVersion = line[7];
+            response.Version =
+                minorVersion == '1' ? HttpVersion.Version11 :
+                minorVersion == '0' ? HttpVersion.Version10 :
+                !IsDigit(minorVersion) ? throw new HttpRequestException(SR.net_http_invalid_response) :
+                new Version(1, minorVersion - '0');
+
+            // Set the status code
             byte status1 = line[9], status2 = line[10], status3 = line[11];
-            if (!IsDigit(majorVersion) || line[6] != (byte)'.' || !IsDigit(minorVersion) ||
-                !IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
+            if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
             {
                 ThrowInvalidHttpResponse();
             }
-            response.Version =
-                (majorVersion == '1' && minorVersion == '1') ? HttpVersionInternal.Version11 :
-                (majorVersion == '1' && minorVersion == '0') ? HttpVersionInternal.Version10 :
-                (majorVersion == '2' && minorVersion == '0') ? HttpVersionInternal.Version20 :
-                HttpVersionInternal.Unknown;
+
             response.StatusCode =
                 (HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
 
@@ -547,7 +573,7 @@ namespace System.Net.Http
                     {
                         try
                         {
-                            fixed (byte* reasonPtr = &reasonBytes.DangerousGetPinnableReference())
+                            fixed (byte* reasonPtr = &MemoryMarshal.GetReference(reasonBytes))
                             {
                                 response.ReasonPhrase = Encoding.ASCII.GetString(reasonPtr, reasonBytes.Length);
                             }

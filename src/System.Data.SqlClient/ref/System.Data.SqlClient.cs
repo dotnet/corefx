@@ -402,6 +402,9 @@ namespace System.Data.SqlClient
         protected override System.Threading.Tasks.Task<System.Data.Common.DbDataReader> ExecuteDbDataReaderAsync(System.Data.CommandBehavior behavior, System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int ExecuteNonQuery() { throw null; }
         public override System.Threading.Tasks.Task<int> ExecuteNonQueryAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
+        public IAsyncResult BeginExecuteNonQuery() { throw null; }
+        public IAsyncResult BeginExecuteNonQuery(AsyncCallback callback, object stateObject) { throw null; }
+        public int EndExecuteNonQuery(IAsyncResult asyncResult) { throw null; }
         public new System.Data.SqlClient.SqlDataReader ExecuteReader() { throw null; }
         public new System.Data.SqlClient.SqlDataReader ExecuteReader(System.Data.CommandBehavior behavior) { throw null; }
         public new System.Threading.Tasks.Task<System.Data.SqlClient.SqlDataReader> ExecuteReaderAsync() { throw null; }
@@ -413,6 +416,9 @@ namespace System.Data.SqlClient
         public System.Xml.XmlReader ExecuteXmlReader() { throw null; }
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync() { throw null; }
         public System.Threading.Tasks.Task<System.Xml.XmlReader> ExecuteXmlReaderAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
+        public System.IAsyncResult BeginExecuteXmlReader() { throw null; }
+        public System.IAsyncResult BeginExecuteXmlReader(System.AsyncCallback callback, object stateObject) { throw null; }
+        public System.Xml.XmlReader EndExecuteXmlReader(System.IAsyncResult asyncResult) { throw null; }
         public override void Prepare() { }
         public System.Data.Sql.SqlNotificationRequest Notification { get { throw null; } set { } }
         public void ResetCommandTimeout() { }

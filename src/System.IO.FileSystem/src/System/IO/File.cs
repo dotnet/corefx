@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Security;
 using System.Text;
 using System.Threading;
@@ -25,7 +24,6 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
             return new StreamReader(path);
         }
@@ -34,7 +32,6 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
             return new StreamWriter(path, append: false);
         }
@@ -43,7 +40,6 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
             return new StreamWriter(path, append: true);
         }
@@ -68,7 +64,6 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(sourceFileName));
             if (destFileName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
-            Contract.EndContractBlock();
 
             InternalCopy(sourceFileName, destFileName, false);
         }
@@ -92,7 +87,6 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(sourceFileName));
             if (destFileName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
-            Contract.EndContractBlock();
 
             InternalCopy(sourceFileName, destFileName, overwrite);
         }
@@ -110,7 +104,7 @@ namespace System.IO
             string fullSourceFileName = Path.GetFullPath(sourceFileName);
             string fullDestFileName = Path.GetFullPath(destFileName);
 
-            FileSystem.Current.CopyFile(fullSourceFileName, fullDestFileName, overwrite);
+            FileSystem.CopyFile(fullSourceFileName, fullDestFileName, overwrite);
 
             return fullDestFileName;
         }
@@ -161,11 +155,10 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
             string fullPath = Path.GetFullPath(path);
 
-            FileSystem.Current.DeleteFile(fullPath);
+            FileSystem.DeleteFile(fullPath);
         }
 
 
@@ -208,7 +201,7 @@ namespace System.IO
 
         internal static bool InternalExists(string path)
         {
-            return FileSystem.Current.FileExists(path);
+            return FileSystem.FileExists(path);
         }
 
         public static FileStream Open(string path, FileMode mode)
@@ -241,85 +234,85 @@ namespace System.IO
         public static void SetCreationTime(string path, DateTime creationTime)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetCreationTime(fullPath, creationTime, asDirectory: false);
+            FileSystem.SetCreationTime(fullPath, creationTime, asDirectory: false);
         }
 
         public static void SetCreationTimeUtc(string path, DateTime creationTimeUtc)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetCreationTime(fullPath, GetUtcDateTimeOffset(creationTimeUtc), asDirectory: false);
+            FileSystem.SetCreationTime(fullPath, GetUtcDateTimeOffset(creationTimeUtc), asDirectory: false);
         }
 
         public static DateTime GetCreationTime(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetCreationTime(fullPath).LocalDateTime;
+            return FileSystem.GetCreationTime(fullPath).LocalDateTime;
         }
 
         public static DateTime GetCreationTimeUtc(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetCreationTime(fullPath).UtcDateTime;
+            return FileSystem.GetCreationTime(fullPath).UtcDateTime;
         }
 
         public static void SetLastAccessTime(string path, DateTime lastAccessTime)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetLastAccessTime(fullPath, lastAccessTime, asDirectory: false);
+            FileSystem.SetLastAccessTime(fullPath, lastAccessTime, asDirectory: false);
         }
 
         public static void SetLastAccessTimeUtc(string path, DateTime lastAccessTimeUtc)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetLastAccessTime(fullPath, GetUtcDateTimeOffset(lastAccessTimeUtc), asDirectory: false);
+            FileSystem.SetLastAccessTime(fullPath, GetUtcDateTimeOffset(lastAccessTimeUtc), asDirectory: false);
         }
 
         public static DateTime GetLastAccessTime(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetLastAccessTime(fullPath).LocalDateTime;
+            return FileSystem.GetLastAccessTime(fullPath).LocalDateTime;
         }
 
         public static DateTime GetLastAccessTimeUtc(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetLastAccessTime(fullPath).UtcDateTime;
+            return FileSystem.GetLastAccessTime(fullPath).UtcDateTime;
         }
 
         public static void SetLastWriteTime(string path, DateTime lastWriteTime)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetLastWriteTime(fullPath, lastWriteTime, asDirectory: false);
+            FileSystem.SetLastWriteTime(fullPath, lastWriteTime, asDirectory: false);
         }
 
         public static void SetLastWriteTimeUtc(string path, DateTime lastWriteTimeUtc)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetLastWriteTime(fullPath, GetUtcDateTimeOffset(lastWriteTimeUtc), asDirectory: false);
+            FileSystem.SetLastWriteTime(fullPath, GetUtcDateTimeOffset(lastWriteTimeUtc), asDirectory: false);
         }
 
         public static DateTime GetLastWriteTime(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetLastWriteTime(fullPath).LocalDateTime;
+            return FileSystem.GetLastWriteTime(fullPath).LocalDateTime;
         }
 
         public static DateTime GetLastWriteTimeUtc(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetLastWriteTime(fullPath).UtcDateTime;
+            return FileSystem.GetLastWriteTime(fullPath).UtcDateTime;
         }
 
         public static FileAttributes GetAttributes(string path)
         {
             string fullPath = Path.GetFullPath(path);
-            return FileSystem.Current.GetAttributes(fullPath);
+            return FileSystem.GetAttributes(fullPath);
         }
 
         public static void SetAttributes(string path, FileAttributes fileAttributes)
         {
             string fullPath = Path.GetFullPath(path);
-            FileSystem.Current.SetAttributes(fullPath, fileAttributes);
+            FileSystem.SetAttributes(fullPath, fileAttributes);
         }
 
         public static FileStream OpenRead(string path)
@@ -339,7 +332,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return InternalReadAllText(path, Encoding.UTF8);
         }
@@ -352,7 +344,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return InternalReadAllText(path, encoding);
         }
@@ -373,7 +364,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             using (StreamWriter sw = new StreamWriter(path))
             {
@@ -389,7 +379,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             using (StreamWriter sw = new StreamWriter(path, false, encoding))
             {
@@ -434,7 +423,6 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
             if (bytes == null)
                 throw new ArgumentNullException(nameof(bytes));
-            Contract.EndContractBlock();
 
             InternalWriteAllBytes(path, bytes);
         }
@@ -456,7 +444,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return InternalReadAllLines(path, Encoding.UTF8);
         }
@@ -469,7 +456,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return InternalReadAllLines(path, encoding);
         }
@@ -496,7 +482,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return ReadLinesIterator.CreateIterator(path, Encoding.UTF8);
         }
@@ -509,7 +494,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             return ReadLinesIterator.CreateIterator(path, encoding);
         }
@@ -527,7 +511,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(contents));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             InternalWriteAllLines(new StreamWriter(path), contents);
         }
@@ -547,7 +530,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             InternalWriteAllLines(new StreamWriter(path, false, encoding), contents);
         }
@@ -572,7 +554,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             using (StreamWriter sw = new StreamWriter(path, append: true))
             {
@@ -588,7 +569,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             using (StreamWriter sw = new StreamWriter(path, true, encoding))
             {
@@ -604,7 +584,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(contents));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             InternalWriteAllLines(new StreamWriter(path, append: true), contents);
         }
@@ -619,7 +598,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(encoding));
             if (path.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
-            Contract.EndContractBlock();
 
             InternalWriteAllLines(new StreamWriter(path, true, encoding), contents);
         }
@@ -636,7 +614,7 @@ namespace System.IO
             if (destinationFileName == null)
                 throw new ArgumentNullException(nameof(destinationFileName));
 
-            FileSystem.Current.ReplaceFile(
+            FileSystem.ReplaceFile(
                 Path.GetFullPath(sourceFileName), 
                 Path.GetFullPath(destinationFileName),
                 destinationBackupFileName != null ? Path.GetFullPath(destinationBackupFileName) : null,
@@ -661,7 +639,6 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(sourceFileName));
             if (destFileName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
-            Contract.EndContractBlock();
 
             string fullSourceFileName = Path.GetFullPath(sourceFileName);
             string fullDestFileName = Path.GetFullPath(destFileName);
@@ -671,7 +648,7 @@ namespace System.IO
                 throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, fullSourceFileName), fullSourceFileName);
             }
 
-            FileSystem.Current.MoveFile(fullSourceFileName, fullDestFileName);
+            FileSystem.MoveFile(fullSourceFileName, fullDestFileName);
         }
 
         public static void Encrypt(string path)

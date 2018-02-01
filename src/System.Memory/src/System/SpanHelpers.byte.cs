@@ -5,6 +5,10 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
+
 #if !netstandard11
 using System.Numerics;
 #endif
@@ -60,9 +64,13 @@ namespace System
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                if (tempIndex != -1)
+                if ((uint)tempIndex < (uint)index)
                 {
-                    index = (index == -1 || index > tempIndex) ? tempIndex : index;
+                    index = tempIndex;
+                    // Reduce space for search, cause we don't care if we find the search value after the index of a previously found value
+                    searchSpaceLength = tempIndex;
+
+                    if (index == 0) break;
                 }
             }
             return index;
@@ -80,10 +88,7 @@ namespace System
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                if (tempIndex != -1)
-                {
-                    index = (index == -1 || index < tempIndex) ? tempIndex : index;
-                }
+                if (tempIndex > index) index = tempIndex;
             }
             return index;
         }
@@ -437,7 +442,7 @@ namespace System
 
                 while ((byte*)nLength > (byte*)index)
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
                     var vMatches = Vector.BitwiseOr(
                                     Vector.Equals(vData, values0),
                                     Vector.Equals(vData, values1));
@@ -572,7 +577,7 @@ namespace System
                 Vector<byte> values2 = GetVector(value2);
                 while ((byte*)nLength > (byte*)index)
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
 
                     var vMatches = Vector.BitwiseOr(
                                     Vector.BitwiseOr(
@@ -707,7 +712,7 @@ namespace System
 
                 while ((byte*)nLength > (byte*)(Vector<byte>.Count - 1))
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
                     var vMatches = Vector.BitwiseOr(
                                     Vector.Equals(vData, values0),
                                     Vector.Equals(vData, values1));
@@ -837,7 +842,7 @@ namespace System
                 Vector<byte> values2 = GetVector(value2);
                 while ((byte*)nLength > (byte*)(Vector<byte>.Count - 1))
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
 
                     var vMatches = Vector.BitwiseOr(
                                     Vector.BitwiseOr(
@@ -961,6 +966,63 @@ namespace System
             return i * 8 + LocateFirstFoundByte(candidate);
         }
 #endif
+
+        public static unsafe int SequenceCompareTo(ref byte first, int firstLength, ref byte second, int secondLength)
+        {
+            Debug.Assert(firstLength >= 0);
+            Debug.Assert(secondLength >= 0);
+
+            if (Unsafe.AreSame(ref first, ref second))
+                goto Equal;
+
+            var minLength = firstLength;
+            if (minLength > secondLength) minLength = secondLength;
+
+            IntPtr i = (IntPtr)0; // Use IntPtr and byte* for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr n = (IntPtr)minLength;
+
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && (byte*)n > (byte*)Vector<byte>.Count)
+            {
+                n -= Vector<byte>.Count;
+                while ((byte*)n > (byte*)i)
+                {
+                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
+                    {
+                        goto NotEqual;
+                    }
+                    i += Vector<byte>.Count;
+                }
+                goto NotEqual;
+            }
+#endif
+
+            if ((byte*)n > (byte*)sizeof(UIntPtr))
+            {
+                n -= sizeof(UIntPtr);
+                while ((byte*)n > (byte*)i)
+                {
+                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
+                    {
+                        goto NotEqual;
+                    }
+                    i += sizeof(UIntPtr);
+                }
+            }
+
+        NotEqual:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
+            while((byte*)minLength > (byte*)i)
+            {
+                int result = Unsafe.AddByteOffset(ref first, i).CompareTo(Unsafe.AddByteOffset(ref second, i));
+                if (result != 0) return result;
+                i += 1;
+            }
+
+        Equal:
+            return firstLength - secondLength;
+        }
 
 #if !netstandard11
         // Vector sub-search adapted from https://github.com/aspnet/KestrelHttpServer/pull/1138

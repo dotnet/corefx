@@ -8,9 +8,9 @@ __DOTNET_PATH=$__TOOLRUNTIME_DIR/dotnetcli
 __DOTNET_CMD=$__DOTNET_PATH/dotnet
 if [ -z "$__BUILDTOOLS_SOURCE" ]; then __BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json; fi
 export __BUILDTOOLS_USE_CSPROJ=true
-__BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt)
-__DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt)
-__ILASM_VERSION=$(cat $__scriptpath/tools-local/ILAsmVersion.txt)
+__BUILD_TOOLS_PACKAGE_VERSION=$(cat $__scriptpath/BuildToolsVersion.txt | sed 's/\r$//') # remove CR if mounted repo on Windows drive
+__DOTNET_TOOLS_VERSION=$(cat $__scriptpath/DotnetCLIVersion.txt | sed 's/\r$//') # remove CR if mounted repo on Windows drive
+__ILASM_VERSION=$(cat $__scriptpath/tools-local/ILAsmVersion.txt | sed 's/\r$//') # remove CR if mounted repo on Windows drive
 __BUILD_TOOLS_PATH=$__PACKAGES_DIR/microsoft.dotnet.buildtools/$__BUILD_TOOLS_PACKAGE_VERSION/lib
 __INIT_TOOLS_RESTORE_PROJECT=$__scriptpath/init-tools.msbuild
 __BUILD_TOOLS_SEMAPHORE=$__TOOLRUNTIME_DIR/$__BUILD_TOOLS_PACKAGE_VERSION/init-tools.complete
@@ -158,11 +158,11 @@ export ILASMCOMPILER_VERSION=$__ILASM_VERSION
 export NATIVE_TOOLS_RID=$__ILASM_RID
 
 echo "Initializing BuildTools..."
-echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR" >> $__init_tools_log
+echo "Running: $__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR $__PACKAGES_DIR" >> $__init_tools_log
 
 # Executables restored with .NET Core 2.0 do not have executable permission flags. https://github.com/NuGet/Home/issues/4424
 chmod +x $__BUILD_TOOLS_PATH/init-tools.sh
-$__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR >> $__init_tools_log
+$__BUILD_TOOLS_PATH/init-tools.sh $__scriptpath $__DOTNET_CMD $__TOOLRUNTIME_DIR $__PACKAGES_DIR >> $__init_tools_log
 if [ "$?" != "0" ]; then
     echo "ERROR: An error occurred when trying to initialize the tools." 1>&2
     display_error_message

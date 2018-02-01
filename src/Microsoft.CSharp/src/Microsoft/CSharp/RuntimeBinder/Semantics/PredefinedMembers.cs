@@ -247,10 +247,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return _loader;
         }
-        private ErrorHandling GetErrorContext()
-        {
-            return GetSymbolLoader().GetErrorContext();
-        }
+
         private TypeManager GetTypeManager()
         {
             return GetSymbolLoader().GetTypeManager();
@@ -289,7 +286,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return classTyVars[signature[indexIntoSignatures++]];
 
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
-                    return GetTypeManager().GetVoid();
+                    return VoidType.Instance;
 
                 default:
                     Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
@@ -384,8 +381,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray argumentTypes = LoadTypeArrayFromSignature(signature, ref index, classTyVars);
             Debug.Assert(argumentTypes != null);
 
-            TypeArray standardMethodTyVars = GetTypeManager().GetStdMethTyVarArray(cMethodTyVars);
-
             MethodSymbol ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
 
             if (ret == null)
@@ -408,9 +403,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         methsym.isStatic == isStatic &&
                         methsym.isVirtual == isVirtual &&
                         methsym.typeVars.Count == cMethodTyVars &&
-                        GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, SubstTypeFlags.DenormMeth) &&
-                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, (TypeArray)null,
-                            methsym.typeVars, SubstTypeFlags.DenormMeth))
+                        GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
+                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
                     {
                         return methsym;
                     }

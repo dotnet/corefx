@@ -568,13 +568,17 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23769)]
-        [ActiveIssue(22707, TestPlatforms.AnyUnix)]
-        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
         {
+            if (!PlatformDetection.IsWindows && !UseManagedHandler && statusCode == 300 && oldMethod == "POST")
+            {
+                // Known behavior: curl does not change method to "GET"
+                // https://github.com/dotnet/corefx/issues/26434
+                newMethod = "POST";
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
@@ -584,29 +588,34 @@ namespace System.Net.Http.Functional.Tests
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
 
-                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
-                            $"HTTP/1.1 {statusCode} OK\r\n" +
-                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                            $"Location: {origUrl}\r\n" +
-                            "\r\n");
-                    await Task.WhenAny(getResponseTask, serverTask);
-                    Assert.False(getResponseTask.IsCompleted, $"{getResponseTask.Status}: {getResponseTask.Exception}");
-                    await serverTask;
-
-                    serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
-                            $"HTTP/1.1 200 OK\r\n" +
-                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                            "\r\n");
-                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
-
-                    List<string> receivedRequest = await serverTask;
-                    string[] statusLineParts = receivedRequest[0].Split(' ');
-
-                    using (HttpResponseMessage response = await getResponseTask)
+                    await LoopbackServer.CreateServerAsync(async (redirServer, redirUrl) =>
                     {
-                        Assert.Equal(200, (int)response.StatusCode);
-                        Assert.Equal(newMethod, statusLineParts[0]);
-                    }
+                        // Original URL will redirect to a different URL
+                        Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                                $"HTTP/1.1 {statusCode} OK\r\n" +
+                                $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                                $"Location: {redirUrl}\r\n" +
+                                "\r\n");
+                        await Task.WhenAny(getResponseTask, serverTask);
+                        Assert.False(getResponseTask.IsCompleted, $"{getResponseTask.Status}: {getResponseTask.Exception}");
+                        await serverTask;
+
+                        // Redirected URL answers with success
+                        serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(redirServer,
+                                $"HTTP/1.1 200 OK\r\n" +
+                                $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                                "\r\n");
+                        await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                        List<string> receivedRequest = await serverTask;
+                        string[] statusLineParts = receivedRequest[0].Split(' ');
+
+                        using (HttpResponseMessage response = await getResponseTask)
+                        {
+                            Assert.Equal(200, (int)response.StatusCode);
+                            Assert.Equal(newMethod, statusLineParts[0]);
+                        }
+                    });
                 });
             }
         }
@@ -1949,6 +1958,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
         {
+            // Managed handler treats 0.0 as a bad version, and throws.
+            if (UseManagedHandler)
+            {
+                return;
+            }
+
             // The default value for HttpRequestMessage.Version is Version(1,1).
             // So, we need to set something different (0,0), to test the "unknown" version.
             Version receivedRequestVersion = await SendRequestAndGetRequestVersionAsync(new Version(0, 0));
@@ -2087,8 +2102,17 @@ namespace System.Net.Http.Functional.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [MemberData(nameof(CredentialsForProxy))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy(ICredentials creds, bool wrapCredsInCache)
+        [MemberData(nameof(CredentialsForProxyRfcCompliant))]
+        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_RfcCompliant(ICredentials creds, bool wrapCredsInCache)
+        {
+            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [MemberData(nameof(CredentialsForProxyNonRfcCompliant))]
+        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_NonRfcCompliant(ICredentials creds, bool wrapCredsInCache)
         {
             if (UseManagedHandler)
             {
@@ -2096,6 +2120,11 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
+        }
+
+        private async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(ICredentials creds, bool wrapCredsInCache)
+        {
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
                 out port,
@@ -2186,7 +2215,16 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
         }
 
-        private static IEnumerable<object[]> CredentialsForProxy()
+        private static IEnumerable<object[]> CredentialsForProxyRfcCompliant()
+        {
+            foreach (bool wrapCredsInCache in new[] { true, false })
+            {
+                yield return new object[] { new NetworkCredential("username", "password"), wrapCredsInCache };
+                yield return new object[] { new NetworkCredential("username", "password", "domain"), wrapCredsInCache };
+            }
+        }
+
+        private static IEnumerable<object[]> CredentialsForProxyNonRfcCompliant()
         {
             yield return new object[] { null, false };
             foreach (bool wrapCredsInCache in new[] { true, false })
@@ -2195,6 +2233,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }
         }
+
         #endregion
 
         #region Uri wire transmission encoding tests

@@ -11,7 +11,7 @@
 
   <!-- Define vNext UAP Moniker -->
   <PropertyGroup>
-    <UAPvNextVersion>10.0.15138</UAPvNextVersion>
+    <UAPvNextVersion>10.0.16300</UAPvNextVersion>
     <UAPvNextTFMFull>UAP,Version=v$(UAPvNextVersion)</UAPvNextTFMFull>
     <UAPvNextTFM>uap$(UAPvNextVersion)</UAPvNextTFM>
   </PropertyGroup>
@@ -21,6 +21,11 @@
   <!-- Informs build tools to apply .NET Framework metadata if not a test project -->
   <PropertyGroup>
     <IsDotNetFrameworkProductAssembly>true</IsDotNetFrameworkProductAssembly>
+  </PropertyGroup>
+
+  <!-- Indicates this is not an officially supported release. Release branches should set this to false. -->
+  <PropertyGroup>
+    <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
   <!-- Common repo directories -->
@@ -224,6 +229,11 @@
     <LangVersion>latest</LangVersion> <!-- default to allowing all language features -->
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsReferenceAssembly)' == 'true'">
+    <!-- disable warnings about unused fields -->
+    <NoWarn>$(NoWarn);0169;0649</NoWarn>
   </PropertyGroup>
 
   <!-- Set up some common paths -->

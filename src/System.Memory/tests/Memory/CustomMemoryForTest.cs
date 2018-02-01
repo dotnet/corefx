@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -38,13 +39,14 @@ namespace System.MemoryTests
             }
         }
 
-        public override MemoryHandle Pin()
+        public override MemoryHandle Pin(int byteOffset = 0)
         {
             unsafe
             {
                 Retain();
+                if (byteOffset < 0 || (byteOffset/Unsafe.SizeOf<T>()) > _array.Length) throw new ArgumentOutOfRangeException(nameof(byteOffset));
                 var handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                return new MemoryHandle(this, (void*)handle.AddrOfPinnedObject(), handle);
+                return new MemoryHandle(this, Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), byteOffset), handle);
             }
         }
 

@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 BetterType nParam = BetterType.Neither;
 
             LAgain:
-                if (type1.GetTypeKind() != type2.GetTypeKind())
+                if (type1.TypeKind != type2.TypeKind)
                 {
                     if (type1 is TypeParameterType)
                     {
@@ -100,25 +100,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    switch (type1.GetTypeKind())
+                    switch (type1.TypeKind)
                     {
                         default:
                             Debug.Assert(false, "Bad kind in CompareTypes");
                             break;
                         case TypeKind.TK_TypeParameterType:
-                        case TypeKind.TK_ErrorType:
                             break;
 
                         case TypeKind.TK_PointerType:
                         case TypeKind.TK_ParameterModifierType:
                         case TypeKind.TK_ArrayType:
                         case TypeKind.TK_NullableType:
-                            type1 = type1.GetBaseOrParameterOrElementType();
-                            type2 = type2.GetBaseOrParameterOrElementType();
+                            type1 = type1.BaseOrParameterOrElementType;
+                            type2 = type2.BaseOrParameterOrElementType;
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:
-                            nParam = CompareTypes(((AggregateType)type1).GetTypeArgsAll(), ((AggregateType)type2).GetTypeArgsAll());
+                            nParam = CompareTypes(((AggregateType)type1).TypeArgsAll, ((AggregateType)type2).TypeArgsAll);
                             break;
                     }
                 }
@@ -191,11 +190,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public TypeArrayKey(CType[] types)
             {
                 _types = types;
-                _hashCode = 0;
-                for (int i = 0, n = types.Length; i < n; i++)
+                int hashCode = 0x162A16FE;
+                foreach (CType type in types)
                 {
-                    _hashCode ^= types[i].GetHashCode();
+                    hashCode = (hashCode << 5) - hashCode;
+                    if (type != null)
+                    {
+                        hashCode ^= type.GetHashCode();
+                    }
                 }
+
+                _hashCode = hashCode;
             }
 
             public bool Equals(TypeArrayKey other)
@@ -214,7 +219,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 for (int i = 0; i < types.Length; i++)
                 {
-                    if (!types[i].Equals(otherTypes[i]))
+                    if (types[i] != otherTypes[i])
                     {
                         return false;
                     }

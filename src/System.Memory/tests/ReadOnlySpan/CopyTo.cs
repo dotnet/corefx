@@ -173,8 +173,8 @@ namespace System.SpanTests
 
                         for (int count = 0; count < GuidCount; ++count)
                         {
-                            var guidfirst = Unsafe.Add(ref memoryFirst, count);
-                            var guidSecond = Unsafe.Add(ref memorySecond, count);
+                            Guid guidfirst = Unsafe.Add(ref memoryFirst, count);
+                            Guid guidSecond = Unsafe.Add(ref memorySecond, count);
                             Assert.Equal(guidfirst, guidSecond);
                         }
                     }
@@ -186,6 +186,37 @@ namespace System.SpanTests
                     if (allocatedSecond)
                         AllocationHelper.ReleaseNative(ref memBlockSecond);
                 }
+            }
+        }
+
+        [Fact]
+        public static void CopyToVaryingSizes()
+        {
+            const int MaxLength = 2048;
+
+            var rng = new Random();
+            byte[] inputArray = new byte[MaxLength];
+            ReadOnlySpan<byte> inputSpan = inputArray;
+            Span<byte> outputSpan = new byte[MaxLength];
+            Span<byte> allZerosSpan = new byte[MaxLength];
+
+            // Test all inputs from size 0 .. MaxLength (inclusive) to make sure we don't have
+            // gaps in our Memmove logic.
+            for (int i = 0; i <= MaxLength; i++)
+            {
+                // Arrange
+
+                rng.NextBytes(inputArray);
+                outputSpan.Clear();
+
+                // Act
+
+                inputSpan.Slice(0, i).CopyTo(outputSpan);
+
+                // Assert
+
+                Assert.True(inputSpan.Slice(0, i).SequenceEqual(outputSpan.Slice(0, i))); // src successfully copied to dst
+                Assert.True(outputSpan.Slice(i).SequenceEqual(allZerosSpan.Slice(i))); // no other part of dst was overwritten
             }
         }
     }

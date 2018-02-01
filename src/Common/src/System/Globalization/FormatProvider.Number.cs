@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Globalization
@@ -547,28 +548,24 @@ namespace System.Globalization
                 return false;
             }
 
-            private static unsafe bool TrailingZeros(ReadOnlySpan<char> s, int index)
+            private static bool TrailingZeros(ReadOnlySpan<char> s, int index)
             {
-                fixed (char* sPtr = &s.DangerousGetPinnableReference())
+                // For compatibility, we need to allow trailing zeros at the end of a number string
+                for (int i = index; i < s.Length; i++)
                 {
-                    var span = new Span<char>(sPtr, s.Length);
-                    // For compatibility, we need to allow trailing zeros at the end of a number string
-                    for (int i = index; i < s.Length; i++)
+                    if (s[i] != '\0')
                     {
-                        if (span[i] != '\0')
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-                    return true;
                 }
+                return true;
             }
 
             internal static unsafe bool TryStringToNumber(ReadOnlySpan<char> str, NumberStyles options, ref NumberBuffer number, StringBuilder sb, NumberFormatInfo numfmt, bool parseDecimal)
             {
                 Debug.Assert(numfmt != null);
 
-                fixed (char* stringPointer = &str.DangerousGetPinnableReference())
+                fixed (char* stringPointer = &MemoryMarshal.GetReference(str))
                 {
                     char* p = stringPointer;
                     if (!ParseNumber(ref p, options, ref number, sb, numfmt, parseDecimal)
@@ -638,72 +635,68 @@ namespace System.Globalization
 
             internal static unsafe char ParseFormatSpecifier(ReadOnlySpan<char> format, out int digits)
             {
-                fixed (char* formatPtr = &format.DangerousGetPinnableReference())
+                char c = default;
+                if (format.Length > 0)
                 {
-                    var formatSpan = new Span<char>(formatPtr, format.Length);
-                    char c = default;
-                    if (format.Length > 0)
+                    // If the format begins with a symbol, see if it's a standard format
+                    // with or without a specified number of digits.
+                    c = format[0];
+                    if ((uint)(c - 'A') <= 'Z' - 'A' ||
+                        (uint)(c - 'a') <= 'z' - 'a')
                     {
-                        // If the format begins with a symbol, see if it's a standard format
-                        // with or without a specified number of digits.
-                        c = formatSpan[0];
-                        if ((uint)(c - 'A') <= 'Z' - 'A' ||
-                            (uint)(c - 'a') <= 'z' - 'a')
+                        // Fast path for sole symbol, e.g. "D"
+                        if (format.Length == 1)
                         {
-                            // Fast path for sole symbol, e.g. "D"
-                            if (format.Length == 1)
-                            {
-                                digits = -1;
-                                return c;
-                            }
+                            digits = -1;
+                            return c;
+                        }
 
-                            if (format.Length == 2)
+                        if (format.Length == 2)
+                        {
+                            // Fast path for symbol and single digit, e.g. "X4"
+                            int d = format[1] - '0';
+                            if ((uint)d < 10)
                             {
-                                // Fast path for symbol and single digit, e.g. "X4"
-                                int d = formatSpan[1] - '0';
-                                if ((uint)d < 10)
-                                {
-                                    digits = d;
-                                    return c;
-                                }
-                            }
-                            else if (format.Length == 3)
-                            {
-                                // Fast path for symbol and double digit, e.g. "F12"
-                                int d1 = formatSpan[1] - '0', d2 = formatSpan[2] - '0';
-                                if ((uint)d1 < 10 && (uint)d2 < 10)
-                                {
-                                    digits = d1 * 10 + d2;
-                                    return c;
-                                }
-                            }
-
-                            // Fallback for symbol and any length digits.  The digits value must be >= 0 && <= 99,
-                            // but it can begin with any number of 0s, and thus we may need to check more than two
-                            // digits.  Further, for compat, we need to stop when we hit a null char.
-                            int n = 0;
-                            int i = 1;
-                            while (i < format.Length && (((uint)formatSpan[i] - '0') < 10) && n < 10)
-                            {
-                                n = (n * 10) + formatSpan[i++] - '0';
-                            }
-
-                            // If we're at the end of the digits rather than having stopped because we hit something
-                            // other than a digit or overflowed, return the standard format info.
-                            if (i == format.Length || formatSpan[i] == '\0')
-                            {
-                                digits = n;
+                                digits = d;
                                 return c;
                             }
                         }
-                    }
+                        else if (format.Length == 3)
+                        {
+                            // Fast path for symbol and double digit, e.g. "F12"
+                            int d1 = format[1] - '0', d2 = format[2] - '0';
+                            if ((uint)d1 < 10 && (uint)d2 < 10)
+                            {
+                                digits = d1 * 10 + d2;
+                                return c;
+                            }
+                        }
 
-                    // Default empty format to be "G"; custom format is signified with '\0'.
-                    digits = -1;
-                    return format.Length == 0 || c == '\0' ? // For compat, treat '\0' as the end of the specifier, even if the specifier extends beyond it.
-                        'G' : 
-                        '\0';
+                        // Fallback for symbol and any length digits.  The digits value must be >= 0 && <= 99,
+                        // but it can begin with any number of 0s, and thus we may need to check more than two
+                        // digits.  Further, for compat, we need to stop when we hit a null char.
+                        int n = 0;
+                        int i = 1;
+                        while (i < format.Length && (((uint)format[i] - '0') < 10) && n < 10)
+                        {
+                            n = (n * 10) + format[i++] - '0';
+                        }
+
+                        // If we're at the end of the digits rather than having stopped because we hit something
+                        // other than a digit or overflowed, return the standard format info.
+                        if (i == format.Length || format[i] == '\0')
+                        {
+                            digits = n;
+                            return c;
+                        }
+                    }
                 }
+
+                // Default empty format to be "G"; custom format is signified with '\0'.
+                digits = -1;
+                return format.Length == 0 || c == '\0' ? // For compat, treat '\0' as the end of the specifier, even if the specifier extends beyond it.
+                    'G' : 
+                    '\0';
             }
 
             internal static unsafe void NumberToString(ref ValueStringBuilder sb, ref NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
@@ -1219,7 +1212,7 @@ namespace System.Globalization
                     return 0;
                 }
 
-                fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                 {
                     int src = 0;
                     for (;;)
@@ -1295,7 +1288,7 @@ namespace System.Globalization
                     scaleAdjust = 0;
                     src = section;
 
-                    fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                    fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                     {
                         while (src < format.Length && (ch = pFormat[src++]) != 0 && ch != ';')
                         {
@@ -1462,8 +1455,7 @@ namespace System.Globalization
                             if (thousandsSepCtr >= thousandsSepPos.Length)
                             {
                                 var newThousandsSepPos = new int[thousandsSepPos.Length * 2];
-                                bool copied = thousandsSepPos.TryCopyTo(newThousandsSepPos);
-                                Debug.Assert(copied, "Expect copy to succeed, as the new array is larger than the original");
+                                thousandsSepPos.CopyTo(newThousandsSepPos);
                                 thousandsSepPos = newThousandsSepPos;
                             }
 
@@ -1485,7 +1477,7 @@ namespace System.Globalization
 
                 bool decimalWritten = false;
 
-                fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                 {
                     char* cur = dig;
 
