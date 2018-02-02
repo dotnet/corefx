@@ -1679,7 +1679,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Trait("inv", "1")][OuterLoop]
+        [OuterLoop]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
