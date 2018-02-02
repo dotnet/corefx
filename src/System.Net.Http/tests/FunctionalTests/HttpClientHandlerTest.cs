@@ -1679,7 +1679,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop]
+        [Trait("inv", "1")][OuterLoop]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1703,7 +1703,16 @@ namespace System.Net.Http.Functional.Tests
                         positionGetFunc: () => 0,
                         canReadFunc: () => true,
                         readAsyncFunc: (buffer, offset, count, cancellationToken) => syncFailure ? throw error : Task.Delay(1).ContinueWith<int>(_ => throw error)));
-                    Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
+
+                    if (!UseManagedHandler)
+                    {
+                        Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
+                    }
+                    else
+                    {
+                        HttpRequestException requestException = await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
+                        Assert.Same(error, requestException.InnerException);
+                    }
                 }
             });
         }
