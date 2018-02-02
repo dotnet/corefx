@@ -1029,7 +1029,7 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Ensures that the hashset can hold up to 'capacity' entries without any further expansion of its backing storage
+        /// Ensures that the hash set can hold up to 'capacity' entries without any further expansion of its backing storage.
         /// </summary>
         public int EnsureCapacity(int capacity)
         {
@@ -1040,6 +1040,7 @@ namespace System.Collections.Generic
                 return currentCapacity;
             if (_buckets == null)
                 return Initialize(capacity);
+
             int newSize = HashHelpers.GetPrime(capacity);
             SetCapacity(newSize);
             return newSize;
@@ -1130,7 +1131,6 @@ namespace System.Collections.Generic
 
             _buckets = new int[size];
             _slots = new Slot[size];
-
             return size;
         }
 
