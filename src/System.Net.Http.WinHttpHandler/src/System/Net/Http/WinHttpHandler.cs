@@ -853,14 +853,14 @@ namespace System.Net.Http
                     {
                         _authHelper.PreAuthenticateRequest(state, proxyAuthScheme);
 
-                        await InternalSendRequestAsync(state);
+                        await InternalSendRequestAsync(state).ConfigureAwait(false);
 
                         if (state.RequestMessage.Content != null)
                         {
                             await InternalSendRequestBodyAsync(state, chunkedModeForSend).ConfigureAwait(false);
                         }
 
-                        bool receivedResponse = await InternalReceiveResponseHeadersAsync(state) != 0;
+                        bool receivedResponse = (await InternalReceiveResponseHeadersAsync(state).ConfigureAwait(false)) != 0;
                         if (receivedResponse)
                         {
                             // If we're manually handling cookies, we need to add them to the container after
