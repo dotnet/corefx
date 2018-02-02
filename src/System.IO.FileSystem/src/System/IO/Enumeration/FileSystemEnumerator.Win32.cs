@@ -9,6 +9,7 @@ namespace System.IO.Enumeration
 {
     public partial class FileSystemEnumerator<TResult>
     {
+        /// <returns>'true' if new data was found</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
         {

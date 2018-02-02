@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 
 namespace System.IO.Enumeration
@@ -41,6 +42,27 @@ namespace System.IO.Enumeration
         public TResult Current => _current;
 
         object IEnumerator.Current => Current;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void DirectoryFinished()
+        {
+            _entry = default;
+
+            // Close the handle now that we're done
+            CloseDirectoryHandle();
+            OnDirectoryFinished(_currentPath);
+
+            if (_pending == null || _pending.Count == 0)
+            {
+                _lastEntryFound = true;
+            }
+            else
+            {
+                // Grab the next directory to parse
+                (_directoryHandle, _currentPath) = _pending.Dequeue();
+                FindNextEntry();
+            }
+        }
 
         public void Reset()
         {

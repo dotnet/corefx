@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.IO.Enumeration;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests.Enumeration
 {
-    // Unix implementation not finished
-    [ActiveIssue(26715, TestPlatforms.AnyUnix)]
     public class SpecialDirectoryTests : FileSystemTest
     {
         protected virtual string[] GetNames(string directory, EnumerationOptions options)
@@ -33,8 +27,6 @@ namespace System.IO.Tests.Enumeration
         }
     }
 
-    // Unix implementation not finished
-    [ActiveIssue(26715, TestPlatforms.AnyUnix)]
     public class SpecialDirectoryTests_DirectoryInfo_GetDirectories : SpecialDirectoryTests
     {
         protected override string[] GetNames(string directory, EnumerationOptions options)

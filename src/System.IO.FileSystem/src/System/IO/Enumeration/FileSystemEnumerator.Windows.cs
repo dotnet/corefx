@@ -19,13 +19,13 @@ namespace System.IO.Enumeration
         // a reasonable buffer for all of the other metadata as well.
         private const int MinimumBufferSize = 1024;
 
-        private readonly string _originalPath;
-        private readonly string _originalFullPath;
+        private readonly string _originalRootDirectory;
+        private readonly string _rootDirectory;
         private readonly EnumerationOptions _options;
 
         private object _lock = new object();
 
-        private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
+        private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _entry;
         private TResult _current;
 
         private byte[] _buffer;
@@ -42,8 +42,8 @@ namespace System.IO.Enumeration
         /// <param name="options">Enumeration options to use.</param>
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
         {
-            _originalPath = directory ?? throw new ArgumentNullException(nameof(directory));
-            _originalFullPath = Path.GetFullPath(directory);
+            _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
+            _rootDirectory = Path.GetFullPath(directory);
             _options = options ?? EnumerationOptions.Default;
 
             // We'll only suppress the media insertion prompt on the topmost directory
@@ -51,10 +51,12 @@ namespace System.IO.Enumeration
             {
                 // We need to initialize the directory handle up front to ensure
                 // we immediately throw IO exceptions for missing directory/etc.
-                _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+                _directoryHandle = CreateDirectoryHandle(_rootDirectory);
+                if (_directoryHandle == IntPtr.Zero)
+                    _lastEntryFound = true;
             }
 
-            _currentPath = _originalFullPath;
+            _currentPath = _rootDirectory;
 
             int requestedBufferSize = _options.BufferSize;
             int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
@@ -136,18 +138,21 @@ namespace System.IO.Enumeration
 
                 do
                 {
-                    FindNextFile();
+                    FindNextEntry();
                     if (_lastEntryFound)
                         return false;
 
+                    // Calling the constructor inside the try block would create a second instance on the stack.
+                    FileSystemEntry.Initialize(ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory);
+
                     // Skip specified attributes
-                    if ((_info->FileAttributes & _options.AttributesToSkip) != 0)
+                    if ((_entry->FileAttributes & _options.AttributesToSkip) != 0)
                         continue;
 
-                    if ((_info->FileAttributes & FileAttributes.Directory) != 0)
+                    if ((_entry->FileAttributes & FileAttributes.Directory) != 0)
                     {
                         // Subdirectory found
-                        if (PathHelpers.IsDotOrDotDot(_info->FileName))
+                        if (PathHelpers.IsDotOrDotDot(_entry->FileName))
                         {
                             // "." or "..", don't process unless the option is set
                             if (!_options.ReturnSpecialDirectories)
@@ -156,7 +161,7 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
+                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _entry->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
                             if (subDirectoryHandle != IntPtr.Zero)
                             {
@@ -176,9 +181,6 @@ namespace System.IO.Enumeration
                         }
                     }
 
-                    // Calling the constructor inside the try block would create a second instance on the stack.
-                    FileSystemEntry.Initialize(ref entry, _info, _currentPath, _originalFullPath, _originalPath);
-
                     if (ShouldIncludeEntry(ref entry))
                     {
                         _current = TransformEntry(ref entry);
@@ -193,40 +195,19 @@ namespace System.IO.Enumeration
             }
         }
 
-        private unsafe void FindNextFile()
+        private unsafe void FindNextEntry()
         {
-            Interop.NtDll.FILE_FULL_DIR_INFORMATION* info = _info;
-            if (info != null && info->NextEntryOffset != 0)
+            Interop.NtDll.FILE_FULL_DIR_INFORMATION* entry = _entry;
+            if (entry != null && entry->NextEntryOffset != 0)
             {
                 // We're already in a buffer and have another entry
-                _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)((byte*)info + info->NextEntryOffset);
+                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)((byte*)entry + entry->NextEntryOffset);
                 return;
             }
 
             // We need more data
             if (GetData())
-                _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void DirectoryFinished()
-        {
-            _info = null;
-
-            // Close the handle now that we're done
-            CloseDirectoryHandle();
-            OnDirectoryFinished(_currentPath);
-
-            if (_pending == null || _pending.Count == 0)
-            {
-                _lastEntryFound = true;
-            }
-            else
-            {
-                // Grab the next directory to parse
-                (_directoryHandle, _currentPath) = _pending.Dequeue();
-                FindNextFile();
-            }
+                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
         }
 
         private void InternalDispose(bool disposing)

@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.IO.Enumeration;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests.Enumeration
 {
-    // Unix implementation not finished
-    [ActiveIssue(26715, TestPlatforms.AnyUnix)]
     public class SkipAttributeTests : FileSystemTest
     {
         protected virtual string[] GetPaths(string directory, EnumerationOptions options)
@@ -33,16 +27,20 @@ namespace System.IO.Tests.Enumeration
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
             DirectoryInfo testSubdirectory = Directory.CreateDirectory(Path.Combine(testDirectory.FullName, GetTestFileName()));
             FileInfo fileOne = new FileInfo(Path.Combine(testDirectory.FullName, GetTestFileName()));
-            FileInfo fileTwo = new FileInfo(Path.Combine(testDirectory.FullName, GetTestFileName()));
+
+            // Put a period in front to make it hidden on Unix
+            FileInfo fileTwo = new FileInfo(Path.Combine(testDirectory.FullName, "." + GetTestFileName()));
             FileInfo fileThree = new FileInfo(Path.Combine(testSubdirectory.FullName, GetTestFileName()));
-            FileInfo fileFour = new FileInfo(Path.Combine(testSubdirectory.FullName, GetTestFileName()));
+            FileInfo fileFour = new FileInfo(Path.Combine(testSubdirectory.FullName, "." + GetTestFileName()));
 
             fileOne.Create().Dispose();
             fileTwo.Create().Dispose();
-            fileTwo.Attributes = fileTwo.Attributes | FileAttributes.Hidden;
+            if (PlatformDetection.IsWindows)
+                fileTwo.Attributes = fileTwo.Attributes | FileAttributes.Hidden;
             fileThree.Create().Dispose();
             fileFour.Create().Dispose();
-            fileFour.Attributes = fileTwo.Attributes | FileAttributes.Hidden;
+            if (PlatformDetection.IsWindows)
+                fileFour.Attributes = fileTwo.Attributes | FileAttributes.Hidden;
 
             string[] paths = GetPaths(testDirectory.FullName, new EnumerationOptions { AttributesToSkip = FileAttributes.Hidden });
             Assert.Equal(new string[] { fileOne.FullName }, paths);
@@ -50,8 +48,16 @@ namespace System.IO.Tests.Enumeration
             paths = GetPaths(testDirectory.FullName, new EnumerationOptions { AttributesToSkip = FileAttributes.Hidden, RecurseSubdirectories = true });
             Assert.Equal(new string[] { fileOne.FullName, fileThree.FullName }, paths);
 
-            // Shouldn't recurse into the subdirectory now that it is hidden
-            testSubdirectory.Attributes = testSubdirectory.Attributes | FileAttributes.Hidden;
+            if (PlatformDetection.IsWindows)
+            {
+                // Shouldn't recurse into the subdirectory now that it is hidden
+                testSubdirectory.Attributes = testSubdirectory.Attributes | FileAttributes.Hidden;
+            }
+            else
+            {
+                Directory.Move(testSubdirectory.FullName, Path.Combine(testDirectory.FullName, "." + testSubdirectory.Name));
+            }
+
             paths = GetPaths(testDirectory.FullName, new EnumerationOptions { AttributesToSkip = FileAttributes.Hidden, RecurseSubdirectories = true });
             Assert.Equal(new string[] { fileOne.FullName }, paths);
         }

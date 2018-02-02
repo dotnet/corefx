@@ -12,7 +12,7 @@ namespace System.IO.Enumeration
         internal static void Initialize(
             ref FileSystemEntry entry,
             Interop.NtDll.FILE_FULL_DIR_INFORMATION* info,
-            string directory,
+            ReadOnlySpan<char> directory,
             string rootDirectory,
             string originalRootDirectory)
         {
@@ -72,11 +72,6 @@ namespace System.IO.Enumeration
         /// Returns true if this entry is a directory.
         /// </summary>
         public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
-
-        public DirectoryInfo ToDirectoryInfo() => DirectoryInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
-
-        public FileInfo ToFileInfo()
-            => FileInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
 
         public FileSystemInfo ToFileSystemInfo()
         {

@@ -25,8 +25,6 @@
     <Compile Include="Base\AllGetSetAttributes.cs" />
     <Compile Include="Base\StaticGetSetTimes.cs" />
     <Compile Include="Directory\EnumerableTests.cs" />
-    <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
-    <Compile Include="Enumeration\SkipAttributeTests.netcoreapp.cs" />
     <Compile Include="FileInfo\GetSetAttributesCommon.cs" />
     <Compile Include="FileInfo\IsReadOnly.cs" />
     <Compile Include="FileInfo\Replace.cs" />
@@ -56,6 +54,8 @@
     <Compile Include="File\ReadWriteAllTextAsync.cs" />
     <Compile Include="FileStream\ReadWriteSpan.netcoreapp.cs" />
     <Compile Include="Enumeration\ConstructionTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SkipAttributeTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->

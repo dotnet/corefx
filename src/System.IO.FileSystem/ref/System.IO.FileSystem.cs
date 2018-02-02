@@ -256,8 +256,6 @@ namespace System.IO.Enumeration
 
         public bool IsNameDotOrDotDot { get { throw null; } }
         public bool IsDirectory { get { throw null; } }
-        public DirectoryInfo ToDirectoryInfo() { throw null; }
-        public FileInfo ToFileInfo() { throw null; }
         public FileSystemInfo ToFileSystemInfo() { throw null; }
         public string ToSpecifiedFullPath() { throw null; }
         public string ToFullPath() { throw null; }

@@ -7,8 +7,6 @@ using Xunit;
 
 namespace System.IO.Tests.Enumeration
 {
-    // Unix implementation not finished
-    [ActiveIssue(26715, TestPlatforms.AnyUnix)]
     public class ConstructionTests : FileSystemTest
     {
         [Fact]
