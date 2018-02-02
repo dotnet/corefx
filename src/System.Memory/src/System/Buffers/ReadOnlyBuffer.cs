@@ -27,7 +27,6 @@ namespace System.Buffers
         private readonly SequencePosition _bufferStart;
         private readonly SequencePosition _bufferEnd;
 
-
         /// <summary>
         /// Returns empty <see cref="ReadOnlyBuffer{T}"/>
         /// </summary>
@@ -44,7 +43,7 @@ namespace System.Buffers
         public bool IsEmpty => Length == 0;
 
         /// <summary>
-        /// Determins if the <see cref="ReadOnlyBuffer{T}"/> is a single <see cref="ReadOnlyMemory{T}"/>.
+        /// Determines if the <see cref="ReadOnlyBuffer{T}"/> contains a single <see cref="ReadOnlyMemory{T}"/> segment.
         /// </summary>
         public bool IsSingleSegment => _bufferStart.Segment == _bufferEnd.Segment;
 
@@ -108,7 +107,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="T:T[]"/>, offset and index.
+        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="T:T[]"/>, start and index.
         /// </summary>
         public ReadOnlyBuffer(T[] array, int start, int length)
         {
@@ -146,7 +145,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="OwnedMemory{T}"/>.
+        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="OwnedMemory{T}"/>, start and length.
         /// Consumer is expected to manage lifetime of memory until <see cref="ReadOnlyBuffer{T}"/> is not used anymore.
         /// </summary>
         public ReadOnlyBuffer(OwnedMemory<T> ownedMemory, int start, int length)
@@ -283,7 +282,7 @@ namespace System.Buffers
         public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
-        /// Returns a new <see cref="SequencePosition"/>  at an <paramref name="offset"/> from the origin <paramref name="origin"/>
+        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the origin <paramref name="origin"/>
         /// </summary>
         public SequencePosition GetPosition(SequencePosition origin, long offset)
         {

@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Collections.Generic;
+using System.MemoryTests;
 using System.Text;
 
 namespace System.Memory.Tests
@@ -63,9 +64,7 @@ namespace System.Memory.Tests
 
             public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
             {
-                var startSegment = new byte[data.Length + 20];
-                Array.Copy(data, 0, startSegment, 10, data.Length);
-                return new ReadOnlyBuffer<byte>(new OwnedArray(startSegment, 10, data.Length));
+                return new ReadOnlyBuffer<byte>(new CustomMemoryForTest<byte>(data));
             }
         }
 

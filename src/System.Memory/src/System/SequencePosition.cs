@@ -9,8 +9,7 @@ namespace System
 {
     /// <summary>
     /// Represents position in non-contiguous set of memory.
-    /// Properties of this type should not be interpreted by anything but the but the
-    /// type that created it.
+    /// Properties of this type should not be interpreted by anything but the type that created it.
     /// </summary>
     public readonly struct SequencePosition : IEquatable<SequencePosition>
     {

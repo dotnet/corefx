@@ -182,7 +182,7 @@ namespace System.Buffers
                 {
                     var isEnd = current == end;
                     int currentEnd = isEnd ? endPosition : current.Memory.Length;
-                    var currentLength = currentEnd - currentIndex;
+                    int currentLength = currentEnd - currentIndex;
 
                     // We would prefer to put position in the beginning of next segment
                     // then past the end of previous one, but only if we are not leaving current buffer
@@ -243,20 +243,16 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static long GetLength(
-            IMemoryList<T> start,
-            int startIndex,
-            IMemoryList<T> endSegment,
-            int endIndex)
+        private static long GetLength(IMemoryList<T> start, int startIndex, IMemoryList<T> endSegment, int endIndex)
         {
             if (start == endSegment)
             {
                 return endIndex - startIndex;
             }
 
-            return (endSegment.RunningIndex - start.Next.RunningIndex)
-                   + (start.Memory.Length - startIndex)
-                   + endIndex;
+            return (endSegment.RunningIndex - start.Next.RunningIndex) // Length of data in between first and last segment
+                   + (start.Memory.Length - startIndex) // Length of data in first segment
+                   + endIndex; // Lenght of data in last segment
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

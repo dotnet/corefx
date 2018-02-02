@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.MemoryTests;
 using Xunit;
 
 namespace System.Memory.Tests
@@ -99,7 +100,7 @@ namespace System.Memory.Tests
         [Fact]
         public void Ctor_OwnedMemory_Offset()
         {
-            var ownedMemory = new OwnedArray(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
+            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
             var buffer = new ReadOnlyBuffer<byte>(ownedMemory, 2, 3);
             Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
         }
@@ -107,7 +108,7 @@ namespace System.Memory.Tests
         [Fact]
         public void Ctor_OwnedMemory_NoOffset()
         {
-            var ownedMemory = new OwnedArray(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
+            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
             var buffer = new ReadOnlyBuffer<byte>(ownedMemory);
             Assert.Equal(buffer.ToArray(), new byte[] { 1, 2, 3, 4, 5 });
         }
@@ -115,12 +116,12 @@ namespace System.Memory.Tests
         [Fact]
         public void Ctor_OwnedMemory_ValidatesArguments()
         {
-            var ownedMemory = new OwnedArray(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
+            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlyBuffer<byte>(ownedMemory, 6, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlyBuffer<byte>(ownedMemory, 4, 2));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlyBuffer<byte>(ownedMemory, -4, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlyBuffer<byte>(ownedMemory, 4, -2));
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlyBuffer<byte>((OwnedArray)null, 4, 2));
+            Assert.Throws<ArgumentNullException>(() => new ReadOnlyBuffer<byte>((CustomMemoryForTest<byte>)null, 4, 2));
         }
 
         [Fact]

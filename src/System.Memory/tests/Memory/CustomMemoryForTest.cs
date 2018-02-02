@@ -15,15 +15,23 @@ namespace System.MemoryTests
         private int _referenceCount;
         private int _noReferencesCalledCount;
         private T[] _array;
+        private readonly int _offset;
+        private readonly int _lenght;
 
-        public CustomMemoryForTest(T[] array)
+        public CustomMemoryForTest(T[] array): this(array, 0, array.Length)
+        {
+        }
+
+        public CustomMemoryForTest(T[] array, int offset, int lenght)
         {
             _array = array;
+            _offset = offset;
+            _lenght = lenght;
         }
 
         public int OnNoRefencesCalledCount => _noReferencesCalledCount;
 
-        public override int Length => _array.Length;
+        public override int Length => _lenght;
 
         public override bool IsDisposed => _disposed;
 
@@ -46,7 +54,7 @@ namespace System.MemoryTests
                 Retain();
                 if (byteOffset < 0 || (byteOffset/Unsafe.SizeOf<T>()) > _array.Length) throw new ArgumentOutOfRangeException(nameof(byteOffset));
                 var handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                return new MemoryHandle(this, Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), byteOffset), handle);
+                return new MemoryHandle(this, Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), _offset + byteOffset), handle);
             }
         }
 
@@ -54,7 +62,7 @@ namespace System.MemoryTests
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-            arraySegment = new ArraySegment<T>(_array);
+            arraySegment = new ArraySegment<T>(_array, _offset, _lenght);
             return true;
         }
 

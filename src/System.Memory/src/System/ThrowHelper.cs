@@ -143,9 +143,7 @@ namespace System
         offset,
         startSegment,
         endSegment,
-
         startIndex,
-
         endIndex
     }
 }
