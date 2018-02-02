@@ -24,5 +24,19 @@ namespace System.IO.Pipes.Tests
             // Should not throw.
             new NamedPipeServerStream(GetUniquePipeName(), PipeDirection.InOut, 2, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly).Dispose();
         }
+
+        [Fact]
+        public static void CreateServer_ConnectClient()
+        {
+            var name = GetUniquePipeName();
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
+            {
+                using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
+                {
+                    // Should not throw.
+                    client.Connect();
+                }
+            }
+        }
     }
 }

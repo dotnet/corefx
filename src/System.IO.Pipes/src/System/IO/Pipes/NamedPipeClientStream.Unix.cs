@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Security;
 using System.Threading;
@@ -49,6 +51,17 @@ namespace System.IO.Pipes
                 }
             }
 
+            if (_isCurrentUserOnly)
+            {
+                if (!ValidateRemotePipeIsCurrentUser(clientHandle))
+                {
+                    clientHandle.Dispose();
+                    socket.Dispose();
+                    State = PipeState.Closed;
+                    throw new UnauthorizedAccessException(SR.UnauthorizedAccess_NotOwnedByCurrentUser);
+                }
+            }
+
             InitializeHandle(clientHandle, isExposed: false, isAsync: (_pipeOptions & PipeOptions.Asynchronous) != 0);
             State = PipeState.Connected;
             return true;
@@ -82,6 +95,17 @@ namespace System.IO.Pipes
                 if (!CanWrite) throw new NotSupportedException(SR.NotSupported_UnwritableStream);
                 return InternalHandle?.NamedPipeSocket?.SendBufferSize ?? 0;
             }
+        }
+
+        private bool ValidateRemotePipeIsCurrentUser(SafePipeHandle handle)
+        {
+            uint userId = Interop.Sys.GetEUid();
+            if (Interop.Sys.GetPeerID(handle, out uint serverOwner) == -1)
+            {
+                throw CreateExceptionForLastError();
+            }
+
+            return userId == serverOwner;
         }
 
         // -----------------------------

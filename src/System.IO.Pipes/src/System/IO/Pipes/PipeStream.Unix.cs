@@ -473,5 +473,13 @@ namespace System.IO.Pipes
                     break;
             }
         }
+
+        internal Exception CreateExceptionForLastError(string pipeName = null)
+        {
+            Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
+            return error.Error == Interop.Error.ENOTSUP ?
+                new PlatformNotSupportedException(SR.Format(SR.PlatformNotSupported_OperatingSystemError, nameof(Interop.Error.ENOTSUP))) :
+                Interop.GetExceptionForIoErrno(error, pipeName);
+        }
     }
 }
