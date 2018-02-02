@@ -248,6 +248,7 @@ namespace System.Memory.Tests
             Assert.Null(result);
         }
 
+        [Fact]
         public void CopyTo_ThrowsWhenSourceLargerThenDestination()
         {
             ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(10);
@@ -262,6 +263,7 @@ namespace System.Memory.Tests
         public static TheoryData<Func<ReadOnlyBuffer<byte>, ReadOnlyBuffer<byte>>> ValidSliceCases => new TheoryData<Func<ReadOnlyBuffer<byte>, ReadOnlyBuffer<byte>>>
         {
             b => b.Slice(5),
+            b => b.Slice(0).Slice(5),
             b => b.Slice(5, 5),
             b => b.Slice(b.GetPosition(b.Start, 5), 5),
             b => b.Slice(5, b.GetPosition(b.Start, 10)),

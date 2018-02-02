@@ -10,7 +10,7 @@ namespace System.Buffers
     public interface IMemoryList<T>
     {
         /// <summary>
-        /// The <see cref="Memory{T}"/> value for current nodes.
+        /// The <see cref="Memory{T}"/> value for current node.
         /// </summary>
         Memory<T> Memory { get; }
 
@@ -20,7 +20,7 @@ namespace System.Buffers
         IMemoryList<T> Next { get; }
 
         /// <summary>
-        /// The sum of node lenghts before current.
+        /// The sum of node length before current.
         /// </summary>
         long RunningIndex { get; }
     }

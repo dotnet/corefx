@@ -70,8 +70,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
+    <Compile Include="ReadOnlyBuffer\OwnedArray.cs" />
     <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlyBufferFactory.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.Common.cs" />
+    <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsBytes.cs" />

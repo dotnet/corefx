@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Numerics.Hashing;
 using System.ComponentModel;
 
 namespace System
@@ -36,6 +37,7 @@ namespace System
         /// Returns true if left and right point at the same segment and have the same index.
         /// </summary>
         public static bool operator ==(SequencePosition left, SequencePosition right) => left.Index == right.Index && left.Segment == right.Segment;
+
         /// <summary>
         /// Returns true if left and right do not point at the same segment and have the same index.
         /// </summary>
@@ -50,17 +52,9 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode()
-        {
-            int h1 = Segment?.GetHashCode() ?? 0;
-            int h2 = Index.GetHashCode();
-
-            uint shift5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
-            return ((int)shift5 + h1) ^ h2;
-        }
+        public override int GetHashCode() => HashHelpers.Combine(Segment?.GetHashCode() ?? 0, Index);
 
         /// <inheritdoc />
-        public override string ToString() =>
-            this == default ? "(default)" : Segment == null ? $"{Index}" : $"{Segment}[{Index}]";
+        public override string ToString() => this == default ? "(default)" : Segment == null ? Index.ToString(): $"{Segment}[{Index}]";
     }
 }

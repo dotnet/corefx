@@ -140,6 +140,12 @@ namespace System
         comparable,
         comparer,
         destination,
-        offset
+        offset,
+        startSegment,
+        endSegment,
+
+        startIndex,
+
+        endIndex
     }
 }

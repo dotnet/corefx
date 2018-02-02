@@ -67,52 +67,6 @@ namespace System.Memory.Tests
                 Array.Copy(data, 0, startSegment, 10, data.Length);
                 return new ReadOnlyBuffer<byte>(new OwnedArray(startSegment, 10, data.Length));
             }
-
-            private class OwnedArray : OwnedMemory<byte>
-            {
-                private readonly byte[] _data;
-
-                private readonly int _offset;
-
-                private readonly int _length;
-
-                public OwnedArray(byte[] data, int offset, int length)
-                {
-                    _data = data;
-                    _offset = offset;
-                    _length = length;
-                }
-
-                protected override void Dispose(bool disposing)
-                {
-                }
-
-                public override MemoryHandle Pin(int byteOffset = 0)
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override bool Release()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override void Retain()
-                {
-                    throw new NotImplementedException();
-                }
-
-                protected override bool TryGetArray(out ArraySegment<byte> arraySegment)
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override bool IsDisposed => false;
-                protected override bool IsRetained => false;
-
-                public override int Length => _length;
-                public override Span<byte> Span => new Span<byte>(_data, _offset, _length);
-            }
         }
 
         internal class SingleSegmentTestBufferFactory : ReadOnlyBufferFactory

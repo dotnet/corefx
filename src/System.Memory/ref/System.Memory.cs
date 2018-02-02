@@ -266,7 +266,7 @@ namespace System.Buffers
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out System.ArraySegment<T> arraySegment);
     }
-    public static partial class ReadOnlyBufferExtensions
+    public static partial class BuffersExtensions
     {
         public static void CopyTo<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, System.Span<T> destination) { }
         public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, T value) where T : System.IEquatable<T> { throw null; }
@@ -278,10 +278,10 @@ namespace System.Buffers
         public static readonly System.Buffers.ReadOnlyBuffer<T> Empty;
         public ReadOnlyBuffer(System.Buffers.IMemoryList<T> startSegment, int startIndex, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
         public ReadOnlyBuffer(T[] array) { throw null; }
-        public ReadOnlyBuffer(T[] array, int offset, int length) { throw null; }
+        public ReadOnlyBuffer(T[] array, int start, int length) { throw null; }
         public ReadOnlyBuffer(System.ReadOnlyMemory<T> memory) { throw null; }
         public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory) { throw null; }
-        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory, int offset, int length) { throw null; }
+        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory, int start, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
         public bool IsEmpty { get { throw null; } }

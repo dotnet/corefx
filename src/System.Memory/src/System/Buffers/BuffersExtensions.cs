@@ -7,10 +7,10 @@ namespace System.Buffers
     /// <summary>
     /// Extension methods for <see cref="ReadOnlyBuffer{T}"/>
     /// </summary>
-    public static class ReadOnlyBufferExtensions
+    public static class BuffersExtensions
     {
         /// <summary>
-        /// Returns position of first occurance of item in the <see cref="ReadOnlyBuffer{T}"/>
+        /// Returns position of first occurrence of item in the <see cref="ReadOnlyBuffer{T}"/>
         /// </summary>
         public static SequencePosition? PositionOf<T>(this ReadOnlyBuffer<T> buffer, T value) where T : IEquatable<T>
         {
@@ -37,9 +37,7 @@ namespace System.Buffers
         public static void CopyTo<T>(this ReadOnlyBuffer<T> buffer, Span<T> destination)
         {
             if (buffer.Length > destination.Length)
-            {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
-            }
 
             foreach (var segment in buffer)
             {
@@ -49,7 +47,7 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Converts the <see cref="ReadOnlyBuffer{T}"/> to an array/>
+        /// Converts the <see cref="ReadOnlyBuffer{T}"/> to an array
         /// </summary>
         public static T[] ToArray<T>(this ReadOnlyBuffer<T> buffer)
         {

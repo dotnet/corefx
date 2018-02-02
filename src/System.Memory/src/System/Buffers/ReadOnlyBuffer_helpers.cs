@@ -28,7 +28,7 @@ namespace System.Buffers
             switch (type)
             {
                 case BufferType.MemoryList:
-                    var bufferSegment = (IMemoryList<T>) start.Segment;
+                    var bufferSegment = (IMemoryList<T>)start.Segment;
                     Memory<T> bufferSegmentMemory = bufferSegment.Memory;
                     int currentEndIndex = bufferSegmentMemory.Length;
 
@@ -180,14 +180,14 @@ namespace System.Buffers
                 // if end is not trusted
                 if (!foundResult)
                 {
-                    Memory<byte> memory = current.Memory;
-                    int currentEnd = current == end ? endPosition : memory.Length;
+                    var isEnd = current == end;
+                    int currentEnd = isEnd ? endPosition : current.Memory.Length;
+                    var currentLength = currentEnd - currentIndex;
 
-                    memory = memory.Slice(0, currentEnd - currentIndex);
                     // We would prefer to put position in the beginning of next segment
                     // then past the end of previous one, but only if we are not leaving current buffer
-                    if (memory.Length > count ||
-                       (memory.Length == count && current == end))
+                    if (currentLength > count ||
+                       (currentLength == count && isEnd))
                     {
                         result = new SequencePosition(current, currentIndex + (int)count);
                         foundResult = true;
@@ -197,7 +197,7 @@ namespace System.Buffers
                         }
                     }
 
-                    count -= memory.Length;
+                    count -= currentLength;
                 }
 
                 if (current.Next == null && current != end)
