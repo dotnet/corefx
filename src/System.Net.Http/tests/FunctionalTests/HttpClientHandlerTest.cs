@@ -1704,14 +1704,14 @@ namespace System.Net.Http.Functional.Tests
                         canReadFunc: () => true,
                         readAsyncFunc: (buffer, offset, count, cancellationToken) => syncFailure ? throw error : Task.Delay(1).ContinueWith<int>(_ => throw error)));
 
-                    if (!UseManagedHandler && !PlatformDetection.IsUap)
-                    {
-                        Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
-                    }
-                    else
+                    if (UseManagedHandler || PlatformDetection.IsUap)
                     {
                         HttpRequestException requestException = await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
                         Assert.Same(error, requestException.InnerException);
+                    }
+                    else
+                    {
+                        Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
                     }
                 }
             });
