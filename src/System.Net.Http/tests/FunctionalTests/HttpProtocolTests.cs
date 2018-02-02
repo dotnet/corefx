@@ -383,8 +383,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
         [InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
-        // TODO #24713: The following pass on Windows but fail on CurlHandler on Linux.
-        // [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
+        [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
         public async Task GetAsync_StatusLineNotFollowRFC_SuccessOnCore(string statusLine, int expectedStatusCode, string expectedReason)
         {
             await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
@@ -417,33 +416,30 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 2345")]
         [InlineData("HTTP/A.1 200 OK")]
         [InlineData("HTTP/X.Y.Z 200 OK")]
-        // TODO #24713: The following pass on Windows on .NET Core but fail on .NET Framework.
-        //[InlineData("HTTP/0.1 200 OK")]
-        //[InlineData("HTTP/3.5 200 OK")]
-        //[InlineData("HTTP/1.12 200 OK")]
-        //[InlineData("HTTP/12.1 200 OK")]
-        // TODO #24713: The following pass on Windows on .NET Core but fail on UWP / WinRT.
-        //[InlineData("HTTP/1.1 200 O\nK")]
-        //[InlineData("HTTP/1.1 200OK")]
-        //[InlineData("HTTP/1.1 20c")]
-        //[InlineData("HTTP/1.1 23")]
-        //[InlineData("HTTP/1.1 2bc")]
-        // TODO #24713: The following pass on Windows but fail on CurlHandler on Linux.
-        //[InlineData("NOTHTTP/1.1")]
-        //[InlineData("HTTP/1.A 200 OK")]
-        //[InlineData("HTTP 1.1 200 OK")]
-        //[InlineData("ABCD/1.1 200 OK")]
-        //[InlineData("HTTP/1.1")]
-        //[InlineData("HTTP\\1.1 200 OK")]
-        //[InlineData("HTTP/1.1 ")]
-        //[InlineData("HTTP/1.1 !11")]
-        //[InlineData("HTTP/1.1 a11")]
-        //[InlineData("HTTP/1.1 abc")]
-        //[InlineData("HTTP/1.1 200 O\rK")]
-        //[InlineData("HTTP/1.1\t\t")]
-        //[InlineData("HTTP/1.1\t")]
-        //[InlineData("HTTP/1.1  ")]
-        //[InlineData("NOTHTTP/1.1 200 OK")]
+        [InlineData("HTTP/0.1 200 OK")]
+        [InlineData("HTTP/3.5 200 OK")]
+        [InlineData("HTTP/1.12 200 OK")]
+        [InlineData("HTTP/12.1 200 OK")]
+        [InlineData("HTTP/1.1 200 O\nK")]
+        [InlineData("HTTP/1.1 200OK")]
+        [InlineData("HTTP/1.1 20c")]
+        [InlineData("HTTP/1.1 23")]
+        [InlineData("HTTP/1.1 2bc")]
+        [InlineData("NOTHTTP/1.1")]
+        [InlineData("HTTP/1.A 200 OK")]
+        [InlineData("HTTP 1.1 200 OK")]
+        [InlineData("ABCD/1.1 200 OK")]
+        [InlineData("HTTP/1.1")]
+        [InlineData("HTTP\\1.1 200 OK")]
+        [InlineData("HTTP/1.1 ")]
+        [InlineData("HTTP/1.1 !11")]
+        [InlineData("HTTP/1.1 a11")]
+        [InlineData("HTTP/1.1 abc")]
+        [InlineData("HTTP/1.1 200 O\rK")]
+        [InlineData("HTTP/1.1\t\t")]
+        [InlineData("HTTP/1.1\t")]
+        [InlineData("HTTP/1.1  ")]
+        [InlineData("NOTHTTP/1.1 200 OK")]
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
         {
             await GetAsyncThrowsExceptionHelper(responseString);
