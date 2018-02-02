@@ -5,9 +5,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
-    internal partial class FindEnumerable<TResult, TState>
+    public partial class FileSystemEnumerator<TResult>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
@@ -36,7 +36,15 @@ namespace System.IO
                     Debug.Assert(statusBlock.Information.ToInt64() != 0);
                     return true;
                 default:
-                    throw Win32Marshal.GetExceptionForWin32Error((int)Interop.NtDll.RtlNtStatusToDosError(status), _currentPath);
+                    int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
+
+                    // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
+                    if (ContinueOnError(error) || (error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible))
+                    {
+                        DirectoryFinished();
+                        return false;
+                    }
+                    throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
             }
         }
     }

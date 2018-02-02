@@ -25,6 +25,8 @@
     <Compile Include="Base\AllGetSetAttributes.cs" />
     <Compile Include="Base\StaticGetSetTimes.cs" />
     <Compile Include="Directory\EnumerableTests.cs" />
+    <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SkipAttributeTests.netcoreapp.cs" />
     <Compile Include="FileInfo\GetSetAttributesCommon.cs" />
     <Compile Include="FileInfo\IsReadOnly.cs" />
     <Compile Include="FileInfo\Replace.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="File\ReadWriteAllBytesAsync.cs" />
     <Compile Include="File\ReadWriteAllTextAsync.cs" />
     <Compile Include="FileStream\ReadWriteSpan.netcoreapp.cs" />
+    <Compile Include="Enumeration\ConstructionTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
@@ -111,6 +114,7 @@
     <Compile Include="File\Move.cs" />
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
+    <Compile Include="Enumeration\DosMatcherTests.netcoreapp.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
@@ -180,6 +184,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Matchers\" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
