@@ -12,6 +12,7 @@ namespace System.Memory.Tests
     {
         public static ReadOnlyBufferFactory ArrayFactory { get; } = new ArrayTestBufferFactory();
         public static ReadOnlyBufferFactory MemoryFactory { get; } = new MemoryTestBufferFactory();
+        public static ReadOnlyBufferFactory OwnedMemoryFactory { get; } = new OwnedMemoryTestBufferFactory();
         public static ReadOnlyBufferFactory SingleSegmentFactory { get; } = new SingleSegmentTestBufferFactory();
         public static ReadOnlyBufferFactory SegmentPerByteFactory { get; } = new BytePerSegmentTestBufferFactory();
 
@@ -50,6 +51,67 @@ namespace System.Memory.Tests
                 var startSegment = new byte[data.Length + 20];
                 Array.Copy(data, 0, startSegment, 10, data.Length);
                 return new ReadOnlyBuffer<byte>(new Memory<byte>(startSegment, 10, data.Length));
+            }
+        }
+
+        internal class OwnedMemoryTestBufferFactory : ReadOnlyBufferFactory
+        {
+            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            {
+                return CreateWithContent(new byte[size]);
+            }
+
+            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            {
+                var startSegment = new byte[data.Length + 20];
+                Array.Copy(data, 0, startSegment, 10, data.Length);
+                return new ReadOnlyBuffer<byte>(new OwnedArray(startSegment, 10, data.Length));
+            }
+
+            private class OwnedArray : OwnedMemory<byte>
+            {
+                private readonly byte[] _data;
+
+                private readonly int _offset;
+
+                private readonly int _length;
+
+                public OwnedArray(byte[] data, int offset, int length)
+                {
+                    _data = data;
+                    _offset = offset;
+                    _length = length;
+                }
+
+                protected override void Dispose(bool disposing)
+                {
+                }
+
+                public override MemoryHandle Pin(int byteOffset = 0)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override bool Release()
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override void Retain()
+                {
+                    throw new NotImplementedException();
+                }
+
+                protected override bool TryGetArray(out ArraySegment<byte> arraySegment)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override bool IsDisposed => false;
+                protected override bool IsRetained => false;
+
+                public override int Length => _length;
+                public override Span<byte> Span => new Span<byte>(_data, _offset, _length);
             }
         }
 

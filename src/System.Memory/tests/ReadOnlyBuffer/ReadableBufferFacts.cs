@@ -18,7 +18,12 @@ namespace System.Memory.Tests
 
         public class OwnedMemory : ReadOnlyBufferFacts
         {
-            public OwnedMemory() : base(ReadOnlyBufferFactory.MemoryFactory) { }
+            public OwnedMemory() : base(ReadOnlyBufferFactory.OwnedMemoryFactory) { }
+        }
+
+        public class Memory : ReadOnlyBufferFacts
+        {
+            public Memory() : base(ReadOnlyBufferFactory.MemoryFactory) { }
         }
 
         public class SingleSegment : ReadOnlyBufferFacts
@@ -95,7 +100,7 @@ namespace System.Memory.Tests
         {
             ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(100);
             SequencePosition position = buffer.GetPosition(buffer.Start, 65);
-            Assert.Equal(buffer.Slice(65).Start, position);
+            Assert.Equal(buffer.Slice(position).Length, 35);
         }
 
         [Fact]

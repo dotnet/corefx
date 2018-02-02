@@ -280,6 +280,8 @@ namespace System.Buffers
         public ReadOnlyBuffer(T[] array) { throw null; }
         public ReadOnlyBuffer(T[] array, int offset, int length) { throw null; }
         public ReadOnlyBuffer(System.ReadOnlyMemory<T> memory) { throw null; }
+        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory) { throw null; }
+        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory, int offset, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
         public bool IsEmpty { get { throw null; } }

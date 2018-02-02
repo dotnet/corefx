@@ -128,6 +128,28 @@ namespace System.Buffers
             _bufferStart = new SequencePosition(segment, 0 | MemoryListStartMask);
             _bufferEnd = new SequencePosition(segment, readOnlyMemory.Length | MemoryListEndMask);
         }
+        /// <summary>
+        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="OwnedMemory{T}"/>.
+        /// Consumer is expected to manage lifetime of memory until  <see cref="ReadOnlyBuffer{T}"/> is not used anymore.
+        /// </summary>
+        public ReadOnlyBuffer(OwnedMemory<T> ownedMemory): this(ownedMemory, 0, ownedMemory.Length)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="ReadOnlyBuffer{T}"/> from the <see cref="OwnedMemory{T}"/>.
+        /// Consumer is expected to manage lifetime of memory until  <see cref="ReadOnlyBuffer{T}"/> is not used anymore.
+        /// </summary>
+        public ReadOnlyBuffer(OwnedMemory<T> ownedMemory, int offset, int length)
+        {
+            if (ownedMemory == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
+            }
+
+            _bufferStart = new SequencePosition(ownedMemory, offset | OwnedMemoryStartMask);
+            _bufferEnd = new SequencePosition(ownedMemory, length | OwnedMemoryEndMask);
+        }
 
         /// <summary>
         /// Forms a slice out of the given <see cref="ReadOnlyBuffer{T}"/>, beginning at <paramref name="start"/>, and is at most <paramref name="length"/> items
