@@ -8,7 +8,7 @@ namespace System.Collections.Generic
 {
     /// <summary>Provides a double-ended queue data structure.</summary>
     /// <typeparam name="T">Type of the data stored in the dequeue.</typeparam>
-    [DebuggerDisplay("Count = {_size}")]
+    [DebuggerDisplay("Count = {_size}, Head={_head}, Tail={_tail}")]
     internal sealed class Dequeue<T>
     {
         private T[] _array = Array.Empty<T>();
