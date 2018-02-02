@@ -195,6 +195,23 @@ namespace System
         }
 
         /// <summary>
+        /// For <see cref="ReadOnlySpan{Char}"/>, returns a new instance of string that represents the characters pointed to by the span.
+        /// Otherwise, returns a <see cref="String"/> with the name of the type and the number of elements.
+        /// </summary>
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char))
+            {
+                unsafe
+                {
+                    fixed (char* src = &Unsafe.As<T, char>(ref _pointer.Value))
+                        return new string(src, 0, _length);
+                }
+            }
+            return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
+        }
+
+        /// <summary>
         /// Forms a slice out of the given read-only span, beginning at 'start'.
         /// </summary>
         /// <param name="start">The index at which to begin this slice.</param>

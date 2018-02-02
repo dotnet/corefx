@@ -82,12 +82,6 @@ namespace System
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> with the name of the type and the number of elements
-        /// </summary>
-        /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
-        public override string ToString() => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
-
-        /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>
         /// </summary>
         public static implicit operator Span<T>(T[] array) => array != null ? new Span<T>(array) : default;

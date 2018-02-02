@@ -292,6 +292,12 @@ namespace System
         public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._pinnable, span._byteOffset, span._length);
 
         /// <summary>
+        /// Returns a <see cref="String"/> with the name of the type and the number of elements
+        /// </summary>
+        /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
+        public override string ToString() => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, Length);
+
+        /// <summary>
         /// Forms a slice out of the given span, beginning at 'start'.
         /// </summary>
         /// <param name="start">The index at which to begin this slice.</param>
