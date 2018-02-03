@@ -30,9 +30,7 @@ namespace System
         {
             if (array == null)
             {
-                _length = default;
-                _pinnable = default;
-                _byteOffset = default;
+                this = default;
                 return; // returns default
             }
             if (default(T) == null && array.GetType() != typeof(T[]))
@@ -60,9 +58,9 @@ namespace System
         {
             if (array == null)
             {
-                _length = default;
-                _pinnable = default;
-                _byteOffset = default;
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                this = default;
                 return; // returns default
             }
             if (default(T) == null && array.GetType() != typeof(T[]))

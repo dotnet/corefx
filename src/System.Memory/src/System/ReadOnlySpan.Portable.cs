@@ -30,9 +30,7 @@ namespace System
         {
             if (array == null)
             {
-                _length = default;
-                _pinnable = default;
-                _byteOffset = default;
+                this = default;
                 return; // returns default
             }
 
@@ -58,9 +56,9 @@ namespace System
         {
             if (array == null)
             {
-                _length = default;
-                _pinnable = default;
-                _byteOffset = default;
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                this = default;
                 return; // returns default
             }
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))

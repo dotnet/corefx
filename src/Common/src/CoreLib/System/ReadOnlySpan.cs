@@ -83,13 +83,13 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="ReadOnlySpan{T}"/>
         /// </summary>
-        public static implicit operator ReadOnlySpan<T>(T[] array) => new ReadOnlySpan<T>(array);
+        public static implicit operator ReadOnlySpan<T>(T[] array) => array != null ? new ReadOnlySpan<T>(array) : default;
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlySpan{T}"/>
         /// </summary>
         public static implicit operator ReadOnlySpan<T>(ArraySegment<T> arraySegment)
-            => new ReadOnlySpan<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+            => arraySegment.Array != null ? new ReadOnlySpan<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count) : default;
 
         /// <summary>
         /// Returns a 0-length read-only span whose base is the null pointer.

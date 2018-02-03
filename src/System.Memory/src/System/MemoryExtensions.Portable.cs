@@ -60,12 +60,12 @@ namespace System
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text)
         {
             if (text == null)
-                return default; // returns default
+                return default;
 
             return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), StringAdjustment, text.Length);
         }
@@ -75,7 +75,7 @@ namespace System
         /// </summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
@@ -83,7 +83,7 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
         {
             if (text == null)
-                return default; // returns default
+                return default;
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -96,7 +96,7 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
@@ -104,7 +104,7 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
         {
             if (text == null)
-                return default; // returns default
+                return default;
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -113,7 +113,7 @@ namespace System
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text)
         {
             if (text == null)
@@ -125,14 +125,14 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
         {
             if (text == null)
-                return default; // returns default
+                return default;
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -143,14 +143,14 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <remarks>Returns default when <paramref name="text "/> is null.</remarks>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
         {
             if (text == null)
-                return default; // returns default
+                return default;
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
