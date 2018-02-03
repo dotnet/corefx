@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 
 namespace System.IO.Enumeration
@@ -43,7 +42,6 @@ namespace System.IO.Enumeration
 
         object IEnumerator.Current => Current;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void DirectoryFinished()
         {
             _entry = default;
