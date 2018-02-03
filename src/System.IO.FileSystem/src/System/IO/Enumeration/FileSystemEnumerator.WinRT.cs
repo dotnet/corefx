@@ -25,10 +25,11 @@ namespace System.IO.Enumeration
                         DirectoryFinished();
                         return false;
                     case Interop.Errors.ERROR_ACCESS_DENIED:
-                        if (_options.IgnoreInaccessable)
+                        if (_options.IgnoreInaccessible)
                         {
-                            return IntPtr.Zero;
+                            return false;
                         }
+                        break;
                 }
 
                 if (!ContinueOnError(error))
