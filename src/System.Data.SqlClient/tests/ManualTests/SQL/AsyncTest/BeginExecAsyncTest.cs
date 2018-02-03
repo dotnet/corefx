@@ -11,7 +11,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private static string GenerateCommandText()
         {
             int suffix = (new Random()).Next(5000);
-            string commandText = $"CREATE TABLE #Shippers{suffix}(" +
+
+            string commandText = 
+                $"CREATE TABLE #Shippers{suffix}(" +
                     $"[ShipperID][int] NULL," +
                     $"[CompanyName] [nvarchar] (40) NOT NULL," +
                     $"[Phone] [nvarchar] (24) NULL )" +
