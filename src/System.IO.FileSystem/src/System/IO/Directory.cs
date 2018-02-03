@@ -157,13 +157,7 @@ namespace System.IO
             => GetFiles(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetFiles(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions));
-        }
+            => EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions));
 
         public static string[] GetDirectories(string path) => GetDirectories(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
@@ -173,13 +167,7 @@ namespace System.IO
             => GetDirectories(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions));
-        }
+            => EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions));
 
         public static string[] GetFileSystemEntries(string path) => GetFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
@@ -189,13 +177,7 @@ namespace System.IO
             => GetFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions));
-        }
+            => EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions));
 
         internal static IEnumerable<string> InternalEnumeratePaths(
             string path,
@@ -203,8 +185,10 @@ namespace System.IO
             SearchTarget searchTarget,
             EnumerationOptions options)
         {
-            Debug.Assert(path != null);
-            Debug.Assert(searchPattern != null);
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (searchPattern == null)
+                throw new ArgumentNullException(nameof(searchPattern));
 
             FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
 
@@ -229,45 +213,30 @@ namespace System.IO
             => EnumerateDirectories(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions);
-        }
+            => InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions);
 
         public static IEnumerable<string> EnumerateFiles(string path) => EnumerateFiles(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static IEnumerable<string> EnumerateFiles(string path, string searchPattern) => EnumerateFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
+        public static IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            => EnumerateFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
             => EnumerateFiles(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFiles(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions);
-        }
+            => InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions);
 
-        public static IEnumerable<string> EnumerateFileSystemEntries(string path) => EnumerateFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Compatible);
+        public static IEnumerable<string> EnumerateFileSystemEntries(string path)
+            => EnumerateFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern) => EnumerateFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
+        public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern)
+            => EnumerateFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
             => EnumerateFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            return InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
-        }
+            =>  InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
 
         public static string GetDirectoryRoot(string path)
         {

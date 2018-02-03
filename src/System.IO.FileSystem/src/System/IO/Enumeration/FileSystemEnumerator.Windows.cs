@@ -23,7 +23,7 @@ namespace System.IO.Enumeration
         private readonly string _rootDirectory;
         private readonly EnumerationOptions _options;
 
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _entry;
         private TResult _current;
@@ -97,7 +97,6 @@ namespace System.IO.Enumeration
 
             if (handle == IntPtr.Zero || handle == (IntPtr)(-1))
             {
-                // Historically we throw directory not found rather than file not found
                 int error = Marshal.GetLastWin32Error();
                 if (ContinueOnError(error))
                     return IntPtr.Zero;
@@ -111,6 +110,7 @@ namespace System.IO.Enumeration
                         }
                         break;
                     case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                        // Historically we throw directory not found rather than file not found
                         error = Interop.Errors.ERROR_PATH_NOT_FOUND;
                         break;
                 }
@@ -126,12 +126,9 @@ namespace System.IO.Enumeration
             if (_lastEntryFound)
                 return false;
 
-            bool acquiredLock = false;
             FileSystemEntry entry = default;
 
-            Monitor.Enter(_lock, ref acquiredLock);
-
-            try
+            lock (_lock)
             {
                 if (_lastEntryFound)
                     return false;
@@ -188,22 +185,13 @@ namespace System.IO.Enumeration
                     }
                 } while (true);
             }
-            finally
-            {
-                if (acquiredLock)
-                    Monitor.Exit(_lock);
-            }
         }
 
         private unsafe void FindNextEntry()
         {
-            Interop.NtDll.FILE_FULL_DIR_INFORMATION* entry = _entry;
-            if (entry != null && entry->NextEntryOffset != 0)
-            {
-                // We're already in a buffer and have another entry
-                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)((byte*)entry + entry->NextEntryOffset);
+            _entry = Interop.NtDll.FILE_FULL_DIR_INFORMATION.GetNextInfo(_entry);
+            if (_entry != null)
                 return;
-            }
 
             // We need more data
             if (GetData())
@@ -215,10 +203,7 @@ namespace System.IO.Enumeration
             // It is possible to fail to allocate the lock, but the finalizer will still run
             if (_lock != null)
             {
-                bool acquiredLock = false;
-                Monitor.Enter(_lock, ref acquiredLock);
-
-                try
+                lock (_lock)
                 {
                     _lastEntryFound = true;
 
@@ -238,11 +223,6 @@ namespace System.IO.Enumeration
                         ArrayPool<byte>.Shared.Return(_buffer);
 
                     _buffer = null;
-                }
-                finally
-                {
-                    if (acquiredLock)
-                        Monitor.Exit(_lock);
                 }
             }
 

@@ -15,7 +15,7 @@ namespace System.IO.Enumeration
         private readonly string _rootDirectory;
         private readonly EnumerationOptions _options;
 
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         private string _currentPath;
         private SafeDirectoryHandle _directoryHandle;
@@ -69,12 +69,9 @@ namespace System.IO.Enumeration
             if (_lastEntryFound)
                 return false;
 
-            bool acquiredLock = false;
             FileSystemEntry entry = default;
 
-            Monitor.Enter(_lock, ref acquiredLock);
-
-            try
+            lock (_lock)
             {
                 if (_lastEntryFound)
                     return false;
@@ -126,20 +123,20 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _entry.InodeName);
-                            SafeDirectoryHandle subDirectoryHandle = CreateDirectoryHandle(subDirectory);
-                            if (subDirectoryHandle != null)
+                            string subdirectory = PathHelpers.CombineNoChecks(_currentPath, _entry.InodeName);
+                            SafeDirectoryHandle subdirectoryHandle = CreateDirectoryHandle(subdirectory);
+                            if (subdirectoryHandle != null)
                             {
                                 try
                                 {
                                     if (_pending == null)
                                         _pending = new Queue<(SafeDirectoryHandle, string)>();
-                                    _pending.Enqueue((subDirectoryHandle, subDirectory));
+                                    _pending.Enqueue((subdirectoryHandle, subdirectory));
                                 }
                                 catch
                                 {
                                     // Couldn't queue the handle, close it and rethrow
-                                    subDirectoryHandle.Dispose();
+                                    subdirectoryHandle.Dispose();
                                     throw;
                                 }
                             }
@@ -152,11 +149,6 @@ namespace System.IO.Enumeration
                         return true;
                     }
                 } while (true);
-            }
-            finally
-            {
-                if (acquiredLock)
-                    Monitor.Exit(_lock);
             }
         }
 
@@ -178,10 +170,7 @@ namespace System.IO.Enumeration
             // It is possible to fail to allocate the lock, but the finalizer will still run
             if (_lock != null)
             {
-                bool acquiredLock = false;
-                Monitor.Enter(_lock, ref acquiredLock);
-
-                try
+                lock(_lock)
                 {
                     _lastEntryFound = true;
 
@@ -193,11 +182,6 @@ namespace System.IO.Enumeration
                             _pending.Dequeue().Handle.Dispose();
                         _pending = null;
                     }
-                }
-                finally
-                {
-                    if (acquiredLock)
-                        Monitor.Exit(_lock);
                 }
             }
 
