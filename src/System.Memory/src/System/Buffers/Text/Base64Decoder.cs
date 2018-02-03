@@ -180,7 +180,7 @@ namespace System.Buffers.Text
         public static int GetMaxDecodedFromUtf8Length(int length)
         {
             if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Length);
 
             return (length >> 2) * 3;
         }

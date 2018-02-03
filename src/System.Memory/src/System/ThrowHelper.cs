@@ -108,16 +108,11 @@ namespace System
 
     internal enum ExceptionArgument
     {
-        array,
-        length,
-        start,
-        text,
-        obj,
-        ownedMemory,
-        minimumBufferSize,
-        byteOffset,
-        pointer,
-        comparable,
-        comparer
+        Length,
+        Start,
+        MinimumBufferSize,
+        ByteOffset,
+        Comparable,
+        Comparer
     }
 }

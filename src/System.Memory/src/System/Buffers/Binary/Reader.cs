@@ -148,7 +148,7 @@ namespace System.Buffers.Binary
 #endif
             if (Unsafe.SizeOf<T>() > buffer.Length)
             {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Length);
             }
             return Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(buffer));
         }

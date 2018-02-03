@@ -1155,7 +1155,7 @@ namespace System
             where TComparer : IComparer<T>
         {
             if (comparer == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparer);
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.Comparer);
 
             var comparable = new SpanHelpers.ComparerComparable<T, TComparer>(
                 value, comparer);

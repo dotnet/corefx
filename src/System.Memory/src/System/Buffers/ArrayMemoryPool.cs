@@ -20,7 +20,7 @@ namespace System.Buffers
             if (minimumBufferSize == -1)
                 minimumBufferSize = 1 + (4095 / Unsafe.SizeOf<T>());
             else if (((uint)minimumBufferSize) > s_maxBufferSize)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumBufferSize);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.MinimumBufferSize);
 
             return new ArrayMemoryPoolBuffer(minimumBufferSize);
         }

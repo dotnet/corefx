@@ -109,7 +109,7 @@ namespace System.Buffers.Text
         public static int GetMaxEncodedToUtf8Length(int length)
         {
             if (length < 0 || length > MaximumEncodeLength)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Length);
 
             return (((length + 2) / 3) * 4);
         }

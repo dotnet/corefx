@@ -23,14 +23,18 @@ namespace System
         /// Creates a new span over the entirety of the target array.
         /// </summary>
         /// <param name="array">The target array.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="array"/> is a null
-        /// reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span(T[] array)
         {
             if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+            {
+                _length = default;
+                _pinnable = default;
+                _byteOffset = default;
+                return; // returns default
+            }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
@@ -46,8 +50,7 @@ namespace System
         /// <param name="array">The target array.</param>
         /// <param name="start">The index at which to begin the span.</param>
         /// <param name="length">The number of items in the span.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="array"/> is a null
-        /// reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
@@ -56,11 +59,16 @@ namespace System
         public Span(T[] array, int start, int length)
         {
             if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+            {
+                _length = default;
+                _pinnable = default;
+                _byteOffset = default;
+                return; // returns default
+            }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
             _length = length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -88,7 +96,7 @@ namespace System
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
             _length = length;
             _pinnable = null;
@@ -308,7 +316,7 @@ namespace System
         public Span<T> Slice(int start)
         {
             if ((uint)start > (uint)_length)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             int length = _length - start;
@@ -327,7 +335,7 @@ namespace System
         public Span<T> Slice(int start, int length)
         {
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             return new Span<T>(_pinnable, newOffset, length);
