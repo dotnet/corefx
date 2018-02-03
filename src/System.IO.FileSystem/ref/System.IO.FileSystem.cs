@@ -253,8 +253,6 @@ namespace System.IO.Enumeration
         public DateTimeOffset CreationTimeUtc { get { throw null; } }
         public DateTimeOffset LastAccessTimeUtc { get { throw null; } }
         public DateTimeOffset LastWriteTimeUtc { get { throw null; } }
-
-        public bool IsNameDotOrDotDot { get { throw null; } }
         public bool IsDirectory { get { throw null; } }
         public FileSystemInfo ToFileSystemInfo() { throw null; }
         public string ToSpecifiedFullPath() { throw null; }

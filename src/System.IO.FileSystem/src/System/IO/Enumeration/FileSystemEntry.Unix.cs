@@ -68,8 +68,6 @@ namespace System.IO.Enumeration
         public DateTimeOffset CreationTimeUtc => Info.CreationTimeCore;
         public DateTimeOffset LastAccessTimeUtc => Info.LastAccessTimeCore;
         public DateTimeOffset LastWriteTimeUtc => Info.LastWriteTimeCore;
-
-        public bool IsNameDotOrDotDot => PathHelpers.IsDotOrDotDot(FileName);
         public bool IsDirectory => _isDirectory;
         public FileSystemInfo ToFileSystemInfo() => Info;
 

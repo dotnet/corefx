@@ -63,12 +63,6 @@ namespace System.IO.Enumeration
         public DateTimeOffset LastWriteTimeUtc => _info->LastWriteTime.ToDateTimeOffset();
 
         /// <summary>
-        /// Returns true if this entry's name is one of the special current (".") and
-        /// parent ("..") directory entries.
-        /// </summary>
-        public bool IsNameDotOrDotDot => PathHelpers.IsDotOrDotDot(FileName);
-
-        /// <summary>
         /// Returns true if this entry is a directory.
         /// </summary>
         public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
