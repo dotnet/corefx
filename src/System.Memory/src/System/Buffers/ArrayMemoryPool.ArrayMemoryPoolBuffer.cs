@@ -70,7 +70,7 @@ namespace System.Buffers
                     Retain(); // this checks IsDisposed
 
                     if (byteOffset != 0 && (((uint)byteOffset) - 1) / Unsafe.SizeOf<T>() >= _array.Length)
-                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.ByteOffset);
+                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteOffset);
 
                     GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
                     return new MemoryHandle(this, ((byte*)handle.AddrOfPinnedObject()) + byteOffset, handle);

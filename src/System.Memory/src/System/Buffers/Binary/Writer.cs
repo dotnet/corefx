@@ -33,7 +33,7 @@ namespace System.Buffers.Binary
 #endif
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Length);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
             Unsafe.WriteUnaligned<T>(ref MemoryMarshal.GetReference(buffer), value);
         }

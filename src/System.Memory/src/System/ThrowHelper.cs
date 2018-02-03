@@ -106,13 +106,16 @@ namespace System
         }
     }
 
+    //
+    // The convention for this enum is using the argument name as the enum name
+    //
     internal enum ExceptionArgument
     {
-        Length,
-        Start,
-        MinimumBufferSize,
-        ByteOffset,
-        Comparable,
-        Comparer
+        length,
+        start,
+        minimumBufferSize,
+        byteOffset,
+        comparable,
+        comparer
     }
 }

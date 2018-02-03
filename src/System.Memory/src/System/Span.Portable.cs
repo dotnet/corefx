@@ -59,14 +59,14 @@ namespace System
             if (array == null)
             {
                 if (start != 0 || length != 0)
-                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
                 this = default;
                 return; // returns default
             }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -94,7 +94,7 @@ namespace System
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _length = length;
             _pinnable = null;
@@ -314,7 +314,7 @@ namespace System
         public Span<T> Slice(int start)
         {
             if ((uint)start > (uint)_length)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             int length = _length - start;
@@ -333,7 +333,7 @@ namespace System
         public Span<T> Slice(int start, int length)
         {
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             IntPtr newOffset = _byteOffset.Add<T>(start);
             return new Span<T>(_pinnable, newOffset, length);
