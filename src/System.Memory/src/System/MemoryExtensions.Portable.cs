@@ -83,7 +83,11 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
         {
             if (text == null)
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
                 return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -104,7 +108,11 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
         {
             if (text == null)
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
                 return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -132,7 +140,11 @@ namespace System
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
         {
             if (text == null)
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
                 return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
@@ -150,7 +162,11 @@ namespace System
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
         {
             if (text == null)
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
                 return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.Start);
 
