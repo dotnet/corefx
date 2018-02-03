@@ -189,12 +189,12 @@ namespace System
 
             return new ReadOnlySpan<char>(ref Unsafe.Add(ref text.GetRawStringData(), start), length);
         }
-
+        
         internal static unsafe void ClearWithoutReferences(ref byte b, nuint byteLength)
         {
             if (byteLength == 0)
                 return;
-
+            
 #if CORECLR && (AMD64 || ARM64)
             if (byteLength > 4096) goto PInvoke;
             Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
@@ -503,7 +503,7 @@ namespace System
 
             return;
 #endif
-
+            
             PInvoke:
             RuntimeImports.RhZeroMemory(ref b, byteLength);
         }
