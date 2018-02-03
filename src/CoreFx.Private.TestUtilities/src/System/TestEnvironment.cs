@@ -10,9 +10,9 @@ namespace System
     public static partial class TestEnvironment
     {
         /// <summary>
-        /// Check if the stress enabling mode environment variable is set.
+        /// Check if the stress mode is enabled.
         /// </summary>
-        /// <returns> true if the environment variable set to '1' or 'true'. returns false otherwise</returns>
+        /// <value> true if the environment variable COREFX_STRESS set to '1' or 'true'. returns false otherwise</value>
         public static bool IsStressModeEnabled
         {
             get
