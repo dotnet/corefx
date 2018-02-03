@@ -16,9 +16,8 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientMiniStress : HttpClientTestBase
     {
-        private static bool HttpStressEnabled => Configuration.Http.StressEnabled;
-
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(GetStressOptions))]
         public void SingleClient_ManyGets_Sync(int numRequests, int dop, HttpCompletionOption completionOption)
         {
@@ -32,7 +31,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         public async Task SingleClient_ManyGets_Async(int numRequests, int dop, HttpCompletionOption completionOption)
         {
             string responseText = CreateResponse("abcdefghijklmnopqrstuvwxyz");
@@ -42,7 +42,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(GetStressOptions))]
         public void ManyClients_ManyGets(int numRequests, int dop, HttpCompletionOption completionOption)
         {
@@ -56,7 +57,8 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(PostStressOptions))]
         public async Task ManyClients_ManyPosts_Async(int numRequests, int dop, int numBytes)
         {
@@ -70,7 +72,8 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [InlineData(1000000)]
         public void CreateAndDestroyManyClients(int numClients)
         {
@@ -80,7 +83,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [InlineData(5000)]
         public async Task MakeAndFaultManyRequests(int numRequests)
         {
@@ -96,7 +100,7 @@ namespace System.Net.Http.Functional.Tests
                          select client.GetStringAsync($"http://{ep.Address}:{ep.Port}"))
                          .ToArray();
 
-                    Assert.All(tasks, t => 
+                    Assert.All(tasks, t =>
                         Assert.True(t.IsFaulted || t.Status == TaskStatus.WaitingForActivation, $"Unexpected status {t.Status}"));
 
                     server.Dispose();
@@ -150,7 +154,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
-                    
+
                     return null;
                 });
 
@@ -180,7 +184,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
-                    
+
                     return null;
                 });
 
@@ -188,7 +192,8 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalFact(nameof(HttpStressEnabled))]
+        // IsStressModeEnabled is true when the environment variable COREFX_STRESS is set to 1 or true
+        [ConditionalFact(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         public async Task UnreadResponseMessage_Collectible()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -211,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
                             GC.Collect();
                             return !wr.IsAlive;
                         }, 10 * 1000), "Response object should have been collected");
-                        
+
                         return null;
                     });
                 }
