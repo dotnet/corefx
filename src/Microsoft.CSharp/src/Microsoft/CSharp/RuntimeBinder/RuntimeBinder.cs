@@ -75,11 +75,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        public Expression Bind(
-            DynamicMetaObjectBinder payload,
-            Expression[] parameters,
-            DynamicMetaObject[] args,
-            out DynamicMetaObject deferredBinding)
+        public Expression Bind(ICSharpBinder payload, Expression[] parameters, DynamicMetaObject[] args, out DynamicMetaObject deferredBinding)
         {
             // The lock is here to protect this instance of the binder from itself
             // when called on multiple threads. The cost in time of a single lock
@@ -98,12 +94,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             // ...subsequent calls that were cache hits, i.e., already bound, took less
             // than 1/1000 sec for the whole 4000 of them.
 
-            ICSharpBinder binder = payload as ICSharpBinder;
-            Debug.Assert(binder != null);
-
             lock (_bindLock)
             {
-                return BindCore(binder, parameters, args, out deferredBinding);
+                return BindCore(payload, parameters, args, out deferredBinding);
             }
         }
 
@@ -226,7 +219,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (t != null)
             {
-                AggregateSymbol agg = ((AggregateType)_symbolTable.GetCTypeFromType(t)).GetOwningAggregate();
+                AggregateSymbol agg = ((AggregateType)_symbolTable.GetCTypeFromType(t)).OwningAggregate;
                 bindingContext.ContextForMemberLookup = _semanticChecker.GetGlobalSymbolFactory().CreateAggregateDecl(agg, null);
             }
             else
@@ -438,23 +431,27 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expr CreateLocal(Type type, bool bIsOut, LocalVariableSymbol local)
+        private Expr CreateLocal(Type type, bool isOut, LocalVariableSymbol local)
         {
-            CType ctype = _symbolTable.GetCTypeFromType(type);
-            if (bIsOut)
+            CType ctype;
+            if (isOut)
             {
-                Debug.Assert(ctype is ParameterModifierType);
+                // We need to record the out state, but GetCTypeFromType will only determine that
+                // it should be some sort of ParameterType but not be able to deduce that it needs
+                // IsOut to be true. So do that logic here rather than create a ref type to then
+                // throw away.
+                Debug.Assert(type.IsByRef);
                 ctype = _semanticChecker.GetTypeManager()
-                    .GetParameterModifier(((ParameterModifierType)ctype).GetParameterType(), true);
+                    .GetParameterModifier(_symbolTable.GetCTypeFromType(type.GetElementType()), true);
+            }
+            else
+            {
+                ctype = _symbolTable.GetCTypeFromType(type);
             }
 
             // If we can convert, do that. If not, cast it.
             ExprLocal exprLocal = _exprFactory.CreateLocal(local);
-            Expr result = _binder.tryConvert(exprLocal, ctype);
-            if (result == null)
-            {
-                result = _binder.mustCast(exprLocal, ctype);
-            }
+            Expr result = _binder.tryConvert(exprLocal, ctype) ?? _binder.mustCast(exprLocal, ctype);
             result.Flags |= EXPRFLAG.EXF_LVALUE;
             return result;
         }
@@ -618,7 +615,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
+                if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -632,13 +629,11 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // If this is a WinRT type we have to add all collection interfaces that have this method 
             // as well so that overload resolution can find them.
-            if (callingType.IsWindowsRuntimeType())
+            if (callingType.IsWindowsRuntimeType)
             {
-                TypeArray collectioniFaces = callingType.GetWinRTCollectionIfacesAll(SymbolLoader);
-
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
+                    if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }
@@ -647,7 +642,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             EXPRFLAG flags = EXPRFLAG.EXF_USERCALLABLE;
             // If its a delegate, mark that on the memgroup.
-            if (Name == SpecialNames.Invoke && callingObject.Type.isDelegateType())
+            if (Name == SpecialNames.Invoke && callingObject.Type.IsDelegateType)
             {
                 flags |= EXPRFLAG.EXF_DELEGATE;
             }
@@ -731,7 +726,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // For a field, simply create the EXPRFIELD and our caller takes care of the rest.
 
             FieldSymbol fieldSymbol = swt.Field();
-            CType returnType = fieldSymbol.GetType();
             AggregateType fieldType = swt.GetType();
             FieldWithType fwt = new FieldWithType(fieldSymbol, fieldType);
 
@@ -792,7 +786,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ArgumentObject[] arguments,
             LocalVariableSymbol[] locals)
         {
-            if (payload is InvokeBinder && !callingObject.Type.isDelegateType())
+            if (payload is InvokeBinder && !callingObject.Type.IsDelegateType)
             {
                 throw Error.BindInvokeFailedNonDelegate();
             }
@@ -893,18 +887,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                 memGroup.Flags &= ~EXPRFLAG.EXF_USERCALLABLE;
             }
 
-            ExprWithArgs pResult = _binder.BindMethodGroupToArguments(// Tree
-                BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length));
+            ExprCall result = _binder.BindMethodGroupToArguments(// Tree
+                BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length)) as ExprCall;
 
-            // If overload resolution failed, throw an error.
-            if (pResult == null || !pResult.IsOK)
-            {
-                throw Error.BindCallFailedOverloadResolution();
-            }
+            Debug.Assert(result != null);
 
-            CheckForConditionalMethodError(pResult);
-            ReorderArgumentsForNamedAndOptional(callingObject, pResult);
-            return pResult;
+            CheckForConditionalMethodError(result);
+            ReorderArgumentsForNamedAndOptional(callingObject, result);
+            return result;
         }
 
         private ExprWithArgs BindWinRTEventAccessor(EventWithType ewt, Expr callingObject, ArgumentObject[] arguments, LocalVariableSymbol[] locals, bool isAddAccessor)
@@ -958,28 +948,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                 args);
         }
 
-        private static void CheckForConditionalMethodError(Expr pExpr)
+        private static void CheckForConditionalMethodError(ExprCall call)
         {
-            if (pExpr is ExprCall call)
+            MethodSymbol method = call.MethWithInst.Meth();
+            object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), true);
+            if (conditions.Length > 0)
             {
-                // This mimics the behavior of the native CompilerSymbolLoader in GetConditionalSymbols. Override
-                // methods cannot have the conditional attribute, but implicitly acquire it from their slot.
-
-                MethodSymbol method = call.MethWithInst.Meth();
-                if (method.isOverride)
-                {
-                    method = method.swtSlot.Meth();
-                }
-
-                object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), false).ToArray();
-                if (conditions.Length > 0)
-                {
-                    throw Error.BindCallToConditionalMethod(method.name);
-                }
-            }
-            else
-            {
-                Debug.Fail("Should be unreachable");
+                throw Error.BindCallToConditionalMethod(method.name);
             }
         }
 
@@ -1010,7 +985,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             ArgInfos argInfo = new ArgInfos
             {
-                carg = ExpressionBinder.CountArguments(arguments, out _)
+                carg = ExpressionBinder.CountArguments(arguments)
             };
             _binder.FillInArgInfoFromArgList(argInfo, arguments);
 
@@ -1411,6 +1386,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol[] locals)
         {
             Debug.Assert(arguments.Length >= 2);
+            Debug.Assert(arguments.All(a => a.Type != null));
 
             string name = payload.Name;
 
@@ -1435,12 +1411,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             int indexOfLast = arguments.Length - 1;
             Expr rhs = CreateArgumentEXPR(arguments[indexOfLast], locals[indexOfLast]);
-
-            if (arguments[0].Type == null)
-            {
-                throw Error.BindBinaryAssignmentFailedNullReference();
-            }
-
             return _binder.BindAssignment(lhs, rhs, bIsCompound);
         }
         #endregion

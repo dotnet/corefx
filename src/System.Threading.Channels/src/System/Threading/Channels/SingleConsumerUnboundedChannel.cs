@@ -13,7 +13,7 @@ namespace System.Threading.Channels
     /// Provides a buffered channel of unbounded capacity for use by any number
     /// of writers but at most a single reader at a time.
     /// </summary>
-    [DebuggerDisplay("Items={ItemsCountForDebugger}")]
+    [DebuggerDisplay("Items={ItemsCountForDebugger}, Closed={ChannelIsClosedForDebugger}")]
     [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
     internal sealed class SingleConsumerUnboundedChannel<T> : Channel<T>, IDebugEnumerable<T>
     {
@@ -45,7 +45,9 @@ namespace System.Threading.Channels
             Writer = new UnboundedChannelWriter(this);
         }
 
-        private sealed class UnboundedChannelReader : ChannelReader<T>
+        [DebuggerDisplay("Items={ItemsCountForDebugger}")]
+        [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
+        private sealed class UnboundedChannelReader : ChannelReader<T>, IDebugEnumerable<T>
         {
             internal readonly SingleConsumerUnboundedChannel<T> _parent;
             internal UnboundedChannelReader(SingleConsumerUnboundedChannel<T> parent) => _parent = parent;
@@ -105,9 +107,17 @@ namespace System.Threading.Channels
                     return newWaiter.Task;
                 }
             }
+
+            /// <summary>Gets the number of items in the channel.  This should only be used by the debugger.</summary>
+            private int ItemsCountForDebugger => _parent._items.Count;
+
+            /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
+            IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _parent._items.GetEnumerator();
         }
 
-        private sealed class UnboundedChannelWriter : ChannelWriter<T>
+        [DebuggerDisplay("Items={ItemsCountForDebugger}")]
+        [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
+        private sealed class UnboundedChannelWriter : ChannelWriter<T>, IDebugEnumerable<T>
         {
             internal readonly SingleConsumerUnboundedChannel<T> _parent;
             internal UnboundedChannelWriter(SingleConsumerUnboundedChannel<T> parent) => _parent = parent;
@@ -170,36 +180,33 @@ namespace System.Threading.Channels
             public override bool TryWrite(T item)
             {
                 SingleConsumerUnboundedChannel<T> parent = _parent;
-                while (true) // in case a reader was canceled and we need to try again
+                ReaderInteractor<bool> waitingReader = null;
+
+                lock (parent.SyncObj)
                 {
-                    ReaderInteractor<bool> waitingReader = null;
-
-                    lock (parent.SyncObj)
+                    // If writing is completed, exit out without writing.
+                    if (parent._doneWriting != null)
                     {
-                        // If writing is completed, exit out without writing.
-                        if (parent._doneWriting != null)
-                        {
-                            return false;
-                        }
-
-                        // Queue the item being written; then if there's a waiting
-                        // reader, store it for notification outside of the lock.
-                        parent._items.Enqueue(item);
-
-                        waitingReader = parent._waitingReader;
-                        if (waitingReader == null)
-                        {
-                            return true;
-                        }
-                        parent._waitingReader = null;
+                        return false;
                     }
 
-                    // If we get here, we grabbed a waiting reader.
-                    // Notify it that an item was written and exit.
-                    Debug.Assert(waitingReader != null, "Expected a waiting reader");
-                    waitingReader.Success(item: true);
-                    return true;
+                    // Queue the item being written; then if there's a waiting
+                    // reader, store it for notification outside of the lock.
+                    parent._items.Enqueue(item);
+
+                    waitingReader = parent._waitingReader;
+                    if (waitingReader == null)
+                    {
+                        return true;
+                    }
+                    parent._waitingReader = null;
                 }
+
+                // If we get here, we grabbed a waiting reader.
+                // Notify it that an item was written and exit.
+                Debug.Assert(waitingReader != null, "Expected a waiting reader");
+                waitingReader.Success(item: true);
+                return true;
             }
 
             public override Task<bool> WaitToWriteAsync(CancellationToken cancellationToken)
@@ -218,12 +225,21 @@ namespace System.Threading.Channels
                 cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
                 TryWrite(item) ? Task.CompletedTask :
                 Task.FromException(ChannelUtilities.CreateInvalidCompletionException(_parent._doneWriting));
+
+            /// <summary>Gets the number of items in the channel. This should only be used by the debugger.</summary>
+            private int ItemsCountForDebugger => _parent._items.Count;
+
+            /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
+            IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _parent._items.GetEnumerator();
         }
 
         private object SyncObj => _items;
 
         /// <summary>Gets the number of items in the channel.  This should only be used by the debugger.</summary>
         private int ItemsCountForDebugger => _items.Count;
+
+        /// <summary>Report if the channel is closed or not. This should only be used by the debugger.</summary>
+        private bool ChannelIsClosedForDebugger => _doneWriting != null;
 
         /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
         IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _items.GetEnumerator();

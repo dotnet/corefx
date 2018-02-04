@@ -11,10 +11,11 @@ using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography.Asn1
 {
-    internal class AsnWriter
+    internal sealed class AsnWriter : IDisposable
     {
         private byte[] _buffer;
         private int _offset;
@@ -32,6 +33,19 @@ namespace System.Security.Cryptography.Asn1
             }
 
             RuleSet = ruleSet;
+        }
+
+        public void Dispose()
+        {
+            _nestingStack = null;
+
+            if (_buffer != null)
+            {
+                Array.Clear(_buffer, 0, _offset);
+                ArrayPool<byte>.Shared.Return(_buffer);
+                _buffer = null;
+                _offset = 0;
+            }
         }
 
         private void EnsureWriteCapacity(int pendingCount)
@@ -1294,6 +1308,23 @@ namespace System.Security.Cryptography.Asn1
             return _buffer.AsSpan().Slice(0, _offset).ToArray();
         }
 
+        public ReadOnlySpan<byte> EncodeAsSpan()
+        {
+            if ((_nestingStack?.Count ?? 0) != 0)
+            {
+                throw new InvalidOperationException(SR.Cryptography_AsnWriter_EncodeUnbalancedStack);
+            }
+
+            if (_offset == 0)
+            {
+                return ReadOnlySpan<byte>.Empty;
+            }
+
+            // If the stack is closed out then everything is a definite encoding (BER, DER) or a
+            // required indefinite encoding (CER). So we're correctly sized up, and ready to copy.
+            return new ReadOnlySpan<byte>(_buffer, 0, _offset);
+        }
+
         private void PushTag(Asn1Tag tag)
         {
             if (_nestingStack == null)
@@ -1414,7 +1445,7 @@ namespace System.Security.Cryptography.Asn1
                 // TODO: Split this for netstandard vs netcoreapp for span?.
                 unsafe
                 {
-                    fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                    fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                     {
                         size = encoding.GetByteCount(strPtr, str.Length);
 
@@ -1431,7 +1462,7 @@ namespace System.Security.Cryptography.Asn1
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
-                fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                 {
                     if (size < 0)
                     {
@@ -1443,7 +1474,7 @@ namespace System.Security.Cryptography.Asn1
                     WriteLength(size);
                     Span<byte> dest = _buffer.AsSpan().Slice(_offset, size);
 
-                    fixed (byte* destPtr = &dest.DangerousGetPinnableReference())
+                    fixed (byte* destPtr = &MemoryMarshal.GetReference(dest))
                     {
                         int written = encoding.GetBytes(strPtr, str.Length, destPtr, dest.Length);
 
@@ -1468,7 +1499,7 @@ namespace System.Security.Cryptography.Asn1
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
-                fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                 {
                     tmp = ArrayPool<byte>.Shared.Rent(size);
 

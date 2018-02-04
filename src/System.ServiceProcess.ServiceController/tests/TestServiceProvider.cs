@@ -9,17 +9,43 @@ using System.Security.Principal;
 using Xunit;
 using System.IO;
 using System.Threading;
+using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace System.ServiceProcess.Tests
 {
     internal sealed class TestServiceProvider
     {
+        private const int readTimeout = 60000;
+
         private static readonly Lazy<bool> s_runningWithElevatedPrivileges = new Lazy<bool>(
             () => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator));
+
+        private NamedPipeClientStream _client;
 
         public static bool RunningWithElevatedPrivileges
         {
             get { return s_runningWithElevatedPrivileges.Value; }
+        }
+
+        public NamedPipeClientStream Client
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    _client = new NamedPipeClientStream(".", TestServiceName, PipeDirection.In);
+                }
+                return _client;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _client.Dispose();
+                    _client = null;
+                }
+            }
         }
 
         public readonly string TestServiceAssembly = typeof(TestService).Assembly.Location;
@@ -52,6 +78,17 @@ namespace System.ServiceProcess.Tests
             // Create the service
             CreateTestServices();
         }
+
+        public async Task<byte> ReadPipeAsync()
+        {
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            readTask = Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            return received[0];
+        }
+
+        public byte GetByte() => ReadPipeAsync().Result;
 
         private void CreateTestServices()
         {
@@ -90,14 +127,15 @@ namespace System.ServiceProcess.Tests
         {
             try
             {
+                if (_client != null)
+                {
+                    _client.Dispose();
+                    _client = null;
+                }
+
                 TestServiceInstaller testServiceInstaller = new TestServiceInstaller();
                 testServiceInstaller.ServiceName = TestServiceName;
                 testServiceInstaller.RemoveService();
-
-                if (File.Exists(LogPath))
-                {
-                    File.Delete(LogPath);
-                }
             }
             finally
             {
@@ -107,17 +145,6 @@ namespace System.ServiceProcess.Tests
                 {
                     _dependentServices.DeleteTestServices();
                 }
-            }
-        }
-
-        private string LogPath => typeof(TestService).Assembly.Location + "." + TestServiceName + ".log";
-
-        public string GetServiceOutput()
-        {
-            // Need to open with FileShare.ReadWrite because we expect the service still has it open for write
-            using (StreamReader reader = new StreamReader(File.Open(LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-            {
-                return reader.ReadToEnd();
             }
         }
     }

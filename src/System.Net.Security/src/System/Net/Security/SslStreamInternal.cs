@@ -14,7 +14,7 @@ namespace System.Net.Security
     //
     // This is a wrapping stream that does data encryption/decryption based on a successfully authenticated SSPI context.
     //
-    internal partial class SslStreamInternal
+    internal partial class SslStreamInternal : IDisposable
     {
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
@@ -57,10 +57,36 @@ namespace System.Net.Security
 
         ~SslStreamInternal()
         {
-            if (_internalBuffer != null)
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+
+            if (_internalBuffer == null)
             {
-                ArrayPool<byte>.Shared.Return(_internalBuffer);
-                _internalBuffer = null;
+                // Suppress finalizer if the read buffer was returned.
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            // Ensure a Read operation is not in progress,
+            // block potential reads since SslStream is disposing.
+            // This leaves the _nestedRead = 1, but that's ok, since
+            // subsequent Reads first check if the context is still available.
+            if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
+            {
+                byte[] buffer = _internalBuffer;
+                if (buffer != null)
+                {
+                    _internalBuffer = null;
+                    _internalBufferCount = 0;
+                    _internalOffset = 0;
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
 
@@ -197,7 +223,7 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count), SR.net_offset_plus_count);
             }
         }
-               
+
         private async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter
         {
@@ -212,7 +238,10 @@ namespace System.Net.Security
                 if (_decryptedBytesCount != 0)
                 {
                     copyBytes = CopyDecryptedData(buffer);
+
+                    _sslState.FinishRead(null);
                     _nestedRead = 0;
+
                     return copyBytes;
                 }
 
@@ -226,7 +255,7 @@ namespace System.Net.Security
 
                     ResetReadBuffer();
                     int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
-                    if(readBytes == 0)
+                    if (readBytes == 0)
                     {
                         return 0;
                     }
@@ -268,12 +297,18 @@ namespace System.Net.Security
                         ProtocolToken message = new ProtocolToken(null, status);
                         if (NetEventSource.IsEnabled)
                             NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+
                         if (message.Renegotiate)
                         {
+                            if (!_sslState._sslAuthenticationOptions.AllowRenegotiation)
+                            {
+                                throw new IOException(SR.net_ssl_io_renego);
+                            }
+
                             _sslState.ReplyOnReAuthentication(extraBuffer);
 
                             // Loop on read.
-                            return -1;
+                            continue;
                         }
 
                         if (message.CloseConnection)
@@ -285,13 +320,19 @@ namespace System.Net.Security
                         throw new IOException(SR.net_io_decrypt, message.GetException());
                     }
                 }
-                catch (Exception e) when (!(e is IOException))
+                catch (Exception e)
                 {
+                    _sslState.FinishRead(null);
+
+                    if (e is IOException)
+                    {
+                        throw;
+                    }
+
                     throw new IOException(SR.net_io_read, e);
                 }
                 finally
                 {
-                    _sslState.FinishRead(null);
                     _nestedRead = 0;
                 }
             }

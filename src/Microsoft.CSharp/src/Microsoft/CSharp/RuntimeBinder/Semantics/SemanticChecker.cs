@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Errors;
-using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -22,24 +21,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class CSemanticChecker
     {
         // Generate an error if CType is static.
-        public void CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
+        public void CheckForStaticClass(CType type)
         {
-            if (CType.isStaticClass())
+            if (type.IsStaticClass)
             {
-                throw ReportStaticClassError(symCtx, CType, err);
+                throw ErrorContext.Error(ErrorCode.ERR_ConvertToStaticClass, type);
             }
         }
 
         public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
                    typeThru is ArrayType ||
-                   typeThru is NullableType ||
-                   typeThru is ErrorType);
+                   typeThru is NullableType);
 
 #if DEBUG
 
@@ -72,7 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(atsCheck != null);
 
             // Substitute on the CType.
-            if (atsCheck.GetTypeArgsAll().Count > 0)
+            if (atsCheck.TypeArgsAll.Count > 0)
             {
                 CType = SymbolLoader.GetTypeManager().SubstType(CType, atsCheck);
             }
@@ -88,21 +86,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (!(type is AggregateType ats))
             {
-                Debug.Assert(type is VoidType || type is ErrorType || type is TypeParameterType);
+                Debug.Assert(type is VoidType || type is TypeParameterType);
                 return true;
             }
 
             do
             {
-                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.GetOwningAggregate(), ats.outerType, symWhere, null))
+                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.OwningAggregate, ats.OuterType, symWhere, null))
                 {
                     return false;
                 }
 
-                ats = ats.outerType;
+                ats = ats.OuterType;
             } while(ats != null);
 
-            TypeArray typeArgs = ((AggregateType)type).GetTypeArgsAll();
+            TypeArray typeArgs = ((AggregateType)type).TypeArgsAll;
             for (int i = 0; i < typeArgs.Count; i++)
             {
                 if (!CheckTypeAccess(typeArgs[i], symWhere))
@@ -113,9 +111,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Generates an error for static classes
-        public RuntimeBinderException ReportStaticClassError(Symbol symCtx, CType CType, ErrorCode err) =>
-            ErrorContext.Error(err, symCtx != null ? new []{CType, new ErrArg(symCtx)} : new ErrArg[]{CType});
-
         public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -141,13 +136,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
                    typeThru is ArrayType ||
-                   typeThru is NullableType ||
-                   typeThru is ErrorType);
+                   typeThru is NullableType);
 
             switch (symCheck.GetAccess())
             {
@@ -184,6 +178,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         return ACCESSERROR.ACCESSERROR_NOACCESS;
                     }
+                    break;
+
+                case ACCESS.ACC_INTERNAL_AND_PROTECTED:
+                    if (symWhere == null || !symWhere.SameAssemOrFriend(symCheck))
+                    {
+                        return ACCESSERROR.ACCESSERROR_NOACCESS;
+                    }
+
                     break;
             }
 
@@ -229,7 +231,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Handle the protected case - which is the only real complicated one.
-            Debug.Assert(symCheck.GetAccess() == ACCESS.ACC_PROTECTED || symCheck.GetAccess() == ACCESS.ACC_INTERNALPROTECTED);
+            Debug.Assert(symCheck.GetAccess() == ACCESS.ACC_PROTECTED
+                || symCheck.GetAccess() == ACCESS.ACC_INTERNALPROTECTED
+                || symCheck.GetAccess() == ACCESS.ACC_INTERNAL_AND_PROTECTED);
 
             // Check if symCheck is in aggWhere or a base of aggWhere,
             // or in an outer agg of aggWhere or a base of an outer agg of aggWhere.
@@ -256,7 +260,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // agg or a CType derived from an instantiation of agg. In this case
                     // all that matters is that agg is in the base AggregateSymbol chain of atsThru. The
                     // actual AGGTYPESYMs involved don't matter.
-                    if (atsThru == null || atsThru.getAggregate().FindBaseAgg(agg))
+                    if (atsThru == null || atsThru.OwningAggregate.FindBaseAgg(agg))
                     {
                         return ACCESSERROR.ACCESSERROR_NOERROR;
                     }

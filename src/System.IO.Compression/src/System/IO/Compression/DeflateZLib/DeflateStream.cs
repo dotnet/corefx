@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -493,7 +494,7 @@ namespace System.IO.Compression
             unsafe
             {
                 // Pass new bytes through deflater and write them too:
-                fixed (byte* bufferPtr = &source.DangerousGetPinnableReference())
+                fixed (byte* bufferPtr = &MemoryMarshal.GetReference(source))
                 {
                     _deflater.SetInput(bufferPtr, source.Length);
                     WriteDeflaterOutput();
@@ -842,7 +843,6 @@ namespace System.IO.Compression
             Debug.Assert(oldValue == 1, $"Expected {nameof(_activeAsyncOperation)} to be 1, got {oldValue}");
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowInvalidBeginCall()
         {
             throw new InvalidOperationException(SR.InvalidBeginCall);
