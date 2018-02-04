@@ -996,40 +996,54 @@ namespace System.Text.RegularExpressions
                 case 'Z':
                 case 'z':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     return new RegexNode(TypeFromCode(ch), _options);
 
                 case 'w':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.ECMAWordClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.WordClass);
 
                 case 'W':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotECMAWordClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotWordClass);
 
                 case 's':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.ECMASpaceClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.SpaceClass);
 
                 case 'S':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotECMASpaceClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotSpaceClass);
 
                 case 'd':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.ECMADigitClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.DigitClass);
 
                 case 'D':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     if (UseOptionE())
                         return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotECMADigitClass);
                     return new RegexNode(RegexNode.Set, _options, RegexCharClass.NotDigitClass);
@@ -1037,6 +1051,8 @@ namespace System.Text.RegularExpressions
                 case 'p':
                 case 'P':
                     MoveRight();
+                    if (scanOnly)
+                        return null;
                     cc = new RegexCharClass();
                     cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), UseOptionI(), _pattern);
                     if (UseOptionI())
@@ -1106,7 +1122,9 @@ namespace System.Text.RegularExpressions
 
                 if (CharsRight() > 0 && MoveRightGetChar() == close)
                 {
-                    if (IsCaptureSlot(capnum) || scanOnly)
+                    if (scanOnly)
+                        return null;
+                    if (IsCaptureSlot(capnum))
                         return new RegexNode(RegexNode.Ref, _options, capnum);
                     else
                         throw MakeException(SR.Format(SR.UndefinedBackref, capnum.ToString(CultureInfo.CurrentCulture)));
@@ -1132,12 +1150,14 @@ namespace System.Text.RegularExpressions
                         newcapnum = newcapnum * 10 + (int)(ch - '0');
                     }
                     if (capnum >= 0)
-                        return new RegexNode(RegexNode.Ref, _options, capnum);
+                        return scanOnly ? null : new RegexNode(RegexNode.Ref, _options, capnum);
                 }
                 else
                 {
                     int capnum = ScanDecimal();
-                    if (IsCaptureSlot(capnum) || scanOnly)
+                    if (scanOnly)
+                        return null;
+                    if (IsCaptureSlot(capnum))
                         return new RegexNode(RegexNode.Ref, _options, capnum);
                     else if (capnum <= 9)
                         throw MakeException(SR.Format(SR.UndefinedBackref, capnum.ToString(CultureInfo.CurrentCulture)));
@@ -1153,6 +1173,8 @@ namespace System.Text.RegularExpressions
 
                 if (CharsRight() > 0 && MoveRightGetChar() == close)
                 {
+                    if (scanOnly)
+                        return null;
                     if (IsCaptureName(capname))
                         return new RegexNode(RegexNode.Ref, _options, CaptureSlotFromName(capname));
                     else
@@ -1168,7 +1190,7 @@ namespace System.Text.RegularExpressions
             if (UseOptionI())
                 ch = _culture.TextInfo.ToLower(ch);
 
-            return new RegexNode(RegexNode.One, _options, ch);
+            return scanOnly ? null : new RegexNode(RegexNode.One, _options, ch);
         }
 
         /*
