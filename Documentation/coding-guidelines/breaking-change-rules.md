@@ -132,6 +132,8 @@ Breaking Change Rules
 * Moving a type from one assembly into another assembly  
 > The old assembly must be marked with `TypeForwardedToAttribute` pointing to the new location
 
+* Changing a `struct` type to a `readonly struct` type
+
 &#10007; **Disallowed**
 * Adding the `sealed` or `abstract` keyword to a type when there _are accessible_ (public or protected) constructors
 
@@ -143,6 +145,11 @@ Breaking Change Rules
 * Removing one or more base classes for a type, including changing `struct` to `class` and vice versa
 
 * Changing the namespace or name of a type
+
+* Changing a `readonly struct` type to a `struct` type
+
+* Changing a `struct` type to a `ref struct` type
+
 
 ### Members
 &#10003; **Allowed**
@@ -186,6 +193,8 @@ successfully bind to that overload, if simply passing an `int` value. However, i
 ### Signatures
 &#10003; **Allowed**
 * Adding `params` to a parameter
+
+* Adding or removing `in` parameter that is a `readonly struct` (Change pass-by-value to pass-by-readonly-reference)
 
 * Removing `readonly` from a field, unless the static type of the field is a mutable value type
 
