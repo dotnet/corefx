@@ -294,6 +294,53 @@ namespace System
             e4,
         }
 
+        public struct Length24
+        {
+            public ulong a1;
+            public ulong a2;
+            public ulong a3;
+        }
+
+        public struct Length24_2
+        {
+            public long a1;
+            public long a2;
+            public long a3;
+        }
+
+        public struct ThreeByteStruct
+        {
+            public byte a1;
+            public byte a2;
+            public byte a3;
+        }
+
+        public struct PaddedStruct4
+        {
+            public byte a1;  // 1 bytes
+                             // 1 bytes padding
+            public char a2;  // 2 bytes
+
+            public PaddedStruct4(byte a11, char a22)
+            {
+                a1 = a11;
+                a2 = a22;
+            }
+        }
+
+        public struct PaddedStruct
+        {
+            public char a1; // 2 bytes
+                            // 2 bytes padding
+            public int a2;  // 4 bytes
+
+            public PaddedStruct(char a11, int a22)
+            {
+                a1 = a11;
+                a2 = a22;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void DoNotIgnore<T>(T value, int consumed)
         {

@@ -145,6 +145,7 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.InteropServices.RuntimeInformation\src\System.Runtime.InteropServices.RuntimeInformation.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.Numerics.Vectors\src\System.Numerics.Vectors.csproj" />
   </ItemGroup>
