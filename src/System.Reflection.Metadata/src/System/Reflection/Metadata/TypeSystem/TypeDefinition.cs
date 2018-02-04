@@ -53,7 +53,7 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Indicates whether this is the nested type.
+        /// Indicates whether this is a nested type.
         /// </summary>
         public bool IsNested => Attributes.IsNested();
 
