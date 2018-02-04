@@ -46,7 +46,9 @@ namespace System.IO.Enumeration
             _rootDirectory = Path.GetFullPath(directory);
             _options = options ?? EnumerationOptions.Default;
 
-            // We'll only suppress the media insertion prompt on the topmost directory
+            // We'll only suppress the media insertion prompt on the topmost directory as that is the
+            // most likely scenario and we don't want to take the perf hit for large enumerations.
+            // (We weren't consistent with how we handled this historically.)
             using (new DisableMediaInsertionPrompt())
             {
                 // We need to initialize the directory handle up front to ensure
@@ -98,21 +100,17 @@ namespace System.IO.Enumeration
             if (handle == IntPtr.Zero || handle == (IntPtr)(-1))
             {
                 int error = Marshal.GetLastWin32Error();
-                if (ContinueOnError(error))
-                    return IntPtr.Zero;
 
-                switch (error)
+                if ((error == Interop.Errors.ERROR_ACCESS_DENIED &&
+                    _options.IgnoreInaccessible) || ContinueOnError(error))
                 {
-                    case Interop.Errors.ERROR_ACCESS_DENIED:
-                        if (_options.IgnoreInaccessible)
-                        {
-                            return IntPtr.Zero;
-                        }
-                        break;
-                    case Interop.Errors.ERROR_FILE_NOT_FOUND:
-                        // Historically we throw directory not found rather than file not found
-                        error = Interop.Errors.ERROR_PATH_NOT_FOUND;
-                        break;
+                    return IntPtr.Zero;
+                }
+
+                if (error == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                {
+                    // Historically we throw directory not found rather than file not found
+                    error = Interop.Errors.ERROR_PATH_NOT_FOUND;
                 }
 
                 throw Win32Marshal.GetExceptionForWin32Error(error, path);

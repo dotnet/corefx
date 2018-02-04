@@ -292,7 +292,7 @@ namespace System.IO.Enumeration
     public static class FileSystemName
     {
         public static string TranslateDosExpression(string expression) { throw null; }
-        public static bool MatchesDosExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
-        public static bool MatchesSimpleExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchesDosExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchesSimpleExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
     }
 }

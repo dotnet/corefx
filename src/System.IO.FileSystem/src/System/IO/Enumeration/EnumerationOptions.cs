@@ -10,12 +10,14 @@ namespace System.IO.Enumeration
         /// For internal use. These are the options we want to use if calling the existing Directory/File APIs where you don't
         /// explicitly specify EnumerationOptions.
         /// </summary>
-        internal static EnumerationOptions Compatible => new EnumerationOptions { MatchType = MatchType.Dos };
+        internal static EnumerationOptions Compatible { get; } = new EnumerationOptions { MatchType = MatchType.Dos };
+
+        private static EnumerationOptions CompatibleRecursive { get; } = new EnumerationOptions { RecurseSubdirectories = true, MatchType = MatchType.Dos };
 
         /// <summary>
         /// Internal singleton for default options.
         /// </summary>
-        internal static EnumerationOptions Default => new EnumerationOptions();
+        internal static EnumerationOptions Default { get; } = new EnumerationOptions();
 
         /// <summary>
         /// Default constructor. Constructs the options class with recommended default options.
@@ -32,7 +34,7 @@ namespace System.IO.Enumeration
             if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
                 throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
 
-            return searchOption == SearchOption.AllDirectories ? new EnumerationOptions { RecurseSubdirectories = true, MatchType = MatchType.Dos } : Compatible;
+            return searchOption == SearchOption.AllDirectories ? CompatibleRecursive : Compatible;
         }
 
         /// <summary>
@@ -46,13 +48,17 @@ namespace System.IO.Enumeration
         public bool IgnoreInaccessible { get; set; }
 
         /// <summary>
-        /// Suggested buffer size.
+        /// Suggested buffer size, in bytes.
         /// </summary>
         /// <remarks>
         /// Not all platforms use user allocated buffers, and some require either fixed buffers or a
         /// buffer that has enough space to return a full result. One scenario where this option is
         /// useful is with remote share enumeration on Windows. Having a large buffer may result in
-        /// better performance as more results can be batched over the wire.
+        /// better performance as more results can be batched over the wire (e.g. over a network
+        /// share). A "large" buffer, for example, would be 16K. Typical is 4K.
+        /// 
+        /// We will not use the suggested buffer size if it has no meaning for the native APIs on the
+        /// current platform or if it would be too small for getting at least a single result.
         /// </remarks>
         public int BufferSize { get; set; }
 

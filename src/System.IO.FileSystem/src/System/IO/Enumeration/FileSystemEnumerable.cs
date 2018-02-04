@@ -31,11 +31,7 @@ namespace System.IO.Enumeration
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            DelegateEnumerator enumerator = Interlocked.Exchange(ref _enumerator, null);
-            if (enumerator == null)
-                enumerator = new DelegateEnumerator(this);
-
-            return enumerator;
+            return Interlocked.Exchange(ref _enumerator, null) ?? new DelegateEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -50,7 +46,7 @@ namespace System.IO.Enumeration
         /// </summary>
         public delegate TResult FindTransform(ref FileSystemEntry entry);
 
-        private class DelegateEnumerator : FileSystemEnumerator<TResult>
+        private sealed class DelegateEnumerator : FileSystemEnumerator<TResult>
         {
             private readonly FileSystemEnumerable<TResult> _enumerable;
 

@@ -40,7 +40,7 @@ namespace System.IO.Enumeration
                     int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
 
                     // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
-                    if (ContinueOnError(error) || (error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible))
+                    if ((error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible) || ContinueOnError(error))
                     {
                         DirectoryFinished();
                         return false;

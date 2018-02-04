@@ -85,7 +85,7 @@ namespace System.IO.Enumeration
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
         /// using <see cref="TranslateDosExpression(string)"/>
         /// </remarks>
-        public static bool MatchesDosExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchesDosExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
         }
@@ -93,19 +93,19 @@ namespace System.IO.Enumeration
         /// <summary>
         /// Return true if the given expression matches the given name. '*' and '?' are wildcards, '\' escapes.
         /// </summary>
-        public static bool MatchesSimpleExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchesSimpleExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: false);
         }
 
-        private static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
+        private static bool MatchPattern(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
         {
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,
             // if one of the locations in the expression is also just exhausted, the name is in the
             // language defined by the regular expression.
 
-            if (string.IsNullOrEmpty(expression) || name.Length == 0)
+            if (expression.Length == 0 || name.Length == 0)
                 return false;
 
             if (expression[0] == '*')
@@ -114,16 +114,17 @@ namespace System.IO.Enumeration
                 if (expression.Length == 1)
                     return true;
 
-                if (expression.IndexOfAny(useExtendedWildcards ? s_wildcardChars : s_simpleWildcardChars, startIndex: 1) == -1)
+                ReadOnlySpan<char> expressionEnd = expression.Slice(1);
+                if (expressionEnd.IndexOfAny(useExtendedWildcards ? s_wildcardChars : s_simpleWildcardChars) == -1)
                 {
                     // Handle the special case of a single starting *, which essentially means "ends with"
 
                     // If the name doesn't have enough characters to match the remaining expression, it can't be a match.
-                    if (name.Length < expression.Length - 1)
+                    if (name.Length < expressionEnd.Length)
                         return false;
 
-                    // See if we end with the expression (minus the *, of course)
-                    return name.EndsWithOrdinal(expression.AsReadOnlySpan().Slice(1), ignoreCase);
+                    // See if we end with the expression
+                    return name.EndsWithOrdinal(expressionEnd, ignoreCase);
                 }
             }
 
@@ -145,6 +146,26 @@ namespace System.IO.Enumeration
             int maxState = expression.Length * 2;
             int currentState;
             bool nameFinished = false;
+
+            //  Walk through the name string, picking off characters.  We go one
+            //  character beyond the end because some wild cards are able to match
+            //  zero characters beyond the end of the string.
+            //
+            //  With each new name character we determine a new set of states that
+            //  match the name so far.  We use two arrays that we swap back and forth
+            //  for this purpose.  One array lists the possible expression states for
+            //  all name characters up to but not including the current one, and other
+            //  array is used to build up the list of states considering the current
+            //  name character as well.  The arrays are then switched and the process
+            //  repeated.
+            //
+            //  There is not a one-to-one correspondence between state number and
+            //  offset into the expression. State numbering is not continuous.
+            //  This allows a simple conversion between state number and expression
+            //  offset.  Each character in the expression can represent one or two
+            //  states.  * and DOS_STAR generate two states: expressionOffset * 2 and
+            //  expressionOffset * 2 + 1.  All other expression characters can produce
+            //  only a single state.  Thus expressionOffset = currentState / 2.
 
             while (!nameFinished)
             {
