@@ -495,16 +495,7 @@ namespace System.Text.RegularExpressions
          * Scans contents of [] (not including []'s), and converts to a
          * RegexCharClass.
          */
-        internal RegexCharClass ScanCharClass(bool caseInsensitive)
-        {
-            return ScanCharClass(caseInsensitive, false);
-        }
-
-        /*
-         * Scans contents of [] (not including []'s), and converts to a
-         * RegexCharClass.
-         */
-        internal RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly)
+        internal RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly = false)
         {
             char ch = '\0';
             char chPrev = '\0';
@@ -988,7 +979,7 @@ namespace System.Text.RegularExpressions
          * Scans chars following a '\' (not counting the '\'), and returns
          * a RegexNode for the type of atom scanned.
          */
-        internal RegexNode ScanBackslash()
+        internal RegexNode ScanBackslash(bool scanOnly = false)
         {
             char ch;
             RegexCharClass cc;
@@ -1054,14 +1045,14 @@ namespace System.Text.RegularExpressions
                     return new RegexNode(RegexNode.Set, _options, cc.ToStringClass());
 
                 default:
-                    return ScanBasicBackslash();
+                    return ScanBasicBackslash(scanOnly);
             }
         }
 
         /*
          * Scans \-style backreferences and character escapes
          */
-        internal RegexNode ScanBasicBackslash()
+        internal RegexNode ScanBasicBackslash(bool scanOnly)
         {
             if (CharsRight() == 0)
                 throw MakeException(SR.IllegalEndEscape);
@@ -1107,7 +1098,7 @@ namespace System.Text.RegularExpressions
                 ch = RightChar();
             }
 
-            // Try to parse backreference: \<1> or \<cap>
+            // Try to parse backreference: \<1>
 
             if (angled && ch >= '0' && ch <= '9')
             {
@@ -1115,7 +1106,7 @@ namespace System.Text.RegularExpressions
 
                 if (CharsRight() > 0 && MoveRightGetChar() == close)
                 {
-                    if (IsCaptureSlot(capnum))
+                    if (IsCaptureSlot(capnum) || scanOnly)
                         return new RegexNode(RegexNode.Ref, _options, capnum);
                     else
                         throw MakeException(SR.Format(SR.UndefinedBackref, capnum.ToString(CultureInfo.CurrentCulture)));
@@ -1146,12 +1137,15 @@ namespace System.Text.RegularExpressions
                 else
                 {
                     int capnum = ScanDecimal();
-                    if (IsCaptureSlot(capnum))
+                    if (IsCaptureSlot(capnum) || scanOnly)
                         return new RegexNode(RegexNode.Ref, _options, capnum);
                     else if (capnum <= 9)
                         throw MakeException(SR.Format(SR.UndefinedBackref, capnum.ToString(CultureInfo.CurrentCulture)));
                 }
             }
+
+
+            // Try to parse backreference: \<foo>
 
             else if (angled && RegexCharClass.IsWordChar(ch))
             {
@@ -1645,7 +1639,7 @@ namespace System.Text.RegularExpressions
                 {
                     case '\\':
                         if (CharsRight() > 0)
-                            MoveRight();
+                            ScanBackslash(scanOnly: true);
                         break;
 
                     case '#':
@@ -1657,7 +1651,7 @@ namespace System.Text.RegularExpressions
                         break;
 
                     case '[':
-                        ScanCharClass(false, true);
+                        ScanCharClass(caseInsensitive: false, scanOnly: true);
                         break;
 
                     case ')':
