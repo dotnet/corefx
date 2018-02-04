@@ -5,6 +5,7 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -379,6 +380,104 @@ namespace System.Net.Http.Functional.Tests
                     await server1.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
                     await request1;
 
+                    Task<string> request2 = client.GetStringAsync(uri);
+                    using (Socket server2 = await listener.AcceptAsync())
+                    using (var serverStream2 = new NetworkStream(server2, ownsSocket: false))
+                    using (var serverReader2 = new StreamReader(serverStream2))
+                    {
+                        while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
+                        await server2.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+                        await request2;
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public async Task SmallConnectionTimeout_SubsequentRequestUsesDifferentConnection()
+        {
+            using (HttpClient client = CreateHttpClient())
+            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // TODO #23166: Use the managed API for ConnectionTimeout when it's exposed
+                object httpClientHandler = client.GetType().BaseType.GetField("_handler", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(client);
+                object managedHandler = httpClientHandler.GetType().GetField("_managedHandler", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(httpClientHandler);
+                managedHandler.GetType().GetProperty("ConnectionTimeout").SetValue(managedHandler, TimeSpan.FromMilliseconds(1));
+
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(100);
+                var ep = (IPEndPoint)listener.LocalEndPoint;
+                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
+
+                string responseBody =
+                    "HTTP/1.1 200 OK\r\n" +
+                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                    "Content-Length: 0\r\n" +
+                    "\r\n";
+
+                // Make first request.
+                Task<string> request1 = client.GetStringAsync(uri);
+                using (Socket server1 = await listener.AcceptAsync())
+                using (var serverStream1 = new NetworkStream(server1, ownsSocket: false))
+                using (var serverReader1 = new StreamReader(serverStream1))
+                {
+                    while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
+                    await server1.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+                    await request1;
+
+                    // Wait a small amount of time before making the second request, to give the first request time to timeout.
+                    await Task.Delay(10);
+
+                    // Make second request.  It should be on a new connection.
+                    Task<string> request2 = client.GetStringAsync(uri);
+                    using (Socket server2 = await listener.AcceptAsync())
+                    using (var serverStream2 = new NetworkStream(server2, ownsSocket: false))
+                    using (var serverReader2 = new StreamReader(serverStream2))
+                    {
+                        while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
+                        await server2.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+                        await request2;
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public async Task SmallConnectionIdleTimeout_SubsequentRequestUsesDifferentConnection()
+        {
+            using (HttpClient client = CreateHttpClient())
+            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // TODO #23166: Use the managed API for ConnectionIdleTimeout when it's exposed
+                object httpClientHandler = client.GetType().BaseType.GetField("_handler", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(client);
+                object managedHandler = httpClientHandler.GetType().GetField("_managedHandler", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(httpClientHandler);
+                managedHandler.GetType().GetProperty("ConnectionIdleTimeout").SetValue(managedHandler, TimeSpan.FromMilliseconds(1));
+
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(100);
+                var ep = (IPEndPoint)listener.LocalEndPoint;
+                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
+
+                string responseBody =
+                    "HTTP/1.1 200 OK\r\n" +
+                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                    "Content-Length: 0\r\n" +
+                    "\r\n";
+
+                // Make first request.
+                Task<string> request1 = client.GetStringAsync(uri);
+                using (Socket server1 = await listener.AcceptAsync())
+                using (var serverStream1 = new NetworkStream(server1, ownsSocket: false))
+                using (var serverReader1 = new StreamReader(serverStream1))
+                {
+                    while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
+                    await server1.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+                    await request1;
+
+                    // Wait a small amount of time before making the second request, to give the first request time to timeout.
+                    await Task.Delay(100);
+
+                    // Make second request.  It should be on a new connection.
                     Task<string> request2 = client.GetStringAsync(uri);
                     using (Socket server2 = await listener.AcceptAsync())
                     using (var serverStream2 = new NetworkStream(server2, ownsSocket: false))

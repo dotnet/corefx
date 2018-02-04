@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
+
 namespace System.Net.Http
 {
     /// <summary>
@@ -20,6 +22,8 @@ namespace System.Net.Http
         public const bool DefaultUseProxy = true;
         public const bool DefaultUseDefaultCredentials = false;
         public const bool DefaultCheckCertificateRevocationList = false;
+        public static readonly TimeSpan DefaultConnectionTimeout = Timeout.InfiniteTimeSpan;
+        public static readonly TimeSpan DefaultConnectionIdleTimeout = TimeSpan.FromMinutes(2);
 
         public static TimeSpan DefaultConnectTimeout => TimeSpan.FromSeconds(60);
     }

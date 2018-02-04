@@ -239,6 +239,36 @@ namespace System.Net.Http
             }
         }
 
+        public TimeSpan ConnectionTimeout
+        {
+            get => _settings._connectionTimeout;
+            set
+            {
+                if (value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._connectionTimeout = value;
+            }
+        }
+
+        public TimeSpan ConnectionIdleTimeout
+        {
+            get => _settings._connectionIdleTimeout;
+            set
+            {
+                if (value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._connectionIdleTimeout = value;
+            }
+        }
+
         public IDictionary<string, object> Properties =>
             _settings._properties ?? (_settings._properties = new Dictionary<string, object>());
 
