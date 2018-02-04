@@ -154,11 +154,6 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsFedora || PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsOSX)
-            {
-                return; // [ActiveIssue(24008)]
-            }
-
             // On all platforms, index 0 means "any interface"
             await MulticastInterface_Set_IPv6_Helper(0);
         }
@@ -188,12 +183,7 @@ namespace System.Net.Sockets.Tests
             {
                 receiveSocket.ReceiveTimeout = 1000;
                 receiveSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(multicastAddress, interfaceIndex));
-
-                // https://github.com/Microsoft/BashOnWindows/issues/990
-                if (!PlatformDetection.IsWindowsSubsystemForLinux)
-                {
-                    sendSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex);
-                }
+                sendSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex);
 
                 var receiveBuffer = new byte[1024];
                 var receiveTask = receiveSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), SocketFlags.None);
