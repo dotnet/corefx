@@ -102,12 +102,7 @@ namespace System.IO.Pipes
             // Success!
             InitializeHandle(handle, false, (_pipeOptions & PipeOptions.Asynchronous) != 0);
             State = PipeState.Connected;
-
-            if (_isCurrentUserOnly)
-            {
-                ValidateRemotePipeIsCurrentUser();
-            }
-
+            ValidateRemotePipeUser();
             return true;
         }
 
@@ -134,8 +129,11 @@ namespace System.IO.Pipes
             }
         }
 
-        private void ValidateRemotePipeIsCurrentUser()
+        private void ValidateRemotePipeUser()
         {
+            if (!_isCurrentUserOnly)
+                return;
+
             SecurityIdentifier currentUserSid = GetCurrentUser();
             PipeSecurity accessControl = this.GetAccessControl();
             IdentityReference remoteOwnerSid = accessControl.GetOwner(typeof(SecurityIdentifier));

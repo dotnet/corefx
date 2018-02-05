@@ -69,11 +69,10 @@ namespace System.IO.Pipes
                 maxNumberOfServerInstances = 255;
             }
 
-            var pinningHandle = new GCHandle();
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(inheritability, pipeSecurity, ref pinningHandle);
-
             try
             {
+                var pinningHandle = new GCHandle();
+                Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(inheritability, pipeSecurity, ref pinningHandle);
                 SafePipeHandle handle = Interop.Kernel32.CreateNamedPipe(fullPipeName, openMode, pipeModes,
                     maxNumberOfServerInstances, outBufferSize, inBufferSize, 0, ref secAttrs);
 
