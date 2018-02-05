@@ -46,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task SetProtocols_AfterRequest_ThrowsException()
         {
             if (!BackendSupportsSslConfiguration)
@@ -86,7 +86,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         [InlineData(SslProtocols.Tls, false)]
         [InlineData(SslProtocols.Tls, true)]
         [InlineData(SslProtocols.Tls11, false)]
@@ -237,7 +237,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
         [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
         [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
@@ -264,7 +264,7 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(8538, TestPlatforms.Windows)]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
