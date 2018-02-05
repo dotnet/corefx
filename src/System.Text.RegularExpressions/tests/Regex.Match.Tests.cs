@@ -764,6 +764,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework needs fix for #26484")]
         public void Match_ExcessPrefix()
         {
             RemoteInvoke(() =>
