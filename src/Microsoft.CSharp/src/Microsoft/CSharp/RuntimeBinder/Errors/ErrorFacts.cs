@@ -44,9 +44,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_ValueCantBeNull:
                     codeStr = SR.ValueCantBeNull;
                     break;
-                case ErrorCode.ERR_WrongNestedThis:
-                    codeStr = SR.WrongNestedThis;
-                    break;
                 case ErrorCode.ERR_NoSuchMember:
                     codeStr = SR.NoSuchMember;
                     break;
@@ -188,9 +185,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;
                     break;
-                case ErrorCode.ERR_NamedArgumentSpecificationBeforeFixedArgument:
-                    codeStr = SR.NamedArgumentSpecificationBeforeFixedArgument;
-                    break;
                 case ErrorCode.ERR_BadNamedArgument:
                     codeStr = SR.BadNamedArgument;
                     break;
@@ -203,6 +197,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NamedArgumentUsedInPositional:
                     codeStr = SR.NamedArgumentUsedInPositional;
                     break;
+                case ErrorCode.ERR_BadNonTrailingNamedArgument:
+                    codeStr = SR.BadNonTrailingNamedArgument;
+                    break;
+
                 default:
                     // means missing resources match the code entry
                     Debug.Assert(false, "Missing resources for the error " + code.ToString());

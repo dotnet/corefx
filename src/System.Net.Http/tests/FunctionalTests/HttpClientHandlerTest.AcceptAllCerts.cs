@@ -14,7 +14,6 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test : HttpClientTestBase
     {
-        // TODO: https://github.com/dotnet/corefx/issues/7812
         private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
 
         [Fact]
@@ -25,6 +24,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(HttpClientHandler.DangerousAcceptAnyServerCertificateValidator(null, null, null, SslPolicyErrors.None));
         }
 
+        [ActiveIssue(25676, TestPlatforms.Linux)]
         [Theory]
         [InlineData(SslProtocols.Tls, false)] // try various protocols to ensure we correctly set versions even when accepting all certs
         [InlineData(SslProtocols.Tls, true)]

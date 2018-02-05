@@ -57,8 +57,8 @@ namespace System.SpanTests
             var actualSpan = new Span<byte>(actualFull, start, length - start - 1);
             actualSpan.Clear();
 
-            var actual = actualSpan.ToArray();
-            var expected = expectedSpan.ToArray();
+            byte[] actual = actualSpan.ToArray();
+            byte[] expected = expectedSpan.ToArray();
             Assert.Equal<byte>(expected, actual);
             Assert.Equal(initial, actualFull[0]);
             Assert.Equal(initial, actualFull[length - 1]);
@@ -83,8 +83,8 @@ namespace System.SpanTests
                 var actualSpan = new Span<byte>(p + start, length - start - 1);
                 actualSpan.Clear();
 
-                var actual = actualSpan.ToArray();
-                var expected = expectedSpan.ToArray();
+                byte[] actual = actualSpan.ToArray();
+                byte[] expected = expectedSpan.ToArray();
                 Assert.Equal<byte>(expected, actual);
                 Assert.Equal(initial, actualFull[0]);
                 Assert.Equal(initial, actualFull[length - 1]);
@@ -108,8 +108,8 @@ namespace System.SpanTests
             var actualSpan = new Span<IntPtr>(actualFull, start, length - start - 1);
             actualSpan.Clear();
 
-            var actual = actualSpan.ToArray();
-            var expected = expectedSpan.ToArray();
+            IntPtr[] actual = actualSpan.ToArray();
+            IntPtr[] expected = expectedSpan.ToArray();
             Assert.Equal<IntPtr>(expected, actual);
             Assert.Equal(initial, actualFull[0]);
             Assert.Equal(initial, actualFull[length - 1]);
@@ -249,20 +249,14 @@ namespace System.SpanTests
 
                 try
                 {
-                    ref int data = ref Unsafe.AsRef<int>(memory.ToPointer());
-
-                    int initial = 5;
-                    for (int i = 0; i < length; i++)
-                    {
-                        Unsafe.Add(ref data, i) = initial;
-                    }
-
                     Span<int> span = new Span<int>(memory.ToPointer(), length);
+                    span.Fill(5);
 
                     // Act
                     span.Clear();
 
                     // Assert using custom code for perf and to avoid allocating extra memory
+                    ref int data = ref Unsafe.AsRef<int>(memory.ToPointer());
                     for (int i = 0; i < length; i++)
                     {
                         var actual = Unsafe.Add(ref data, i);

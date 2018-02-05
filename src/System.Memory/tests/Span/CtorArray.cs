@@ -62,17 +62,22 @@ namespace System.SpanTests
             Span<int> span;
 
             span = new Span<int>(empty);
-            span.Validate();
+            span.ValidateNonNullEmpty();
 
             span = new Span<int>(empty, 0, empty.Length);
-            span.Validate();
+            span.ValidateNonNullEmpty();
         }
 
         [Fact]
         public static void CtorArrayNullArray()
         {
-            Assert.Throws<ArgumentNullException>(() => new Span<int>(null).DontBox());
-            Assert.Throws<ArgumentNullException>(() => new Span<int>(null, 0, 0).DontBox());
+            var span = new Span<int>(null);
+            span.Validate();
+            Assert.True(span == default);
+
+            span = new Span<int>(null, 0, 0);
+            span.Validate();
+            Assert.True(span == default);
         }
 
         [Fact]

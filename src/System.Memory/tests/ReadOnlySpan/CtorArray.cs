@@ -63,17 +63,22 @@ namespace System.SpanTests
             ReadOnlySpan<int> span;
 
             span = new ReadOnlySpan<int>(empty);
-            span.Validate();
+            span.ValidateNonNullEmpty();
 
             span = new ReadOnlySpan<int>(empty, 0, empty.Length);
-            span.Validate();
+            span.ValidateNonNullEmpty();
         }
 
         [Fact]
         public static void CtorArrayNullArray()
         {
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySpan<int>(null).DontBox());
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySpan<int>(null, 0, 0).DontBox());
+            var span = new ReadOnlySpan<int>(null);
+            span.Validate();
+            Assert.True(span == default);
+
+            span = new ReadOnlySpan<int>(null, 0, 0);
+            span.Validate();
+            Assert.True(span == default);
         }
 
         [Fact]

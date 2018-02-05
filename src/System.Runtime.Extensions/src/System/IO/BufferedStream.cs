@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics.Contracts;
 
 namespace System.IO
 {
@@ -165,7 +164,6 @@ namespace System.IO
 
         public override bool CanRead
         {
-            [Pure]
             get
             {
                 return _stream != null && _stream.CanRead;
@@ -174,7 +172,6 @@ namespace System.IO
 
         public override bool CanWrite
         {
-            [Pure]
             get
             {
                 return _stream != null && _stream.CanWrite;
@@ -183,7 +180,6 @@ namespace System.IO
 
         public override bool CanSeek
         {
-            [Pure]
             get
             {
                 return _stream != null && _stream.CanSeek;
@@ -444,8 +440,7 @@ namespace System.IO
             Debug.Assert(readbytes >= 0);
             if (readbytes > 0)
             {
-                bool copied = new Span<byte>(_buffer, _readPos, readbytes).TryCopyTo(destination);
-                Debug.Assert(copied);
+                new ReadOnlySpan<byte>(_buffer, _readPos, readbytes).CopyTo(destination);
                 _readPos += readbytes;
             }
             return readbytes;

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace System.IO
@@ -43,11 +42,11 @@ namespace System.IO
         {
             get
             {
-                if ((FileSystemObject.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                if ((Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
                     throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, DisplayPath), DisplayPath);
                 }
-                return FileSystemObject.Length;
+                return LengthCore;
             }
         }
 
@@ -138,7 +137,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(destFileName), SR.ArgumentNull_FileName);
             if (destFileName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
-            Contract.EndContractBlock();
 
             return new FileInfo(File.InternalCopy(FullPath, destFileName, overwrite), isNormalized: true);
         }
@@ -160,7 +158,7 @@ namespace System.IO
         // 
         public override void Delete()
         {
-            FileSystem.Current.DeleteFile(FullPath);
+            FileSystem.DeleteFile(FullPath);
         }
 
         // Tests if the given file exists. The result is true if the file
@@ -174,7 +172,7 @@ namespace System.IO
             {
                 try
                 {
-                    return FileSystemObject.Exists;
+                    return ExistsCore;
                 }
                 catch
                 {
@@ -225,7 +223,6 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(destFileName));
             if (destFileName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
-            Contract.EndContractBlock();
 
             string fullDestFileName = Path.GetFullPath(destFileName);
 
@@ -241,7 +238,7 @@ namespace System.IO
                 throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, FullName), FullName);
             }
 
-            FileSystem.Current.MoveFile(FullPath, fullDestFileName);
+            FileSystem.MoveFile(FullPath, fullDestFileName);
 
             FullPath = fullDestFileName;
             OriginalPath = destFileName;

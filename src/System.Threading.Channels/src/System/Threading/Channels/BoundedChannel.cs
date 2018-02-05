@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace System.Threading.Channels
 {
     /// <summary>Provides a channel with a bounded capacity.</summary>
-    [DebuggerDisplay("Items={ItemsCountForDebugger}, Capacity={_bufferedCapacity}")]
+    [DebuggerDisplay("Items={ItemsCountForDebugger}, Capacity={_bufferedCapacity}, Mode={_mode}, Closed={ChannelIsClosedForDebugger}")]
     [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
     internal sealed class BoundedChannel<T> : Channel<T>, IDebugEnumerable<T>
     {
@@ -49,7 +49,9 @@ namespace System.Threading.Channels
             Writer = new BoundedChannelWriter(this);
         }
 
-        private sealed class BoundedChannelReader : ChannelReader<T>
+        [DebuggerDisplay("Items={ItemsCountForDebugger}")]
+        [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
+        private sealed class BoundedChannelReader : ChannelReader<T>, IDebugEnumerable<T>
         {
             internal readonly BoundedChannel<T> _parent;
             internal BoundedChannelReader(BoundedChannel<T> parent) => _parent = parent;
@@ -117,37 +119,57 @@ namespace System.Threading.Channels
                 // Dequeue an item.
                 T item = parent._items.DequeueHead();
 
-                // If we're now empty and we're done writing, complete the channel.
-                if (parent._doneWriting != null && parent._items.IsEmpty)
+                if (parent._doneWriting != null)
                 {
-                    ChannelUtilities.Complete(parent._completion, parent._doneWriting);
-                }
-
-                // If there are any writers blocked, there's now room for at least one
-                // to be promoted to have its item moved into the items queue.  We need
-                // to loop while trying to complete the writer in order to find one that
-                // hasn't yet been canceled (canceled writers transition to canceled but
-                // remain in the physical queue).
-                while (!parent._blockedWriters.IsEmpty)
-                {
-                    WriterInteractor<T> w = parent._blockedWriters.DequeueHead();
-                    if (w.Success(default))
+                    // We're done writing, so if we're now empty, complete the channel.
+                    if (parent._items.IsEmpty)
                     {
-                        parent._items.EnqueueTail(w.Item);
-                        return item;
+                        ChannelUtilities.Complete(parent._completion, parent._doneWriting);
                     }
                 }
+                else
+                {
+                    // If there are any writers blocked, there's now room for at least one
+                    // to be promoted to have its item moved into the items queue.  We need
+                    // to loop while trying to complete the writer in order to find one that
+                    // hasn't yet been canceled (canceled writers transition to canceled but
+                    // remain in the physical queue).
+                    //
+                    // (It's possible for _doneWriting to be non-null due to Complete
+                    // having been called but for there to still be blocked/waiting writers.
+                    // This is a temporary condition, after which Complete has set _doneWriting
+                    // and then exited the lock; at that point it'll proceed to clean this up,
+                    // so we just ignore them.)
 
-                // There was no blocked writer, so see if there's a WaitToWriteAsync
-                // we should wake up.
-                ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: true);
+                    while (!parent._blockedWriters.IsEmpty)
+                    {
+                        WriterInteractor<T> w = parent._blockedWriters.DequeueHead();
+                        if (w.Success(default))
+                        {
+                            parent._items.EnqueueTail(w.Item);
+                            return item;
+                        }
+                    }
+
+                    // There was no blocked writer, so see if there's a WaitToWriteAsync
+                    // we should wake up.
+                    ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: true);
+                }
 
                 // Return the item
                 return item;
             }
+
+            /// <summary>Gets the number of items in the channel. This should only be used by the debugger.</summary>
+            private int ItemsCountForDebugger => _parent._items.Count;
+
+            /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
+            IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _parent._items.GetEnumerator();
         }
 
-        private sealed class BoundedChannelWriter : ChannelWriter<T>
+        [DebuggerDisplay("Items={ItemsCountForDebugger}, Capacity={CapacityForDebugger}")]
+        [DebuggerTypeProxy(typeof(DebugEnumeratorDebugView<>))]
+        private sealed class BoundedChannelWriter : ChannelWriter<T>, IDebugEnumerable<T>
         {
             internal readonly BoundedChannel<T> _parent;
             internal BoundedChannelWriter(BoundedChannel<T> parent) => _parent = parent;
@@ -186,6 +208,7 @@ namespace System.Threading.Channels
                 // We also know that only one thread (this one) will ever get here, as only that thread
                 // will be the one to transition from _doneWriting false to true.  As such, we can
                 // freely manipulate them without any concurrency concerns.
+
                 ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
                 ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
                 ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: false, error: error);
@@ -375,6 +398,15 @@ namespace System.Threading.Channels
                 waitingReaders.Success(item: true);
                 return ChannelUtilities.s_trueTask;
             }
+
+            /// <summary>Gets the number of items in the channel. This should only be used by the debugger.</summary>
+            private int ItemsCountForDebugger => _parent._items.Count;
+
+            /// <summary>Gets the capacity of the channel. This should only be used by the debugger.</summary>
+            private int CapacityForDebugger => _parent._bufferedCapacity;
+
+            /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
+            IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _parent._items.GetEnumerator();
         }
 
         [Conditional("DEBUG")]
@@ -404,6 +436,9 @@ namespace System.Threading.Channels
 
         /// <summary>Gets the number of items in the channel.  This should only be used by the debugger.</summary>
         private int ItemsCountForDebugger => _items.Count;
+
+        /// <summary>Report if the channel is closed or not. This should only be used by the debugger.</summary>
+        private bool ChannelIsClosedForDebugger => _doneWriting != null;
 
         /// <summary>Gets an enumerator the debugger can use to show the contents of the channel.</summary>
         IEnumerator<T> IDebugEnumerable<T>.GetEnumerator() => _items.GetEnumerator();

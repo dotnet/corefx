@@ -34,12 +34,6 @@ namespace System.Net.Http
             }
         }
 
-        public bool SupportsAutomaticDecompression => true;
-
-        public bool SupportsProxy => true;
-
-        public bool SupportsRedirectConfiguration => true;
-
         public bool UseCookies
         {
             get => _settings._useCookies;
@@ -264,7 +258,7 @@ namespace System.Net.Http
             HttpMessageHandler handler = new HttpConnectionHandler(_settings);
 
             if (_settings._useProxy &&
-                (_settings._proxy != null || HttpProxyConnectionHandler.EnvironmentProxyConfigured))
+                (_settings._proxy != null || HttpProxyConnectionHandler.DefaultProxyConfigured))
             {
                 handler = new HttpProxyConnectionHandler(_settings, handler);
             }
@@ -300,6 +294,36 @@ namespace System.Net.Http
         {
             CheckDisposed();
             HttpMessageHandler handler = _handler ?? SetupHandlerChain();
+
+            if (request.Version.Major == 0)
+            {
+                return Task.FromException<HttpResponseMessage>(new NotSupportedException(SR.net_http_unsupported_version));
+            }
+
+            // Add headers to define content transfer, if not present
+            if (request.Content != null &&
+                (!request.HasHeaders || request.Headers.TransferEncodingChunked != true) &&
+                request.Content.Headers.ContentLength == null)
+            {
+                // We have content, but neither Transfer-Encoding or Content-Length is set.
+                request.Headers.TransferEncodingChunked = true;
+            }
+
+            if (request.Version.Minor == 0 && request.Version.Major == 1 && request.HasHeaders)
+            {
+                // HTTP 1.0 does not support chunking
+                if (request.Headers.TransferEncodingChunked == true)
+                {
+                    return Task.FromException<HttpResponseMessage>(new NotSupportedException(SR.net_http_unsupported_chunking));
+                }
+
+                // HTTP 1.0 does not support Expect: 100-continue; just disable it.
+                if (request.Headers.ExpectContinue == true)
+                {
+                    request.Headers.ExpectContinue = false;
+                }
+            }
+
             return handler.SendAsync(request, cancellationToken);
         }
     }
