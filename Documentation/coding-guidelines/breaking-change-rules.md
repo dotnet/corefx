@@ -206,7 +206,7 @@ successfully bind to that overload, if simply passing an `int` value. However, i
 
 * Removing `params` from a parameter
 
-* Adding or removing `in`, `out`, `ref` keywords from a parameter
+* Adding or removing `in`, `out`, or `ref` keywords from a parameter
 
 * Renaming a parameter (including case)  
 > This is considered breaking for two reasons:
