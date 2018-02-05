@@ -1647,10 +1647,13 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [InlineData(null)]
-        public async Task PostAsync_ExpectContinue_Success(bool? expectContinue)
+        [InlineData(false, "1.0")]
+        [InlineData(true, "1.0")]
+        [InlineData(null, "1.0")]
+        [InlineData(false, "1.1")]
+        [InlineData(true, "1.1")]
+        [InlineData(null, "1.1")]
+        public async Task PostAsync_ExpectContinue_Success(bool? expectContinue, string version)
         {
             using (HttpClient client = CreateHttpClient())
             {
@@ -1659,6 +1662,7 @@ namespace System.Net.Http.Functional.Tests
                     Content = new StringContent("Test String", Encoding.UTF8)
                 };
                 req.Headers.ExpectContinue = expectContinue;
+                req.Version = new Version(version);
 
                 using (HttpResponseMessage response = await client.SendAsync(req))
                 {
@@ -1666,7 +1670,7 @@ namespace System.Net.Http.Functional.Tests
                     if (UseManagedHandler)
                     {
                         const string ExpectedReqHeader = "\"Expect\": \"100-continue\"";
-                        if (expectContinue == true)
+                        if (expectContinue == true && version == "1.1")
                         {
                             Assert.Contains(ExpectedReqHeader, await response.Content.ReadAsStringAsync());
                         }
@@ -1677,6 +1681,44 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
             }
+        }
+
+        [OuterLoop]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task PostAsync_ThrowFromContentCopy_RequestFails(bool syncFailure)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            {
+                Task responseTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                {
+                    var buffer = new byte[1000];
+                    while (await socket.ReceiveAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), SocketFlags.None) != 0);
+                    return null;
+                });
+
+                using (var client = CreateHttpClient())
+                {
+                    Exception error = new FormatException();
+                    var content = new StreamContent(new DelegateStream(
+                        canSeekFunc: () => true,
+                        lengthFunc: () => 12345678,
+                        positionGetFunc: () => 0,
+                        canReadFunc: () => true,
+                        readAsyncFunc: (buffer, offset, count, cancellationToken) => syncFailure ? throw error : Task.Delay(1).ContinueWith<int>(_ => throw error)));
+
+                    if (UseManagedHandler || PlatformDetection.IsUap)
+                    {
+                        HttpRequestException requestException = await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
+                        Assert.Same(error, requestException.InnerException);
+                    }
+                    else
+                    {
+                        Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
+                    }
+                }
+            });
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -1958,6 +2000,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
         {
+            // Managed handler treats 0.0 as a bad version, and throws.
+            if (UseManagedHandler)
+            {
+                return;
+            }
+
             // The default value for HttpRequestMessage.Version is Version(1,1).
             // So, we need to set something different (0,0), to test the "unknown" version.
             Version receivedRequestVersion = await SendRequestAndGetRequestVersionAsync(new Version(0, 0));
@@ -2096,8 +2144,17 @@ namespace System.Net.Http.Functional.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [MemberData(nameof(CredentialsForProxy))]
-        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy(ICredentials creds, bool wrapCredsInCache)
+        [MemberData(nameof(CredentialsForProxyRfcCompliant))]
+        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_RfcCompliant(ICredentials creds, bool wrapCredsInCache)
+        {
+            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [MemberData(nameof(CredentialsForProxyNonRfcCompliant))]
+        public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_NonRfcCompliant(ICredentials creds, bool wrapCredsInCache)
         {
             if (UseManagedHandler)
             {
@@ -2105,6 +2162,11 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
+        }
+
+        private async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(ICredentials creds, bool wrapCredsInCache)
+        {
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
                 out port,
@@ -2195,7 +2257,16 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
         }
 
-        private static IEnumerable<object[]> CredentialsForProxy()
+        private static IEnumerable<object[]> CredentialsForProxyRfcCompliant()
+        {
+            foreach (bool wrapCredsInCache in new[] { true, false })
+            {
+                yield return new object[] { new NetworkCredential("username", "password"), wrapCredsInCache };
+                yield return new object[] { new NetworkCredential("username", "password", "domain"), wrapCredsInCache };
+            }
+        }
+
+        private static IEnumerable<object[]> CredentialsForProxyNonRfcCompliant()
         {
             yield return new object[] { null, false };
             foreach (bool wrapCredsInCache in new[] { true, false })
@@ -2204,6 +2275,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }
         }
+
         #endregion
 
         #region Uri wire transmission encoding tests

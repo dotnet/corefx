@@ -1945,6 +1945,7 @@ namespace System
         public bool Equals(System.ReadOnlyMemory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> arraySegment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
@@ -7976,8 +7977,6 @@ namespace System.Threading.Tasks
         public TResult Result { get { throw null; } }
         public System.Threading.Tasks.Task<TResult> AsTask() { throw null; }
         public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable<TResult> ConfigureAwait(bool continueOnCapturedContext) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        public static System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder<TResult> CreateAsyncMethodBuilder() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.Tasks.ValueTask<TResult> other) { throw null; }
         public System.Runtime.CompilerServices.ValueTaskAwaiter<TResult> GetAwaiter() { throw null; }

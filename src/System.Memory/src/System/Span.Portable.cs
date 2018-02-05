@@ -17,20 +17,22 @@ namespace System
     /// </summary>
     [DebuggerTypeProxy(typeof(SpanDebugView<>))]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public readonly ref struct Span<T>
+    public readonly ref partial struct Span<T>
     {
         /// <summary>
         /// Creates a new span over the entirety of the target array.
         /// </summary>
         /// <param name="array">The target array.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="array"/> is a null
-        /// reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span(T[] array)
         {
             if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+            {
+                this = default;
+                return; // returns default
+            }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
@@ -46,8 +48,7 @@ namespace System
         /// <param name="array">The target array.</param>
         /// <param name="start">The index at which to begin the span.</param>
         /// <param name="length">The number of items in the span.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="array"/> is a null
-        /// reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
@@ -56,7 +57,12 @@ namespace System
         public Span(T[] array, int start, int length)
         {
             if (array == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                this = default;
+                return; // returns default
+            }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
@@ -108,16 +114,6 @@ namespace System
 
         //Debugger Display = System.Span<T>[length]
         private string DebuggerDisplay => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
-
-        /// <summary>
-        /// The number of items in the span.
-        /// </summary>
-        public int Length => _length;
-
-        /// <summary>
-        /// Returns true if Length is 0.
-        /// </summary>
-        public bool IsEmpty => _length == 0;
 
         /// <summary>
         /// Returns a reference to specified element of the Span.
@@ -297,58 +293,26 @@ namespace System
         }
 
         /// <summary>
-        /// Returns false if left and right point at the same memory and have the same length.  Note that
-        /// this does *not* check to see if the *contents* are equal.
-        /// </summary>
-        public static bool operator !=(Span<T> left, Span<T> right) => !(left == right);
-
-        /// <summary>
-        /// This method is not supported as spans cannot be boxed. To compare two spans, use operator==.
-        /// <exception cref="System.NotSupportedException">
-        /// Always thrown by this method.
-        /// </exception>
-        /// </summary>
-        [Obsolete("Equals() on Span will always throw an exception. Use == instead.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj)
-        {
-            throw new NotSupportedException(SR.CannotCallEqualsOnSpan);
-        }
-
-        /// <summary>
-        /// This method is not supported as spans cannot be boxed.
-        /// <exception cref="System.NotSupportedException">
-        /// Always thrown by this method.
-        /// </exception>
-        /// </summary>
-        [Obsolete("GetHashCode() on Span will always throw an exception.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode()
-        {
-            throw new NotSupportedException(SR.CannotCallGetHashCodeOnSpan);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="String"/> with the name of the type and the number of elements
-        /// </summary>
-        /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
-        public override string ToString() => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, Length);
-
-        /// <summary>
-        /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>
-        /// </summary>
-        public static implicit operator Span<T>(T[] array) => array != null ? new Span<T>(array) : default;
-
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/>
-        /// </summary>
-        public static implicit operator Span<T>(ArraySegment<T> arraySegment)
-            => arraySegment.Array != null ? new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count) : default;
-
-        /// <summary>
         /// Defines an implicit conversion of a <see cref="Span{T}"/> to a <see cref="ReadOnlySpan{T}"/>
         /// </summary>
         public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._pinnable, span._byteOffset, span._length);
+
+        /// <summary>
+        /// For <see cref="Span{Char}"/>, returns a new instance of string that represents the characters pointed to by the span.
+        /// Otherwise, returns a <see cref="String"/> with the name of the type and the number of elements.
+        /// </summary>
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char))
+            {
+                unsafe
+                {
+                    fixed (char* src = &Unsafe.As<T, char>(ref DangerousGetPinnableReference()))
+                        return new string(src, 0, _length);
+                }
+            }
+            return string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
+        }
 
         /// <summary>
         /// Forms a slice out of the given span, beginning at 'start'.
@@ -402,11 +366,6 @@ namespace System
         }
 
         /// <summary>
-        /// Returns a 0-length span whose base is the null pointer.
-        /// </summary>
-        public static Span<T> Empty => default(Span<T>);
-
-        /// <summary>
         /// This method is obsolete, use System.Runtime.InteropServices.MemoryMarshal.GetReference instead.
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
         /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
@@ -419,48 +378,6 @@ namespace System
                 unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
             else
                 return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
-        }
-
-        /// <summary>Gets an enumerator for this span.</summary>
-        public Enumerator GetEnumerator() => new Enumerator(this);
-
-        /// <summary>Enumerates the elements of a <see cref="Span{T}"/>.</summary>
-        public ref struct Enumerator
-        {
-            /// <summary>The span being enumerated.</summary>
-            private readonly Span<T> _span;
-            /// <summary>The next index to yield.</summary>
-            private int _index;
-
-            /// <summary>Initialize the enumerator.</summary>
-            /// <param name="span">The span to enumerate.</param>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal Enumerator(Span<T> span)
-            {
-                _span = span;
-                _index = -1;
-            }
-
-            /// <summary>Advances the enumerator to the next element of the span.</summary>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext()
-            {
-                int index = _index + 1;
-                if (index < _span.Length)
-                {
-                    _index = index;
-                    return true;
-                }
-
-                return false;
-            }
-
-            /// <summary>Gets the element at the current position of the enumerator.</summary>
-            public ref T Current
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref _span[_index];
-            }
         }
 
         // These expose the internal representation for Span-related apis use only.
