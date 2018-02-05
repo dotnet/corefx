@@ -47,7 +47,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             }
         }
 
-        /*[Fact]
+        [Fact]
         public void RedirectClearsAuth()
         {
             var output = Fetch(new Uri("http://httpbin.org//redirect-to?url=http://httpbin.org/get")).Result;
@@ -65,7 +65,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
                 manifestresponse.EnsureSuccessStatusCode();
                 return await manifestresponse.Content.ReadAsStringAsync();
             }
-        }*/
+        }
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]

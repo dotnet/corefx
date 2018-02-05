@@ -917,6 +917,20 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 }
             }
         }
+        
+        // Commented out as the test relies on finalizer for cleanup and only has value as written
+        // when run on its own and manual analysis is done of logs.
+        //[Fact]
+        //public void SendAsync_MultipleCallsWithoutDispose_NoHandleLeaksManuallyVerifiedUsingLogging()
+        //{
+        //    WinHttpHandler handler;
+        //    HttpResponseMessage response;
+        //    for (int i = 0; i < 50; i++)
+        //    {
+        //        handler = new WinHttpHandler();
+        //        response = SendRequestHelper.Send(handler, () => { });
+        //    }
+        //}
 
         public class CustomProxy : IWebProxy
         {
