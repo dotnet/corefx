@@ -47,26 +47,6 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             }
         }
 
-        [Fact]
-        public void RedirectClearsAuth()
-        {
-            var output = Fetch(new Uri("http://httpbin.org//redirect-to?url=http://httpbin.org/get")).Result;
-            Console.Write(output);
-            Assert.False(output.Contains(Convert.ToBase64String(Encoding.UTF8.GetBytes("testaccount:notarealpassword"))));
-        }
-
-        static public async Task<string> Fetch(Uri dropUri)
-        {
-            using (var client = new HttpClient())
-            {
-                var base64EncodedString = Convert.ToBase64String(Encoding.UTF8.GetBytes("testaccount:notarealpassword"));
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", base64EncodedString);
-                var manifestresponse = await client.GetAsync(dropUri);
-                manifestresponse.EnsureSuccessStatusCode();
-                return await manifestresponse.Content.ReadAsStringAsync();
-            }
-        }
-
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(CookieUsePolicy.UseInternalCookieStoreOnly, "cookieName1", "cookieValue1")]
