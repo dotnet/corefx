@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions.Tests
     /// </summary>
     public class Perf_Regex
     {
-        private const int innerIterations = 100;
+        private const int InnerIterations = 100;
 
         [Benchmark]
         [MeasureGCAllocations]
@@ -22,7 +22,7 @@ namespace System.Text.RegularExpressions.Tests
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIterations; i++)
+                    for (int i = 0; i < InnerIterations; i++)
                     {
                         foreach(var test in Match_TestData())
                             Regex.Match((string)test[1], (string)test[0], (RegexOptions)test[2]);
