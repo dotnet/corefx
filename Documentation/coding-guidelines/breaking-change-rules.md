@@ -194,8 +194,6 @@ successfully bind to that overload, if simply passing an `int` value. However, i
 &#10003; **Allowed**
 * Adding `params` to a parameter
 
-* Adding or removing `in` parameter that is a `readonly struct` (Change pass-by-value to pass-by-readonly-reference)
-
 * Removing `readonly` from a field, unless the static type of the field is a mutable value type
 
 &#10007; **Disallowed**
@@ -209,7 +207,7 @@ successfully bind to that overload, if simply passing an `int` value. However, i
 
 * Removing `params` from a parameter
 
-* Adding or removing `out` or `ref` keywords from a parameter
+* Adding or removing `in`, `out`, `ref` keywords from a parameter
 
 * Renaming a parameter (including case)  
 > This is considered breaking for two reasons:
