@@ -59,24 +59,6 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void GetDirectoryName_SpaceThrowOnWindows_Core()
-        {
-            string path = " ";
-            Action action = () => Path.GetDirectoryName(path);
-            if (PlatformDetection.IsWindows)
-            {
-                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
-                Assert.Equal(string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan()))); 
-            }
-            else
-            {
-                // This is a valid path on Unix
-                action();
-            }
-        }
-
         [Theory]
         [InlineData("\u00A0")] // Non-breaking Space
         [InlineData("\u2028")] // Line separator
@@ -121,20 +103,6 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.GetDirectoryName(path));
         }
 
-        [Theory]
-        [InlineData(@"dir/baz", @"dir")]
-        [InlineData(@"dir//baz", @"dir")]
-        [InlineData(@"dir\baz", @"")]
-        [InlineData(@"dir/baz/bar", @"dir/baz")]
-        [InlineData(@"../../files.txt", @"../..")]
-        [InlineData(@"/", null)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific paths
-        public static void GetDirectoryName_Unix(string path, string expected)
-        {
-            Assert.Equal(expected, Path.GetDirectoryName(path));
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
-        }
-
         [Fact]
         public static void GetDirectoryName_CurrentDirectory()
         {
@@ -142,18 +110,6 @@ namespace System.IO.Tests
             Assert.Equal(curDir, Path.GetDirectoryName(Path.Combine(curDir, "baz")));
         
             Assert.Equal(null, Path.GetDirectoryName(Path.GetPathRoot(curDir)));
-        }
-
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks Unix-specific special characters in directory path
-        [Theory]
-        [InlineData('\t', 1, "file")]
-        [InlineData('\b', 2, "fi le")]
-        [InlineData('\v', 3, "fi\nle")]
-        [InlineData('\n', 4, "fi\rle")]
-        public static void GetDirectoryName_ControlCharacters_Unix(char ch, int count, string file)
-        {
-            Assert.Equal(new string(ch, count), Path.GetDirectoryName(Path.Combine(new string(ch, count), file)));
-            Assert.Equal(new string(ch, count), new string(Path.GetDirectoryName(Path.Combine(new string(ch, count), file).AsReadOnlySpan())));
         }
 
         [Theory]
@@ -175,22 +131,6 @@ namespace System.IO.Tests
             Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path));
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks file extension behavior on Unix
-        [Theory]
-        [InlineData("file.e xe", ".e xe")]
-        [InlineData("file. ", ". ")]
-        [InlineData(" file. ", ". ")]
-        [InlineData(" file.extension", ".extension")]
-        [InlineData("file.exten\tsion", ".exten\tsion")]
-        public static void GetExtension_Unix(string path, string expected)
-        {
-            Assert.Equal(expected, Path.GetExtension(path));
-            Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path));
-
-            Assert.Equal(expected, new string(Path.GetExtension(path.AsReadOnlySpan())));
-            Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path.AsReadOnlySpan()));
-        }
-
         public static IEnumerable<object[]> GetFileName_TestData()
         {
             yield return new object[] { null, null };
@@ -210,24 +150,6 @@ namespace System.IO.Tests
         public static void GetFileName(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFileName(path));
-        }
-
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific valid file names
-        [Theory]
-        [InlineData(" . ")]
-        [InlineData(" .. ")]
-        [InlineData("fi le")]
-        public static void GetFileName_Unix(string file)
-        {
-            Assert.Equal(file, Path.GetFileName(file));
-            Assert.Equal(file, new string(Path.GetFileName(file).AsReadOnlySpan()));     
-        }
-
-        [Fact]
-        public static void GetFileNameWithSpaces_Unix()
-        {
-            Assert.Equal("fi  le", Path.GetFileName(Path.Combine("b \r\n ar", "fi  le")));
-            Assert.Equal("fi  le", new string(Path.GetFileName(Path.Combine("b \r\n ar", "fi  le").AsReadOnlySpan())));
         }
 
         public static IEnumerable<object[]> GetFileNameWithoutExtension_TestData()
