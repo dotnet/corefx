@@ -148,8 +148,7 @@ Breaking Change Rules
 
 * Changing a `readonly struct` type to a `struct` type
 
-* Changing a `struct` type to a `ref struct` type
-
+* Changing a `struct` type to a `ref struct` type and vice versa
 
 ### Members
 &#10003; **Allowed**
