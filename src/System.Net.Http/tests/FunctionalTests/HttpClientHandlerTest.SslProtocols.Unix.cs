@@ -22,6 +22,6 @@ namespace System.Net.Http.Functional.Tests
 
         private bool SSLv3DisabledByDefault =>
             BackendSupportsSslConfiguration ||
-            Version.Parse(Interop.Http.CurlVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
+            Version.Parse(Interop.Http.GetVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
     }
 }

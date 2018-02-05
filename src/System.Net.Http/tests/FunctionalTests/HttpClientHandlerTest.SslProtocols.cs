@@ -86,7 +86,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
+        [Theory]
         [InlineData(SslProtocols.Tls, false)]
         [InlineData(SslProtocols.Tls, true)]
         [InlineData(SslProtocols.Tls11, false)]
@@ -237,7 +237,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
+        [Theory]
         [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
         [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
         [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
