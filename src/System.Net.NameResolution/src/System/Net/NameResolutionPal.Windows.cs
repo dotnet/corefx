@@ -4,9 +4,12 @@
 
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 using ProtocolFamily = System.Net.Internals.ProtocolFamily;
 
 namespace System.Net
@@ -19,6 +22,18 @@ namespace System.Net
         private const int HostNameBufferLength = 256;
         private static bool s_initialized;
         private static readonly object s_initializedLock = new object();
+
+        private static readonly unsafe Interop.Winsock.GetAddrInfoExCompletionCallback s_getAddrInfoExCallback = GetAddressInfoExCallback;
+        private static bool s_getAddrInfoExSupported;
+
+        public static bool SupportsGetAddrInfoAsync
+        {
+            get
+            {
+                EnsureSocketsAreInitialized();
+                return s_getAddrInfoExSupported;
+            }
+        }
 
         /*++
 
@@ -232,7 +247,6 @@ namespace System.Net
                 //
                 while (pAddressInfo != null)
                 {
-                    SocketAddress sockaddr;
                     //
                     // Retrieve the canonical name for the host - only appears in the first AddressInfo
                     // entry in the returned array.
@@ -247,29 +261,13 @@ namespace System.Net
                     // We also filter based on whether IPv6 is supported on the current
                     // platform / machine.
                     //
-                    if ((pAddressInfo->ai_family == AddressFamily.InterNetwork) || // Never filter v4
-                        (pAddressInfo->ai_family == AddressFamily.InterNetworkV6 && SocketProtocolSupportPal.OSSupportsIPv6))
+                    if (pAddressInfo->ai_family == AddressFamily.InterNetwork)
                     {
-                        sockaddr = new SocketAddress(pAddressInfo->ai_family, pAddressInfo->ai_addrlen);
-                        //
-                        // Push address data into the socket address buffer
-                        //
-                        for (int d = 0; d < pAddressInfo->ai_addrlen; d++)
-                        {
-                            sockaddr[d] = *(pAddressInfo->ai_addr + d);
-                        }
-                        //
-                        // NOTE: We need an IPAddress now, the only way to create it from a
-                        //       SocketAddress is via IPEndPoint. This ought to be simpler.
-                        //
-                        if (pAddressInfo->ai_family == AddressFamily.InterNetwork)
-                        {
-                            addresses.Add(((IPEndPoint)IPEndPointStatics.Any.Create(sockaddr)).Address);
-                        }
-                        else
-                        {
-                            addresses.Add(((IPEndPoint)IPEndPointStatics.IPv6Any.Create(sockaddr)).Address);
-                        }
+                        addresses.Add(CreateIPv4Address(pAddressInfo->ai_addr, pAddressInfo->ai_addrlen));
+                    }
+                    else if (pAddressInfo->ai_family == AddressFamily.InterNetworkV6 && SocketProtocolSupportPal.OSSupportsIPv6)
+                    {
+                        addresses.Add(CreateIPv6Address(pAddressInfo->ai_addr, pAddressInfo->ai_addrlen));
                     }
                     //
                     // Next addressinfo entry
@@ -385,10 +383,299 @@ namespace System.Net
                             throw new SocketException((int)errorCode);
                         }
 
+                        s_getAddrInfoExSupported = TestGetAddrInfoEx();
+
                         Volatile.Write(ref s_initialized, true);
                     }
                 }
             }
         }
+
+        private static bool TestGetAddrInfoEx()
+        {
+            using (SafeLibraryHandle libHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.Ws2_32, IntPtr.Zero, 0))
+            {
+                return Interop.Kernel32.GetProcAddress(libHandle, nameof(Interop.Winsock.GetAddrInfoExCancel)) != IntPtr.Zero;
+            }
+        }
+
+        public static unsafe void GetAddrInfoAsync(string name, DnsResolveAsyncResult asyncResult)
+        {
+            try
+            { }
+            finally
+            {
+                GetAddrInfoExContext* context = GetAddrInfoExContext.AllocateContext(name, asyncResult);
+
+                AddressInfoEx hints = new AddressInfoEx();
+                hints.ai_flags = AddressInfoHints.AI_CANONNAME;
+                hints.ai_family = AddressFamily.Unspecified; // Gets all address families
+
+                SocketError errorCode =
+                    (SocketError)Interop.Winsock.GetAddrInfoExW(name, null, 0 /* NS_ALL*/, IntPtr.Zero, ref hints, out context->Result, IntPtr.Zero, ref context->Overlapped, s_getAddrInfoExCallback, out context->CancelHandle);
+
+                if (errorCode != SocketError.IOPending)
+                    ProcessResult(errorCode, context);
+            }
+        }
+
+        private static unsafe void GetAddressInfoExCallback([In] int error, [In] int bytes, [In] NativeOverlapped* overlapped)
+        {
+            try
+            { }
+            finally
+            {
+                // Can be casted directly to QueryContext* because the overlapped is its first field
+                GetAddrInfoExContext* context = (GetAddrInfoExContext*)overlapped;
+
+                ProcessResult((SocketError)error, context);
+            }
+        }
+
+        private static unsafe void ProcessResult(SocketError errorCode, GetAddrInfoExContext* context)
+        {
+            GetAddrInfoExState state = context->GetQueryState();
+
+            if (state == null || !state.SetCallbackStartedOrCanceled())
+                return;
+
+            try
+            {
+                if (errorCode != SocketError.Success)
+                {
+                    state.CompleteAsyncResult(new SocketException((int)errorCode));
+                    return;
+                }
+
+                AddressInfoEx* result = context->Result;
+                string canonicalName = null;
+
+                List<IPAddress> addresses = new List<IPAddress>();
+
+                while (result != null)
+                {
+                    if (canonicalName == null && result->ai_canonname != IntPtr.Zero)
+                        canonicalName = Marshal.PtrToStringUni(result->ai_canonname);
+
+                    IPAddress ipAddress = null;
+
+                    if (result->ai_family == AddressFamily.InterNetwork)
+                    {
+                        ipAddress = CreateIPv4Address(result->ai_addr, result->ai_addrlen);
+                    }
+                    else if (SocketProtocolSupportPal.OSSupportsIPv6 && result->ai_family == AddressFamily.InterNetworkV6)
+                    {
+                        ipAddress = CreateIPv6Address(result->ai_addr, result->ai_addrlen);
+                    }
+
+                    if (ipAddress != null)
+                        addresses.Add(ipAddress);
+
+                    result = result->ai_next;
+                }
+
+                if (canonicalName == null)
+                    canonicalName = state.HostAddress;
+
+                state.CompleteAsyncResult(new IPHostEntry
+                {
+                    HostName = canonicalName,
+                    Aliases = Array.Empty<string>(),
+                    AddressList = addresses.ToArray()
+                });
+            }
+            finally
+            {
+                state.Dispose();
+            }
+        }
+
+        private static unsafe IPAddress CreateIPv4Address(byte* socketAddress, int addressLength)
+        {
+            const int IPv4SocketAddressSize = 16;
+
+            if (addressLength != IPv4SocketAddressSize)
+                return null;
+
+            long address = (long)(
+                               (socketAddress[4] & 0x000000FF) |
+                               (socketAddress[5] << 8 & 0x0000FF00) |
+                               (socketAddress[6] << 16 & 0x00FF0000) |
+                               (socketAddress[7] << 24)
+                           ) & 0x00000000FFFFFFFF;
+
+            return new IPAddress(address);
+        }
+
+        private static unsafe IPAddress CreateIPv6Address(byte* socketAddress, int addressLength)
+        {
+            const int IPv6SocketAddressSize = 28;
+            const int IPv6AddressBytes = 16;
+
+            if (addressLength != IPv6SocketAddressSize)
+                return null;
+
+            byte[] address = new byte[IPv6AddressBytes];
+            for (int i = 0; i < address.Length; i++)
+            {
+                address[i] = socketAddress[i + 8];
+            }
+
+            long scope = (long)((socketAddress[27] << 24) +
+                                (socketAddress[26] << 16) +
+                                (socketAddress[25] << 8) +
+                                (socketAddress[24]));
+
+            return new IPAddress(address, scope);
+        }
+
+        #region GetAddrInfoAsync Helper Classes
+
+        private sealed unsafe class GetAddrInfoExState : CriticalFinalizerObject, IDisposable
+        {
+            private IntPtr m_context;
+            private int m_callbackStartedOrCanceled;
+            private DnsResolveAsyncResult m_asyncResult;
+
+            public string HostAddress { get; }
+
+            public GetAddrInfoExState(string hostAddress, DnsResolveAsyncResult asyncResult)
+            {
+                HostAddress = hostAddress;
+                m_asyncResult = asyncResult;
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            public void SetQueryContext(IntPtr context)
+            {
+                m_context = context;
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            public bool SetCallbackStartedOrCanceled()
+            {
+                return Interlocked.Exchange(ref m_callbackStartedOrCanceled, 1) == 0;
+            }
+
+            public void CompleteAsyncResult(object o)
+            {
+                Task.Run(() => m_asyncResult.InvokeCallback(o));
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            ~GetAddrInfoExState()
+            {
+                // The finalizer should only be called when the AppDomain is unloading while there was a pending operation.
+                // Calling GetAddrInfoExCancel will invoke the callback inline with WSA_E_CANCELLED error code.
+
+                // If the callback is already invoked, let the traditional Dispose clear the resources.
+                // This should not be possible, because the finalizer would not have been called if the object was still alive.
+                // This is an extra protection in case the object was somehow resurrected.
+                if (!SetCallbackStartedOrCanceled())
+                    return;
+
+                ReleaseResources(cancelQuery: true);
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            public void Dispose()
+            {
+                GC.SuppressFinalize(this);
+                ReleaseResources(cancelQuery: false);
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            private void ReleaseResources(bool cancelQuery)
+            {
+                var ptr = Interlocked.Exchange(ref m_context, IntPtr.Zero);
+
+                if (ptr == IntPtr.Zero)
+                    return;
+
+                var context = (GetAddrInfoExContext*)ptr;
+
+                if (cancelQuery)
+                    context->CancelQuery();
+
+                GetAddrInfoExContext.FreeContext(context);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private unsafe struct GetAddrInfoExContext
+        {
+            private static readonly int Size = Marshal.SizeOf<GetAddrInfoExContext>();
+
+            public NativeOverlapped Overlapped;
+            public AddressInfoEx* Result;
+            public IntPtr QueryStateHandle;
+            public IntPtr CancelHandle;
+
+            public GetAddrInfoExContext(GetAddrInfoExState state)
+            {
+                Overlapped = new NativeOverlapped();
+                Result = null;
+
+                var handle = GCHandle.Alloc(state, GCHandleType.Normal);
+                QueryStateHandle = GCHandle.ToIntPtr(handle);
+
+                CancelHandle = IntPtr.Zero;
+            }
+
+            public GetAddrInfoExState GetQueryState()
+            {
+                var stateHandle = Interlocked.Exchange(ref QueryStateHandle, IntPtr.Zero);
+
+                if (stateHandle == IntPtr.Zero)
+                    return null;
+
+                var handle = GCHandle.FromIntPtr(stateHandle);
+
+                if (!handle.IsAllocated)
+                    return null;
+
+                var state = (GetAddrInfoExState)handle.Target;
+                handle.Free();
+
+                return state;
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            public void CancelQuery()
+            {
+                if (CancelHandle != IntPtr.Zero)
+                {
+                    Interop.Winsock.GetAddrInfoExCancel(ref CancelHandle);
+                    CancelHandle = IntPtr.Zero;
+                }
+            }
+
+            public static GetAddrInfoExContext* AllocateContext(string hostAddress, DnsResolveAsyncResult asyncResult)
+            {
+                GetAddrInfoExContext* context = (GetAddrInfoExContext*)Marshal.AllocHGlobal(Size);
+                GetAddrInfoExState state = new GetAddrInfoExState(hostAddress, asyncResult);
+
+                *context = new GetAddrInfoExContext(state);
+                state.SetQueryContext((IntPtr)context);
+                return context;
+            }
+
+            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+            public static void FreeContext(GetAddrInfoExContext* context)
+            {
+                if (context->Result != null)
+                {
+                    Interop.Winsock.FreeAddrInfoEx(context->Result);
+                    context->Result = null;
+                }
+
+                // There is no need to free the GCHandle held in 'QueryStateHandle'
+                // The handle is freed by 'GetQueryState' unless the AppDomain is unloaded.
+
+                Marshal.FreeHGlobal((IntPtr)context);
+            }
+        }
+
+        #endregion
     }
 }

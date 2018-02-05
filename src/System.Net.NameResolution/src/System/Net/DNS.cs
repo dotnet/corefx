@@ -252,32 +252,9 @@ namespace System.Net
             return ipHostEntry;
         }
 
-        private class ResolveAsyncResult : ContextAwareResult
-        {
-            // Forward lookup
-            internal ResolveAsyncResult(string hostName, object myObject, bool includeIPv6, object myState, AsyncCallback myCallBack) :
-                base(myObject, myState, myCallBack)
-            {
-                this.hostName = hostName;
-                this.includeIPv6 = includeIPv6;
-            }
-
-            // Reverse lookup
-            internal ResolveAsyncResult(IPAddress address, object myObject, bool includeIPv6, object myState, AsyncCallback myCallBack) :
-                base(myObject, myState, myCallBack)
-            {
-                this.includeIPv6 = includeIPv6;
-                this.address = address;
-            }
-
-            internal readonly string hostName;
-            internal bool includeIPv6;
-            internal IPAddress address;
-        }
-
         private static void ResolveCallback(object context)
         {
-            ResolveAsyncResult result = (ResolveAsyncResult)context;
+            DnsResolveAsyncResult result = (DnsResolveAsyncResult)context;
             IPHostEntry hostEntry;
             try
             {
@@ -316,7 +293,7 @@ namespace System.Net
 
             // See if it's an IP Address.
             IPAddress address;
-            ResolveAsyncResult asyncResult;
+            DnsResolveAsyncResult asyncResult;
             if (IPAddress.TryParse(hostName, out address))
             {
                 if (throwOnIIPAny && (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)))
@@ -324,7 +301,7 @@ namespace System.Net
                     throw new ArgumentException(SR.net_invalid_ip_addr, nameof(hostName));
                 }
 
-                asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
+                asyncResult = new DnsResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
 
                 if (justReturnParsedIp)
                 {
@@ -337,19 +314,26 @@ namespace System.Net
             }
             else
             {
-                asyncResult = new ResolveAsyncResult(hostName, null, includeIPv6, state, requestCallback);
+                asyncResult = new DnsResolveAsyncResult(hostName, null, includeIPv6, state, requestCallback);
             }
 
             // Set up the context, possibly flow.
             asyncResult.StartPostingAsyncOp(false);
 
-            // Start the resolve.
-            Task.Factory.StartNew(
-                s => ResolveCallback(s),
-                asyncResult,
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach,
-                TaskScheduler.Default);
+            if (NameResolutionPal.SupportsGetAddrInfoAsync && includeIPv6 && SocketProtocolSupportPal.OSSupportsIPv6 && address == null)
+            {
+                NameResolutionPal.GetAddrInfoAsync(hostName, asyncResult);
+            }
+            else
+            {
+                // Start the resolve.
+                Task.Factory.StartNew(
+                    s => ResolveCallback(s),
+                    asyncResult,
+                    CancellationToken.None,
+                    TaskCreationOptions.DenyChildAttach,
+                    TaskScheduler.Default);
+            }
 
             // Finish the flowing, maybe it completed?  This does nothing if we didn't initiate the flowing above.
             asyncResult.FinishPostingAsyncOp();
@@ -371,7 +355,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, address);
 
             // Set up the context, possibly flow.
-            ResolveAsyncResult asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
+            DnsResolveAsyncResult asyncResult = new DnsResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
             if (flowContext)
             {
                 asyncResult.StartPostingAsyncOp(false);
@@ -399,7 +383,7 @@ namespace System.Net
             {
                 throw new ArgumentNullException(nameof(asyncResult));
             }
-            ResolveAsyncResult castedResult = asyncResult as ResolveAsyncResult;
+            DnsResolveAsyncResult castedResult = asyncResult as DnsResolveAsyncResult;
             if (castedResult == null)
             {
                 throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
@@ -611,7 +595,7 @@ namespace System.Net
             }
             catch (SocketException ex)
             {
-                IPAddress address = ((ResolveAsyncResult)asyncResult).address;
+                IPAddress address = ((DnsResolveAsyncResult)asyncResult).address;
                 if (address == null)
                     throw; // BeginResolve was called with a HostName, not an IPAddress
 
