@@ -44,9 +44,10 @@ namespace System.Net.Http
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
         private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
+        public static readonly HttpMethod s_httpConnectMethod = new HttpMethod("CONNECT");
 
-        private readonly HttpConnectionPool _pool;
-        private readonly Stream _stream;
+        private HttpConnectionPool _pool;
+        private Stream _stream;
         private readonly TransportContext _transportContext;
         private readonly bool _usingProxy;
         private readonly byte[] _idnHostAsciiBytes;
@@ -338,14 +339,14 @@ namespace System.Net.Http
                     _readLength = bytesRead;
                 }
 
-                // The request is no longer retryable; either we received data from the _readAheadTask, 
+                // The request is no longer retryable; either we received data from the _readAheadTask,
                 // or there was no _readAheadTask because this is the first request on the connection.
                 _canRetry = false;
 
                 // Parse the response status line.
                 var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
                 ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
-                
+
                 // If we sent an Expect: 100-continue header, handle the response accordingly.
                 if (allowExpect100ToContinue != null)
                 {
@@ -381,7 +382,6 @@ namespace System.Net.Http
                         }
                     }
                 }
-
                 // Parse the response headers.
                 while (true)
                 {
@@ -416,6 +416,12 @@ namespace System.Net.Http
                 {
                     responseStream = EmptyReadStream.Instance;
                     ReturnConnectionToPool();
+                }
+                else if (request.Method == s_httpConnectMethod && (int)response.StatusCode == 200)
+                {
+                    // Successful response to CONNECT does not have body.
+                    // What ever comes next should be opaque.
+                    responseStream = EmptyReadStream.Instance;
                 }
                 else if (response.Content.Headers.ContentLength != null)
                 {
@@ -1193,6 +1199,31 @@ namespace System.Net.Http
 
             // We're not putting the connection back in the pool. Dispose it.
             Dispose();
+        }
+
+        // rfc2817
+        public async void UpgradeToTls(HttpConnectionSettings settings, string host, HttpConnectionPool pool, CancellationToken cancellationToken)
+        {
+            SslStream sslStream = await ConnectHelper.EstablishSslConnectionAsync(settings, host, null, _stream, cancellationToken);
+            _stream = sslStream;
+
+            if (NetEventSource.IsEnabled)
+            {
+                Trace(
+                        $"Connection upgraded to TLS {_pool.Key.Host}:{_pool.Key.Port}. " +
+                        $"SslHostName:{_pool.Key.SslHostName}. " +
+                        $"SslProtocol:{sslStream.SslProtocol}, " +
+                        $"CipherAlgorithm:{sslStream.CipherAlgorithm}, CipherStrength:{sslStream.CipherStrength}, " +
+                        $"HashAlgorithm:{sslStream.HashAlgorithm}, HashStrength:{sslStream.HashStrength}, " +
+                        $"KeyExchangeAlgorithm:{sslStream.KeyExchangeAlgorithm}, KeyExchangeStrength:{sslStream.KeyExchangeStrength}, " +
+                        $"LocalCert:{sslStream.LocalCertificate}, RemoteCert:{sslStream.RemoteCertificate}");
+            }
+            if (pool != null)
+            {
+                _pool.DecrementConnectionCount();
+                _pool = pool;
+                _pool.IncrementConnectionCount();
+           }
         }
 
         private static bool EqualsOrdinal(string left, Span<byte> right)

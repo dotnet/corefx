@@ -391,5 +391,96 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
+
+        [OuterLoop]
+        [Fact]
+        public async Task HttpConnectMethod_Succeeds()
+        {
+            using (HttpClient client = CreateHttpClient())
+            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(100);
+                var ep = (IPEndPoint)listener.LocalEndPoint;
+                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
+                string responseBody = "HTTP/1.1 200 Connection established\r\n\r\n";
+
+                HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("CONNECT"), uri);
+                Task<HttpResponseMessage> responseTask = client.SendAsync(request);
+
+                using (Socket server = await listener.AcceptAsync())
+                using (var serverStream = new NetworkStream(server, ownsSocket: false))
+                {
+                    // Skip request headers.
+                    while (true)
+                    {
+                        if (serverStream.ReadByte() == '\r')
+                        {
+                            serverStream.ReadByte();
+                            break;
+                        }
+                        while (serverStream.ReadByte() != '\r') { }
+                        serverStream.ReadByte();
+                    }
+
+                    // Send response.
+                    await server.SendAsync(
+                    new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)),
+                                            SocketFlags.None);
+                    HttpResponseMessage response = await responseTask;
+                    Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                }
+            }
+        }
+
+        // Tests unsuccessful attempt to switch to tunneling mode.
+        [OuterLoop]
+        [Fact]
+        public async Task HttpConnectMethod_Forbidden()
+        {
+            using (HttpClient client = CreateHttpClient())
+            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(100);
+                var ep = (IPEndPoint)listener.LocalEndPoint;
+                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
+                string responseBody =
+                    "HTTP/1.1 403 Forbidden\r\n" +
+                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                    "Server: squid\r\n" +
+                    "Content-Length: 7\r\n" +
+                    "\r\n"+
+                    "error\r\n";
+
+                HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("CONNECT"), uri);
+                Task<HttpResponseMessage> responseTask = client.SendAsync(request);
+
+                using (Socket server = await listener.AcceptAsync())
+                using (var serverStream = new NetworkStream(server, ownsSocket: false))
+                {
+                    // Skip request headers.
+                    while (true)
+                    {
+                        if (serverStream.ReadByte() == '\r')
+                        {
+                            serverStream.ReadByte();
+                            break;
+                        }
+                        while (serverStream.ReadByte() != '\r') { }
+                        serverStream.ReadByte();
+                    }
+
+                    // Send response.
+                    await server.SendAsync(
+                        new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+
+                    HttpResponseMessage response = await responseTask;
+                    Assert.Equal(response.StatusCode, HttpStatusCode.Forbidden);
+                    string body = await response.Content.ReadAsStringAsync();
+                    Assert.True(body.Length > 0);
+                }
+            }
+        }
     }
 }
