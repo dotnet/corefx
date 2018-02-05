@@ -282,7 +282,7 @@ namespace System.Buffers
         public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
-        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the origin <paramref name="origin"/>
+        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the <paramref name="origin"/>
         /// </summary>
         public SequencePosition GetPosition(SequencePosition origin, long offset)
         {

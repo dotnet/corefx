@@ -64,7 +64,9 @@ namespace System.Memory.Tests
 
             public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
             {
-                return new ReadOnlyBuffer<byte>(new CustomMemoryForTest<byte>(data));
+                var startSegment = new byte[data.Length + 20];
+                Array.Copy(data, 0, startSegment, 10, data.Length);
+                return new ReadOnlyBuffer<byte>(new CustomMemoryForTest<byte>(startSegment, 10, data.Length));
             }
         }
 

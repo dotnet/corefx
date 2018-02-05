@@ -16,22 +16,22 @@ namespace System.MemoryTests
         private int _noReferencesCalledCount;
         private T[] _array;
         private readonly int _offset;
-        private readonly int _lenght;
+        private readonly int _length;
 
         public CustomMemoryForTest(T[] array): this(array, 0, array.Length)
         {
         }
 
-        public CustomMemoryForTest(T[] array, int offset, int lenght)
+        public CustomMemoryForTest(T[] array, int offset, int length)
         {
             _array = array;
             _offset = offset;
-            _lenght = lenght;
+            _length = length;
         }
 
         public int OnNoRefencesCalledCount => _noReferencesCalledCount;
 
-        public override int Length => _lenght;
+        public override int Length => _length;
 
         public override bool IsDisposed => _disposed;
 
@@ -43,7 +43,7 @@ namespace System.MemoryTests
             {
                 if (IsDisposed)
                     throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-                return new Span<T>(_array, 0, _array.Length);
+                return new Span<T>(_array, _offset, _length);
             }
         }
 
@@ -62,7 +62,7 @@ namespace System.MemoryTests
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-            arraySegment = new ArraySegment<T>(_array, _offset, _lenght);
+            arraySegment = new ArraySegment<T>(_array, _offset, _length);
             return true;
         }
 
