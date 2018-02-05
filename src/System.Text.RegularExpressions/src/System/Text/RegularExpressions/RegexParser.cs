@@ -288,7 +288,7 @@ namespace System.Text.RegularExpressions
                         goto ContinueOuterScan;
 
                     case '[':
-                        AddUnitSet(ScanCharClass(UseOptionI()).ToStringClass());
+                        AddUnitSet(ScanCharClass(UseOptionI(), scanOnly: false).ToStringClass());
                         break;
 
                     case '(':
@@ -326,7 +326,7 @@ namespace System.Text.RegularExpressions
                         break;
 
                     case '\\':
-                        AddUnitNode(ScanBackslash());
+                        AddUnitNode(ScanBackslash(scanOnly: false));
                         break;
 
                     case '^':
@@ -495,7 +495,7 @@ namespace System.Text.RegularExpressions
          * Scans contents of [] (not including []'s), and converts to a
          * RegexCharClass.
          */
-        internal RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly = false)
+        internal RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly)
         {
             char ch = '\0';
             char chPrev = '\0';
@@ -615,7 +615,7 @@ namespace System.Text.RegularExpressions
                             // In that case, we'll add chPrev to our char class, skip the opening [, and
                             // scan the new character class recursively.
                             cc.AddChar(chPrev);
-                            cc.AddSubtraction(ScanCharClass(caseInsensitive, false));
+                            cc.AddSubtraction(ScanCharClass(caseInsensitive, scanOnly));
 
                             if (CharsRight() > 0 && RightChar() != ']')
                                 throw MakeException(SR.SubtractionMustBeLast);
@@ -643,7 +643,7 @@ namespace System.Text.RegularExpressions
                     if (!scanOnly)
                     {
                         MoveRight(1);
-                        cc.AddSubtraction(ScanCharClass(caseInsensitive, false));
+                        cc.AddSubtraction(ScanCharClass(caseInsensitive, scanOnly));
 
                         if (CharsRight() > 0 && RightChar() != ']')
                             throw MakeException(SR.SubtractionMustBeLast);
@@ -651,7 +651,7 @@ namespace System.Text.RegularExpressions
                     else
                     {
                         MoveRight(1);
-                        ScanCharClass(caseInsensitive, true);
+                        ScanCharClass(caseInsensitive, scanOnly);
                     }
                 }
                 else
@@ -979,7 +979,7 @@ namespace System.Text.RegularExpressions
          * Scans chars following a '\' (not counting the '\'), and returns
          * a RegexNode for the type of atom scanned.
          */
-        internal RegexNode ScanBackslash(bool scanOnly = false)
+        internal RegexNode ScanBackslash(bool scanOnly)
         {
             char ch;
             RegexCharClass cc;
