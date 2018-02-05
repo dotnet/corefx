@@ -217,7 +217,7 @@ namespace System.Net.Http
 
             // Similarly, we need to clear any Auth headers that were added to the request manually or
             // through the default headers.
-            //ResetAuthRequestHeaders(state);
+            ResetAuthRequestHeaders(state);
         }
         
         private static void OnRequestSendingRequest(WinHttpRequestState state)
@@ -413,7 +413,7 @@ namespace System.Net.Http
         {
             const string AuthHeaderNameWithColon = "Authorization:";
             SafeWinHttpHandle requestHandle = state.RequestHandle;
-            //state.RequestMessage.Headers.Authorization = null;
+            state.RequestMessage.Headers.Authorization = null;
             
             // Clear auth headers.
             if (!Interop.WinHttp.WinHttpAddRequestHeaders(
