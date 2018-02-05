@@ -117,8 +117,12 @@ namespace System
                 }
                 else
                 {
-                    while (Unsafe.Add(ref keys, ++left).CompareTo(pivot) < 0) ;
-                    while (pivot.CompareTo(Unsafe.Add(ref keys, --right)) < 0) ;
+                    // TODO: Possible buffer over/underflow here if custom CompareTo? What to do?
+                    //       Here we bound the expression like in the above loop, but is that the same in coreclr?
+                    //       This is the reason for "catch (IndexOutOfRangeException) => IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);"
+                    // NOTE: Inserted check to ensure no out of bounds
+                    while (left < (hi - 1) && pivot.CompareTo(Unsafe.Add(ref keys, ++left)) > 0) ;
+                    while (right > lo && pivot.CompareTo(Unsafe.Add(ref keys, --right)) < 0) ;
                 }
 
                 if (left >= right)
@@ -244,66 +248,73 @@ namespace System
             ref var r0 = ref Unsafe.Add(ref keys, i0);
             ref var r1 = ref Unsafe.Add(ref keys, i1);
             ref var r2 = ref Unsafe.Add(ref keys, i2);
+            Sort2(ref r0, ref r1, ref values, i0, i1);
+            Sort2(ref r0, ref r2, ref values, i0, i2);
+            Sort2(ref r1, ref r2, ref values, i1, i2);
 
-            if (r0 != null && r0.CompareTo(r1) < 0) //r0 < r1)
-            {
-                if (r1 != null && r1.CompareTo(r2) < 0) //(r1 < r2)
-                {
-                    return ref r1;
-                }
-                else if (r0.CompareTo(r2) < 0) //(r0 < r2)
-                {
-                    Swap(ref r1, ref r2);
-                    ref var v1 = ref Unsafe.Add(ref values, i1);
-                    ref var v2 = ref Unsafe.Add(ref values, i2);
-                    Swap(ref v1, ref v2);
-                }
-                else
-                {
-                    TKey tmp = r0;
-                    r0 = r2;
-                    r2 = r1;
-                    r1 = tmp;
-                    ref var v0 = ref Unsafe.Add(ref values, i0);
-                    ref var v1 = ref Unsafe.Add(ref values, i1);
-                    ref var v2 = ref Unsafe.Add(ref values, i2);
-                    TValue vTemp = v0;
-                    v0 = v2;
-                    v2 = v1;
-                    v1 = vTemp;
-                }
-            }
-            else
-            {
-                if (r0 != null && r0.CompareTo(r2) < 0) //(r0 < r2)
-                {
-                    Swap(ref r0, ref r1);
-                    ref var v0 = ref Unsafe.Add(ref values, i0);
-                    ref var v1 = ref Unsafe.Add(ref values, i1);
-                    Swap(ref v0, ref v1);
-                }
-                else if (r2 != null && r2.CompareTo(r1) < 0) //(r2 < r1)
-                {
-                    Swap(ref r0, ref r2);
-                    ref var v0 = ref Unsafe.Add(ref values, i0);
-                    ref var v2 = ref Unsafe.Add(ref values, i2);
-                    Swap(ref v0, ref v2);
-                }
-                else
-                {
-                    TKey tmp = r0;
-                    r0 = r1;
-                    r1 = r2;
-                    r2 = tmp;
-                    ref var v0 = ref Unsafe.Add(ref values, i0);
-                    ref var v1 = ref Unsafe.Add(ref values, i1);
-                    ref var v2 = ref Unsafe.Add(ref values, i2);
-                    TValue vTemp = v0;
-                    v0 = v1;
-                    v1 = v2;
-                    v2 = vTemp;
-                }
-            }
+            //ref var r0 = ref Unsafe.Add(ref keys, i0);
+            //ref var r1 = ref Unsafe.Add(ref keys, i1);
+            //ref var r2 = ref Unsafe.Add(ref keys, i2);
+
+            //if (r0 != null && r0.CompareTo(r1) <= 0) //r0 <= r1)
+            //{
+            //    if (r1 != null && r1.CompareTo(r2) <= 0) //(r1 <= r2)
+            //    {
+            //        return ref r1;
+            //    }
+            //    else if (r0.CompareTo(r2) < 0) //(r0 < r2)
+            //    {
+            //        Swap(ref r1, ref r2);
+            //        ref var v1 = ref Unsafe.Add(ref values, i1);
+            //        ref var v2 = ref Unsafe.Add(ref values, i2);
+            //        Swap(ref v1, ref v2);
+            //    }
+            //    else
+            //    {
+            //        TKey tmp = r0;
+            //        r0 = r2;
+            //        r2 = r1;
+            //        r1 = tmp;
+            //        ref var v0 = ref Unsafe.Add(ref values, i0);
+            //        ref var v1 = ref Unsafe.Add(ref values, i1);
+            //        ref var v2 = ref Unsafe.Add(ref values, i2);
+            //        TValue vTemp = v0;
+            //        v0 = v2;
+            //        v2 = v1;
+            //        v1 = vTemp;
+            //    }
+            //}
+            //else
+            //{
+            //    if (r0 != null && r0.CompareTo(r2) < 0) //(r0 < r2)
+            //    {
+            //        Swap(ref r0, ref r1);
+            //        ref var v0 = ref Unsafe.Add(ref values, i0);
+            //        ref var v1 = ref Unsafe.Add(ref values, i1);
+            //        Swap(ref v0, ref v1);
+            //    }
+            //    else if (r2 != null && r2.CompareTo(r1) < 0) //(r2 < r1)
+            //    {
+            //        Swap(ref r0, ref r2);
+            //        ref var v0 = ref Unsafe.Add(ref values, i0);
+            //        ref var v2 = ref Unsafe.Add(ref values, i2);
+            //        Swap(ref v0, ref v2);
+            //    }
+            //    else
+            //    {
+            //        TKey tmp = r0;
+            //        r0 = r1;
+            //        r1 = r2;
+            //        r2 = tmp;
+            //        ref var v0 = ref Unsafe.Add(ref values, i0);
+            //        ref var v1 = ref Unsafe.Add(ref values, i1);
+            //        ref var v2 = ref Unsafe.Add(ref values, i2);
+            //        TValue vTemp = v0;
+            //        v0 = v1;
+            //        v1 = v2;
+            //        v2 = vTemp;
+            //    }
+            //}
             return ref r1;
         }
 
@@ -316,6 +327,13 @@ namespace System
 
             ref TKey a = ref Unsafe.Add(ref keys, i);
             ref TKey b = ref Unsafe.Add(ref keys, j);
+            Sort2(ref a, ref b, ref values, i, j);
+        }
+
+        private static void Sort2<TKey, TValue>(
+            ref TKey a, ref TKey b, ref TValue values, int i, int j) 
+            where TKey : IComparable<TKey>
+        {
             if (a != null && a.CompareTo(b) > 0)
             {
                 Swap(ref a, ref b);

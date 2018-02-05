@@ -124,8 +124,12 @@ namespace System
                 }
                 else
                 {
-                    while (Unsafe.Add(ref keys, ++left).CompareTo(pivot) < 0) ;
-                    while (pivot.CompareTo(Unsafe.Add(ref keys, --right)) < 0) ;
+                    // TODO: Possible buffer over/underflow here if custom CompareTo? What to do?
+                    //       Here we bound the expression like in the above loop, but is that the same in coreclr?
+                    //       This is the reason for "catch (IndexOutOfRangeException) => IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);"
+                    // NOTE: Inserted check to ensure no out of bounds
+                    while (left < (hi - 1) && pivot.CompareTo(Unsafe.Add(ref keys, ++left)) > 0) ;
+                    while (right > lo && pivot.CompareTo(Unsafe.Add(ref keys, --right)) < 0) ;
                 }
 
                 if (left >= right)
@@ -234,42 +238,48 @@ namespace System
             ref TKey r0, ref TKey r1, ref TKey r2)
             where TKey : IComparable<TKey>
         {
-            if (r0 != null && r0.CompareTo(r1) < 0) //r0 < r1)
-            {
-                if (r1 != null && r1.CompareTo(r2) < 0) //(r1 < r2)
-                {
-                    return;
-                }
-                else if (r0.CompareTo(r2) < 0) //(r0 < r2)
-                {
-                    Swap(ref r1, ref r2);
-                }
-                else
-                {
-                    TKey tmp = r0;
-                    r0 = r2;
-                    r2 = r1;
-                    r1 = tmp;
-                }
-            }
-            else
-            {
-                if (r0 != null && r0.CompareTo(r2) < 0) //(r0 < r2)
-                {
-                    Swap(ref r0, ref r1);
-                }
-                else if (r2 != null && r2.CompareTo(r1) < 0) //(r2 < r1)
-                {
-                    Swap(ref r0, ref r2);
-                }
-                else
-                {
-                    TKey tmp = r0;
-                    r0 = r1;
-                    r1 = r2;
-                    r2 = tmp;
-                }
-            }
+            Sort2(ref r0, ref r1);
+            Sort2(ref r0, ref r2);
+            Sort2(ref r1, ref r2);
+
+            // Below works but does not give exactly the same result as Array.Sort
+            // i.e. order could be a bit different for keys that are equal
+            //if (r0 != null && r0.CompareTo(r1) <= 0) //r0 <= r1)
+            //{
+            //    if (r1 != null && r1.CompareTo(r2) <= 0) //(r1 <= r2)
+            //    {
+            //        return;
+            //    }
+            //    else if (r0.CompareTo(r2) < 0) //(r0 < r2)
+            //    {
+            //        Swap(ref r1, ref r2);
+            //    }
+            //    else
+            //    {
+            //        TKey tmp = r0;
+            //        r0 = r2;
+            //        r2 = r1;
+            //        r1 = tmp;
+            //    }
+            //}
+            //else
+            //{
+            //    if (r0 != null && r0.CompareTo(r2) < 0) //(r0 < r2)
+            //    {
+            //        Swap(ref r0, ref r1);
+            //    }
+            //    else if (r2 != null && r2.CompareTo(r1) < 0) //(r2 < r1)
+            //    {
+            //        Swap(ref r0, ref r2);
+            //    }
+            //    else
+            //    {
+            //        TKey tmp = r0;
+            //        r0 = r1;
+            //        r1 = r2;
+            //        r2 = tmp;
+            //    }
+            //}
         }
 
 
@@ -282,6 +292,12 @@ namespace System
 
             ref TKey a = ref Unsafe.Add(ref keys, i);
             ref TKey b = ref Unsafe.Add(ref keys, j);
+            Sort2(ref a, ref b);
+        }
+
+        private static void Sort2<TKey>(ref TKey a, ref TKey b) 
+            where TKey : IComparable<TKey>
+        {
             if (a != null && a.CompareTo(b) > 0)
             {
                 TKey temp = a;

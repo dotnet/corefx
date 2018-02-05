@@ -82,7 +82,7 @@ namespace System
             public void Sort(ref TKey keys, int length)
             {
                 S.Sort(ref keys, length,
-                    new ComparerLessThanComparer<TKey, IComparer<TKey>>(Comparer<TKey>.Default));
+                    new ComparerDirectComparer<TKey, IComparer<TKey>>(Comparer<TKey>.Default));
             }
         }
 
@@ -141,12 +141,12 @@ namespace System
                 if (typeof(TComparer) == typeof(IComparer<TKey>) && comparer == null)
                 {
                     S.Sort(ref keys, length,
-                        new ComparerLessThanComparer<TKey, IComparer<TKey>>(Comparer<TKey>.Default));
+                        new ComparerDirectComparer<TKey, IComparer<TKey>>(Comparer<TKey>.Default));
                 }
                 else
                 {
                     S.Sort(ref keys, length,
-                        new ComparerLessThanComparer<TKey, IComparer<TKey>>(comparer));
+                        new ComparerDirectComparer<TKey, IComparer<TKey>>(comparer));
                 }
                 //}
                 //catch (IndexOutOfRangeException e)
@@ -189,7 +189,7 @@ namespace System
                 else
                 {
                     S.Sort(ref keys, length,
-                        new ComparerLessThanComparer<TKey, TComparer>(comparer));
+                        new ComparerDirectComparer<TKey, TComparer>(comparer));
                 }
                 //}
                 //catch (IndexOutOfRangeException e)
