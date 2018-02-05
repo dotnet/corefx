@@ -11,13 +11,10 @@ namespace System.Threading.Channels.Tests
 {
     public class StressTests
     {
-        public delegate Task<bool> Read(ChannelReader<int> reader);
-        public delegate Task Write(ChannelWriter<int> writer, int value);
-
         public static IEnumerable<object[]> TestData()
         {
-            foreach (var readDelegate in new Read[] { ReadSynchronous, ReadASynchronous, ReadSyncAndASync} )
-            foreach (var writeDelegate in new Write[] { WriteSynchronous, WriteASynchronous, WriteSyncAndASync} )
+            foreach (var readDelegate in new Func<ChannelReader<int>, Task<bool>>[] { ReadSynchronous, ReadAsynchronous, ReadSyncAndAsync} )
+            foreach (var writeDelegate in new Func<ChannelWriter<int>, int, Task>[] { WriteSynchronous, WriteAsynchronous, WriteSyncAndAsync} )
             foreach (bool singleReader in new [] {false, true})
             foreach (bool singleWriter in new [] {false, true})
             foreach (bool allowSynchronousContinuations in new [] {false, true})
@@ -32,9 +29,9 @@ namespace System.Threading.Channels.Tests
                 };
             }
 
-            foreach (var readDelegate in new Read[] { ReadSynchronous, ReadASynchronous, ReadSyncAndASync} )
-            foreach (var writeDelegate in new Write[] { WriteSynchronous, WriteASynchronous, WriteSyncAndASync} )
-            for (BoundedChannelFullMode bco = BoundedChannelFullMode.Wait;  bco <= BoundedChannelFullMode.DropWrite; bco++)
+            foreach (var readDelegate in new Func<ChannelReader<int>, Task<bool>>[] { ReadSynchronous, ReadAsynchronous, ReadSyncAndAsync} )
+            foreach (var writeDelegate in new Func<ChannelWriter<int>, int, Task>[] { WriteSynchronous, WriteAsynchronous, WriteSyncAndAsync} )
+            foreach (BoundedChannelFullMode bco in Enum.GetValues(typeof(BoundedChannelFullMode)))
             foreach (int capacity in new [] { 1, 1000 })
             foreach (bool singleReader in new [] {false, true})
             foreach (bool singleWriter in new [] {false, true})
@@ -65,7 +62,7 @@ namespace System.Threading.Channels.Tests
             return true;
         }
 
-        private static async Task<bool> ReadASynchronous(ChannelReader<int> reader)
+        private static async Task<bool> ReadAsynchronous(ChannelReader<int> reader)
         {
             if (await reader.WaitToReadAsync())
             {
@@ -76,7 +73,7 @@ namespace System.Threading.Channels.Tests
             return false;
         }
 
-        private static async Task<bool> ReadSyncAndASync(ChannelReader<int> reader)
+        private static async Task<bool> ReadSyncAndAsync(ChannelReader<int> reader)
         {
             if (!reader.TryRead(out int value))
             {
@@ -102,7 +99,7 @@ namespace System.Threading.Channels.Tests
             }
         }
 
-        private static async Task WriteASynchronous(ChannelWriter<int> writer, int value)
+        private static async Task WriteAsynchronous(ChannelWriter<int> writer, int value)
         {
             if (await writer.WaitToWriteAsync())
             {
@@ -110,7 +107,7 @@ namespace System.Threading.Channels.Tests
             }
         }
 
-        private static async Task WriteSyncAndASync(ChannelWriter<int> writer, int value)
+        private static async Task WriteSyncAndAsync(ChannelWriter<int> writer, int value)
         {
             if (!writer.TryWrite(value))
             {
@@ -124,10 +121,13 @@ namespace System.Threading.Channels.Tests
         const int MaxNumberToWriteToChannel = 400_000;
         private static readonly int MaxTaskCounts = Math.Max(2, Environment.ProcessorCount);
 
-        [OuterLoop]
-        [Theory]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(TestData))]
-        public void RunInStressMode(Func<ChannelOptions, Channel<int>> channelCreator, ChannelOptions options, Read readDelegate, Write writeDelegate)
+        public void RunInStressMode(
+                        Func<ChannelOptions, Channel<int>> channelCreator,
+                        ChannelOptions options,
+                        Func<ChannelReader<int>, Task<bool>> readDelegate,
+                        Func<ChannelWriter<int>, int, Task> writeDelegate)
         {
             Channel<int> channel = channelCreator(options);
             ChannelReader<int> reader = channel.Reader;
