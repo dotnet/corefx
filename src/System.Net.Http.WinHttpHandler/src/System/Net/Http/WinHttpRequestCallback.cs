@@ -413,7 +413,6 @@ namespace System.Net.Http
         {
             const string AuthHeaderNameWithColon = "Authorization:";
             SafeWinHttpHandle requestHandle = state.RequestHandle;
-            state.RequestMessage.Headers.Authorization = null;
             
             // Clear auth headers.
             if (!Interop.WinHttp.WinHttpAddRequestHeaders(

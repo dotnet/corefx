@@ -242,6 +242,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
         {
