@@ -15,7 +15,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
-        private class ManagedDecryptorPal : DecryptorPal
+        private sealed class ManagedDecryptorPal : DecryptorPal
         {
             private byte[] _dataCopy;
             private EnvelopedDataAsn _envelopedData;

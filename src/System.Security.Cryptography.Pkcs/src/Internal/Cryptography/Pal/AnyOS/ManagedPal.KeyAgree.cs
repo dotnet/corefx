@@ -11,7 +11,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
-        private class ManagedKeyAgreePal : KeyAgreeRecipientInfoPal
+        private sealed class ManagedKeyAgreePal : KeyAgreeRecipientInfoPal
         {
             private readonly KeyAgreeRecipientInfoAsn _asn;
             private readonly int _index;

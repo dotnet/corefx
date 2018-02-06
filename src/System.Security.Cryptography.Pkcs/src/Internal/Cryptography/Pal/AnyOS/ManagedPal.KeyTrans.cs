@@ -17,7 +17,7 @@ namespace Internal.Cryptography.Pal.AnyOS
         private static readonly byte[] s_rsaPkcsParameters = { 0x05, 0x00 };
         private static readonly byte[] s_rsaOaepSha1Parameters = { 0x30, 0x00 };
 
-        private class ManagedKeyTransPal : KeyTransRecipientInfoPal
+        private sealed class ManagedKeyTransPal : KeyTransRecipientInfoPal
         {
             private readonly KeyTransRecipientInfoAsn _asn;
 
