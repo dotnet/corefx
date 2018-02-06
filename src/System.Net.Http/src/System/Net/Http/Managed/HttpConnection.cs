@@ -49,7 +49,7 @@ namespace System.Net.Http
         private HttpConnectionPool _pool;
         private Stream _stream;
         private readonly TransportContext _transportContext;
-        private readonly bool _usingProxy;
+        private bool _usingProxy;
         private readonly byte[] _idnHostAsciiBytes;
 
         private HttpRequestMessage _currentRequest;
@@ -215,15 +215,24 @@ namespace System.Net.Http
                 await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
 
-                if (_usingProxy)
+                if (request.Method == s_httpConnectMethod)
                 {
-                    // Proxied requests contain full URL
-                    Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
-                    await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
+                    // RFC 7231 #section-4.3.6.
+                    // Write only CONNECT foo.com:345 HTTP/1.1
                     await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                    await WriteAsciiStringAsync(String.Format(":{0}", request.RequestUri.Port), cancellationToken).ConfigureAwait(false);
                 }
-
-                await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
+                else
+                {
+                    if (_usingProxy)
+                    {
+                        // Proxied requests contain full URL
+                        Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
+                        await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
+                        await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                    }
+                    await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
+                }
 
                 // fall-back to 1.1 for all versions other than 1.0
                 Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0); // guaranteed by Version class
@@ -1202,10 +1211,12 @@ namespace System.Net.Http
         }
 
         // rfc2817
-        public async void UpgradeToTls(HttpConnectionSettings settings, string host, HttpConnectionPool pool, CancellationToken cancellationToken)
+        public async Task UpgradeToTls(HttpConnectionSettings settings, string host, HttpConnectionPool pool, CancellationToken cancellationToken)
         {
             SslStream sslStream = await ConnectHelper.EstablishSslConnectionAsync(settings, host, null, _stream, cancellationToken);
             _stream = sslStream;
+            _currentRequest = null;
+            _usingProxy = false;
 
             if (NetEventSource.IsEnabled)
             {
