@@ -303,7 +303,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7 && !PlatformDetection.IsFedora27; // TODO: remove IsFedora27 when #26803 is fixed
+        private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7;
         // TLS 1.2 may not be enabled on Win7
         // https://technet.microsoft.com/en-us/library/dn786418.aspx#BKMK_SchannelTR_TLS12
     }
