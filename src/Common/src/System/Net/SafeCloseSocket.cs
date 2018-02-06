@@ -170,6 +170,12 @@ namespace System.Net.Sockets
                 Dispose();
                 if (innerSocket != null)
                 {
+
+                    if (AsyncContext == null && !IsNonBlocking && !_underlyingHandleNonBlocking && !innerSocket.IsClosed && !innerSocket.IsInvalid)
+                    {
+                        Interop.Sys.Shutdown(innerSocket, SocketShutdown.Receive);
+                    }
+
                     // Wait until it's safe.
                     SpinWait sw = new SpinWait();
                     while (!_released)
