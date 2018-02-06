@@ -9,7 +9,6 @@ namespace System.Net.Http
         private static IWebProxy ConstructSystemProxy()
         {
             return HttpSystemProxy.TryToCreate();
-            //return HttpEnvironmentProxy.TryToCreate();
         }
     }
 }
