@@ -13,7 +13,7 @@ namespace System.Net
 {
     internal static partial class NameResolutionPal
     {
-        public static bool SupportsGetAddrInfoAsync => false;
+        public const bool SupportsGetAddrInfoAsync = false;
 
         private static SocketError GetSocketErrorForErrno(int errno)
         {

@@ -46,6 +46,9 @@
     <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
       <Link>Common\System\Net\IPEndPointStatics.cs</Link>
     </Compile>
+	<Compile Include="$(CommonPath)\System\Net\ByteOrder.cs">
+      <Link>Common\System\Net\ByteOrder.cs</Link>
+    </Compile>
     <Compile Include="System\Net\DnsResolveAsyncResult.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
@@ -72,6 +75,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\SocketProtocolSupportPal.Windows.cs">
       <Link>Common\System\Net\SocketProtocolSupportPal.Windows</Link>
+    </Compile>
+	<Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
+      <Link>Common\System\Net\SocketAddressPal.Windows</Link>
     </Compile>
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">

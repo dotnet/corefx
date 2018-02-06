@@ -41,17 +41,22 @@ namespace System.Net
             return InternalGetHostByName(hostName, false);
         }
 
-        private static IPHostEntry InternalGetHostByName(string hostName, bool includeIPv6)
+        private static void ValidateHostName(string hostName)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostName);
-            IPHostEntry ipHostEntry = null;
-
             if (hostName.Length > MaxHostName // If 255 chars, the last one must be a dot.
                 || hostName.Length == MaxHostName && hostName[MaxHostName - 1] != '.')
             {
                 throw new ArgumentOutOfRangeException(nameof(hostName), SR.Format(SR.net_toolong,
                     nameof(hostName), MaxHostName.ToString(NumberFormatInfo.CurrentInfo)));
             }
+        }
+
+        private static IPHostEntry InternalGetHostByName(string hostName, bool includeIPv6)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostName);
+            IPHostEntry ipHostEntry = null;
+
+            ValidateHostName(hostName);
 
             //
             // IPv6 Changes: IPv6 requires the use of getaddrinfo() rather
@@ -258,13 +263,13 @@ namespace System.Net
             IPHostEntry hostEntry;
             try
             {
-                if (result.address != null)
+                if (result.IpAddress != null)
                 {
-                    hostEntry = InternalGetHostByAddress(result.address, result.includeIPv6);
+                    hostEntry = InternalGetHostByAddress(result.IpAddress, result.IncludeIPv6);
                 }
                 else
                 {
-                    hostEntry = InternalGetHostByName(result.hostName, result.includeIPv6);
+                    hostEntry = InternalGetHostByName(result.HostName, result.IncludeIPv6);
                 }
             }
             catch (OutOfMemoryException)
@@ -292,20 +297,20 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, hostName);
 
             // See if it's an IP Address.
-            IPAddress address;
+            IPAddress ipAddress;
             DnsResolveAsyncResult asyncResult;
-            if (IPAddress.TryParse(hostName, out address))
+            if (IPAddress.TryParse(hostName, out ipAddress))
             {
-                if (throwOnIIPAny && (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)))
+                if (throwOnIIPAny && (ipAddress.Equals(IPAddress.Any) || ipAddress.Equals(IPAddress.IPv6Any)))
                 {
                     throw new ArgumentException(SR.net_invalid_ip_addr, nameof(hostName));
                 }
 
-                asyncResult = new DnsResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
+                asyncResult = new DnsResolveAsyncResult(ipAddress, null, includeIPv6, state, requestCallback);
 
                 if (justReturnParsedIp)
                 {
-                    IPHostEntry hostEntry = NameResolutionUtilities.GetUnresolvedAnswer(address);
+                    IPHostEntry hostEntry = NameResolutionUtilities.GetUnresolvedAnswer(ipAddress);
                     asyncResult.StartPostingAsyncOp(false);
                     asyncResult.InvokeCallback(hostEntry);
                     asyncResult.FinishPostingAsyncOp();
@@ -320,8 +325,15 @@ namespace System.Net
             // Set up the context, possibly flow.
             asyncResult.StartPostingAsyncOp(false);
 
-            if (NameResolutionPal.SupportsGetAddrInfoAsync && includeIPv6 && SocketProtocolSupportPal.OSSupportsIPv6 && address == null)
+            // GetHostByName is used instead of GetAddrInfo if ipv6 is not supported.
+            // See the comment in InternalGetHostByName for further explanation.
+            bool useGetHostByName = includeIPv6 || SocketProtocolSupportPal.OSSupportsIPv6;
+
+            // If the OS supports it and 'hostName' is not an IP Address, resolve the name asynchronously
+            // instead of calling the synchronous version in the ThreadPool.
+            if (NameResolutionPal.SupportsGetAddrInfoAsync && ipAddress == null && !useGetHostByName)
             {
+                ValidateHostName(hostName);
                 NameResolutionPal.GetAddrInfoAsync(hostName, asyncResult);
             }
             else
@@ -595,7 +607,7 @@ namespace System.Net
             }
             catch (SocketException ex)
             {
-                IPAddress address = ((DnsResolveAsyncResult)asyncResult).address;
+                IPAddress address = ((DnsResolveAsyncResult)asyncResult).IpAddress;
                 if (address == null)
                     throw; // BeginResolve was called with a HostName, not an IPAddress
 
