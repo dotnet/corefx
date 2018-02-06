@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 #endif
 using System;
@@ -136,7 +137,7 @@ namespace BasicEventSourceTests
             {
                 if (i != 0)
                     sb.Append(',');
-                sb.Append(PayloadString(i, null));
+                sb.Append(PayloadString(i, PayloadNames[i]));
             }
             sb.Append(')');
             return sb.ToString();
@@ -225,7 +226,6 @@ namespace BasicEventSourceTests
                     Debug.WriteLine("Processing data file " + Path.GetFullPath(_dataFileName));
 
                     // Parse all the events as best we can, and also send unhandled events there as well.  
-                    traceEventSource.Registered.All += OnEventHelper;
                     traceEventSource.Dynamic.All += OnEventHelper;
                     traceEventSource.UnhandledEvents += OnEventHelper;
                     // Process all the events in the file.  
