@@ -148,7 +148,6 @@ namespace System.IO.Tests
         public static void GetDirectoryName_Unix(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
         }
 
         [Fact]
@@ -248,9 +247,9 @@ namespace System.IO.Tests
         public static void GetFileName_Unix(string file)
         {
             Assert.Equal(file, Path.GetFileName(file));
-            Assert.Equal(file, new string(Path.GetFileName(file).AsReadOnlySpan()));
         }
 
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Fact]
         public static void GetFileNameWithSpaces_Unix()
         {
