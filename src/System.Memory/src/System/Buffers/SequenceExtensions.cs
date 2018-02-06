@@ -5,41 +5,40 @@
 namespace System.Buffers
 {
     /// <summary>
-    /// Extension methods for <see cref="ReadOnlyBuffer{T}"/>
+    /// Extension methods for <see cref="ReadOnlySequence{T}"/>
     /// </summary>
     public static class BuffersExtensions
     {
         /// <summary>
-        /// Returns position of first occurrence of item in the <see cref="ReadOnlyBuffer{T}"/>
+        /// Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}"/>
         /// </summary>
-        public static SequencePosition? PositionOf<T>(this ReadOnlyBuffer<T> buffer, T value) where T : IEquatable<T>
+        public static SequencePosition? PositionOf<T>(this ReadOnlySequence<T> sequence, T value) where T : IEquatable<T>
         {
-            SequencePosition position = buffer.Start;
+            SequencePosition position = sequence.Start;
             SequencePosition result = position;
-            while (buffer.TryGet(ref position, out var memory))
+            while (sequence.TryGet(ref position, out var memory))
             {
                 var index = memory.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return buffer.GetPosition(result, index);
+                    return sequence.GetPosition(result, index);
                 }
                 result = position;
             }
             return null;
         }
 
-
         /// <summary>
-        /// Copy the <see cref="ReadOnlyBuffer{T}"/> to the specified <see cref="Span{Byte}"/>.
+        /// Copy the <see cref="ReadOnlySequence{T}"/> to the specified <see cref="Span{Byte}"/>.
         /// </summary>
-        /// <param name="buffer">The source <see cref="ReadOnlyBuffer{T}"/>.</param>
+        /// <param name="sequence">The source <see cref="ReadOnlySequence{T}"/>.</param>
         /// <param name="destination">The destination <see cref="Span{Byte}"/>.</param>
-        public static void CopyTo<T>(this ReadOnlyBuffer<T> buffer, Span<T> destination)
+        public static void CopyTo<T>(this ReadOnlySequence<T> sequence, Span<T> destination)
         {
-            if (buffer.Length > destination.Length)
+            if (sequence.Length > destination.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
 
-            foreach (var segment in buffer)
+            foreach (var segment in sequence)
             {
                 segment.Span.CopyTo(destination);
                 destination = destination.Slice(segment.Length);
@@ -47,12 +46,12 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Converts the <see cref="ReadOnlyBuffer{T}"/> to an array
+        /// Converts the <see cref="ReadOnlySequence{T}"/> to an array
         /// </summary>
-        public static T[] ToArray<T>(this ReadOnlyBuffer<T> buffer)
+        public static T[] ToArray<T>(this ReadOnlySequence<T> sequence)
         {
-            var array = new T[buffer.Length];
-            buffer.CopyTo(array);
+            var array = new T[sequence.Length];
+            sequence.CopyTo(array);
             return array;
         }
     }

@@ -268,43 +268,43 @@ namespace System.Buffers
     }
     public static partial class BuffersExtensions
     {
-        public static void CopyTo<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, System.Span<T> destination) { }
-        public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, T value) where T : System.IEquatable<T> { throw null; }
-        public static T[] ToArray<T>(this System.Buffers.ReadOnlyBuffer<T> buffer) { throw null; }
+        public static void CopyTo<T>(this System.Buffers.ReadOnlySequence<T> sequence, System.Span<T> destination) { }
+        public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
+        public static T[] ToArray<T>(this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
     }
-    public readonly partial struct ReadOnlyBuffer<T>
+    public readonly partial struct ReadOnlySequence<T>
     {
         private readonly object _dummy;
-        public static readonly System.Buffers.ReadOnlyBuffer<T> Empty;
-        public ReadOnlyBuffer(System.Buffers.IMemoryList<T> startSegment, int startIndex, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
-        public ReadOnlyBuffer(T[] array) { throw null; }
-        public ReadOnlyBuffer(T[] array, int start, int length) { throw null; }
-        public ReadOnlyBuffer(System.ReadOnlyMemory<T> memory) { throw null; }
-        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory) { throw null; }
-        public ReadOnlyBuffer(System.Buffers.OwnedMemory<T> memory, int start, int length) { throw null; }
+        public static readonly System.Buffers.ReadOnlySequence<T> Empty;
+        public ReadOnlySequence(System.Buffers.IMemoryList<T> startSegment, int startIndex, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
+        public ReadOnlySequence(T[] array) { throw null; }
+        public ReadOnlySequence(T[] array, int start, int length) { throw null; }
+        public ReadOnlySequence(System.ReadOnlyMemory<T> memory) { throw null; }
+        public ReadOnlySequence(System.Buffers.OwnedMemory<T> memory) { throw null; }
+        public ReadOnlySequence(System.Buffers.OwnedMemory<T> memory, int start, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public bool IsSingleSegment { get { throw null; } }
         public long Length { get { throw null; } }
         public System.SequencePosition Start { get { throw null; } }
-        public System.Buffers.ReadOnlyBuffer<T>.Enumerator GetEnumerator() { throw null; }
+        public System.Buffers.ReadOnlySequence<T>.Enumerator GetEnumerator() { throw null; }
         public System.SequencePosition GetPosition(System.SequencePosition origin, long offset) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(int start, int length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(int start, System.SequencePosition end) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long start) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long start, long length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(long start, System.SequencePosition end) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, int length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, long length) { throw null; }
-        public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, System.SequencePosition end) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(int start, int length) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(int start, System.SequencePosition end) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(long start) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(long start, long length) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(long start, System.SequencePosition end) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start, int length) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start, long length) { throw null; }
+        public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start, System.SequencePosition end) { throw null; }
         public override string ToString() { throw null; }
         public bool TryGet(ref System.SequencePosition position, out System.ReadOnlyMemory<T> data, bool advance = true) { throw null; }
         public partial struct Enumerator
         {
             private object _dummy;
-            public Enumerator(System.Buffers.ReadOnlyBuffer<T> readOnlyBuffer) { throw null; }
+            public Enumerator(System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
             public System.ReadOnlyMemory<T> Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }

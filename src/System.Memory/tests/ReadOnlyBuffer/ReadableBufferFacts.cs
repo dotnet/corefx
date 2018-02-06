@@ -46,7 +46,7 @@ namespace System.Memory.Tests
         [Fact]
         public void EmptyIsCorrect()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(0);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(0);
             Assert.Equal(0, buffer.Length);
             Assert.True(buffer.IsEmpty);
         }
@@ -56,7 +56,7 @@ namespace System.Memory.Tests
         [InlineData(8)]
         public void LengthIsCorrect(int length)
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(length);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(length);
             Assert.Equal(length, buffer.Length);
         }
 
@@ -66,7 +66,7 @@ namespace System.Memory.Tests
         public void ToArrayIsCorrect(int length)
         {
             byte[] data = Enumerable.Range(0, length).Select(i => (byte)i).ToArray();
-            ReadOnlyBuffer<byte> buffer = Factory.CreateWithContent(data);
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(data);
             Assert.Equal(length, buffer.Length);
             Assert.Equal(data, buffer.ToArray());
         }
@@ -74,31 +74,31 @@ namespace System.Memory.Tests
         [Fact]
         public void ToStringIsCorrect()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateWithContent(Enumerable.Range(0, 255).Select(i => (byte)i).ToArray());
-            Assert.Equal("System.Buffers.ReadOnlyBuffer<Byte>[255]", buffer.ToString());
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(Enumerable.Range(0, 255).Select(i => (byte)i).ToArray());
+            Assert.Equal("System.Buffers.ReadOnlySequence<Byte>[255]", buffer.ToString());
         }
 
         [Theory]
         [MemberData(nameof(ValidSliceCases))]
-        public void Slice_Works(Func<ReadOnlyBuffer<byte>, ReadOnlyBuffer<byte>> func)
+        public void Slice_Works(Func<ReadOnlySequence<byte>, ReadOnlySequence<byte>> func)
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateWithContent(new byte[] { 0, 1, 2 ,3 ,4, 5, 6, 7, 8, 9 });
-            ReadOnlyBuffer<byte> slice = func(buffer);
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(new byte[] { 0, 1, 2 ,3 ,4, 5, 6, 7, 8, 9 });
+            ReadOnlySequence<byte> slice = func(buffer);
             Assert.Equal(new byte[] { 5, 6, 7, 8, 9 }, slice.ToArray());
         }
 
         [Theory]
         [MemberData(nameof(OutOfRangeSliceCases))]
-        public void ReadOnlyBufferDoesNotAllowSlicingOutOfRange(Action<ReadOnlyBuffer<byte>> fail)
+        public void ReadOnlyBufferDoesNotAllowSlicingOutOfRange(Action<ReadOnlySequence<byte>> fail)
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(100);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
             Assert.Throws<ArgumentOutOfRangeException>(() => fail(buffer));
         }
 
         [Fact]
         public void ReadOnlyBufferGetPosition_MovesPosition()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(100);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
             SequencePosition position = buffer.GetPosition(buffer.Start, 65);
             Assert.Equal(buffer.Slice(position).Length, 35);
         }
@@ -106,20 +106,20 @@ namespace System.Memory.Tests
         [Fact]
         public void ReadOnlyBufferGetPosition_ChecksBounds()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(100);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetPosition(buffer.Start, 101));
         }
 
         [Fact]
         public void ReadOnlyBufferGetPosition_DoesNotAlowNegative()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(20);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(20);
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetPosition(buffer.Start, -1));
         }
 
         public void ReadOnlyBufferSlice_ChecksEnd()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(100);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Slice(70, buffer.Start));
         }
 
@@ -132,12 +132,12 @@ namespace System.Memory.Tests
             var bufferSegment1 = new BufferSegment(new byte[49]);
             BufferSegment bufferSegment2 = bufferSegment1.Append(new byte[50]);
 
-            var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
             SequencePosition c1 = buffer.GetPosition(buffer.Start, 25); // segment 1 index 75
             SequencePosition c2 = buffer.GetPosition(buffer.Start, 55); // segment 2 index 5
 
-            ReadOnlyBuffer<byte> sliced = buffer.Slice(c1, c2);
+            ReadOnlySequence<byte> sliced = buffer.Slice(c1, c2);
             Assert.Equal(30, sliced.Length);
         }
 
@@ -147,7 +147,7 @@ namespace System.Memory.Tests
             BufferSegment bufferSegment1 = new BufferSegment(new byte[50]);
             BufferSegment bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
-            ReadOnlyBuffer<byte> buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
             SequencePosition c1 = buffer.GetPosition(buffer.Start, 50);
 
@@ -162,7 +162,7 @@ namespace System.Memory.Tests
             BufferSegment bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment bufferSegment3 = bufferSegment2.Append(new byte[0]);
 
-            var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 100);
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 100);
 
             SequencePosition c1 = buffer.GetPosition(buffer.Start, 200);
 
@@ -173,14 +173,14 @@ namespace System.Memory.Tests
         [Fact]
         public void Create_WorksWithArray()
         {
-            var buffer = new ReadOnlyBuffer<byte>(new byte[] { 1, 2, 3, 4, 5 });
+            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 });
             Assert.Equal(buffer.ToArray(), new byte[] {  1, 2, 3, 4, 5 });
         }
 
         [Fact]
         public void Empty_ReturnsLengthZeroBuffer()
         {
-            var buffer = ReadOnlyBuffer<byte>.Empty;
+            var buffer = ReadOnlySequence<byte>.Empty;
             Assert.Equal(0, buffer.Length);
             Assert.Equal(true, buffer.IsSingleSegment);
             Assert.Equal(0, buffer.First.Length);
@@ -189,14 +189,14 @@ namespace System.Memory.Tests
         [Fact]
         public void Create_WorksWithArrayWithOffset()
         {
-            var buffer = new ReadOnlyBuffer<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
+            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
             Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
         }
 
         [Fact]
         public void C_WorksWithArrayWithOffset()
         {
-            var buffer = new ReadOnlyBuffer<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
+            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
             Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
         }
 
@@ -205,14 +205,14 @@ namespace System.Memory.Tests
         public void Create_WorksWithMemory()
         {
             var memory = new ReadOnlyMemory<byte>(new byte[] { 1, 2, 3, 4, 5 });
-            var buffer = new ReadOnlyBuffer<byte>(memory.Slice(2, 3));
+            var buffer = new ReadOnlySequence<byte>(memory.Slice(2, 3));
             Assert.Equal(new byte[] { 3, 4, 5 }, buffer.ToArray());
         }
 
         [Fact]
         public void SliceToTheEndWorks()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(10);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(10);
             Assert.True(buffer.Slice(buffer.End).IsEmpty);
         }
 
@@ -232,7 +232,7 @@ namespace System.Memory.Tests
         [InlineData("/localhost:5000/PATH/PATH2/ HTTP/1.1", ' ', 27)]
         public void PositionOf_ReturnsPosition(string raw, char searchFor, int expectIndex)
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateWithContent(raw);
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(raw);
             SequencePosition? result = buffer.PositionOf((byte)searchFor);
 
             Assert.NotNull(result);
@@ -242,7 +242,7 @@ namespace System.Memory.Tests
         [Fact]
         public void PositionOf_ReturnsNullIfNotFound()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateWithContent(new byte[] { 1, 2, 3 });
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(new byte[] { 1, 2, 3 });
             SequencePosition? result = buffer.PositionOf((byte)4);
 
             Assert.Null(result);
@@ -251,7 +251,7 @@ namespace System.Memory.Tests
         [Fact]
         public void CopyTo_ThrowsWhenSourceLargerThenDestination()
         {
-            ReadOnlyBuffer<byte> buffer = Factory.CreateOfSize(10);
+            ReadOnlySequence<byte> buffer = Factory.CreateOfSize(10);
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
@@ -260,7 +260,7 @@ namespace System.Memory.Tests
             });
         }
 
-        public static TheoryData<Func<ReadOnlyBuffer<byte>, ReadOnlyBuffer<byte>>> ValidSliceCases => new TheoryData<Func<ReadOnlyBuffer<byte>, ReadOnlyBuffer<byte>>>
+        public static TheoryData<Func<ReadOnlySequence<byte>, ReadOnlySequence<byte>>> ValidSliceCases => new TheoryData<Func<ReadOnlySequence<byte>, ReadOnlySequence<byte>>>
         {
             b => b.Slice(5),
             b => b.Slice(0).Slice(5),
@@ -275,7 +275,7 @@ namespace System.Memory.Tests
             b => b.Slice((long)5, b.GetPosition(b.Start, 10)),
         };
 
-        public static TheoryData<Action<ReadOnlyBuffer<byte>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlyBuffer<byte>>>
+        public static TheoryData<Action<ReadOnlySequence<byte>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<byte>>>
         {
             b => b.Slice(101),
             b => b.Slice(0, 101),

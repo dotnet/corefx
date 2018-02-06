@@ -17,67 +17,67 @@ namespace System.Memory.Tests
         public static ReadOnlyBufferFactory SingleSegmentFactory { get; } = new SingleSegmentTestBufferFactory();
         public static ReadOnlyBufferFactory SegmentPerByteFactory { get; } = new BytePerSegmentTestBufferFactory();
 
-        public abstract ReadOnlyBuffer<byte> CreateOfSize(int size);
-        public abstract ReadOnlyBuffer<byte> CreateWithContent(byte[] data);
+        public abstract ReadOnlySequence<byte> CreateOfSize(int size);
+        public abstract ReadOnlySequence<byte> CreateWithContent(byte[] data);
 
-        public ReadOnlyBuffer<byte> CreateWithContent(string data)
+        public ReadOnlySequence<byte> CreateWithContent(string data)
         {
             return CreateWithContent(Encoding.ASCII.GetBytes(data));
         }
 
         internal class ArrayTestBufferFactory : ReadOnlyBufferFactory
         {
-            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
-                return new ReadOnlyBuffer<byte>(new byte[size + 20], 10, size);
+                return new ReadOnlySequence<byte>(new byte[size + 20], 10, size);
             }
 
-            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            public override ReadOnlySequence<byte> CreateWithContent(byte[] data)
             {
                 var startSegment = new byte[data.Length + 20];
                 Array.Copy(data, 0, startSegment, 10, data.Length);
-                return new ReadOnlyBuffer<byte>(startSegment, 10, data.Length);
+                return new ReadOnlySequence<byte>(startSegment, 10, data.Length);
             }
         }
 
         internal class MemoryTestBufferFactory : ReadOnlyBufferFactory
         {
-            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
                 return CreateWithContent(new byte[size]);
             }
 
-            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            public override ReadOnlySequence<byte> CreateWithContent(byte[] data)
             {
                 var startSegment = new byte[data.Length + 20];
                 Array.Copy(data, 0, startSegment, 10, data.Length);
-                return new ReadOnlyBuffer<byte>(new Memory<byte>(startSegment, 10, data.Length));
+                return new ReadOnlySequence<byte>(new Memory<byte>(startSegment, 10, data.Length));
             }
         }
 
         internal class OwnedMemoryTestBufferFactory : ReadOnlyBufferFactory
         {
-            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
                 return CreateWithContent(new byte[size]);
             }
 
-            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            public override ReadOnlySequence<byte> CreateWithContent(byte[] data)
             {
                 var startSegment = new byte[data.Length + 20];
                 Array.Copy(data, 0, startSegment, 10, data.Length);
-                return new ReadOnlyBuffer<byte>(new CustomMemoryForTest<byte>(startSegment, 10, data.Length));
+                return new ReadOnlySequence<byte>(new CustomMemoryForTest<byte>(startSegment, 10, data.Length));
             }
         }
 
         internal class SingleSegmentTestBufferFactory : ReadOnlyBufferFactory
         {
-            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
                 return CreateWithContent(new byte[size]);
             }
 
-            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            public override ReadOnlySequence<byte> CreateWithContent(byte[] data)
             {
                 return CreateSegments(data);
             }
@@ -85,12 +85,12 @@ namespace System.Memory.Tests
 
         internal class BytePerSegmentTestBufferFactory : ReadOnlyBufferFactory
         {
-            public override ReadOnlyBuffer<byte> CreateOfSize(int size)
+            public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
                 return CreateWithContent(new byte[size]);
             }
 
-            public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
+            public override ReadOnlySequence<byte> CreateWithContent(byte[] data)
             {
                 var segments = new List<byte[]>();
 
@@ -105,7 +105,7 @@ namespace System.Memory.Tests
             }
         }
 
-        public static ReadOnlyBuffer<byte> CreateSegments(params byte[][] inputs)
+        public static ReadOnlySequence<byte> CreateSegments(params byte[][] inputs)
         {
             if (inputs == null || inputs.Length == 0)
             {
@@ -144,7 +144,7 @@ namespace System.Memory.Tests
                 i++;
             } while (i < inputs.Length);
 
-            return new ReadOnlyBuffer<byte>(first, 0, last, last.Memory.Length);
+            return new ReadOnlySequence<byte>(first, 0, last, last.Memory.Length);
         }
     }
 }
