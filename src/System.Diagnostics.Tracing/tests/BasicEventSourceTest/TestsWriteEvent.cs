@@ -221,7 +221,8 @@ namespace BasicEventSourceTests
 
                         Assert.Equal("128", evt.PayloadValue(0, "iptr").ToString());
                         Assert.Equal(true, (bool)evt.PayloadValue(1, "b"));
-                        Assert.Equal((long)SdtEventSources.MyLongEnum.LongVal1, (long)evt.PayloadValue(2, "le"));
+                        // The value must be cast to a ulong first because enums in ETW are unsigned.
+                        Assert.Equal((long)SdtEventSources.MyLongEnum.LongVal1, (long)(ulong)evt.PayloadValue(2, "le"));
                     }));
 #endif // USE_ETW
                 /*************************************************************************/
@@ -239,7 +240,8 @@ namespace BasicEventSourceTests
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("EventEnum", evt.EventName);
 
-                        Assert.Equal(1, (int)evt.PayloadValue(0, "x"));
+                        // The value must be cast to a ulong first because enums in ETW are unsigned.
+                        Assert.Equal(1, (int)(uint)evt.PayloadValue(0, "x"));
                         if (evt.IsEtw && !useSelfDescribingEvents)
                             Assert.Equal("Blue", evt.PayloadString(0, "x"));
                     }));
@@ -254,7 +256,8 @@ namespace BasicEventSourceTests
                        Assert.Equal(logger.Name, evt.ProviderName);
                        Assert.Equal("EventEnum1", evt.EventName);
 
-                       Assert.Equal(1, (int)evt.PayloadValue(0, "x"));
+                       // The value must be cast to a ulong first because enums in ETW are unsigned.
+                       Assert.Equal(1, (int)(uint)evt.PayloadValue(0, "x"));
                        if (evt.IsEtw && !useSelfDescribingEvents)
                            Assert.Equal("Blue", evt.PayloadString(0, "x"));
                    }));
