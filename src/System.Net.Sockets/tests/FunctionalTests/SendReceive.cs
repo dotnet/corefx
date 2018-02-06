@@ -385,6 +385,45 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(Loopbacks))]
+        public void SendRecv_BlockingStreamRead_Close(IPAddress listenAt)
+        {
+            // Test for #22564 when close is called while blocking read is pending.
+            using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            {
+                server.BindToAnonymousPort(listenAt);
+                server.Listen(1);
+
+                Thread clientThread = new Thread(() =>
+                {
+                    byte[] buffer = new byte[16];
+                    client.Connect(server.LocalEndPoint);
+                    // Blocking read.
+                    try
+                    {
+                        client.Receive(buffer);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Closed and disposed by parent thread.
+                        return;
+                    }
+                    catch (SocketException) { };
+
+                    client.Close();
+                });
+                clientThread.IsBackground = true;
+                clientThread.Start();
+                Socket s = server.Accept();
+                // Close client socket from parent thread.
+                client.Close();
+                clientThread.Join();
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(LoopbacksAndBuffers))]

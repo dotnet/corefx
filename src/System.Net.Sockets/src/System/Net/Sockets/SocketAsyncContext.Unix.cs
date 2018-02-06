@@ -1183,6 +1183,10 @@ namespace System.Net.Sockets
             }
         }
 
+        public bool GetNonBlocking() {
+            return _nonBlockingSet;
+        }
+
         private void PerformSyncOperation<TOperation>(ref OperationQueue<TOperation> queue, TOperation operation, int timeout, int observedSequenceNumber)
             where TOperation : AsyncOperation
         {

@@ -208,6 +208,14 @@ namespace System.Net.Sockets
             }
         }
 
+        private void TryWakeup(InnerSafeCloseSocket innerSocket)
+        {
+            if ((AsyncContext == null || !AsyncContext.GetNonBlocking()) && innerSocket != null && !_underlyingHandleNonBlocking && !innerSocket.IsClosed && !innerSocket.IsInvalid)
+            {
+                Interop.Sys.Shutdown(innerSocket, SocketShutdown.Receive);
+            }
+        }
+
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
         {
             private unsafe SocketError InnerReleaseHandle()
