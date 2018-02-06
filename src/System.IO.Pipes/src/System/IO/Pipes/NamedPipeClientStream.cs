@@ -95,7 +95,7 @@ namespace System.IO.Pipes
 
             Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
 
-            _normalizedPipePath = GetPipePath(serverName, pipeName);
+            _normalizedPipePath = GetPipePath(serverName, pipeName, IsCurrentUserOnly);
             _direction = direction;
             _inheritability = inheritability;
             _impersonationLevel = impersonationLevel;
