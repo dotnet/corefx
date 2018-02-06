@@ -1025,6 +1025,7 @@ namespace MonoTests.System.Runtime.Caching
         }
 
         [Fact]
+        [OuterLoop] // makes long wait
         public void TestCacheSliding()
         {
             var config = new NameValueCollection();
