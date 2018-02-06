@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace System.IO.Pipes
 {
@@ -112,8 +113,18 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
             }
 
+            if ((options & PipeOptions.CurrentUserOnly) != 0)
+            {
+                IsCurrentUserOnly = true;
+
+                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
+                options &= ~PipeOptions.CurrentUserOnly;
+            }
+
+            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
+
             Create(pipeName, direction, maxNumberOfServerInstances, transmissionMode,
-                options, inBufferSize, outBufferSize, inheritability);
+            options, inBufferSize, outBufferSize, inheritability);
         }
 
         // Create a NamedPipeServerStream from an existing server pipe handle.

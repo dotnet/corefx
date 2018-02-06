@@ -96,7 +96,7 @@ namespace System.IO.Pipes
         private bool ValidateRemotePipeUser(SafePipeHandle handle, out Exception exception)
         {
             exception = null;
-            if (!_isCurrentUserOnly)
+            if (!IsCurrentUserOnly)
                 return true;
 
             uint userId = Interop.Sys.GetEUid();
