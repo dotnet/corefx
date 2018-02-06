@@ -244,11 +244,17 @@ namespace BasicEventSourceTests
     #region private
         private void OnEventHelper(TraceEvent data)
         {
+            // Ignore EventTrace events.
+            if (data.ProviderGuid == EventTraceProviderID)
+                return;
+
             // Ignore manifest events. 
             if ((int)data.ID == 0xFFFE)
                 return;
             this.OnEvent(new EtwEvent(data));
         }
+
+        private static readonly Guid EventTraceProviderID = new Guid("9e814aad-3204-11d2-9a82-006008a86939");
 
         /// <summary>
         /// EtwEvent implements the 'Event' abstraction for ETW events (it has a TraceEvent in it) 
