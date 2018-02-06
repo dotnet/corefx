@@ -6,7 +6,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
  <PropertyGroup>
-    <!-- Temporary property to diagnose flaky crashing tests in Unix -->
+    <!-- Temporary property to diagnose hanging test -->
     <XunitShowProgress>true</XunitShowProgress>
     <XunitMaxThreads>1</XunitMaxThreads>
   </PropertyGroup>  
