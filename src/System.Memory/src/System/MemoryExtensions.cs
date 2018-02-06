@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -165,6 +166,34 @@ namespace System
                     return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparison"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the end of the source span.</param>
+        /// <param name="comparison">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparison)
+        {
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+
+            return sourceString.EndsWith(valueString, comparison);
+        }
+
+        /// <summary>
+        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparison"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the beginning of the source span.</param>
+        /// <param name="comparison">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparison)
+        {
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+
+            return sourceString.StartsWith(valueString, comparison);
         }
 
         /// <summary>
