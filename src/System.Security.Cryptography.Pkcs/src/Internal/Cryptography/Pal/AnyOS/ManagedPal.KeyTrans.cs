@@ -85,6 +85,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                             return null;
                         }
 
+#if netcoreapp
                         cek = ArrayPool<byte>.Shared.Rent(rsa.KeySize / 8);
 
                         if (!rsa.TryDecrypt(_asn.EncryptedKey.Span, cek, encryptionPadding, out cekLength))
@@ -96,6 +97,10 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                         exception = null;
                         return new Span<byte>(cek, 0, cekLength).ToArray();
+#else
+                        exception = null;
+                        return rsa.Decrypt(_asn.EncryptedKey.Span.ToArray(), encryptionPadding);
+#endif
                     }
                 }
                 catch (CryptographicException e)

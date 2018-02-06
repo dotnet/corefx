@@ -449,7 +449,7 @@ namespace Internal.Cryptography
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                using (var cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Write, leaveOpen: true))
+                using (var cryptoStream = new CryptoStream(memoryStream, transform, CryptoStreamMode.Write))
                 {
                     cryptoStream.Write(data, offset, length);
                 }
