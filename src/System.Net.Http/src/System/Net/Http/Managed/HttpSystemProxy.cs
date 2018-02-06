@@ -14,14 +14,14 @@ namespace System.Net.Http
 {
     internal sealed class HttpSystemProxy : IWebProxy
     {
-        private readonly Uri _proxyUri;     // String URI for HTTPS requests
-        string[] _bypass = null;            // list of domains not to proxy
-        bool _bypassLocal = false;          // we should bypass domain considered local
+        private readonly Uri _proxyUri;         // String URI for HTTPS requests
+        private string[] _bypass = null;        // list of domains not to proxy
+        private bool _bypassLocal = false;      // we should bypass domain considered local
         private ICredentials _credentials=null;
         private readonly WinInetProxyHelper _proxyHelper = null;
         private readonly SafeWinHttpHandle _sessionHandle;
 
-        public static HttpSystemProxy TryToCreate()
+        public static HttpSystemProxy TryCreate()
         {
             // This will get basic proxy setting from system using existing
             // WinInetProxyHelper functions. If no proxy is enabled, it will return null.
@@ -102,15 +102,12 @@ namespace System.Net.Http
                 value = "http://" + value;
             }
 
-            try
+            if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri) &&
+                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
             {
-                Uri uri = new Uri(value);
-                if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme != Uri.UriSchemeHttps)
-                {
-                    return uri;
-                }
+                // We only support http and https for now.
+                return uri;
             }
-            catch { };
             return null;
         }
 

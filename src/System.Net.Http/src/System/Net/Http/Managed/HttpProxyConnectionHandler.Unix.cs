@@ -9,7 +9,7 @@ namespace System.Net.Http
         // On Unix we get default proxy configuration from environment variables
         private static IWebProxy ConstructSystemProxy()
         {
-            return HttpEnvironmentProxy.TryToCreate();
+            return HttpEnvironmentProxy.TryCreate();
         }
     }
 }
