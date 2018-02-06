@@ -239,9 +239,9 @@ namespace System.Net.Http
             }
         }
 
-        public TimeSpan ConnectionTimeout
+        public TimeSpan PooledConnectionLifetime
         {
-            get => _settings._connectionTimeout;
+            get => _settings._pooledConnectionLifetime;
             set
             {
                 if (value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan)
@@ -250,13 +250,13 @@ namespace System.Net.Http
                 }
 
                 CheckDisposedOrStarted();
-                _settings._connectionTimeout = value;
+                _settings._pooledConnectionLifetime = value;
             }
         }
 
-        public TimeSpan ConnectionIdleTimeout
+        public TimeSpan PooledConnectionIdleTimeout
         {
-            get => _settings._connectionIdleTimeout;
+            get => _settings._pooledConnectionIdleTimeout;
             set
             {
                 if (value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan)
@@ -265,7 +265,7 @@ namespace System.Net.Http
                 }
 
                 CheckDisposedOrStarted();
-                _settings._connectionIdleTimeout = value;
+                _settings._pooledConnectionIdleTimeout = value;
             }
         }
 

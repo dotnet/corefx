@@ -38,8 +38,8 @@ namespace System.Net.Http
         internal bool _checkCertificateRevocationList = HttpHandlerDefaults.DefaultCheckCertificateRevocationList;
         internal SslProtocols _sslProtocols = SslProtocols.None;
 
-        internal TimeSpan _connectionTimeout = HttpHandlerDefaults.DefaultConnectionTimeout;
-        internal TimeSpan _connectionIdleTimeout = HttpHandlerDefaults.DefaultConnectionIdleTimeout;
+        internal TimeSpan _pooledConnectionLifetime = HttpHandlerDefaults.DefaultPooledConnectionLifetime;
+        internal TimeSpan _pooledConnectionIdleTimeout = HttpHandlerDefaults.DefaultPooledConnectionIdleTimeout;
 
         internal IDictionary<string, object> _properties;
     }

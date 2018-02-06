@@ -22,9 +22,7 @@ namespace System.Net.Http
         public const bool DefaultUseProxy = true;
         public const bool DefaultUseDefaultCredentials = false;
         public const bool DefaultCheckCertificateRevocationList = false;
-        public static readonly TimeSpan DefaultConnectionTimeout = Timeout.InfiniteTimeSpan;
-        public static readonly TimeSpan DefaultConnectionIdleTimeout = TimeSpan.FromMinutes(2);
-
-        public static TimeSpan DefaultConnectTimeout => TimeSpan.FromSeconds(60);
+        public static readonly TimeSpan DefaultPooledConnectionLifetime = Timeout.InfiniteTimeSpan;
+        public static readonly TimeSpan DefaultPooledConnectionIdleTimeout = TimeSpan.FromMinutes(2);
     }
 }
