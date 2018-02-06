@@ -215,6 +215,12 @@ namespace BasicEventSourceTests
 
         public override void Dispose()
         {
+            if(_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
             _session.Flush();
             Thread.Sleep(1010);      // Let it drain.
             _session.Dispose();     // This also will kill the real time thread 
@@ -273,6 +279,7 @@ namespace BasicEventSourceTests
     #endregion
         }
 
+        private bool _disposed;
         private string _dataFileName;
         private volatile TraceEventSession _session;
     #endregion
@@ -334,6 +341,12 @@ namespace BasicEventSourceTests
 
         public override void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
             EventTestHarness.LogWriteLine("Disposing Listener");
             _listener.Dispose();
         }
@@ -438,5 +451,7 @@ namespace BasicEventSourceTests
                 return _data.Payload[propertyIndex];
             }
         }
+
+        private bool _disposed;
     }
 }
