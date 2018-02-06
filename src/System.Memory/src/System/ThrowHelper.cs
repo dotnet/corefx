@@ -145,6 +145,7 @@ namespace System
         endSegment,
         startIndex,
         endIndex,
+        array,
         ownedMemory
     }
 }
