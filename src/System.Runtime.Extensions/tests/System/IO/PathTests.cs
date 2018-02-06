@@ -136,15 +136,19 @@ namespace System.IO.Tests
         public static TheoryData<string, string> GetDirectoryName_Unix_Test_Data => new TheoryData<string, string>
         {
             { @"dir/baz", @"dir" },
-            { @"dir//baz", @"dir" },
             { @"dir\baz", @"" },
             { @"dir/baz/bar", @"dir/baz" },
             { @"../../files.txt", @"../.." },
             { @"/", null },
         };
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific paths
-        [Theory, MemberData(nameof(GetDirectoryName_Unix_Test_Data))]
+		public static TheoryData<string, string> GetDirectoryName_Unix_String_Test_Data => new TheoryData<string, string>
+		{
+			{ @"dir//baz", @"dir" },
+		};
+
+		[PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific paths
+        [Theory, MemberData(nameof(GetDirectoryName_Unix_Test_Data)), MemberData(nameof(GetDirectoryName_Unix_String_Test_Data))]
         public static void GetDirectoryName_Unix(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
