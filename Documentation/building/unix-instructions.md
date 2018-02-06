@@ -102,6 +102,9 @@ ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
 ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
 ```
 
+Alternatively, instead of butchering /usr/local/ like a savage. Invoke cmake with `OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/*/`.
+
+
 ### Known Issues
 If you see errors along the lines of `SendFailure (Error writing headers)` you may need to import trusted root certificates:
 
