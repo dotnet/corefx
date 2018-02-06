@@ -2,7 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
   <PropertyGroup>
-    <PreReleaseLabel>preview2</PreReleaseLabel>
     <PackageVersion>2.0.0</PackageVersion>
     <SkipValidatePackage>true</SkipValidatePackage>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
