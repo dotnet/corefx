@@ -70,9 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlyBufferFactory.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.Common.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.cs" />
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>

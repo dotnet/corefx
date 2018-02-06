@@ -9,36 +9,36 @@ using Xunit;
 
 namespace System.Memory.Tests
 {
-    public abstract class ReadOnlyBufferFacts
+    public abstract class ReadOnlySequenceTests
     {
-        public class Array : ReadOnlyBufferFacts
+        public class Array : ReadOnlySequenceTests
         {
-            public Array() : base(ReadOnlyBufferFactory.ArrayFactory) { }
+            public Array() : base(ReadOnlySequenceFactory.ArrayFactory) { }
         }
 
-        public class OwnedMemory : ReadOnlyBufferFacts
+        public class OwnedMemory : ReadOnlySequenceTests
         {
-            public OwnedMemory() : base(ReadOnlyBufferFactory.OwnedMemoryFactory) { }
+            public OwnedMemory() : base(ReadOnlySequenceFactory.OwnedMemoryFactory) { }
         }
 
-        public class Memory : ReadOnlyBufferFacts
+        public class Memory : ReadOnlySequenceTests
         {
-            public Memory() : base(ReadOnlyBufferFactory.MemoryFactory) { }
+            public Memory() : base(ReadOnlySequenceFactory.MemoryFactory) { }
         }
 
-        public class SingleSegment : ReadOnlyBufferFacts
+        public class SingleSegment : ReadOnlySequenceTests
         {
-            public SingleSegment() : base(ReadOnlyBufferFactory.SingleSegmentFactory) { }
+            public SingleSegment() : base(ReadOnlySequenceFactory.SingleSegmentFactory) { }
         }
 
-        public class SegmentPerByte : ReadOnlyBufferFacts
+        public class SegmentPerByte : ReadOnlySequenceTests
         {
-            public SegmentPerByte() : base(ReadOnlyBufferFactory.SegmentPerByteFactory) { }
+            public SegmentPerByte() : base(ReadOnlySequenceFactory.SegmentPerByteFactory) { }
         }
 
-        internal ReadOnlyBufferFactory Factory { get; }
+        internal ReadOnlySequenceFactory Factory { get; }
 
-        internal ReadOnlyBufferFacts(ReadOnlyBufferFactory factory)
+        internal ReadOnlySequenceTests(ReadOnlySequenceFactory factory)
         {
             Factory = factory;
         }

@@ -9,13 +9,13 @@ using System.Text;
 
 namespace System.Memory.Tests
 {
-    public abstract class ReadOnlyBufferFactory
+    public abstract class ReadOnlySequenceFactory
     {
-        public static ReadOnlyBufferFactory ArrayFactory { get; } = new ArrayTestBufferFactory();
-        public static ReadOnlyBufferFactory MemoryFactory { get; } = new MemoryTestBufferFactory();
-        public static ReadOnlyBufferFactory OwnedMemoryFactory { get; } = new OwnedMemoryTestBufferFactory();
-        public static ReadOnlyBufferFactory SingleSegmentFactory { get; } = new SingleSegmentTestBufferFactory();
-        public static ReadOnlyBufferFactory SegmentPerByteFactory { get; } = new BytePerSegmentTestBufferFactory();
+        public static ReadOnlySequenceFactory ArrayFactory { get; } = new ArrayTestSequenceFactory();
+        public static ReadOnlySequenceFactory MemoryFactory { get; } = new MemoryTestSequenceFactory();
+        public static ReadOnlySequenceFactory OwnedMemoryFactory { get; } = new OwnedMemoryTestSequenceFactory();
+        public static ReadOnlySequenceFactory SingleSegmentFactory { get; } = new SingleSegmentTestSequenceFactory();
+        public static ReadOnlySequenceFactory SegmentPerByteFactory { get; } = new BytePerSegmentTestSequenceFactory();
 
         public abstract ReadOnlySequence<byte> CreateOfSize(int size);
         public abstract ReadOnlySequence<byte> CreateWithContent(byte[] data);
@@ -25,7 +25,7 @@ namespace System.Memory.Tests
             return CreateWithContent(Encoding.ASCII.GetBytes(data));
         }
 
-        internal class ArrayTestBufferFactory : ReadOnlyBufferFactory
+        internal class ArrayTestSequenceFactory : ReadOnlySequenceFactory
         {
             public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
@@ -40,7 +40,7 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class MemoryTestBufferFactory : ReadOnlyBufferFactory
+        internal class MemoryTestSequenceFactory : ReadOnlySequenceFactory
         {
             public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
@@ -55,7 +55,7 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class OwnedMemoryTestBufferFactory : ReadOnlyBufferFactory
+        internal class OwnedMemoryTestSequenceFactory : ReadOnlySequenceFactory
         {
             public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
@@ -70,7 +70,7 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class SingleSegmentTestBufferFactory : ReadOnlyBufferFactory
+        internal class SingleSegmentTestSequenceFactory : ReadOnlySequenceFactory
         {
             public override ReadOnlySequence<byte> CreateOfSize(int size)
             {
@@ -83,7 +83,7 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class BytePerSegmentTestBufferFactory : ReadOnlyBufferFactory
+        internal class BytePerSegmentTestSequenceFactory : ReadOnlySequenceFactory
         {
             public override ReadOnlySequence<byte> CreateOfSize(int size)
             {

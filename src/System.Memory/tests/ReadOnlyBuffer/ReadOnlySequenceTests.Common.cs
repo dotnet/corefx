@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Memory.Tests
 {
-    public class CommonReadOnlyBufferTests
+    public class CommonReadOnlySequenceTests
     {
         [Fact]
         public void SegmentStartIsConsideredInBoundsCheck()
