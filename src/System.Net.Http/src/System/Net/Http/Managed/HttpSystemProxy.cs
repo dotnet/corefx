@@ -18,7 +18,7 @@ namespace System.Net.Http
         string[] _bypass = null;            // list of domains not to proxy
         bool _bypassLocal = false;          // we should bypass domain considered local
         private ICredentials _credentials=null;
-	    private readonly WinInetProxyHelper _proxyHelper = null;
+        private readonly WinInetProxyHelper _proxyHelper = null;
         private readonly SafeWinHttpHandle _sessionHandle;
 
         public static HttpSystemProxy TryToCreate()
