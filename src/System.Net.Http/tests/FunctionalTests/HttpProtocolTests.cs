@@ -442,6 +442,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "HTTP/1.1 200 O\nK";
                 yield return "HTTP/1.1 200OK";
                 yield return "HTTP/1.1 20c";
+                yield return "HTTP/1.1 23";
                 yield return "HTTP/1.1 2bc";
             }
 
