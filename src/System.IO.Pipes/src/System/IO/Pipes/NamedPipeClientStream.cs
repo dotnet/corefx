@@ -25,7 +25,6 @@ namespace System.IO.Pipes
         private readonly PipeOptions _pipeOptions;
         private readonly HandleInheritability _inheritability;
         private readonly PipeDirection _direction;
-        private readonly bool _isCurrentUserOnly;
 
         // Creates a named pipe client using default server (same machine, or "."), and PipeDirection.InOut 
         public NamedPipeClientStream(String pipeName)
@@ -88,7 +87,7 @@ namespace System.IO.Pipes
             }
             if ((options & PipeOptions.CurrentUserOnly) != 0)
             {
-                _isCurrentUserOnly = true;
+                IsCurrentUserOnly = true;
 
                 // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
                 options &= ~PipeOptions.CurrentUserOnly;

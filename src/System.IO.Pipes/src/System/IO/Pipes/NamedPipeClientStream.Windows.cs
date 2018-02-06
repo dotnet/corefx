@@ -131,7 +131,7 @@ namespace System.IO.Pipes
 
         private void ValidateRemotePipeUser()
         {
-            if (!_isCurrentUserOnly)
+            if (!IsCurrentUserOnly)
                 return;
 
             SecurityIdentifier currentUserSid = GetCurrentUser();
