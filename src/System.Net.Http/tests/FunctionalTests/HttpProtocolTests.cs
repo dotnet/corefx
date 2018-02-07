@@ -436,7 +436,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "HTTP/12.1 200 OK";
             }
             
-            // Only fail on WinRTHandler.
+            // Skip these test cases on UAP since the behavior is different.
             if (!PlatformDetection.IsUap)
             {
                 yield return "HTTP/1.1 200 O\nK";
@@ -446,7 +446,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "HTTP/1.1 2bc";
             }
 
-            // Only fail on WinRTHandler & CurlHandler.
+            // Skip these test cases on UAP & CurlHandler since the behavior is different.
             if (!PlatformDetection.IsUap && PlatformDetection.IsWindows)
             {
                 yield return "NOTHTTP/1.1";
