@@ -79,7 +79,7 @@ More than one entry can be present, in case multiple PDBs were produced during t
 | Offset            | Size          | Field          | Description                                                             |
 |:------------------|:--------------|:---------------|-------------------------------------------------------------------------|
 | 0                 | 4             | Signature      | 0x50, 0x44, 0x42, 0x43 (ASCII string: "PDBC")                           |
-| 4                 | AlgNameLength | AlgorithmName  | Zero-terminated ASCII string. The name of the crypho hash algorithm.    |
+| 4                 | AlgNameLength | AlgorithmName  | Zero-terminated UTF8 string. The name of the crypho hash algorithm.     |
 | 4 + AlgNameLength | ChecksumSize  | Checksum       | Blob. Checksum of the PDB content.                                      |
 
 _AlgorithmName_ is the name of the crypto hash algorithm used to calculate the checksum. The name is case-sensitive.
