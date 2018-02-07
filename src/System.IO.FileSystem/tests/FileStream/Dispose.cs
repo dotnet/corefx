@@ -137,8 +137,7 @@ namespace System.IO.Tests
                         fswrite.WriteByte(0);
                     };
                     act();
-
-                    Assert.False(writeDisposeInvoked, "Expected disposed isnt called yet");
+                    
                     // make sure finalizer gets called and doesnt throw exception
                     for (int i = 0; i < 2; i++)
                     {
