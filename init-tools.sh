@@ -174,7 +174,10 @@ echo "Making all .sh files executable under Tools."
 ls $__scriptpath/Tools/*.sh | xargs chmod +x
 ls $__scriptpath/Tools/scripts/docker/*.sh | xargs chmod +x
 
+__compilersVersion=`ls $__PACKAGES_DIR/microsoft.netcore.compilers/ | sed 'r/\([0-9]\+\).*/\1/g'`
+
 Tools/crossgen.sh $__scriptpath/Tools
+Tools/crossgen.sh $__PACKAGES_DIR/microsoft.netcore.compilers/$__compilersVersion/tools/bincore
 
 mkdir -p "$(dirname "$__BUILD_TOOLS_SEMAPHORE")" && touch $__BUILD_TOOLS_SEMAPHORE
 
