@@ -134,7 +134,7 @@ namespace System.IO.Pipes
             if (!IsCurrentUserOnly)
                 return;
 
-            SecurityIdentifier currentUserSid = GetCurrentUser();
+            SecurityIdentifier currentUserSid = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity accessControl = this.GetAccessControl();
             IdentityReference remoteOwnerSid = accessControl.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwnerSid != currentUserSid)

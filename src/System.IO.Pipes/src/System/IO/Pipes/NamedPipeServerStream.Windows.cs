@@ -43,7 +43,7 @@ namespace System.IO.Pipes
 
             if (IsCurrentUserOnly)
             {
-                SecurityIdentifier identifier = GetCurrentUser();
+                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
                 PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
                 pipeSecurity = new PipeSecurity();
 

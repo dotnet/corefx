@@ -33,7 +33,7 @@ namespace System.IO.Pipes.Tests
             {
                 using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
                 {
-                    // Should not throw.
+                    // Should not fail to connect since both, the server and client have the same owner.
                     client.Connect();
                 }
             }

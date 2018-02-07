@@ -51,11 +51,15 @@ namespace System.IO.Pipes
                 }
             }
 
-            if (!ValidateRemotePipeUser(clientHandle, out Exception exception))
+            try
+            {
+                ValidateRemotePipeUser(clientHandle);
+            }
+            catch (Exception)
             {
                 clientHandle.Dispose();
                 socket.Dispose();
-                throw exception;
+                throw;
             }
 
             InitializeHandle(clientHandle, isExposed: false, isAsync: (_pipeOptions & PipeOptions.Asynchronous) != 0);
@@ -93,26 +97,21 @@ namespace System.IO.Pipes
             }
         }
 
-        private bool ValidateRemotePipeUser(SafePipeHandle handle, out Exception exception)
+        private void ValidateRemotePipeUser(SafePipeHandle handle)
         {
-            exception = null;
             if (!IsCurrentUserOnly)
-                return true;
+                return;
 
             uint userId = Interop.Sys.GetEUid();
             if (Interop.Sys.GetPeerID(handle, out uint serverOwner) == -1)
             {
-                exception = CreateExceptionForLastError();
-                return false;
+                throw CreateExceptionForLastError();
             }
 
             if (userId != serverOwner)
             {
-                exception = new UnauthorizedAccessException(SR.UnauthorizedAccess_NotOwnedByCurrentUser);
-                return false;
+                throw new UnauthorizedAccessException(SR.UnauthorizedAccess_NotOwnedByCurrentUser);
             }
-
-            return true;
         }
 
         // -----------------------------
