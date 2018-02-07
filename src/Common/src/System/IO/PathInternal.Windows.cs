@@ -81,6 +81,15 @@ namespace System.IO
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
+        private static bool EndsWithPeriodOrSpace(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            char c = path[path.Length - 1];
+            return c == ' ' || c == '.';
+        }
+
         /// <summary>
         /// Adds the extended path prefix (\\?\) if not already a device path, IF the path is not relative,
         /// AND the path is more than 259 characters. (> MAX_PATH + null). This will also insert the extended
@@ -90,7 +99,7 @@ namespace System.IO
         /// </summary>
         internal static string EnsureExtendedPrefixIfNeeded(string path)
         {
-            if (path != null && (path.Length >= MaxShortPath || path.EndsWith(' ') || path.EndsWith('.')))
+            if (path != null && (path.Length >= MaxShortPath || EndsWithPeriodOrSpace(path)))
             {
                 return EnsureExtendedPrefix(path);
             }
