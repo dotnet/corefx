@@ -25,6 +25,14 @@ namespace System.IO.Pipes
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(_inheritability);
 
+            if ((_pipeOptions & PipeOptions.CurrentUserOnly) != 0)
+            {
+                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
+                _pipeOptions &= ~PipeOptions.CurrentUserOnly;
+            }
+
+            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
+
             int _pipeFlags = (int)_pipeOptions;
             if (_impersonationLevel != TokenImpersonationLevel.None)
             {

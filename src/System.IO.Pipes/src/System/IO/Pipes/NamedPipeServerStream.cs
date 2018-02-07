@@ -116,12 +116,7 @@ namespace System.IO.Pipes
             if ((options & PipeOptions.CurrentUserOnly) != 0)
             {
                 IsCurrentUserOnly = true;
-
-                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
-                options &= ~PipeOptions.CurrentUserOnly;
             }
-
-            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
 
             Create(pipeName, direction, maxNumberOfServerInstances, transmissionMode,
             options, inBufferSize, outBufferSize, inheritability);

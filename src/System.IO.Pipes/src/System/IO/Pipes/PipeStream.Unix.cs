@@ -63,7 +63,10 @@ namespace System.IO.Pipes
             {
                 string directory = Path.Combine(Path.GetTempPath(), ".NET" + Interop.Sys.GetEUid());
                 Directory.CreateDirectory(directory);
-                Interop.Sys.ChMod(directory, (int)Interop.Sys.Permissions.S_IRWXU);
+                if (Interop.Sys.ChMod(directory, (int)Interop.Sys.Permissions.S_IRWXU) == -1)
+                {
+                    throw CreateExceptionForLastError();
+                }
 
                 return Path.Combine(directory, s_pipePrefix + pipeName);
             }
@@ -484,7 +487,7 @@ namespace System.IO.Pipes
             }
         }
 
-        internal Exception CreateExceptionForLastError(string pipeName = null)
+        internal static Exception CreateExceptionForLastError(string pipeName = null)
         {
             Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
             return error.Error == Interop.Error.ENOTSUP ?

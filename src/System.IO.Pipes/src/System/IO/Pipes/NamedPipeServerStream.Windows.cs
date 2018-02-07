@@ -49,7 +49,12 @@ namespace System.IO.Pipes
 
                 pipeSecurity.AddAccessRule(rule);
                 pipeSecurity.SetOwner(identifier);
+
+                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
+                options &= ~PipeOptions.CurrentUserOnly;
             }
+
+            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
 
             int openMode = ((int)direction) |
                            (maxNumberOfServerInstances == 1 ? Interop.Kernel32.FileOperations.FILE_FLAG_FIRST_PIPE_INSTANCE : 0) |
