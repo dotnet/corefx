@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
 using Xunit;
 
 namespace System.SpanTests
@@ -54,7 +53,7 @@ namespace System.SpanTests
         [Fact]
         public static unsafe void ToStringFromString()
         {
-            string original = BuildString(42);
+            string original = TestHelpers.BuildString(10, 42);
             ReadOnlySpan<char> span = original.AsReadOnlySpan();
 
             string returnedString = span.ToString();
@@ -71,7 +70,7 @@ namespace System.SpanTests
             Assert.Equal("RD", subString2);
             Assert.Equal("DD", subString3);
 
-            fixed(char* pOriginal = original)
+            fixed (char* pOriginal = original)
             fixed (char* pString1 = returnedString)
             fixed (char* pString2 = returnedStringUsingSlice)
             {
@@ -91,17 +90,6 @@ namespace System.SpanTests
                 Assert.NotEqual((int)pSubString1, (int)pSubString3);
                 Assert.NotEqual((int)pSubString2, (int)pSubString3);
             }
-        }
-
-        private static string BuildString(int seed)
-        {
-            Random rnd = new Random(seed);
-            var builder = new StringBuilder();
-            for (int i = 0; i < 10; i++)
-            {
-                builder.Append((char)rnd.Next(65, 91));
-            }
-            return builder.ToString();
         }
     }
 }

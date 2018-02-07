@@ -55,5 +55,52 @@ namespace System.SpanTests
             var span = new Span<string>(a);
             Assert.Equal("System.Span<String>[3]", span.ToString());
         }
+
+        [Fact]
+        public static unsafe void ToStringFromString()
+        {
+            string original = TestHelpers.BuildString(10, 42);
+
+            ReadOnlyMemory<char> readOnlyMemory = original.AsReadOnlyMemory();
+            Memory<char> memory = MemoryMarshal.AsMemory(readOnlyMemory);
+
+            Span<char> span = memory.Span;
+
+            string returnedString = span.ToString();
+            string returnedStringUsingSlice = span.Slice(0, original.Length).ToString();
+
+            string subString1 = span.Slice(1).ToString();
+            string subString2 = span.Slice(0, 2).ToString();
+            string subString3 = span.Slice(1, 2).ToString();
+
+            Assert.Equal("RDDNEGSNET", returnedString);
+            Assert.Equal("RDDNEGSNET", returnedStringUsingSlice);
+
+            Assert.Equal("DDNEGSNET", subString1);
+            Assert.Equal("RD", subString2);
+            Assert.Equal("DD", subString3);
+
+            fixed (char* pOriginal = original)
+            fixed (char* pString1 = returnedString)
+            fixed (char* pString2 = returnedStringUsingSlice)
+            {
+                Assert.Equal((int)pOriginal, (int)pString1);
+                Assert.Equal((int)pOriginal, (int)pString2);
+            }
+
+            fixed (char* pOriginal = original)
+            fixed (char* pSubString1 = subString1)
+            fixed (char* pSubString2 = subString2)
+            fixed (char* pSubString3 = subString3)
+            {
+                Assert.NotEqual((int)pOriginal, (int)pSubString1);
+                Assert.NotEqual((int)pOriginal, (int)pSubString2);
+                Assert.NotEqual((int)pOriginal, (int)pSubString3);
+                Assert.NotEqual((int)pSubString1, (int)pSubString2);
+                Assert.NotEqual((int)pSubString1, (int)pSubString3);
+                Assert.NotEqual((int)pSubString2, (int)pSubString3);
+
+            }
+        }
     }
 }
