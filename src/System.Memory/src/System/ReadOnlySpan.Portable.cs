@@ -193,7 +193,8 @@ namespace System
         {
             if (typeof(T) == typeof(char))
             {
-                if (_pinnable is string str)
+                object obj = Unsafe.As<Pinnable<T>, object>(ref Unsafe.AsRef(_pinnable));
+                if (obj is string str && _byteOffset == MemoryExtensions.StringAdjustment && _length == str.Length)
                 {
                     return str;
                 }

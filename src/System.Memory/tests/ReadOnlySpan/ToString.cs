@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
 using Xunit;
 
 namespace System.SpanTests
@@ -43,11 +44,64 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static unsafe void ToStringForSpanOfString()
+        public static void ToStringForSpanOfString()
         {
             string[] a = { "a", "b", "c" };
             var span = new ReadOnlySpan<string>(a);
             Assert.Equal("System.ReadOnlySpan<String>[3]", span.ToString());
+        }
+
+        [Fact]
+        public static unsafe void ToStringFromString()
+        {
+            string original = BuildString(42);
+            ReadOnlySpan<char> span = original.AsReadOnlySpan();
+
+            string returnedString = span.ToString();
+            string returnedStringUsingSlice = span.Slice(0, original.Length).ToString();
+
+            string subString1 = span.Slice(1).ToString();
+            string subString2 = span.Slice(0, 2).ToString();
+            string subString3 = span.Slice(1, 2).ToString();
+
+            Assert.Equal("RDDNEGSNET", returnedString);
+            Assert.Equal("RDDNEGSNET", returnedStringUsingSlice);
+
+            Assert.Equal("DDNEGSNET", subString1);
+            Assert.Equal("RD", subString2);
+            Assert.Equal("DD", subString3);
+
+            fixed(char* pOriginal = original)
+            fixed (char* pString1 = returnedString)
+            fixed (char* pString2 = returnedStringUsingSlice)
+            {
+                Assert.Equal((int)pOriginal, (int)pString1);
+                Assert.Equal((int)pOriginal, (int)pString2);
+            }
+
+            fixed (char* pOriginal = original)
+            fixed (char* pSubString1 = subString1)
+            fixed (char* pSubString2 = subString2)
+            fixed (char* pSubString3 = subString3)
+            {
+                Assert.NotEqual((int)pOriginal, (int)pSubString1);
+                Assert.NotEqual((int)pOriginal, (int)pSubString2);
+                Assert.NotEqual((int)pOriginal, (int)pSubString3);
+                Assert.NotEqual((int)pSubString1, (int)pSubString2);
+                Assert.NotEqual((int)pSubString1, (int)pSubString3);
+                Assert.NotEqual((int)pSubString2, (int)pSubString3);
+            }
+        }
+
+        private static string BuildString(int seed)
+        {
+            Random rnd = new Random(seed);
+            var builder = new StringBuilder();
+            for (int i = 0; i < 10; i++)
+            {
+                builder.Append((char)rnd.Next(65, 91));
+            }
+            return builder.ToString();
         }
     }
 }

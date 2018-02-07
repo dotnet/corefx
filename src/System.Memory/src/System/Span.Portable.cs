@@ -305,10 +305,6 @@ namespace System
         {
             if (typeof(T) == typeof(char))
             {
-                if (_pinnable is string str)
-                {
-                    return str;
-                }
                 unsafe
                 {
                     fixed (char* src = &Unsafe.As<T, char>(ref DangerousGetPinnableReference()))
