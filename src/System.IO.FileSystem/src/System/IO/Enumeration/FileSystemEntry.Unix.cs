@@ -9,41 +9,44 @@ namespace System.IO.Enumeration
     /// </summary>
     public unsafe ref struct FileSystemEntry
     {
-        // TODO: Unix implementation https://github.com/dotnet/corefx/issues/26715
-        // Inital implementation is naive and not optimized.
-
         internal static void Initialize(
             ref FileSystemEntry entry,
             Interop.Sys.DirectoryEntry directoryEntry,
             bool isDirectory,
             ReadOnlySpan<char> directory,
             string rootDirectory,
-            string originalRootDirectory)
+            string originalRootDirectory,
+            Span<char> pathBuffer)
         {
             entry._directoryEntry = directoryEntry;
             entry._isDirectory = isDirectory;
             entry.Directory = directory;
             entry.RootDirectory = rootDirectory;
             entry.OriginalRootDirectory = originalRootDirectory;
+            entry._pathBuffer = pathBuffer;
+            FileStatus.Initialize(ref entry._status, isDirectory);
         }
 
         internal Interop.Sys.DirectoryEntry _directoryEntry;
-        private FileSystemInfo _info;
+        private FileStatus _status;
         private bool _isDirectory;
+        private Span<char> _pathBuffer;
+        private ReadOnlySpan<char> _fullPath;
 
-        private FileSystemInfo Info
+        private ReadOnlySpan<char> FullPath
         {
             get
             {
-                if (_info == null)
+                if (_fullPath.Length == 0)
                 {
-                    string fullPath = PathHelpers.CombineNoChecks(Directory, _directoryEntry.InodeName);
-                    _info = _isDirectory
-                        ? (FileSystemInfo) new DirectoryInfo(fullPath, fullPath, _directoryEntry.InodeName, isNormalized: true)
-                        : new FileInfo(fullPath, fullPath, _directoryEntry.InodeName, isNormalized: true);
-                    _info.Refresh();
+                    ReadOnlySpan<char> directory = Directory;
+                    directory.CopyTo(_pathBuffer);
+                    _pathBuffer[directory.Length] = Path.DirectorySeparatorChar;
+                    ReadOnlySpan<char> fileName = _directoryEntry.InodeName;
+                    fileName.CopyTo(_pathBuffer.Slice(directory.Length + 1));
+                    _fullPath = _pathBuffer.Slice(0, directory.Length + fileName.Length + 1);
                 }
-                return _info;
+                return _fullPath;
             }
         }
 
@@ -63,13 +66,25 @@ namespace System.IO.Enumeration
         public string OriginalRootDirectory { get; private set; }
 
         public ReadOnlySpan<char> FileName => _directoryEntry.InodeName;
-        public FileAttributes Attributes => Info.Attributes;
-        public long Length => Info.LengthCore;
-        public DateTimeOffset CreationTimeUtc => Info.CreationTimeCore;
-        public DateTimeOffset LastAccessTimeUtc => Info.LastAccessTimeCore;
-        public DateTimeOffset LastWriteTimeUtc => Info.LastWriteTimeCore;
+        public FileAttributes Attributes => _status.GetAttributes(FullPath, FileName);
+        public long Length => _status.GetLength(FullPath);
+        public DateTimeOffset CreationTimeUtc => _status.GetCreationTime(FullPath);
+        public DateTimeOffset LastAccessTimeUtc => _status.GetLastAccessTime(FullPath);
+        public DateTimeOffset LastWriteTimeUtc => _status.GetLastWriteTime(FullPath);
         public bool IsDirectory => _isDirectory;
-        public FileSystemInfo ToFileSystemInfo() => Info;
+
+        public FileSystemInfo ToFileSystemInfo()
+        {
+            string fullPath = ToFullPath();
+            if (_isDirectory)
+            {
+                return DirectoryInfo.Create(fullPath, _directoryEntry.InodeName, _status);
+            }
+            else
+            {
+                return FileInfo.Create(fullPath, _directoryEntry.InodeName, _status);
+            }
+        }
 
         /// <summary>
         /// Returns the full path for find results, based on the initially provided path.
@@ -81,6 +96,6 @@ namespace System.IO.Enumeration
         /// Returns the full path of the find result.
         /// </summary>
         public string ToFullPath() =>
-            PathHelpers.CombineNoChecks(Directory, FileName);
+            new string(FullPath);
     }
 }
