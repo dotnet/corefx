@@ -94,9 +94,7 @@ Supported algorithm names include at least:
 
 #### Portable PDB Checksum
 
-If the symbol format is Portable PDB the checksum is calculated by hashing two blocks of the symbol file content: 
-first block starts at offset 0 and ends just before the first byte of PDB ID field of the `#Pdb` stream, 
-second block starts just after the PDB ID field of the `#Pdb` stream and ends at the end of the file.
+If the symbol format is Portable PDB the checksum is calculated by hashing the entire content of the PDB file with the PDB ID set to 0 (20 zeroed bytes).
 
 When validating that Portable PDB matches the debug directory record check that the checksums match and that the PDB ID match the data in the corresponding [Portable CodeView record](#PortableCodeViewEntry).
 
