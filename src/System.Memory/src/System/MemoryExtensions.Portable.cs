@@ -24,9 +24,9 @@ namespace System
             {
                 return span.EndsWith<char>(value);
             }
+
             string sourceString = span.ToString();
             string valueString = value.ToString();
-
             return sourceString.EndsWith(valueString, comparisonType);
         }
 
@@ -42,9 +42,9 @@ namespace System
             {
                 return span.StartsWith<char>(value);
             }
+
             string sourceString = span.ToString();
             string valueString = value.ToString();
-
             return sourceString.StartsWith(valueString, comparisonType);
         }
 

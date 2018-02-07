@@ -51,7 +51,7 @@ namespace System.SpanTests
         {
             char[] a = { '7', '4', '5', '6' };
             char[] b = { '4', '5', '6' };
-            var span = new ReadOnlySpan<char>(a, 0, 3);
+            var span = new ReadOnlySpan<char>(a, 1, 3);
             var slice = new ReadOnlySpan<char>(b, 0, 3);
             Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
         }
