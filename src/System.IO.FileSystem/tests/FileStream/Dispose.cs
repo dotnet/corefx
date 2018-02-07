@@ -109,6 +109,7 @@ namespace System.IO.Tests
                     }
                     Assert.False(writeDisposeInvoked, "Expected finalizer to have been suppressed");
                 }
+                return SuccessExitCode;
             }).Dispose();
         }
 
@@ -146,6 +147,7 @@ namespace System.IO.Tests
                     }
                     Assert.True(writeDisposeInvoked, "Expected finalizer to be invoked but not throw exception");
                 }
+                return SuccessExitCode;
             }).Dispose();
         }
 
