@@ -377,7 +377,7 @@ namespace System.Net.Http.Functional.Tests
                 await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonNoSpace);
             }
         }
-
+        
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The following pass on .NET Core but fail on .NET Framework.")]
         [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
@@ -439,7 +439,6 @@ namespace System.Net.Http.Functional.Tests
             // Skip these test cases on UAP since the behavior is different.
             if (!PlatformDetection.IsUap)
             {
-                yield return "HTTP/1.1 200 O\nK";
                 yield return "HTTP/1.1 200OK";
                 yield return "HTTP/1.1 20c";
                 yield return "HTTP/1.1 23";
@@ -454,7 +453,6 @@ namespace System.Net.Http.Functional.Tests
                 yield return "ABCD/1.1 200 OK";
                 yield return "HTTP/1.1";
                 yield return "HTTP\\1.1 200 OK";
-                yield return "HTTP/1.1 200 O\rK";
                 yield return "NOTHTTP/1.1 200 OK";
             }
         }
@@ -466,6 +464,26 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
         {
             await GetAsyncThrowsExceptionHelper(responseString);
+        }
+        
+        [Theory]
+        [InlineData("HTTP/1.1 200 O\nK")]
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionLFReasonPhrase(string responseString)
+        {
+            if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
+            {
+                await GetAsyncThrowsExceptionHelper(responseString);
+            }
+        }
+        
+        [Theory]
+        [InlineData("HTTP/1.1 200 O\rK")]
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionCRReasonPhrase(string responseString)
+        {
+            if (IsWinHttpHandler || IsNetfxHandler)
+            {
+                await GetAsyncThrowsExceptionHelper(responseString);
+            }
         }
 
         [Theory]
