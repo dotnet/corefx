@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="System\VoidResult.cs" />
     <Compile Include="System\Collections\Generic\Dequeue.cs" />
+    <Compile Include="System\Runtime\CompilerServices\AutoResetAwaiter.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IAwaiter.cs" />
     <Compile Include="System\Threading\Channels\BoundedChannel.cs" />
     <Compile Include="System\Threading\Channels\BoundedChannelFullMode.cs" />
     <Compile Include="System\Threading\Channels\Channel.cs" />
