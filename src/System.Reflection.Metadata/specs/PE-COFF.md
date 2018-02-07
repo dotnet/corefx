@@ -66,7 +66,7 @@ The Major version specified in the entry indicates the version of the Portable P
 
 The value of Stamp field in the entry shall be 0.
 
-### PDB Checksum Debug Directory Entry (type 18)
+### PDB Checksum Debug Directory Entry (type 19)
 
 Stores crypto hash of the content of the symbol file the PE/COFF file was built with.
 
