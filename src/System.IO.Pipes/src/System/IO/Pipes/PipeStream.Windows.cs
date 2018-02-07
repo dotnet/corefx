@@ -17,7 +17,8 @@ namespace System.IO.Pipes
         internal const bool CheckOperationsRequiresSetHandle = true;
         internal ThreadPoolBoundHandle _threadPoolBinding;
 
-        internal static string GetPipePath(string serverName, string pipeName)
+        // In Windows we don't use isCurrentUserOnly flag for the path because we set an ACL to the pipe.
+        internal static string GetPipePath(string serverName, string pipeName, bool isCurrentUserOnly)
         {
             string normalizedPipePath = Path.GetFullPath(@"\\" + serverName + @"\pipe\" + pipeName);
             if (String.Equals(normalizedPipePath, @"\\.\pipe\" + AnonymousPipeName, StringComparison.OrdinalIgnoreCase))
@@ -488,7 +489,5 @@ namespace System.IO.Pipes
 
             return Win32Marshal.GetExceptionForWin32Error(errorCode);
         }
-
-        internal SecurityIdentifier GetCurrentUser() => WindowsIdentity.GetCurrent().Owner;
     }
 }

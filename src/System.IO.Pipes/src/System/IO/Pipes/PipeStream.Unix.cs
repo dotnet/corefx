@@ -61,7 +61,7 @@ namespace System.IO.Pipes
             // with a tmp file for the lifetime of the server stream.
             if (isCurrentUserOnly)
             {
-                string directory = Path.Combine(Path.GetTempPath(), $"CoreFx{Interop.Sys.GetEUid()}");
+                string directory = Path.Combine(Path.GetTempPath(), ".NET" + Interop.Sys.GetEUid());
                 Directory.CreateDirectory(directory);
                 Interop.Sys.ChMod(directory, (int)Interop.Sys.Permissions.S_IRWXU);
 
