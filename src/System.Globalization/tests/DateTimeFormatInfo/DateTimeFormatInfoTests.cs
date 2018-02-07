@@ -146,7 +146,7 @@ namespace System.Globalization.Tests
             Assert.Equal(13, ci.DateTimeFormat.AbbreviatedMonthGenitiveNames.Length);
 
             DateTime dt = ci.DateTimeFormat.Calendar.ToDateTime(5779, 1, 1, 0, 0, 0, 0); // leap year
-            for (int i=0; i<13; i++)
+            for (int i = 0; i < 13; i++)
             {
                 string formatted = dt.ToString(ci.DateTimeFormat.LongDatePattern, ci);
                 Assert.Equal(dt, DateTime.ParseExact(formatted, ci.DateTimeFormat.LongDatePattern, ci));
@@ -154,7 +154,7 @@ namespace System.Globalization.Tests
             }
 
             dt = ci.DateTimeFormat.Calendar.ToDateTime(5778, 1, 1, 0, 0, 0, 0); // non leap year
-            for (int i=0; i<12; i++)
+            for (int i = 0; i < 12; i++)
             {
                 string formatted = dt.ToString(ci.DateTimeFormat.LongDatePattern, ci);
                 Assert.Equal(dt, DateTime.ParseExact(formatted, ci.DateTimeFormat.LongDatePattern, ci));
