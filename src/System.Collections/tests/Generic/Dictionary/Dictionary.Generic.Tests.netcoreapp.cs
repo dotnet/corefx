@@ -232,14 +232,16 @@ namespace System.Collections.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => dictionary.TrimExcess(-1));
         }
 
-        [Fact]
-        public void TrimExcess_Generic_CapacitySmallerThanCount_Throws()
+        [Theory]
+        [InlineData(20)]
+        [InlineData(23)]
+        public void TrimExcess_Generic_CapacitySmallerThanCount_Throws(int suggestedCapacity)
         {
             var dictionary = new Dictionary<TKey, TValue>();
             dictionary.Add(GetNewKey(dictionary), CreateTValue(0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => dictionary.TrimExcess(0));
 
-            dictionary = new Dictionary<TKey, TValue>(20);
+            dictionary = new Dictionary<TKey, TValue>(suggestedCapacity);
             dictionary.Add(GetNewKey(dictionary), CreateTValue(0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => dictionary.TrimExcess(0));
         }
@@ -252,17 +254,19 @@ namespace System.Collections.Tests
             Assert.Equal(7, dictionary.EnsureCapacity(0));
         }
 
-        [Fact]
-        public void TrimExcess_Generic_TrimToLargerThanExistingCapacity_DoesNothing()
+        [Theory]
+        [InlineData(20)]
+        [InlineData(23)]
+        public void TrimExcess_Generic_TrimToLargerThanExistingCapacity_DoesNothing(int suggestedCapacity)
         {
             var dictionary = new Dictionary<TKey, TValue>();
             int capacity = dictionary.EnsureCapacity(0);
-            dictionary.TrimExcess(20);
+            dictionary.TrimExcess(suggestedCapacity);
             Assert.Equal(capacity, dictionary.EnsureCapacity(0));
 
-            dictionary = new Dictionary<TKey, TValue>(10);
+            dictionary = new Dictionary<TKey, TValue>(suggestedCapacity/2);
             capacity = dictionary.EnsureCapacity(0);
-            dictionary.TrimExcess(20);
+            dictionary.TrimExcess(suggestedCapacity);
             Assert.Equal(capacity, dictionary.EnsureCapacity(0));
         }
 
