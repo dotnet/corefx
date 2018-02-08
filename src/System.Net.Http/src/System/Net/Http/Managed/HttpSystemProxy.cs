@@ -12,25 +12,27 @@ using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
 namespace System.Net.Http
 {
-    internal sealed class HttpSystemProxy : IWebProxy
+    internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
         private readonly Uri _proxyUri;         // String URI for HTTPS requests
-        private string[] _bypass = null;        // list of domains not to proxy
+        private string[] _bypass;               // list of domains not to proxy
         private bool _bypassLocal = false;      // we should bypass domain considered local
-        private ICredentials _credentials=null;
-        private readonly WinInetProxyHelper _proxyHelper = null;
-        private readonly SafeWinHttpHandle _sessionHandle;
+        private ICredentials _credentials;
+        private readonly WinInetProxyHelper _proxyHelper;
+        private SafeWinHttpHandle _sessionHandle;
+        private volatile bool _disposed;
 
-        public static HttpSystemProxy TryCreate()
+        public static bool TryCreate(out IWebProxy proxy)
         {
             // This will get basic proxy setting from system using existing
             // WinInetProxyHelper functions. If no proxy is enabled, it will return null.
             SafeWinHttpHandle sessionHandle = null;
+            proxy = null;
 
             WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
             if (!proxyHelper.ManualSettingsOnly && !proxyHelper.AutoSettingsUsed)
             {
-                return null;
+                return false;
             }
             if (proxyHelper.AutoSettingsUsed)
             {
@@ -43,10 +45,11 @@ namespace System.Net.Http
                 if (sessionHandle.IsInvalid)
                 {
                     // Proxy failures are currently ignored by managed handler.
-                    return null;
+                    return false;
                 }
             }
-            return new HttpSystemProxy(proxyHelper, sessionHandle);
+            proxy  = new HttpSystemProxy(proxyHelper, sessionHandle);
+            return true;
         }
 
         private HttpSystemProxy(WinInetProxyHelper proxyHelper, SafeWinHttpHandle sessionHandle)
@@ -85,6 +88,24 @@ namespace System.Net.Http
             }
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        internal void Dispose(bool disposing)
+        {
+            if (disposing && !_disposed)
+            {
+                _disposed = true;
+
+                if (_sessionHandle != null && !_sessionHandle.IsInvalid)
+                {
+                    SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);
+                }
+            }
+        }
+
         /// <summary>
         /// This function will evaluate given string and it will try to convert
         /// it to Uri object. The string could contain URI fragment, IP address and  port
@@ -112,7 +133,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// Gets the proxy URI. (iWebProxy interface)
+        /// Gets the proxy URI. (IWebProxy interface)
         /// </summary>
         public Uri GetProxy(Uri uri)
         {
@@ -121,9 +142,17 @@ namespace System.Net.Http
                 return _proxyUri;
             }
             var proxyInfo = new Interop.WinHttp.WINHTTP_PROXY_INFO();
-            if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+            try
             {
-                return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                {
+                    return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(proxyInfo.Proxy);
+                Marshal.FreeHGlobal(proxyInfo.ProxyBypass);
             }
             return null;
         }
@@ -137,14 +166,14 @@ namespace System.Net.Http
             {
                 if (_bypassLocal)
                 {
-                    // TODO: implement bypass macth.
+                    // TODO #23150: implement bypass match.
                 }
                 return false;
             }
             else if (_proxyHelper.AutoSettingsUsed)
             {
                 // Always return false for now to avoid query to WinHtttp.
-                // If URI should be bypessed GetProxy() will return null;
+                // If URI should be bypassed GetProxy() will return null;
                 return false;
             }
             return true;
@@ -156,7 +185,10 @@ namespace System.Net.Http
             {
                 return _credentials;
             }
-            set { throw new NotSupportedException(); }
+            set
+            {
+                _credentials = value;
+            }
         }
     }
 }

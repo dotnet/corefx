@@ -8,7 +8,7 @@ namespace System.Net.Http
     {
         private static IWebProxy ConstructSystemProxy()
         {
-            return HttpSystemProxy.TryCreate();
+            return HttpSystemProxy.TryCreate(out IWebProxy proxy) ? proxy : null;
         }
     }
 }

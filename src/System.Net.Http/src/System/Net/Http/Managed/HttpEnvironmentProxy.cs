@@ -92,12 +92,14 @@ namespace System.Net.Http
         private string[] _bypass = null;// list of domains not to proxy
         private ICredentials _credentials;
 
-        public static HttpEnvironmentProxy TryCreate()
+        public static bool TryCreate(out IWebProxy proxy)
         {
             // Get environmental variables. Protocol specific take precedence over
             // general all_*, lower case variable has precedence over upper case.
             // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
+
+            proxy = null;
 
             Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
             Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
@@ -122,10 +124,11 @@ namespace System.Net.Http
             // Caller may pick some other proxy type.
             if (httpProxy == null && httpsProxy == null)
             {
-                return null;
+                return false;
             }
 
-            return new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
+            proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
+            return true;
         }
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
