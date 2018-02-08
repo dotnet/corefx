@@ -1183,7 +1183,8 @@ namespace System.Net.Sockets
             }
         }
 
-        public bool GetNonBlocking() {
+        public bool GetNonBlocking()
+        {
             return _nonBlockingSet;
         }
 
