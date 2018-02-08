@@ -262,7 +262,7 @@ namespace BasicEventSourceTests
             TestUtilities.CheckNoEventSourcesRunning("Start");
             using (var log = new EventSourceTest())
             {
-                using (var el = new LoudListener())
+                using (var el = new LoudListener(log))
                 {
                     Guid actid = Guid.NewGuid();
                     log.LogTaskScheduled(actid, "Hello from a test");
