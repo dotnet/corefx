@@ -32,8 +32,8 @@ namespace System.Threading.Channels
         /// <summary>non-null if the channel has been marked as complete for writing.</summary>
         private volatile Exception _doneWriting;
 
-        /// <summary>A <see cref="ReaderInteractor{T}"/> or <see cref="AutoResetAwaiter{TResult}"/> if there's a blocked reader.</summary>
-        private object _blockedReader;
+        /// <summary>A <see cref="ReaderInteractor{T}"/> if there's a blocked reader.</summary>
+        private ReaderInteractor<T> _blockedReader;
 
         /// <summary>A waiting reader (e.g. WaitForReadAsync) if there is one.</summary>
         private ReaderInteractor<bool> _waitingReader;
@@ -88,7 +88,7 @@ namespace System.Threading.Channels
                             return ChannelUtilities.GetInvalidCompletionValueTask<T>(parent._doneWriting);
                         }
 
-                        Debug.Assert(parent._blockedReader == null || ((parent._blockedReader as ReaderInteractor<T>)?.Task.IsCanceled ?? false),
+                        Debug.Assert(parent._blockedReader == null || parent._blockedReader.Task.IsCanceled,
                             "Incorrect usage; multiple outstanding reads were issued against this single-consumer channel");
 
                         // Store the reader to be completed by a writer.
@@ -169,7 +169,7 @@ namespace System.Threading.Channels
 
             public override bool TryComplete(Exception error)
             {
-                object blockedReader = null;
+                ReaderInteractor<T> blockedReader = null;
                 ReaderInteractor<bool> waitingReader = null;
                 bool completeTask = false;
 
@@ -218,15 +218,7 @@ namespace System.Threading.Channels
                 if (blockedReader != null)
                 {
                     error = ChannelUtilities.CreateInvalidCompletionException(error);
-
-                    if (blockedReader is ReaderInteractor<T> interactor)
-                    {
-                        interactor.Fail(error);
-                    }
-                    else
-                    {
-                        ((AutoResetAwaiter<T>)blockedReader).SetException(error);
-                    }
+                    blockedReader.Fail(error);
                 }
 
                 // Complete a waiting reader if necessary.  (We really shouldn't have both a blockedReader
@@ -252,7 +244,7 @@ namespace System.Threading.Channels
                 SingleConsumerUnboundedChannel<T> parent = _parent;
                 while (true) // in case a reader was canceled and we need to try again
                 {
-                    object blockedReader = null;
+                    ReaderInteractor<T> blockedReader = null;
                     ReaderInteractor<bool> waitingReader = null;
 
                     lock (parent.SyncObj)
@@ -298,16 +290,8 @@ namespace System.Threading.Channels
                     // have been completed due to cancellation by the time we get here.  In that case,
                     // we'll loop around to try again so as not to lose the item being written.
                     Debug.Assert(blockedReader != null);
-                    if (blockedReader is ReaderInteractor<T> interactor)
+                    if (blockedReader.Success(item))
                     {
-                        if (interactor.Success(item))
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        ((AutoResetAwaiter<T>)blockedReader).SetResult(item);
                         return true;
                     }
                 }
