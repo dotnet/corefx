@@ -12,6 +12,8 @@ using Xunit;
 
 // TODO: Check request after processing to see if the cookie header was added to the collection
 
+    // TODO: Clean up [Theory] stuff here and define some string consts for use
+
 namespace System.Net.Http.Functional.Tests
 {
     public class HttpCookieProtocolTests : HttpClientTestBase
@@ -108,6 +110,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("CustomCookie", "123")]
         public async Task GetAsync_AddCookieHeader_CookieHeaderSent(string cookieName, string cookieValue)
         {
+            if (IsNetfxHandler)
+            {
+                // Netfx handler does not support custom cookie header
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
@@ -171,6 +179,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("ContainerCookie", "123")]
         public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent(string cookieName, string cookieValue)
         {
+            if (IsNetfxHandler)
+            {
+                // Netfx handler does not support custom cookie header
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
