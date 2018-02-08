@@ -10,20 +10,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-// TODO: Check request after processing to see if the cookie header was added to the collection
+// TODO: Check request after processing to see if the cookie header was added to the collection?
 
 namespace System.Net.Http.Functional.Tests
 {
     public class HttpCookieProtocolTests : HttpClientTestBase
     {
-        //
-        // Send cookie tests
-        //
-
         private const string s_cookieName = "ABC";
         private const string s_cookieValue = "123";
         private const string s_expectedCookieHeaderValue = "ABC=123";
         private const string s_customCookieHeaderValue = "CustomCookie=456";
+
+        //
+        // Send cookie tests
+        //
 
         private static CookieContainer CreateSingleCookieContainer(Uri uri)
         {
@@ -150,9 +150,8 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Theory]
-        [InlineData("ContainerCookie", "123")]
-        public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent(string cookieName, string cookieValue)
+        [Fact]
+        public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
         {
             if (IsNetfxHandler)
             {
