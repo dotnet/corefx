@@ -28,15 +28,8 @@ namespace System.Net.Http.Functional.Tests
 
         public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<Socket, Task> serverFunc)
         {
-            IPEndPoint ignored;
-            return LoopbackServer.CreateServerAsync(async (server, uri) =>
-            {
-                Task clientTask = clientFunc(uri);
-                Task serverTask = serverFunc(server);
-
-                await TestHelper.WhenAllCompletedOrAnyFailed(clientTask, serverTask);
-
-            }, out ignored);
+            // cleanup 
+            return LoopbackServer.CreateServerAndClientAsync(clientFunc, serverFunc);
         }
 
         [Fact]

@@ -160,6 +160,18 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            if (IsCurlHandler)
+            {
+                // CurlHandler ignores container cookies when custom Cookie header is set.
+                return;
+            }
+
+            if (UseManagedHandler)
+            {
+                // TODO: Fix this
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
@@ -189,6 +201,55 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [Fact]
+        public async Task GetAsyncWithRedirect_SetCookieContainer_CorrectCookiesSent()
+        {
+            if (UseManagedHandler)
+            {
+                // TODO: Fix this
+                return;
+            }
 
+            const string content = "Hello world!";
+
+            await LoopbackServer.CreateServerAndClientAsync(async url =>
+            {
+                Uri url1 = new Uri(url, "/foo");
+                Uri url2 = new Uri(url, "/bar");
+                Uri unusedUrl = new Uri(url, "/unused");
+                Console.WriteLine($"url1={url1}, url2={url2}");
+
+                HttpClientHandler handler = CreateHttpClientHandler();
+                handler.CookieContainer = new CookieContainer();
+                handler.CookieContainer.Add(url1, new Cookie("cookie1", "value1"));
+                handler.CookieContainer.Add(url2, new Cookie("cookie2", "value2"));
+                handler.CookieContainer.Add(unusedUrl, new Cookie("cookie3", "value3"));
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    await client.GetAsync(url1);
+                }
+            },
+            async server =>
+            {
+                List<string> request1Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                    $"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nLocation: /bar\r\nConnection: close\r\n\r\n");
+
+                foreach (var s in request1Lines)
+                    Console.WriteLine(s);
+
+                Assert.Contains($"Cookie: cookie1=value1", request1Lines);
+                Assert.Equal(1, request1Lines.Count(s => s.StartsWith("Cookie:")));
+
+                List<string> request2Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                    $"HTTP/1.1 200 OK\r\nContent-Length: {content.Length}\r\n\r\n{content}");
+
+                foreach (var s in request2Lines)
+                    Console.WriteLine(s);
+
+                Assert.Contains($"Cookie: cookie2=value2", request2Lines);
+                Assert.Equal(1, request2Lines.Count(s => s.StartsWith("Cookie:")));
+            });
+        }
     }
 }
