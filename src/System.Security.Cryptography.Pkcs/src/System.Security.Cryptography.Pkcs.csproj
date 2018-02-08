@@ -243,10 +243,6 @@
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.ECDsa.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.RSA.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSigner.cs" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161RequestResponseStatus.cs" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampRequest.cs" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampToken.cs" />
-    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampTokenInfo.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignedCms.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignedCms.CtorOverloads.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignerInfo.cs" />
@@ -255,6 +251,10 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.DSA.cs" />
+    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161RequestResponseStatus.cs" />
+    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampRequest.cs" />
+    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampToken.cs" />
+    <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampTokenInfo.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
