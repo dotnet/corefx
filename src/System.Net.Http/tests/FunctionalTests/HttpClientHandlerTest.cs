@@ -978,6 +978,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        // TODO: Remove?
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_DefaultCoookieContainer_NoCookieSent()
@@ -992,6 +994,8 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
+
+        // TODO: Remove?
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
