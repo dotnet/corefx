@@ -395,6 +395,63 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(999)]
+        [InlineData(1000)]
+        [InlineData(1001)]
+        [InlineData(1999)]
+        [InlineData(999000)]
+        [InlineData(999001)]
+        [InlineData(999999)]
+        [InlineData(1000000)]
+        [InlineData(1000001)]
+        [InlineData(1000999)]
+        [InlineData(1001000)]
+        [InlineData(1001001)]
+        [InlineData(1999999)]
+        public static void AccuracyRoundtrips(long totalMicroseconds)
+        {
+            Rfc3161TimestampTokenInfo info = new Rfc3161TimestampTokenInfo(
+                new Oid("0.0", "0.0"),
+                new Oid(Oids.Sha256),
+                new byte[256 / 8],
+                new byte[] { 1 },
+                DateTimeOffset.UtcNow,
+                accuracyInMicroseconds: totalMicroseconds);
+
+            Assert.True(info.AccuracyInMicroseconds.HasValue);
+            Assert.Equal(totalMicroseconds, info.AccuracyInMicroseconds.Value);
+
+            byte[] encoded = info.Encode();
+
+            Rfc3161TimestampTokenInfo info2;
+            int bytesConsumed;
+
+            Assert.True(
+                Rfc3161TimestampTokenInfo.TryDecode(encoded, out info2, out bytesConsumed));
+
+            Assert.Equal(encoded.Length, bytesConsumed);
+            Assert.NotNull(info2);
+            Assert.True(info2.AccuracyInMicroseconds.HasValue);
+            Assert.Equal(totalMicroseconds, info2.AccuracyInMicroseconds.Value);
+        }
+
+        [Fact]
+        public static void NegativeAccuracyThrows()
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "accuracyInMicroseconds2",
+                () => new Rfc3161TimestampTokenInfo(
+                    new Oid("0.0", "0.0"),
+                    new Oid(Oids.Sha256),
+                    new byte[256 / 8],
+                    new byte[] { 2 },
+                    DateTimeOffset.UtcNow,
+                    accuracyInMicroseconds: -1));
+        }
+
         internal static void AssertEqual(TimestampTokenTestData testData, Rfc3161TimestampTokenInfo tokenInfo)
         {
             Assert.Equal(testData.Version, tokenInfo.Version);

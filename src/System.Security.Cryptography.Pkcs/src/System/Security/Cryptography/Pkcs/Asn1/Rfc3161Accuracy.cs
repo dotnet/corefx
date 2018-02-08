@@ -30,14 +30,15 @@ namespace System.Security.Cryptography.Pkcs.Asn1
         [OptionalValue]
         internal int? Micros;
 
-        internal Rfc3161Accuracy(long totalMicros)
+        // Parameter name (and exception) match the Rfc3161TimestampTokenInfo ctor.
+        internal Rfc3161Accuracy(long accuracyInMicroseconds)
         {
-            if (totalMicros <= 0)
+            if (accuracyInMicroseconds < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(totalMicros));
+                throw new ArgumentOutOfRangeException(nameof(accuracyInMicroseconds));
             }
 
-            long totalMillis = Math.DivRem(totalMicros, 1000, out long micros);
+            long totalMillis = Math.DivRem(accuracyInMicroseconds, 1000, out long micros);
             long seconds = Math.DivRem(totalMillis, 1000, out long millis);
 
             if (seconds != 0)
