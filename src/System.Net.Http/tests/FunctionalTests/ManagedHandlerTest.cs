@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Net.Test.Common;
@@ -128,11 +129,10 @@ namespace System.Net.Http.Functional.Tests
     //    protected override bool UseManagedHandler => true;
     //}
 
-    // TODO #23142: The managed handler doesn't currently track how much data was written for the response headers.
-    //public sealed class ManagedHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
-    //{
-    //    protected override bool UseManagedHandler => true;
-    //}
+    public sealed class ManagedHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
+    {
+        protected override bool UseManagedHandler => true;
+    }
 
     public sealed class ManagedHandler_HttpClientHandler_DuplexCommunication_Test : HttpClientTestBase
     {
@@ -263,7 +263,57 @@ namespace System.Net.Http.Functional.Tests
             public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
             public override void SetLength(long value) => throw new NotImplementedException();
         }
+    }
 
+    public sealed class ManagedHandler_ConnectionUpgrade_Test : HttpClientTestBase
+    {
+        protected override bool UseManagedHandler => true;
+
+        [Fact]
+        public async Task UpgradeConnection_Success()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    // We need to use ResponseHeadersRead here, otherwise we will hang trying to buffer the response body.
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, serverReader, serverWriter) =>
+                    {
+                        Task<List<string>> serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, serverReader, serverWriter,
+                            $"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
+
+                        await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                        using (Stream clientStream = await (await getResponseTask).Content.ReadAsStreamAsync())
+                        {
+                            Assert.True(clientStream.CanWrite);
+                            Assert.True(clientStream.CanRead);
+                            Assert.False(clientStream.CanSeek);
+
+                            TextReader clientReader = new StreamReader(clientStream);
+                            TextWriter clientWriter = new StreamWriter(clientStream) { AutoFlush = true };
+
+                            const string helloServer = "hello server";
+                            const string helloClient = "hello client";
+                            const string goodbyeServer = "goodbye server";
+                            const string goodbyeClient = "goodbye client";
+
+                            clientWriter.WriteLine(helloServer);
+                            Assert.Equal(helloServer, serverReader.ReadLine());
+                            serverWriter.WriteLine(helloClient);
+                            Assert.Equal(helloClient, clientReader.ReadLine());
+                            clientWriter.WriteLine(goodbyeServer);
+                            Assert.Equal(goodbyeServer, serverReader.ReadLine());
+                            serverWriter.WriteLine(goodbyeClient);
+                            Assert.Equal(goodbyeClient, clientReader.ReadLine());
+                        }
+
+                        return null;
+                    });
+                }
+            });
+        }
     }
 
     public sealed class ManagedHandler_HttpClientHandler_ConnectionPooling_Test : HttpClientTestBase
