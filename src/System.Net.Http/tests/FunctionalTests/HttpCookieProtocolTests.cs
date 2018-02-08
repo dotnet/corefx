@@ -194,7 +194,7 @@ namespace System.Net.Http.Functional.Tests
 
                     Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie: ")));
 
-                    var cookies = requestLines.Single(s => s.StartsWith("Cookie: ")).Substring(8).Split("; ");
+                    var cookies = requestLines.Single(s => s.StartsWith("Cookie: ")).Substring(8).Split(new string[] { "; " }, StringSplitOptions.None);
                     Assert.Equal(2, cookies.Count());
                     Assert.Contains($"{cookieName}={cookieValue}", cookies);
                     Assert.Contains($"CustomCookie=456", cookies);
