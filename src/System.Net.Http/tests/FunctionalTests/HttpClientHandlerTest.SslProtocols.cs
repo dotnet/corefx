@@ -100,9 +100,10 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseManagedHandler)
+            if (PlatformDetection.IsWindows7 && acceptedProtocol != SslProtocols.Tls && !requestOnlyThisProtocol)
             {
-                // TODO #26186: The managed handler is failing on some OSes.
+                // Windows 7 defaults to TLS 1.0 if not set explicitly, that case is covered when 
+                // requestOnlyThisProtocol is true.
                 return;
             }
 
@@ -141,17 +142,12 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
-            if (UseManagedHandler)
-            {
-                // TODO #26186: The managed handler is failing on some OSes.
-                return;
-            }
-
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                if (PlatformDetection.IsRedHatFamily7)
+                if (PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsWindows7)
                 {
                     // Default protocol selection is always TLSv1 on Centos7 libcurl 7.29.0
+                    // and Windows 7.
                     // Hence, set the specific protocol on HttpClient that is required by test
                     handler.SslProtocols = sslProtocols;
                 }
