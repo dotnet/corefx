@@ -327,7 +327,7 @@ namespace System.Net
 
             // GetHostByName is used instead of GetAddrInfo if ipv6 is not supported.
             // See the comment in InternalGetHostByName for further explanation.
-            bool useGetHostByName = includeIPv6 || SocketProtocolSupportPal.OSSupportsIPv6;
+            bool useGetHostByName = !includeIPv6 && !SocketProtocolSupportPal.OSSupportsIPv6;
 
             // If the OS supports it and 'hostName' is not an IP Address, resolve the name asynchronously
             // instead of calling the synchronous version in the ThreadPool.
