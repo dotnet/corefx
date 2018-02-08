@@ -460,22 +460,18 @@ namespace System.Net
                     if (canonicalName == null && result->ai_canonname != IntPtr.Zero)
                         canonicalName = Marshal.PtrToStringUni(result->ai_canonname);
 
-                    IPAddress ipAddress = null;
                     var socketAddress = new ReadOnlySpan<byte>(result->ai_addr, result->ai_addrlen);
 
                     if (result->ai_family == AddressFamily.InterNetwork)
                     {
                         if (socketAddress.Length == SocketAddressPal.IPv4AddressSize)
-                            ipAddress = CreateIPv4Address(socketAddress);
+                            addresses.Add(CreateIPv4Address(socketAddress));
                     }
                     else if (SocketProtocolSupportPal.OSSupportsIPv6 && result->ai_family == AddressFamily.InterNetworkV6)
                     {
                         if (socketAddress.Length == SocketAddressPal.IPv6AddressSize)
-                            ipAddress = CreateIPv6Address(socketAddress);
+                            addresses.Add(CreateIPv6Address(socketAddress));
                     }
-
-                    if (ipAddress != null)
-                        addresses.Add(ipAddress);
 
                     result = result->ai_next;
                 }
