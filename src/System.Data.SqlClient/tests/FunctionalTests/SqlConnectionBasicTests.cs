@@ -81,7 +81,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
-        public void NonOpenConnectionSchemaRetrieval()
+        public void ClosedConnectionSchemaRetrieval()
         {
             using (SqlConnection connection = new SqlConnection(string.Empty))
             {
