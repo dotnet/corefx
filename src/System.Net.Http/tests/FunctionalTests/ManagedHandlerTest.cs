@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Net.Test.Common;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,11 +129,10 @@ namespace System.Net.Http.Functional.Tests
     //    protected override bool UseManagedHandler => true;
     //}
 
-    // TODO #23142: The managed handler doesn't currently track how much data was written for the response headers.
-    //public sealed class ManagedHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
-    //{
-    //    protected override bool UseManagedHandler => true;
-    //}
+    public sealed class ManagedHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
+    {
+        protected override bool UseManagedHandler => true;
+    }
 
     public sealed class ManagedHandler_HttpClientHandler_DuplexCommunication_Test : HttpClientTestBase
     {
@@ -261,7 +263,57 @@ namespace System.Net.Http.Functional.Tests
             public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
             public override void SetLength(long value) => throw new NotImplementedException();
         }
+    }
 
+    public sealed class ManagedHandler_ConnectionUpgrade_Test : HttpClientTestBase
+    {
+        protected override bool UseManagedHandler => true;
+
+        [Fact]
+        public async Task UpgradeConnection_Success()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    // We need to use ResponseHeadersRead here, otherwise we will hang trying to buffer the response body.
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, serverReader, serverWriter) =>
+                    {
+                        Task<List<string>> serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, serverReader, serverWriter,
+                            $"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
+
+                        await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                        using (Stream clientStream = await (await getResponseTask).Content.ReadAsStreamAsync())
+                        {
+                            Assert.True(clientStream.CanWrite);
+                            Assert.True(clientStream.CanRead);
+                            Assert.False(clientStream.CanSeek);
+
+                            TextReader clientReader = new StreamReader(clientStream);
+                            TextWriter clientWriter = new StreamWriter(clientStream) { AutoFlush = true };
+
+                            const string helloServer = "hello server";
+                            const string helloClient = "hello client";
+                            const string goodbyeServer = "goodbye server";
+                            const string goodbyeClient = "goodbye client";
+
+                            clientWriter.WriteLine(helloServer);
+                            Assert.Equal(helloServer, serverReader.ReadLine());
+                            serverWriter.WriteLine(helloClient);
+                            Assert.Equal(helloClient, clientReader.ReadLine());
+                            clientWriter.WriteLine(goodbyeServer);
+                            Assert.Equal(goodbyeServer, serverReader.ReadLine());
+                            serverWriter.WriteLine(goodbyeClient);
+                            Assert.Equal(goodbyeClient, clientReader.ReadLine());
+                        }
+
+                        return null;
+                    });
+                }
+            });
+        }
     }
 
     public sealed class ManagedHandler_HttpClientHandler_ConnectionPooling_Test : HttpClientTestBase
@@ -316,38 +368,29 @@ namespace System.Net.Http.Functional.Tests
         public async Task ServerDisconnectsAfterInitialRequest_SubsequentRequestUsesDifferentConnection()
         {
             using (HttpClient client = CreateHttpClient())
-            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-                listener.Listen(100);
-                var ep = (IPEndPoint)listener.LocalEndPoint;
-                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
-
-                string responseBody =
-                    "HTTP/1.1 200 OK\r\n" +
-                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                    "Content-Length: 0\r\n" +
-                    "\r\n";
-
-                // Make multiple requests iteratively.
-                for (int i = 0; i < 2; i++)
+                await LoopbackServer.CreateServerAsync(async (listener, uri) =>
                 {
-                    Task<string> request = client.GetStringAsync(uri);
-                    using (Socket server = await listener.AcceptAsync())
-                    using (var serverStream = new NetworkStream(server, ownsSocket: false))
-                    using (var serverReader = new StreamReader(serverStream))
+                    // Make multiple requests iteratively.
+                    for (int i = 0; i < 2; i++)
                     {
-                        while (!string.IsNullOrWhiteSpace(await serverReader.ReadLineAsync()));
-                        await server.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
-                        await request;
-
-                        server.Shutdown(SocketShutdown.Both);
-                        if (i == 0)
+                        Task<string> request = client.GetStringAsync(uri);
+                        await LoopbackServer.AcceptSocketAsync(listener, async (server, serverStream, serverReader, serverWriter) =>
                         {
-                            await Task.Delay(2000); // give client time to see the closing before next connect
-                        }
+                            while (!string.IsNullOrWhiteSpace(await serverReader.ReadLineAsync()));
+                            await serverWriter.WriteAsync(LoopbackServer.DefaultHttpResponse);
+                            await request;
+
+                            server.Shutdown(SocketShutdown.Both);
+                            if (i == 0)
+                            {
+                                await Task.Delay(2000); // give client time to see the closing before next connect
+                            }
+
+                            return null;
+                        });
                     }
-                }
+                });
             }
         }
 
@@ -355,41 +398,86 @@ namespace System.Net.Http.Functional.Tests
         public async Task ServerSendsConnectionClose_SubsequentRequestUsesDifferentConnection()
         {
             using (HttpClient client = CreateHttpClient())
-            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-                listener.Listen(100);
-                var ep = (IPEndPoint)listener.LocalEndPoint;
-                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
-
-                string responseBody =
-                    "HTTP/1.1 200 OK\r\n" +
-                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                    "Content-Length: 0\r\n" +
-                    "Connection: close\r\n" +
-                    "\r\n";
-
-                // Make multiple requests iteratively.
-                Task<string> request1 = client.GetStringAsync(uri);
-                using (Socket server1 = await listener.AcceptAsync())
-                using (var serverStream1 = new NetworkStream(server1, ownsSocket: false))
-                using (var serverReader1 = new StreamReader(serverStream1))
+                await LoopbackServer.CreateServerAsync(async (listener, uri) =>
                 {
-                    while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
-                    await server1.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
-                    await request1;
+                    string responseBody =
+                        "HTTP/1.1 200 OK\r\n" +
+                        $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                        "Content-Length: 0\r\n" +
+                        "Connection: close\r\n" +
+                        "\r\n";
 
-                    Task<string> request2 = client.GetStringAsync(uri);
-                    using (Socket server2 = await listener.AcceptAsync())
-                    using (var serverStream2 = new NetworkStream(server2, ownsSocket: false))
-                    using (var serverReader2 = new StreamReader(serverStream2))
+                    // Make first request.
+                    Task<string> request1 = client.GetStringAsync(uri);
+                    await LoopbackServer.AcceptSocketAsync(listener, async (server1, serverStream1, serverReader1, serverWriter1) =>
                     {
-                        while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
-                        await server2.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
-                        await request2;
-                    }
+                        while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
+                        await serverWriter1.WriteAsync(responseBody);
+                        await request1;
+
+                        // Make second request and expect it to be served from a different connection.
+                        Task<string> request2 = client.GetStringAsync(uri);
+                        await LoopbackServer.AcceptSocketAsync(listener, async (server2, serverStream2, serverReader2, serverWriter2) =>
+                        {
+                            while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
+                            await serverWriter2.WriteAsync(responseBody);
+                            await request2;
+                            return null;
+                        });
+
+                        return null;
+                    });
+                });
+            }
+        }
+
+        [Theory]
+        [InlineData("PooledConnectionLifetime")]
+        [InlineData("PooledConnectionIdleTimeout")]
+        public async Task SmallConnectionTimeout_SubsequentRequestUsesDifferentConnection(string timeoutPropertyName)
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                SetManagedHandlerProperty(handler, timeoutPropertyName, TimeSpan.FromMilliseconds(1));
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    await LoopbackServer.CreateServerAsync(async (listener, uri) =>
+                    {
+                        // Make first request.
+                        Task<string> request1 = client.GetStringAsync(uri);
+                        await LoopbackServer.AcceptSocketAsync(listener, async (server1, serverStream1, serverReader1, serverWriter1) =>
+                        {
+                            while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
+                            await serverWriter1.WriteAsync(LoopbackServer.DefaultHttpResponse);
+                            await request1;
+
+                            // Wait a small amount of time before making the second request, to give the first request time to timeout.
+                            await Task.Delay(100);
+
+                            // Make second request and expect it to be served from a different connection.
+                            Task<string> request2 = client.GetStringAsync(uri);
+                            await LoopbackServer.AcceptSocketAsync(listener, async (server2, serverStream2, serverReader2, serverWriter2) =>
+                            {
+                                while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
+                                await serverWriter2.WriteAsync(LoopbackServer.DefaultHttpResponse);
+                                await request2;
+                                return null;
+                            });
+
+                            return null;
+                        });
+                    });
                 }
             }
+        }
+
+        private static void SetManagedHandlerProperty(HttpClientHandler handler, string name, object value)
+        {
+            // TODO #23166: Use the managed API for ConnectionIdleTimeout when it's exposed
+            object managedHandler = handler.GetType().GetField("_managedHandler", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler);
+            managedHandler.GetType().GetProperty(name).SetValue(managedHandler, value);
         }
     }
 }
