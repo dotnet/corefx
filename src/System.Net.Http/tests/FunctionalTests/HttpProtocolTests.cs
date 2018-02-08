@@ -453,6 +453,8 @@ namespace System.Net.Http.Functional.Tests
                 yield return "ABCD/1.1 200 OK";
                 yield return "HTTP/1.1";
                 yield return "HTTP\\1.1 200 OK";
+                // ActiveIssue: #26946
+                // yield return "HTTP/1.1 200 O\rK";
                 yield return "NOTHTTP/1.1 200 OK";
             }
         }
@@ -466,23 +468,22 @@ namespace System.Net.Http.Functional.Tests
             await GetAsyncThrowsExceptionHelper(responseString);
         }
         
-        [Theory]
-        [InlineData("HTTP/1.1 200 O\nK")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionLFReasonPhrase(string responseString)
+        [Fact]
+        public async Task GetAsync_ReasonPhraseHasLF_BehaviorDifference()
         {
+            string responseString = "HTTP/1.1 200 O\nK";
+            int expectedStatusCode = 200;
+            string expectedReason = "O";
+
             if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
             {
+                // WinHttpHandler, .NET Framework, and CurlHandler will throw HttpRequestException.
                 await GetAsyncThrowsExceptionHelper(responseString);
             }
-        }
-        
-        [Theory]
-        [InlineData("HTTP/1.1 200 O\rK")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionCRReasonPhrase(string responseString)
-        {
-            if (IsWinHttpHandler || IsNetfxHandler)
+            else
             {
-                await GetAsyncThrowsExceptionHelper(responseString);
+                // UAP and ManagedHandler will allow LF ending.
+                await GetAsyncSuccessHelper(responseString, expectedStatusCode, expectedReason);
             }
         }
 
