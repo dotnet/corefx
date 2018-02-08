@@ -21,6 +21,8 @@ namespace System.Net.Http.Functional.Tests
         private const string s_expectedCookieHeaderValue = "ABC=123";
         private const string s_customCookieHeaderValue = "CustomCookie=456";
 
+        private const string s_simpleContent = "Hello world!";
+
         //
         // Send cookie tests
         //
@@ -209,7 +211,6 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            const string content = "Hello world!";
 
             await LoopbackServer.CreateServerAndClientAsync(async url =>
             {
@@ -241,13 +242,113 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(1, request1Lines.Count(s => s.StartsWith("Cookie:")));
 
                 List<string> request2Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                    $"HTTP/1.1 200 OK\r\nContent-Length: {content.Length}\r\n\r\n{content}");
+                    $"HTTP/1.1 200 OK\r\nContent-Length: {s_simpleContent.Length}\r\n\r\n{s_simpleContent}");
 
                 foreach (var s in request2Lines)
                     Console.WriteLine(s);
 
                 Assert.Contains($"Cookie: cookie2=value2", request2Lines);
                 Assert.Equal(1, request2Lines.Count(s => s.StartsWith("Cookie:")));
+            });
+        }
+
+        //
+        // Receive cookie tests
+        //
+
+        [Fact]
+        public async Task GetAsync_ReceiveSetCookieHeader_CookieAdded()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 Ok\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: {s_expectedCookieHeaderValue}\r\n\r\n{s_simpleContent}");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+                    Assert.Equal(1, collection.Count);
+                    Assert.Equal(s_cookieName, collection[0].Name);
+                    Assert.Equal(s_cookieValue, collection[0].Value);
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_ReceiveMultipleSetCookieHeaders_CookieAdded()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 Ok\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: A=1\r\nSet-Cookie: B=2\r\nSet-Cookie: C=3\r\n\r\n{s_simpleContent}");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+                    Assert.Equal(3, collection.Count);
+
+                    // Convert to array so we can more easily process contents, since CookieCollection does not implement IEnumerable<Cookie>
+                    Cookie[] cookies = new Cookie[3];
+                    collection.CopyTo(cookies, 0);
+
+                    Assert.Contains(cookies, c => c.Name == "A" && c.Value == "1");
+                    Assert.Contains(cookies, c => c.Name == "B" && c.Value == "2");
+                    Assert.Contains(cookies, c => c.Name == "C" && c.Value == "3");
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_ReceiveSetCookieHeader_CookieUpdated()
+        {
+            const string newCookieValue = "789";
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                handler.CookieContainer = CreateSingleCookieContainer(url);
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 Ok\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: {s_cookieName}={newCookieValue}\r\n\r\n{s_simpleContent}");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+                    Assert.Equal(1, collection.Count);
+                    Assert.Equal(s_cookieName, collection[0].Name);
+                    Assert.Equal(newCookieValue, collection[0].Value);
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_ReceiveSetCookieHeader_CookieRemoved()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                handler.CookieContainer = CreateSingleCookieContainer(url);
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 Ok\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: {s_cookieName}=; Expires=Sun, 06 Nov 1994 08:49:37 GMT\r\n\r\n{s_simpleContent}");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+                    Assert.Equal(0, collection.Count);
+                }
             });
         }
     }
