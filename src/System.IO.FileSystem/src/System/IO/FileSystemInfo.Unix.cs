@@ -15,7 +15,7 @@ namespace System.IO
 
         internal void Invalidate() => _fileStatus.Invalidate();
 
-        internal unsafe void Init(FileStatus fileStatus)
+        internal unsafe void Init(ref FileStatus fileStatus)
         {
             _fileStatus = fileStatus;
             _fileStatus.EnsureStatInitialized(FullPath);

@@ -22,19 +22,23 @@ namespace System.Text
             _bytes = initialBuffer;
         }
 
-        public Span<byte> ConvertString(ReadOnlySpan<char> value)
+        public Span<byte> ConvertAndTerminateString(ReadOnlySpan<char> value)
         {
-            int maxSize = Encoding.UTF8.GetMaxByteCount(value.Length);
+            int maxSize = Encoding.UTF8.GetMaxByteCount(value.Length) + 1;
             if (_bytes.Length < maxSize)
             {
-                Clear();
-                byte[] poolArray = ArrayPool<byte>.Shared.Rent(maxSize);
-                _bytes = new Span<byte>(poolArray);
+                Dispose();
+                _arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(maxSize);
+                _bytes = new Span<byte>(_arrayToReturnToPool);
             }
-            return _bytes.Slice(0, Encoding.UTF8.GetBytes(value, _bytes));
+
+            // Grab the bytes and null terminate
+            int byteCount = Encoding.UTF8.GetBytes(value, _bytes);
+            _bytes[byteCount] = 0;
+            return _bytes.Slice(0, byteCount + 1);
         }
 
-        public void Clear()
+        public void Dispose()
         {
             byte[] toReturn = _arrayToReturnToPool;
             if (toReturn != null)

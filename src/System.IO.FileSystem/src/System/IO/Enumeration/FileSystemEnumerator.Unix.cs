@@ -99,23 +99,7 @@ namespace System.IO.Enumeration
                     if (_lastEntryFound)
                         return false;
 
-                    // Get from the dir entry whether the entry is a file or directory.
-                    // We classify everything as a file unless we know it to be a directory.
-                    // (This includes regular files, FIFOs, etc.)
-                    bool isDirectory = false;
-                    if (_entry.InodeType == Interop.Sys.NodeType.DT_DIR)
-                    {
-                        // We know it's a directory.
-                        isDirectory = true;
-                    }
-                    else if (_entry.InodeType == Interop.Sys.NodeType.DT_LNK || _entry.InodeType == Interop.Sys.NodeType.DT_UNKNOWN)
-                    {
-                        // It's a symlink or unknown: stat to it to see if we can resolve it to a directory.
-                        // If we can't (e.g. symlink to a file, broken symlink, etc.), we'll just treat it as a file.
-                        isDirectory = FileSystem.DirectoryExists(Path.Combine(_currentPath, _entry.InodeName));
-                    }
-
-                    FileSystemEntry.Initialize(ref entry, _entry, isDirectory, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
+                    bool isDirectory = FileSystemEntry.Initialize(ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
 
                     if (_options.AttributesToSkip != 0)
                     {

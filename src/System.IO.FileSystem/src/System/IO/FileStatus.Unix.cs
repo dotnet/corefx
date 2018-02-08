@@ -8,32 +8,28 @@ namespace System.IO
     {
         private const int NanosecondsPerTick = 100;
 
-        /// <summary>The last cached stat information about the file.</summary>
+        // The last cached stat information about the file
         private Interop.Sys.FileStatus _fileStatus;
 
-        /// <summary>true if <see cref="_fileStatus"/> represents a symlink and the target of that symlink is a directory.</summary>
-        private bool _targetOfSymlinkIsDirectory;
-
-        private bool _isDirectory;
-
-        /// <summary>
-        /// Exists as a path as of last refresh.
-        /// </summary>
-        private bool _exists;
-
-        /// <summary>
-        /// Whether we've successfully cached a stat structure.
-        /// -1 if we need to refresh _fileStatus, 0 if we've successfully cached one,
-        /// or any other value that serves as an errno error code from the
-        /// last time we tried and failed to refresh _fileStatus.
-        /// </summary>
+        // -1 if _fileStatus isn't initialized, 0 if _fileStatus was initialized with no
+        // errors, or the errno error code.
         private int _fileStatusInitialized;
+
+        // We track intent of creation to know whether or not we want to (1) create a
+        // DirectoryInfo around this status struct or (2) actually are part of a DirectoryInfo.
+        internal bool InitiallyDirectory { get; private set; }
+
+        // Is a directory as of the last refresh
+        internal bool _isDirectory;
+
+        // Exists as of the last refresh
+        private bool _exists;
 
         internal static void Initialize(
             ref FileStatus status,
             bool isDirectory)
         {
-            status._isDirectory = isDirectory;
+            status.InitiallyDirectory = isDirectory;
             status._fileStatusInitialized = -1;
         }
 
@@ -48,15 +44,42 @@ namespace System.IO
 
             FileAttributes attrs = default;
 
-            if (IsDirectoryAssumesInitialized) // this is the one attribute where we follow symlinks
+            bool IsReadOnly(ref Interop.Sys.FileStatus fileStatus)
+            {
+                Interop.Sys.Permissions readBit, writeBit;
+                if (fileStatus.Uid == Interop.Sys.GetEUid())
+                {
+                    // User effectively owns the file
+                    readBit = Interop.Sys.Permissions.S_IRUSR;
+                    writeBit = Interop.Sys.Permissions.S_IWUSR;
+                }
+                else if (fileStatus.Gid == Interop.Sys.GetEGid())
+                {
+                    // User belongs to a group that effectively owns the file
+                    readBit = Interop.Sys.Permissions.S_IRGRP;
+                    writeBit = Interop.Sys.Permissions.S_IWGRP;
+                }
+                else
+                {
+                    // Others permissions
+                    readBit = Interop.Sys.Permissions.S_IROTH;
+                    writeBit = Interop.Sys.Permissions.S_IWOTH;
+                }
+
+                return
+                    (fileStatus.Mode & (int)readBit) != 0 && // has read permission
+                    (fileStatus.Mode & (int)writeBit) == 0;  // but not write permission
+            }
+
+            if (_isDirectory) // this is the one attribute where we follow symlinks
             {
                 attrs |= FileAttributes.Directory;
             }
-            if (GetIsReadOnlyAssumesInitialized())
+            if (IsReadOnly(ref _fileStatus))
             {
                 attrs |= FileAttributes.ReadOnly;
             }
-            if (IsSymlinkAssumesInitialized)
+            if ((_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK)
             {
                 attrs |= FileAttributes.ReparsePoint;
             }
@@ -87,58 +110,15 @@ namespace System.IO
                 throw new ArgumentException(SR.Arg_InvalidFileAttrs, "Attributes");
             }
 
-            // The only thing we can reasonably change is whether the file object is readonly,
-            // just changing its permissions accordingly.
             EnsureStatInitialized(path);
 
             if (!_exists)
                 FileSystemInfo.ThrowNotFound(path);
 
-            SetIsReadOnlyAssumesInitialized(path, (attributes & FileAttributes.ReadOnly) != 0);
-            _fileStatusInitialized = -1;
-        }
+            // The only thing we can reasonably change is whether the file object is readonly by changing permissions.
 
-        /// <summary>Gets whether stat reported this system object as a directory.</summary>
-        private bool IsDirectoryAssumesInitialized =>
-            (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR ||
-            (IsSymlinkAssumesInitialized && _targetOfSymlinkIsDirectory);
-
-        /// <summary>Gets whether stat reported this system object as a symlink.</summary>
-        private bool IsSymlinkAssumesInitialized =>
-            (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK;
-
-        /// <summary>
-        /// Gets or sets whether the file is read-only.  This is based on the read/write/execute
-        /// permissions of the object.
-        /// </summary>
-        private bool GetIsReadOnlyAssumesInitialized()
-        {
-            Interop.Sys.Permissions readBit, writeBit;
-            if (_fileStatus.Uid == Interop.Sys.GetEUid())      // does the user effectively own the file?
-            {
-                readBit = Interop.Sys.Permissions.S_IRUSR;
-                writeBit = Interop.Sys.Permissions.S_IWUSR;
-            }
-            else if (_fileStatus.Gid == Interop.Sys.GetEGid()) // does the user belong to a group that effectively owns the file?
-            {
-                readBit = Interop.Sys.Permissions.S_IRGRP;
-                writeBit = Interop.Sys.Permissions.S_IWGRP;
-            }
-            else                                              // everyone else
-            {
-                readBit = Interop.Sys.Permissions.S_IROTH;
-                writeBit = Interop.Sys.Permissions.S_IWOTH;
-            }
-
-            return
-                (_fileStatus.Mode & (int)readBit) != 0 && // has read permission
-                (_fileStatus.Mode & (int)writeBit) == 0;  // but not write permission
-        }
-
-        private void SetIsReadOnlyAssumesInitialized(string path, bool readOnly)
-        {
             int newMode = _fileStatus.Mode;
-            if (readOnly) // true if going from writable to readable, false if going from readable to writable
+            if ((attributes & FileAttributes.ReadOnly) != 0)
             {
                 // Take away all write permissions from user/group/everyone
                 newMode &= ~(int)(Interop.Sys.Permissions.S_IWUSR | Interop.Sys.Permissions.S_IWGRP | Interop.Sys.Permissions.S_IWOTH);
@@ -152,8 +132,10 @@ namespace System.IO
             // Change the permissions on the file
             if (newMode != _fileStatus.Mode)
             {
-                Interop.CheckIo(Interop.Sys.ChMod(path, newMode), path, _isDirectory);
+                Interop.CheckIo(Interop.Sys.ChMod(path, newMode), path, InitiallyDirectory);
             }
+
+            _fileStatusInitialized = -1;
         }
 
         internal bool GetExists(ReadOnlySpan<char> path)
@@ -161,7 +143,7 @@ namespace System.IO
             if (_fileStatusInitialized == -1)
                 Refresh(path);
 
-            return _exists && _isDirectory == IsDirectoryAssumesInitialized;
+            return _exists && InitiallyDirectory == _isDirectory;
         }
 
         internal DateTimeOffset GetCreationTime(ReadOnlySpan<char> path)
@@ -218,13 +200,14 @@ namespace System.IO
 
         private void SetAccessWriteTimes(string path, long? accessTime, long? writeTime)
         {
-            _fileStatusInitialized = -1; // force a refresh so that we have an up-to-date times for values not being overwritten
+            // force a refresh so that we have an up-to-date times for values not being overwritten
+            _fileStatusInitialized = -1;
             EnsureStatInitialized(path);
             Interop.Sys.UTimBuf buf;
             // we use utime() not utimensat() so we drop the subsecond part
             buf.AcTime = accessTime ?? _fileStatus.ATime;
             buf.ModTime = writeTime ?? _fileStatus.MTime;
-            Interop.CheckIo(Interop.Sys.UTime(path, ref buf), path, _isDirectory);
+            Interop.CheckIo(Interop.Sys.UTime(path, ref buf), path, InitiallyDirectory);
             _fileStatusInitialized = -1;
         }
 
@@ -243,10 +226,10 @@ namespace System.IO
             // If it is a symlink, then subsequently get details on the target of the symlink,
             // storing those results separately.  We only report failure if the initial
             // lstat fails, as a broken symlink should still report info on exists, attributes, etc.
-            _targetOfSymlinkIsDirectory = false;
+            _isDirectory = false;
             if (PathInternal.EndsInDirectorySeparator(path))
                 path = path.Slice(0, path.Length - 1);
-            int result = Interop.Sys.LStat_Span(path, out _fileStatus);
+            int result = Interop.Sys.LStat(path, out _fileStatus);
             if (result < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
@@ -267,11 +250,13 @@ namespace System.IO
             }
 
             _exists = true;
+            _isDirectory = (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
 
+            // If we're a symlink, attempt to check the target to see if it is a directory
             if ((_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK &&
-                Interop.Sys.Stat_Span(path, out Interop.Sys.FileStatus targetStatus) >= 0)
+                Interop.Sys.Stat(path, out Interop.Sys.FileStatus targetStatus) >= 0)
             {
-                _targetOfSymlinkIsDirectory = (targetStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
+                _isDirectory = (targetStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
             }
 
             _fileStatusInitialized = 0;

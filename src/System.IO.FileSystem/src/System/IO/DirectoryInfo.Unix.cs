@@ -6,10 +6,10 @@ namespace System.IO
 {
     partial class DirectoryInfo
     {
-        internal static unsafe DirectoryInfo Create(string fullPath, string fileName, FileStatus fileStatus)
+        internal static unsafe DirectoryInfo Create(string fullPath, string fileName, ref FileStatus fileStatus)
         {
             DirectoryInfo info = new DirectoryInfo(fullPath, fileName: fileName, isNormalized: true);
-            info.Init(fileStatus);
+            info.Init(ref fileStatus);
             return info;
         }
     }
