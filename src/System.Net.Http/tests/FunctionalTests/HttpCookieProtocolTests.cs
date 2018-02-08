@@ -69,8 +69,8 @@ namespace System.Net.Http.Functional.Tests
                     foreach (var s in requestLines)
                         Console.WriteLine(s);
 
-                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                     Assert.Contains($"Cookie: {s_expectedCookieHeaderValue}", requestLines);
+                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                 }
             });
         }
@@ -110,8 +110,8 @@ namespace System.Net.Http.Functional.Tests
 
                     string expectedHeader = "Cookie: " + string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}").ToArray());
 
-                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                     Assert.Contains(expectedHeader, requestLines);
+                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                 }
             });
         }
@@ -144,8 +144,8 @@ namespace System.Net.Http.Functional.Tests
                     foreach (var s in requestLines)
                         Console.WriteLine(s);
 
-                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                     Assert.Contains($"Cookie: {s_customCookieHeaderValue}", requestLines);
+                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie:")));
                 }
             });
         }
@@ -182,9 +182,9 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie: ")));
 
                     var cookies = requestLines.Single(s => s.StartsWith("Cookie: ")).Substring(8).Split(new string[] { "; " }, StringSplitOptions.None);
-                    Assert.Equal(2, cookies.Count());
                     Assert.Contains(s_expectedCookieHeaderValue, cookies);
                     Assert.Contains(s_customCookieHeaderValue, cookies);
+                    Assert.Equal(2, cookies.Count());
                 }
             });
         }
