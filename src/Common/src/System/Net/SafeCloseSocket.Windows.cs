@@ -123,10 +123,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private void TryWakeup(InnerSafeCloseSocket innerSocket)
-        {
-            return;
-        }
+        private void UnblockSocket(InnerSafeCloseSocket innerSocket) {}
 
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
         {

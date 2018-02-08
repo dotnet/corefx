@@ -170,7 +170,7 @@ namespace System.Net.Sockets
                 Dispose();
                 if (innerSocket != null)
                 {
-                    TryWakeup(innerSocket);
+                    UnblockSocket(innerSocket);
 
                     // Wait until it's safe.
                     SpinWait sw = new SpinWait();

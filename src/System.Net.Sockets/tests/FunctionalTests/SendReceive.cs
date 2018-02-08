@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
@@ -382,45 +384,6 @@ namespace System.Net.Sockets.Tests
 
                 Assert.Equal(bytesSent, bytesReceived);
                 Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);
-            }
-        }
-
-        [OuterLoop]
-        [Theory]
-        [MemberData(nameof(Loopbacks))]
-        public void SendRecv_BlockingStreamRead_Close(IPAddress listenAt)
-        {
-            // Test for #22564 when close is called while blocking read is pending.
-            using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
-            using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
-            {
-                server.BindToAnonymousPort(listenAt);
-                server.Listen(1);
-
-                Thread clientThread = new Thread(() =>
-                {
-                    byte[] buffer = new byte[16];
-                    client.Connect(server.LocalEndPoint);
-                    // Blocking read.
-                    try
-                    {
-                        client.Receive(buffer);
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // Closed and disposed by parent thread.
-                        return;
-                    }
-                    catch (SocketException) { };
-
-                    client.Close();
-                });
-                clientThread.IsBackground = true;
-                clientThread.Start();
-                Socket s = server.Accept();
-                // Close client socket from parent thread.
-                client.Close();
-                clientThread.Join();
             }
         }
 
@@ -1373,6 +1336,109 @@ namespace System.Net.Sockets.Tests
         }
     }
 
+    public class BlockingSendReceive : RemoteExecutorTestBase
+    {
+
+        private readonly ITestOutputHelper _log;
+        public static readonly object[][] Loopbacks = MemberDatas.Loopbacks;
+
+        public BlockingSendReceive(ITestOutputHelper output)
+        {
+            _log = output;
+        }
+
+        [Theory]
+        [MemberData(nameof(Loopbacks))]
+        public void BlockingStreamRead_Close(IPAddress ipAddress)
+        {
+            // This test verifies blocking behavior. Always run it as remote task
+            // to isolate any possible failures.
+            RemoteInvoke((address) =>
+            {
+                IPAddress listenAt = IPAddress.Parse(address);
+
+                // Test for #22564 when close is called while blocking read is pending.
+                using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    server.BindToAnonymousPort(listenAt);
+                    server.Listen(1);
+                    byte[] buffer = new byte[1];
+                    buffer[0] = Convert.ToByte('a');
+
+                    Thread clientThread = new Thread(() =>
+                    {
+                        client.Connect(server.LocalEndPoint);
+                        client.Send(buffer);
+                        // Blocking read.
+                        try
+                        {
+                            client.Receive(buffer);
+                        }
+                        catch (SocketException) { };
+                    });
+                    clientThread.IsBackground = true;
+                    clientThread.Start();
+                    Socket s = server.Accept();
+                    s.Receive(buffer, 1, SocketFlags.None);
+                    // Close client socket from parent thread.
+                    // clientThread should be now blocked on Receive()
+                    client.Close();
+                    clientThread.Join();
+                }
+                return SuccessExitCode;
+            }, ipAddress.ToString()).Dispose();
+        }
+
+        [Theory]
+        [PlatformSpecific(~TestPlatforms.OSX)]
+        [MemberData(nameof(Loopbacks))]
+        public void BlockingStreamAccept_Close(IPAddress ipAddress)
+        {
+            // This test verifies blocking behavior. Always run it as remote task
+            // to isolate any possible failures.
+            RemoteInvoke((address) =>
+            {
+                IPAddress listenAt = IPAddress.Parse(address);
+
+                // Test for #26034 when close is called while blocking accept is pending.
+                using (var server = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                using (var client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    byte[] buffer = new byte[1];
+                    buffer[0] = Convert.ToByte('a');
+                    server.BindToAnonymousPort(listenAt);
+                    Thread clientThread = new Thread(() =>
+                    {
+                        server.Listen(1);
+                        try
+                        {
+                            // Each round will block until new connection is accepted.
+                            while (true)
+                            {
+                                Socket serverSocket = server.Accept();
+                                serverSocket.Send(buffer);
+                            }
+                        }
+                        catch (SocketException) { };
+                    });
+                    clientThread.IsBackground = true;
+                    clientThread.Start();
+                    // Make sure we can connect at least once
+                    client.Connect(server.LocalEndPoint);
+                    client.Receive(buffer, 1, SocketFlags.None);
+                    client.Close();
+                    // Now clientThread should be blocked waiting for another connect.
+                    // force Close on the socket from parent thread.
+                    server.Close();
+                    clientThread.Join();
+                }
+                return SuccessExitCode;
+            }, ipAddress.ToString()).Dispose();
+        }
+    }
+
+    public sealed class SendReceiveSync : SendReceive<SocketHelperArraySync> { }
     public sealed class SendReceiveSyncForceNonBlocking : SendReceive<SocketHelperSyncForceNonBlocking> { }
     public sealed class SendReceiveApm : SendReceive<SocketHelperApm> { }
     public sealed class SendReceiveTask : SendReceive<SocketHelperTask> { }

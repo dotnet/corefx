@@ -208,7 +208,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private void TryWakeup(InnerSafeCloseSocket innerSocket)
+        private void UnblockSocket(InnerSafeCloseSocket innerSocket)
         {
             if ((AsyncContext == null || !AsyncContext.GetNonBlocking()) && innerSocket != null && !_underlyingHandleNonBlocking && !innerSocket.IsClosed && !innerSocket.IsInvalid)
             {
