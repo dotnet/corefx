@@ -250,17 +250,8 @@
   <data name="Cryptography_TimestampReq_BadResponse" xml:space="preserve">
     <value>The response from the timestamping server was not understood.</value>
   </data>
-  <data name="Cryptography_TimestampReq_Error" xml:space="preserve">
-    <value>An error occurred when requesting a timestamp.</value>
-  </data>
   <data name="Cryptography_TimestampReq_Failure" xml:space="preserve">
     <value>The timestamping server did not grant the request. The request status is '{0}' with failure info '{1}'.</value>
-  </data>
-  <data name="Cryptography_TimestampReq_HttpError" xml:space="preserve">
-    <value>The timestamp request failed with HTTP error '{0}' ({1}) and reason '{2}'.</value>
-  </data>
-  <data name="Cryptography_TimestampReq_HttpOrHttps" xml:space="preserve">
-    <value>An absolute URI whose scheme is 'http' or 'https' is required.</value>
   </data>
   <data name="Cryptography_TimestampReq_NoCertFound" xml:space="preserve">
     <value>The timestamping request requested the TSA certificate in the response, but it was not found.</value>
