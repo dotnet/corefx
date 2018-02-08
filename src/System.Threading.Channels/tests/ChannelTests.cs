@@ -135,15 +135,15 @@ namespace System.Threading.Channels.Tests
         public async void TestBaseClassReadAsync()
         {
             WrapperChannel<int> channel = new WrapperChannel<int>(10);
-            var reader = channel.Reader;
-            var writer = channel.Writer;
+            ChannelReader<int> reader = channel.Reader;
+            ChannelWriter<int> writer = channel.Writer;
 
-            // 1- do it through synchoronouse TryRead()
+            // 1- do it through synchronous TryRead()
             writer.TryWrite(50);
             Assert.Equal(50, await reader.ReadAsync());
 
             // 2- do it through async
-            var readTask = reader.ReadAsync();
+            ValueTask<int> readTask = reader.ReadAsync();
             writer.TryWrite(100);
             Assert.Equal(100, await readTask);
 
