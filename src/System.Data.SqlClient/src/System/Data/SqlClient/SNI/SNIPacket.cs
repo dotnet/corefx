@@ -240,7 +240,11 @@ namespace System.Data.SqlClient.SNI
         {
             bool error = false;
             TaskContinuationOptions options = TaskContinuationOptions.DenyChildAttach;
-            if(isMars)
+            // MARS operations during Sync ADO.Net API calls are Sync over Async. Each API call can request 
+            // threads to execute the async reads. MARS operations do not get the threads quickly enough leading to timeout
+            // To fix the MARS thread exhaustion issue LongRunning continuation option is a temporary solution with its own drawbacks, 
+            // and should be removed after evaluating how to fix MARS threading issues efficiently
+            if (isMars)
             {
                 options |= TaskContinuationOptions.LongRunning;
             }
