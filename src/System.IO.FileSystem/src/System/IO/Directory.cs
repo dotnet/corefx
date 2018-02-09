@@ -65,11 +65,15 @@ namespace System.IO
         {
             if (string.IsNullOrEmpty(path) || path.Contains('\0'))
                 return false;
-
-            char c = path[path.Length - 1];
-            if (c == '.' || c == ' ')
-                path = path.TrimEnd(new char[] { '.', ' '});
-
+            
+            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\"))
+            {
+				if ( path.Contains('\\') && path.Substring(path.LastIndexOf('\\')) == "\\..")
+				{
+					path = Path.GetDirectoryName(Path.GetDirectoryName(path));
+				}
+                path = PathHelpers.TrimTrailingSpacesAndDots(path);
+            }
             return FileSystem.DirectoryExists(path);
         }
 

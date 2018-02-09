@@ -174,14 +174,11 @@ namespace System.IO
             if (string.IsNullOrEmpty(path))
                 return false;
 
-            char c = path[path.Length - 1];
-            if (c == '.' || c == ' ')
-                path = path.TrimEnd(new char[] { '.', ' ' });
+            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\") && (c == '.' || c == ' '))
+                path = PathHelpers.TrimTrailingSpacesAndDots(path);
 
             if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
-            {
                 return false;
-            }
 
             return FileSystem.FileExists(path);
         }
