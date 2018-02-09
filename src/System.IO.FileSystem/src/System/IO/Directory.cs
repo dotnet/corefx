@@ -72,7 +72,7 @@ namespace System.IO
 				{
 					path = Path.GetDirectoryName(Path.GetDirectoryName(path));
 				}
-                path = PathHelpers.TrimTrailingSpacesAndDots(path);
+                path = path.TrimEnd(new char[] { '.', ' ' });
             }
             return FileSystem.DirectoryExists(path);
         }

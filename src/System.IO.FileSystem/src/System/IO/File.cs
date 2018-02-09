@@ -174,8 +174,8 @@ namespace System.IO
             if (string.IsNullOrEmpty(path))
                 return false;
 
-            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\") && (c == '.' || c == ' '))
-                path = PathHelpers.TrimTrailingSpacesAndDots(path);
+            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\"))
+                path = path.TrimEnd(new char[] { '.', ' ' });
 
             if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
                 return false;

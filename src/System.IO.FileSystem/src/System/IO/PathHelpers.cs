@@ -189,14 +189,5 @@ namespace System.IO
 
             return ReadOnlySpan<char>.Empty;
         }
-
-        internal static string TrimTrailingSpacesAndDots(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                return path;
-            char c = path[path.Length - 1];
-            if (c == '.' || c == ' ')
-                return path.TrimEnd(new char[] { '.', ' ' });
-        }
     }
 }
