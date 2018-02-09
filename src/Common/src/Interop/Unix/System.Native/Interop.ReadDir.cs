@@ -39,20 +39,16 @@ internal static partial class Interop
                 Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(255), "should have enough space for the max file name");
                 Debug.Assert(Name != null, "should not have a null name");
 
-                int byteLength = NameLength;
-                if (byteLength == -1)
-                {
-                    byteLength = 0;
-                    byte* first = Name;
-                    while (*first++ != 0)
-                        byteLength++;
-                }
+                ReadOnlySpan<byte> nameBytes = NameLength == -1
+                    // In this case the struct was allocated via struct dirent *readdir(DIR *dirp);
+                    ? new ReadOnlySpan<byte>(Name, new ReadOnlySpan<byte>(Name, 255).IndexOf<byte>(0))
+                    : new ReadOnlySpan<byte>(Name, NameLength);
 
-                Debug.Assert(byteLength >= 0, "we shouldn't have gotten a garbage value from the OS");
-                if (byteLength <= 0)
+                Debug.Assert(nameBytes.Length > 0, "we shouldn't have gotten a garbage value from the OS");
+                if (nameBytes.Length == 0)
                     return buffer.Slice(0, 0);
 
-                int charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(Name, byteLength), buffer);
+                int charCount = Encoding.UTF8.GetChars(nameBytes, buffer);
                 ReadOnlySpan<char> value = buffer.Slice(0, charCount);
                 Debug.Assert(value.IndexOf('\0') == -1, "should not have embedded nulls");
                 return value;
@@ -80,7 +76,7 @@ internal static partial class Interop
         /// </summary>
         internal static int ReadDir(SafeDirectoryHandle dir, Span<byte> buffer, ref DirectoryEntry entry)
         {
-            // The calling pattern for ReadDir is described in src/Native/System.Native/pal_readdir.cpp
+            // The calling pattern for ReadDir is described in src/Native/Unix/System.Native/pal_io.cpp|.h
             Debug.Assert(buffer.Length >= ReadBufferSize, "should have a big enough buffer for the raw data");
 
             // ReadBufferSize is zero when the native implementation does not support reading into a buffer.
