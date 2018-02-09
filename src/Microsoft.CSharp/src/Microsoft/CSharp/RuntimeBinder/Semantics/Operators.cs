@@ -2453,7 +2453,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = ExpressionKindName(ek);
             Debug.Assert(name != null);
             bool foundSome = false;
-            for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+            for (MethodSymbol methCur = SymbolLoader.LookupAggMember(name, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
                 methCur != null;
                 methCur = SymbolLoader.LookupNextSym(methCur, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
             {

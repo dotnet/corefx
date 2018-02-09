@@ -13,12 +13,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public PropertySymbol propNubValue;
         public MethodSymbol methNubCtor;
 
-        private readonly SymFactory _symFactory;
-
         public BSYMMGR()
         {
-            _symFactory = new SymFactory();
-
             ////////////////////////////////////////////////////////////////////////////////
             // Build the data structures needed to make FPreLoad fast. Make sure the 
             // namespaces are created. Compute and sort hashes of the NamespaceSymbol * value and type
@@ -36,7 +32,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
                     Name nm = NameManager.Add(sub);
-                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
+                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? SymFactory.CreateNamespace(nm, ns);
                     start += sub.Length + 1;
                 }
             }
@@ -114,20 +110,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return nTot;
         }
 
-        public SymFactory GetSymFactory()
-        {
-            return _symFactory;
-        }
+        public static Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask) => SymbolStore.LookupSym(name, parent, kindmask);
 
-        public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask)
-        {
-            return SymbolStore.LookupSym(name, parent, kindmask);
-        }
-
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
-        {
-            return SymbolStore.LookupSym(name, agg, mask);
-        }
+        public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => SymbolStore.LookupSym(name, agg, mask);
 
         public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
         {

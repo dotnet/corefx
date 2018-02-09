@@ -544,8 +544,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
                         getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
-                    GetSymbolLoader()
-                        .LookupAggMember(getOrCreateMethodName, fieldType.OwningAggregate, symbmask_t.MASK_MethodSymbol)
+                    SymbolLoader.LookupAggMember(getOrCreateMethodName, fieldType.OwningAggregate, symbmask_t.MASK_MethodSymbol)
                          as MethodSymbol;
 
                 MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType);
@@ -562,8 +561,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
                         invocationListName.Text, null, fieldType.AssociatedSystemType);
                 PropertySymbol invocationList =
-                    GetSymbolLoader()
-                        .LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
+                    SymbolLoader.LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
                          as PropertySymbol;
 
                 MethPropWithInst mpwi = new MethPropWithInst(invocationList, fieldType);
@@ -688,7 +686,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Find the next operator.
                 methCur = methCur == null
-                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol
+                    ? SymbolLoader.LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol
                     : SymbolLoader.LookupNextSym(methCur, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
 
                 if (methCur == null)

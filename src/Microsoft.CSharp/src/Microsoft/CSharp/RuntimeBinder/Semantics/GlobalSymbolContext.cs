@@ -27,10 +27,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private BSYMMGR GlobalSymbols { get; }
         public BSYMMGR GetGlobalSymbols() { return GlobalSymbols; }
         public PredefinedTypes GetPredefTypes() { return _predefTypes; }
-
-        public SymFactory GetGlobalSymbolFactory()
-        {
-            return GetGlobalSymbols().GetSymFactory();
-        }
     }
 }

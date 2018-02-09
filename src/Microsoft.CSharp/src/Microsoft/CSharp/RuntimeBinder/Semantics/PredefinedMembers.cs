@@ -368,7 +368,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
         {
-            for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
+            for (Symbol sym = SymbolLoader.LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;
                  sym = SymbolLoader.LookupNextSym(sym, type, symbmask_t.MASK_ALL))
             {

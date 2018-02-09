@@ -53,12 +53,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             _semanticChecker = new CSemanticChecker();
 
-            BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
-
             _symbolTable = new SymbolTable(
-                bsymmgr.GetSymFactory(),
                 _semanticChecker.GetTypeManager(),
-                bsymmgr,
                 _semanticChecker);
             _semanticChecker.getPredefTypes().Init(_symbolTable);
             _semanticChecker.GetTypeManager().InitTypeFactory(_symbolTable);
@@ -137,7 +133,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             //    Linq expression tree for the whole thing and return it.
 
             // (1) - Create the locals
-            Scope pScope = _semanticChecker.GetGlobalSymbolFactory().CreateScope();
+            Scope pScope = SymFactory.CreateScope();
             LocalVariableSymbol[] locals = PopulateLocalScope(payload, pScope, arguments, parameters);
 
             // (1.5) - Check to see if we need to defer.
@@ -219,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (t != null)
             {
                 AggregateSymbol agg = ((AggregateType)_symbolTable.GetCTypeFromType(t)).OwningAggregate;
-                bindingContext.ContextForMemberLookup = _semanticChecker.GetGlobalSymbolFactory().CreateAggregateDecl(agg, null);
+                bindingContext.ContextForMemberLookup = SymFactory.CreateAggregateDecl(agg, null);
             }
             else
             {
@@ -402,8 +398,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
                 }
                 LocalVariableSymbol local =
-                    _semanticChecker.GetGlobalSymbolFactory()
-                        .CreateLocalVar(NameManager.Add("p" + i), pScope, type);
+                    SymFactory.CreateLocalVar(NameManager.Add("p" + i), pScope, type);
                 locals[i] = local;
             }
 
@@ -609,7 +604,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
+                if (SymbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -627,7 +622,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 foreach (AggregateType t in callingType.WinRTCollectionIfacesAll.Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
+                    if (SymbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }

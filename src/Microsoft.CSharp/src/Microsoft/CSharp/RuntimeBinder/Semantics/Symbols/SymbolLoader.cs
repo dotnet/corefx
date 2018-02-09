@@ -59,19 +59,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GlobalSymbolContext.GetGlobalSymbols();
         }
 
-        public SymFactory GetGlobalSymbolFactory()
-        {
-            return GlobalSymbolContext.GetGlobalSymbolFactory();
-        }
-
         public AggregateSymbol GetPredefAgg(PredefinedType pt) => GetTypeManager().GetPredefAgg(pt);
 
         public AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
 
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
-        {
-            return getBSymmgr().LookupAggMember(name, agg, mask);
-        }
+        public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => BSYMMGR.LookupAggMember(name, agg, mask);
 
         public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
             => BSYMMGR.LookupNextSym(sym, parent, kindmask);

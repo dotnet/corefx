@@ -40,7 +40,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public EventSymbol getEvent(SymbolLoader symbolLoader)
         {
             Debug.Assert(isEvent);
-            return symbolLoader.LookupAggMember(name, getClass(), symbmask_t.MASK_EventSymbol) as EventSymbol;
+            return SymbolLoader.LookupAggMember(name, getClass(), symbmask_t.MASK_EventSymbol) as EventSymbol;
         }
     }
 }

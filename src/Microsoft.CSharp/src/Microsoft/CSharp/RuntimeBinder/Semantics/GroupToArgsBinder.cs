@@ -586,7 +586,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                             AggregateSymbol agg = symbolLoader.GetPredefAgg(PredefinedType.PT_MISSING);
                             Name name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
-                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
+                            FieldSymbol field = SymbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             ExprField exprField = ExprFactory.CreateField(agg.getThisType(), null, fwt);
                             optionalArgument = ExprFactory.CreateCast(type, exprField);
@@ -659,7 +659,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         pAggregate?.GetBaseAgg() != null;
                         pAggregate = pAggregate.GetBaseAgg())
                 {
-                    for (MethodOrPropertySymbol meth = symbolLoader.LookupAggMember(method.name, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol;
+                    for (MethodOrPropertySymbol meth = SymbolLoader.LookupAggMember(method.name, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol;
                             meth != null;
                             meth = SymbolLoader.LookupNextSym(meth, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol)
                     {

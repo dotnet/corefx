@@ -112,7 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Loop through symbols.
             Symbol symCur;
-            for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.OwningAggregate, symbmask_t.MASK_Member);
+            for (symCur = SymbolLoader.LookupAggMember(_name, typeCur.OwningAggregate, symbmask_t.MASK_Member);
                  symCur != null;
                  symCur = SymbolLoader.LookupNextSym(symCur, typeCur.OwningAggregate, symbmask_t.MASK_Member))
             {
