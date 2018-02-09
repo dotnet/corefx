@@ -19,7 +19,6 @@ namespace System.Net.Http
         {
             var proxyConfig = new Interop.WinHttp.WINHTTP_CURRENT_USER_IE_PROXY_CONFIG();
 
-	    Console.WriteLine("WinInetProxyHelper() called!!!! {0}", proxyConfig);
             try
             {
                 if (Interop.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(out proxyConfig))
@@ -64,7 +63,6 @@ namespace System.Net.Http
         {
             get
             {
-		Console.WriteLine("AutoSettingsUsed {0}", AutoDetect);
                 return AutoDetect || !string.IsNullOrEmpty(AutoConfigUrl);
             }
         }
@@ -89,8 +87,6 @@ namespace System.Net.Http
             proxyInfo.AccessType = Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY;
             proxyInfo.Proxy = IntPtr.Zero;
             proxyInfo.ProxyBypass = IntPtr.Zero;
-
-	    Console.WriteLine("GetProxyForUrl {0}", uri);
 
             if (!_useProxy)
             {
@@ -135,7 +131,7 @@ namespace System.Net.Http
                 {
                     WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: Using autoconfig proxy settings");
                     useProxy = true;
-                    Console.WriteLine("proxy34: {0}", Marshal.PtrToStringUni(proxyInfo.Proxy)            );
+                    
                     break;
                 }
                 else
@@ -167,7 +163,6 @@ namespace System.Net.Http
             if (!useProxy && !string.IsNullOrEmpty(Proxy))
             {
                 proxyInfo.AccessType = Interop.WinHttp.WINHTTP_ACCESS_TYPE_NAMED_PROXY;
-                Console.WriteLine("proxy33: {0}", Proxy);
                 proxyInfo.Proxy = Marshal.StringToHGlobalUni(Proxy);
                 proxyInfo.ProxyBypass = string.IsNullOrEmpty(ProxyBypass) ?
                     IntPtr.Zero : Marshal.StringToHGlobalUni(ProxyBypass);
