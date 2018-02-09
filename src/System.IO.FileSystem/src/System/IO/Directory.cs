@@ -94,7 +94,7 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
-
+ 
         public static void SetLastWriteTime(string path, DateTime lastWriteTime)
         {
             string fullPath = Path.GetFullPath(path);
@@ -226,7 +226,7 @@ namespace System.IO
             => EnumerateFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
-            => InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
+            =>  InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
 
         public static string GetDirectoryRoot(string path)
         {
@@ -241,8 +241,7 @@ namespace System.IO
 
         internal static string InternalGetDirectoryRoot(string path)
         {
-            if (path == null)
-                return null;
+            if (path == null) return null;
             return path.Substring(0, PathInternal.GetRootLength(path));
         }
 
