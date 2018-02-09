@@ -413,7 +413,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _pGroup,
                         _pArguments,
                         _pExprBinder.GetTypes(),
-                        _pExprBinder.GetExprFactory(),
                         GetSymbolLoader());
                 return _bArgumentsChangedForNamedOrOptionalArguments;
             }
@@ -425,7 +424,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ExprMemberGroup pGroup,
                     ArgInfos pArguments,
                     TypeManager typeManager,
-                    ExprFactory exprFactory,
                     SymbolLoader symbolLoader)
             {
                 // We use the param count from pCurrentParameters because they may have been resized 
@@ -477,7 +475,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         if (methprop.IsParameterOptional(index))
                         {
-                            pNewArg = GenerateOptionalArgument(symbolLoader, exprFactory, methprop, @params[index], index);
+                            pNewArg = GenerateOptionalArgument(symbolLoader, methprop, @params[index], index);
                         }
                         else if (paramArrayArgument != null && index == methprop.Params.Count - 1)
                         {
@@ -516,7 +514,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private static Expr GenerateOptionalArgument(
                     SymbolLoader symbolLoader,
-                    ExprFactory exprFactory,
                     MethodOrPropertySymbol methprop,
                     CType type,
                     int index)
@@ -739,7 +736,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    pArguments[index] = GenerateOptionalArgument(GetSymbolLoader(), _pExprBinder.GetExprFactory(), methprop, @params[i], i);
+                    pArguments[index] = GenerateOptionalArgument(GetSymbolLoader(), methprop, @params[i], i);
                 }
 
                 // Success. Lets copy them in now.
@@ -1086,7 +1083,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(pMethod != null);
                     }
                     Debug.Assert(pMethod.IsParameterOptional(iParam));
-                    Expr pArgumentNew = GenerateOptionalArgument(GetSymbolLoader(), _pExprBinder.GetExprFactory(), pMethod, _pCurrentParameters[iParam], iParam);
+                    Expr pArgumentNew = GenerateOptionalArgument(GetSymbolLoader(), pMethod, _pCurrentParameters[iParam], iParam);
                     _pArguments.prgexpr[iParam] = pArgumentNew;
                 }
             }

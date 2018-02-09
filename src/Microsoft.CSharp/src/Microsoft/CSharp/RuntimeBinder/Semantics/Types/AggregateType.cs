@@ -165,7 +165,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public TypeArray GetWinRTCollectionIfacesAll(SymbolLoader pSymbolLoader)
+        public TypeArray GetWinRTCollectionIfacesAll()
         {
             if (_winrtifacesAll == null)
             {

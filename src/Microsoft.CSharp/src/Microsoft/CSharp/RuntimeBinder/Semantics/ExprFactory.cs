@@ -31,19 +31,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
-        public static ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) =>
-            new ExprMemberGroup(flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
+        public static ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, Expr obj, CMemberLookupResults memberLookupResults) =>
+            new ExprMemberGroup(flags, name, typeArgs, symKind, parentType, obj, memberLookupResults);
 
         public static ExprMemberGroup CreateMemGroup(Expr obj, MethPropWithInst method)
         {
             Name name = method.Sym?.name;
-            MethodOrPropertySymbol methProp = method.MethProp();
-
-            CType type = method.GetType();
-
             return CreateMemGroup(
-                0, name, method.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, method.GetType(), methProp,
-                obj, new CMemberLookupResults(TypeArray.Allocate(type), name));
+                0, name, method.TypeArgs, method.MethProp()?.getKind() ?? SYMKIND.SK_MethodSymbol, method.GetType(),
+                obj, new CMemberLookupResults(TypeArray.Allocate((CType)method.GetType()), name));
         }
 
         public static ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 

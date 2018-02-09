@@ -153,7 +153,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             ErrAppendChar('.');
         }
 
-        private void ErrAppendTypeParameters(TypeArray @params, SubstContext pctx, bool forClass)
+        private void ErrAppendTypeParameters(TypeArray @params, SubstContext pctx)
         {
             if (@params != null && @params.Count != 0)
             {
@@ -270,7 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
             }
 
-            ErrAppendTypeParameters(meth.typeVars, pctx, false);
+            ErrAppendTypeParameters(meth.typeVars, pctx);
 
             if (fArgs)
             {
@@ -350,7 +350,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         {
                             ErrAppendParentSym(sym, pctx);
                             ErrAppendName(sym.name);
-                            ErrAppendTypeParameters(((AggregateSymbol)sym).GetTypeVars(), pctx, true);
+                            ErrAppendTypeParameters(((AggregateSymbol)sym).GetTypeVars(), pctx);
                         }
                         break;
                     }
@@ -446,7 +446,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                             ErrAppendName(pAggType.OwningAggregate.name);
                         }
 
-                        ErrAppendTypeParameters(pAggType.TypeArgsThis, null, true);
+                        ErrAppendTypeParameters(pAggType.TypeArgsThis, null);
                         break;
                     }
 

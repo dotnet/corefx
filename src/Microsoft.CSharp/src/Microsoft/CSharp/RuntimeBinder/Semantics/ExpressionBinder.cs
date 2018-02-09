@@ -591,7 +591,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // the setter is actually an lvalue.
             Expr pObjectThrough = pObject;
 
-            PostBindProperty(pwt, pObject, out MethWithType mwtGet, out MethWithType mwtSet);
+            PostBindProperty(pwt, out MethWithType mwtGet, out MethWithType mwtSet);
 
             if (mwtGet &&
                     (!mwtSet ||
@@ -1036,7 +1036,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private void PostBindProperty(PropWithType pwt, Expr pObject, out MethWithType pmwtGet, out MethWithType pmwtSet)
+        private void PostBindProperty(PropWithType pwt, out MethWithType pmwtGet, out MethWithType pmwtSet)
         {
             PropertySymbol prop = pwt.Prop();
             Debug.Assert(prop != null);

@@ -494,7 +494,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Ambiguous.
 
-                    throw AmbiguousOperatorError(ek, arg1, arg2);
+                    throw AmbiguousOperatorError(arg1, arg2);
                 }
             }
 
@@ -525,7 +525,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 if (bofs.fnkind == BinOpFuncKind.BoolBitwiseOp)
                 {
-                    return BindBoolBitwiseOp(ek, flags, expr1, expr2, bofs);
+                    return BindBoolBitwiseOp(ek, flags, expr1, expr2);
                 }
                 return bofs.pfn(ek, flags, expr1, expr2);
             }
@@ -1195,7 +1195,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (nBestSignature < 0)
                         {
                             // Ambiguous.
-                            throw AmbiguousOperatorError(ek, pArgument, null);
+                            throw AmbiguousOperatorError(pArgument, null);
                         }
 
                         // Verify that our answer works.
@@ -1207,7 +1207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
                             if (WhichUofsIsBetter(pSignatures[nBestSignature], pSignatures[iuofs], type) >= 0)
                             {
-                                throw AmbiguousOperatorError(ek, pArgument, null);
+                                throw AmbiguousOperatorError(pArgument, null);
                             }
                         }
                     }
@@ -1812,7 +1812,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ExprFactory.CreateBinop(ek, GetPredefindType(PredefinedType.PT_BOOL), arg1, arg2);
         }
 
-        private ExprOperator BindBoolBitwiseOp(ExpressionKind ek, EXPRFLAG flags, Expr expr1, Expr expr2, BinOpFullSig bofs)
+        private ExprOperator BindBoolBitwiseOp(ExpressionKind ek, EXPRFLAG flags, Expr expr1, Expr expr2)
         {
             Debug.Assert(ek == ExpressionKind.BitwiseAnd || ek == ExpressionKind.BitwiseOr);
             Debug.Assert(expr1.Type.IsPredefType(PredefinedType.PT_BOOL) || expr1.Type is NullableType expNubType1 && expNubType1.UnderlyingType.IsPredefType(PredefinedType.PT_BOOL));
@@ -2276,7 +2276,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
           Report an ambiguous operator types error.
          */
-        private RuntimeBinderException AmbiguousOperatorError(ExpressionKind ek, Expr op1, Expr op2)
+        private RuntimeBinderException AmbiguousOperatorError(Expr op1, Expr op2)
         {
             Debug.Assert(op1 != null);
 

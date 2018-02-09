@@ -315,7 +315,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType ctype = GetCTypeFromType(type);
             if (ctype.IsWindowsRuntimeType)
             {
-                TypeArray collectioniFaces = ((AggregateType)ctype).GetWinRTCollectionIfacesAll(_semanticChecker.SymbolLoader);
+                TypeArray collectioniFaces = ((AggregateType)ctype).GetWinRTCollectionIfacesAll();
 
                 for (int i = 0; i < collectioniFaces.Count; i++)
                 {
@@ -1326,7 +1326,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 if (isIndexer)
                 {
-                    prop = _semanticChecker.SymbolLoader.GetGlobalSymbolFactory().CreateIndexer(name, aggregate, GetName(property.Name));
+                    prop = _semanticChecker.SymbolLoader.GetGlobalSymbolFactory().CreateIndexer(name, aggregate);
                     prop.Params = CreateParameterArray(null, property.GetIndexParameters());
                 }
                 else

@@ -58,7 +58,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // comparison when binding. The standard method type variables are useful during
             // binding for signature comparison.
 
-            public TypeParameterType GetTypeVarSym(int iv, TypeManager pTypeManager, bool fMeth)
+            public TypeParameterType GetTypeVarSym(int iv, bool fMeth)
             {
                 Debug.Assert(iv >= 0);
 
@@ -605,10 +605,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return SubstEqualTypes(typeDst, typeSrc, typeCls, (TypeArray)null);
         }
 
-        public TypeParameterType GetStdMethTypeVar(int iv)
-        {
-            return _stvcMethod.GetTypeVarSym(iv, this, true);
-        }
+        public TypeParameterType GetStdMethTypeVar(int iv) => _stvcMethod.GetTypeVarSym(iv, true);
 
         // These are singletons for each.
         public static TypeParameterType GetTypeParameter(TypeParameterSymbol pSymbol)

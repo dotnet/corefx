@@ -193,7 +193,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Scope CreateScope() => (Scope)NewBasicSymbol(SYMKIND.SK_Scope, null, null);
 
-        public IndexerSymbol CreateIndexer(Name name, ParentSymbol parent, Name realName)
+        public IndexerSymbol CreateIndexer(Name name, ParentSymbol parent)
         {
             IndexerSymbol sym = (IndexerSymbol)NewBasicSymbol(SYMKIND.SK_IndexerSymbol, name, parent);
             sym.setKind(SYMKIND.SK_PropertySymbol);
