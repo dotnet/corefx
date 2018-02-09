@@ -293,10 +293,6 @@ namespace System.SpanTests
         [InlineData("", "a", StringComparison.OrdinalIgnoreCase, false)]
         public static void EndsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
-            if (comparisonType == StringComparison.CurrentCulture)
-            {
-                Assert.Equal(expected, s.AsReadOnlySpan().EndsWith(value.AsReadOnlySpan()));
-            }
             Assert.Equal(expected, s.AsReadOnlySpan().EndsWith(value.AsReadOnlySpan(), comparisonType));
         }
 

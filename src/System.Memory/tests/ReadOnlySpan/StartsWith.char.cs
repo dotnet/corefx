@@ -301,10 +301,6 @@ namespace System.SpanTests
         [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
         public static void StartsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
-            if (comparisonType == StringComparison.CurrentCulture)
-            {
-                Assert.Equal(expected, s.AsReadOnlySpan().StartsWith(value.AsReadOnlySpan()));
-            }
             Assert.Equal(expected, s.AsReadOnlySpan().StartsWith(value.AsReadOnlySpan(), comparisonType));
         }
 
