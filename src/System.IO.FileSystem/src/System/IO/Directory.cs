@@ -63,24 +63,14 @@ namespace System.IO
         //
         public static bool Exists(string path)
         {
-            try
-            {
-                if (path == null)
-                    return false;
-                if (path.Length == 0)
-                    return false;
-
-                string fullPath = Path.GetFullPath(path);
-
-                return FileSystem.DirectoryExists(fullPath);
-            }
-            catch (ArgumentException) { }
-            catch (NotSupportedException) { }  // Security can throw this on ":"
-            catch (SecurityException) { }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
-
-            return false;
+            if (string.IsNullOrEmpty(path) || path.Contains('\0'))
+                return false;
+             
+             if (!Path.IsPathFullyQualified(path) || path.EndsWith('.') || path.EndsWith(' '))
+             {
+                path = Path.GetFullPath(path);
+             }
+             return FileSystem.DirectoryExists(path);
         }
 
         public static void SetCreationTime(string path, DateTime creationTime)
@@ -304,7 +294,7 @@ namespace System.IO
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
-            
+
             if (FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 

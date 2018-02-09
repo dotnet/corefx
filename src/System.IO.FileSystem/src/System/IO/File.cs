@@ -171,32 +171,18 @@ namespace System.IO
         // 
         public static bool Exists(string path)
         {
-            try
+            if (string.IsNullOrEmpty(path) || path.Contains('\0'))
+                return false;
+
+            if (!Path.IsPathFullyQualified(path) || path.EndsWith('.') || path.EndsWith(' '))
             {
-                if (path == null)
-                    return false;
-                if (path.Length == 0)
-                    return false;
-
                 path = Path.GetFullPath(path);
-                // After normalizing, check whether path ends in directory separator.
-                // Otherwise, FillAttributeInfo removes it and we may return a false positive.
-                // GetFullPath should never return null
-                Debug.Assert(path != null, "File.Exists: GetFullPath returned null");
-                if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
-                {
-                    return false;
-                }
-
-                return FileSystem.FileExists(path);
             }
-            catch (ArgumentException) { }
-            catch (NotSupportedException) { } // Security can throw this on ":"
-            catch (SecurityException) { }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
 
-            return false;
+            if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
+                return false;
+
+            return FileSystem.FileExists(path);
         }
 
         public static FileStream Open(string path, FileMode mode)
