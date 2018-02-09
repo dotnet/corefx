@@ -888,6 +888,13 @@ namespace System.Net.Http
 
                 HttpResponseMessage responseMessage = WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck);
                 state.Tcs.TrySetResult(responseMessage);
+
+                if(responseMessage.StatusCode == HttpStatusCode.Redirect &&
+                   responseMessage.Headers.Location.IsAbsoluteUri &&
+                   responseMessage.Headers.Location.Scheme == Uri.UriSchemeHttps) {
+                    //WinHttpTraceHelper.Trace("Possible insecure redirect (https -> http) detected.");
+                    Console.WriteLine("Insecure redirect detected.");
+                }
             }
             catch (Exception ex)
             {
