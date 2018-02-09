@@ -1737,12 +1737,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return GetSymbolLoader().GetTypeManager();
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private BSYMMGR GetGlobalSymbols()
-        {
-            return GetSymbolLoader().getBSymmgr();
-        }
     }
 }

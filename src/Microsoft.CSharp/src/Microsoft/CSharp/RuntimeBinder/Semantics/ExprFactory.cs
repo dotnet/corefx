@@ -19,8 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         private TypeManager Types => _globalSymbolContext.GetTypes();
 
-        private BSYMMGR GlobalSymbols => _globalSymbolContext.GetGlobalSymbols();
-
         public ExprCall CreateCall(EXPRFLAG flags, CType type, Expr arguments, ExprMemberGroup memberGroup, MethWithInst method) => 
             new ExprCall(type, flags, arguments, memberGroup, method);
 

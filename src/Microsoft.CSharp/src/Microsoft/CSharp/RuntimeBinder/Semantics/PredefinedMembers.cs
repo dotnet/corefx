@@ -252,10 +252,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return GetSymbolLoader().GetTypeManager();
         }
-        private BSYMMGR getBSymmgr()
-        {
-            return GetSymbolLoader().getBSymmgr();
-        }
 
         private Name GetPredefName(PredefinedName pn)
         {
