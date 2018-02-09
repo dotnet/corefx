@@ -136,6 +136,44 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async Task GetAsync_AddMultipleCookieHeaders_CookiesSent()
+        {
+            if (IsNetfxHandler)
+            {
+                // Netfx handler does not support custom cookie header
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    requestMessage.Headers.Add("Cookie", "A=1");
+                    requestMessage.Headers.Add("Cookie", "B=2");
+                    requestMessage.Headers.Add("Cookie", "C=3");
+
+                    Task<HttpResponseMessage> getResponseTask = client.SendAsync(requestMessage);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server);
+
+                    List<string> requestLines = await serverTask;
+
+                    foreach (var s in requestLines)
+                        Console.WriteLine(s);
+
+                    Assert.Equal(1, requestLines.Count(s => s.StartsWith("Cookie: ")));
+
+                    var cookies = requestLines.Single(s => s.StartsWith("Cookie: ")).Substring(8).Split(new string[] { "; " }, StringSplitOptions.None);
+                    Assert.Contains("A=1", cookies);
+                    Assert.Contains("B=2", cookies);
+                    Assert.Contains("C=3", cookies);
+                    Assert.Equal(3, cookies.Count());
+                }
+            });
+        }
+
+        [Fact]
         public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
         {
             if (IsNetfxHandler)
