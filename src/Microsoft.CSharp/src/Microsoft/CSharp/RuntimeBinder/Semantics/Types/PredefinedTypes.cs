@@ -12,12 +12,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class PredefinedTypes
     {
         private SymbolTable _runtimeBinderSymbolTable;
-        private readonly BSYMMGR _symbolManager;
         private AggregateSymbol[] _predefSyms;    // array of predefined symbol types.
 
-        public PredefinedTypes(BSYMMGR symbolManager)
+        public PredefinedTypes()
         {
-            _symbolManager = symbolManager;
             _runtimeBinderSymbolTable = null;
         }
 
@@ -41,7 +39,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void Init(SymbolTable symtable)
         {
             _runtimeBinderSymbolTable = symtable;
-            Debug.Assert(_symbolManager != null);
             Debug.Assert(_predefSyms == null);
 
             _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];

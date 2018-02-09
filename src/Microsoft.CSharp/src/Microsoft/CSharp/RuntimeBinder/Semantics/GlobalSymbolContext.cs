@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public GlobalSymbolContext()
         {
             GlobalSymbols = new BSYMMGR();
-            _predefTypes = new PredefinedTypes(GlobalSymbols);
+            _predefTypes = new PredefinedTypes();
             TypeManager = new TypeManager(GlobalSymbols, _predefTypes);
         }
 
