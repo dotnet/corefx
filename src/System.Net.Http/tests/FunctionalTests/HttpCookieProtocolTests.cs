@@ -211,13 +211,14 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
+            const string path1 = "/foo";
+            const string path2 = "/bar";
 
             await LoopbackServer.CreateServerAndClientAsync(async url =>
             {
-                Uri url1 = new Uri(url, "/foo");
-                Uri url2 = new Uri(url, "/bar");
+                Uri url1 = new Uri(url, path1);
+                Uri url2 = new Uri(url, path2);
                 Uri unusedUrl = new Uri(url, "/unused");
-                Console.WriteLine($"url1={url1}, url2={url2}");
 
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = new CookieContainer();
@@ -233,7 +234,7 @@ namespace System.Net.Http.Functional.Tests
             async server =>
             {
                 List<string> request1Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                    $"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nLocation: /bar\r\nConnection: close\r\n\r\n");
+                    $"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nLocation: {path2}\r\nConnection: close\r\n\r\n");
 
                 foreach (var s in request1Lines)
                     Console.WriteLine(s);
@@ -351,5 +352,56 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
+
+        [Fact]
+        public async Task GetAsyncWithRedirect_ReceiveSetCookie_CookieSent()
+        {
+            const string path1 = "/foo";
+            const string path2 = "/bar";
+
+            await LoopbackServer.CreateServerAndClientAsync(async url =>
+            {
+                Uri url1 = new Uri(url, path1);
+
+                HttpClientHandler handler = CreateHttpClientHandler();
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    await client.GetAsync(url1);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+
+                    Assert.Equal(2, collection.Count);
+
+                    // Convert to array so we can more easily process contents, since CookieCollection does not implement IEnumerable<Cookie>
+                    Cookie[] cookies = new Cookie[2];
+                    collection.CopyTo(cookies, 0);
+
+                    Assert.Contains(cookies, c => c.Name == "A" && c.Value == "1");
+                    Assert.Contains(cookies, c => c.Name == "B" && c.Value == "2");
+                }
+            },
+            async server =>
+            {
+                List<string> request1Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                    $"HTTP/1.1 302 Found\r\nContent-Length: 0\r\nLocation: {path2}\r\nSet-Cookie: A=1; Path=/\r\nConnection: close\r\n\r\n");
+
+                foreach (var s in request1Lines)
+                    Console.WriteLine(s);
+
+                Assert.Equal(0, request1Lines.Count(s => s.StartsWith("Cookie:")));
+
+                List<string> request2Lines = await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                    $"HTTP/1.1 200 OK\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: B=2; Path=/\r\n\r\n{s_simpleContent}");
+
+                foreach (var s in request2Lines)
+                    Console.WriteLine(s);
+
+                Assert.Contains($"Cookie: A=1", request2Lines);
+                Assert.Equal(1, request2Lines.Count(s => s.StartsWith("Cookie:")));
+            });
+        }
+
+
     }
 }
