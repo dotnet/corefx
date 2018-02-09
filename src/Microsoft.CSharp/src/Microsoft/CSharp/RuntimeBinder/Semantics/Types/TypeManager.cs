@@ -100,9 +100,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pArray;
         }
 
-        public AggregateType GetAggregate(AggregateSymbol agg, AggregateType atsOuter, TypeArray typeArgs)
+        public static AggregateType GetAggregate(AggregateSymbol agg, AggregateType atsOuter, TypeArray typeArgs)
         {
-            Debug.Assert(agg.GetTypeManager() == this);
             Debug.Assert(atsOuter == null || atsOuter.OwningAggregate == agg.Parent, "");
 
             if (typeArgs == null)
@@ -128,7 +127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pAggregate;
         }
 
-        public AggregateType GetAggregate(AggregateSymbol agg, TypeArray typeArgsAll)
+        public static AggregateType GetAggregate(AggregateSymbol agg, TypeArray typeArgsAll)
         {
             Debug.Assert(typeArgsAll != null && typeArgsAll.Count == agg.GetTypeVarsAll().Count);
 

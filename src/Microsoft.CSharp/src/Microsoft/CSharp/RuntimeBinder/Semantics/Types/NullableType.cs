@@ -30,7 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeManager = typeManager;
         }
 
-        public AggregateType GetAts() => _ats ?? (_ats = _typeManager.GetAggregate(
+        public AggregateType GetAts() => _ats ?? (_ats = TypeManager.GetAggregate(
                                              _typeManager.GetNullable(), TypeArray.Allocate(UnderlyingType)));
 
         public override CType StripNubs() => UnderlyingType;

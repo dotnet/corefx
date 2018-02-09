@@ -719,7 +719,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
 
                 TypeArray typeArray = TypeArray.Allocate(types.ToArray());
-                AggregateType aggType = _typeManager.GetAggregate(agg, typeArray);
+                AggregateType aggType = TypeManager.GetAggregate(agg, typeArray);
                 return aggType;
             }
             CType ctype = agg.getThisType();

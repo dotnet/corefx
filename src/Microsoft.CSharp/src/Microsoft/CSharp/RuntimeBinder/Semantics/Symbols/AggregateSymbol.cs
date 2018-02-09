@@ -89,7 +89,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 AggregateType pOuterType = isNested() ? GetOuterAgg().getThisType() : null;
 
-                _atsInst = _pTypeManager.GetAggregate(this, pOuterType, GetTypeVars());
+                _atsInst = TypeManager.GetAggregate(this, pOuterType, GetTypeVars());
             }
 
             //Debug.Assert(GetTypeVars().Size == atsInst.GenericArguments.Count);

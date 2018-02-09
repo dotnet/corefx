@@ -269,7 +269,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     int typeCount = agg.GetTypeVars().Count;
                     if (typeCount == 0)
                     {
-                        return GetTypeManager().GetAggregate(agg, TypeArray.Empty);
+                        return TypeManager.GetAggregate(agg, TypeArray.Empty);
                     }
 
                     CType[] typeArgs = new CType[typeCount];
@@ -278,7 +278,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
                     }
 
-                    return GetTypeManager().GetAggregate(agg, TypeArray.Allocate(typeArgs));
+                    return TypeManager.GetAggregate(agg, TypeArray.Allocate(typeArgs));
             }
         }
 

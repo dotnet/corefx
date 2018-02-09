@@ -2689,7 +2689,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Set the predefined method to call.
             AggregateSymbol agg = methSym.getClass();
-            AggregateType callingType = GetTypes().GetAggregate(agg, TypeArray.Empty);
+            AggregateType callingType = TypeManager.GetAggregate(agg, TypeArray.Empty);
             binop.PredefinedMethodToCall = new MethWithInst(methSym, callingType, null);
             binop.UserDefinedCallMethod = binop.PredefinedMethodToCall;
             return binop;
@@ -2703,7 +2703,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Set the predefined method to call.
             AggregateSymbol pAgg = methSym.getClass();
-            AggregateType pCallingType = GetTypes().GetAggregate(pAgg, TypeArray.Empty);
+            AggregateType pCallingType = TypeManager.GetAggregate(pAgg, TypeArray.Empty);
             pUnaryOp.PredefinedMethodToCall = new MethWithInst(methSym, pCallingType, null);
             pUnaryOp.UserDefinedCallMethod = pUnaryOp.PredefinedMethodToCall;
             return pUnaryOp;
