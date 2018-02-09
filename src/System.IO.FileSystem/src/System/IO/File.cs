@@ -171,7 +171,7 @@ namespace System.IO
         // 
         public static bool Exists(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path) || path.Contains('\0'))
                 return false;
 
             if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\"))
