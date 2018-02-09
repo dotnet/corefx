@@ -310,8 +310,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (_needsExprDest)
                         {
                             _exprDest = _exprSrc is ExprConstant
-                                ? GetExprFactory().CreateZeroInit(nubDst)
-                                : GetExprFactory().CreateCast(_typeDest, _exprSrc);
+                                ? ExprFactory.CreateZeroInit(nubDst)
+                                : ExprFactory.CreateCast(_typeDest, _exprSrc);
                         }
                         return true;
                     }
@@ -363,8 +363,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_needsExprDest)
                 {
                     MethWithInst mwi = new MethWithInst(null, null);
-                    ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-                    ExprCall exprDst = GetExprFactory().CreateCall(0, nubDst, _exprSrc, pMemGroup, null);
+                    ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+                    ExprCall exprDst = ExprFactory.CreateCall(0, nubDst, _exprSrc, pMemGroup, null);
 
                     // Here we want to first check whether or not the conversions work on the base types.
 
@@ -408,8 +408,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Otherwise, bind this as a cast to the destination type. In a later
                     // rewrite pass we will rewrite the cast as SEQ(side effects, ZEROINIT).
                     _exprDest = _exprSrc is ExprConstant
-                        ? GetExprFactory().CreateZeroInit(_typeDest)
-                        : GetExprFactory().CreateCast(_typeDest, _exprSrc);
+                        ? ExprFactory.CreateZeroInit(_typeDest)
+                        : ExprFactory.CreateCast(_typeDest, _exprSrc);
                 }
                 return true;
             }
@@ -648,7 +648,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // into a constant here - we should move this to a later pass.
                     if (_needsExprDest)
                     {
-                        _exprDest = GetExprFactory().CreateConstant(_typeDest, ConstVal.GetDefaultValue(_typeDest.ConstValKind));
+                        _exprDest = ExprFactory.CreateConstant(_typeDest, ConstVal.GetDefaultValue(_typeDest.ConstValKind));
                     }
                     return true;
                 }
@@ -734,10 +734,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private SymbolLoader GetSymbolLoader()
             {
                 return _binder.GetSymbolLoader();
-            }
-            private ExprFactory GetExprFactory()
-            {
-                return _binder.GetExprFactory();
             }
         }
     }

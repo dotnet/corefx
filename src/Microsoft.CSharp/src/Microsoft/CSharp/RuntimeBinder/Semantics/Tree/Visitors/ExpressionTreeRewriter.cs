@@ -105,12 +105,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr body = Visit(anonmeth.Expression);
             Debug.Assert(anonmeth.ArgumentScope.nextChild == null);
             Expr parameters = GenerateParamsArray(null, PredefinedType.PT_PARAMETEREXPRESSION);
-            Expr args = GetExprFactory().CreateList(body, parameters);
+            Expr args = ExprFactory.CreateList(body, parameters);
             CType typeRet = GetSymbolLoader().GetTypeManager().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-            ExprCall call = GetExprFactory().CreateCall(0, typeRet, args, pMemGroup, mwi);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+            ExprCall call = ExprFactory.CreateCall(0, typeRet, args, pMemGroup, mwi);
             call.PredefinedMethod = PREDEFMETH.PM_EXPRESSION_LAMBDA;
-            return GetExprFactory().CreateSequence(createParameters, call);
+            return ExprFactory.CreateSequence(createParameters, call);
         }
         protected override Expr VisitCONSTANT(ExprConstant expr)
         {
@@ -129,7 +129,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr pObject;
             if (expr.OptionalObject== null)
             {
-                pObject = GetExprFactory().CreateNull();
+                pObject = ExprFactory.CreateNull();
             }
             else
             {
@@ -260,7 +260,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr pObject;
             if (expr.MethWithInst.Meth().isStatic || expr.MemberGroup.OptionalObject== null)
             {
-                pObject = GetExprFactory().CreateNull();
+                pObject = ExprFactory.CreateNull();
             }
             else
             {
@@ -299,7 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr pObject;
             if (expr.PropWithTypeSlot.Prop().isStatic || expr.MemberGroup.OptionalObject== null)
             {
-                pObject = GetExprFactory().CreateNull();
+                pObject = ExprFactory.CreateNull();
             }
             else
             {
@@ -793,15 +793,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(anonmeth.Expression != null);
                 Expr create = GenerateParameter(local.name.Text, local.GetType());
-                local.wrap = GetExprFactory().CreateWrap(create);
-                Expr save = GetExprFactory().CreateSave(local.wrap);
+                local.wrap = ExprFactory.CreateWrap(create);
+                Expr save = ExprFactory.CreateSave(local.wrap);
                 if (sequence == null)
                 {
                     sequence = save;
                 }
                 else
                 {
-                    sequence = GetExprFactory().CreateSequence(sequence, save);
+                    sequence = ExprFactory.CreateSequence(sequence, save);
                 }
             }
 
@@ -825,7 +825,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (ExpressionIterator it = new ExpressionIterator(oldArgs); !it.AtEnd(); it.MoveNext())
             {
                 Expr oldArg = it.Current();
-                GetExprFactory().AppendItemToList(Visit(oldArg), ref newArgs, ref newArgsTail);
+                ExprFactory.AppendItemToList(Visit(oldArg), ref newArgs, ref newArgsTail);
             }
             return newArgs;
         }
@@ -841,11 +841,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr newIndex = it.Current();
                 if (newIndex.Type != intType)
                 {
-                    newIndex = expressionFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, intType, newIndex);
+                    newIndex = ExprFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, intType, newIndex);
                     newIndex.Flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
                 }
                 Expr rewrittenIndex = Visit(newIndex);
-                expressionFactory.AppendItemToList(rewrittenIndex, ref newIndices, ref newIndicesTail);
+                ExprFactory.AppendItemToList(rewrittenIndex, ref newIndices, ref newIndicesTail);
             }
             return newIndices;
         }
@@ -868,7 +868,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 flags = EXPRFLAG.EXF_BOX;
             }
 
-            ExprCast cast = GetExprFactory().CreateCast(flags, pObject, expr);
+            ExprCast cast = ExprFactory.CreateCast(flags, pObject, expr);
             ExprTypeOf pTypeOf2 = CreateTypeOf(expr.Type);
 
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, cast, pTypeOf2);
@@ -883,8 +883,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return null;
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(method, expressionType);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-            ExprCall call = GetExprFactory().CreateCall(0, mwi.Meth().RetType, arg1, pMemGroup, mwi);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+            ExprCall call = ExprFactory.CreateCall(0, mwi.Meth().RetType, arg1, pMemGroup, mwi);
             call.PredefinedMethod = pdm;
             return call;
         }
@@ -895,10 +895,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (method == null)
                 return null;
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
-            Expr args = GetExprFactory().CreateList(arg1, arg2);
+            Expr args = ExprFactory.CreateList(arg1, arg2);
             MethWithInst mwi = new MethWithInst(method, expressionType);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-            ExprCall call = GetExprFactory().CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+            ExprCall call = ExprFactory.CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
             call.PredefinedMethod = pdm;
             return call;
         }
@@ -909,10 +909,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (method == null)
                 return null;
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
-            Expr args = GetExprFactory().CreateList(arg1, arg2, arg3);
+            Expr args = ExprFactory.CreateList(arg1, arg2, arg3);
             MethWithInst mwi = new MethWithInst(method, expressionType);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-            ExprCall call = GetExprFactory().CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+            ExprCall call = ExprFactory.CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
             call.PredefinedMethod = pdm;
             return call;
         }
@@ -923,10 +923,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (method == null)
                 return null;
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
-            Expr args = GetExprFactory().CreateList(arg1, arg2, arg3, arg4);
+            Expr args = ExprFactory.CreateList(arg1, arg2, arg3, arg4);
             MethWithInst mwi = new MethWithInst(method, expressionType);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-            ExprCall call = GetExprFactory().CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+            ExprCall call = ExprFactory.CreateCall(0, mwi.Meth().RetType, args, pMemGroup, mwi);
             call.PredefinedMethod = pdm;
             return call;
         }
@@ -937,7 +937,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType paramsArrayElementType = GetSymbolLoader().GetPredefindType(pt);
             ArrayType paramsArrayType = GetSymbolLoader().GetTypeManager().GetArray(paramsArrayElementType, 1, true);
             ExprConstant paramsArrayArg = GetExprFactory().CreateIntegerConstant(parameterCount);
-            return GetExprFactory().CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
+            return ExprFactory.CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
         }
 
         private void FixLiftedUserDefinedBinaryOperators(ExprBinOp expr, ref Expr pp1, ref Expr pp2)
@@ -985,10 +985,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pp2 = new2;
         }
 
-        private bool IsNullableValueType(CType pType) =>
+        private static bool IsNullableValueType(CType pType) =>
             pType is NullableType && pType.StripNubs() is AggregateType agg && agg.OwningAggregate.IsValueType();
 
-        private bool IsNullableValueAccess(Expr pExpr, Expr pObject)
+        private static bool IsNullableValueAccess(Expr pExpr, Expr pObject)
         {
             Debug.Assert(pExpr != null);
             return pExpr is ExprProperty prop && prop.MemberGroup.OptionalObject == pObject && pObject.Type is NullableType;

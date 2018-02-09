@@ -333,14 +333,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region GetName
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Name GetName(string p)
-        {
-            return NameManager.Add(p ?? "");
-        }
+        private static Name GetName(string p) => NameManager.Add(p ?? "");
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Name GetName(Type type)
+        private static Name GetName(Type type)
         {
             string name = type.Name;
             if (type.IsGenericType)
@@ -464,7 +461,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private bool AreTypeParametersEquivalent(Type t1, Type t2)
+        private static bool AreTypeParametersEquivalent(Type t1, Type t2)
         {
             Debug.Assert(t1.IsGenericParameter && t2.IsGenericParameter);
 
@@ -514,7 +511,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         // return the type parameter type given if it is in a method, we do not try to
         // generalize these occurrences for reference equality.
         //
-        private Type GetOriginalTypeParameterType(Type t)
+        private static Type GetOriginalTypeParameterType(Type t)
         {
             Debug.Assert(t.IsGenericParameter);
 
@@ -630,7 +627,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             typeParam.SetConstraints(cons);
             typeParam.SetAccess(ACCESS.ACC_PUBLIC);
-            TypeParameterType typeParamType = _typeManager.GetTypeParameter(typeParam);
+            TypeParameterType typeParamType = TypeManager.GetTypeParameter(typeParam);
 
             return typeParamType;
         }
@@ -843,7 +840,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         // to lookup names of types for real (only names of members).
 
         // For either case, move onto the next symbol in the chain, and check again for appropriate type.
-        private AggregateSymbol FindSymForType(Symbol sym, Type t)
+        private static AggregateSymbol FindSymForType(Symbol sym, Type t)
         {
             while (sym != null)
             {
@@ -1725,7 +1722,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private uint GetCountOfModOpts(ParameterInfo[] parameters)
+        private static uint GetCountOfModOpts(ParameterInfo[] parameters)
         {
             uint count = 0;
 #if UNSUPPORTEDAPI
@@ -1788,7 +1785,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private bool DoesMethodHaveParameterArray(ParameterInfo[] parameters)
+        private static bool DoesMethodHaveParameterArray(ParameterInfo[] parameters)
         {
             if (parameters.Length == 0)
             {

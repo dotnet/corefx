@@ -83,7 +83,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // See if one's parameter types (un-instantiated) are more specific.
-            BetterType nT = GetGlobalSymbols().CompareTypes(
+            BetterType nT = BSYMMGR.CompareTypes(
                RearrangeNamedArguments(mpwi1.MethProp().Params, mpwi1, pTypeThrough, args),
                RearrangeNamedArguments(mpwi2.MethProp().Params, mpwi2, pTypeThrough, args));
             if (nT == BetterType.Left || nT == BetterType.Right)

@@ -1182,15 +1182,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private bool TypesAreEqual(Type t1, Type t2)
-        {
-            if (t1 == t2)
-            {
-                return true;
-            }
+        private static bool TypesAreEqual(Type t1, Type t2) => t1 == t2 || t1.IsEquivalentTo(t2);
 
-            return t1.IsEquivalentTo(t2);
-        }
         #endregion
     }
 }

@@ -311,7 +311,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            private void CopyArgInfos(ArgInfos src, ArgInfos dst)
+            private static void CopyArgInfos(ArgInfos src, ArgInfos dst)
             {
                 dst.carg = src.carg;
                 dst.types = src.types;
@@ -537,7 +537,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // but the constval that stores it is a long.
 
                         AggregateType dateTimeType = symbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
-                        optionalArgument = exprFactory.CreateConstant(dateTimeType, ConstVal.Get(DateTime.FromBinary(cv.Int64Val)));
+                        optionalArgument = ExprFactory.CreateConstant(dateTimeType, ConstVal.Get(DateTime.FromBinary(cv.Int64Val)));
                     }
                     else if (pConstValType.IsSimpleOrEnumOrString)
                     {
@@ -548,7 +548,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // For enum parameters, we create a constant of the enum type. For everything
                         // else, we create the appropriate constant.
 
-                        optionalArgument = exprFactory.CreateConstant(
+                        optionalArgument = ExprFactory.CreateConstant(
                             pRawParamType.IsEnumType && pConstValType == pRawParamType.UnderlyingEnumType
                                 ? pRawParamType
                                 : pConstValType,
@@ -558,7 +558,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         // We have an "= null" default value with a reference type or a nullable type.
 
-                        optionalArgument = exprFactory.CreateNull();
+                        optionalArgument = ExprFactory.CreateNull();
                     }
                     else
                     {
@@ -566,7 +566,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // interpreted as default(something). For instance, the pParamType could be
                         // a type parameter type or a non-simple value type.
 
-                        optionalArgument = exprFactory.CreateZeroInit(pParamType);
+                        optionalArgument = ExprFactory.CreateZeroInit(pParamType);
                     }
                 }
                 else
@@ -581,7 +581,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // For [opt] parameters of type object, if we have marshal(iunknown),
                             // marshal(idispatch), or marshal(interface), then we emit a null.
 
-                            optionalArgument = exprFactory.CreateNull();
+                            optionalArgument = ExprFactory.CreateNull();
                         }
                         else
                         {
@@ -591,8 +591,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             Name name = NameManager.GetPredefinedName(PredefinedName.PN_CAP_VALUE);
                             FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
-                            ExprField exprField = exprFactory.CreateField(agg.getThisType(), null, fwt);
-                            optionalArgument = exprFactory.CreateCast(type, exprField);
+                            ExprField exprField = ExprFactory.CreateField(agg.getThisType(), null, fwt);
+                            optionalArgument = ExprFactory.CreateCast(type, exprField);
                         }
                     }
                     else
@@ -600,7 +600,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Every type aside from object that doesn't have a default value gets
                         // its default value.
 
-                        optionalArgument = exprFactory.CreateZeroInit(pParamType);
+                        optionalArgument = ExprFactory.CreateZeroInit(pParamType);
                     }
                 }
 
@@ -905,7 +905,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(_methList.IsEmpty() || _methList.Head().mpwi.MethProp() != _pCurrentSym);
                 // Construct the expanded params.
-                return _pExprBinder.TryGetExpandedParams(_pCurrentSym.Params, _pArguments.carg, out _pCurrentParameters);
+                return TryGetExpandedParams(_pCurrentSym.Params, _pArguments.carg, out _pCurrentParameters);
             }
 
             private Result DetermineCurrentTypeArgs()
@@ -1091,7 +1091,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            private bool DoesTypeArgumentsContainErrorSym(CType var)
+            private static bool DoesTypeArgumentsContainErrorSym(CType var)
             {
                 if (!(var is AggregateType varAgg))
                 {

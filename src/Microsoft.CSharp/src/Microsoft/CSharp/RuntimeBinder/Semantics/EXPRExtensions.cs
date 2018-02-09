@@ -23,7 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             foreach (Expr item in expr.ToEnumerable())
             {
                 Expr mappedItem = f(item);
-                factory.AppendItemToList(mappedItem, ref result, ref tail);
+                ExprFactory.AppendItemToList(mappedItem, ref result, ref tail);
             }
             return result;
         }

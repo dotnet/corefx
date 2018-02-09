@@ -310,7 +310,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private bool IsDynamicMember(Symbol sym)
+        private static bool IsDynamicMember(Symbol sym)
         {
             System.Runtime.CompilerServices.DynamicAttribute da = null;
             if (sym is FieldSymbol field)

@@ -10,16 +10,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class CNullable
     {
         private readonly SymbolLoader _pSymbolLoader;
-        private readonly ExprFactory _exprFactory;
-        private readonly ErrorHandling _pErrorContext;
 
         private SymbolLoader GetSymbolLoader()
         {
             return _pSymbolLoader;
-        }
-        private ExprFactory GetExprFactory()
-        {
-            return _exprFactory;
         }
 
         private static bool IsNullableConstructor(Expr expr, out ExprCall call)
@@ -74,8 +68,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             PropWithType pwt = new PropWithType(prop, ats);
             MethPropWithInst mpwi = new MethPropWithInst(prop, ats);
-            ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(exprSrc, mpwi);
-            return GetExprFactory().CreateProperty(typeBase, null, null, pMemGroup, pwt, null);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(exprSrc, mpwi);
+            return ExprFactory.CreateProperty(typeBase, null, null, pMemGroup, pwt, null);
         }
 
         public ExprCall BindNew(Expr pExprSrc)
@@ -94,14 +88,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             MethWithInst methwithinst = new MethWithInst(meth, pSourceType, TypeArray.Empty);
-            ExprMemberGroup memgroup = GetExprFactory().CreateMemGroup(null, methwithinst);
-            return GetExprFactory().CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
+            ExprMemberGroup memgroup = ExprFactory.CreateMemGroup(null, methwithinst);
+            return ExprFactory.CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
         }
-        public CNullable(SymbolLoader symbolLoader, ErrorHandling errorContext, ExprFactory exprFactory)
+
+        public CNullable(SymbolLoader symbolLoader)
         {
             _pSymbolLoader = symbolLoader;
-            _pErrorContext = errorContext;
-            _exprFactory = exprFactory;
         }
     }
 

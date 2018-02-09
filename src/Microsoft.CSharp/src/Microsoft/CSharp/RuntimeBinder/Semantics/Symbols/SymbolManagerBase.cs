@@ -50,7 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return tableGlobal;
         }
 
-        public BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
+        public static BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
         {
             if (ta1 == ta2)
             {

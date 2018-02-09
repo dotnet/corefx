@@ -201,28 +201,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
         private readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
 
-        private Name GetMethName(PREDEFMETH method)
-        {
-            return GetPredefName(GetMethPredefName(method));
-        }
-
-        private AggregateSymbol GetMethParent(PREDEFMETH method)
-        {
-            return GetPredefAgg(GetMethPredefType(method));
-        }
-
         private PropertySymbol LoadProperty(PREDEFPROP property)
         {
-            return LoadProperty(
-                        property,
-                        GetPropName(property),
-                        GetPropGetter(property));
+            PredefinedPropertyInfo info = GetPropInfo(property);
+            return LoadProperty(property, NameManager.GetPredefinedName(info.name), info.getter);
         }
 
-        private Name GetPropName(PREDEFPROP property)
-        {
-            return GetPredefName(GetPropPredefName(property));
-        }
         private PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
             Name propertyName,
@@ -253,10 +237,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetSymbolLoader().GetTypeManager();
         }
 
-        private Name GetPredefName(PredefinedName pn)
-        {
-            return NameManager.GetPredefinedName(pn);
-        }
         private AggregateSymbol GetPredefAgg(PredefinedType pt)
         {
             return GetSymbolLoader().GetPredefAgg(pt);
@@ -400,7 +380,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         methsym.isVirtual == isVirtual &&
                         methsym.typeVars.Count == cMethodTyVars &&
                         GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
-                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
+                        TypeManager.SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
                     {
                         return methsym;
                     }
@@ -411,19 +391,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private MethodSymbol LoadMethod(PREDEFMETH method)
         {
+            PredefinedMethodInfo info = GetMethInfo(method);
             return LoadMethod(
-                        GetMethParent(method),
-                        GetMethSignature(method),
-                        GetMethTyVars(method),
-                        GetMethName(method),
-                        GetMethAccess(method),
-                        IsMethStatic(method),
-                        IsMethVirtual(method));
-        }
-
-        private static PredefinedName GetPropPredefName(PREDEFPROP property)
-        {
-            return GetPropInfo(property).name;
+                        GetPredefAgg(info.type),
+                        info.signature,
+                        info.cTypeVars,
+                        NameManager.GetPredefinedName(info.name),
+                        info.access,
+                        info.callingConvention == MethodCallingConventionEnum.Static,
+                        info.callingConvention == MethodCallingConventionEnum.Virtual);
         }
 
         private static PREDEFMETH GetPropGetter(PREDEFPROP property)
@@ -461,41 +437,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(s_predefinedMethods[(int)method].method == method);
 
             return s_predefinedMethods[(int)method];
-        }
-
-        private static PredefinedName GetMethPredefName(PREDEFMETH method)
-        {
-            return GetMethInfo(method).name;
-        }
-
-        private static PredefinedType GetMethPredefType(PREDEFMETH method)
-        {
-            return GetMethInfo(method).type;
-        }
-
-        private static bool IsMethStatic(PREDEFMETH method)
-        {
-            return GetMethInfo(method).callingConvention == MethodCallingConventionEnum.Static;
-        }
-
-        private static bool IsMethVirtual(PREDEFMETH method)
-        {
-            return GetMethInfo(method).callingConvention == MethodCallingConventionEnum.Virtual;
-        }
-
-        private static ACCESS GetMethAccess(PREDEFMETH method)
-        {
-            return GetMethInfo(method).access;
-        }
-
-        private static int GetMethTyVars(PREDEFMETH method)
-        {
-            return GetMethInfo(method).cTypeVars;
-        }
-
-        private static int[] GetMethSignature(PREDEFMETH method)
-        {
-            return GetMethInfo(method).signature;
         }
 
         // the list of predefined method definitions.

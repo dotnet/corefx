@@ -39,7 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             m_strBuilder = null;
         }
 
-        private void ErrSK(out string psz, SYMKIND sk)
+        private static void ErrSK(out string psz, SYMKIND sk)
         {
             MessageID id;
             switch (sk)
@@ -313,10 +313,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
         }
 
-        private void ErrAppendEvent(EventSymbol @event, SubstContext pctx)
-        {
-        }
-
         private void ErrAppendId(MessageID id)
         {
             string str;
@@ -368,7 +364,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case SYMKIND.SK_EventSymbol:
-                    ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
                 case SYMKIND.SK_NamespaceSymbol:
@@ -630,7 +625,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             return m_globalSymbols.GetTypes();
         }
 
-        private void ErrId(out string s, MessageID id)
+        private static void ErrId(out string s, MessageID id)
         {
             s = ErrorFacts.GetMessage(id);
         }

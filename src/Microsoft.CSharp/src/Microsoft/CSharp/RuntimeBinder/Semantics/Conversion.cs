@@ -754,7 +754,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        if (isConvInTable(prguci, convCur, atsCur, fFromImplicit, fToImplicit))
+                        if (IsConvInTable(prguci, convCur, atsCur, fFromImplicit, fToImplicit))
                         {
                             // VSWhidbey 579325: duplicate conversions in the convInfo table cause false ambiguity:
                             // If a user defined implicit conversion exists in a generic base type,
@@ -1034,7 +1034,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].Meth, prguci[iuciBestDst].Meth, typeSrc, typeDst);
         }
 
-        private void MarkAsIntermediateConversion(Expr pExpr)
+        private static void MarkAsIntermediateConversion(Expr pExpr)
         {
             for (;;)
             {

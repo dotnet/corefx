@@ -70,7 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pTypeParameter.SetIndexInOwnParameters(iv);
                     pTypeParameter.SetIndexInTotalParameters(iv);
                     pTypeParameter.SetAccess(ACCESS.ACC_PRIVATE);
-                    tpt = pTypeManager.GetTypeParameter(pTypeParameter);
+                    tpt = GetTypeParameter(pTypeParameter);
                     this.prgptvs.Add(tpt);
                 }
                 else
@@ -344,7 +344,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return !ctx.IsNop && SubstEqualTypesCore(typeDst, typeSrc, ctx);
         }
 
-        public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
+        public static bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
         {
             // Handle the simple common cases first.
             if (taDst == taSrc || (taDst != null && taDst.Equals(taSrc)))
@@ -378,7 +378,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private bool SubstEqualTypesCore(CType typeDst, CType typeSrc, SubstContext pctx)
+        private static bool SubstEqualTypesCore(CType typeDst, CType typeSrc, SubstContext pctx)
         {
         LRecurse:  // Label used for "tail" recursion.
 
@@ -611,7 +611,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // These are singletons for each.
-        public TypeParameterType GetTypeParameter(TypeParameterSymbol pSymbol)
+        public static TypeParameterType GetTypeParameter(TypeParameterSymbol pSymbol)
         {
             Debug.Assert(pSymbol.GetTypeParameterType() == null); // Should have been checked first before creating
             return new TypeParameterType(pSymbol);
