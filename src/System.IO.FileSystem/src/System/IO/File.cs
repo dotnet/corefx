@@ -174,8 +174,10 @@ namespace System.IO
             if (string.IsNullOrEmpty(path) || path.Contains('\0'))
                 return false;
 
-            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\"))
-                path = path.TrimEnd(new char[] { '.', ' ' });
+            if (!Path.IsPathFullyQualified(path) || path.EndsWith('.') || path.EndsWith(' '))
+            {
+                path = Path.GetFullPath(path);
+            }
 
             if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
                 return false;

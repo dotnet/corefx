@@ -65,16 +65,12 @@ namespace System.IO
         {
             if (string.IsNullOrEmpty(path) || path.Contains('\0'))
                 return false;
-            
-            if (!path.StartsWith(@"\\?\") && !path.StartsWith(@"\??\"))
-            {
-				if ( path.Contains('\\') && path.Substring(path.LastIndexOf('\\')) == "\\..")
-				{
-					path = Path.GetDirectoryName(Path.GetDirectoryName(path));
-				}
-                path = path.TrimEnd(new char[] { '.', ' ' });
-            }
-            return FileSystem.DirectoryExists(path);
+             
+             if (!Path.IsPathFullyQualified(path) || path.EndsWith('.') || path.EndsWith(' '))
+             {
+                path = Path.GetFullPath(path);
+             }
+             return FileSystem.DirectoryExists(path);
         }
 
         public static void SetCreationTime(string path, DateTime creationTime)
