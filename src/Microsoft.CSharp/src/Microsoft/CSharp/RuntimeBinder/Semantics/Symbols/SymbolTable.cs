@@ -91,7 +91,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private readonly Dictionary<Key, Symbol> _dictionary;
 
-        private sealed class Key : IEquatable<Key>
+        private readonly struct Key : IEquatable<Key>
         {
             private readonly Name _name;
             private readonly ParentSymbol _parent;
@@ -102,21 +102,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _parent = parent;
             }
 
-            public bool Equals(Key other) => other != null && _name.Equals(other._name) && _parent.Equals(other._parent);
+            public bool Equals(Key other) => _name == other._name && _parent == other._parent;
 
-#if  DEBUG 
+#if  DEBUG
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
 #endif
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                return Equals(obj as Key);
+                return obj is Key key && Equals(key);
             }
 
-            public override int GetHashCode()
-            {
-                return _name.GetHashCode() ^ _parent.GetHashCode();
-            }
+            public override int GetHashCode() => _name.GetHashCode() ^ _parent.GetHashCode();
         }
     }
 }
