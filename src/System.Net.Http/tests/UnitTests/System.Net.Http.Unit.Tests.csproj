@@ -370,7 +370,7 @@
   <!-- <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'"> -->
   <ItemGroup Condition=" '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="HttpSystemProxyTest.cs" />
-    <Compile Include="..\..\src\System\Net\Http\Managed\HttpSystemProxy.cs">
+    <Compile Include="..\..\src\System\Net\Http\SocketHttpHandler\HttpSystemProxy.cs">
       <Link>ProductionCode\System\Net\Http\HttpSystemProxy.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinInetProxyHelper.cs">
