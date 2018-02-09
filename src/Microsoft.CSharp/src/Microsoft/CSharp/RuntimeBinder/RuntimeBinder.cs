@@ -625,7 +625,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // as well so that overload resolution can find them.
             if (callingType.IsWindowsRuntimeType)
             {
-                foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll().Items)
+                foreach (AggregateType t in callingType.WinRTCollectionIfacesAll.Items)
                 {
                     if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                     {

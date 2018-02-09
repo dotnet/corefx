@@ -165,24 +165,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public TypeArray GetWinRTCollectionIfacesAll()
+        public TypeArray WinRTCollectionIfacesAll
         {
-            if (_winrtifacesAll == null)
+            get
             {
-                List<CType> typeList = new List<CType>();
-                foreach (AggregateType type in IfacesAll.Items)
+                if (_winrtifacesAll == null)
                 {
-                    Debug.Assert(type.IsInterfaceType);
-                    if (type.IsCollectionType)
+                    List<CType> typeList = new List<CType>();
+                    foreach (AggregateType type in IfacesAll.Items)
                     {
-                        typeList.Add(type);
+                        Debug.Assert(type.IsInterfaceType);
+                        if (type.IsCollectionType)
+                        {
+                            typeList.Add(type);
+                        }
                     }
+
+                    _winrtifacesAll = TypeArray.Allocate(typeList.ToArray());
                 }
 
-                _winrtifacesAll = TypeArray.Allocate(typeList.ToArray());
+                return _winrtifacesAll;
             }
-
-            return _winrtifacesAll;
         }
 
         public override bool IsReferenceType => OwningAggregate.IsRefType();
