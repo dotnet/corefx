@@ -236,9 +236,14 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="stream">Stream to read from</param>
         /// <param name="callback">Completion callback</param>
-        public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
+        public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback, bool isMars)
         {
             bool error = false;
+            TaskContinuationOptions options = TaskContinuationOptions.DenyChildAttach;
+            if(isMars)
+            {
+                options |= TaskContinuationOptions.LongRunning;
+            }
 
             stream.ReadAsync(_data, 0, _capacity).ContinueWith(t =>
             {
@@ -267,7 +272,7 @@ namespace System.Data.SqlClient.SNI
                 callback(this, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
             },
             CancellationToken.None,
-            TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.LongRunning,
+            options,
             TaskScheduler.Default);
         }
 
