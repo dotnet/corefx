@@ -63,24 +63,14 @@ namespace System.IO
         //
         public static bool Exists(string path)
         {
-            try
-            {
-                if (path == null)
-                    return false;
-                if (path.Length == 0)
-                    return false;
+            if (string.IsNullOrEmpty(path) || path.Contains('\0'))
+                return false;
 
-                string fullPath = Path.GetFullPath(path);
+            char c = path[path.Length - 1];
+            if (c == '.' || c == ' ')
+                path = path.TrimEnd(new char[] { '.', ' '});
 
-                return FileSystem.DirectoryExists(fullPath);
-            }
-            catch (ArgumentException) { }
-            catch (NotSupportedException) { }  // Security can throw this on ":"
-            catch (SecurityException) { }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
-
-            return false;
+            return FileSystem.DirectoryExists(path);
         }
 
         public static void SetCreationTime(string path, DateTime creationTime)
@@ -104,7 +94,7 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
- 
+
         public static void SetLastWriteTime(string path, DateTime lastWriteTime)
         {
             string fullPath = Path.GetFullPath(path);
@@ -236,7 +226,7 @@ namespace System.IO
             => EnumerateFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
-            =>  InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
+            => InternalEnumeratePaths(path, searchPattern, SearchTarget.Both, enumerationOptions);
 
         public static string GetDirectoryRoot(string path)
         {
@@ -251,7 +241,8 @@ namespace System.IO
 
         internal static string InternalGetDirectoryRoot(string path)
         {
-            if (path == null) return null;
+            if (path == null)
+                return null;
             return path.Substring(0, PathInternal.GetRootLength(path));
         }
 
@@ -304,7 +295,7 @@ namespace System.IO
             // to make sure our cross platform behavior matches NetFX behavior.
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
-            
+
             if (FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
