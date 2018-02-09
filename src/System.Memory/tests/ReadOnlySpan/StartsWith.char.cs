@@ -10,6 +10,8 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
+        private const string SoftHyphen = "\u00AD";
+
         [Fact]
         public static void ZeroLengthStartsWith_StringComparison()
         {
@@ -18,6 +20,21 @@ namespace System.SpanTests
             var span = new ReadOnlySpan<char>(a);
             var slice = new ReadOnlySpan<char>(a, 2, 0);
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+
+            span = ReadOnlySpan<char>.Empty;
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -26,6 +43,12 @@ namespace System.SpanTests
             char[] a = { '4', '5', '6' };
             var span = new ReadOnlySpan<char>(a);
             Assert.True(span.StartsWith(span, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(span, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -35,6 +58,12 @@ namespace System.SpanTests
             var span = new ReadOnlySpan<char>(a, 0, 2);
             var slice = new ReadOnlySpan<char>(a, 0, 3);
             Assert.False(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -44,6 +73,12 @@ namespace System.SpanTests
             var span = new ReadOnlySpan<char>(a, 0, 3);
             var slice = new ReadOnlySpan<char>(a, 0, 2);
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -54,6 +89,12 @@ namespace System.SpanTests
             var span = new ReadOnlySpan<char>(a, 0, 3);
             var slice = new ReadOnlySpan<char>(b, 0, 3);
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -75,6 +116,12 @@ namespace System.SpanTests
                     var firstSpan = new ReadOnlySpan<char>(first);
                     var secondSpan = new ReadOnlySpan<char>(second);
                     Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.Ordinal));
+
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.InvariantCulture));
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.InvariantCultureIgnoreCase));
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.OrdinalIgnoreCase));
                 }
             }
         }
@@ -93,6 +140,12 @@ namespace System.SpanTests
                 var span1 = new ReadOnlySpan<char>(first, 1, length);
                 var span2 = new ReadOnlySpan<char>(second, 1, length);
                 Assert.True(span1.StartsWith(span2, StringComparison.Ordinal));
+
+                Assert.True(span1.StartsWith(span2, StringComparison.CurrentCulture));
+                Assert.True(span1.StartsWith(span2, StringComparison.CurrentCultureIgnoreCase));
+                Assert.True(span1.StartsWith(span2, StringComparison.InvariantCulture));
+                Assert.True(span1.StartsWith(span2, StringComparison.InvariantCultureIgnoreCase));
+                Assert.True(span1.StartsWith(span2, StringComparison.OrdinalIgnoreCase));
             }
         }
 
@@ -178,6 +231,111 @@ namespace System.SpanTests
             Assert.False(span.StartsWith(value, StringComparison.OrdinalIgnoreCase));
             Assert.False(span.StartsWith(value, StringComparison.InvariantCulture));
             Assert.False(span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        [Theory]
+        // CurrentCulture
+        [InlineData("Hello", "Hel", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "HELLO", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "Abc", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.CurrentCulture, true)]
+        [InlineData("", "", StringComparison.CurrentCulture, true)]
+        [InlineData("", "hello", StringComparison.CurrentCulture, false)]
+        // CurrentCultureIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.CurrentCultureIgnoreCase, false)]
+        // InvariantCulture
+        [InlineData("Hello", "Hel", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "HELLO", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "Abc", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.InvariantCulture, true)]
+        [InlineData("", "", StringComparison.InvariantCulture, true)]
+        [InlineData("", "hello", StringComparison.InvariantCulture, false)]
+        // InvariantCultureIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.InvariantCultureIgnoreCase, false)]
+        // Ordinal
+        [InlineData("Hello", "H", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hel", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hello Larger", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "HEL", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Abc", StringComparison.Ordinal, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.Ordinal, false)]
+        [InlineData("", "", StringComparison.Ordinal, true)]
+        [InlineData("", "hello", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwx", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklm", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "ab_defghijklmnopqrstu", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdef_hijklmn", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghij_lmn", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "a", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", StringComparison.Ordinal, false)]
+        // OrdinalIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Hello Larger", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
+        public static void StartsWith(string s, string value, StringComparison comparisonType, bool expected)
+        {
+            if (comparisonType == StringComparison.CurrentCulture)
+            {
+                Assert.Equal(expected, s.AsReadOnlySpan().StartsWith(value.AsReadOnlySpan()));
+            }
+            Assert.Equal(expected, s.AsReadOnlySpan().StartsWith(value.AsReadOnlySpan(), comparisonType));
+        }
+
+        [Theory]
+        [InlineData(StringComparison.Ordinal)]
+        [InlineData(StringComparison.OrdinalIgnoreCase)]
+        public static void StartsWith_NullInStrings(StringComparison comparison)
+        {
+            Assert.False("\0test".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.False("te\0st".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.True("te\0st".AsReadOnlySpan().StartsWith("te\0s".AsReadOnlySpan(), comparison));
+            Assert.True("test\0".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.False("test".AsReadOnlySpan().StartsWith("te\0".AsReadOnlySpan(), comparison));
+        }
+
+        // NOTE: This is by design on Unix as Unix ignores the null characters (i.e. null characters has no weights for the string comparison).
+        // For desired behavior, use ordinal comparisons instead of linguistic comparison.
+        // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [InlineData(StringComparison.CurrentCulture)]
+        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(StringComparison.InvariantCulture)]
+        [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+        public static void StartsWith_NullInStrings_NonOrdinal(StringComparison comparison)
+        {
+            Assert.False("\0test".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.False("te\0st".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.True("te\0st".AsReadOnlySpan().StartsWith("te\0s".AsReadOnlySpan(), comparison));
+            Assert.True("test\0".AsReadOnlySpan().StartsWith("test".AsReadOnlySpan(), comparison));
+            Assert.False("test".AsReadOnlySpan().StartsWith("te\0".AsReadOnlySpan(), comparison));
         }
     }
 }
