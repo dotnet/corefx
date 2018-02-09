@@ -255,7 +255,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return TypeManager.GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
 
                 case MethodSignatureEnum.SIG_METH_TYVAR:
-                    return GetTypeManager().GetStdMethTypeVar(signature[indexIntoSignatures++]);
+                    return TypeManager.GetStdMethTypeVar(signature[indexIntoSignatures++]);
 
                 case MethodSignatureEnum.SIG_CLASS_TYVAR:
                     return classTyVars[signature[indexIntoSignatures++]];

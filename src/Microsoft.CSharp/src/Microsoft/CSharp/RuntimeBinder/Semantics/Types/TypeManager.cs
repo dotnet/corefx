@@ -19,11 +19,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private SymbolTable _symbolTable;
 
-        private readonly StdTypeVarColl _stvcMethod;
+        private static readonly StdTypeVarColl s_stvcMethod = new StdTypeVarColl();
 
         public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
         {
-            _stvcMethod = new StdTypeVarColl();
             _BSymmgr = bsymmgr;
             _predefTypes = predefTypes;
         }
@@ -60,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(iv >= 0);
 
                 TypeParameterType tpt;
-                if (iv >= this.prgptvs.Count)
+                if (iv >= prgptvs.Count)
                 {
                     TypeParameterSymbol pTypeParameter = new TypeParameterSymbol();
                     pTypeParameter.SetIsMethodTypeParameter(fMeth);
@@ -68,11 +67,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pTypeParameter.SetIndexInTotalParameters(iv);
                     pTypeParameter.SetAccess(ACCESS.ACC_PRIVATE);
                     tpt = GetTypeParameter(pTypeParameter);
-                    this.prgptvs.Add(tpt);
+                    prgptvs.Add(tpt);
                 }
                 else
                 {
-                    tpt = this.prgptvs[iv];
+                    tpt = prgptvs[iv];
                 }
                 Debug.Assert(tpt != null);
                 return tpt;
@@ -591,7 +590,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray SubstTypeArray(TypeArray taSrc, AggregateType atsCls)
         {
-            return this.SubstTypeArray(taSrc, atsCls, (TypeArray)null);
+            return SubstTypeArray(taSrc, atsCls, (TypeArray)null);
         }
 
         private bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls, TypeArray typeArgsMeth) =>
@@ -602,7 +601,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return SubstEqualTypes(typeDst, typeSrc, typeCls, (TypeArray)null);
         }
 
-        public TypeParameterType GetStdMethTypeVar(int iv) => _stvcMethod.GetTypeVarSym(iv, true);
+        public static TypeParameterType GetStdMethTypeVar(int iv) => s_stvcMethod.GetTypeVarSym(iv, true);
 
         // These are singletons for each.
         public static TypeParameterType GetTypeParameter(TypeParameterSymbol pSymbol)
