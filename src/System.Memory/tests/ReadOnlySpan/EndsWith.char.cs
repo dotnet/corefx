@@ -312,8 +312,8 @@ namespace System.SpanTests
             Assert.False("test".AsReadOnlySpan().EndsWith("\0st".AsReadOnlySpan(), comparison));
         }
 
-        // NOTE: This is by design on Unix as Unix ignores the null characters (i.e. null characters has no weights for the string comparison).
-        // For desired behavior, use ordinal comparisons instead of linguistic comparison.
+        // NOTE: This is by design. Unix ignores the null characters (i.e. null characters have no weights for the string comparison).
+        // For desired behavior, use ordinal comparison instead of linguistic comparison.
         // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
