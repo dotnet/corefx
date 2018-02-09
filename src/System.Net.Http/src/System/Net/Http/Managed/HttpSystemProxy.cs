@@ -14,13 +14,13 @@ namespace System.Net.Http
 {
     internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
-        private readonly Uri _proxyUri;         // String URI for HTTPS requests
+        private readonly Uri _proxyUri;         // URI of the system proxy if set
         private string[] _bypass;               // list of domains not to proxy
         private bool _bypassLocal = false;      // we should bypass domain considered local
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
-        private volatile bool _disposed;
+        private bool _disposed;
 
         public static bool TryCreate(out IWebProxy proxy)
         {
@@ -90,12 +90,7 @@ namespace System.Net.Http
 
         public void Dispose()
         {
-            Dispose(true);
-        }
-
-        internal void Dispose(bool disposing)
-        {
-            if (disposing && !_disposed)
+            if (!_disposed)
             {
                 _disposed = true;
 

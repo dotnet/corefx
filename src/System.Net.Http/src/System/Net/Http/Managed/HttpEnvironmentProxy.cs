@@ -99,8 +99,6 @@ namespace System.Net.Http
             // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
 
-            proxy = null;
-
             Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
             Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
                              GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
@@ -124,6 +122,7 @@ namespace System.Net.Http
             // Caller may pick some other proxy type.
             if (httpProxy == null && httpsProxy == null)
             {
+                proxy = null;
                 return false;
             }
 
