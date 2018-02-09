@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -21,15 +17,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private SYMTBL tableGlobal;
 
-        // The hash table for type arrays.
-        private Dictionary<TypeArrayKey, TypeArray> tableTypeArrays;
-
         public BSYMMGR()
         {
             this.tableGlobal = new SYMTBL();
             _symFactory = new SymFactory(this.tableGlobal);
-
-            this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
 
             ////////////////////////////////////////////////////////////////////////////////
             // Build the data structures needed to make FPreLoad fast. Make sure the 
@@ -164,133 +155,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return null;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Allocate a type array; used to represent a parameter list.
-        // We use a hash table to make sure that allocating the same type array twice 
-        // returns the same value. This does two things:
-        //
-        // 1) Save a lot of memory.
-        // 2) Make it so parameter lists can be compared by a simple pointer comparison
-        // 3) Allow us to associate a token with each signature for faster metadata emit
-
-        private readonly struct TypeArrayKey : IEquatable<TypeArrayKey>
-        {
-            private readonly CType[] _types;
-            private readonly int _hashCode;
-
-            public TypeArrayKey(CType[] types)
-            {
-                _types = types;
-                int hashCode = 0x162A16FE;
-                foreach (CType type in types)
-                {
-                    hashCode = (hashCode << 5) - hashCode;
-                    if (type != null)
-                    {
-                        hashCode ^= type.GetHashCode();
-                    }
-                }
-
-                _hashCode = hashCode;
-            }
-
-            public bool Equals(TypeArrayKey other)
-            {
-                CType[] types = _types;
-                CType[] otherTypes = other._types;
-                if (otherTypes == types)
-                {
-                    return true;
-                }
-
-                if (other._hashCode != _hashCode || otherTypes.Length != types.Length)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < types.Length; i++)
-                {
-                    if (types[i] != otherTypes[i])
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-#if  DEBUG 
-            [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
-#endif
-            public override bool Equals(object obj)
-            {
-                Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                return obj is TypeArrayKey && Equals((TypeArrayKey)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return _hashCode;
-            }
-        }
-
-        public TypeArray AllocParams(int ctype, CType[] prgtype)
-        {
-            if (ctype == 0)
-            {
-                return TypeArray.Empty;
-            }
-            Debug.Assert(ctype == prgtype.Length);
-            return AllocParams(prgtype);
-        }
-
-        public TypeArray AllocParams(int ctype, TypeArray array, int offset)
-        {
-            if (ctype == 0)
-            {
-                return TypeArray.Empty;
-            }
-
-            if (ctype == array.Count)
-            {
-                return array;
-            }
-
-            CType[] types = array.Items;
-            CType[] newTypes = new CType[ctype];
-            Array.ConstrainedCopy(types, offset, newTypes, 0, ctype);
-            return AllocParams(newTypes);
-        }
-
-        public TypeArray AllocParams(params CType[] types)
-        {
-            if (types == null || types.Length == 0)
-            {
-                return TypeArray.Empty;
-            }
-            TypeArrayKey key = new TypeArrayKey(types);
-            TypeArray result;
-            if (!tableTypeArrays.TryGetValue(key, out result))
-            {
-                result = new TypeArray(types);
-                tableTypeArrays.Add(key, result);
-            }
-            return result;
-        }
-
-        private TypeArray ConcatParams(CType[] prgtype1, CType[] prgtype2)
-        {
-            CType[] combined = new CType[prgtype1.Length + prgtype2.Length];
-            Array.Copy(prgtype1, 0, combined, 0, prgtype1.Length);
-            Array.Copy(prgtype2, 0, combined, prgtype1.Length, prgtype2.Length);
-            return AllocParams(combined);
-        }
-
-        public TypeArray ConcatParams(TypeArray pta1, TypeArray pta2)
-        {
-            return ConcatParams(pta1.Items, pta2.Items);
         }
     }
 }

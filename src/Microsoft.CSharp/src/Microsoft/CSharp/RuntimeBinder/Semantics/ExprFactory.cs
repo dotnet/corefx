@@ -45,7 +45,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return CreateMemGroup(
                 0, name, method.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, method.GetType(), methProp,
-                obj, new CMemberLookupResults(GlobalSymbols.AllocParams(1, new[] {type}), name));
+                obj, new CMemberLookupResults(TypeArray.Allocate(type), name));
         }
 
         public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 

@@ -147,8 +147,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             int cvarOuter = aggOuter.GetTypeVarsAll().Count;
             Debug.Assert(cvarOuter <= typeArgsAll.Count);
 
-            TypeArray typeArgsOuter = _BSymmgr.AllocParams(cvarOuter, typeArgsAll, 0);
-            TypeArray typeArgsInner = _BSymmgr.AllocParams(agg.GetTypeVars().Count, typeArgsAll, cvarOuter);
+            TypeArray typeArgsOuter = TypeArray.Allocate(cvarOuter, typeArgsAll, 0);
+            TypeArray typeArgsInner = TypeArray.Allocate(agg.GetTypeVars().Count, typeArgsAll, cvarOuter);
             AggregateType atsOuter = GetAggregate(aggOuter, typeArgsOuter);
 
             return GetAggregate(agg, atsOuter, typeArgsInner);
@@ -237,7 +237,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             dsts[i] = SubstTypeCore(srcs[i], ctx);
                         }
 
-                        return _BSymmgr.AllocParams(dsts);
+                        return TypeArray.Allocate(dsts);
                     }
                 }
             }
@@ -566,11 +566,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateSymbol GetPredefAgg(PredefinedType pt) => _predefTypes.GetPredefinedAggregate(pt);
 
-        public TypeArray ConcatenateTypeArrays(TypeArray pTypeArray1, TypeArray pTypeArray2)
-        {
-            return _BSymmgr.ConcatParams(pTypeArray1, pTypeArray2);
-        }
-
         public AggregateType SubstType(AggregateType typeSrc, SubstContext ctx) =>
             ctx == null || ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
 
@@ -748,7 +743,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // case, the recursion worked out and we are OK to vary this argument.
             }
 
-            TypeArray newTypeArgs = semanticChecker.getBSymmgr().AllocParams(typeArgs.Count, newTypeArgsTemp);
+            TypeArray newTypeArgs = TypeArray.Allocate(newTypeArgsTemp);
             CType intermediateType = GetAggregate(aggSym, typeSrc.OuterType, newTypeArgs);
 
             // All type arguments were varied successfully, which means now we must be accessible. But we could

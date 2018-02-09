@@ -295,7 +295,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 _typeVarsThis = typeVars;
-                _typeVarsAll = _pTypeManager.ConcatenateTypeArrays(outerTypeVars, typeVars);
+                _typeVarsAll = TypeArray.Concat(outerTypeVars, typeVars);
             }
         }
 

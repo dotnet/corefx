@@ -656,13 +656,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             TypeArray typeArgumentsAsTypeArray = typeArguments?.Length > 0
-                ? _semanticChecker.getBSymmgr().AllocParams(_symbolTable.GetCTypeArrayFromTypes(typeArguments))
+                ? TypeArray.Allocate(_symbolTable.GetCTypeArrayFromTypes(typeArguments))
                 : TypeArray.Empty;
 
-            ExprMemberGroup memgroup = _exprFactory.CreateMemGroup(// Tree
-                flags, name, typeArgumentsAsTypeArray, kind, callingType, null, null, new CMemberLookupResults(
-                    _semanticChecker.getBSymmgr().AllocParams(callingTypes.Count, callingTypes.ToArray()),
-                    name));
+            ExprMemberGroup memgroup = _exprFactory.CreateMemGroup( // Tree
+                flags, name, typeArgumentsAsTypeArray, kind, callingType, null, null,
+                new CMemberLookupResults(TypeArray.Allocate(callingTypes.ToArray()), name));
             if (callingObject is ExprClass)
             {
                 memgroup.OptionalLHS = callingObject;

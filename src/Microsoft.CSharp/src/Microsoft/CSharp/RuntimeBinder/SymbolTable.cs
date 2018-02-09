@@ -376,10 +376,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (int i = 0; i < genericArguments.Length; i++)
                 {
                     Type t = genericArguments[i];
-                    ((TypeParameterType)ctypes[i]).Symbol.SetBounds(_bsymmgr.AllocParams(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
+                    ((TypeParameterType)ctypes[i]).Symbol.SetBounds(TypeArray.Allocate(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                 }
 
-                return _bsymmgr.AllocParams(ctypes.Length, ctypes);
+                return TypeArray.Allocate(ctypes);
             }
 
             return TypeArray.Empty;
@@ -436,7 +436,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
                 }
 
-                return _bsymmgr.AllocParams(ctypes.Count, ctypes.ToArray());
+                return TypeArray.Allocate(ctypes.ToArray());
             }
 
             return TypeArray.Empty;
@@ -735,7 +735,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     types.Add(GetCTypeFromType(argument));
                 }
 
-                TypeArray typeArray = _bsymmgr.AllocParams(types.ToArray());
+                TypeArray typeArray = TypeArray.Allocate(types.ToArray());
                 AggregateType aggType = _typeManager.GetAggregate(agg, typeArray);
                 return aggType;
             }
@@ -1004,7 +1004,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Type t = genericArguments[i];
                     if (agg.GetTypeVars()[i] is TypeParameterType typeVar)
                     {
-                        typeVar.Symbol.SetBounds(_bsymmgr.AllocParams(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
+                        typeVar.Symbol.SetBounds(TypeArray.Allocate(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                     }
                 }
             }
@@ -1071,7 +1071,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // we don't really care where they've come from as long as we know the overall
             // set of IfacesAll.
 
-            aggregate.SetIfaces(_bsymmgr.AllocParams(interfaces.Length, GetCTypeArrayFromTypes(interfaces)));
+            aggregate.SetIfaces(TypeArray.Allocate(GetCTypeArrayFromTypes(interfaces)));
             aggregate.SetIfacesAll(aggregate.GetIfaces());
         }
         #endregion
@@ -1757,7 +1757,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 types[types.Length - 1] = ArgumentListType.Instance;
             }
 
-            return _bsymmgr.AllocParams(types);
+            return TypeArray.Allocate(types);
         }
 
         /////////////////////////////////////////////////////////////////////////////////

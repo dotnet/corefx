@@ -2444,7 +2444,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             candidateList.Add(new CandidateFunctionMember(
                 new MethPropWithInst(method, ats, TypeArray.Empty),
-                GetGlobalSymbols().AllocParams(2, rgtype),
+                TypeArray.Allocate(rgtype),
                 2, // two lifted arguments
                 false));
             return true;

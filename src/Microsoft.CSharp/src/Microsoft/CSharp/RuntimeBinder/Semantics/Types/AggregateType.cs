@@ -60,8 +60,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Ensure that invariant here.
 
             Debug.Assert(outerType == null || outerType.TypeArgsAll != null);
-            TypeArgsAll = parent.GetTypeManager()
-                .ConcatenateTypeArrays(outerType != null ? outerType.TypeArgsAll : TypeArray.Empty, typeArgsThis);
+            TypeArgsAll = outerType != null ? TypeArray.Concat(outerType.TypeArgsAll, typeArgsThis) : typeArgsThis;
         }
 
         public bool? ConstraintError;       // Did the constraints check produce an error?
@@ -180,7 +179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                _winrtifacesAll = pSymbolLoader.getBSymmgr().AllocParams(typeList.Count, typeList.ToArray());
+                _winrtifacesAll = TypeArray.Allocate(typeList.ToArray());
             }
 
             return _winrtifacesAll;

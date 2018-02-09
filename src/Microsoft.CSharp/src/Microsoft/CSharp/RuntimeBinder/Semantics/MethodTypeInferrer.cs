@@ -142,7 +142,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray GetResults() => GetGlobalSymbols().AllocParams(_pFixedResults);
+        private TypeArray GetResults() => TypeArray.Allocate(_pFixedResults);
 
         ////////////////////////////////////////////////////////////////////////////////
 

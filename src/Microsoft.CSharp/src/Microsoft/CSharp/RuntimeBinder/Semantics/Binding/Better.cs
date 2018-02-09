@@ -179,7 +179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            return GetSymbolLoader().getBSymmgr().AllocParams(pta.Count, typeList);
+            return TypeArray.Allocate(typeList);
         }
 
         ////////////////////////////////////////////////////////////////////////////////

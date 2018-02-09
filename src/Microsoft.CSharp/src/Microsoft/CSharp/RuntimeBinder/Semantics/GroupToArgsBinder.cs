@@ -508,7 +508,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     prgTypes[i] = pArguments.prgexpr[i].Type;
                 }
                 pArguments.carg = pCurrentParameters.Count;
-                pArguments.types = symbolLoader.getBSymmgr().AllocParams(pCurrentParameters.Count, prgTypes);
+                pArguments.types = TypeArray.Allocate(prgTypes);
                 return true;
             }
 
@@ -752,7 +752,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     prgTypes[n] = _pArguments.prgexpr[n].Type;
                 }
-                _pArguments.types = GetSymbolLoader().getBSymmgr().AllocParams(@params.Count, prgTypes);
+                _pArguments.types = TypeArray.Allocate(prgTypes);
                 _pArguments.carg = @params.Count;
                 _bArgumentsChangedForNamedOrOptionalArguments = true;
                 return true;

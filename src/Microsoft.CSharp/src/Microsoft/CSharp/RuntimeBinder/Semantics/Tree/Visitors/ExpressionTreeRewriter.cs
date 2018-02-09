@@ -96,7 +96,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             MethodSymbol lambdaMethod = GetPreDefMethod(PREDEFMETH.PM_EXPRESSION_LAMBDA);
             AggregateType delegateType = anonmeth.DelegateType;
-            TypeArray lambdaTypeParams = GetSymbolLoader().getBSymmgr().AllocParams(1, new CType[] { delegateType });
+            TypeArray lambdaTypeParams = TypeArray.Allocate(delegateType);
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);

@@ -741,7 +741,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     methFirstList.Add(new CandidateFunctionMember(
                                     new MethPropWithInst(methCur, atsCur, TypeArray.Empty),
-                                    GetGlobalSymbols().AllocParams(1, new CType[] { nubParam }),
+                                    TypeArray.Allocate(nubParam),
                                     1,
                                     false));
                 }
@@ -1454,7 +1454,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Debug.Assert(iarg <= argInfo.carg);
-            argInfo.types = GetGlobalSymbols().AllocParams(iarg, prgtype);
+            argInfo.types = TypeArray.Allocate(prgtype);
         }
 
         private bool TryGetExpandedParams(TypeArray @params, int count, out TypeArray ppExpandedParams)
@@ -1467,7 +1467,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // case that all the parameters are optional.
                 prgtype = new CType[@params.Count - 1];
                 @params.CopyItems(0, @params.Count - 1, prgtype);
-                ppExpandedParams = GetGlobalSymbols().AllocParams(@params.Count - 1, prgtype);
+                ppExpandedParams = TypeArray.Allocate(prgtype);
                 return true;
             }
 
@@ -1491,7 +1491,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 prgtype[itype] = elementType;
             }
 
-            ppExpandedParams = GetGlobalSymbols().AllocParams(prgtype);
+            ppExpandedParams = TypeArray.Allocate(prgtype);
 
             return true;
         }

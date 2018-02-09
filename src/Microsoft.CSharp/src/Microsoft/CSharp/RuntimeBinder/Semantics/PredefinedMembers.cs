@@ -303,7 +303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
                     }
 
-                    return GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(typeArgs));
+                    return GetTypeManager().GetAggregate(agg, TypeArray.Allocate(typeArgs));
             }
         }
 
@@ -322,7 +322,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 ptypes[i] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
             }
 
-            return getBSymmgr().AllocParams(count, ptypes);
+            return TypeArray.Allocate(ptypes);
         }
 
         public PredefinedMembers(SymbolLoader loader)
