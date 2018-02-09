@@ -45,6 +45,27 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public void ServerCertificateCustomValidationCallback_SetGet_Roundtrips()
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                Assert.Null(handler.ServerCertificateCustomValidationCallback);
+
+                Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> callback1 = (req, cert, chain, policy) => throw new NotImplementedException("callback1");
+                Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> callback2 = (req, cert, chain, policy) => throw new NotImplementedException("callback2");
+
+                handler.ServerCertificateCustomValidationCallback = callback1;
+                Assert.Same(callback1, handler.ServerCertificateCustomValidationCallback);
+
+                handler.ServerCertificateCustomValidationCallback = callback2;
+                Assert.Same(callback2, handler.ServerCertificateCustomValidationCallback);
+
+                handler.ServerCertificateCustomValidationCallback = null;
+                Assert.Null(handler.ServerCertificateCustomValidationCallback);
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task NoCallback_ValidCertificate_SuccessAndExpectedPropertyBehavior()
@@ -64,16 +85,16 @@ namespace System.Net.Http.Functional.Tests
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP won't send requests through a custom proxy")]
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task UseCallback_HaveNoCredsAndUseAuthenticatedCustomProxyAndPostToSecureServer_ProxyAuthenticationRequiredStatusCode()
         {
             if (!BackendSupportsCustomCertificateHandling)
             {
                 return;
             }
-            if (UseManagedHandler)
+            if (UseSocketsHttpHandler)
             {
-                return; // TODO #23136: SSL proxy tunneling not yet implemented in ManagedHandler
+                return; // TODO #23136: SSL proxy tunneling not yet implemented in SocketsHttpHandler
             }
 
             int port;
@@ -100,7 +121,7 @@ namespace System.Net.Http.Functional.Tests
         }
         
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task UseCallback_NotSecureConnection_CallbackNotCalled()
         {
             if (!BackendSupportsCustomCertificateHandling)
@@ -140,7 +161,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Theory]
         [MemberData(nameof(UseCallback_ValidCertificate_ExpectedValuesDuringCallback_Urls))]
         public async Task UseCallback_ValidCertificate_ExpectedValuesDuringCallback(Uri url, bool checkRevocation)
         {
@@ -189,7 +210,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task UseCallback_CallbackReturnsFailure_ThrowsException()
         {
             if (!BackendSupportsCustomCertificateHandling)
@@ -207,7 +228,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task UseCallback_CallbackThrowsException_ExceptionPropagatesAsBaseException()
         {
             if (!BackendSupportsCustomCertificateHandling)
@@ -263,13 +284,13 @@ namespace System.Net.Http.Functional.Tests
             }
             catch (HttpRequestException)
             {
-                if (UseManagedHandler || !ShouldSuppressRevocationException)
+                if (UseSocketsHttpHandler || !ShouldSuppressRevocationException)
                     throw;
             }
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task NoCallback_RevokedCertificate_RevocationChecking_Fails()
         {
             if (!BackendSupportsCustomCertificateHandling)
@@ -293,7 +314,7 @@ namespace System.Net.Http.Functional.Tests
             new object[] { Configuration.Http.WrongHostNameCertRemoteServer , SslPolicyErrors.RemoteCertificateNameMismatch},
         };
 
-        private async Task UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(string url, bool useManagedHandler, SslPolicyErrors expectedErrors)
+        private async Task UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(string url, bool useSocketsHttpHandler, SslPolicyErrors expectedErrors)
         {
             if (!BackendSupportsCustomCertificateHandling)
             {
@@ -301,7 +322,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            HttpClientHandler handler = CreateHttpClientHandler(useManagedHandler);
+            HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandler);
             using (var client = new HttpClient(handler))
             {
                 bool callbackCalled = false;
@@ -312,9 +333,9 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(request);
                     Assert.NotNull(cert);
                     Assert.NotNull(chain);
-                    if (!useManagedHandler)
+                    if (!useSocketsHttpHandler)
                     {
-                        // TODO #23137: This test is failing with the managed handler on the exact value of the managed errors,
+                        // TODO #23137: This test is failing with SocketsHttpHandler on the exact value of the managed errors,
                         // e.g. reporting "RemoteCertificateNameMismatch, RemoteCertificateChainErrors" when we only expect
                         // "RemoteCertificateChainErrors"
                         Assert.Equal(expectedErrors, errors);
@@ -332,7 +353,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Theory]
         [MemberData(nameof(CertificateValidationServersAndExpectedPolicies))]
         public async Task UseCallback_BadCertificate_ExpectedPolicyErrors(string url, SslPolicyErrors expectedErrors)
         {
@@ -350,19 +371,19 @@ namespace System.Net.Http.Functional.Tests
                     // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
                     // the same process as the other tests. Each test needs to be isolated to its own process.
                     // See dicussion: https://github.com/dotnet/corefx/issues/21945
-                    RemoteInvoke((remoteUrl, remoteExpectedErrors, useManagedHandlerString) =>
+                    RemoteInvoke((remoteUrl, remoteExpectedErrors, useSocketsHttpHandlerString) =>
                     {
                         UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(
                             remoteUrl,
-                            bool.Parse(useManagedHandlerString),
+                            bool.Parse(useSocketsHttpHandlerString),
                             (SslPolicyErrors)Enum.Parse(typeof(SslPolicyErrors), remoteExpectedErrors)).Wait();
 
                         return SuccessExitCode;
-                    }, url, expectedErrors.ToString(), UseManagedHandler.ToString()).Dispose();
+                    }, url, expectedErrors.ToString(), UseSocketsHttpHandler.ToString()).Dispose();
                 }
                 else
                 {
-                    await UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(url, UseManagedHandler, expectedErrors);
+                    await UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(url, UseSocketsHttpHandler, expectedErrors);
                 }
             }
             catch (HttpRequestException e) when (e.InnerException?.GetType().Name == "WinHttpException" &&
