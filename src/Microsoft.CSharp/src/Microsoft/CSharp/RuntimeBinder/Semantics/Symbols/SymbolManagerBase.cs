@@ -15,12 +15,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private readonly SymFactory _symFactory;
 
-        private SYMTBL tableGlobal;
-
         public BSYMMGR()
         {
-            this.tableGlobal = new SYMTBL();
-            _symFactory = new SymFactory(this.tableGlobal);
+            _symFactory = new SymFactory();
 
             ////////////////////////////////////////////////////////////////////////////////
             // Build the data structures needed to make FPreLoad fast. Make sure the 
@@ -43,11 +40,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     start += sub.Length + 1;
                 }
             }
-        }
-
-        public SYMTBL GetSymbolTable()
-        {
-            return tableGlobal;
         }
 
         public static BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
@@ -129,12 +121,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask)
         {
-            return tableGlobal.LookupSym(name, parent, kindmask);
+            return SymbolStore.LookupSym(name, parent, kindmask);
         }
 
         public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
         {
-            return tableGlobal.LookupSym(name, agg, mask);
+            return SymbolStore.LookupSym(name, agg, mask);
         }
 
         public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)

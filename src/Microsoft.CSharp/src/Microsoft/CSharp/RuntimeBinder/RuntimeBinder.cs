@@ -56,7 +56,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             BSYMMGR bsymmgr = _semanticChecker.getBSymmgr();
 
             _symbolTable = new SymbolTable(
-                bsymmgr.GetSymbolTable(),
                 bsymmgr.GetSymFactory(),
                 _semanticChecker.GetTypeManager(),
                 bsymmgr,

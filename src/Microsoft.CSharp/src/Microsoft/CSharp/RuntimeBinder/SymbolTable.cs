@@ -23,7 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         private readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
 
         // Members from the managed binder.
-        private readonly SYMTBL _symbolTable;
         private readonly SymFactory _symFactory;
         private readonly TypeManager _typeManager;
         private readonly BSYMMGR _bsymmgr;
@@ -62,13 +61,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
 
         internal SymbolTable(
-            SYMTBL symTable,
             SymFactory symFactory,
             TypeManager typeManager,
             BSYMMGR bsymmgr,
             CSemanticChecker semanticChecker)
         {
-            _symbolTable = symTable;
             _symFactory = symFactory;
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
@@ -656,7 +653,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
 
                     AggregateSymbol next = FindSymForType(
-                        _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol), t);
+                        SymbolStore.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol), t);
 
                     // If we haven't found this type yet, then add it to our symbol table.
                     if (next == null)
@@ -860,7 +857,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private NamespaceSymbol AddNamespaceToSymbolTable(NamespaceOrAggregateSymbol parent, string sz)
         {
             Name name = GetName(sz);
-            return _symbolTable.LookupSym(name, parent, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol
+            return SymbolStore.LookupSym(name, parent, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol
                 ?? _symFactory.CreateNamespace(name, parent as NamespaceSymbol);
         }
         #endregion
@@ -1078,7 +1075,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private FieldSymbol AddFieldToSymbolTable(FieldInfo fieldInfo, AggregateSymbol aggregate)
         {
-            FieldSymbol field = _symbolTable.LookupSym(
+            FieldSymbol field = SymbolStore.LookupSym(
                 GetName(fieldInfo.Name),
                 aggregate,
                 symbmask_t.MASK_FieldSymbol) as FieldSymbol;
@@ -1171,7 +1168,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void AddEventToSymbolTable(EventInfo eventInfo, AggregateSymbol aggregate, FieldSymbol addedField)
         {
-            EventSymbol ev = _symbolTable.LookupSym(
+            EventSymbol ev = SymbolStore.LookupSym(
                 GetName(eventInfo.Name),
                 aggregate,
                 symbmask_t.MASK_EventSymbol) as EventSymbol;
@@ -1276,7 +1273,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 name = GetName(property.Name);
             }
-            PropertySymbol prop = _symbolTable.LookupSym(
+            PropertySymbol prop = SymbolStore.LookupSym(
                 name,
                 aggregate,
                 symbmask_t.MASK_PropertySymbol) as PropertySymbol;

@@ -9,13 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class SymFactory
     {
-        private readonly SYMTBL _symbolTable;
-
-        public SymFactory(SYMTBL symtable)
-        {
-            _symbolTable = symtable;
-        }
-
         private Symbol NewBasicSymbol(
             SYMKIND kind,
             Name name,
@@ -78,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Set the parent element of the child symbol.
                 parent.AddToChildList(sym);
-                _symbolTable.InsertChild(parent, sym);
+                SymbolStore.InsertChild(parent, sym);
             }
 
             return (sym);
