@@ -252,8 +252,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (current)
             {
                 case MethodSignatureEnum.SIG_SZ_ARRAY:
-                    return GetTypeManager()
-                        .GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
+                    return TypeManager.GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
 
                 case MethodSignatureEnum.SIG_METH_TYVAR:
                     return GetTypeManager().GetStdMethTypeVar(signature[indexIntoSignatures++]);

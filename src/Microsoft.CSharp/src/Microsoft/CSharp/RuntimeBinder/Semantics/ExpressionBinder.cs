@@ -527,7 +527,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Access event backing field (EventRegistrationTokenTable<T>) using
                     // EventRegistrationTokenTable<T>.GetOrCreateEventRegistrationTokenTable()
                     // to ensure non-null
-                    pFieldType = GetTypes().GetParameterModifier(pFieldType, false);
+                    pFieldType = TypeManager.GetParameterModifier(pFieldType, false);
                 }
             }
 

@@ -935,7 +935,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             int parameterCount = ExpressionIterator.Count(args);
             AggregateType paramsArrayElementType = GetSymbolLoader().GetPredefindType(pt);
-            ArrayType paramsArrayType = GetSymbolLoader().GetTypeManager().GetArray(paramsArrayElementType, 1, true);
+            ArrayType paramsArrayType = TypeManager.GetArray(paramsArrayElementType, 1, true);
             ExprConstant paramsArrayArg = GetExprFactory().CreateIntegerConstant(parameterCount);
             return ExprFactory.CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
         }

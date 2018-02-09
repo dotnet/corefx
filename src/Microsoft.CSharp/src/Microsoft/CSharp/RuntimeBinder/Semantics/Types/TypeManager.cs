@@ -17,15 +17,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private BSYMMGR _BSymmgr;
         private PredefinedTypes _predefTypes;
 
-        private readonly TypeTable _typeTable;
         private SymbolTable _symbolTable;
 
         private readonly StdTypeVarColl _stvcMethod;
 
         public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
         {
-            _typeTable = new TypeTable();
-
             _stvcMethod = new StdTypeVarColl();
             _BSymmgr = bsymmgr;
             _predefTypes = predefTypes;
@@ -82,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public ArrayType GetArray(CType elementType, int args, bool isSZArray)
+        public static ArrayType GetArray(CType elementType, int args, bool isSZArray)
         {
             Debug.Assert(args > 0 && args < 32767);
             Debug.Assert(args == 1 || !isSZArray);
@@ -90,12 +87,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             int rankNum = isSZArray ? 0 : args;
 
             // See if we already have an array type of this element type and rank.
-            ArrayType pArray = _typeTable.LookupArray(elementType, rankNum);
+            ArrayType pArray = TypeTable.LookupArray(elementType, rankNum);
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
                 pArray = new ArrayType(elementType, args, isSZArray);
-                _typeTable.InsertArray(elementType, rankNum, pArray);
+                TypeTable.InsertArray(elementType, rankNum, pArray);
             }
 
             Debug.Assert(pArray.Rank == args);
@@ -115,14 +112,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Debug.Assert(agg.GetTypeVars().Count == typeArgs.Count);
-            AggregateType pAggregate = _typeTable.LookupAggregate(agg, atsOuter, typeArgs);
+            AggregateType pAggregate = TypeTable.LookupAggregate(agg, atsOuter, typeArgs);
             if (pAggregate == null)
             {
                 pAggregate = new AggregateType(agg, typeArgs, atsOuter);
 
                 Debug.Assert(!pAggregate.ConstraintError.HasValue);
 
-                _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
+                TypeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
             }
 
             Debug.Assert(pAggregate.OwningAggregate == agg);
@@ -154,14 +151,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetAggregate(agg, atsOuter, typeArgsInner);
         }
 
-        public PointerType GetPointer(CType baseType)
+        public static PointerType GetPointer(CType baseType)
         {
-            PointerType pPointer = _typeTable.LookupPointer(baseType);
+            PointerType pPointer = TypeTable.LookupPointer(baseType);
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
                 pPointer = new PointerType(baseType);
-                _typeTable.InsertPointer(baseType, pPointer);
+                TypeTable.InsertPointer(baseType, pPointer);
             }
 
             Debug.Assert(pPointer.ReferentType == baseType);
@@ -173,24 +170,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(!(pUnderlyingType is NullableType), "Attempt to make nullable of nullable");
 
-            NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
+            NullableType pNullableType = TypeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
                 pNullableType = new NullableType(pUnderlyingType, _BSymmgr, this);
-                _typeTable.InsertNullable(pUnderlyingType, pNullableType);
+                TypeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
             return pNullableType;
         }
 
-        public ParameterModifierType GetParameterModifier(CType paramType, bool isOut)
+        public static ParameterModifierType GetParameterModifier(CType paramType, bool isOut)
         {
-            ParameterModifierType pParamModifier = _typeTable.LookupParameterModifier(paramType, isOut);
+            ParameterModifierType pParamModifier = TypeTable.LookupParameterModifier(paramType, isOut);
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
                 pParamModifier = new ParameterModifierType(paramType, isOut);
-                _typeTable.InsertParameterModifier(paramType, isOut, pParamModifier);
+                TypeTable.InsertParameterModifier(paramType, isOut, pParamModifier);
             }
 
             Debug.Assert(pParamModifier.ParameterType == paramType);

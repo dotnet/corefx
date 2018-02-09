@@ -754,7 +754,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (t.IsArray)
             {
                 // Now we return an array of nesting level corresponding to the rank.
-                return _typeManager.GetArray(
+                return TypeManager.GetArray(
                     GetCTypeFromType(t.GetElementType()), 
                     t.GetArrayRank(),
 #if netcoreapp
@@ -768,7 +768,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (t.IsPointer)
             {
                 // Now we return the pointer type that we want.
-                return _typeManager.GetPointer(GetCTypeFromType(t.GetElementType()));
+                return TypeManager.GetPointer(GetCTypeFromType(t.GetElementType()));
             }
 
             return null;
@@ -892,7 +892,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
 
         internal CType GetCTypeFromType(Type type) => type.IsByRef
-            ? _typeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
+            ? TypeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
             : LoadSymbolsFromType(type);
 
         #endregion
@@ -1777,7 +1777,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (ctype is ParameterModifierType mod && p.IsOut && !p.IsIn)
             {
                 CType parameterType = mod.ParameterType;
-                ctype = _typeManager.GetParameterModifier(parameterType, true);
+                ctype = TypeManager.GetParameterModifier(parameterType, true);
             }
 
             return ctype;

@@ -398,7 +398,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         CSharpArgumentInfo info = arguments[i].Info;
                         if (info.IsByRefOrOut)
                         {
-                            type = _semanticChecker.GetTypeManager().GetParameterModifier(type, info.IsOut);
+                            type = TypeManager.GetParameterModifier(type, info.IsOut);
                         }
                     }
                 }
@@ -437,8 +437,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // IsOut to be true. So do that logic here rather than create a ref type to then
                 // throw away.
                 Debug.Assert(type.IsByRef);
-                ctype = _semanticChecker.GetTypeManager()
-                    .GetParameterModifier(_symbolTable.GetCTypeFromType(type.GetElementType()), true);
+                ctype = TypeManager.GetParameterModifier(_symbolTable.GetCTypeFromType(type.GetElementType()), true);
             }
             else
             {
