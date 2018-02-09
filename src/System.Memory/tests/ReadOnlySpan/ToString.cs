@@ -50,7 +50,10 @@ namespace System.SpanTests
             Assert.Equal("System.ReadOnlySpan<String>[3]", span.ToString());
         }
 
+        // This test is only relevant for portable span
+#if FEATURE_PORTABLE_SPAN
         [Fact]
+#endif
         public static unsafe void ToStringFromString()
         {
             string original = TestHelpers.BuildString(10, 42);
@@ -63,12 +66,12 @@ namespace System.SpanTests
             string subString2 = span.Slice(0, 2).ToString();
             string subString3 = span.Slice(1, 2).ToString();
 
-            Assert.Equal("RDDNEGSNET", returnedString);
-            Assert.Equal("RDDNEGSNET", returnedStringUsingSlice);
+            Assert.Equal(original, returnedString);
+            Assert.Equal(original, returnedStringUsingSlice);
 
-            Assert.Equal("DDNEGSNET", subString1);
-            Assert.Equal("RD", subString2);
-            Assert.Equal("DD", subString3);
+            Assert.Equal(original.Substring(1), subString1);
+            Assert.Equal(original.Substring(0, 2), subString2);
+            Assert.Equal(original.Substring(1, 2), subString3);
 
             fixed (char* pOriginal = original)
             fixed (char* pString1 = returnedString)
