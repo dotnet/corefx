@@ -730,7 +730,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (canConvert(arg, typeParam))
                 {
                     methFirstList.Add(new CandidateFunctionMember(
-                                    new MethPropWithInst(methCur, atsCur, BSYMMGR.EmptyTypeArray()),
+                                    new MethPropWithInst(methCur, atsCur, TypeArray.Empty),
                                     paramsCur,
                                     0,
                                     false));
@@ -740,7 +740,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                          canConvert(arg, nubParam = GetTypes().GetNullable(typeParam)))
                 {
                     methFirstList.Add(new CandidateFunctionMember(
-                                    new MethPropWithInst(methCur, atsCur, BSYMMGR.EmptyTypeArray()),
+                                    new MethPropWithInst(methCur, atsCur, TypeArray.Empty),
                                     GetGlobalSymbols().AllocParams(1, new CType[] { nubParam }),
                                     1,
                                     false));

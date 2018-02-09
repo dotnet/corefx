@@ -2425,7 +2425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (canConvert(arg1, paramsCur[0]) && canConvert(arg2, paramsCur[1]))
             {
                 candidateList.Add(new CandidateFunctionMember(
-                    new MethPropWithInst(method, ats, BSYMMGR.EmptyTypeArray()),
+                    new MethPropWithInst(method, ats, TypeArray.Empty),
                     paramsCur,
                     0, // No lifted arguments
                     false));
@@ -2443,7 +2443,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
             candidateList.Add(new CandidateFunctionMember(
-                new MethPropWithInst(method, ats, BSYMMGR.EmptyTypeArray()),
+                new MethPropWithInst(method, ats, TypeArray.Empty),
                 GetGlobalSymbols().AllocParams(2, rgtype),
                 2, // two lifted arguments
                 false));
@@ -2693,7 +2693,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Set the predefined method to call.
             AggregateSymbol agg = methSym.getClass();
-            AggregateType callingType = GetTypes().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
+            AggregateType callingType = GetTypes().GetAggregate(agg, TypeArray.Empty);
             binop.PredefinedMethodToCall = new MethWithInst(methSym, callingType, null);
             binop.UserDefinedCallMethod = binop.PredefinedMethodToCall;
             return binop;
@@ -2707,7 +2707,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Set the predefined method to call.
             AggregateSymbol pAgg = methSym.getClass();
-            AggregateType pCallingType = GetTypes().GetAggregate(pAgg, BSYMMGR.EmptyTypeArray());
+            AggregateType pCallingType = GetTypes().GetAggregate(pAgg, TypeArray.Empty);
             pUnaryOp.PredefinedMethodToCall = new MethWithInst(methSym, pCallingType, null);
             pUnaryOp.UserDefinedCallMethod = pUnaryOp.PredefinedMethodToCall;
             return pUnaryOp;

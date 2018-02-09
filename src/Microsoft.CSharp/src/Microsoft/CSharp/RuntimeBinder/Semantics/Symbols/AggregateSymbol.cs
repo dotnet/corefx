@@ -291,7 +291,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    outerTypeVars = BSYMMGR.EmptyTypeArray();
+                    outerTypeVars = TypeArray.Empty;
                 }
 
                 _typeVarsThis = typeVars;

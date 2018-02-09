@@ -24,8 +24,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // The hash table for type arrays.
         private Dictionary<TypeArrayKey, TypeArray> tableTypeArrays;
 
-        private static readonly TypeArray s_taEmpty = new TypeArray(Array.Empty<CType>());
-
         public BSYMMGR()
         {
             this.tableGlobal = new SYMTBL();
@@ -59,11 +57,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public SYMTBL GetSymbolTable()
         {
             return tableGlobal;
-        }
-
-        public static TypeArray EmptyTypeArray()
-        {
-            return s_taEmpty;
         }
 
         public BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
@@ -247,7 +240,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (ctype == 0)
             {
-                return s_taEmpty;
+                return TypeArray.Empty;
             }
             Debug.Assert(ctype == prgtype.Length);
             return AllocParams(prgtype);
@@ -257,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (ctype == 0)
             {
-                return s_taEmpty;
+                return TypeArray.Empty;
             }
 
             if (ctype == array.Count)
@@ -275,7 +268,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (types == null || types.Length == 0)
             {
-                return s_taEmpty;
+                return TypeArray.Empty;
             }
             TypeArrayKey key = new TypeArrayKey(types);
             TypeArray result;

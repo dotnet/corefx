@@ -294,7 +294,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     int typeCount = agg.GetTypeVars().Count;
                     if (typeCount == 0)
                     {
-                        return GetTypeManager().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
+                        return GetTypeManager().GetAggregate(agg, TypeArray.Empty);
                     }
 
                     CType[] typeArgs = new CType[typeCount];

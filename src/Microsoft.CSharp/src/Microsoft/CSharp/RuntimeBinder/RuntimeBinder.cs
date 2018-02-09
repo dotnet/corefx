@@ -655,12 +655,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 flags |= EXPRFLAG.EXF_INDEXER;
             }
 
-            TypeArray typeArgumentsAsTypeArray = BSYMMGR.EmptyTypeArray();
-            if (typeArguments != null && typeArguments.Length > 0)
-            {
-                typeArgumentsAsTypeArray = _semanticChecker.getBSymmgr().AllocParams(
-                    _symbolTable.GetCTypeArrayFromTypes(typeArguments));
-            }
+            TypeArray typeArgumentsAsTypeArray = typeArguments?.Length > 0
+                ? _semanticChecker.getBSymmgr().AllocParams(_symbolTable.GetCTypeArrayFromTypes(typeArguments))
+                : TypeArray.Empty;
+
             ExprMemberGroup memgroup = _exprFactory.CreateMemGroup(// Tree
                 flags, name, typeArgumentsAsTypeArray, kind, callingType, null, null, new CMemberLookupResults(
                     _semanticChecker.getBSymmgr().AllocParams(callingTypes.Count, callingTypes.ToArray()),

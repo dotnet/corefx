@@ -545,29 +545,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeQual = (_flags & MemLookFlags.Ctor) != 0 ? _typeSrc : obj?.Type;
 
             // Determine what to search.
-            AggregateType typeCls1 = null;
-            AggregateType typeIface = null;
-            TypeArray ifaces = BSYMMGR.EmptyTypeArray();
-            AggregateType typeCls2 = null;
+            AggregateType typeCls1;
+            AggregateType typeIface;
+            TypeArray ifaces;
 
-            if (!typeSrc.IsInterfaceType)
-            {
-                typeCls1 = (AggregateType)typeSrc;
-
-                if (typeCls1.IsWindowsRuntimeType)
-                {
-                    ifaces = typeCls1.GetWinRTCollectionIfacesAll(GetSymbolLoader());
-                }
-            }
-            else
+            if (typeSrc.IsInterfaceType)
             {
                 Debug.Assert((_flags & (MemLookFlags.Ctor | MemLookFlags.NewObj | MemLookFlags.Operator | MemLookFlags.BaseCall)) == 0);
+                typeCls1 = null;
                 typeIface = (AggregateType)typeSrc;
                 ifaces = typeIface.IfacesAll;
             }
+            else
+            {
+                typeCls1 = (AggregateType)typeSrc;
+                typeIface = null;
+                ifaces = typeCls1.IsWindowsRuntimeType
+                    ? typeCls1.GetWinRTCollectionIfacesAll(GetSymbolLoader())
+                    : TypeArray.Empty;
+            }
 
-            if (typeIface != null || ifaces.Count > 0)
-                typeCls2 = GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
+            AggregateType typeCls2 = typeIface != null || ifaces.Count > 0
+                ? GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT)
+                : null;
 
             // Search the class first (except possibly object).
             if (typeCls1 == null || LookupInClass(typeCls1, ref typeCls2))

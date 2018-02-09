@@ -13,6 +13,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class TypeArray
     {
+        public static readonly TypeArray Empty = new TypeArray(Array.Empty<CType>());
+
         public TypeArray(CType[] types)
         {
             Debug.Assert(types != null);

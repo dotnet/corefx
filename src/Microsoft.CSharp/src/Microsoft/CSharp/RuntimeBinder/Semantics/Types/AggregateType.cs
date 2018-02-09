@@ -61,7 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(outerType == null || outerType.TypeArgsAll != null);
             TypeArgsAll = parent.GetTypeManager()
-                .ConcatenateTypeArrays(outerType != null ? outerType.TypeArgsAll : BSYMMGR.EmptyTypeArray(), typeArgsThis);
+                .ConcatenateTypeArrays(outerType != null ? outerType.TypeArgsAll : TypeArray.Empty, typeArgsThis);
         }
 
         public bool? ConstraintError;       // Did the constraints check produce an error?

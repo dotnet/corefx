@@ -378,9 +378,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Type t = genericArguments[i];
                     ((TypeParameterType)ctypes[i]).Symbol.SetBounds(_bsymmgr.AllocParams(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                 }
+
                 return _bsymmgr.AllocParams(ctypes.Length, ctypes);
             }
-            return BSYMMGR.EmptyTypeArray();
+
+            return TypeArray.Empty;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -433,9 +435,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                         ctypes.Add(ctype);
                     }
                 }
+
                 return _bsymmgr.AllocParams(ctypes.Count, ctypes.ToArray());
             }
-            return BSYMMGR.EmptyTypeArray();
+
+            return TypeArray.Empty;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -941,7 +945,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
             agg.SetAggKind(kind);
-            agg.SetTypeVars(BSYMMGR.EmptyTypeArray());
+            agg.SetTypeVars(TypeArray.Empty);
 
             ACCESS access;
             if (type.IsPublic)
@@ -1331,7 +1335,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 else
                 {
                     prop = _symFactory.CreateProperty(GetName(property.Name), aggregate);
-                    prop.Params = BSYMMGR.EmptyTypeArray();
+                    prop.Params = TypeArray.Empty;
                 }
             }
             prop.AssociatedPropertyInfo = property;
@@ -1524,7 +1528,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                methodSymbol.typeVars = BSYMMGR.EmptyTypeArray();
+                methodSymbol.typeVars = TypeArray.Empty;
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;

@@ -111,7 +111,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeArgs == null)
             {
-                typeArgs = BSYMMGR.EmptyTypeArray();
+                typeArgs = TypeArray.Empty;
             }
 
             Debug.Assert(agg.GetTypeVars().Count == typeArgs.Count);

@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                            | EXPRFLAG.EXF_MASK_ANY)) == 0);
             Flags = flags;
             Name = name;
-            TypeArgs = typeArgs ?? BSYMMGR.EmptyTypeArray();
+            TypeArgs = typeArgs ?? TypeArray.Empty;
             SymKind = symKind;
             ParentType = parentType;
             OptionalObject = optionalObject;

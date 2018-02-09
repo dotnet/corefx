@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 GetSymbolLoader().getBSymmgr().methNubCtor = meth;
             }
 
-            MethWithInst methwithinst = new MethWithInst(meth, pSourceType, BSYMMGR.EmptyTypeArray());
+            MethWithInst methwithinst = new MethWithInst(meth, pSourceType, TypeArray.Empty);
             ExprMemberGroup memgroup = GetExprFactory().CreateMemGroup(null, methwithinst);
             return GetExprFactory().CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
         }
