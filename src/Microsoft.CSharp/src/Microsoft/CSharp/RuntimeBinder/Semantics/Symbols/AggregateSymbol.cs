@@ -364,9 +364,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _pConvFirst = conv;
         }
 
-        public bool InternalsVisibleTo(Assembly assembly)
-        {
-            return _pTypeManager.InternalsVisibleTo(AssociatedAssembly, assembly);
-        }
+        public bool InternalsVisibleTo(Assembly assembly) => TypeManager.InternalsVisibleTo(AssociatedAssembly, assembly);
     }
 }

@@ -8,12 +8,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class TypeManager
     {
+        private static readonly Dictionary<(Assembly, Assembly), bool> s_internalsVisibleToCache =
+            new Dictionary<(Assembly, Assembly), bool>();
+
         private BSYMMGR _BSymmgr;
         private PredefinedTypes _predefTypes;
 
@@ -776,15 +780,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateType ObjectAggregateType => (AggregateType)_symbolTable.GetCTypeFromType(typeof(object));
 
-        private readonly Dictionary<Tuple<Assembly, Assembly>, bool> _internalsVisibleToCalculated
-            = new Dictionary<Tuple<Assembly, Assembly>, bool>();
-
-        internal bool InternalsVisibleTo(Assembly assemblyThatDefinesAttribute, Assembly assemblyToCheck)
+        internal static bool InternalsVisibleTo(Assembly assemblyThatDefinesAttribute, Assembly assemblyToCheck)
         {
-            bool result;
-
-            var key = Tuple.Create(assemblyThatDefinesAttribute, assemblyToCheck);
-            if (!_internalsVisibleToCalculated.TryGetValue(key, out result))
+            (Assembly, Assembly) key = (assemblyThatDefinesAttribute, assemblyToCheck);
+            if (!s_internalsVisibleToCache.TryGetValue(key, out bool result))
             {
                 AssemblyName assyName;
 
@@ -795,20 +794,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 try
                 {
                     assyName = assemblyToCheck.GetName();
+                    result = assemblyThatDefinesAttribute.GetCustomAttributes()
+                        .OfType<InternalsVisibleToAttribute>()
+                        .Select(ivta => new AssemblyName(ivta.AssemblyName))
+                        .Any(an => AssemblyName.ReferenceMatchesDefinition(an, assyName));
                 }
-                catch (System.Security.SecurityException)
+                catch (SecurityException)
                 {
                     result = false;
-                    goto SetMemo;
                 }
 
-                result = assemblyThatDefinesAttribute.GetCustomAttributes()
-                    .OfType<InternalsVisibleToAttribute>()
-                    .Select(ivta => new AssemblyName(ivta.AssemblyName))
-                    .Any(an => AssemblyName.ReferenceMatchesDefinition(an, assyName));
-
-            SetMemo:
-                _internalsVisibleToCalculated[key] = result;
+                s_internalsVisibleToCache[key] = result;
             }
 
             return result;
