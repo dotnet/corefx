@@ -409,7 +409,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _pCurrentType,
                         _pGroup,
                         _pArguments,
-                        _pExprBinder.GetTypes(),
                         GetSymbolLoader());
                 return _bArgumentsChangedForNamedOrOptionalArguments;
             }
@@ -420,7 +419,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     AggregateType pCurrentType,
                     ExprMemberGroup pGroup,
                     ArgInfos pArguments,
-                    TypeManager typeManager,
                     SymbolLoader symbolLoader)
             {
                 // We use the param count from pCurrentParameters because they may have been resized 

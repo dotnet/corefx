@@ -16,10 +16,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public GlobalSymbolContext()
         {
             GlobalSymbols = new BSYMMGR();
-            TypeManager = new TypeManager();
         }
 
-        public TypeManager TypeManager { get; }
         private BSYMMGR GlobalSymbols { get; }
         public BSYMMGR GetGlobalSymbols() { return GlobalSymbols; }
     }

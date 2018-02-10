@@ -26,16 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GlobalSymbolContext;
         }
 
-        public TypeManager GetTypeManager()
-        {
-            return TypeManager;
-        }
-
-        public TypeManager TypeManager
-        {
-            get { return GlobalSymbolContext.TypeManager; }
-        }
-
         public BSYMMGR getBSymmgr()
         {
             return GlobalSymbolContext.GetGlobalSymbols();

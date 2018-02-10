@@ -13,7 +13,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class TypeManager
+    internal static class TypeManager
     {
         private static readonly Dictionary<(Assembly, Assembly), bool> s_internalsVisibleToCache =
             new Dictionary<(Assembly, Assembly), bool>();
@@ -584,7 +584,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // RUNTIME BINDER ONLY CHANGE
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        internal CType GetBestAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, CType typeSrc)
+        internal static CType GetBestAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, CType typeSrc)
         {
             // This method implements the "best accessible type" algorithm for determining the type
             // of untyped arguments in the runtime binder. It is also used in method type inference
@@ -662,7 +662,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetPredefAgg(PredefinedType.PT_VALUE).getThisType();
         }
 
-        private bool TryVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, AggregateType typeSrc, out CType typeDst)
+        private static bool TryVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, AggregateType typeSrc, out CType typeDst)
         {
             Debug.Assert(typeSrc != null);
             Debug.Assert(typeSrc.IsInterfaceType || typeSrc.IsDelegateType);
@@ -722,7 +722,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private bool TryArrayVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, ArrayType typeSrc, out CType typeDst)
+        private static bool TryArrayVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, ArrayType typeSrc, out CType typeDst)
         {
             Debug.Assert(typeSrc != null);
 

@@ -270,7 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // (which, in the worst case, may be object).
 
                 CType actualType = SymbolTable.GetCTypeFromType(t);
-                CType bestType = _semanticChecker.GetTypeManager().GetBestAccessibleType(_semanticChecker, _bindingContext.ContextForMemberLookup, actualType);
+                CType bestType = TypeManager.GetBestAccessibleType(_semanticChecker, _bindingContext.ContextForMemberLookup, actualType);
                 t = bestType.AssociatedSystemType;
             }
 
@@ -980,7 +980,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 type,
                 memgroup,
                 argInfo,
-                _semanticChecker.GetTypeManager(),
                 SymbolLoader);
             {
                 Expr pList = null;

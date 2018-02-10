@@ -339,10 +339,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public CSemanticChecker GetSemanticChecker() { return SemanticChecker; }
 
-        private TypeManager GetTypes() { return TypeManager; }
-
-        private TypeManager TypeManager { get { return SymbolLoader.TypeManager; } }
-
         private ExprFactory GetExprFactory() { return ExprFactory; }
 
         private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
