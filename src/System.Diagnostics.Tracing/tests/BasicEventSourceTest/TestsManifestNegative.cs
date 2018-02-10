@@ -105,8 +105,8 @@ namespace BasicEventSourceTests
 #endif
 
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
-            e = AssertExtensions.Throws<ArgumentException>(GetResourceString("EventSource_EventWithAdminChannelMustHaveMessage", "WriteInteger", "Admin"),
-                () => EventSource.GenerateManifest(typeof(Sdt.EventWithAdminChannelNoMessageEventSource), string.Empty, strictOptions));
+            e = AssertExtensions.Throws<ArgumentException>(null, () => EventSource.GenerateManifest(typeof(Sdt.EventWithAdminChannelNoMessageEventSource), string.Empty, strictOptions));
+            AsserExceptionStringsEqual(() => GetResourceString("EventSource_EventWithAdminChannelMustHaveMessage", "WriteInteger", "Admin"), e);
 #endif // USE_ETW
 
             e = AssertExtensions.Throws<ArgumentException>(null, () => EventSource.GenerateManifest(typeof(Sdt.ReservedOpcodeEventSource), string.Empty, strictOptions));
