@@ -1824,8 +1824,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType typeRes = TypeManager.GetNullable(typeBool);
 
                 // Get the non-lifted result.
-                Expr nonLiftedArg1 = CNullable.StripNullableConstructor(expr1);
-                Expr nonLiftedArg2 = CNullable.StripNullableConstructor(expr2);
+                Expr nonLiftedArg1 = StripNullableConstructor(expr1);
+                Expr nonLiftedArg2 = StripNullableConstructor(expr2);
                 Expr nonLiftedResult = null;
 
                 if (!(nonLiftedArg1.Type is NullableType) && !(nonLiftedArg2.Type is NullableType))

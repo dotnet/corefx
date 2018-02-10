@@ -331,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                             if (dstWasNullable)
                             {
-                                ExprCall call = _binder.BindNubNew(exprTmp);
+                                ExprCall call = BindNubNew(exprTmp);
                                 exprTmp = call;
                                 call.NullableCallLiftKind = NullableCallLiftKind.NullableConversionConstructor;
                             }

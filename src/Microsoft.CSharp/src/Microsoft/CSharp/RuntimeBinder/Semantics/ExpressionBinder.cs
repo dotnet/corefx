@@ -265,12 +265,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private BindingContext Context;
         public BindingContext GetContext() { return Context; }
-        private CNullable m_nullable;
 
         public ExpressionBinder(BindingContext context)
         {
             Context = context;
-            m_nullable = new CNullable(GetSymbolLoader());
             g_binopSignatures = new BinOpSig[]
             {
                 new BinOpSig (PredefinedType.PT_INT,        PredefinedType.PT_INT,      BinOpMask.Integer,  8, BindIntBinOp,            OpSigFlags.Value,       BinOpFuncKind.IntBinOp      ),

@@ -196,7 +196,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Expr valueSrc = _exprSrc;
                         if (valueSrc.Type is NullableType)
                         {
-                            valueSrc = _binder.BindNubValue(valueSrc);
+                            valueSrc = BindNubValue(valueSrc);
                         }
 
                         Debug.Assert(valueSrc.Type == _typeSrc.StripNubs());

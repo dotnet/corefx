@@ -9,10 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class BSYMMGR
     {
-        // Special nullable members.
-        public PropertySymbol propNubValue;
-        public MethodSymbol methNubCtor;
-
         public BSYMMGR()
         {
             ////////////////////////////////////////////////////////////////////////////////
