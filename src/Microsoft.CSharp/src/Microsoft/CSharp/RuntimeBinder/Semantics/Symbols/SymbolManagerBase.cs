@@ -9,31 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class BSYMMGR
     {
-        public BSYMMGR()
-        {
-            ////////////////////////////////////////////////////////////////////////////////
-            // Build the data structures needed to make FPreLoad fast. Make sure the 
-            // namespaces are created. Compute and sort hashes of the NamespaceSymbol * value and type
-            // name (sans arity indicator).
-
-            for (int i = 0; i < (int)PredefinedType.PT_COUNT; ++i)
-            {
-                NamespaceSymbol ns = NamespaceSymbol.Root;
-                string name = PredefinedTypeFacts.GetName((PredefinedType)i);
-                int start = 0;
-                while (start < name.Length)
-                {
-                    int iDot = name.IndexOf('.', start);
-                    if (iDot == -1)
-                        break;
-                    string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = NameManager.Add(sub);
-                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? SymFactory.CreateNamespace(nm, ns);
-                    start += sub.Length + 1;
-                }
-            }
-        }
-
         public static BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
         {
             if (ta1 == ta2)
@@ -105,8 +80,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return nTot;
         }
-
-        public static Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask) => SymbolStore.LookupSym(name, parent, kindmask);
 
         public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => SymbolStore.LookupSym(name, agg, mask);
 
