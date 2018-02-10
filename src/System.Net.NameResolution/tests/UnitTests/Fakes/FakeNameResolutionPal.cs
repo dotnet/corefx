@@ -51,7 +51,7 @@ namespace System.Net
             throw new NotImplementedException();
         }
 
-        internal static void GetAddrInfoAsync(string name, DnsResolveAsyncResult asyncResult)
+        internal static void GetAddrInfoAsync(DnsResolveAsyncResult asyncResult)
         {
             throw new NotImplementedException();
         }

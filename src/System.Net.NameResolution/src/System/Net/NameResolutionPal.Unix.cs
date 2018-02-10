@@ -196,7 +196,7 @@ namespace System.Net
             return SocketError.Success;
         }
 
-        internal static void GetAddrInfoAsync(string name, DnsResolveAsyncResult asyncResult)
+        internal static void GetAddrInfoAsync(DnsResolveAsyncResult asyncResult)
         {
             throw new NotSupportedException();
         }

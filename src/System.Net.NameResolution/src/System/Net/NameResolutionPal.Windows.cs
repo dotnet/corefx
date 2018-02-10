@@ -397,7 +397,7 @@ namespace System.Net
 
         private static bool GetAddrInfoExSupportsOverlapped()
         {
-            using (SafeLibraryHandle libHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.Ws2_32, IntPtr.Zero, 0))
+            using (SafeLibraryHandle libHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.Ws2_32, IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_SEARCH_SYSTEM32))
             {
                 if (libHandle.IsInvalid)
                     return false;
@@ -408,16 +408,27 @@ namespace System.Net
             }
         }
 
-        public static unsafe void GetAddrInfoAsync(string name, DnsResolveAsyncResult asyncResult)
+        public static unsafe void GetAddrInfoAsync(DnsResolveAsyncResult asyncResult)
         {
-            GetAddrInfoExContext* context = GetAddrInfoExContext.AllocateContext(name, asyncResult);
+            GetAddrInfoExContext* context = GetAddrInfoExContext.AllocateContext();
+
+            try
+            {
+                var state = new GetAddrInfoExState(asyncResult);
+                context->QueryStateHandle = state.CreateHandle();
+            }
+            catch
+            {
+                GetAddrInfoExContext.FreeContext(context);
+                throw;
+            }
 
             AddressInfoEx hints = new AddressInfoEx();
             hints.ai_flags = AddressInfoHints.AI_CANONNAME;
             hints.ai_family = AddressFamily.Unspecified; // Gets all address families
 
             SocketError errorCode =
-                (SocketError)Interop.Winsock.GetAddrInfoExW(name, null, 0 /* NS_ALL*/, IntPtr.Zero, ref hints, out context->Result, IntPtr.Zero, ref context->Overlapped, s_getAddrInfoExCallback, out context->CancelHandle);
+                (SocketError)Interop.Winsock.GetAddrInfoExW(asyncResult.HostName, null, 0 /* NS_ALL*/, IntPtr.Zero, ref hints, out context->Result, IntPtr.Zero, ref context->Overlapped, s_getAddrInfoExCallback, out context->CancelHandle);
 
             if (errorCode != SocketError.IOPending)
                 ProcessResult(errorCode, context);
@@ -433,17 +444,10 @@ namespace System.Net
 
         private static unsafe void ProcessResult(SocketError errorCode, GetAddrInfoExContext* context)
         {
-            GetAddrInfoExState state = context->GetQueryState();
-
-            // 'state' may be null or 'SetCallbackStartedOrCanceled' may return false if
-            // the AppDomain started unloading before the callback was raised.
-            // In this case we don't need to free the context, it will be done in
-            // GetAddrInfoExState's finalizer.
-            if (state == null || !state.SetCallbackStartedOrCanceled())
-                return;
-
             try
             {
+                GetAddrInfoExState state = GetAddrInfoExState.FromHandle(context->QueryStateHandle);
+
                 if (errorCode != SocketError.Success)
                 {
                     state.CompleteAsyncResult(new SocketException((int)errorCode));
@@ -477,7 +481,7 @@ namespace System.Net
                 }
 
                 if (canonicalName == null)
-                    canonicalName = state.HostAddress;
+                    canonicalName = state.HostName;
 
                 state.CompleteAsyncResult(new IPHostEntry
                 {
@@ -488,7 +492,7 @@ namespace System.Net
             }
             finally
             {
-                state.Dispose();
+                GetAddrInfoExContext.FreeContext(context);
             }
         }
 
@@ -509,157 +513,75 @@ namespace System.Net
 
         #region GetAddrInfoAsync Helper Classes
 
-        private sealed unsafe class GetAddrInfoExState : IDisposable
+        //
+        // Warning: If this ever ported to NETFX, AppDomain unloads needs to be handled
+        // to protect against AppDomainUnloadException if there are pending operations.
+        //
+
+        private sealed class GetAddrInfoExState
         {
-            private IntPtr _context;
-            private int _callbackStartedOrCanceled;
             private DnsResolveAsyncResult _asyncResult;
+            private object _result;
 
-            public string HostAddress { get; }
+            public string HostName => _asyncResult.HostName;
 
-            public GetAddrInfoExState(string hostAddress, DnsResolveAsyncResult asyncResult)
+            public GetAddrInfoExState(DnsResolveAsyncResult asyncResult)
             {
-                HostAddress = hostAddress;
                 _asyncResult = asyncResult;
-            }
-
-            public void SetQueryContext(IntPtr context)
-            {
-                _context = context;
-            }
-
-            public bool SetCallbackStartedOrCanceled()
-            {
-                return Interlocked.Exchange(ref _callbackStartedOrCanceled, 1) == 0;
             }
 
             public void CompleteAsyncResult(object o)
             {
                 // We don't want to expose the GetAddrInfoEx callback thread to user code.
+                // The callback occurs in a native windows thread pool.
 
-                var state = Tuple.Create(_asyncResult, o);
+                _result = o;
 
                 Task.Factory.StartNew(s =>
                 {
-                    var t = (Tuple<DnsResolveAsyncResult, object>)s;
-                    t.Item1.InvokeCallback(t.Item2);
-                }, state, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                    var self = (GetAddrInfoExState)s;
+                    self._asyncResult.InvokeCallback(self._result);
+                }, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
 
-            ~GetAddrInfoExState()
+            public IntPtr CreateHandle()
             {
-                // The finalizer should only be called when the AppDomain is unloading while there was a pending operation.
-                // Calling GetAddrInfoExCancel will invoke the callback inline with WSA_E_CANCELLED error code.
-
-                // If the callback is already invoked, let the traditional Dispose clear the resources.
-                // This should not be possible, because the finalizer would not have been called if the object was still alive.
-                // This is an extra protection in case the object was somehow resurrected.
-                if (!SetCallbackStartedOrCanceled())
-                    return;
-
-                ReleaseResources(cancelQuery: true);
+                GCHandle handle = GCHandle.Alloc(this, GCHandleType.Normal);
+                return GCHandle.ToIntPtr(handle);
             }
 
-            public void Dispose()
+            public static GetAddrInfoExState FromHandle(IntPtr handle)
             {
-                GC.SuppressFinalize(this);
-                ReleaseResources(cancelQuery: false);
-            }
+                GCHandle gcHandle = GCHandle.FromIntPtr(handle);
+                var state = (GetAddrInfoExState)gcHandle.Target;
+                gcHandle.Free();
 
-            private void ReleaseResources(bool cancelQuery)
-            {
-                IntPtr ptr = Interlocked.Exchange(ref _context, IntPtr.Zero);
-
-                if (ptr == IntPtr.Zero)
-                    return;
-
-                var context = (GetAddrInfoExContext*)ptr;
-
-                if (cancelQuery)
-                    context->CancelQuery();
-
-                GetAddrInfoExContext.FreeContext(context);
+                return state;
             }
         }
 
         [StructLayout(LayoutKind.Sequential)]
         private unsafe struct GetAddrInfoExContext
         {
-            private static readonly int Size = Marshal.SizeOf<GetAddrInfoExContext>();
+            private static readonly int Size = sizeof(GetAddrInfoExContext);
 
             public NativeOverlapped Overlapped;
             public AddressInfoEx* Result;
-            public IntPtr QueryStateHandle;
             public IntPtr CancelHandle;
+            public IntPtr QueryStateHandle;
 
-            public GetAddrInfoExContext(GetAddrInfoExState state)
+            public static GetAddrInfoExContext* AllocateContext()
             {
-                Overlapped = new NativeOverlapped();
-                Result = null;
+                var context = (GetAddrInfoExContext*)Marshal.AllocHGlobal(Size);
+                *context = new GetAddrInfoExContext();
 
-                GCHandle handle = GCHandle.Alloc(state, GCHandleType.Normal);
-                QueryStateHandle = GCHandle.ToIntPtr(handle);
-
-                CancelHandle = IntPtr.Zero;
-            }
-
-            public GetAddrInfoExState GetQueryState()
-            {
-                IntPtr stateHandle = Interlocked.Exchange(ref QueryStateHandle, IntPtr.Zero);
-
-                if (stateHandle == IntPtr.Zero)
-                    return null;
-
-                GCHandle handle = GCHandle.FromIntPtr(stateHandle);
-
-                if (!handle.IsAllocated)
-                    return null;
-
-                var state = (GetAddrInfoExState)handle.Target;
-                handle.Free();
-
-                return state;
-            }
-
-            public void CancelQuery()
-            {
-                if (CancelHandle != IntPtr.Zero)
-                {
-                    Interop.Winsock.GetAddrInfoExCancel(ref CancelHandle);
-                    CancelHandle = IntPtr.Zero;
-                }
-            }
-
-            public static GetAddrInfoExContext* AllocateContext(string hostAddress, DnsResolveAsyncResult asyncResult)
-            {
-                GetAddrInfoExContext* context = (GetAddrInfoExContext*)Marshal.AllocHGlobal(Size);
-
-                try
-                {
-                    GetAddrInfoExState state = new GetAddrInfoExState(hostAddress, asyncResult);
-
-                    *context = new GetAddrInfoExContext(state);
-                    state.SetQueryContext((IntPtr)context);
-                }
-                catch (OutOfMemoryException)
-                {
-                    Marshal.FreeHGlobal((IntPtr)context);
-                    throw;
-                }
-                
                 return context;
             }
 
             public static void FreeContext(GetAddrInfoExContext* context)
             {
                 if (context->Result != null)
-                {
                     Interop.Winsock.FreeAddrInfoEx(context->Result);
-                    context->Result = null;
-                }
-
-                // There is no need to free the GCHandle held in 'QueryStateHandle'
-                // The handle is freed by 'GetQueryState' unless the AppDomain is unloaded.
 
                 Marshal.FreeHGlobal((IntPtr)context);
             }

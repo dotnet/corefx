@@ -325,16 +325,12 @@ namespace System.Net
             // Set up the context, possibly flow.
             asyncResult.StartPostingAsyncOp(false);
 
-            // GetHostByName is used instead of GetAddrInfo if ipv6 is not supported.
-            // See the comment in InternalGetHostByName for further explanation.
-            bool useGetHostByName = !includeIPv6 && !SocketProtocolSupportPal.OSSupportsIPv6;
-
             // If the OS supports it and 'hostName' is not an IP Address, resolve the name asynchronously
             // instead of calling the synchronous version in the ThreadPool.
-            if (NameResolutionPal.SupportsGetAddrInfoAsync && ipAddress == null && !useGetHostByName)
+            if (NameResolutionPal.SupportsGetAddrInfoAsync && ipAddress == null)
             {
                 ValidateHostName(hostName);
-                NameResolutionPal.GetAddrInfoAsync(hostName, asyncResult);
+                NameResolutionPal.GetAddrInfoAsync(asyncResult);
             }
             else
             {
