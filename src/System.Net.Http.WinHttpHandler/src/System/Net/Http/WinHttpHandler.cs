@@ -889,11 +889,14 @@ namespace System.Net.Http
                 HttpResponseMessage responseMessage = WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck);
                 state.Tcs.TrySetResult(responseMessage);
 
-                if(responseMessage.StatusCode == HttpStatusCode.Redirect &&
-                   responseMessage.Headers.Location.IsAbsoluteUri &&
-                   responseMessage.Headers.Location.Scheme == Uri.UriSchemeHttps) {
-                    //WinHttpTraceHelper.Trace("Possible insecure redirect (https -> http) detected.");
-                    Console.WriteLine("Insecure redirect detected.");
+                if((responseMessage.StatusCode == HttpStatusCode.MultipleChoices ||
+                    responseMessage.StatusCode == HttpStatusCode.MovedPermanently ||
+                    responseMessage.StatusCode == HttpStatusCode.Redirect ||
+                    responseMessage.StatusCode == HttpStatusCode.RedirectMethod ||
+                    responseMessage.StatusCode == HttpStatusCode.RedirectKeepVerb) &&
+                   state.RequestMessage.RequestUri.Scheme == Uri.UriSchemeHttps &&
+                   responseMessage.Headers.Location?.Scheme == Uri.UriSchemeHttp) {
+                    WinHttpTraceHelper.Trace("WinHttpHandler.SendAsync: Insecure https to http redirect blocked.");
                 }
             }
             catch (Exception ex)
