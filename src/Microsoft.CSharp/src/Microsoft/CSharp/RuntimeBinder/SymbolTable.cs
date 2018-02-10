@@ -429,7 +429,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             for (AggregateSymbol p = parent; p != null; p = p.parent as AggregateSymbol)
             {
-                for (TypeParameterSymbol typeParam = BSYMMGR.LookupAggMember(
+                for (TypeParameterSymbol typeParam = SymbolStore.LookupSym(
                         GetName(t), p, symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol;
                     typeParam != null;
                     typeParam = BSYMMGR.LookupNextSym(typeParam, p, symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol)
@@ -1691,7 +1691,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static MethodSymbol FindMatchingMethod(MemberInfo method, AggregateSymbol callingAggregate)
         {
-            MethodSymbol meth = BSYMMGR.LookupAggMember(GetName(method.Name), callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+            MethodSymbol meth = SymbolStore.LookupSym(GetName(method.Name), callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             while (meth != null)
             {
                 if (meth.AssociatedMemberInfo.IsEquivalentTo(method))

@@ -9,8 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class BSYMMGR
     {
-        public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => SymbolStore.LookupSym(name, agg, mask);
-
         public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
         {
             Debug.Assert(sym.parent == parent);
