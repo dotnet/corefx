@@ -113,10 +113,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return _pExprBinder.GetSemanticChecker();
             }
-            private ErrorHandling GetErrorContext()
-            {
-                return _pExprBinder.GetErrorContext();
-            }
+
             private static CType GetTypeQualifier(ExprMemberGroup pGroup)
             {
                 Debug.Assert(pGroup != null);
@@ -349,11 +346,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 pAmbig1.mpwi.GetType() != pAmbig2.mpwi.GetType() ||
                                 pAmbig1.mpwi.MethProp().Params == pAmbig2.mpwi.MethProp().Params)
                             {
-                                throw GetErrorContext().Error(ErrorCode.ERR_AmbigCall, pAmbig1.mpwi, pAmbig2.mpwi);
+                                throw ErrorHandling.Error(ErrorCode.ERR_AmbigCall, pAmbig1.mpwi, pAmbig2.mpwi);
                             }
 
                             // The two signatures are identical so don't use the type args in the error message.
-                            throw GetErrorContext().Error(ErrorCode.ERR_AmbigCall, pAmbig1.mpwi.MethProp(), pAmbig2.mpwi.MethProp());
+                            throw ErrorHandling.Error(ErrorCode.ERR_AmbigCall, pAmbig1.mpwi.MethProp(), pAmbig2.mpwi.MethProp());
                         }
                     }
 
@@ -965,7 +962,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     for (int ivar = 0; ivar < _pArguments.carg; ivar++)
                     {
                         CType var = _pCurrentParameters[ivar];
-                        bool constraintErrors = !TypeBind.CheckConstraints(GetSemanticChecker(), GetErrorContext(), var, CheckConstraintsFlags.NoErrors);
+                        bool constraintErrors = !TypeBind.CheckConstraints(GetSemanticChecker(), var, CheckConstraintsFlags.NoErrors);
                         if (constraintErrors && !DoesTypeArgumentsContainErrorSym(var))
                         {
                             _mpwiParamTypeConstraints.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
@@ -1132,7 +1129,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_results.BestResult.TypeArgs.Count > 0)
                     {
                         // Check method type variable constraints.
-                        TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), new MethWithInst(_results.BestResult));
+                        TypeBind.CheckMethConstraints(GetSemanticChecker(), new MethWithInst(_results.BestResult));
                     }
                 }
             }
@@ -1142,7 +1139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // First and foremost, report if the user specified a name more than once.
                 if (_pDuplicateSpecifiedName != null)
                 {
-                    return GetErrorContext().Error(ErrorCode.ERR_DuplicateNamedArgument, _pDuplicateSpecifiedName);
+                    return ErrorHandling.Error(ErrorCode.ERR_DuplicateNamedArgument, _pDuplicateSpecifiedName);
                 }
 
                 Debug.Assert(_methList.IsEmpty());
@@ -1175,7 +1172,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // We have the bad name. Is it misplaced or absent?
                                 if (paramNames.Contains(name))
                                 {
-                                    return GetErrorContext().Error(ErrorCode.ERR_BadNonTrailingNamedArgument, name);
+                                    return ErrorHandling.Error(ErrorCode.ERR_BadNonTrailingNamedArgument, name);
                                 }
 
                                 // Let this be handled by _pInvalidSpecifiedName handling.
@@ -1188,7 +1185,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 else if (_mpwiBogus)
                 {
                     // We might have called this, but it is bogus...
-                    return GetErrorContext().Error(ErrorCode.ERR_BindToBogus, _mpwiBogus);
+                    return ErrorHandling.Error(ErrorCode.ERR_BindToBogus, _mpwiBogus);
                 }
 
                 bool bUseDelegateErrors = false;
@@ -1221,19 +1218,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(_results.UninferableResult.Sym is MethodSymbol);
 
                     MethWithType mwtCantInfer = new MethWithType(_results.UninferableResult.Meth(), _results.UninferableResult.GetType());
-                    return GetErrorContext().Error(ErrorCode.ERR_CantInferMethTypeArgs, mwtCantInfer);
+                    return ErrorHandling.Error(ErrorCode.ERR_CantInferMethTypeArgs, mwtCantInfer);
                 }
 
                 if (_mwtBadArity)
                 {
                     int cvar = _mwtBadArity.Meth().typeVars.Count;
-                    return GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _mwtBadArity, new ErrArgSymKind(_mwtBadArity.Meth()), _pArguments.carg);
+                    return ErrorHandling.Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _mwtBadArity, new ErrArgSymKind(_mwtBadArity.Meth()), _pArguments.carg);
                 }
 
                 if (_mpwiParamTypeConstraints)
                 {
                     // This will always report an error
-                    TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), new MethWithInst(_mpwiParamTypeConstraints));
+                    TypeBind.CheckMethConstraints(GetSemanticChecker(), new MethWithInst(_mpwiParamTypeConstraints));
                     Debug.Fail("Unreachable");
                     return null;
                 }
@@ -1242,37 +1239,37 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Give a better message for delegate invoke.
                     return _pGroup.OptionalObject?.Type is AggregateType agg && agg.OwningAggregate.IsDelegate()
-                        ? GetErrorContext().Error(
+                        ? ErrorHandling.Error(
                             ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.OwningAggregate.name,
                             _pInvalidSpecifiedName)
-                        : GetErrorContext().Error(ErrorCode.ERR_BadNamedArgument, _pGroup.Name, _pInvalidSpecifiedName);
+                        : ErrorHandling.Error(ErrorCode.ERR_BadNamedArgument, _pGroup.Name, _pInvalidSpecifiedName);
                 }
 
                 if (_pNameUsedInPositionalArgument != null)
                 {
-                    return GetErrorContext().Error(ErrorCode.ERR_NamedArgumentUsedInPositional, _pNameUsedInPositionalArgument);
+                    return ErrorHandling.Error(ErrorCode.ERR_NamedArgumentUsedInPositional, _pNameUsedInPositionalArgument);
                 }
 
                 // The number of arguments must be wrong.
 
                 if (_fCandidatesUnsupported)
                 {
-                    return GetErrorContext().Error(ErrorCode.ERR_BindToBogus, nameErr);
+                    return ErrorHandling.Error(ErrorCode.ERR_BindToBogus, nameErr);
                 }
 
                 if (bUseDelegateErrors)
                 {
                     Debug.Assert(0 == (_pGroup.Flags & EXPRFLAG.EXF_CTOR));
-                    return GetErrorContext().Error(ErrorCode.ERR_BadDelArgCount, nameErr, _pArguments.carg);
+                    return ErrorHandling.Error(ErrorCode.ERR_BadDelArgCount, nameErr, _pArguments.carg);
                 }
 
                 if (0 != (_pGroup.Flags & EXPRFLAG.EXF_CTOR))
                 {
                     Debug.Assert(!(_pGroup.ParentType is TypeParameterType));
-                    return GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, _pGroup.ParentType, _pArguments.carg);
+                    return ErrorHandling.Error(ErrorCode.ERR_BadCtorArgCount, _pGroup.ParentType, _pArguments.carg);
                 }
 
-                return GetErrorContext().Error(ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
+                return ErrorHandling.Error(ErrorCode.ERR_BadArgCount, nameErr, _pArguments.carg);
             }
 
             private RuntimeBinderException ReportErrorsForBestMatching(bool bUseDelegateErrors)
@@ -1280,10 +1277,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (bUseDelegateErrors)
                 {
                     // Point to the Delegate, not the Invoke method
-                    return GetErrorContext().Error(ErrorCode.ERR_BadDelArgTypes, _results.BestResult.GetType());
+                    return ErrorHandling.Error(ErrorCode.ERR_BadDelArgTypes, _results.BestResult.GetType());
                 }
 
-                return GetErrorContext().Error(ErrorCode.ERR_BadArgTypes, _results.BestResult);
+                return ErrorHandling.Error(ErrorCode.ERR_BadArgTypes, _results.BestResult);
             }
         }
     }

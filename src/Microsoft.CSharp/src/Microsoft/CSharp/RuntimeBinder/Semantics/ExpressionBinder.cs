@@ -339,15 +339,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public CSemanticChecker GetSemanticChecker() { return SemanticChecker; }
 
-        private ErrorHandling ErrorContext
-        {
-            get
-            {
-                return SymbolLoader.ErrorContext;
-            }
-        }
-        private ErrorHandling GetErrorContext() { return ErrorContext; }
-
         private TypeManager GetTypes() { return TypeManager; }
 
         private TypeManager TypeManager { get { return SymbolLoader.TypeManager; } }
@@ -616,7 +607,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (!mwtGet)
                 {
-                    throw ErrorContext.Error(ErrorCode.ERR_PropertyLacksGet, pwt);
+                    throw ErrorHandling.Error(ErrorCode.ERR_PropertyLacksGet, pwt);
                 }
 
                 CType type = null;
@@ -631,10 +622,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // if the get exists, but is not accessible, give an error.
                     if (error == ACCESSERROR.ACCESSERROR_NOACCESSTHRU)
                     {
-                        throw ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, pwt, type, ContextForMemberLookup());
+                        throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwt, type, ContextForMemberLookup());
                     }
 
-                    throw ErrorContext.Error(ErrorCode.ERR_InaccessibleGetter, pwt);
+                    throw ErrorHandling.Error(ErrorCode.ERR_InaccessibleGetter, pwt);
                 }
             }
 
@@ -746,7 +737,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pmethBest == null)
             {
                 // No winner, so its an ambiguous call...
-                throw ErrorContext.Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
+                throw ErrorHandling.Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
             }
 
             ExprCall call;
@@ -914,10 +905,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pOperand2 != null)
             {
                 Debug.Assert(pOperand2.Type != null);
-                return ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
+                return ErrorHandling.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
             }
 
-            return ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
+            return ErrorHandling.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
         }
 
         private static ErrorCode GetStandardLvalueError(CheckLvalueKind kind)
@@ -949,9 +940,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (CSemanticChecker.CheckAccess2(mwt.Meth(), mwt.GetType(), ContextForMemberLookup(), type))
             {
                 case ACCESSERROR.ACCESSERROR_NOACCESSTHRU:
-                    throw ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, pwtSlot, type, ContextForMemberLookup());
+                    throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwtSlot, type, ContextForMemberLookup());
                 case ACCESSERROR.ACCESSERROR_NOACCESS:
-                    throw ErrorContext.Error(mwt.Meth().isSetAccessor() ? ErrorCode.ERR_InaccessibleSetter : ErrorCode.ERR_InaccessibleGetter, pwtSlot);
+                    throw ErrorHandling.Error(mwt.Meth().isSetAccessor() ? ErrorCode.ERR_InaccessibleSetter : ErrorCode.ERR_InaccessibleGetter, pwtSlot);
             }
         }
 
@@ -1001,18 +992,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // SPEC VIOLATION: would be a breaking change.  We currently discard "no op" casts
                     // SPEC VIOLATION: very aggressively rather than generating an ExpressionKind.EK_CAST node.
 
-                    throw ErrorContext.Error(ErrorCode.ERR_AssgReadonlyProp, prop.PropWithTypeSlot);
+                    throw ErrorHandling.Error(ErrorCode.ERR_AssgReadonlyProp, prop.PropWithTypeSlot);
 
                 case ExpressionKind.Field:
                     ExprField field = (ExprField)expr;
                     Debug.Assert(field.FieldWithType.Field().isReadOnly);
-                    throw ErrorContext.Error(
+                    throw ErrorHandling.Error(
                         field.FieldWithType.Field().isStatic
                             ? ErrorCode.ERR_AssgReadonlyStatic
                             : ErrorCode.ERR_AssgReadonly);
 
                 default:
-                    throw ErrorContext.Error(GetStandardLvalueError(kind));
+                    throw ErrorHandling.Error(GetStandardLvalueError(kind));
             }
         }
 
@@ -1069,10 +1060,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return null;
                     }
 
-                    throw ErrorContext.Error(ErrorCode.ERR_ObjectProhibited, swt);
+                    throw ErrorHandling.Error(ErrorCode.ERR_ObjectProhibited, swt);
                 }
 
-                throw ErrorContext.Error(ErrorCode.ERR_ObjectRequired, swt);
+                throw ErrorHandling.Error(ErrorCode.ERR_ObjectRequired, swt);
             }
 
             // At this point, all errors for static invocations have been reported, and
@@ -1717,7 +1708,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (type == null || type.IsUnsafe())
             {
-                throw ErrorContext.Error(ErrorCode.ERR_UnsafeNeeded);
+                throw ErrorHandling.Error(ErrorCode.ERR_UnsafeNeeded);
             }
         }
 

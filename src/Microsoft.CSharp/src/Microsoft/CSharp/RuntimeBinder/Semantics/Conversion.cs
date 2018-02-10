@@ -371,18 +371,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Failed because value was out of range. Report nifty error message.
                     string value = constant.Int64Value.ToString(CultureInfo.InvariantCulture);
-                    throw ErrorContext.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
+                    throw ErrorHandling.Error(ErrorCode.ERR_ConstOutOfRange, value, dest);
                 }
             }
 
             if (expr.Type is NullType && dest.FundamentalType != FUNDTYPE.FT_REF)
             {
-                throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
+                throw ErrorHandling.Error(ErrorCode.ERR_ValueCantBeNull, dest);
             }
 
             // canCast => can't convert, but explicit exists and can be specified by the user (no anonymous types).
             // !canCast => Generic "can't convert" error.
-            throw ErrorContext.Error(canCast(expr.Type, dest, flags) ? ErrorCode.ERR_NoImplicitConvCast : ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+            throw ErrorHandling.Error(canCast(expr.Type, dest, flags) ? ErrorCode.ERR_NoImplicitConvCast : ErrorCode.ERR_NoImplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
         }
 
         // performs an implicit conversion if its possible. otherwise returns null. flags is an optional parameter.
@@ -446,7 +446,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // We have a constant decimal that is out of range of the destination type.
                     // In both checked and unchecked contexts we issue an error. No need to recheck conversion in unchecked context.
                     // Decimal is a SimpleType represented in a FT_STRUCT
-                    throw ErrorContext.Error(
+                    throw ErrorHandling.Error(
                         ErrorCode.ERR_ConstOutOfRange,
                         ((ExprConstant)exprConst).Val.DecimalVal.ToString(CultureInfo.InvariantCulture), dest);
                 }
@@ -483,13 +483,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             break;
                     }
 
-                    throw ErrorContext.Error(ErrorCode.ERR_ConstOutOfRangeChecked, value, dest);
+                    throw ErrorHandling.Error(ErrorCode.ERR_ConstOutOfRangeChecked, value, dest);
                 }
             }
 
             if (expr.Type is NullType && dest.FundamentalType != FUNDTYPE.FT_REF)
             {
-                throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
+                throw ErrorHandling.Error(ErrorCode.ERR_ValueCantBeNull, dest);
             }
 
             throw CantConvert(expr, dest);
@@ -499,7 +499,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // Generic "can't convert" error.
             Debug.Assert(expr.Type != null);
-            return ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
+            return ErrorHandling.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
         }
 
         public Expr mustCast(Expr expr, CType dest) => mustCast(expr, dest, 0);
@@ -1031,7 +1031,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count);
             Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count);
-            return ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].Meth, prguci[iuciBestDst].Meth, typeSrc, typeDst);
+            return ErrorHandling.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].Meth, prguci[iuciBestDst].Meth, typeSrc, typeDst);
         }
 
         private static void MarkAsIntermediateConversion(Expr pExpr)

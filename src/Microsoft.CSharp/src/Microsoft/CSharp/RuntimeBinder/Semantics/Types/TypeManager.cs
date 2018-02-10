@@ -712,7 +712,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // All type arguments were varied successfully, which means now we must be accessible. But we could
             // have violated constraints. Let's check that out.
 
-            if (!TypeBind.CheckConstraints(semanticChecker, errHandling: null, intermediateType, CheckConstraintsFlags.NoErrors))
+            if (!TypeBind.CheckConstraints(semanticChecker, intermediateType, CheckConstraintsFlags.NoErrors))
             {
                 return false;
             }

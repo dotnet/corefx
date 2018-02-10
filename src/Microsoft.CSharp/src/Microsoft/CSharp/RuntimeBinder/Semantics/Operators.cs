@@ -2286,8 +2286,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Bad arg types - report error to user.
             return op2 != null
-                ? GetErrorContext().Error(ErrorCode.ERR_AmbigBinaryOps, strOp, op1.Type, op2.Type)
-                : GetErrorContext().Error(ErrorCode.ERR_AmbigUnaryOp, strOp, op1.Type);
+                ? ErrorHandling.Error(ErrorCode.ERR_AmbigBinaryOps, strOp, op1.Type, op2.Type)
+                : ErrorHandling.Error(ErrorCode.ERR_AmbigUnaryOp, strOp, op1.Type);
         }
 
         private Expr BindUserBoolOp(ExpressionKind kind, ExprCall pCall)
@@ -2303,7 +2303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!TypeManager.SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[0], typeRet) ||
                 !TypeManager.SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[1], typeRet))
             {
-                throw GetErrorContext().Error(ErrorCode.ERR_BadBoolOp, pCall.MethWithInst);
+                throw ErrorHandling.Error(ErrorCode.ERR_BadBoolOp, pCall.MethWithInst);
             }
 
             ExprList list = (ExprList)pCall.OptionalArguments;
@@ -2322,7 +2322,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pCallT == null || pCallF == null)
             {
-                throw GetErrorContext().Error(ErrorCode.ERR_MustHaveOpTF, typeRet);
+                throw ErrorHandling.Error(ErrorCode.ERR_MustHaveOpTF, typeRet);
             }
 
             pCallT = mustConvert(pCallT, GetPredefindType(PredefinedType.PT_BOOL));
@@ -2521,7 +2521,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pmethBest == null)
             {
                 // No winner, so its an ambiguous call...
-                throw GetErrorContext().Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
+                throw ErrorHandling.Error(ErrorCode.ERR_AmbigCall, pmethAmbig1.mpwi, pmethAmbig2.mpwi);
             }
 
             ppmpwi = pmethBest.mpwi;

@@ -25,7 +25,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (type.IsStaticClass)
             {
-                throw ErrorContext.Error(ErrorCode.ERR_ConvertToStaticClass, type);
+                throw ErrorHandling.Error(ErrorCode.ERR_ConvertToStaticClass, type);
             }
         }
 
@@ -117,8 +117,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /////////////////////////////////////////////////////////////////////////////////
         // SymbolLoader forwarders (begin)
         //
-
-        public ErrorHandling ErrorContext => SymbolLoader.ErrorContext;
 
         public TypeManager GetTypeManager() { return SymbolLoader.GetTypeManager(); }
 
@@ -277,8 +275,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return CheckAccess2(swtBad.Sym, swtBad.GetType(), symWhere, typeQual)
                    == ACCESSERROR.ACCESSERROR_NOACCESSTHRU
-                ? ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, swtBad, typeQual, symWhere)
-                : ErrorContext.Error(ErrorCode.ERR_BadAccess, swtBad);
+                ? ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, swtBad, typeQual, symWhere)
+                : ErrorHandling.Error(ErrorCode.ERR_BadAccess, swtBad);
         }
 
         public static bool CheckAccess(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru) =>

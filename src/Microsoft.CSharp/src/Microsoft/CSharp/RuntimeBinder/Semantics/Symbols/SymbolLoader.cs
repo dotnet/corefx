@@ -11,20 +11,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class SymbolLoader
     {
         private GlobalSymbolContext GlobalSymbolContext { get; }
-        public ErrorHandling ErrorContext { get; }
+
         public SymbolTable RuntimeBinderSymbolTable { get; private set; }
 
         public SymbolLoader()
         {
             GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
-            ErrorContext = new ErrorHandling();
             GlobalSymbolContext = globalSymbols;
             Debug.Assert(GlobalSymbolContext != null);
-        }
-
-        public ErrorHandling GetErrorContext()
-        {
-            return ErrorContext;
         }
 
         public GlobalSymbolContext GetGlobalSymbolContext()

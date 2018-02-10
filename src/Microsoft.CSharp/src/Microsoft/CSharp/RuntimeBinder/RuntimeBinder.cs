@@ -1258,7 +1258,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         if (type.IsArray && type.GetArrayRank() != numIndexArguments)
                         {
-                            throw _semanticChecker.ErrorContext.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
+                            throw ErrorHandling.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
                         
                         Debug.Assert(callingObject.Type is ArrayType);

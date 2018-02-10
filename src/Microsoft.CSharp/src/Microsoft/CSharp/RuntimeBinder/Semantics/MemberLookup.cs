@@ -472,7 +472,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private SymbolLoader GetSymbolLoader() { return _pSymbolLoader; }
         private CSemanticChecker GetSemanticChecker() { return _pSemanticChecker; }
-        private ErrorHandling GetErrorContext() { return GetSymbolLoader().GetErrorContext(); }
 
         private RuntimeBinderException ReportBogus(SymWithType swt)
         {
@@ -481,10 +480,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol meth2 = swt.Prop().SetterMethod;
             Debug.Assert((meth1 ?? meth2) != null);
             return meth1 == null | meth2 == null
-                ? GetErrorContext().Error(
+                ? ErrorHandling.Error(
                     ErrorCode.ERR_BindToBogusProp1, swt.Sym.name, new SymWithType(meth1 ?? meth2, swt.GetType()),
                     new ErrArgRefOnly(swt.Sym))
-                : GetErrorContext().Error(
+                : ErrorHandling.Error(
                     ErrorCode.ERR_BindToBogusProp2, swt.Sym.name, new SymWithType(meth1, swt.GetType()),
                     new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
         }
@@ -610,13 +609,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (_swtFirst)
             {
                 // Ambiguous lookup.
-                return GetErrorContext().Error(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
+                return ErrorHandling.Error(ErrorCode.ERR_AmbigMember, _swtFirst, _swtAmbig);
             }
 
             if (_swtInaccess)
             {
                 return !_swtInaccess.Sym.isUserCallable() && ((_flags & MemLookFlags.UserCallable) != 0)
-                    ? GetErrorContext().Error(ErrorCode.ERR_CantCallSpecialMethod, _swtInaccess)
+                    ? ErrorHandling.Error(ErrorCode.ERR_CantCallSpecialMethod, _swtInaccess)
                     : GetSemanticChecker().ReportAccessError(_swtInaccess, _symWhere, _typeQual);
             }
 
@@ -624,23 +623,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(_typeSrc is AggregateType);
                 return _arity > 0
-                    ? GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, ((AggregateType)_typeSrc).OwningAggregate, _arity)
-                    : GetErrorContext().Error(ErrorCode.ERR_NoConstructors, ((AggregateType)_typeSrc).OwningAggregate);
+                    ? ErrorHandling.Error(ErrorCode.ERR_BadCtorArgCount, ((AggregateType)_typeSrc).OwningAggregate, _arity)
+                    : ErrorHandling.Error(ErrorCode.ERR_NoConstructors, ((AggregateType)_typeSrc).OwningAggregate);
             }
 
             if ((_flags & MemLookFlags.Operator) != 0)
             {
-                return GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
+                return ErrorHandling.Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
             }
 
             if ((_flags & MemLookFlags.Indexer) != 0)
             {
-                return GetErrorContext().Error(ErrorCode.ERR_BadIndexLHS, _typeSrc);
+                return ErrorHandling.Error(ErrorCode.ERR_BadIndexLHS, _typeSrc);
             }
 
             if (_swtBad)
             {
-                return GetErrorContext().Error((_flags & MemLookFlags.MustBeInvocable) != 0 ? ErrorCode.ERR_NonInvocableMemberCalled : ErrorCode.ERR_CantCallSpecialMethod, _swtBad);
+                return ErrorHandling.Error((_flags & MemLookFlags.MustBeInvocable) != 0 ? ErrorCode.ERR_NonInvocableMemberCalled : ErrorCode.ERR_CantCallSpecialMethod, _swtBad);
             }
 
             if (_swtBogus)
@@ -655,13 +654,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_swtBadArity.Sym is MethodSymbol badMeth)
                 {
                     int cvar = badMeth.typeVars.Count;
-                    return GetErrorContext().Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
+                    return ErrorHandling.Error(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                 }
 
-                return GetErrorContext().Error(ErrorCode.ERR_TypeArgsNotAllowed, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
+                return ErrorHandling.Error(ErrorCode.ERR_TypeArgsNotAllowed, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym));
             }
 
-            return GetErrorContext().Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
+            return ErrorHandling.Error(ErrorCode.ERR_NoSuchMember, _typeSrc, _name);
         }
     }
 }
