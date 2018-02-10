@@ -363,7 +363,8 @@ namespace BasicEventSourceTests
                         Assert.Equal("", evt.PayloadValue(2, null));
                     }));
 
-                if (useSelfDescribingEvents)
+                // Self-describing ETW does not support NULL arguments.
+                if (useSelfDescribingEvents && !(listener is EtwListener))
                 {
                     tests.Add(new SubTest("WriteEvent/Basic/EventVarArgsWithString",
                         delegate () { logger.EventVarArgsWithString(1, 2, 12, null); },
