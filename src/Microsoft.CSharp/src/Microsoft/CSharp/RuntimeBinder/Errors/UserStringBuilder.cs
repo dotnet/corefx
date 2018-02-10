@@ -16,18 +16,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void BeginString()
         {
-            Debug.Assert(_strBuilder == null);
-            _strBuilder = new StringBuilder();
+            Debug.Assert(_strBuilder == null || _strBuilder.Length == 0);
+            if(_strBuilder == null)
+            {
+                _strBuilder = new StringBuilder();
+            }
         }
 
-        private void EndString(out string s)
+        private string EndString()
         {
             Debug.Assert(_strBuilder != null);
-            s = _strBuilder.ToString();
-            _strBuilder = null;
+            string s = _strBuilder.ToString();
+            _strBuilder.Clear();
+            return s;
         }
 
-        private static void ErrSK(out string psz, SYMKIND sk)
+        private static string ErrSK(SYMKIND sk)
         {
             MessageID id;
             switch (sk)
@@ -62,7 +66,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
             }
 
-            ErrId(out psz, id);
+            return ErrId(id);
         }
         /*
          * Create a fill-in string describing a parameter list.
@@ -301,12 +305,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
         }
 
-        private void ErrAppendId(MessageID id)
-        {
-            string str;
-            ErrId(out str, id);
-            ErrAppendString(str);
-        }
+        private void ErrAppendId(MessageID id) => ErrAppendString(ErrId(id));
 
         /*
          * Create a fill-in string describing a symbol.
@@ -553,18 +552,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             switch (parg.eak)
             {
                 case ErrArgKind.SymKind:
-                    ErrSK(out psz, parg.sk);
+                    psz = ErrSK(parg.sk);
                     break;
                 case ErrArgKind.Type:
                     BeginString();
                     ErrAppendType(parg.pType, null);
-                    EndString(out psz);
+                    psz = EndString();
                     fUserStrings = true;
                     break;
                 case ErrArgKind.Sym:
                     BeginString();
                     ErrAppendSym(parg.sym, null);
-                    EndString(out psz);
+                    psz = EndString();
                     fUserStrings = true;
                     break;
                 case ErrArgKind.Name:
@@ -586,7 +585,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         SubstContext ctx = new SubstContext(parg.swtMemo.ats, null);
                         BeginString();
                         ErrAppendSym(parg.swtMemo.sym, ctx, true);
-                        EndString(out psz);
+                        psz = EndString();
                         fUserStrings = true;
                         break;
                     }
@@ -596,7 +595,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         SubstContext ctx = new SubstContext(parg.mpwiMemo.ats, parg.mpwiMemo.typeArgs);
                         BeginString();
                         ErrAppendSym(parg.mpwiMemo.sym, ctx, true);
-                        EndString(out psz);
+                        psz = EndString();
                         fUserStrings = true;
                         break;
                     }
@@ -608,9 +607,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             return result;
         }
 
-        private static void ErrId(out string s, MessageID id)
-        {
-            s = ErrorFacts.GetMessage(id);
-        }
+        private static string ErrId(MessageID id) => ErrorFacts.GetMessage(id);
     }
 }
