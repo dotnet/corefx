@@ -346,7 +346,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             for (Symbol sym = SymbolLoader.LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;
-                 sym = SymbolLoader.LookupNextSym(sym, type, symbmask_t.MASK_ALL))
+                 sym = sym.LookupNext(symbmask_t.MASK_ALL))
             {
                 if (sym is MethodSymbol methsym)
                 {

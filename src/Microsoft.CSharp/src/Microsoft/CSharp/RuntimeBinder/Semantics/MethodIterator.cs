@@ -128,7 +128,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     CurrentSymbol = (CurrentSymbol == null
                         ? SymbolLoader.LookupAggMember(_name, CurrentType.OwningAggregate, _mask)
-                        : SymbolLoader.LookupNextSym(CurrentSymbol, CurrentType.OwningAggregate, _mask)) as MethodOrPropertySymbol;
+                        : CurrentSymbol.LookupNext(_mask)) as MethodOrPropertySymbol;
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.
                     if (CurrentSymbol == null)

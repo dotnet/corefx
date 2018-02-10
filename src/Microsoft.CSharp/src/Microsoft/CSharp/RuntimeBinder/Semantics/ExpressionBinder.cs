@@ -664,12 +664,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol methCur = null;
             AggregateType atsCur = (AggregateType)typeSrc;
 
-            for (; ;)
+            for (;;)
             {
                 // Find the next operator.
-                methCur = methCur == null
-                    ? SymbolLoader.LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol
-                    : SymbolLoader.LookupNextSym(methCur, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+                methCur = (methCur == null
+                    ? SymbolLoader.LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol)
+                    : methCur.LookupNext(symbmask_t.MASK_MethodSymbol)) as MethodSymbol;
 
                 if (methCur == null)
                 {

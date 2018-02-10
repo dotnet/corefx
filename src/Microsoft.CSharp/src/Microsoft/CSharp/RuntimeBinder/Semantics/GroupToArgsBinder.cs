@@ -656,7 +656,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     for (MethodOrPropertySymbol meth = SymbolLoader.LookupAggMember(method.name, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol;
                             meth != null;
-                            meth = SymbolLoader.LookupNextSym(meth, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol)
+                            meth = meth.LookupNext(symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol) as MethodOrPropertySymbol)
                     {
                         if (!meth.isOverride)
                         {

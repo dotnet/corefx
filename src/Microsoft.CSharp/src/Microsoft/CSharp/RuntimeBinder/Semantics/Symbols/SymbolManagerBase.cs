@@ -9,25 +9,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class BSYMMGR
     {
-        public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
-        {
-            Debug.Assert(sym.parent == parent);
-
-            sym = sym.nextSameName;
-            Debug.Assert(sym == null || sym.parent == parent);
-
-            // Keep traversing the list of symbols with same name and parent.
-            while (sym != null)
-            {
-                if ((kindmask & sym.mask()) > 0)
-                    return sym;
-
-                sym = sym.nextSameName;
-                Debug.Assert(sym == null || sym.parent == parent);
-            }
-
-            return null;
-        }
     }
 }
 

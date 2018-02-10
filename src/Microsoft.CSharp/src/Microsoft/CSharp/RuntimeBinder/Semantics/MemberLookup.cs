@@ -114,7 +114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Symbol symCur;
             for (symCur = SymbolLoader.LookupAggMember(_name, typeCur.OwningAggregate, symbmask_t.MASK_Member);
                  symCur != null;
-                 symCur = SymbolLoader.LookupNextSym(symCur, typeCur.OwningAggregate, symbmask_t.MASK_Member))
+                 symCur = symCur.LookupNext(symbmask_t.MASK_Member))
             {
                 Debug.Assert(!(symCur is AggregateSymbol));
                 // Check for arity.

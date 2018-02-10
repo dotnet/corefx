@@ -432,7 +432,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (TypeParameterSymbol typeParam = SymbolStore.LookupSym(
                         GetName(t), p, symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol;
                     typeParam != null;
-                    typeParam = BSYMMGR.LookupNextSym(typeParam, p, symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol)
+                    typeParam = typeParam.LookupNext(symbmask_t.MASK_TypeParameterSymbol) as TypeParameterSymbol)
                 {
                     if (AreTypeParametersEquivalent(typeParam.GetTypeParameterType().AssociatedSystemType, t))
                     {
@@ -1280,7 +1280,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
 
                     prevProp = prop;
-                    prop = SymbolLoader.LookupNextSym(prop, prop.parent, symbmask_t.MASK_PropertySymbol) as PropertySymbol;
+                    prop = prop.LookupNext(symbmask_t.MASK_PropertySymbol) as PropertySymbol;
                 }
 
                 prop = prevProp;
@@ -1699,7 +1699,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return meth;
                 }
 
-                meth = BSYMMGR.LookupNextSym(meth, callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+                meth = meth.LookupNext(symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             }
 
             return null;
@@ -1832,7 +1832,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             for (;
                     meth != null && !meth.AssociatedMemberInfo.IsEquivalentTo(baseMemberInfo);
-                    meth = SymbolLoader.LookupNextSym(meth, aggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
+                    meth = meth.LookupNext(symbmask_t.MASK_MethodSymbol) as MethodSymbol)
                 ;
 
             return meth;

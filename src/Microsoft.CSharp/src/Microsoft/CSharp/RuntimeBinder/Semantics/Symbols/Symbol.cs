@@ -68,6 +68,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Symbol nextChild;     // next child of this parent
         public Symbol nextSameName;  // next child of this parent with same name.
 
+        public Symbol LookupNext(symbmask_t kindmask)
+        {
+            // Keep traversing the list of symbols with same name and parent.
+            for (Symbol sym = nextSameName; sym != null; sym = sym.nextSameName)
+            {
+                if ((kindmask & sym.mask()) != 0)
+                {
+                    return sym;
+                }
+            }
+
+            return null;
+        }
 
         public ACCESS GetAccess()
         {

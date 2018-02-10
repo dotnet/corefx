@@ -37,9 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => SymbolStore.LookupSym(name, agg, mask);
 
-        public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
-            => BSYMMGR.LookupNextSym(sym, parent, kindmask);
-
         private static bool IsBaseInterface(AggregateType atsDer, AggregateType pBase)
         {
             Debug.Assert(atsDer != null);

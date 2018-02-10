@@ -2455,7 +2455,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool foundSome = false;
             for (MethodSymbol methCur = SymbolLoader.LookupAggMember(name, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
                 methCur != null;
-                methCur = SymbolLoader.LookupNextSym(methCur, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
+                methCur = methCur.LookupNext(symbmask_t.MASK_MethodSymbol) as MethodSymbol)
             {
                 if (UserDefinedBinaryOperatorIsApplicable(candidateList, ek, methCur, type, arg1, arg2, fDontLift))
                 {
