@@ -10,7 +10,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class SymbolLoader
     {
-        private PredefinedMembers PredefinedMembers { get; }
         private GlobalSymbolContext GlobalSymbolContext { get; }
         public ErrorHandling ErrorContext { get; }
         public SymbolTable RuntimeBinderSymbolTable { get; private set; }
@@ -18,7 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public SymbolLoader()
         {
             GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
-            PredefinedMembers = new PredefinedMembers();
             ErrorContext = new ErrorHandling();
             GlobalSymbolContext = globalSymbols;
             Debug.Assert(GlobalSymbolContext != null);
@@ -42,11 +40,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeManager TypeManager
         {
             get { return GlobalSymbolContext.TypeManager; }
-        }
-
-        public PredefinedMembers getPredefinedMembers()
-        {
-            return PredefinedMembers;
         }
 
         public BSYMMGR getBSymmgr()

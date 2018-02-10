@@ -643,12 +643,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateCall(pdm, p1, p2, lift, methodInfo);
         }
 
-        private Expr GenerateConversion(Expr arg, CType CType, bool bChecked)
-        {
-            return GenerateConversionWithSource(Visit(arg), CType, bChecked || arg.isChecked());
-        }
+        private Expr GenerateConversion(Expr arg, CType CType, bool bChecked) =>
+            GenerateConversionWithSource(Visit(arg), CType, bChecked || arg.isChecked());
 
-        private Expr GenerateConversionWithSource(Expr pTarget, CType pType, bool bChecked)
+        private static Expr GenerateConversionWithSource(Expr pTarget, CType pType, bool bChecked)
         {
             PREDEFMETH pdm = bChecked ? PREDEFMETH.PM_EXPRESSION_CONVERTCHECKED : PREDEFMETH.PM_EXPRESSION_CONVERT;
             Expr pTypeOf = CreateTypeOf(pType);
@@ -669,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateUserDefinedConversion(arg, type, target, method);
         }
 
-        private Expr GenerateUserDefinedConversion(Expr arg, CType CType, Expr target, MethWithInst method)
+        private static Expr GenerateUserDefinedConversion(Expr arg, CType CType, Expr target, MethWithInst method)
         {
             // The user-defined explicit conversion from enum? to decimal or decimal? requires
             // that we convert the enum? to its nullable underlying CType.
@@ -759,7 +757,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateUserDefinedConversion(pCastArgument, pExpr.Type, pConversionSource, pExpr.UserDefinedCallMethod);
         }
 
-        private Expr GenerateParameter(string name, CType CType)
+        private static Expr GenerateParameter(string name, CType CType)
         {
             SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);  // force an ensure state
             ExprConstant nameString = ExprFactory.CreateStringConstant(name);
@@ -767,14 +765,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_PARAMETER, pTypeOf, nameString);
         }
 
-        private MethodSymbol GetPreDefMethod(PREDEFMETH pdm)
-        {
-            return GetSymbolLoader().getPredefinedMembers().GetMethod(pdm);
-        }
+        private static MethodSymbol GetPreDefMethod(PREDEFMETH pdm) => PredefinedMembers.GetMethod(pdm);
 
         private static ExprTypeOf CreateTypeOf(CType type) => ExprFactory.CreateTypeOf(type);
 
-        private Expr CreateWraps(ExprBoundLambda anonmeth)
+        private static Expr CreateWraps(ExprBoundLambda anonmeth)
         {
             Expr sequence = null;
             for (Symbol sym = anonmeth.ArgumentScope.firstChild; sym != null; sym = sym.nextChild)
@@ -843,7 +838,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return newIndices;
         }
 
-        private Expr GenerateConstant(Expr expr)
+        private static Expr GenerateConstant(Expr expr)
         {
             EXPRFLAG flags = 0;
 
@@ -867,7 +862,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, cast, pTypeOf2);
         }
 
-        private ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1)
+        private static ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1)
         {
             MethodSymbol method = GetPreDefMethod(pdm);
             // this should be enforced in an earlier pass and the transform pass should not 
@@ -882,7 +877,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return call;
         }
 
-        private ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2)
+        private static ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2)
         {
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
@@ -896,7 +891,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return call;
         }
 
-        private ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2, Expr arg3)
+        private static ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2, Expr arg3)
         {
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
@@ -910,7 +905,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return call;
         }
 
-        private ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2, Expr arg3, Expr arg4)
+        private static ExprCall GenerateCall(PREDEFMETH pdm, Expr arg1, Expr arg2, Expr arg3, Expr arg4)
         {
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
@@ -933,7 +928,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ExprFactory.CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
         }
 
-        private void FixLiftedUserDefinedBinaryOperators(ExprBinOp expr, ref Expr pp1, ref Expr pp2)
+        private static void FixLiftedUserDefinedBinaryOperators(ExprBinOp expr, ref Expr pp1, ref Expr pp2)
         {
             // If we have lifted T1 op T2 to T1? op T2?, and we have an expression T1 op T2? or T1? op T2 then
             // we need to ensure that the unlifted actual arguments are promoted to their nullable CType.

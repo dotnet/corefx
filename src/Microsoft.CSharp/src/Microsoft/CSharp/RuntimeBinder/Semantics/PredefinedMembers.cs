@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -190,22 +189,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             this.name = name;
             this.getter = getter;
         }
-    };
+    }
 
     // Loads and caches predefined members.
     // Also finds constructors on delegate types.
-    internal sealed class PredefinedMembers
+    internal static class PredefinedMembers
     {
-        private readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
-        private readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
+        private static readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
+        private static readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
 
-        private PropertySymbol LoadProperty(PREDEFPROP property)
+        private static PropertySymbol LoadProperty(PREDEFPROP property)
         {
             PredefinedPropertyInfo info = GetPropInfo(property);
             return LoadProperty(property, NameManager.GetPredefinedName(info.name), info.getter);
         }
 
-        private PropertySymbol LoadProperty(
+        private static PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
             Name propertyName,
             PREDEFMETH propertyGetter)
@@ -283,12 +282,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return TypeArray.Allocate(ptypes);
         }
 
-        public PredefinedMembers()
-        {
-            _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
-            _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
-
 #if DEBUG
+        static PredefinedMembers()
+        {
             // validate the tables
             for (int i = 0; i < (int)PREDEFMETH.PM_COUNT; i++)
             {
@@ -298,16 +294,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert((int)GetPropInfo((PREDEFPROP)i).property == i);
             }
-#endif
         }
+#endif
 
-        public PropertySymbol GetProperty(PREDEFPROP property)
+        public static PropertySymbol GetProperty(PREDEFPROP property)
         {
             Debug.Assert(property >= 0 && property < PREDEFPROP.PP_COUNT);
             return _properties[(int)property] ?? (_properties[(int)property] = LoadProperty(property));
         }
 
-        public MethodSymbol GetMethod(PREDEFMETH method)
+        public static MethodSymbol GetMethod(PREDEFMETH method)
         {
             Debug.Assert(method >= 0 && method < PREDEFMETH.PM_COUNT);
             return _methods[(int)method] ?? (_methods[(int)method] = LoadMethod(method));

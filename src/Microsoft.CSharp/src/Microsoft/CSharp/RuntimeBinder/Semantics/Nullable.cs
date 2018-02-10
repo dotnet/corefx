@@ -61,7 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PropertySymbol prop = GetSymbolLoader().getBSymmgr().propNubValue;
             if (prop == null)
             {
-                prop = GetSymbolLoader().getPredefinedMembers().GetProperty(PREDEFPROP.PP_G_OPTIONAL_VALUE);
+                prop = PredefinedMembers.GetProperty(PREDEFPROP.PP_G_OPTIONAL_VALUE);
                 Debug.Assert(prop != null);
                 GetSymbolLoader().getBSymmgr().propNubValue = prop;
             }
@@ -82,7 +82,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol meth = GetSymbolLoader().getBSymmgr().methNubCtor;
             if (meth == null)
             {
-                meth = GetSymbolLoader().getPredefinedMembers().GetMethod(PREDEFMETH.PM_G_OPTIONAL_CTOR);
+                meth = PredefinedMembers.GetMethod(PREDEFMETH.PM_G_OPTIONAL_CTOR);
                 Debug.Assert(meth != null);
                 GetSymbolLoader().getBSymmgr().methNubCtor = meth;
             }
