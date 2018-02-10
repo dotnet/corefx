@@ -10,14 +10,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprFactory
     {
-        private readonly GlobalSymbolContext _globalSymbolContext;
-
-        public ExprFactory(GlobalSymbolContext globalSymbolContext)
-        {
-            Debug.Assert(globalSymbolContext != null);
-            _globalSymbolContext = globalSymbolContext;
-        }
-
         public static ExprCall CreateCall(EXPRFLAG flags, CType type, Expr arguments, ExprMemberGroup memberGroup, MethWithInst method) => 
             new ExprCall(type, flags, arguments, memberGroup, method);
 

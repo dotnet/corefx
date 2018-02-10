@@ -10,26 +10,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class SymbolLoader
     {
-        private GlobalSymbolContext GlobalSymbolContext { get; }
-
         public SymbolTable RuntimeBinderSymbolTable { get; private set; }
-
-        public SymbolLoader()
-        {
-            GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
-            GlobalSymbolContext = globalSymbols;
-            Debug.Assert(GlobalSymbolContext != null);
-        }
-
-        public GlobalSymbolContext GetGlobalSymbolContext()
-        {
-            return GlobalSymbolContext;
-        }
-
-        public BSYMMGR getBSymmgr()
-        {
-            return GlobalSymbolContext.GetGlobalSymbols();
-        }
 
         public static AggregateSymbol GetPredefAgg(PredefinedType pt) => TypeManager.GetPredefAgg(pt);
 
