@@ -19,19 +19,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class NullableType : CType
     {
         private AggregateType _ats;
-        private readonly BSYMMGR _symmgr;
-        private readonly TypeManager _typeManager;
 
-        public NullableType(CType underlyingType, BSYMMGR symmgr, TypeManager typeManager)
+        public NullableType(CType underlyingType)
             : base(TypeKind.TK_NullableType)
         {
             UnderlyingType = underlyingType;
-            _symmgr = symmgr;
-            _typeManager = typeManager;
         }
 
-        public AggregateType GetAts() => _ats ?? (_ats = TypeManager.GetAggregate(
-                                             _typeManager.GetNullable(), TypeArray.Allocate(UnderlyingType)));
+        public AggregateType GetAts() =>
+            _ats ?? (_ats = TypeManager.GetAggregate(TypeManager.GetNullable(), TypeArray.Allocate(UnderlyingType)));
 
         public override CType StripNubs() => UnderlyingType;
 

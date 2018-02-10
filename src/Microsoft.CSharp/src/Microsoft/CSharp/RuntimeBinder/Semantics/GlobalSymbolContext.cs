@@ -13,19 +13,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class GlobalSymbolContext
     {
-        private readonly PredefinedTypes _predefTypes;
-
         public GlobalSymbolContext()
         {
             GlobalSymbols = new BSYMMGR();
-            _predefTypes = new PredefinedTypes();
-            TypeManager = new TypeManager(GlobalSymbols, _predefTypes);
+            TypeManager = new TypeManager();
         }
 
         public TypeManager TypeManager { get; }
         public TypeManager GetTypes() { return TypeManager; }
         private BSYMMGR GlobalSymbols { get; }
         public BSYMMGR GetGlobalSymbols() { return GlobalSymbols; }
-        public PredefinedTypes GetPredefTypes() { return _predefTypes; }
     }
 }

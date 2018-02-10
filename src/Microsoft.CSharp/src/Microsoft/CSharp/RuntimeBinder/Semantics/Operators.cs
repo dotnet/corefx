@@ -191,7 +191,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         Debug.Assert(typeSig1.IsValueType);
 
-                        typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig1);
+                        typeSig1 = TypeManager.GetNullable(typeSig1);
                         if (!canConvert(constant, typeSig1))
                         {
                             continue;
@@ -218,7 +218,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         Debug.Assert(typeSig1.IsValueType);
 
-                        typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig1);
+                        typeSig1 = TypeManager.GetNullable(typeSig1);
                         if (!canConvert(info.arg1, typeSig1))
                         {
                             continue;
@@ -275,7 +275,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         Debug.Assert(typeSig2.IsValueType);
 
-                        typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig2);
+                        typeSig2 = TypeManager.GetNullable(typeSig2);
                         if (!canConvert(constant, typeSig2))
                         {
                             continue;
@@ -303,7 +303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         Debug.Assert(typeSig2.IsValueType);
 
-                        typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig2);
+                        typeSig2 = TypeManager.GetNullable(typeSig2);
                         if (!canConvert(info.arg2, typeSig2))
                         {
                             continue;
@@ -584,7 +584,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if (!(resultType is NullableType))
                 {
-                    resultType = GetSymbolLoader().GetTypeManager().GetNullable(resultType);
+                    resultType = TypeManager.GetNullable(resultType);
                 }
             }
 
@@ -684,7 +684,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 pgrflt = LiftFlags.None;
-                typeDst = GetSymbolLoader().GetTypeManager().GetNullable(typeDst);
+                typeDst = TypeManager.GetNullable(typeDst);
                 if (!canConvert(info.arg1, typeDst))
                     return false;
                 pgrflt = LiftFlags.Convert1;
@@ -694,7 +694,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (info.type2 is NullableType)
             {
                 pgrflt = pgrflt | LiftFlags.Lift2;
-                ptypeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(info.typeRaw2);
+                ptypeSig2 = TypeManager.GetNullable(info.typeRaw2);
             }
             else
                 ptypeSig2 = info.typeRaw2;
@@ -718,7 +718,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             else
             {
                 pgrflt = LiftFlags.None;
-                typeDst = GetSymbolLoader().GetTypeManager().GetNullable(typeDst);
+                typeDst = TypeManager.GetNullable(typeDst);
                 if (!canConvert(info.arg2, typeDst))
                     return false;
                 pgrflt = LiftFlags.Convert2;
@@ -728,7 +728,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (info.type1 is NullableType)
             {
                 pgrflt = pgrflt | LiftFlags.Lift1;
-                ptypeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(info.typeRaw1);
+                ptypeSig1 = TypeManager.GetNullable(info.typeRaw1);
             }
             else
                 ptypeSig1 = info.typeRaw1;
@@ -751,7 +751,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(info.type1 is NullableType);
                 grflt = grflt | LiftFlags.Lift1;
-                typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(info.typeRaw1);
+                typeSig1 = TypeManager.GetNullable(info.typeRaw1);
             }
             else
                 typeSig1 = info.typeRaw1;
@@ -760,7 +760,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(info.type2 is NullableType);
                 grflt = grflt | LiftFlags.Lift2;
-                typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(info.typeRaw2);
+                typeSig2 = TypeManager.GetNullable(info.typeRaw2);
             }
             else
                 typeSig2 = info.typeRaw2;
@@ -1133,7 +1133,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     return mustCast(
                         BindStandardUnaryOperator(
-                            op, mustCast(pArgument, GetTypes().GetNullable(GetPredefindType(ptOp)))), nub);
+                            op, mustCast(pArgument, TypeManager.GetNullable(GetPredefindType(ptOp)))), nub);
                 }
             }
 
@@ -1395,7 +1395,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        typeSig = GetSymbolLoader().GetTypeManager().GetNullable(typeSig);
+                        typeSig = TypeManager.GetNullable(typeSig);
                         if (!canConvert(pArgument, typeSig))
                         {
                             continue;
@@ -1411,7 +1411,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        typeSig = GetSymbolLoader().GetTypeManager().GetNullable(typeSig);
+                        typeSig = TypeManager.GetNullable(typeSig);
                         if (!canConvert(pArgument, typeSig))
                         {
                             continue;
@@ -1821,7 +1821,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (expr1.Type is NullableType || expr2.Type is NullableType)
             {
                 CType typeBool = GetPredefindType(PredefinedType.PT_BOOL);
-                CType typeRes = GetSymbolLoader().GetTypeManager().GetNullable(typeBool);
+                CType typeRes = TypeManager.GetNullable(typeBool);
 
                 // Get the non-lifted result.
                 Expr nonLiftedArg1 = CNullable.StripNullableConstructor(expr1);
@@ -2001,7 +2001,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 nonNullableType2 = nonNullableType1.UnderlyingEnumType;
             }
 
-            NullableType typeDst = GetTypes().GetNullable(GetEnumBinOpType(ek, nonNullableType1, nonNullableType2, out AggregateType typeEnum));
+            NullableType typeDst = TypeManager.GetNullable(GetEnumBinOpType(ek, nonNullableType1, nonNullableType2, out AggregateType typeEnum));
 
             Debug.Assert(typeEnum != null);
             PredefinedType ptOp;
@@ -2023,7 +2023,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            NullableType typeOp = GetTypes().GetNullable(GetPredefindType(ptOp));
+            NullableType typeOp = TypeManager.GetNullable(GetPredefindType(ptOp));
             arg1 = mustCast(arg1, typeOp, CONVERTTYPE.NOUDC);
             arg2 = mustCast(arg2, typeOp, CONVERTTYPE.NOUDC);
 
@@ -2314,8 +2314,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             list.OptionalElement = pExprWrap;
 
             // Reflection load the true and false methods.
-            SymbolLoader.RuntimeBinderSymbolTable.PopulateSymbolTableWithName(SpecialNames.CLR_True, null, pExprWrap.Type.AssociatedSystemType);
-            SymbolLoader.RuntimeBinderSymbolTable.PopulateSymbolTableWithName(SpecialNames.CLR_False, null, pExprWrap.Type.AssociatedSystemType);
+            SymbolTable.PopulateSymbolTableWithName(SpecialNames.CLR_True, null, pExprWrap.Type.AssociatedSystemType);
+            SymbolTable.PopulateSymbolTableWithName(SpecialNames.CLR_False, null, pExprWrap.Type.AssociatedSystemType);
 
             Expr pCallT = bindUDUnop(ExpressionKind.True, pExprWrap);
             Expr pCallF = bindUDUnop(ExpressionKind.False, pExprWrap);
@@ -2432,8 +2432,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
             CType[] rgtype = new CType[2];
-            rgtype[0] = GetTypes().GetNullable(paramsCur[0]);
-            rgtype[1] = GetTypes().GetNullable(paramsCur[1]);
+            rgtype[0] = TypeManager.GetNullable(paramsCur[0]);
+            rgtype[1] = TypeManager.GetNullable(paramsCur[1]);
             if (!canConvert(arg1, rgtype[0]) || !canConvert(arg2, rgtype[1]))
             {
                 return false;
@@ -2591,7 +2591,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (ek)
             {
                 default:
-                    typeRet = GetTypes().GetNullable(typeRetRaw);
+                    typeRet = TypeManager.GetNullable(typeRetRaw);
                     break;
                 case ExpressionKind.Eq:
                 case ExpressionKind.NotEq:

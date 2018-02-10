@@ -18,18 +18,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static readonly Dictionary<(Assembly, Assembly), bool> s_internalsVisibleToCache =
             new Dictionary<(Assembly, Assembly), bool>();
 
-        private BSYMMGR _BSymmgr;
-        private PredefinedTypes _predefTypes;
-
         private SymbolTable _symbolTable;
 
         private static readonly StdTypeVarColl s_stvcMethod = new StdTypeVarColl();
-
-        public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
-        {
-            _BSymmgr = bsymmgr;
-            _predefTypes = predefTypes;
-        }
 
         public void InitTypeFactory(SymbolTable table)
         {
@@ -168,14 +159,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pPointer;
         }
 
-        public NullableType GetNullable(CType pUnderlyingType)
+        public static NullableType GetNullable(CType pUnderlyingType)
         {
             Debug.Assert(!(pUnderlyingType is NullableType), "Attempt to make nullable of nullable");
 
             NullableType pNullableType = TypeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                pNullableType = new NullableType(pUnderlyingType, _BSymmgr, this);
+                pNullableType = new NullableType(pUnderlyingType);
                 TypeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
@@ -197,7 +188,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pParamModifier;
         }
 
-        public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
+        public static AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
 
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
@@ -206,7 +197,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
-        public AggregateType SubstType(AggregateType typeSrc, TypeArray typeArgsCls)
+        public static AggregateType SubstType(AggregateType typeSrc, TypeArray typeArgsCls)
         {
             Debug.Assert(typeSrc != null);
 
@@ -217,7 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth) =>
             SubstType(typeSrc, typeArgsCls, typeArgsMeth, false);
 
-        public TypeArray SubstTypeArray(TypeArray taSrc, SubstContext ctx)
+        public static TypeArray SubstTypeArray(TypeArray taSrc, SubstContext ctx)
         {
             if (taSrc != null && taSrc.Count != 0 && ctx != null && !ctx.IsNop)
             {
@@ -244,14 +235,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return taSrc;
         }
 
-        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
+        public static TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
             => taSrc == null || taSrc.Count == 0
             ? taSrc
             : SubstTypeArray(taSrc, new SubstContext(typeArgsCls, typeArgsMeth, false));
 
-        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls) => SubstTypeArray(taSrc, typeArgsCls, null);
+        public static TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls) => SubstTypeArray(taSrc, typeArgsCls, null);
 
-        private AggregateType SubstTypeCore(AggregateType type, SubstContext ctx)
+        private static AggregateType SubstTypeCore(AggregateType type, SubstContext ctx)
         {
             TypeArray args = type.TypeArgsAll;
             if (args.Count > 0)
@@ -266,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        private CType SubstTypeCore(CType type, SubstContext pctx)
+        private static CType SubstTypeCore(CType type, SubstContext pctx)
         {
             CType typeSrc;
             CType typeDst;
@@ -563,7 +554,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public AggregateSymbol GetPredefAgg(PredefinedType pt) => _predefTypes.GetPredefinedAggregate(pt);
+        public static AggregateSymbol GetPredefAgg(PredefinedType pt) => PredefinedTypes.GetPredefinedAggregate(pt);
 
         public AggregateType SubstType(AggregateType typeSrc, SubstContext ctx) =>
             ctx == null || ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
@@ -777,8 +768,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             typeDst = null;
             return false;
         }
-
-        public AggregateType ObjectAggregateType => (AggregateType)_symbolTable.GetCTypeFromType(typeof(object));
 
         internal static bool InternalsVisibleTo(Assembly assemblyThatDefinesAttribute, Assembly assemblyToCheck)
         {

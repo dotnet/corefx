@@ -60,18 +60,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprMethodInfo CreateMethodInfo(MethodSymbol method, AggregateType methodType, TypeArray methodParameters)
         {
             return new ExprMethodInfo(
-                Types.GetPredefAgg(method.IsConstructor() ? PredefinedType.PT_CONSTRUCTORINFO : PredefinedType.PT_METHODINFO).getThisType(),
+                TypeManager.GetPredefAgg(method.IsConstructor() ? PredefinedType.PT_CONSTRUCTORINFO : PredefinedType.PT_METHODINFO).getThisType(),
                 method, methodType, methodParameters);
         }
 
         public ExprPropertyInfo CreatePropertyInfo(PropertySymbol prop, AggregateType propertyType) => 
-            new ExprPropertyInfo(Types.GetPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
+            new ExprPropertyInfo(TypeManager.GetPredefAgg(PredefinedType.PT_PROPERTYINFO).getThisType(), prop, propertyType);
 
         public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType) => 
-            new ExprFieldInfo(field, fieldType, Types.GetPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
+            new ExprFieldInfo(field, fieldType, TypeManager.GetPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
 
         public ExprTypeOf CreateTypeOf(CType sourceType) => 
-            new ExprTypeOf(Types.GetPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
+            new ExprTypeOf(TypeManager.GetPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
 
 
         public static ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
@@ -80,7 +80,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprConcat CreateConcat(Expr first, Expr second) => new ExprConcat(first, second);
 
         public ExprConstant CreateStringConstant(string str) => 
-            CreateConstant(Types.GetPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
+            CreateConstant(TypeManager.GetPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
 
         public static ExprMultiGet CreateMultiGet(EXPRFLAG flags, CType type, ExprMulti multi) => 
             new ExprMultiGet(type, flags, multi);
@@ -136,10 +136,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprConstant CreateConstant(CType type, ConstVal constVal) => new ExprConstant(type, constVal);
 
         public ExprConstant CreateIntegerConstant(int x) =>
-            CreateConstant(Types.GetPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
+            CreateConstant(TypeManager.GetPredefAgg(PredefinedType.PT_INT).getThisType(), ConstVal.Get(x));
 
         public ExprConstant CreateBoolConstant(bool b) => 
-            CreateConstant(Types.GetPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
+            CreateConstant(TypeManager.GetPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
 
         public static ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
             new ExprArrayIndex(type, array, index);

@@ -23,7 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             => runtimeBinder.BindAssignment(this, arguments, locals);
 
         public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
-            => symbolTable.PopulateSymbolTableWithName(SpecialNames.Indexer, null, arguments[0].Type);
+            => SymbolTable.PopulateSymbolTableWithName(SpecialNames.Indexer, null, arguments[0].Type);
 
         public bool IsBinderThatCanHaveRefReceiver => true;
 

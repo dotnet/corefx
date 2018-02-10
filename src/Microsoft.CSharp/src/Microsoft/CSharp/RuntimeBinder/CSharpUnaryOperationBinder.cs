@@ -35,7 +35,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             => runtimeBinder.BindUnaryOperation(this, arguments, locals);
 
         public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
-            => symbolTable.PopulateSymbolTableWithName(Operation.GetCLROperatorName(), null, arguments[0].Type);
+            => SymbolTable.PopulateSymbolTableWithName(Operation.GetCLROperatorName(), null, arguments[0].Type);
 
         public bool IsBinderThatCanHaveRefReceiver => false;
 

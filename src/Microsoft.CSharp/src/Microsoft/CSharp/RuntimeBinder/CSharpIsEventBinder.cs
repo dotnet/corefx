@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             => runtimeBinder.BindIsEvent(this, arguments, locals);
 
         public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
-            => symbolTable.PopulateSymbolTableWithName(Name, null, arguments[0].Info.IsStaticType ? arguments[0].Value as Type : arguments[0].Type);
+            => SymbolTable.PopulateSymbolTableWithName(Name, null, arguments[0].Info.IsStaticType ? arguments[0].Value as Type : arguments[0].Type);
 
         public bool IsBinderThatCanHaveRefReceiver => false;
 

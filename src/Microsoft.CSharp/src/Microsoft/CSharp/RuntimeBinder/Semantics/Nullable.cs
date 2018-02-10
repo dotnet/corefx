@@ -76,7 +76,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pExprSrc != null);
 
-            NullableType pNubSourceType = GetSymbolLoader().GetTypeManager().GetNullable(pExprSrc.Type);
+            NullableType pNubSourceType = TypeManager.GetNullable(pExprSrc.Type);
 
             AggregateType pSourceType = pNubSourceType.GetAts();
             MethodSymbol meth = GetSymbolLoader().getBSymmgr().methNubCtor;

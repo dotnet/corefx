@@ -276,7 +276,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 // append argument types
                 ErrAppendChar('(');
-                ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isParamArray);
+                ErrAppendParamList(TypeManager.SubstTypeArray(meth.Params, pctx), meth.isParamArray);
                 ErrAppendChar(')');
             }
         }
@@ -284,7 +284,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         private void ErrAppendIndexer(IndexerSymbol indexer, SubstContext pctx)
         {
             ErrAppendString("this[");
-            ErrAppendParamList(GetTypeManager().SubstTypeArray(indexer.Params, pctx), indexer.isParamArray);
+            ErrAppendParamList(TypeManager.SubstTypeArray(indexer.Params, pctx), indexer.isParamArray);
             ErrAppendChar(']');
         }
         private void ErrAppendProperty(PropertySymbol prop, SubstContext pctx)

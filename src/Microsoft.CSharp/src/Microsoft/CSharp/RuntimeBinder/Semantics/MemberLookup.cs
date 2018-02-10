@@ -564,7 +564,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             AggregateType typeCls2 = typeIface != null || ifaces.Count > 0
-                ? GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT)
+                ? SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT)
                 : null;
 
             // Search the class first (except possibly object).

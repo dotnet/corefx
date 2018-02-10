@@ -172,7 +172,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.Bounds, typeArgsCls, typeArgsMeth);
+            TypeArray bnds = TypeManager.SubstTypeArray(var.Bounds, typeArgsCls, typeArgsMeth);
             int itypeMin = 0;
 
             if (var.HasValConstraint)

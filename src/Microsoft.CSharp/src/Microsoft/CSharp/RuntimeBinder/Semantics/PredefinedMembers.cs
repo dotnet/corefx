@@ -239,7 +239,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private AggregateSymbol GetPredefAgg(PredefinedType pt)
         {
-            return GetSymbolLoader().GetPredefAgg(pt);
+            return SymbolLoader.GetPredefAgg(pt);
         }
 
         private CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)

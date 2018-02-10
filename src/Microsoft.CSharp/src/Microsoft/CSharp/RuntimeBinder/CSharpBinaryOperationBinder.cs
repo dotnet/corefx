@@ -37,8 +37,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             string name = Operation.GetCLROperatorName();
             Debug.Assert(name != null);
-            symbolTable.PopulateSymbolTableWithName(name, null, arguments[0].Type);
-            symbolTable.PopulateSymbolTableWithName(name, null, arguments[1].Type);
+            SymbolTable.PopulateSymbolTableWithName(name, null, arguments[0].Type);
+            SymbolTable.PopulateSymbolTableWithName(name, null, arguments[1].Type);
         }
 
         public bool IsBinderThatCanHaveRefReceiver => false;

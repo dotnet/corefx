@@ -238,8 +238,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                AggregateSymbol aggIList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_ILIST);
-                AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
+                AggregateSymbol aggIList = SymbolLoader.GetPredefAgg(PredefinedType.PT_G_ILIST);
+                AggregateSymbol aggIReadOnlyList = SymbolLoader.GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
                     !SymbolLoader.IsBaseAggregate(aggIList, aggDest.OwningAggregate)) &&
@@ -278,8 +278,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                AggregateSymbol aggIList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_ILIST);
-                AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
+                AggregateSymbol aggIList = SymbolLoader.GetPredefAgg(PredefinedType.PT_G_ILIST);
+                AggregateSymbol aggIReadOnlyList = SymbolLoader.GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
                     !SymbolLoader.IsBaseAggregate(aggIList, aggSrc.OwningAggregate)) &&

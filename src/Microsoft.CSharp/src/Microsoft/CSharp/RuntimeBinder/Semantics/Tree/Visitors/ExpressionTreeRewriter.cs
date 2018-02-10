@@ -97,7 +97,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol lambdaMethod = GetPreDefMethod(PREDEFMETH.PM_EXPRESSION_LAMBDA);
             AggregateType delegateType = anonmeth.DelegateType;
             TypeArray lambdaTypeParams = TypeArray.Allocate(delegateType);
-            AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
+            AggregateType expressionType = SymbolLoader.GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);
             Debug.Assert(createParameters != null);
@@ -190,7 +190,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr p1 = Visit(expr.FirstArgument);
             Expr p2 = Visit(expr.SecondArgument);
             MethodSymbol method = GetPreDefMethod(pdm);
-            Expr methodInfo = GetExprFactory().CreateMethodInfo(method, GetSymbolLoader().GetPredefindType(PredefinedType.PT_STRING), null);
+            Expr methodInfo = GetExprFactory().CreateMethodInfo(method, SymbolLoader.GetPredefindType(PredefinedType.PT_STRING), null);
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_ADD_USER_DEFINED, p1, p2, methodInfo);
         }
         protected override Expr VisitBINOP(ExprBinOp expr)
@@ -403,28 +403,28 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // We have already inserted casts if not lifted, so we should never see an enum.
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(typeL.UnderlyingEnumType);
+                convertL = TypeManager.GetNullable(typeL.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
             else if (typeL is NullableType nubL && nubL.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(nubL.UnderlyingType.UnderlyingEnumType);
+                convertL = TypeManager.GetNullable(nubL.UnderlyingType.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
             if (typeR.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(typeR.UnderlyingEnumType);
+                convertR = TypeManager.GetNullable(typeR.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
             else if (typeR is NullableType nubR && nubR.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(nubR.UnderlyingType.UnderlyingEnumType);
+                convertR = TypeManager.GetNullable(nubR.UnderlyingType.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
@@ -686,7 +686,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // converting an enum to its underlying CType never fails, so no need to check it.
                 CType underlyingType = arg.Type.StripNubs().UnderlyingEnumType;
-                CType nullableType = GetSymbolLoader().GetTypeManager().GetNullable(underlyingType);
+                CType nullableType = TypeManager.GetNullable(underlyingType);
                 Expr typeofNubEnum = CreateTypeOf(nullableType);
                 target = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, target, typeofNubEnum);
             }
@@ -765,7 +765,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Expr GenerateParameter(string name, CType CType)
         {
-            GetSymbolLoader().GetPredefindType(PredefinedType.PT_STRING);  // force an ensure state
+            SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);  // force an ensure state
             ExprConstant nameString = GetExprFactory().CreateStringConstant(name);
             ExprTypeOf pTypeOf = CreateTypeOf(CType);
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_PARAMETER, pTypeOf, nameString);
@@ -832,7 +832,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private Expr GenerateIndexList(Expr oldIndices)
         {
-            CType intType = symbolLoader.GetPredefindType(PredefinedType.PT_INT);
+            CType intType = SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
 
             Expr newIndices = null;
             Expr newIndicesTail = newIndices;
@@ -854,7 +854,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             EXPRFLAG flags = 0;
 
-            AggregateType pObject = GetSymbolLoader().GetPredefindType(PredefinedType.PT_OBJECT);
+            AggregateType pObject = SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT);
 
             if (expr.Type is NullType)
             {
@@ -862,7 +862,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, expr, pTypeOf);
             }
 
-            AggregateType stringType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_STRING);
+            AggregateType stringType = SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);
             if (expr.Type != stringType)
             {
                 flags = EXPRFLAG.EXF_BOX;
@@ -881,7 +881,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // be handling this error
             if (method == null)
                 return null;
-            AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
+            AggregateType expressionType = SymbolLoader.GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(method, expressionType);
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
             ExprCall call = ExprFactory.CreateCall(0, mwi.Meth().RetType, arg1, pMemGroup, mwi);
@@ -894,7 +894,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
                 return null;
-            AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
+            AggregateType expressionType = SymbolLoader.GetPredefindType(PredefinedType.PT_EXPRESSION);
             Expr args = ExprFactory.CreateList(arg1, arg2);
             MethWithInst mwi = new MethWithInst(method, expressionType);
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
@@ -908,7 +908,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
                 return null;
-            AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
+            AggregateType expressionType = SymbolLoader.GetPredefindType(PredefinedType.PT_EXPRESSION);
             Expr args = ExprFactory.CreateList(arg1, arg2, arg3);
             MethWithInst mwi = new MethWithInst(method, expressionType);
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
@@ -922,7 +922,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol method = GetPreDefMethod(pdm);
             if (method == null)
                 return null;
-            AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
+            AggregateType expressionType = SymbolLoader.GetPredefindType(PredefinedType.PT_EXPRESSION);
             Expr args = ExprFactory.CreateList(arg1, arg2, arg3, arg4);
             MethWithInst mwi = new MethWithInst(method, expressionType);
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
@@ -934,7 +934,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprArrayInit GenerateParamsArray(Expr args, PredefinedType pt)
         {
             int parameterCount = ExpressionIterator.Count(args);
-            AggregateType paramsArrayElementType = GetSymbolLoader().GetPredefindType(pt);
+            AggregateType paramsArrayElementType = SymbolLoader.GetPredefindType(pt);
             ArrayType paramsArrayType = TypeManager.GetArray(paramsArrayElementType, 1, true);
             ExprConstant paramsArrayArg = GetExprFactory().CreateIntegerConstant(parameterCount);
             return ExprFactory.CreateArrayInit(paramsArrayType, args, paramsArrayArg, new int[] { parameterCount }, parameterCount);
@@ -968,8 +968,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return;
             }
 
-            CType nubfptype1 = GetSymbolLoader().GetTypeManager().GetNullable(fptype1);
-            CType nubfptype2 = GetSymbolLoader().GetTypeManager().GetNullable(fptype2);
+            CType nubfptype1 = TypeManager.GetNullable(fptype1);
+            CType nubfptype2 = TypeManager.GetNullable(fptype2);
             // If we have null op X, or T1 op T2?, or T1 op null, lift first arg to T1?
             if (aatype1 is NullType || aatype1 == fptype1 && (aatype2 == nubfptype2 || aatype2 is NullType))
             {

@@ -360,7 +360,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pt != PredefinedType.PT_VOID); // use getVoidType()
 
-            return GetSymbolLoader().GetPredefindType(pt);
+            return SymbolLoader.GetPredefindType(pt);
         }
 
         private Expr GenerateAssignmentConversion(Expr op1, Expr op2, bool allowExplicit) =>
@@ -540,9 +540,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Name getOrCreateMethodName =
                     NameManager.GetPredefinedName(PredefinedName.PN_GETORCREATEEVENTREGISTRATIONTOKENTABLE);
-                GetSymbolLoader()
-                    .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
+                SymbolTable.PopulateSymbolTableWithName(
+                    getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
                     SymbolLoader.LookupAggMember(getOrCreateMethodName, fieldType.OwningAggregate, symbmask_t.MASK_MethodSymbol)
                          as MethodSymbol;
@@ -557,9 +556,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Name invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.
-                GetSymbolLoader()
-                    .RuntimeBinderSymbolTable.PopulateSymbolTableWithName(
-                        invocationListName.Text, null, fieldType.AssociatedSystemType);
+                SymbolTable.PopulateSymbolTableWithName(invocationListName.Text, null, fieldType.AssociatedSystemType);
                 PropertySymbol invocationList =
                     SymbolLoader.LookupAggMember(invocationListName, fieldTypeSymbol, symbmask_t.MASK_PropertySymbol)
                          as PropertySymbol;
@@ -729,7 +726,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else if (typeParam.IsNonNullableValueType &&
                          GetTypes().SubstType(methCur.RetType, atsCur).IsNonNullableValueType &&
-                         canConvert(arg, nubParam = GetTypes().GetNullable(typeParam)))
+                         canConvert(arg, nubParam = TypeManager.GetNullable(typeParam)))
                 {
                     methFirstList.Add(new CandidateFunctionMember(
                                     new MethPropWithInst(methCur, atsCur, TypeArray.Empty),
@@ -779,7 +776,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeRet = GetTypes().SubstType(mpwi.Meth().RetType, mpwi.GetType());
             if (!(typeRet is NullableType))
             {
-                typeRet = GetTypes().GetNullable(typeRet);
+                typeRet = TypeManager.GetNullable(typeRet);
             }
 
             // First bind the non-lifted version for errors.

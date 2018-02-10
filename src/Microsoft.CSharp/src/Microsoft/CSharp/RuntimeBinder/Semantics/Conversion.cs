@@ -731,9 +731,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         // Lift the conversion if needed.
                         if (fLiftSrc && (fDstHasNull || !fNeedImplicit) && typeFrom.IsNonNullableValueType)
-                            typeFrom = GetTypes().GetNullable(typeFrom);
+                            typeFrom = TypeManager.GetNullable(typeFrom);
                         if (fLiftDst && typeTo.IsNonNullableValueType)
-                            typeTo = GetTypes().GetNullable(typeTo);
+                            typeTo = TypeManager.GetNullable(typeTo);
 
                         // Check for applicability.
                         bool fFromImplicit = exprSrc != null ? canConvert(exprSrc, typeFrom, CONVERTTYPE.STANDARDANDNOUDC) : canConvert(typeSrc, typeFrom, CONVERTTYPE.STANDARDANDNOUDC);
@@ -863,13 +863,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Lift the conversion if needed.
                 if (fLiftSrc && typeFrom.IsNonNullableValueType)
                 {
-                    typeFrom = GetTypes().GetNullable(typeFrom);
+                    typeFrom = TypeManager.GetNullable(typeFrom);
                     ctypeLift++;
                 }
 
                 if (fLiftDst && typeTo.IsNonNullableValueType)
                 {
-                    typeTo = GetTypes().GetNullable(typeTo);
+                    typeTo = TypeManager.GetNullable(typeTo);
                     ctypeLift++;
                 }
 
@@ -989,7 +989,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (typeFrom != typeSrcBase)
                     {
                         // There is an intermediate conversion.
-                        NullableType pConversionNubSourceType = SymbolLoader.GetTypeManager().GetNullable(typeFrom);
+                        NullableType pConversionNubSourceType = TypeManager.GetNullable(typeFrom);
                         pConversionArgument = mustCast(exprSrc, pConversionNubSourceType);
                         MarkAsIntermediateConversion(pConversionArgument);
                     }

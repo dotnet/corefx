@@ -19,11 +19,10 @@ namespace Microsoft.CSharp.RuntimeBinder
     {
         /////////////////////////////////////////////////////////////////////////////////
         // Members
-        private readonly HashSet<Type> _typesWithConversionsLoaded = new HashSet<Type>();
-        private readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
+        private static readonly HashSet<Type> _typesWithConversionsLoaded = new HashSet<Type>();
+        private static readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
 
         // Members from the managed binder.
-        private readonly TypeManager _typeManager;
         private readonly CSemanticChecker _semanticChecker;
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -58,11 +57,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal SymbolTable(
-            TypeManager typeManager,
-            CSemanticChecker semanticChecker)
+        internal SymbolTable(CSemanticChecker semanticChecker)
         {
-            _typeManager = typeManager;
             _semanticChecker = semanticChecker;
 
             // Now populate object.
@@ -71,7 +67,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void PopulateSymbolTableWithName(
+        internal static void PopulateSymbolTableWithName(
             string name,
             IEnumerable<Type> typeArguments,
             Type callingType)
@@ -125,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (type is ArrayType)
             {
-                type = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ARRAY);
+                type = SymbolLoader.GetPredefindType(PredefinedType.PT_ARRAY);
             }
             if (type is NullableType nub)
             {
@@ -149,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return mem.SwtFirst();
         }
 
-        private void AddParameterConversions(MethodBase method)
+        private static void AddParameterConversions(MethodBase method)
         {
             foreach (ParameterInfo param in method.GetParameters())
             {
@@ -158,7 +154,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         }
 
         #region InheritanceHierarchy
-        private void AddNamesOnType(NameHashKey key)
+        private static void AddNamesOnType(NameHashKey key)
         {
             Debug.Assert(!_namesLoadedForEachType.Contains(key));
 
@@ -171,7 +167,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void AddNamesInInheritanceHierarchy(string name, List<Type> inheritance)
+        private static void AddNamesInInheritanceHierarchy(string name, List<Type> inheritance)
         {
             for (int i = inheritance.Count - 1; i >= 0; --i)
             {
@@ -266,7 +262,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private List<Type> CreateInheritanceHierarchyList(Type type)
+        private static List<Type> CreateInheritanceHierarchyList(Type type)
         {
             List<Type> list;
             if (type.IsInterface)
@@ -345,7 +341,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region TypeParameters
         /////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray GetMethodTypeParameters(MethodInfo method, MethodSymbol parent)
+        private static TypeArray GetMethodTypeParameters(MethodInfo method, MethodSymbol parent)
         {
             if (method.IsGenericMethod)
             {
@@ -372,7 +368,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray GetAggregateTypeParameters(Type type, AggregateSymbol agg)
+        private static TypeArray GetAggregateTypeParameters(Type type, AggregateSymbol agg)
         {
             if (type.IsGenericType)
             {
@@ -623,7 +619,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region LoadTypeChain
         /////////////////////////////////////////////////////////////////////////////////
 
-        private CType LoadSymbolsFromType(Type type)
+        private static CType LoadSymbolsFromType(Type type)
         {
             List<object> declarationChain = BuildDeclarationChain(type);
 
@@ -638,7 +634,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     if (t.IsNullableType())
                     {
-                        return _typeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
+                        return TypeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
                     }
 
                     AggregateSymbol next = FindSymForType(
@@ -687,7 +683,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private TypeParameterType ProcessMethodTypeParameter(MethodInfo methinfo, Type t, AggregateSymbol parent)
+        private static TypeParameterType ProcessMethodTypeParameter(MethodInfo methinfo, Type t, AggregateSymbol parent)
         {
             MethodSymbol meth = FindMatchingMethod(methinfo, parent);
             if (meth == null)
@@ -700,12 +696,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // type parameter on it.
                 Debug.Assert(meth != null);
             }
+
             return LoadMethodTypeParameter(meth, t);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private CType GetConstructedType(Type type, AggregateSymbol agg)
+        private static CType GetConstructedType(Type type, AggregateSymbol agg)
         {
             // We've found the one we want, so return it.
             if (type.IsGenericType)
@@ -728,7 +725,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private CType ProcessSpecialTypeInChain(NamespaceOrAggregateSymbol parent, Type t)
+        private static CType ProcessSpecialTypeInChain(NamespaceOrAggregateSymbol parent, Type t)
         {
             if (t.IsGenericParameter)
             {
@@ -854,7 +851,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region CTypeFromType
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal CType[] GetCTypeArrayFromTypes(Type[] types)
+        internal static CType[] GetCTypeArrayFromTypes(Type[] types)
         {
             Debug.Assert(types != null);
 
@@ -877,7 +874,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal CType GetCTypeFromType(Type type) => type.IsByRef
+        internal static CType GetCTypeFromType(Type type) => type.IsByRef
             ? TypeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
             : LoadSymbolsFromType(type);
 
@@ -886,11 +883,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Aggregates
         /////////////////////////////////////////////////////////////////////////////////
 
-        private AggregateSymbol AddAggregateToSymbolTable(
+        private static AggregateSymbol AddAggregateToSymbolTable(
             NamespaceOrAggregateSymbol parent,
             Type type)
         {
-            AggregateSymbol agg = SymFactory.CreateAggregate(GetName(type), parent, _typeManager);
+            AggregateSymbol agg = SymFactory.CreateAggregate(GetName(type), parent);
             agg.AssociatedSystemType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
             agg.AssociatedAssembly = type.Assembly;
 
@@ -1021,7 +1018,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 agg.SetBaseClass((AggregateType)GetCTypeFromType(t));
             }
-            agg.SetTypeManager(_typeManager);
+
             agg.SetFirstUDConversion(null);
             SetInterfacesOnAggregate(agg, type);
             agg.SetHasPubNoArgCtor(type.GetConstructor(Type.EmptyTypes) != null);
@@ -1038,7 +1035,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void SetInterfacesOnAggregate(AggregateSymbol aggregate, Type type)
+        private static void SetInterfacesOnAggregate(AggregateSymbol aggregate, Type type)
         {
             if (type.IsGenericType)
             {
@@ -1062,7 +1059,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Field
         /////////////////////////////////////////////////////////////////////////////////
 
-        private FieldSymbol AddFieldToSymbolTable(FieldInfo fieldInfo, AggregateSymbol aggregate)
+        private static FieldSymbol AddFieldToSymbolTable(FieldInfo fieldInfo, AggregateSymbol aggregate)
         {
             FieldSymbol field = SymbolStore.LookupSym(
                 GetName(fieldInfo.Name),
@@ -1155,7 +1152,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return cachedResult;
         }
 
-        private void AddEventToSymbolTable(EventInfo eventInfo, AggregateSymbol aggregate, FieldSymbol addedField)
+        private static void AddEventToSymbolTable(EventInfo eventInfo, AggregateSymbol aggregate, FieldSymbol addedField)
         {
             EventSymbol ev = SymbolStore.LookupSym(
                 GetName(eventInfo.Name),
@@ -1247,7 +1244,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
+        private static void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
             Name name;
             bool isIndexer = property.GetIndexParameters().Length != 0
@@ -1429,7 +1426,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private MethodSymbol AddMethodToSymbolTable(MethodBase member, AggregateSymbol callingAggregate, MethodKindEnum kind)
+        private static MethodSymbol AddMethodToSymbolTable(MethodBase member, AggregateSymbol callingAggregate, MethodKindEnum kind)
         {
             MethodInfo method = member as MethodInfo;
 
@@ -1532,7 +1529,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void SetParameterDataForMethProp(MethodOrPropertySymbol methProp, ParameterInfo[] parameters)
+        private static void SetParameterDataForMethProp(MethodOrPropertySymbol methProp, ParameterInfo[] parameters)
         {
             if (parameters.Length > 0)
             {
@@ -1555,7 +1552,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void SetParameterAttributes(MethodOrPropertySymbol methProp, ParameterInfo[] parameters, int i)
+        private static void SetParameterAttributes(MethodOrPropertySymbol methProp, ParameterInfo[] parameters, int i)
         {
             ParameterInfo parameter = parameters[i];
             if ((parameter.Attributes & ParameterAttributes.Optional) != 0 && !parameter.ParameterType.IsByRef)
@@ -1580,7 +1577,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 // Get DateTimeConstant
                 ConstVal cv = ConstVal.Get(((DateTime)dateAttr.Value).Ticks);
-                CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
+                CType cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                 methProp.SetDefaultParameterValue(i, cvType, cv);
             }
             else
@@ -1590,7 +1587,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     // Get DecimalConstant
                     ConstVal cv = ConstVal.Get(decAttr.Value);
-                    CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
+                    CType cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
                     methProp.SetDefaultParameterValue(i, cvType, cv);
                 }
                 else if ((parameter.Attributes & ParameterAttributes.HasDefault) != 0 && !parameter.ParameterType.IsByRef)
@@ -1599,7 +1596,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     // looking at isn't a by ref type or a type parameter.
 
                     ConstVal cv = default(ConstVal);
-                    CType cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT);
+                    CType cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_OBJECT);
 
                     // We need to use RawDefaultValue, because DefaultValue is too clever.
 #if UNSUPPORTEDAPI
@@ -1617,67 +1614,67 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                             case TypeCode.Byte:
                                 cv = ConstVal.Get((byte)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BYTE);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_BYTE);
                                 break;
 
                             case TypeCode.Int16:
                                 cv = ConstVal.Get((short)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SHORT);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_SHORT);
                                 break;
 
                             case TypeCode.Int32:
                                 cv = ConstVal.Get((int)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_INT);
                                 break;
 
                             case TypeCode.Int64:
                                 cv = ConstVal.Get((long)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_LONG);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_LONG);
                                 break;
 
                             case TypeCode.Single:
                                 cv = ConstVal.Get((float)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FLOAT);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_FLOAT);
                                 break;
 
                             case TypeCode.Double:
                                 cv = ConstVal.Get((double)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
                                 break;
 
                             case TypeCode.Char:
                                 cv = ConstVal.Get((char)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_CHAR);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_CHAR);
                                 break;
 
                             case TypeCode.Boolean:
                                 cv = ConstVal.Get((bool)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL);
                                 break;
 
                             case TypeCode.SByte:
                                 cv = ConstVal.Get((sbyte)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_SBYTE);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_SBYTE);
                                 break;
 
                             case TypeCode.UInt16:
                                 cv = ConstVal.Get((ushort)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_USHORT);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_USHORT);
                                 break;
 
                             case TypeCode.UInt32:
                                 cv = ConstVal.Get((uint)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_UINT);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_UINT);
                                 break;
 
                             case TypeCode.UInt64:
                                 cv = ConstVal.Get((ulong)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_ULONG);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_ULONG);
                                 break;
 
                             case TypeCode.String:
                                 cv = ConstVal.Get((string)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);
+                                cvType = SymbolLoader.GetPredefindType(PredefinedType.PT_STRING);
                                 break;
                         }
 
@@ -1727,7 +1724,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray CreateParameterArray(MemberInfo associatedInfo, ParameterInfo[] parameters)
+        private static TypeArray CreateParameterArray(MemberInfo associatedInfo, ParameterInfo[] parameters)
         {
             bool isVarArg = associatedInfo is MethodBase mb && (mb.CallingConvention & CallingConventions.VarArgs) != 0;
             CType[] types = new CType[isVarArg ? parameters.Length + 1 : parameters.Length];
@@ -1747,7 +1744,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private CType GetTypeOfParameter(ParameterInfo p, MemberInfo m)
+        private static CType GetTypeOfParameter(ParameterInfo p, MemberInfo m)
         {
             Type t = p.ParameterType;
             CType ctype;
@@ -1795,7 +1792,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private SymWithType GetSlotForOverride(MethodInfo method)
+        private static SymWithType GetSlotForOverride(MethodInfo method)
         {
             if (method.IsVirtual && method.IsHideBySig)
             {
@@ -1822,7 +1819,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private MethodSymbol FindMethodFromMemberInfo(MemberInfo baseMemberInfo)
+        private static MethodSymbol FindMethodFromMemberInfo(MemberInfo baseMemberInfo)
         {
             CType t = GetCTypeFromType(baseMemberInfo.DeclaringType);
             Debug.Assert(t is AggregateType);
@@ -1851,7 +1848,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Conversions
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void AddConversionsForType(Type type)
+        internal static void AddConversionsForType(Type type)
         {
             if (type.IsInterface)
             {
@@ -1865,7 +1862,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void AddConversionsForOneType(Type type)
+        private static void AddConversionsForOneType(Type type)
         {
             if (type.IsGenericType)
             {

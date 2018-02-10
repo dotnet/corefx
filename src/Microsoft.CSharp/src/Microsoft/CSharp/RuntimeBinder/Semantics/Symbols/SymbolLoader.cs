@@ -34,11 +34,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GlobalSymbolContext;
         }
 
-        public PredefinedTypes GetPredefindTypes()
-        {
-            return GlobalSymbolContext.GetPredefTypes();
-        }
-
         public TypeManager GetTypeManager()
         {
             return TypeManager;
@@ -59,9 +54,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GlobalSymbolContext.GetGlobalSymbols();
         }
 
-        public AggregateSymbol GetPredefAgg(PredefinedType pt) => GetTypeManager().GetPredefAgg(pt);
+        public static AggregateSymbol GetPredefAgg(PredefinedType pt) => TypeManager.GetPredefAgg(pt);
 
-        public AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
+        public static AggregateType GetPredefindType(PredefinedType pt) => GetPredefAgg(pt).getThisType();
 
         public static Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask) => BSYMMGR.LookupAggMember(name, agg, mask);
 

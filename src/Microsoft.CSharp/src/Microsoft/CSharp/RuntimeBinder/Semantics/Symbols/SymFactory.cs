@@ -87,16 +87,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         /////////////////////////////////////////////////////////////////////////////////
-        public static AggregateSymbol CreateAggregate(Name name, NamespaceOrAggregateSymbol parent, TypeManager typeManager)
+        public static AggregateSymbol CreateAggregate(Name name, NamespaceOrAggregateSymbol parent)
         {
-            if (name == null || parent == null || typeManager == null)
-            {
-                throw Error.InternalCompilerError();
-            }
+            Debug.Assert(name != null);
+            Debug.Assert(parent != null);
 
             AggregateSymbol sym = (AggregateSymbol)NewBasicSymbol(SYMKIND.SK_AggregateSymbol, name, parent);
             sym.name = name;
-            sym.SetTypeManager(typeManager);
             sym.SetSealed(false);
             sym.SetAccess(ACCESS.ACC_UNKNOWN);
             sym.SetIfaces(null);

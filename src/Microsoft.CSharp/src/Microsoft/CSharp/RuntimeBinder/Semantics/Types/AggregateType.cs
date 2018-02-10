@@ -100,10 +100,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we don't have a generic type definition, then we just need to set our base
                     // class. This is so that if we have a base type that's generic, we'll be
                     // getting the correctly instantiated base type.
-                    TypeManager manager = OwningAggregate.GetTypeManager();
-                    AggregateType baseClass = manager.SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
+                    AggregateType baseClass = SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
                     Debug.Assert(baseClass != null);
-                    _baseType = manager.SubstType(baseClass, TypeArgsAll);
+                    _baseType = TypeManager.SubstType(baseClass, TypeArgsAll);
                 }
 
                 return _baseType;
@@ -122,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         yield return iface;
                     }
 
-                    yield return OwningAggregate.GetTypeManager().ObjectAggregateType;
+                    yield return PredefinedTypes.GetPredefinedAggregate(PredefinedType.PT_OBJECT).getThisType();
                 }
                 else
                 {
@@ -138,7 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray TypeArgsAll { get; }
 
-        public TypeArray IfacesAll => _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager().SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
+        public TypeArray IfacesAll => _ifacesAll ?? (_ifacesAll = TypeManager.SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
 
         private bool IsCollectionType
         {

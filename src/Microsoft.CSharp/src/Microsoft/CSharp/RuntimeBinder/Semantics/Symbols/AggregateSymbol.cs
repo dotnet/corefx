@@ -225,7 +225,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool HasConversion(SymbolLoader pLoader)
         {
-            pLoader.RuntimeBinderSymbolTable.AddConversionsForType(AssociatedSystemType);
+            SymbolTable.AddConversionsForType(AssociatedSystemType);
 
             if (!_hasConversion.HasValue)
             {
