@@ -10,24 +10,21 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Errors
 {
-    internal sealed class UserStringBuilder
+    internal struct UserStringBuilder
     {
-        private bool m_buildingInProgress;
-        private StringBuilder m_strBuilder;
+        private StringBuilder _strBuilder;
 
         private void BeginString()
         {
-            Debug.Assert(!m_buildingInProgress);
-            m_buildingInProgress = true;
-            m_strBuilder = new StringBuilder();
+            Debug.Assert(_strBuilder == null);
+            _strBuilder = new StringBuilder();
         }
 
         private void EndString(out string s)
         {
-            Debug.Assert(m_buildingInProgress);
-            m_buildingInProgress = false;
-            s = m_strBuilder.ToString();
-            m_strBuilder = null;
+            Debug.Assert(_strBuilder != null);
+            s = _strBuilder.ToString();
+            _strBuilder = null;
         }
 
         private static void ErrSK(out string psz, SYMKIND sk)
@@ -96,12 +93,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendString(string str)
         {
-            m_strBuilder.Append(str);
+            _strBuilder.Append(str);
         }
 
         private void ErrAppendChar(char ch)
         {
-            m_strBuilder.Append(ch);
+            _strBuilder.Append(ch);
         }
 
         private void ErrAppendPrintf(string format, params object[] args)
