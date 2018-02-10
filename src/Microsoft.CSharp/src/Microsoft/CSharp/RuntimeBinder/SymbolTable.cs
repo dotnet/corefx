@@ -1229,7 +1229,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Properties
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void AddPredefinedPropertyToSymbolTable(AggregateSymbol type, Name property)
+        internal static void AddPredefinedPropertyToSymbolTable(AggregateSymbol type, Name property)
         {
             AggregateType aggtype = type.getThisType();
             Type t = aggtype.AssociatedSystemType;
@@ -1393,7 +1393,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region Methods
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal void AddPredefinedMethodToSymbolTable(AggregateSymbol type, Name methodName)
+        internal static void AddPredefinedMethodToSymbolTable(AggregateSymbol type, Name methodName)
         {
             Type t = type.getThisType().AssociatedSystemType;
 

@@ -462,7 +462,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expression GenerateConstantType(ExprCall pExpr)
+        private static Expression GenerateConstantType(ExprCall pExpr)
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
 
@@ -873,7 +873,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private object GetObject(Expr pExpr)
+        private static object GetObject(Expr pExpr)
         {
             for (;;)
             {
@@ -997,7 +997,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private MethodInfo GetMethodInfoFromExpr(ExprMethodInfo methinfo)
+        private static MethodInfo GetMethodInfoFromExpr(ExprMethodInfo methinfo)
         {
             // To do this, we need to construct a type array of the parameter types,
             // get the parent constructed type, and get the method from it.
@@ -1005,8 +1005,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType aggType = methinfo.Method.Ats;
             MethodSymbol methSym = methinfo.Method.Meth();
 
-            TypeArray genericParams = _typeManager.SubstTypeArray(methSym.Params, aggType, methSym.typeVars);
-            CType genericReturn = _typeManager.SubstType(methSym.RetType, aggType, methSym.typeVars);
+            TypeArray genericParams = TypeManager.SubstTypeArray(methSym.Params, aggType, methSym.typeVars);
+            CType genericReturn = TypeManager.SubstType(methSym.RetType, aggType, methSym.typeVars);
 
             Type type = aggType.AssociatedSystemType;
             MethodInfo methodInfo = methSym.AssociatedMemberInfo as MethodInfo;
@@ -1071,7 +1071,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private ConstructorInfo GetConstructorInfoFromExpr(ExprMethodInfo methinfo)
+        private static ConstructorInfo GetConstructorInfoFromExpr(ExprMethodInfo methinfo)
         {
             // To do this, we need to construct a type array of the parameter types,
             // get the parent constructed type, and get the method from it.
@@ -1079,7 +1079,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType aggType = methinfo.Method.Ats;
             MethodSymbol methSym = methinfo.Method.Meth();
 
-            TypeArray genericInstanceParams = _typeManager.SubstTypeArray(methSym.Params, aggType);
+            TypeArray genericInstanceParams = TypeManager.SubstTypeArray(methSym.Params, aggType);
             Type type = aggType.AssociatedSystemType;
             ConstructorInfo ctorInfo = (ConstructorInfo)methSym.AssociatedMemberInfo;
 
@@ -1125,7 +1125,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private PropertyInfo GetPropertyInfoFromExpr(ExprPropertyInfo propinfo)
+        private static PropertyInfo GetPropertyInfoFromExpr(ExprPropertyInfo propinfo)
         {
             // To do this, we need to construct a type array of the parameter types,
             // get the parent constructed type, and get the property from it.
@@ -1133,7 +1133,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType aggType = propinfo.Property.Ats;
             PropertySymbol propSym = propinfo.Property.Prop();
 
-            TypeArray genericInstanceParams = _typeManager.SubstTypeArray(propSym.Params, aggType, null);
+            TypeArray genericInstanceParams = TypeManager.SubstTypeArray(propSym.Params, aggType, null);
 
             Type type = aggType.AssociatedSystemType;
             PropertyInfo propertyInfo = propSym.AssociatedPropertyInfo;

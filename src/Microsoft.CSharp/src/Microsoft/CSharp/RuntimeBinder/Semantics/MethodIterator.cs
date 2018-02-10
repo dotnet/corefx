@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     // Check access. If Sym is not accessible, then let it through and mark it.
-                    IsCurrentSymbolInaccessible = !_semanticChecker.CheckAccess(CurrentSymbol, CurrentType, _context, _qualifyingType);
+                    IsCurrentSymbolInaccessible = !CSemanticChecker.CheckAccess(CurrentSymbol, CurrentType, _context, _qualifyingType);
 
                     // Check bogus. If Sym is bogus, then let it through and mark it.
                     IsCurrentSymbolBogus = CSemanticChecker.CheckBogus(CurrentSymbol);

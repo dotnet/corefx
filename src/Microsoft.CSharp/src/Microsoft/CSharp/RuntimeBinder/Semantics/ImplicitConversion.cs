@@ -191,7 +191,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 object srcRuntimeObject = _exprSrc?.RuntimeObject;
                 if (srcRuntimeObject != null
                     && _typeDest.AssociatedSystemType.IsInstanceOfType(srcRuntimeObject)
-                    && _binder.GetSemanticChecker().CheckTypeAccess(_typeDest, _binder.Context.ContextForMemberLookup))
+                    && CSemanticChecker.CheckTypeAccess(_typeDest, _binder.Context.ContextForMemberLookup))
                 {
                     if (_needsExprDest)
                     {

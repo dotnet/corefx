@@ -215,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(propertyName != null);
             Debug.Assert(propertyGetter >= 0 && propertyGetter < PREDEFMETH.PM_COUNT);
 
-            RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(
+            SymbolTable.AddPredefinedPropertyToSymbolTable(
                 GetPredefAgg(GetPropPredefType(predefProp)), propertyName);
             MethodSymbol getter = GetMethod(propertyGetter);
 
@@ -237,12 +237,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetSymbolLoader().GetTypeManager();
         }
 
-        private AggregateSymbol GetPredefAgg(PredefinedType pt)
-        {
-            return SymbolLoader.GetPredefAgg(pt);
-        }
+        private static AggregateSymbol GetPredefAgg(PredefinedType pt) => SymbolLoader.GetPredefAgg(pt);
 
-        private CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
+        private static CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
 
@@ -282,7 +279,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
+        private static TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
 
@@ -333,7 +330,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _methods[(int)method] ?? (_methods[(int)method] = LoadMethod(method));
         }
 
-        private MethodSymbol LoadMethod(
+        private static MethodSymbol LoadMethod(
                         AggregateSymbol type,
                         int[] signature,
                         int cMethodTyVars,
@@ -360,13 +357,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (ret == null)
             {
-                RuntimeBinderSymbolTable.AddPredefinedMethodToSymbolTable(type, methodName);
+                SymbolTable.AddPredefinedMethodToSymbolTable(type, methodName);
                 ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
             }
             return ret;
         }
 
-        private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
+        private static MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
         {
             for (Symbol sym = SymbolLoader.LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;
@@ -378,7 +375,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         methsym.isStatic == isStatic &&
                         methsym.isVirtual == isVirtual &&
                         methsym.typeVars.Count == cMethodTyVars &&
-                        GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
+                        TypeManager.SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
                         TypeManager.SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
                     {
                         return methsym;
@@ -388,7 +385,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        private MethodSymbol LoadMethod(PREDEFMETH method)
+        private static MethodSymbol LoadMethod(PREDEFMETH method)
         {
             PredefinedMethodInfo info = GetMethInfo(method);
             return LoadMethod(

@@ -436,7 +436,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // set, then for the remainder, look for a named argument with a matching name.
                 int index = 0;
                 Expr paramArrayArgument = null;
-                TypeArray @params = typeManager.SubstTypeArray(
+                TypeArray @params = TypeManager.SubstTypeArray(
                     pCurrentParameters,
                     pCurrentType,
                     pGroup.TypeArgs);
@@ -723,7 +723,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // just generate defaults for every missing argument.
                 int i = _pArguments.carg;
                 int index = 0;
-                TypeArray @params = _pExprBinder.GetTypes().SubstTypeArray(
+                TypeArray @params = TypeManager.SubstTypeArray(
                     _pCurrentParameters,
                     _pCurrentType,
                     _pGroup.TypeArgs);
@@ -1045,7 +1045,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Parameter types might have changed as a result of
                 // method type inference. 
 
-                _pCurrentParameters = _pExprBinder.GetTypes().SubstTypeArray(
+                _pCurrentParameters = TypeManager.SubstTypeArray(
                         _pCurrentParameters, _pCurrentType, _pCurrentTypeArgs);
 
                 // It is also possible that an optional argument has changed its value

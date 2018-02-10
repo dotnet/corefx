@@ -356,7 +356,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
 
-        private AggregateType GetPredefindType(PredefinedType pt)
+        private static AggregateType GetPredefindType(PredefinedType pt)
         {
             Debug.Assert(pt != PredefinedType.PT_VOID); // use getVoidType()
 
@@ -474,7 +474,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                pReturnType = GetTypes().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
+                pReturnType = TypeManager.SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
             }
 
             ExprCall pResult = ExprFactory.CreateCall(0, pReturnType, pArguments, pMemGroup, mwi);
@@ -504,7 +504,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().OwningAggregate);
 
-            CType pFieldType = GetTypes().SubstType(fwt.Field().GetType(), fwt.GetType());
+            CType pFieldType = TypeManager.SubstType(fwt.Field().GetType(), fwt.GetType());
             pOptionalObject = AdjustMemberObject(fwt, pOptionalObject);
 
             checkUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
@@ -607,7 +607,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             pMemGroup.OptionalObject = pObject;
-            CType pReturnType = GetTypes().SubstType(pwt.Prop().RetType, pwt.GetType());
+            CType pReturnType = TypeManager.SubstType(pwt.Prop().RetType, pwt.GetType());
 
             // if we are doing a get on this thing, and there is no get, and
             // most importantly, we are not leaving the arguments to be bound by the array index
@@ -625,7 +625,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     type = pObjectThrough.Type;
                 }
 
-                ACCESSERROR error = SemanticChecker.CheckAccess2(mwtGet.Meth(), mwtGet.GetType(), ContextForMemberLookup(), type);
+                ACCESSERROR error = CSemanticChecker.CheckAccess2(mwtGet.Meth(), mwtGet.GetType(), ContextForMemberLookup(), type);
                 if (error != ACCESSERROR.ACCESSERROR_NOERROR)
                 {
                     // if the get exists, but is not accessible, give an error.
@@ -712,7 +712,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(methCur.typeVars.Count == 0);
 
-                TypeArray paramsCur = GetTypes().SubstTypeArray(methCur.Params, atsCur);
+                TypeArray paramsCur = TypeManager.SubstTypeArray(methCur.Params, atsCur);
                 CType typeParam = paramsCur[0];
                 NullableType nubParam;
 
@@ -725,7 +725,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                     false));
                 }
                 else if (typeParam.IsNonNullableValueType &&
-                         GetTypes().SubstType(methCur.RetType, atsCur).IsNonNullableValueType &&
+                         TypeManager.SubstType(methCur.RetType, atsCur).IsNonNullableValueType &&
                          canConvert(arg, nubParam = TypeManager.GetNullable(typeParam)))
                 {
                     methFirstList.Add(new CandidateFunctionMember(
@@ -773,7 +773,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             Debug.Assert(arg.Type is NullableType);
 
-            CType typeRet = GetTypes().SubstType(mpwi.Meth().RetType, mpwi.GetType());
+            CType typeRet = TypeManager.SubstType(mpwi.Meth().RetType, mpwi.GetType());
             if (!(typeRet is NullableType))
             {
                 typeRet = TypeManager.GetNullable(typeRet);
@@ -793,7 +793,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprCall BindUDUnopCall(Expr arg, CType typeArg, MethPropWithInst mpwi)
         {
-            CType typeRet = GetTypes().SubstType(mpwi.Meth().RetType, mpwi.GetType());
+            CType typeRet = TypeManager.SubstType(mpwi.Meth().RetType, mpwi.GetType());
             checkUnsafe(typeRet); // added to the binder so we don't bind to pointer ops
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mpwi);
             ExprCall call = ExprFactory.CreateCall(0, typeRet, mustConvert(arg, typeArg), pMemGroup, null);
@@ -946,7 +946,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void CheckPropertyAccess(MethWithType mwt, PropWithType pwtSlot, CType type)
         {
-            switch (SemanticChecker.CheckAccess2(mwt.Meth(), mwt.GetType(), ContextForMemberLookup(), type))
+            switch (CSemanticChecker.CheckAccess2(mwt.Meth(), mwt.GetType(), ContextForMemberLookup(), type))
             {
                 case ACCESSERROR.ACCESSERROR_NOACCESSTHRU:
                     throw ErrorContext.Error(ErrorCode.ERR_BadProtectedAccess, pwtSlot, type, ContextForMemberLookup());
@@ -1240,7 +1240,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
 
                         Debug.Assert(index != mp.Params.Count);
-                        CType substDestType = GetTypes().SubstType(@params[index], type, pTypeArgs);
+                        CType substDestType = TypeManager.SubstType(@params[index], type, pTypeArgs);
 
                         // If we cant convert the argument and we're the param array argument, then deal with it.
                         if (!canConvert(named.Value, substDestType) &&
@@ -1254,7 +1254,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // void Foo(int y, params int[] x);
                             // ...
                             // Foo(x:1, y:1);
-                            CType arrayType = (ArrayType)GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
+                            CType arrayType = (ArrayType)TypeManager.SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
 
                             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
                             ExprArrayInit arrayInit = ExprFactory.CreateArrayInit(arrayType, null, null, new[] { 0 }, 1);
@@ -1273,7 +1273,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else
                     {
-                        CType substDestType = GetTypes().SubstType(@params[iDst], type, pTypeArgs);
+                        CType substDestType = TypeManager.SubstType(@params[iDst], type, pTypeArgs);
                         rval = tryConvert(indir, substDestType);
                     }
 
@@ -1321,7 +1321,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // we need to create an array and put it as the last arg...
-            CType substitutedArrayType = GetTypes().SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
+            CType substitutedArrayType = TypeManager.SubstType(mp.Params[mp.Params.Count - 1], type, pTypeArgs);
             if (!(substitutedArrayType is ArrayType subArr) || !subArr.IsSZArray)
             {
                 // Invalid type for params array parameter. Happens in LAF scenarios, e.g.

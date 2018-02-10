@@ -1544,20 +1544,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
             Handles standard binary floating point (float, double) based operators.
         */
-        private ExprOperator BindRealBinOp(ExpressionKind ek, EXPRFLAG _, Expr arg1, Expr arg2)
+        private static ExprOperator BindRealBinOp(ExpressionKind ek, EXPRFLAG _, Expr arg1, Expr arg2)
         {
             Debug.Assert(arg1.Type.IsPredefined && arg2.Type.IsPredefined && arg1.Type.PredefinedType == arg2.Type.PredefinedType);
-            return bindFloatOp(ek, arg1, arg2);
+            return BindFloatOp(ek, arg1, arg2);
         }
 
 
         /*
             Handles standard unary floating point (float, double) based operators.
         */
-        private ExprOperator BindRealUnaOp(ExpressionKind ek, EXPRFLAG _, Expr arg)
+        private static ExprOperator BindRealUnaOp(ExpressionKind ek, EXPRFLAG _, Expr arg)
         {
             Debug.Assert(arg.Type.IsPredefined);
-            return bindFloatOp(ek, arg, null);
+            return BindFloatOp(ek, arg, null);
         }
 
 
@@ -1715,7 +1715,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             This function is called twice by the EE for every binary operator it evaluates
             Here is how it works.
         */
-        private ExprBinOp BindDecBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
+        private static ExprBinOp BindDecBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
             Debug.Assert(arg1.Type.IsPredefType(PredefinedType.PT_DECIMAL) && arg2.Type.IsPredefType(PredefinedType.PT_DECIMAL));
 
@@ -1802,7 +1802,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Bind a bool binary operator: ==, !=, &&, ||, , |, ^. If both operands are constant, the
             result will be a constant also.
         */
-        private ExprBinOp BindBoolBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
+        private static ExprBinOp BindBoolBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
             Debug.Assert(arg1 != null);
             Debug.Assert(arg2 != null);
@@ -1853,7 +1853,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
             Handles boolean unary operator (!).
         */
-        private Expr BindBoolUnaOp(ExpressionKind ek, EXPRFLAG flags, Expr arg)
+        private static Expr BindBoolUnaOp(ExpressionKind ek, EXPRFLAG flags, Expr arg)
         {
             Debug.Assert(arg.Type.IsPredefType(PredefinedType.PT_BOOL));
             Debug.Assert(ek == ExpressionKind.LogicalNot);
@@ -2235,7 +2235,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
           will be a constant also. op2 can be null for a unary operator. The operands are assumed
           to be already converted to the correct type.
          */
-        private ExprOperator bindFloatOp(ExpressionKind kind, Expr op1, Expr op2)
+        private static ExprOperator BindFloatOp(ExpressionKind kind, Expr op1, Expr op2)
         {
             //Debug.Assert(kind.isRelational() || kind.isArithmetic());
             Debug.Assert(op2 == null || op1.Type == op2.Type);
@@ -2300,8 +2300,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeRet = pCall.Type;
 
             Debug.Assert(pCall.MethWithInst.Meth().Params.Count == 2);
-            if (!GetTypes().SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[0], typeRet) ||
-                !GetTypes().SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[1], typeRet))
+            if (!TypeManager.SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[0], typeRet) ||
+                !TypeManager.SubstEqualTypes(typeRet, pCall.MethWithInst.Meth().Params[1], typeRet))
             {
                 throw GetErrorContext().Error(ErrorCode.ERR_BadBoolOp, pCall.MethWithInst);
             }
@@ -2366,7 +2366,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return cats;
         }
 
-        private bool UserDefinedBinaryOperatorCanBeLifted(ExpressionKind ek, MethodSymbol method, AggregateType ats,
+        private static bool UserDefinedBinaryOperatorCanBeLifted(ExpressionKind ek, MethodSymbol method, AggregateType ats,
             TypeArray Params)
         {
             if (!Params[0].IsNonNullableValueType || !Params[1].IsNonNullableValueType)
@@ -2374,7 +2374,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType typeRet = GetTypes().SubstType(method.RetType, ats);
+            CType typeRet = TypeManager.SubstType(method.RetType, ats);
             if (!typeRet.IsNonNullableValueType)
             {
                 return false;
@@ -2417,7 +2417,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
             Debug.Assert(method.typeVars.Count == 0);
-            TypeArray paramsCur = GetTypes().SubstTypeArray(method.Params, ats);
+            TypeArray paramsCur = TypeManager.SubstTypeArray(method.Params, ats);
             if (canConvert(arg1, paramsCur[0]) && canConvert(arg2, paramsCur[1]))
             {
                 candidateList.Add(new CandidateFunctionMember(
@@ -2533,7 +2533,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return BindLiftedUDBinop(ek, arg1, arg2, pmethBest.@params, pmethBest.mpwi);
             }
 
-            CType typeRetRaw = GetTypes().SubstType(pmethBest.mpwi.Meth().RetType, pmethBest.mpwi.GetType());
+            CType typeRetRaw = TypeManager.SubstType(pmethBest.mpwi.Meth().RetType, pmethBest.mpwi.GetType());
 
             return BindUDBinopCall(arg1, arg2, pmethBest.@params, typeRetRaw, pmethBest.mpwi);
         }
@@ -2561,7 +2561,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr exprVal1 = arg1;
             Expr exprVal2 = arg2;
             CType typeRet;
-            CType typeRetRaw = GetTypes().SubstType(mpwi.Meth().RetType, mpwi.GetType());
+            CType typeRetRaw = TypeManager.SubstType(mpwi.Meth().RetType, mpwi.GetType());
 
             // This is a lifted user defined operator.  We know that both arguments
             // go to the nullable formal parameter types, and that at least one
@@ -2573,7 +2573,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // argument to the nullable formal parameter type first, before we then
             // do the cast for the non-nullable call.
 
-            TypeArray paramsRaw = GetTypes().SubstTypeArray(mpwi.Meth().Params, mpwi.GetType());
+            TypeArray paramsRaw = TypeManager.SubstTypeArray(mpwi.Meth().Params, mpwi.GetType());
             Debug.Assert(Params != paramsRaw);
             Debug.Assert(paramsRaw[0] == Params[0].BaseOrParameterOrElementType);
             Debug.Assert(paramsRaw[1] == Params[1].BaseOrParameterOrElementType);
@@ -2640,7 +2640,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return call;
         }
 
-        private AggregateType GetEnumBinOpType(ExpressionKind ek, CType argType1, CType argType2, out AggregateType ppEnumType)
+        private static AggregateType GetEnumBinOpType(ExpressionKind ek, CType argType1, CType argType2, out AggregateType ppEnumType)
         {
             Debug.Assert(argType1.IsEnumType || argType2.IsEnumType);
 

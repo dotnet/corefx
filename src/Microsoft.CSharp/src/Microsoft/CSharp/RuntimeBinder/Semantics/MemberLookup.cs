@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Make sure this type is accessible. It may not be due to private inheritance
             // or friend assemblies.
-            bool fInaccess = !GetSemanticChecker().CheckTypeAccess(typeCur, _symWhere);
+            bool fInaccess = !CSemanticChecker.CheckTypeAccess(typeCur, _symWhere);
             if (fInaccess && (_csym != 0 || _swtInaccess != null))
                 return false;
 
@@ -158,7 +158,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                if (fInaccess || !GetSemanticChecker().CheckAccess(symCur, typeCur, _symWhere, _typeQual))
+                if (fInaccess || !CSemanticChecker.CheckAccess(symCur, typeCur, _symWhere, _typeQual))
                 {
                     // Not accessible so get the next sym.
                     if (!_swtInaccess)
@@ -489,8 +489,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     new SymWithType(meth2, swt.GetType()), new ErrArgRefOnly(swt.Sym));
         }
 
-        private bool IsDelegateType(CType pSrcType, AggregateType pAggType) =>
-            GetSymbolLoader().GetTypeManager().SubstType(pSrcType, pAggType, pAggType.TypeArgsAll).IsDelegateType;
+        private static bool IsDelegateType(CType pSrcType, AggregateType pAggType) =>
+            TypeManager.SubstType(pSrcType, pAggType, pAggType.TypeArgsAll).IsDelegateType;
 
         /////////////////////////////////////////////////////////////////////////////////
         // Public methods.

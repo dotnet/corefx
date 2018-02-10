@@ -352,7 +352,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From System.Array and the interfaces it implements, to any array-type.
 
-                if (_binder.canConvert(_binder.GetPredefindType(PredefinedType.PT_ARRAY), _typeSrc, CONVERTTYPE.NOUDC))
+                if (_binder.canConvert(GetPredefindType(PredefinedType.PT_ARRAY), _typeSrc, CONVERTTYPE.NOUDC))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);

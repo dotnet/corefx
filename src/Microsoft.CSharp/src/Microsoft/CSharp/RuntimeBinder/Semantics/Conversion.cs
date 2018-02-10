@@ -699,8 +699,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             continue;
 
                         // Get the substituted src and dst types.
-                        typeFrom = GetTypes().SubstType(convCur.Params[0], atsCur);
-                        typeTo = GetTypes().SubstType(convCur.RetType, atsCur);
+                        typeFrom = TypeManager.SubstType(convCur.Params[0], atsCur);
+                        typeTo = TypeManager.SubstType(convCur.RetType, atsCur);
 
                         bool fNeedImplicit = fImplicitOnly;
 
@@ -855,8 +855,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 UdConvInfo uci = prguci[iuci];
 
                 // Get the substituted src and dst types.
-                typeFrom = GetTypes().SubstType(uci.Meth.Meth().Params[0], uci.Meth.GetType());
-                typeTo = GetTypes().SubstType(uci.Meth.Meth().RetType, uci.Meth.GetType());
+                typeFrom = TypeManager.SubstType(uci.Meth.Meth().Params[0], uci.Meth.GetType());
+                typeTo = TypeManager.SubstType(uci.Meth.Meth().RetType, uci.Meth.GetType());
 
                 int ctypeLift = 0;
 
@@ -956,8 +956,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(ctypeLiftBest <= 2);
 
-            typeFrom = GetTypes().SubstType(mwiBest.Meth().Params[0], mwiBest.GetType());
-            typeTo = GetTypes().SubstType(mwiBest.Meth().RetType, mwiBest.GetType());
+            typeFrom = TypeManager.SubstType(mwiBest.Meth().Params[0], mwiBest.GetType());
+            typeTo = TypeManager.SubstType(mwiBest.Meth().RetType, mwiBest.GetType());
 
             Expr exprDst;
             Expr pTransformedArgument = exprSrc;
@@ -1100,7 +1100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (ftSrc == FUNDTYPE.FT_STRUCT || ftDest == FUNDTYPE.FT_STRUCT)
             {
                 // Do constant folding involving decimal constants.
-                Expr expr = bindDecimalConstCast(typeDest, exprSrc.Type, constSrc);
+                Expr expr = BindDecimalConstCast(typeDest, exprSrc.Type, constSrc);
 
                 if (expr == null)
                 {
@@ -1342,7 +1342,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
          * Bind a constant cast to or from decimal. Return null if cast can't be done.
          */
-        private Expr bindDecimalConstCast(CType destType, CType srcType, ExprConstant src)
+        private static Expr BindDecimalConstCast(CType destType, CType srcType, ExprConstant src)
         {
             CType typeDecimal = SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
             ConstVal cv;

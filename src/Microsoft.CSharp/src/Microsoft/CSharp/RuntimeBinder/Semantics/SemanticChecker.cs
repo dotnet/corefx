@@ -29,7 +29,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
+        public static ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
             Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
@@ -72,12 +72,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Substitute on the CType.
             if (atsCheck.TypeArgsAll.Count > 0)
             {
-                CType = SymbolLoader.GetTypeManager().SubstType(CType, atsCheck);
+                CType = TypeManager.SubstType(CType, atsCheck);
             }
 
             return CheckTypeAccess(CType, symWhere) ? ACCESSERROR.ACCESSERROR_NOERROR : ACCESSERROR.ACCESSERROR_NOACCESS;
         }
-        public bool CheckTypeAccess(CType type, Symbol symWhere)
+
+        public static bool CheckTypeAccess(CType type, Symbol symWhere)
         {
             Debug.Assert(type != null);
 
@@ -128,7 +129,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // Utility methods
         //
-        private ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
+        private static ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
             Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
@@ -267,10 +268,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return found ? ACCESSERROR.ACCESSERROR_NOACCESSTHRU : ACCESSERROR.ACCESSERROR_NOACCESS;
         }
 
-        public static bool CheckBogus(Symbol sym)
-        {
-            return (sym as PropertySymbol)?.Bogus ?? false;
-        }
+        public static bool CheckBogus(Symbol sym) => (sym as PropertySymbol)?.Bogus ?? false;
 
         public RuntimeBinderException ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)
         {
@@ -283,9 +281,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 : ErrorContext.Error(ErrorCode.ERR_BadAccess, swtBad);
         }
 
-        public bool CheckAccess(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
-        {
-            return CheckAccess2(symCheck, atsCheck, symWhere, typeThru) == ACCESSERROR.ACCESSERROR_NOERROR;
-        }
+        public static bool CheckAccess(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru) =>
+            CheckAccess2(symCheck, atsCheck, symWhere, typeThru) == ACCESSERROR.ACCESSERROR_NOERROR;
     }
 }

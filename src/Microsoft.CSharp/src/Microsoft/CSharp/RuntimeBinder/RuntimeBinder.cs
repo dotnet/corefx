@@ -342,7 +342,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private void AddConversionsForArguments(ArgumentObject[] arguments)
+        private static void AddConversionsForArguments(ArgumentObject[] arguments)
         {
             foreach (ArgumentObject arg in arguments)
             {
@@ -362,7 +362,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         // we have a call off of a struct for example. If thats the case, don't treat the 
         // local as a ref type.
 
-        private LocalVariableSymbol[] PopulateLocalScope(
+        private static LocalVariableSymbol[] PopulateLocalScope(
             ICSharpBinder payload,
             Scope pScope,
             ArgumentObject[] arguments,
@@ -405,9 +405,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private ExprBoundLambda GenerateBoundLambda(
-            Scope pScope,
-            Expr call)
+        private static ExprBoundLambda GenerateBoundLambda(Scope pScope, Expr call)
         {
             // We don't actually need the real delegate type here - we just need SOME delegate type.
             // This is because we never attempt any conversions on the lambda itself.
@@ -547,7 +545,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private ExprMemberGroup CreateMemberGroupEXPR(
+        private static ExprMemberGroup CreateMemberGroupExpr(
             string Name,
             Type[] typeArguments,
             Expr callingObject,
@@ -677,7 +675,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             PropertySymbol property = swt.Prop();
             AggregateType propertyType = swt.GetType();
             PropWithType pwt = new PropWithType(property, propertyType);
-            ExprMemberGroup pMemGroup = CreateMemberGroupEXPR(property.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            ExprMemberGroup pMemGroup = CreateMemberGroupExpr(property.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
 
             return _binder.BindToProperty(// For a static property instance, don't set the object.
                     callingObject is ExprClass ? null : callingObject, pwt, flags, null, pMemGroup);
@@ -688,7 +686,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private ExprWithArgs CreateIndexer(SymWithType swt, Expr callingObject, Expr arguments, BindingFlag bindFlags)
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
-            ExprMemberGroup memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            ExprMemberGroup memgroup = CreateMemberGroupExpr(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
             ExprWithArgs result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
             ReorderArgumentsForNamedAndOptional(callingObject, result);
             return result;
@@ -811,7 +809,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // method, then we may be in the situation where the user called the method
             // via a simple name call through the phantom overload. If thats the case,
             // then we want to sub in a type instead of the object.
-            ExprMemberGroup memGroup = CreateMemberGroupEXPR(payload.Name, payload.TypeArguments, callingObject, swt.Sym.getKind());
+            ExprMemberGroup memGroup = CreateMemberGroupExpr(payload.Name, payload.TypeArguments, callingObject, swt.Sym.getKind());
             if ((payload.Flags & CSharpCallFlags.SimpleNameCall) != 0)
             {
                 callingObject.Flags |= EXPRFLAG.EXF_SIMPLENAME;
@@ -843,7 +841,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     eventCType = swtEvent.Event().type;
                 }
 
-                Type eventType = SymbolLoader.GetTypeManager().SubstType(eventCType, swtEvent.Ats).AssociatedSystemType;
+                Type eventType = TypeManager.SubstType(eventCType, swtEvent.Ats).AssociatedSystemType;
 
                 if (eventType != null)
                 {
@@ -925,7 +923,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             SymbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = ExprFactory.CreateClass(SymbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
-            ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            ExprMemberGroup addEventGrp = CreateMemberGroupExpr(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             return _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
@@ -976,7 +974,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // We need to substitute type parameters BEFORE getting the most derived one because
             // we're binding against the base method, and the derived method may change the 
             // generic arguments. 
-            TypeArray parameters = SymbolLoader.GetTypeManager().SubstTypeArray(methprop.Params, type, typeArgs);
+            TypeArray parameters = TypeManager.SubstTypeArray(methprop.Params, type, typeArgs);
             methprop = ExpressionBinder.GroupToArgsBinder.FindMostDerivedMethod(SymbolLoader, methprop, callingObject.Type);
             ExpressionBinder.GroupToArgsBinder.ReOrderArgsForNamedArguments(
                 methprop,
