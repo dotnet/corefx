@@ -337,10 +337,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public CSemanticChecker GetSemanticChecker() { return SemanticChecker; }
 
-        private ExprFactory GetExprFactory() { return ExprFactory; }
-
-        private ExprFactory ExprFactory { get { return Context.ExprFactory; } }
-
         private static AggregateType GetPredefindType(PredefinedType pt)
         {
             Debug.Assert(pt != PredefinedType.PT_VOID); // use getVoidType()
@@ -380,7 +376,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // convert the indexes to ints
 
             CType pDestType = ChooseArrayIndexType(pOp2);
-            Expr transformedIndices = pOp2.Map(GetExprFactory(),
+            Expr transformedIndices = pOp2.Map(
                 x =>
                 {
                     Expr pTemp = mustConvert(x, pDestType);

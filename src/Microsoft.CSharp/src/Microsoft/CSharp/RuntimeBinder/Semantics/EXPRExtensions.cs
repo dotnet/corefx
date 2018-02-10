@@ -10,13 +10,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal static class EXPRExtensions
     {
-        public static Expr Map(this Expr expr, ExprFactory factory, Func<Expr, Expr> f)
+        public static Expr Map(this Expr expr, Func<Expr, Expr> f)
         {
             Debug.Assert(f != null);
-            Debug.Assert(factory != null);
 
             if (expr == null)
-                return f(expr);
+            {
+                return f(null);
+            }
 
             Expr result = null;
             Expr tail = null;

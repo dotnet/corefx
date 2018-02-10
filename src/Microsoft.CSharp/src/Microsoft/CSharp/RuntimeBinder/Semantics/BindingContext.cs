@@ -13,16 +13,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class BindingContext
     {
-        public BindingContext(CSemanticChecker semanticChecker, ExprFactory exprFactory)
+        public BindingContext(CSemanticChecker semanticChecker)
         {
             Debug.Assert(semanticChecker != null);
-            ExprFactory = exprFactory;
             SemanticChecker = semanticChecker;
             SymbolLoader = semanticChecker.SymbolLoader;
         }
 
         public BindingContext(BindingContext parent)
-            : this(parent.SemanticChecker, parent.ExprFactory)
+            : this(parent.SemanticChecker)
         {
             // We copy the context object, but leave checking false.
             ContextForMemberLookup = parent.ContextForMemberLookup;
@@ -38,8 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateDeclaration ContextForMemberLookup { get; set; }
 
         public CSemanticChecker SemanticChecker { get; }
-
-        public ExprFactory ExprFactory { get; }
 
         public bool Checked { get; set; }
     }

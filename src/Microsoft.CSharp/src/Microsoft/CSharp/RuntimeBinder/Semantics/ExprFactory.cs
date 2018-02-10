@@ -8,18 +8,18 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class ExprFactory
+    internal static class ExprFactory
     {
-        public static ExprCall CreateCall(EXPRFLAG flags, CType type, Expr arguments, ExprMemberGroup memberGroup, MethWithInst method) => 
+        public static ExprCall CreateCall(EXPRFLAG flags, CType type, Expr arguments, ExprMemberGroup memberGroup, MethWithInst method) =>
             new ExprCall(type, flags, arguments, memberGroup, method);
 
-        public static ExprField CreateField(CType type, Expr optionalObject, FieldWithType field) => 
+        public static ExprField CreateField(CType type, Expr optionalObject, FieldWithType field) =>
             new ExprField(type, optionalObject, field);
 
-        public static ExprArrayInit CreateArrayInit(CType type, Expr arguments, Expr argumentDimensions, int[] dimSizes, int dimSize) => 
+        public static ExprArrayInit CreateArrayInit(CType type, Expr arguments, Expr argumentDimensions, int[] dimSizes, int dimSize) =>
             new ExprArrayInit(type, arguments, argumentDimensions, dimSizes, dimSize);
 
-        public static ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
+        public static ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) =>
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
         public static ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, Expr obj, CMemberLookupResults memberLookupResults) =>
@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 obj, new CMemberLookupResults(TypeArray.Allocate((CType)method.GetType()), name));
         }
 
-        public static ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 
+        public static ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) =>
             new ExprUserDefinedConversion(arg, call, method);
 
         public static ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, type, argument);
@@ -42,10 +42,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
-        public static ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) => 
+        public static ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) =>
             new ExprBoundLambda(delegateType, argumentScope, expression);
 
-        public static ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi) => 
+        public static ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi) =>
             CreateMethodInfo(mwi.Meth(), mwi.GetType(), mwi.TypeArgs);
 
         public static ExprMethodInfo CreateMethodInfo(MethodSymbol method, AggregateType methodType, TypeArray methodParameters) =>
@@ -62,8 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprTypeOf CreateTypeOf(CType sourceType) =>
             new ExprTypeOf(TypeManager.GetPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
 
-
-        public static ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
+        public static ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) =>
             new ExprUserLogicalOp(type, trueFalseCall, operatorCall);
 
         public static ExprConcat CreateConcat(Expr first, Expr second) => new ExprConcat(first, second);
@@ -71,10 +70,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprConstant CreateStringConstant(string str) =>
             CreateConstant(TypeManager.GetPredefAgg(PredefinedType.PT_STRING).getThisType(), ConstVal.Get(str));
 
-        public static ExprMultiGet CreateMultiGet(EXPRFLAG flags, CType type, ExprMulti multi) => 
+        public static ExprMultiGet CreateMultiGet(EXPRFLAG flags, CType type, ExprMulti multi) =>
             new ExprMultiGet(type, flags, multi);
 
-        public static ExprMulti CreateMulti(EXPRFLAG flags, CType type, Expr left, Expr op) => 
+        public static ExprMulti CreateMulti(EXPRFLAG flags, CType type, Expr left, Expr op) =>
             new ExprMulti(type, flags, left, op);
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -133,10 +132,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
             new ExprArrayIndex(type, array, index);
 
-        public static ExprBinOp CreateBinop(ExpressionKind exprKind, CType type, Expr left, Expr right) => 
+        public static ExprBinOp CreateBinop(ExpressionKind exprKind, CType type, Expr left, Expr right) =>
             new ExprBinOp(exprKind, type, left, right);
 
-        public static ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType type, Expr operand) => 
+        public static ExprUnaryOp CreateUnaryOp(ExpressionKind exprKind, CType type, Expr operand) =>
             new ExprUnaryOp(exprKind, type, operand);
 
         public static ExprOperator CreateOperator(ExpressionKind exprKind, CType type, Expr arg1, Expr arg2)
@@ -148,12 +147,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 : CreateBinop(exprKind, type, arg1, arg2);
         }
 
-
-        public static ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType type, Expr left, Expr right, Expr call, MethPropWithInst userMethod) => 
+        public static ExprBinOp CreateUserDefinedBinop(ExpressionKind exprKind, CType type, Expr left, Expr right, Expr call, MethPropWithInst userMethod) =>
             new ExprBinOp(exprKind, type, left, right, call, userMethod);
 
         // The call may be lifted, but we do not mark the outer binop as lifted.
-        public static ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType type, Expr operand, ExprCall call, MethPropWithInst userMethod) => 
+        public static ExprUnaryOp CreateUserDefinedUnaryOperator(ExpressionKind exprKind, CType type, Expr operand, ExprCall call, MethPropWithInst userMethod) =>
             new ExprUnaryOp(exprKind, type, operand, call, userMethod);
 
         public static ExprUnaryOp CreateNeg(EXPRFLAG flags, Expr operand)
@@ -192,11 +190,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static ExprConstant CreateNull() => CreateConstant(NullType.Instance, default);
 
-        public static void AppendItemToList(
-            Expr newItem,
-            ref Expr first,
-            ref Expr last
-        )
+        public static void AppendItemToList(Expr newItem, ref Expr first, ref Expr last)
         {
             if (newItem == null)
             {
