@@ -9,19 +9,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExpressionTreeRewriter : ExprVisitorBase
     {
-        public static ExprBinOp Rewrite(ExprBoundLambda expr, ExprFactory expressionFactory, SymbolLoader symbolLoader) =>
-            new ExpressionTreeRewriter(expressionFactory, symbolLoader).VisitBoundLambda(expr);
+        public static ExprBinOp Rewrite(ExprBoundLambda expr, SymbolLoader symbolLoader) =>
+            new ExpressionTreeRewriter(symbolLoader).VisitBoundLambda(expr);
 
-        private ExprFactory expressionFactory;
         private SymbolLoader symbolLoader;
-
-        private ExprFactory GetExprFactory() { return expressionFactory; }
 
         private SymbolLoader GetSymbolLoader() { return symbolLoader; }
 
-        private ExpressionTreeRewriter(ExprFactory expressionFactory, SymbolLoader symbolLoader)
+        private ExpressionTreeRewriter(SymbolLoader symbolLoader)
         {
-            this.expressionFactory = expressionFactory;
             this.symbolLoader = symbolLoader;
         }
 

@@ -13,16 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
     internal sealed class UserStringBuilder
     {
         private bool m_buildingInProgress;
-        private GlobalSymbolContext m_globalSymbols;
         private StringBuilder m_strBuilder;
-
-        public UserStringBuilder(
-            GlobalSymbolContext globalSymbols)
-        {
-            Debug.Assert(globalSymbols != null);
-            m_buildingInProgress = false;
-            m_globalSymbols = globalSymbols;
-        }
 
         private void BeginString()
         {
@@ -618,11 +609,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
 
             return result;
-        }
-
-        private TypeManager GetTypeManager()
-        {
-            return m_globalSymbols.GetTypes();
         }
 
         private static void ErrId(out string s, MessageID id)

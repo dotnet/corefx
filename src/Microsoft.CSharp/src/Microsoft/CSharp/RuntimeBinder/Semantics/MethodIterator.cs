@@ -13,7 +13,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public partial class CMethodIterator
         {
             private readonly SymbolLoader _symbolLoader;
-            private readonly CSemanticChecker _semanticChecker;
             // Inputs.
             private readonly AggregateDeclaration _context;
             private readonly TypeArray _containingTypes;
@@ -26,14 +25,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Internal state.
             private int _currentTypeIndex;
 
-            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
+            public CMethodIterator(SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(symLoader != null);
-                Debug.Assert(checker != null);
                 Debug.Assert(containingTypes != null);
                 Debug.Assert(containingTypes.Count != 0);
-                _semanticChecker = checker;
+
                 _symbolLoader = symLoader;
                 _name = name;
                 _containingTypes = containingTypes;

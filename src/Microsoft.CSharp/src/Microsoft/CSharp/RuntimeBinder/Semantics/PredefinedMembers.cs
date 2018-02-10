@@ -196,8 +196,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Also finds constructors on delegate types.
     internal sealed class PredefinedMembers
     {
-        private readonly SymbolLoader _loader;
-        internal SymbolTable RuntimeBinderSymbolTable;
         private readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
         private readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
 
@@ -223,18 +221,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PropertySymbol property = getter.getProperty();
             Debug.Assert(property != null);
             return property;
-        }
-
-        private SymbolLoader GetSymbolLoader()
-        {
-            Debug.Assert(_loader != null);
-
-            return _loader;
-        }
-
-        private TypeManager GetTypeManager()
-        {
-            return GetSymbolLoader().GetTypeManager();
         }
 
         private static AggregateSymbol GetPredefAgg(PredefinedType pt) => SymbolLoader.GetPredefAgg(pt);
@@ -297,11 +283,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return TypeArray.Allocate(ptypes);
         }
 
-        public PredefinedMembers(SymbolLoader loader)
+        public PredefinedMembers()
         {
-            _loader = loader;
-            Debug.Assert(_loader != null);
-
             _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
             _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
 

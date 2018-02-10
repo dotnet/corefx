@@ -29,25 +29,23 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly Dictionary<ExprCall, Expression> _DictionaryOfParameters;
         private readonly Expression[] _ListOfParameters;
-        private readonly TypeManager _typeManager;
-        // Counts how many EXPRSAVEs we've encountered so we know which index into the 
+        // Counts how many EXPRSAVEs we've encountered so we know which index into the
         // parameter list we should be taking.
         private int _currentParameterIndex;
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private ExpressionTreeCallRewriter(TypeManager typeManager, Expression[] listOfParameters)
+        private ExpressionTreeCallRewriter(Expression[] listOfParameters)
         {
-            _typeManager = typeManager;
             _DictionaryOfParameters = new Dictionary<ExprCall, Expression>();
             _ListOfParameters = listOfParameters;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        public static Expression Rewrite(TypeManager typeManager, ExprBinOp binOp, Expression[] listOfParameters)
+        public static Expression Rewrite(ExprBinOp binOp, Expression[] listOfParameters)
         {
-            ExpressionTreeCallRewriter rewriter = new ExpressionTreeCallRewriter(typeManager, listOfParameters);
+            ExpressionTreeCallRewriter rewriter = new ExpressionTreeCallRewriter(listOfParameters);
 
             // We should have a ExprBinOp that's an EK_SEQUENCE. The RHS of our sequence
             // should be a call to PM_EXPRESSION_LAMBDA. The LHS of our sequence is the 

@@ -18,16 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static readonly Dictionary<(Assembly, Assembly), bool> s_internalsVisibleToCache =
             new Dictionary<(Assembly, Assembly), bool>();
 
-        private SymbolTable _symbolTable;
-
         private static readonly StdTypeVarColl s_stvcMethod = new StdTypeVarColl();
-
-        public void InitTypeFactory(SymbolTable table)
-        {
-            _symbolTable = table;
-        }
-
-        public SymbolTable SymbolTable => _symbolTable;
 
         private sealed class StdTypeVarColl
         {

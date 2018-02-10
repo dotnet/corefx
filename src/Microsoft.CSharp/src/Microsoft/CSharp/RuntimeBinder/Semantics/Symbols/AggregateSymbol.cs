@@ -32,8 +32,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray _typeVarsThis; // Type variables for this generic class, as declarations.
         private TypeArray _typeVarsAll;     // The type variables for this generic class and all containing classes.
 
-        private TypeManager _pTypeManager;     // This is so AGGTYPESYMs can instantiate their baseClass and ifacesAll members on demand.
-
         // First UD conversion operator. This chain is for this type only (not base types).
         // The hasConversion flag indicates whether this or any base types have UD conversions.
         private MethodSymbol _pConvFirst;
@@ -342,16 +340,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void SetIfacesAll(TypeArray ifacesAll)
         {
             _ifacesAll = ifacesAll;
-        }
-
-        public TypeManager GetTypeManager()
-        {
-            return _pTypeManager;
-        }
-
-        public void SetTypeManager(TypeManager typeManager)
-        {
-            _pTypeManager = typeManager;
         }
 
         public MethodSymbol GetFirstUDConversion()

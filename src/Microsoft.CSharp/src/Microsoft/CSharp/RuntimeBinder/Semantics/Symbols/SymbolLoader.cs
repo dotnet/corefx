@@ -18,8 +18,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public SymbolLoader()
         {
             GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
-            PredefinedMembers = new PredefinedMembers(this);
-            ErrorContext = new ErrorHandling(globalSymbols);
+            PredefinedMembers = new PredefinedMembers();
+            ErrorContext = new ErrorHandling();
             GlobalSymbolContext = globalSymbols;
             Debug.Assert(GlobalSymbolContext != null);
         }

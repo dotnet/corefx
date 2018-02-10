@@ -29,10 +29,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public CMethodIterator GetMethodIterator(
-            CSemanticChecker pChecker, SymbolLoader pSymLoader, CType pQualifyingType, AggregateDeclaration pContext, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
+            SymbolLoader pSymLoader, CType pQualifyingType, AggregateDeclaration pContext, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
         {
             Debug.Assert(pSymLoader != null);
-            CMethodIterator iterator = new CMethodIterator(pChecker, pSymLoader, _pName, ContainingTypes, pQualifyingType, pContext, arity, flags, mask, nonTrailingNamedArguments);
+            CMethodIterator iterator = new CMethodIterator(pSymLoader, _pName, ContainingTypes, pQualifyingType, pContext, arity, flags, mask, nonTrailingNamedArguments);
             return iterator;
         }
 
