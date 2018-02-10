@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.Win32.SafeHandles;
 
@@ -23,13 +24,15 @@ namespace System.IO.Enumeration
         private string _currentPath;
         private SafeDirectoryHandle _directoryHandle;
         private bool _lastEntryFound;
-        private Queue<(SafeDirectoryHandle Handle, string Path)> _pending;
+        private Queue<string> _pending;
 
         private Interop.Sys.DirectoryEntry _entry;
         private TResult _current;
 
         // Used for creating full paths
         private char[] _pathBuffer;
+        // Used to get the raw entry data
+        private byte[] _entryBuffer;
 
         /// <summary>
         /// Encapsulates a find operation.
@@ -53,6 +56,8 @@ namespace System.IO.Enumeration
             try
             {
                 _pathBuffer = ArrayPool<char>.Shared.Rent(StandardBufferSize);
+                int size = Interop.Sys.ReadBufferSize;
+                _entryBuffer = size > 0 ? ArrayPool<byte>.Shared.Rent(size) : null;
             }
             catch
             {
@@ -62,15 +67,20 @@ namespace System.IO.Enumeration
             }
         }
 
-        private static SafeDirectoryHandle CreateDirectoryHandle(string path)
+        private SafeDirectoryHandle CreateDirectoryHandle(string path)
         {
             // TODO: https://github.com/dotnet/corefx/issues/26715
-            // - Check access denied option and allow through if specified.
             // - Use IntPtr handle directly
             SafeDirectoryHandle handle = Interop.Sys.OpenDir(path);
             if (handle.IsInvalid)
             {
-                throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo(), path, isDirectory: true);
+                Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
+                if ((_options.IgnoreInaccessible && IsAccessError(info.RawErrno))
+                    || ContinueOnError(info.RawErrno))
+                {
+                    return null;
+                }
+                throw Interop.GetExceptionForIoErrno(info, path, isDirectory: true);
             }
             return handle;
         }
@@ -107,7 +117,7 @@ namespace System.IO.Enumeration
                         {
                             // These three we don't have to hit the disk again to evaluate
                             if (((_options.AttributesToSkip & FileAttributes.Directory) != 0 && isDirectory)
-                                || ((_options.AttributesToSkip & FileAttributes.Hidden) != 0 && _entry.InodeName[0] == '.')
+                                || ((_options.AttributesToSkip & FileAttributes.Hidden) != 0 && _entry.Name[0] == '.')
                                 || ((_options.AttributesToSkip & FileAttributes.ReparsePoint) != 0 && _entry.InodeType == Interop.Sys.NodeType.DT_LNK))
                                 continue;
                         }
@@ -121,7 +131,7 @@ namespace System.IO.Enumeration
                     if (isDirectory)
                     {
                         // Subdirectory found
-                        if (PathHelpers.IsDotOrDotDot(_entry.InodeName))
+                        if (_entry.Name[0] == '.' && (_entry.Name[1] == 0 || (_entry.Name[1] == '.' && _entry.Name[2] == 0)))
                         {
                             // "." or "..", don't process unless the option is set
                             if (!_options.ReturnSpecialDirectories)
@@ -130,23 +140,9 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subdirectory = PathHelpers.CombineNoChecks(_currentPath, _entry.InodeName);
-                            SafeDirectoryHandle subdirectoryHandle = CreateDirectoryHandle(subdirectory);
-                            if (subdirectoryHandle != null)
-                            {
-                                try
-                                {
-                                    if (_pending == null)
-                                        _pending = new Queue<(SafeDirectoryHandle, string)>();
-                                    _pending.Enqueue((subdirectoryHandle, subdirectory));
-                                }
-                                catch
-                                {
-                                    // Couldn't queue the handle, close it and rethrow
-                                    subdirectoryHandle.Dispose();
-                                    throw;
-                                }
-                            }
+                            if (_pending == null)
+                                _pending = new Queue<string>();
+                            _pending.Enqueue(PathHelpers.CombineNoChecks(_currentPath, entry.FileName));
                         }
                     }
 
@@ -161,16 +157,41 @@ namespace System.IO.Enumeration
 
         private unsafe void FindNextEntry()
         {
-            // Read each entry from the enumerator
-            if (Interop.Sys.ReadDir(_directoryHandle, out _entry) != 0)
+            Span<byte> buffer = _entryBuffer == null ? Span<byte>.Empty : new Span<byte>(_entryBuffer);
+            int result = Interop.Sys.ReadDir(_directoryHandle, buffer, ref _entry);
+            switch (result)
             {
-                // TODO: https://github.com/dotnet/corefx/issues/26715
-                // - Refactor ReadDir so we can process errors here
-
-                // Directory finished
-                DirectoryFinished();
+                case -1:
+                    // End of directory
+                    DirectoryFinished();
+                    break;
+                case 0:
+                    // Success
+                    break;
+                default:
+                    // Error
+                    if ((_options.IgnoreInaccessible && IsAccessError(result))
+                        || ContinueOnError(result))
+                    {
+                        DirectoryFinished();
+                        break;
+                    }
+                    else
+                    {
+                        throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(result), _currentPath, isDirectory: true);
+                    }
             }
         }
+
+        private void DequeueNextDirectory()
+        {
+            _currentPath = _pending.Dequeue();
+            _directoryHandle = CreateDirectoryHandle(_currentPath);
+        }
+
+        private static bool IsAccessError(int error)
+            => error == (int)Interop.Error.EACCES || error == (int)Interop.Error.EBADF
+                || error == (int)Interop.Error.EPERM;
 
         private void InternalDispose(bool disposing)
         {
@@ -180,15 +201,16 @@ namespace System.IO.Enumeration
                 lock(_lock)
                 {
                     _lastEntryFound = true;
+                    _pending = null;
 
                     CloseDirectoryHandle();
 
-                    if (_pending != null)
-                    {
-                        while (_pending.Count > 0)
-                            _pending.Dequeue().Handle.Dispose();
-                        _pending = null;
-                    }
+                    if (_pathBuffer != null)
+                        ArrayPool<char>.Shared.Return(_pathBuffer);
+                    _pathBuffer = null;
+                    if (_entryBuffer != null)
+                        ArrayPool<byte>.Shared.Return(_entryBuffer);
+                    _entryBuffer = null;
                 }
             }
 
