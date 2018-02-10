@@ -94,7 +94,7 @@ namespace System.Reflection.Metadata.Tests
 
         internal static unsafe int IndexOf(byte[] peImage, byte[] toFind, int start)
         {
-            for (int i = 0; i < peImage.Length - toFind.Length; i++)
+            for (int i = 0; i + start < peImage.Length - toFind.Length; i++)
             {
                 if (toFind.SequenceEqual(peImage.Slice(i + start, i + start + toFind.Length)))
                 {
@@ -105,6 +105,190 @@ namespace System.Reflection.Metadata.Tests
         }
 
         #endregion
+
+        [Fact]
+        public unsafe void ZeroFirstFieldRowIdAndGetParameterRange()
+        {
+            byte[] peImage = (byte[])NetModule.AppCS.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            int firstFieldRowIdIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x10, 0x00, 0x71, 0x01 }, headers.MetadataStartOffset);
+            Assert.NotEqual(firstFieldRowIdIndex, -1);
+            peImage[firstFieldRowIdIndex + headers.MetadataStartOffset] = 0x00;
+
+            int firstParamRowIdIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x70, 0x20, 0x00, 0x00, 0x00, 0x00, 0x86 }, headers.MetadataStartOffset + firstFieldRowIdIndex);
+            Assert.NotEqual(firstParamRowIdIndex, -1);
+            peImage[firstParamRowIdIndex + firstFieldRowIdIndex + headers.MetadataStartOffset] = 0x00;
+            
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+
+            TypeDefinitionHandle typeDef = TypeDefinitionHandle.FromRowId(1);
+            int firstFieldRowId = -1;
+            int lastFieldRowId = -1;
+            reader.GetFieldRange(typeDef, out firstFieldRowId, out lastFieldRowId);
+
+            Assert.Equal(firstFieldRowId, 1);
+            Assert.Equal(lastFieldRowId, 0);
+
+            MethodDefinitionHandle methodDef = MethodDefinitionHandle.FromRowId(1);
+            int firstParamRowId = -1;
+            int lastParamRowId = -1;
+            reader.GetParameterRange(methodDef, out firstParamRowId, out lastParamRowId);
+
+            Assert.Equal(firstParamRowId, 1);
+            Assert.Equal(lastParamRowId, 0);
+
+            methodDef = MethodDefinitionHandle.FromRowId(2);
+            reader.GetParameterRange(methodDef, out firstParamRowId, out lastParamRowId);
+
+            Assert.Equal(firstParamRowId, 1);
+            Assert.Equal(lastParamRowId, 1);
+
+            methodDef = MethodDefinitionHandle.FromRowId(20);
+            reader.GetParameterRange(methodDef, out firstParamRowId, out lastParamRowId);
+
+            Assert.Equal(firstParamRowId, 8);
+            Assert.Equal(lastParamRowId, 7);
+        }
+
+        [Fact]
+        public unsafe void LocalVariableandConstantRange()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+
+            //find remainingBytes to be increased because we are adding a row
+            int remainingBytesIndex = IndexOf(peImage, BitConverter.GetBytes(180), 0);
+            Assert.NotEqual(remainingBytesIndex, -1);
+
+            //need to add a row for complete test
+            int rowCountIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x1B }, remainingBytesIndex);
+            Assert.NotEqual(rowCountIndex, -1);
+
+            //Find the row to double
+            int scopeIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63 }, rowCountIndex + remainingBytesIndex);
+            Assert.NotEqual(rowCountIndex, -1);
+
+            //Add the row a second time
+            peImage.ToList().InsertRange(rowCountIndex + scopeIndex + remainingBytesIndex, new List<byte> { 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63, 0x00, 0x00, 0x00 });
+
+            //add a second row
+            peImage[rowCountIndex + remainingBytesIndex] = 0x02;
+
+            //increase size of metadata for second row
+            Array.Copy(BitConverter.GetBytes(196), 0, peImage, remainingBytesIndex, sizeof(int));
+
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+
+            LocalScopeHandle scope = LocalScopeHandle.FromRowId(1);
+            int firstVariableRowId = -1;
+            int lastVariableRowId = -1;
+            reader.GetLocalVariableRange(scope, out firstVariableRowId, out lastVariableRowId);
+
+            Assert.Equal(firstVariableRowId, 1);
+            Assert.Equal(lastVariableRowId, 0);
+
+            int firstConstantRowId = -1;
+            int lastConstantRowId = -1;
+            reader.GetLocalConstantRange(scope, out firstConstantRowId, out lastConstantRowId);
+
+            Assert.Equal(firstConstantRowId, 1);
+            Assert.Equal(lastConstantRowId, 7);
+
+            scope = LocalScopeHandle.FromRowId(2);
+            firstVariableRowId = -1;
+            lastVariableRowId = -1;
+            reader.GetLocalVariableRange(scope, out firstVariableRowId, out lastVariableRowId);
+
+            Assert.Equal(firstVariableRowId, 1);
+            Assert.Equal(lastVariableRowId, 0);
+
+            firstConstantRowId = -1;
+            lastConstantRowId = -1;
+            reader.GetLocalConstantRange(scope, out firstConstantRowId, out lastConstantRowId);
+
+            Assert.Equal(firstConstantRowId, 8);
+            Assert.Equal(lastConstantRowId, 0);
+
+            int firstVariableRowIdIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0);
+            Assert.NotEqual(firstVariableRowIdIndex, -1);
+            peImage[firstVariableRowIdIndex] = 0x00;
+
+            int firstConstantRowIdIndex = IndexOf(peImage, new byte[] { 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, firstVariableRowIdIndex);
+            Assert.NotEqual(firstConstantRowIdIndex, -1);
+            peImage[firstConstantRowIdIndex + firstVariableRowIdIndex] = 0x00;
+           
+            firstVariableRowId = -1;
+            lastVariableRowId = -1;
+            reader.GetLocalVariableRange(scope, out firstVariableRowId, out lastVariableRowId);
+
+            Assert.Equal(firstVariableRowId, 1);
+            Assert.Equal(lastVariableRowId, 0);
+
+            firstConstantRowId = -1;
+            lastConstantRowId = -1;
+            reader.GetLocalConstantRange(scope, out firstConstantRowId, out lastConstantRowId);
+
+            Assert.Equal(firstConstantRowId, 1);
+            Assert.Equal(lastConstantRowId, 0);
+            
+        }
+
+        [Fact]
+        public unsafe void InvalidModuleAndAssemblyDefinition()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+            Assert.Throws<InvalidOperationException>(() => reader.GetModuleDefinition());
+            Assert.Throws<InvalidOperationException>(() => reader.GetAssemblyDefinition());
+        }
+
+        [Fact]
+        public unsafe void GetNamespaceDefinitionRootTest()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+            Assert.True(reader.GetNamespaceDefinitionRoot().Parent.IsNil);
+        }
+
+        [Fact]
+        public unsafe void GetTypeRefTreatmentAndRowIdTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(1, reader.GetTypeReference(TypeReferenceHandle.FromRowId(1)).ResolutionScope.RowId);
+        }
+
+        [Fact]
+        public unsafe void GetCustomAttributeTreatmentAndRowIdTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(421, reader.GetCustomAttribute(CustomAttributeHandle.FromRowId(1)).Value.GetHeapOffset());
+        }
+
+        //[Fact]
+        //public unsafe void GetDeclarativeSecurityAttributeTest()
+        //{
+        //    byte[] peImage = (byte[])Namespace.NamespaceTests.Clone();
+
+        //    GCHandle pinned = GetPinnedPEImage(peImage);
+        //    PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+        //    MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+        //    //Assert.Equal(0, reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)));
+        //    DeclarativeSecurityAttribute attribute = reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1));
+        //    int test = attribute.PermissionSet.GetHeapOffset();
+        //}
 
         [Fact]
         public unsafe void InvalidSignature()
@@ -410,6 +594,10 @@ namespace System.Reflection.Metadata.Tests
             AssertEx.Equal(
                 new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A },
                 reader.GetBlobBytes(assemblyRef.PublicKeyOrToken));
+
+            AssertEx.Equal(
+                Collections.Immutable.ImmutableArray.ToImmutableArray(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }),
+                reader.GetBlobContent(assemblyRef.PublicKeyOrToken));
 
             var blobReader = reader.GetBlobReader(assemblyRef.PublicKeyOrToken);
             Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, blobReader.ReadBytes(8));
