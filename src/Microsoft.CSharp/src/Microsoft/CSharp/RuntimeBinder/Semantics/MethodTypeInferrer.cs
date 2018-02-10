@@ -27,7 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             DependsMask = 0x10,
             Indirect = 0x12
         }
-        private readonly SymbolLoader _symbolLoader;
+
         private readonly ExpressionBinder _binder;
         private readonly TypeArray _pMethodTypeParameters;
         private readonly TypeArray _pMethodFormalParameterTypes;
@@ -81,7 +81,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static bool Infer(
             ExpressionBinder binder,
-            SymbolLoader symbolLoader,
             MethodSymbol pMethod,
             TypeArray pMethodFormalParameterTypes,
             ArgInfos pMethodArguments,
@@ -99,9 +98,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pMethodFormalParameterTypes != null);
             Debug.Assert(pMethodArguments.carg <= pMethodFormalParameterTypes.Count);
 
-            var inferrer = new MethodTypeInferrer(binder, symbolLoader,
-                pMethodFormalParameterTypes, pMethodArguments,
-                pMethod.typeVars);
+            var inferrer = new MethodTypeInferrer(
+                binder, pMethodFormalParameterTypes, pMethodArguments, pMethod.typeVars);
             bool success = inferrer.InferTypeArgs();
 
             ppInferredTypeArguments = inferrer.GetResults();
@@ -118,12 +116,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // SPEC: with an empty set of bounds.
 
         private MethodTypeInferrer(
-            ExpressionBinder exprBinder, SymbolLoader symLoader,
-            TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments,
-            TypeArray pMethodTypeParameters)
+            ExpressionBinder exprBinder, TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments, TypeArray pMethodTypeParameters)
         {
             _binder = exprBinder;
-            _symbolLoader = symLoader;
             _pMethodFormalParameterTypes = pMethodFormalParameterTypes;
             _pMethodArguments = pMethodArguments;
             _pMethodTypeParameters = pMethodTypeParameters;
@@ -1716,19 +1711,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             UpdateDependenciesAfterFix(iParam);
             return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Helper methods
-        //
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-
-        private SymbolLoader GetSymbolLoader()
-        {
-            return _symbolLoader;
         }
     }
 }

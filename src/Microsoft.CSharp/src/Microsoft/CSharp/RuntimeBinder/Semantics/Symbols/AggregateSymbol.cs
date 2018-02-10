@@ -221,7 +221,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        public bool HasConversion(SymbolLoader pLoader)
+        public bool HasConversion()
         {
             SymbolTable.AddConversionsForType(AssociatedSystemType);
 
@@ -230,7 +230,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // ok, we tried defining all the conversions, and we didn't get anything
                 // for this type.  However, we will still think this type has conversions
                 // if it's base type has conversions.
-                _hasConversion = GetBaseAgg() != null && GetBaseAgg().HasConversion(pLoader);
+                _hasConversion = GetBaseAgg() != null && GetBaseAgg().HasConversion();
             }
 
             return _hasConversion.Value;

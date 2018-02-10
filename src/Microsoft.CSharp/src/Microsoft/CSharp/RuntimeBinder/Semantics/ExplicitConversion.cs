@@ -252,7 +252,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType typeArr = arrSrc.ElementType;
                 CType typeLst = aggDest.TypeArgsAll[0];
 
-                if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
+                if (!CConversions.FExpRefConv(typeArr, typeLst))
                 {
                     return false;
                 }
@@ -293,7 +293,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType typeLst = aggSrc.TypeArgsAll[0];
 
                 Debug.Assert(!(typeArr is MethodGroupType));
-                if (typeArr != typeLst && !CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
+                if (typeArr != typeLst && !CConversions.FExpRefConv(typeArr, typeLst))
                 {
                     return false;
                 }
@@ -321,10 +321,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;  // Ranks do not match.
                 }
 
-                if (CConversions.FExpRefConv(GetSymbolLoader(), arraySrc.ElementType, arrayDest.ElementType))
+                if (CConversions.FExpRefConv(arraySrc.ElementType, arrayDest.ElementType))
                 {
                     if (_needsExprDest)
+                    {
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);
+                    }
+
                     return true;
                 }
 
@@ -670,7 +673,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggSrc = atSrc.OwningAggregate;
                 AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
-                if (GetSymbolLoader().HasBaseConversion(aggTypeDest, atSrc))
+                if (SymbolLoader.HasBaseConversion(aggTypeDest, atSrc))
                 {
                     if (_needsExprDest)
                     {
@@ -687,7 +690,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if ((aggSrc.IsClass() && !aggSrc.IsSealed() && aggDest.IsInterface()) ||
                     (aggSrc.IsInterface() && aggDest.IsClass() && !aggDest.IsSealed()) ||
                     (aggSrc.IsInterface() && aggDest.IsInterface()) ||
-                    CConversions.HasGenericDelegateExplicitReferenceConversion(GetSymbolLoader(), _typeSrc, aggTypeDest))
+                    CConversions.HasGenericDelegateExplicitReferenceConversion(_typeSrc, aggTypeDest))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK | (_exprSrc?.Flags & EXPRFLAG.EXF_CANTBENULL ?? 0));
@@ -756,11 +759,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 return AggCastResult.Failure;
-            }
-
-            private SymbolLoader GetSymbolLoader()
-            {
-                return _binder.GetSymbolLoader();
             }
         }
     }

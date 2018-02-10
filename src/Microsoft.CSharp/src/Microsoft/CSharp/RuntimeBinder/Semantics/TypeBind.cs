@@ -226,7 +226,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // to which they have an implicit reference conversion
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedRefType;
                         }
-                        else if (arg is NullableType nubArg && checker.SymbolLoader.HasBaseConversion(nubArg.UnderlyingType, typeBnd))    // This is inlining FBoxingConv
+                        else if (arg is NullableType nubArg && SymbolLoader.HasBaseConversion(nubArg.UnderlyingType, typeBnd))    // This is inlining FBoxingConv
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
@@ -341,7 +341,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_TypeParameterType:
                 case TypeKind.TK_ArrayType:
                 case TypeKind.TK_AggregateType:
-                    return checker.SymbolLoader.HasBaseConversion(arg, typeBnd);
+                    return SymbolLoader.HasBaseConversion(arg, typeBnd);
             }
         }
     }

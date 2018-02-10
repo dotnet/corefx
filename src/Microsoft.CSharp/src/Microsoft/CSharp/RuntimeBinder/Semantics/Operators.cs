@@ -920,7 +920,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return false;
 
                         if (type1.IsInterfaceType || type1.IsPredefType(PredefinedType.PT_STRING)
-                            || GetSymbolLoader().HasBaseConversion(type1, typeDel))
+                            || SymbolLoader.HasBaseConversion(type1, typeDel))
                             type1 = typeObj;
                         else if (type1 is ArrayType)
                             type1 = GetPredefindType(PredefinedType.PT_ARRAY);
@@ -928,7 +928,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return false;
 
                         if (type2.IsInterfaceType || type2.IsPredefType(PredefinedType.PT_STRING)
-                            || GetSymbolLoader().HasBaseConversion(type2, typeDel))
+                            || SymbolLoader.HasBaseConversion(type2, typeDel))
                             type2 = typeObj;
                         else if (type2 is ArrayType)
                             type2 = GetPredefindType(PredefinedType.PT_ARRAY);
@@ -942,9 +942,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             type2.IsClassType && !type2.IsPredefType(PredefinedType.PT_STRING)
                             && !type2.IsPredefType(PredefinedType.PT_DELEGATE));
 
-                        if (GetSymbolLoader().HasBaseConversion(type2, type1))
+                        if (SymbolLoader.HasBaseConversion(type2, type1))
                             typeCls = type1;
-                        else if (GetSymbolLoader().HasBaseConversion(type1, type2))
+                        else if (SymbolLoader.HasBaseConversion(type1, type2))
                             typeCls = type2;
 
                     }

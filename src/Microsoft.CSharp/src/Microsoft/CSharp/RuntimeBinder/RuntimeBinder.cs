@@ -32,8 +32,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private SymbolTable _symbolTable;
         private CSemanticChecker _semanticChecker;
-        private SymbolLoader SymbolLoader => _semanticChecker.SymbolLoader;
-
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
 
@@ -53,7 +51,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             _semanticChecker = new CSemanticChecker();
 
             _symbolTable = new SymbolTable(_semanticChecker);
-            SymbolLoader.SetSymbolTable(_symbolTable);
 
             _bindingContext = new BindingContext(_semanticChecker);
             _binder = new ExpressionBinder(_bindingContext);
@@ -231,7 +228,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
 
             // (4) - Rewrite the ExprBoundLambda into an expression tree.
-            ExprBinOp exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, SymbolLoader);
+            ExprBinOp exprTree = ExpressionTreeRewriter.Rewrite(boundLambda);
 
             // (5) - Create the actual Expression Tree
             Expression e = ExpressionTreeCallRewriter.Rewrite(exprTree, parameters);
@@ -971,41 +968,34 @@ namespace Microsoft.CSharp.RuntimeBinder
             // we're binding against the base method, and the derived method may change the 
             // generic arguments. 
             TypeArray parameters = TypeManager.SubstTypeArray(methprop.Params, type, typeArgs);
-            methprop = ExpressionBinder.GroupToArgsBinder.FindMostDerivedMethod(SymbolLoader, methprop, callingObject.Type);
+            methprop = ExpressionBinder.GroupToArgsBinder.FindMostDerivedMethod(methprop, callingObject.Type);
             ExpressionBinder.GroupToArgsBinder.ReOrderArgsForNamedArguments(
-                methprop,
-                parameters,
-                type,
-                memgroup,
-                argInfo,
-                SymbolLoader);
+                methprop, parameters, type, memgroup, argInfo);
+            Expr pList = null;
+
+            // We reordered, so make a new list of them and set them on the constructor.
+            // Go backwards cause lists are right-flushed.
+            // Also perform the conversions to the right types.
+            for (int i = argInfo.carg - 1; i >= 0; i--)
             {
-                Expr pList = null;
+                Expr pArg = argInfo.prgexpr[i];
 
-                // We reordered, so make a new list of them and set them on the constructor.
-                // Go backwards cause lists are right-flushed.
-                // Also perform the conversions to the right types.
-                for (int i = argInfo.carg - 1; i >= 0; i--)
+                // Strip the name-ness away, since we don't need it.
+                pArg = StripNamedArgument(pArg);
+
+                // Perform the correct conversion.
+                pArg = _binder.tryConvert(pArg, parameters[i]);
+                if (pList == null)
                 {
-                    Expr pArg = argInfo.prgexpr[i];
-
-                    // Strip the name-ness away, since we don't need it.
-                    pArg = StripNamedArgument(pArg);
-
-                    // Perform the correct conversion.
-                    pArg = _binder.tryConvert(pArg, parameters[i]);
-                    if (pList == null)
-                    {
-                        pList = pArg;
-                    }
-                    else
-                    {
-                        pList = ExprFactory.CreateList(pArg, pList);
-                    }
+                    pList = pArg;
                 }
-
-                result.OptionalArguments = pList;
+                else
+                {
+                    pList = ExprFactory.CreateList(pArg, pList);
+                }
             }
+
+            result.OptionalArguments = pList;
         }
 
         private Expr StripNamedArgument(Expr pArg)

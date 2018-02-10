@@ -318,16 +318,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             };
         }
 
-        private SymbolLoader GetSymbolLoader() { return SymbolLoader; }
-
-        private SymbolLoader SymbolLoader
-        {
-            get
-            {
-                return Context.SymbolLoader;
-            }
-        }
-
         private CSemanticChecker SemanticChecker
         {
             get
@@ -499,8 +489,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType fieldType = null;
             // If this field is the backing field of a WindowsRuntime event then we need to bind to its
             // invocationlist property which is a delegate containing all the handlers.
-            if (fwt.Field().isEvent && fwt.Field().getEvent(GetSymbolLoader()) != null
-                && fwt.Field().getEvent(GetSymbolLoader()).IsWindowsRuntimeEvent)
+            if (fwt.Field().isEvent && fwt.Field().getEvent() != null
+                && fwt.Field().getEvent().IsWindowsRuntimeEvent)
             {
                 fieldType = fwt.Field().GetType() as AggregateType;
                 if (fieldType != null)
@@ -572,7 +562,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (mwtGet &&
                     (!mwtSet ||
                      mwtSet.GetType() == mwtGet.GetType() ||
-                     GetSymbolLoader().HasBaseConversion(mwtGet.GetType(), mwtSet.GetType())
+                     SymbolLoader.HasBaseConversion(mwtGet.GetType(), mwtSet.GetType())
                      )
                 )
             {
@@ -1165,7 +1155,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             newArgs = null;
             Expr newArgsTail = null;
 
-            MethodOrPropertySymbol mostDerivedMethod = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mp, callingObjectType);
+            MethodOrPropertySymbol mostDerivedMethod = GroupToArgsBinder.FindMostDerivedMethod(mp, callingObjectType);
 
             int paramCount = mp.Params.Count;
             TypeArray @params = mp.Params;

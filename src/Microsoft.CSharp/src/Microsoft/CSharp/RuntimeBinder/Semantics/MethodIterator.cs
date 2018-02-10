@@ -10,9 +10,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal partial class CMemberLookupResults
     {
-        public partial class CMethodIterator
+        public class CMethodIterator
         {
-            private readonly SymbolLoader _symbolLoader;
             // Inputs.
             private readonly AggregateDeclaration _context;
             private readonly TypeArray _containingTypes;
@@ -25,14 +24,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Internal state.
             private int _currentTypeIndex;
 
-            public CMethodIterator(SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
+            public CMethodIterator(Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
             {
                 Debug.Assert(name != null);
-                Debug.Assert(symLoader != null);
                 Debug.Assert(containingTypes != null);
                 Debug.Assert(containingTypes.Count != 0);
 
-                _symbolLoader = symLoader;
                 _name = name;
                 _containingTypes = containingTypes;
                 _qualifyingType = qualifyingType;
@@ -102,7 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (args != null)
                 {
                     List<Name> paramNames = ExpressionBinder.GroupToArgsBinder
-                        .FindMostDerivedMethod(_symbolLoader, CurrentSymbol, _qualifyingType)
+                        .FindMostDerivedMethod(CurrentSymbol, _qualifyingType)
                         .ParameterNames;
 
                     List<Expr> argExpressions = args.prgexpr;

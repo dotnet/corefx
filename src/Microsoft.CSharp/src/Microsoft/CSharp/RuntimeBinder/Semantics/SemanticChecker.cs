@@ -111,9 +111,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        // Generates an error for static classes
-        public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
-
         private static ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);

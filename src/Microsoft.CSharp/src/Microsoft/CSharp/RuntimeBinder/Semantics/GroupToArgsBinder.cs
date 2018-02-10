@@ -105,10 +105,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return _results;
             }
 
-            private SymbolLoader GetSymbolLoader()
-            {
-                return _pExprBinder.GetSymbolLoader();
-            }
             private CSemanticChecker GetSemanticChecker()
             {
                 return _pExprBinder.GetSemanticChecker();
@@ -134,7 +130,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // iterator will only return propsyms (or methsyms, or whatever)
                 symbmask_t mask = (symbmask_t)(1 << (int)_pGroup.SymKind);
 
-                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetSymbolLoader(), GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsKind == NamedArgumentsKind.NonTrailing ? _pOriginalArguments : null);
+                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsKind == NamedArgumentsKind.NonTrailing ? _pOriginalArguments : null);
                 while (true)
                 {
                     bool bFoundExpanded;
@@ -404,22 +400,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 _bArgumentsChangedForNamedOrOptionalArguments = ReOrderArgsForNamedArguments(
-                        methprop,
-                        _pCurrentParameters,
-                        _pCurrentType,
-                        _pGroup,
-                        _pArguments,
-                        GetSymbolLoader());
+                    methprop, _pCurrentParameters, _pCurrentType, _pGroup, _pArguments);
                 return _bArgumentsChangedForNamedOrOptionalArguments;
             }
 
             internal static bool ReOrderArgsForNamedArguments(
-                    MethodOrPropertySymbol methprop,
-                    TypeArray pCurrentParameters,
-                    AggregateType pCurrentType,
-                    ExprMemberGroup pGroup,
-                    ArgInfos pArguments,
-                    SymbolLoader symbolLoader)
+                MethodOrPropertySymbol methprop, TypeArray pCurrentParameters, AggregateType pCurrentType, ExprMemberGroup pGroup, ArgInfos pArguments)
             {
                 // We use the param count from pCurrentParameters because they may have been resized 
                 // for param arrays.
@@ -470,7 +456,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         if (methprop.IsParameterOptional(index))
                         {
-                            pNewArg = GenerateOptionalArgument(symbolLoader, methprop, @params[index], index);
+                            pNewArg = GenerateOptionalArgument(methprop, @params[index], index);
                         }
                         else if (paramArrayArgument != null && index == methprop.Params.Count - 1)
                         {
@@ -507,11 +493,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             /////////////////////////////////////////////////////////////////////////////////
 
-            private static Expr GenerateOptionalArgument(
-                    SymbolLoader symbolLoader,
-                    MethodOrPropertySymbol methprop,
-                    CType type,
-                    int index)
+            private static Expr GenerateOptionalArgument(MethodOrPropertySymbol methprop, CType type, int index)
             {
                 CType pParamType = type;
                 CType pRawParamType = type.StripNubs();
@@ -601,21 +583,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return optionalArgument;
             }
 
-            /////////////////////////////////////////////////////////////////////////////////
+            private MethodOrPropertySymbol FindMostDerivedMethod(MethodOrPropertySymbol pMethProp, Expr pObject) =>
+                FindMostDerivedMethod(pMethProp, pObject?.Type);
 
-            private MethodOrPropertySymbol FindMostDerivedMethod(
-                    MethodOrPropertySymbol pMethProp,
-                    Expr pObject)
-            {
-                return FindMostDerivedMethod(GetSymbolLoader(), pMethProp, pObject?.Type);
-            }
-
-            /////////////////////////////////////////////////////////////////////////////////
-
-            public static MethodOrPropertySymbol FindMostDerivedMethod(
-                    SymbolLoader symbolLoader,
-                    MethodOrPropertySymbol pMethProp,
-                    CType pType)
+            public static MethodOrPropertySymbol FindMostDerivedMethod(MethodOrPropertySymbol pMethProp, CType pType)
             {
                 bool bIsIndexer = false;
 
@@ -731,7 +702,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    pArguments[index] = GenerateOptionalArgument(GetSymbolLoader(), methprop, @params[i], i);
+                    pArguments[index] = GenerateOptionalArgument(methprop, @params[i], i);
                 }
 
                 // Success. Lets copy them in now.
@@ -924,8 +895,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // error sym to go to any type.
 
                     bool inferenceSucceeded = MethodTypeInferrer.Infer(
-                        _pExprBinder, GetSymbolLoader(), methSym, _pCurrentParameters, _pArguments,
-                        out _pCurrentTypeArgs);
+                        _pExprBinder, methSym, _pCurrentParameters, _pArguments, out _pCurrentTypeArgs);
 
                     if (!inferenceSucceeded)
                     {
@@ -1078,7 +1048,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(pMethod != null);
                     }
                     Debug.Assert(pMethod.IsParameterOptional(iParam));
-                    Expr pArgumentNew = GenerateOptionalArgument(GetSymbolLoader(), pMethod, _pCurrentParameters[iParam], iParam);
+                    Expr pArgumentNew = GenerateOptionalArgument(pMethod, _pCurrentParameters[iParam], iParam);
                     _pArguments.prgexpr[iParam] = pArgumentNew;
                 }
             }

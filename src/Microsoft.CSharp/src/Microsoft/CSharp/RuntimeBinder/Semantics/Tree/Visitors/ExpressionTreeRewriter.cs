@@ -9,17 +9,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExpressionTreeRewriter : ExprVisitorBase
     {
-        public static ExprBinOp Rewrite(ExprBoundLambda expr, SymbolLoader symbolLoader) =>
-            new ExpressionTreeRewriter(symbolLoader).VisitBoundLambda(expr);
-
-        private SymbolLoader symbolLoader;
-
-        private SymbolLoader GetSymbolLoader() { return symbolLoader; }
-
-        private ExpressionTreeRewriter(SymbolLoader symbolLoader)
-        {
-            this.symbolLoader = symbolLoader;
-        }
+        public static ExprBinOp Rewrite(ExprBoundLambda expr) => new ExpressionTreeRewriter().VisitBoundLambda(expr);
 
         protected override Expr Dispatch(Expr expr)
         {
@@ -149,7 +139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // we can omit the cast.
             if (pArgument.Type == pExpr.Type ||
                     SymbolLoader.IsBaseClassOfClass(pArgument.Type, pExpr.Type) ||
-                    CConversions.FImpRefConv(GetSymbolLoader(), pArgument.Type, pExpr.Type))
+                    CConversions.FImpRefConv(pArgument.Type, pExpr.Type))
             {
                 return Visit(pArgument);
             }

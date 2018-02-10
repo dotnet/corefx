@@ -270,7 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateType atsDst = nubDst.GetAts();
 
                 // Check for the unboxing conversion. This takes precedence over the wrapping conversions.
-                if (GetSymbolLoader().HasBaseConversion(nubDst.UnderlyingType, _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
+                if (SymbolLoader.HasBaseConversion(nubDst.UnderlyingType, _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
                 {
                     // These should be different! Fix the caller if typeSrc is an AggregateType of Nullable.
                     Debug.Assert(atsDst != _typeSrc);
@@ -440,7 +440,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
                 }
-                if (GetSymbolLoader().HasBaseConversion(nubSrc.UnderlyingType, _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
+                if (SymbolLoader.HasBaseConversion(nubSrc.UnderlyingType, _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
                 {
                     if (_needsExprDest)
                     {
@@ -475,7 +475,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // *   From any array-type to System.Array.
                 // *   From any array-type to any interface implemented by System.Array.
 
-                if (!GetSymbolLoader().HasBaseConversion(_typeSrc, _typeDest))
+                if (!SymbolLoader.HasBaseConversion(_typeSrc, _typeDest))
                 {
                     return false;
                 }
@@ -571,7 +571,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // *   From any delegate-type to System.Delegate.
                 // *   From any delegate-type to System.ICloneable.
 
-                if (!(_typeDest is AggregateType) || !GetSymbolLoader().HasBaseConversion(pSource, _typeDest))
+                if (!(_typeDest is AggregateType) || !SymbolLoader.HasBaseConversion(pSource, _typeDest))
                 {
                     return false;
                 }
@@ -601,7 +601,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // base class for all enums (21.4). A struct or enum can be boxed to the type System.ValueType, 
                 // since that is the direct base class for all structs (18.3.2) and a base class for all enums.
 
-                if (_typeDest is AggregateType aggDest && GetSymbolLoader().HasBaseConversion(aggTypeSrc, aggDest))
+                if (_typeDest is AggregateType aggDest && SymbolLoader.HasBaseConversion(aggTypeSrc, aggDest))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL);
@@ -729,11 +729,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_needsExprDest)
                     _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
                 return true;
-            }
-
-            private SymbolLoader GetSymbolLoader()
-            {
-                return _binder.GetSymbolLoader();
             }
         }
     }

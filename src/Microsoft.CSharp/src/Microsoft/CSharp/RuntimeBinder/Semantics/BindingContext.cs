@@ -17,7 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(semanticChecker != null);
             SemanticChecker = semanticChecker;
-            SymbolLoader = semanticChecker.SymbolLoader;
         }
 
         public BindingContext(BindingContext parent)
@@ -26,13 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // We copy the context object, but leave checking false.
             ContextForMemberLookup = parent.ContextForMemberLookup;
         }
-
-        //The SymbolLoader can be retrieved from SemanticChecker,
-        //but that is a virtual call that is showing up on the profiler. Retrieve
-        //the SymbolLoader once at construction and return a cached copy.
-
-        // PERFORMANCE: Is this cache still necessary?
-        public SymbolLoader SymbolLoader { get; }
 
         public AggregateDeclaration ContextForMemberLookup { get; set; }
 

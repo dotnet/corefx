@@ -220,7 +220,7 @@ LAgain:
 
             CType type = pTypeThrough != null ? pTypeThrough : mpwi.GetType();
             CType[] typeList = new CType[pta.Count];
-            MethodOrPropertySymbol methProp = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi.MethProp(), type);
+            MethodOrPropertySymbol methProp = GroupToArgsBinder.FindMostDerivedMethod(mpwi.MethProp(), type);
 
             // We initialize the new type array with the parameters for the method. 
             for (int iParam = 0; iParam < pta.Count; iParam++)

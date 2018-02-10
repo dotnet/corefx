@@ -39,7 +39,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // The inputs to Lookup.
         private CSemanticChecker _pSemanticChecker;
-        private SymbolLoader _pSymbolLoader;
         private CType _typeSrc;
         private CType _typeQual;
         private ParentSymbol _symWhere;
@@ -470,7 +469,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private SymbolLoader GetSymbolLoader() { return _pSymbolLoader; }
         private CSemanticChecker GetSemanticChecker() { return _pSemanticChecker; }
 
         private RuntimeBinderException ReportBogus(SymWithType swt)
@@ -534,7 +532,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Save the inputs for error handling, etc.
             _pSemanticChecker = checker;
-            _pSymbolLoader = checker.SymbolLoader;
             _typeSrc = typeSrc;
             _symWhere = symWhere;
             _name = name;
