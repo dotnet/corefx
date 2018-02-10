@@ -237,7 +237,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeThru != null && !symCheck.isStatic)
             {
-                atsThru = SymbolLoader.GetAggTypeSym(typeThru);
+                atsThru = typeThru.GetAts();
             }
 
             // Look for aggCheck among the base classes of aggWhere and outer aggs.

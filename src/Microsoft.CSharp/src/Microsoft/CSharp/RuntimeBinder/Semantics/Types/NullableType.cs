@@ -26,7 +26,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             UnderlyingType = underlyingType;
         }
 
-        public AggregateType GetAts() =>
+        public override AggregateType GetAts() =>
             _ats ?? (_ats = TypeManager.GetAggregate(TypeManager.GetNullable(), TypeArray.Allocate(UnderlyingType)));
 
         public override CType StripNubs() => UnderlyingType;

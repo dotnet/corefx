@@ -63,27 +63,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
             => BSYMMGR.LookupNextSym(sym, parent, kindmask);
 
-        // It would be nice to make this a virtual method on typeSym.
-        public AggregateType GetAggTypeSym(CType typeSym)
-        {
-            Debug.Assert(typeSym != null);
-            Debug.Assert(typeSym is AggregateType ||
-                   typeSym is ArrayType ||
-                   typeSym is NullableType);
-
-            switch (typeSym.TypeKind)
-            {
-                case TypeKind.TK_AggregateType:
-                    return (AggregateType)typeSym;
-                case TypeKind.TK_ArrayType:
-                    return GetPredefindType(PredefinedType.PT_ARRAY);
-                case TypeKind.TK_NullableType:
-                    return ((NullableType)typeSym).GetAts();
-            }
-            Debug.Assert(false, "Bad typeSym!");
-            return null;
-        }
-
         private static bool IsBaseInterface(AggregateType atsDer, AggregateType pBase)
         {
             Debug.Assert(atsDer != null);

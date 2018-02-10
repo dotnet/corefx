@@ -385,5 +385,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
         }
+
+        public override AggregateType GetAts() => this;
     }
 }
