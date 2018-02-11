@@ -48,12 +48,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        internal SymbolTable()
-        {
-            // Now populate object.
-            LoadSymbolsFromType(typeof(object));
-        }
-
         internal static void PopulateSymbolTableWithName(
             string name,
             IEnumerable<Type> typeArguments,
