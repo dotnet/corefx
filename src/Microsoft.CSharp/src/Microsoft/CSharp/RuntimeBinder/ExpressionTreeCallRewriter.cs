@@ -258,7 +258,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             Expression obj = null;
-            MethodInfo m = GetMethodInfoFromExpr(methinfo);
+            MethodInfo m = methinfo.MethodInfo;
             Expression[] arguments = GetArgumentsFromArrayInit(arrinit);
 
             if (m == null)
@@ -331,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 Debug.Assert((pExpr.Flags & EXPRFLAG.EXF_UNBOXRUNTIME) == 0);
 
-                MethodInfo m = GetMethodInfoFromExpr((ExprMethodInfo)list2.OptionalNextListNode);
+                MethodInfo m = ((ExprMethodInfo)list2.OptionalNextListNode).MethodInfo;
 
                 if (pm == PREDEFMETH.PM_EXPRESSION_CONVERT_USER_DEFINED)
                 {
@@ -393,7 +393,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 arguments = null;
             }
 
-            PropertyInfo p = GetPropertyInfoFromExpr(propinfo);
+            PropertyInfo p = propinfo.PropertyInfo;
 
             if (p == null)
             {
@@ -453,8 +453,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
 
-            var constructor = GetConstructorInfoFromExpr(list.OptionalElement as ExprMethodInfo);
-            var arguments = GetArgumentsFromArrayInit(list.OptionalNextListNode as ExprArrayInit);
+            ConstructorInfo constructor = ((ExprMethodInfo)list.OptionalElement).ConstructorInfo;
+            Expression[] arguments = GetArgumentsFromArrayInit(list.OptionalNextListNode as ExprArrayInit);
             return Expression.New(constructor, arguments);
         }
 
@@ -558,11 +558,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ExprConstant isLifted = (ExprConstant)next.OptionalElement;
                 Debug.Assert(isLifted != null);
                 bIsLifted = isLifted.Val.Int32Val == 1;
-                methodInfo = GetMethodInfoFromExpr((ExprMethodInfo)next.OptionalNextListNode);
+                methodInfo = ((ExprMethodInfo)next.OptionalNextListNode).MethodInfo;
             }
             else
             {
-                methodInfo = GetMethodInfoFromExpr((ExprMethodInfo)list.OptionalNextListNode);
+                methodInfo = ((ExprMethodInfo)list.OptionalNextListNode).MethodInfo;
             }
 
             switch (pExpr.PredefinedMethod)
@@ -649,7 +649,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             PREDEFMETH pm = pExpr.PredefinedMethod;
             ExprList list = (ExprList)pExpr.OptionalArguments;
             Expression arg = GetExpression(list.OptionalElement);
-            MethodInfo methodInfo = GetMethodInfoFromExpr((ExprMethodInfo)list.OptionalNextListNode);
+            MethodInfo methodInfo = ((ExprMethodInfo)list.OptionalNextListNode).MethodInfo;
 
             switch (pm)
             {
@@ -885,7 +885,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else if (pExpr is ExprMethodInfo methodInfo)
                 {
-                    return GetMethodInfoFromExpr(methodInfo);
+                    return methodInfo.MethodInfo;
                 }
                 else if (pExpr is ExprConstant constant)
                 {
@@ -992,195 +992,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return expressions.ToArray();
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
-
-        private static MethodInfo GetMethodInfoFromExpr(ExprMethodInfo methinfo)
-        {
-            // To do this, we need to construct a type array of the parameter types,
-            // get the parent constructed type, and get the method from it.
-
-            AggregateType aggType = methinfo.Method.Ats;
-            MethodSymbol methSym = methinfo.Method.Meth();
-
-            TypeArray genericParams = TypeManager.SubstTypeArray(methSym.Params, aggType, methSym.typeVars);
-            CType genericReturn = TypeManager.SubstType(methSym.RetType, aggType, methSym.typeVars);
-
-            Type type = aggType.AssociatedSystemType;
-            MethodInfo methodInfo = methSym.AssociatedMemberInfo as MethodInfo;
-
-            // This is to ensure that for embedded nopia types, we have the
-            // appropriate local type from the member itself; this is possible
-            // because nopia types are not generic or nested.
-            if (!type.IsGenericType && !type.IsNested)
-            {
-                type = methodInfo.DeclaringType;
-            }
-
-            // We need to find the associated methodinfo on the instantiated type.
-            foreach (MethodInfo m in type.GetRuntimeMethods())
-            {
-#if UNSUPPORTEDAPI
-                if ((m.MetadataToken != methodInfo.MetadataToken) || (m.Module != methodInfo.Module))
-#else
-                if (!m.HasSameMetadataDefinitionAs(methodInfo))
-#endif
-                {
-                    continue;
-                }
-
-                Debug.Assert((m.Name == methodInfo.Name) &&
-                    (m.GetParameters().Length == genericParams.Count) &&
-                    (TypesAreEqual(m.ReturnType, genericReturn.AssociatedSystemType)));
-
-                bool bMatch = true;
-                ParameterInfo[] parameters = m.GetParameters();
-                for (int i = 0; i < genericParams.Count; i++)
-                {
-                    if (!TypesAreEqual(parameters[i].ParameterType, genericParams[i].AssociatedSystemType))
-                    {
-                        bMatch = false;
-                        break;
-                    }
-                }
-                if (bMatch)
-                {
-                    if (m.IsGenericMethod)
-                    {
-                        int size = methinfo.Method.TypeArgs?.Count ?? 0;
-                        Type[] typeArgs = new Type[size];
-                        if (size > 0)
-                        {
-                            for (int i = 0; i < methinfo.Method.TypeArgs.Count; i++)
-                            {
-                                typeArgs[i] = methinfo.Method.TypeArgs[i].AssociatedSystemType;
-                            }
-                        }
-                        return m.MakeGenericMethod(typeArgs);
-                    }
-
-                    return m;
-                }
-            }
-
-            Debug.Assert(false, "Could not find matching method");
-            throw Error.InternalCompilerError();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
-
-        private static ConstructorInfo GetConstructorInfoFromExpr(ExprMethodInfo methinfo)
-        {
-            // To do this, we need to construct a type array of the parameter types,
-            // get the parent constructed type, and get the method from it.
-
-            AggregateType aggType = methinfo.Method.Ats;
-            MethodSymbol methSym = methinfo.Method.Meth();
-
-            TypeArray genericInstanceParams = TypeManager.SubstTypeArray(methSym.Params, aggType);
-            Type type = aggType.AssociatedSystemType;
-            ConstructorInfo ctorInfo = (ConstructorInfo)methSym.AssociatedMemberInfo;
-
-            // This is to ensure that for embedded nopia types, we have the
-            // appropriate local type from the member itself; this is possible
-            // because nopia types are not generic or nested.
-            if (!type.IsGenericType && !type.IsNested)
-            {
-                type = ctorInfo.DeclaringType;
-            }
-
-            foreach (ConstructorInfo c in type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
-            {
-#if UNSUPPORTEDAPI
-                if ((c.MetadataToken != ctorInfo.MetadataToken) || (c.Module != ctorInfo.Module))
-#else
-                if (!c.HasSameMetadataDefinitionAs(ctorInfo))
-#endif
-                {
-                    continue;
-                }
-                Debug.Assert(c.GetParameters() == null || c.GetParameters().Length == genericInstanceParams.Count);
-
-                bool bMatch = true;
-                ParameterInfo[] parameters = c.GetParameters();
-                for (int i = 0; i < genericInstanceParams.Count; i++)
-                {
-                    if (!TypesAreEqual(parameters[i].ParameterType, genericInstanceParams[i].AssociatedSystemType))
-                    {
-                        bMatch = false;
-                        break;
-                    }
-                }
-                if (bMatch)
-                {
-                    return c;
-                }
-            }
-
-            Debug.Assert(false, "Could not find matching constructor");
-            throw Error.InternalCompilerError();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
-
-        private static PropertyInfo GetPropertyInfoFromExpr(ExprPropertyInfo propinfo)
-        {
-            // To do this, we need to construct a type array of the parameter types,
-            // get the parent constructed type, and get the property from it.
-
-            AggregateType aggType = propinfo.Property.Ats;
-            PropertySymbol propSym = propinfo.Property.Prop();
-
-            TypeArray genericInstanceParams = TypeManager.SubstTypeArray(propSym.Params, aggType, null);
-
-            Type type = aggType.AssociatedSystemType;
-            PropertyInfo propertyInfo = propSym.AssociatedPropertyInfo;
-
-            // This is to ensure that for embedded nopia types, we have the
-            // appropriate local type from the member itself; this is possible
-            // because nopia types are not generic or nested.
-            if (!type.IsGenericType && !type.IsNested)
-            {
-                type = propertyInfo.DeclaringType;
-            }
-
-            foreach (PropertyInfo p in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
-            {
-#if UNSUPPORTEDAPI
-                if ((p.MetadataToken != propertyInfo.MetadataToken) || (p.Module != propertyInfo.Module))
-#else
-                if (!p.HasSameMetadataDefinitionAs(propertyInfo))
-                {
-#endif
-                    continue;
-                }
-                Debug.Assert((p.Name == propertyInfo.Name) &&
-                    (p.GetIndexParameters() == null || p.GetIndexParameters().Length == genericInstanceParams.Count));
-
-                bool bMatch = true;
-                ParameterInfo[] parameters = p.GetSetMethod(true) != null ?
-                    p.GetSetMethod(true).GetParameters() : p.GetGetMethod(true).GetParameters();
-                for (int i = 0; i < genericInstanceParams.Count; i++)
-                {
-                    if (!TypesAreEqual(parameters[i].ParameterType, genericInstanceParams[i].AssociatedSystemType))
-                    {
-                        bMatch = false;
-                        break;
-                    }
-                }
-                if (bMatch)
-                {
-                    return p;
-                }
-            }
-
-            Debug.Assert(false, "Could not find matching property");
-            throw Error.InternalCompilerError();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
-
-        private static bool TypesAreEqual(Type t1, Type t2) => t1 == t2 || t1.IsEquivalentTo(t2);
 
         #endregion
     }
