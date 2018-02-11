@@ -128,7 +128,7 @@ namespace System.Net.Http.Functional.Tests
                     writer.Write(responseText);
                     s.Shutdown(SocketShutdown.Send);
 
-                    return Task.FromResult<List<string>>(null);
+                    return Task.CompletedTask;
                 }).GetAwaiter().GetResult();
 
                 getAsync.GetAwaiter().GetResult().Dispose();
@@ -148,8 +148,6 @@ namespace System.Net.Http.Functional.Tests
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
-
-                    return null;
                 });
 
                 (await getAsync.ConfigureAwait(false)).Dispose();
@@ -178,8 +176,6 @@ namespace System.Net.Http.Functional.Tests
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
-
-                    return null;
                 });
 
                 (await postAsync.ConfigureAwait(false)).Dispose();
@@ -209,8 +205,6 @@ namespace System.Net.Http.Functional.Tests
                             GC.Collect();
                             return !wr.IsAlive;
                         }, 10 * 1000), "Response object should have been collected");
-
-                        return null;
                     });
                 }
             });

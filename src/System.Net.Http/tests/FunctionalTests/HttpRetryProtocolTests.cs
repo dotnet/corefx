@@ -63,8 +63,6 @@ namespace System.Net.Http.Functional.Tests
 
                     // Client should reconnect.  Accept that connection and send response.
                     await LoopbackServer.ReadRequestAndSendResponseAsync(server, s_simpleResponse);
-
-                    return null;
                 });
             });
         }
@@ -124,11 +122,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(s_simpleContent, contentLine + "\r\n");
 
                         await writer2.WriteAsync(s_simpleResponse);
-
-                        return null;
                     });
-
-                    return null;
                 });
             });
         }

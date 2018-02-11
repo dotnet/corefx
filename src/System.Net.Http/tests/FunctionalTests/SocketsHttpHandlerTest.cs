@@ -315,8 +315,6 @@ namespace System.Net.Http.Functional.Tests
                             serverWriter.WriteLine(goodbyeClient);
                             Assert.Equal(goodbyeClient, clientReader.ReadLine());
                         }
-
-                        return null;
                     });
                 }
             });
@@ -393,8 +391,6 @@ namespace System.Net.Http.Functional.Tests
                             {
                                 await Task.Delay(2000); // give client time to see the closing before next connect
                             }
-
-                            return null;
                         });
                     }
                 });
@@ -430,10 +426,7 @@ namespace System.Net.Http.Functional.Tests
                             while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
                             await serverWriter2.WriteAsync(responseBody);
                             await request2;
-                            return null;
                         });
-
-                        return null;
                     });
                 });
             }
@@ -475,10 +468,7 @@ namespace System.Net.Http.Functional.Tests
                                 while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
                                 await serverWriter2.WriteAsync(LoopbackServer.DefaultHttpResponse);
                                 await request2;
-                                return null;
                             });
-
-                            return null;
                         });
                     });
                 }

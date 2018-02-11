@@ -540,8 +540,6 @@ namespace System.Net.Http.Functional.Tests
 
                     Assert.Contains($"Cookie: A=1", request2Lines);
                     Assert.Equal(1, request2Lines.Count(s => s.StartsWith("Cookie:")));
-
-                    return null;
                 });
             });
         }

@@ -1133,9 +1133,8 @@ namespace System.Net.Http.Functional.Tests
                     Task serverTask =
                         LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                         {
-                            var list = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, partialResponse);
+                            await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, partialResponse);
                             await tcs.Task;
-                            return list;
                         }, null);
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
@@ -1170,7 +1169,6 @@ namespace System.Net.Http.Functional.Tests
                             }
                         }
                         catch { }
-                        return null;
                     }, null);
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
@@ -1274,8 +1272,6 @@ namespace System.Net.Http.Functional.Tests
                                 Assert.True(bytesRead < buffer.Length, "bytesRead should be less than buffer.Length");
                             }
                         }
-
-                        return null;
                     });
                 }
             });
@@ -1305,7 +1301,6 @@ namespace System.Net.Http.Functional.Tests
                         Task server1 = LoopbackServer.AcceptSocketAsync(socket1, async (s, stream, reader, writer) =>
                         {
                             await unblockServers.Task;
-                            return null;
                         });
 
                         // Second server connects and sends some but not all headers
@@ -1314,7 +1309,6 @@ namespace System.Net.Http.Functional.Tests
                             while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
                             await writer.WriteAsync($"HTTP/1.1 200 OK\r\n");
                             await unblockServers.Task;
-                            return null;
                         });
 
                         // Third server connects and sends all headers and some but not all of the body
@@ -1326,7 +1320,6 @@ namespace System.Net.Http.Functional.Tests
                             await unblockServers.Task;
                             await writer.WriteAsync("1234567890");
                             s.Shutdown(SocketShutdown.Send);
-                            return null;
                         });
 
                         // Make three requests
@@ -1659,7 +1652,6 @@ namespace System.Net.Http.Functional.Tests
                 {
                     var buffer = new byte[1000];
                     while (await socket.ReceiveAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), SocketFlags.None) != 0);
-                    return null;
                 });
 
                 using (var client = CreateHttpClient())

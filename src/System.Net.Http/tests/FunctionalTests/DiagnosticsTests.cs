@@ -148,8 +148,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
-                            Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
-                                    (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
+                            Task<List<string>> requestLines = LoopbackServer.ReadRequestAndSendResponseAsync(server);
                             Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 
@@ -358,8 +357,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
-                            Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
+                            Task<List<string>> requestLines = LoopbackServer.ReadRequestAndSendResponseAsync(server);
                             Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 

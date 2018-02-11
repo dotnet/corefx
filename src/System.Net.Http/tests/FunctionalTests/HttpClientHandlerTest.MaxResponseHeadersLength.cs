@@ -90,7 +90,6 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                         cts.Cancel();
                         await serverTask;
-                        return null;
                     });
                 }
             });
@@ -132,8 +131,6 @@ namespace System.Net.Http.Functional.Tests
                             await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                             try { await serverTask; } catch { }
                         }
-                        
-                        return null;
                     });
                 }
             });

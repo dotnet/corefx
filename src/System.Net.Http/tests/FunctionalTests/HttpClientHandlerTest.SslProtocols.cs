@@ -230,7 +230,6 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(stream).SslProtocol);
                             await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
-                            return null;
                         }, options));
                 }, options);
             }
