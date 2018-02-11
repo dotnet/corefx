@@ -22,13 +22,12 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public RuntimeBinder(Type contextType, bool isChecked = false)
         {
-            AggregateDeclaration context;
+            AggregateSymbol context;
             if (contextType != null)
             {
                 lock (s_bindLock)
                 {
-                    AggregateSymbol agg = ((AggregateType)SymbolTable.GetCTypeFromType(contextType)).OwningAggregate;
-                    context = SymFactory.CreateAggregateDecl(agg, null);
+                    context = ((AggregateType)SymbolTable.GetCTypeFromType(contextType)).OwningAggregate;
                 }
             }
             else

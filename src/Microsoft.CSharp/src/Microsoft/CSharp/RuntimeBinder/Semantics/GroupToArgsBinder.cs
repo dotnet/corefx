@@ -120,7 +120,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // iterator will only return propsyms (or methsyms, or whatever)
                 symbmask_t mask = (symbmask_t)(1 << (int)_pGroup.SymKind);
 
-                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsKind == NamedArgumentsKind.NonTrailing ? _pOriginalArguments : null);
+                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup, _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsKind == NamedArgumentsKind.NonTrailing ? _pOriginalArguments : null);
                 while (true)
                 {
                     bool bFoundExpanded;
@@ -1105,7 +1105,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_results.InaccessibleResult)
                 {
                     // We might have called this, but it is inaccessible...
-                    return CSemanticChecker.ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
+                    return CSemanticChecker.ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup, GetTypeQualifier(_pGroup));
                 }
 
                 if (_misnamed)

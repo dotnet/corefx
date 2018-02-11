@@ -177,11 +177,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     aggWhere = aggSym;
                     break;
                 }
-                if (symT is AggregateDeclaration aggDec)
-                {
-                    aggWhere = aggDec.Agg();
-                    break;
-                }
             }
 
             if (aggWhere == null)

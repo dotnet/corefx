@@ -584,7 +584,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // RUNTIME BINDER ONLY CHANGE
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        internal static CType GetBestAccessibleType(AggregateDeclaration context, CType typeSrc)
+        internal static CType GetBestAccessibleType(AggregateSymbol context, CType typeSrc)
         {
             // This method implements the "best accessible type" algorithm for determining the type
             // of untyped arguments in the runtime binder. It is also used in method type inference
@@ -660,7 +660,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetPredefAgg(PredefinedType.PT_VALUE).getThisType();
         }
 
-        private static bool TryVarianceAdjustmentToGetAccessibleType(AggregateDeclaration context, AggregateType typeSrc, out CType typeDst)
+        private static bool TryVarianceAdjustmentToGetAccessibleType(AggregateSymbol context, AggregateType typeSrc, out CType typeDst)
         {
             Debug.Assert(typeSrc != null);
             Debug.Assert(typeSrc.IsInterfaceType || typeSrc.IsDelegateType);
@@ -720,7 +720,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private static bool TryArrayVarianceAdjustmentToGetAccessibleType(AggregateDeclaration context, ArrayType typeSrc, out CType typeDst)
+        private static bool TryArrayVarianceAdjustmentToGetAccessibleType(AggregateSymbol context, ArrayType typeSrc, out CType typeDst)
         {
             Debug.Assert(typeSrc != null);
 

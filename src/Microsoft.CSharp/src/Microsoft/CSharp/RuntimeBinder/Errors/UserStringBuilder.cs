@@ -319,10 +319,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             switch (sym.getKind())
             {
-                case SYMKIND.SK_AggregateDeclaration:
-                    ErrAppendSym(((AggregateDeclaration)sym).Agg(), pctx);
-                    break;
-
                 case SYMKIND.SK_AggregateSymbol:
                     {
                         // Check for a predefined class with a special "nice" name for

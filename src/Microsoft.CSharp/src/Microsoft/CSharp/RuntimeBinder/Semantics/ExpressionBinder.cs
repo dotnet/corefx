@@ -540,13 +540,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     type = pObjectThrough.Type;
                 }
 
-                ACCESSERROR error = CSemanticChecker.CheckAccess2(mwtGet.Meth(), mwtGet.GetType(), ContextForMemberLookup(), type);
+                ACCESSERROR error = CSemanticChecker.CheckAccess2(mwtGet.Meth(), mwtGet.GetType(), ContextForMemberLookup, type);
                 if (error != ACCESSERROR.ACCESSERROR_NOERROR)
                 {
                     // if the get exists, but is not accessible, give an error.
                     if (error == ACCESSERROR.ACCESSERROR_NOACCESSTHRU)
                     {
-                        throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwt, type, ContextForMemberLookup());
+                        throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwt, type, ContextForMemberLookup);
                     }
 
                     throw ErrorHandling.Error(ErrorCode.ERR_InaccessibleGetter, pwt);
@@ -861,10 +861,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void CheckPropertyAccess(MethWithType mwt, PropWithType pwtSlot, CType type)
         {
-            switch (CSemanticChecker.CheckAccess2(mwt.Meth(), mwt.GetType(), ContextForMemberLookup(), type))
+            switch (CSemanticChecker.CheckAccess2(mwt.Meth(), mwt.GetType(), ContextForMemberLookup, type))
             {
                 case ACCESSERROR.ACCESSERROR_NOACCESSTHRU:
-                    throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwtSlot, type, ContextForMemberLookup());
+                    throw ErrorHandling.Error(ErrorCode.ERR_BadProtectedAccess, pwtSlot, type, ContextForMemberLookup);
                 case ACCESSERROR.ACCESSERROR_NOACCESS:
                     throw ErrorHandling.Error(mwt.Meth().isSetAccessor() ? ErrorCode.ERR_InaccessibleSetter : ErrorCode.ERR_InaccessibleGetter, pwtSlot);
             }
@@ -1636,11 +1636,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-        private AggregateDeclaration ContextForMemberLookup()
-        {
-            return Context.ContextForMemberLookup;
-        }
+        private AggregateSymbol ContextForMemberLookup => Context.ContextForMemberLookup;
 
         private static ExprWrap WrapShortLivedExpression(Expr expr) => ExprFactory.CreateWrap(expr);
 

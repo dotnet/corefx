@@ -162,10 +162,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_TypeParameterSymbol:
                     return ((AggregateSymbol)parent).AssociatedAssembly;
 
-                case SYMKIND.SK_AggregateDeclaration:
-                    return ((AggregateDeclaration)this).GetAssembly();
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).AssociatedAssembly;
+
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "GetAssemblyID called on bad sym kind");
@@ -187,8 +186,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_TypeParameterSymbol:
                     return ((AggregateSymbol)parent).InternalsVisibleTo(assembly);
 
-                case SYMKIND.SK_AggregateDeclaration:
-                    return ((AggregateDeclaration)this).Agg().InternalsVisibleTo(assembly);
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).InternalsVisibleTo(assembly);
                 default:

@@ -25,10 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     sym = new AggregateSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_AggregateDeclaration:
-                    sym = new AggregateDeclaration();
-                    sym.name = name;
-                    break;
                 case SYMKIND.SK_TypeParameterSymbol:
                     sym = new TypeParameterSymbol();
                     sym.name = name;
@@ -100,21 +96,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             sym.SetIfacesAll(null);
             sym.SetTypeVars(null);
 
-            return sym;
-        }
-
-        public static AggregateDeclaration CreateAggregateDecl(AggregateSymbol agg, AggregateDeclaration declOuter)
-        {
-            Debug.Assert(agg != null);
-            //Debug.Assert(declOuter == null || declOuter.Bag() == agg.Parent);
-
-            // DECLSYMs are not parented like named symbols.
-            AggregateDeclaration sym = NewBasicSymbol(SYMKIND.SK_AggregateDeclaration, agg.name, null) as AggregateDeclaration;
-
-            declOuter?.AddToChildList(sym);
-            agg.AddDecl(sym);
-
-            Debug.Assert(sym != null);
             return sym;
         }
 

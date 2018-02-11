@@ -13,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public class CMethodIterator
         {
             // Inputs.
-            private readonly AggregateDeclaration _context;
+            private readonly AggregateSymbol _context;
             private readonly TypeArray _containingTypes;
             private readonly CType _qualifyingType;
             private readonly Name _name;
@@ -24,7 +24,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Internal state.
             private int _currentTypeIndex;
 
-            public CMethodIterator(Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
+            public CMethodIterator(Name name, TypeArray containingTypes, CType qualifyingType, AggregateSymbol context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(containingTypes != null);

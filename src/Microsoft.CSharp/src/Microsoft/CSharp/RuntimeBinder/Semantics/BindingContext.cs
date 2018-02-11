@@ -11,7 +11,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal readonly struct BindingContext
     {
-        public BindingContext(AggregateDeclaration context, bool isChecked)
+        public BindingContext(AggregateSymbol context, bool isChecked)
         {
             ContextForMemberLookup = context;
             Checked = isChecked;
@@ -24,7 +24,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Checked = false;
         }
 
-        public AggregateDeclaration ContextForMemberLookup { get; }
+        public AggregateSymbol ContextForMemberLookup { get; }
 
         public bool Checked { get; }
     }
