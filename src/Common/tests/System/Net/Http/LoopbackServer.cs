@@ -16,8 +16,43 @@ using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
-    public class LoopbackServer
+    // TODO: Expose Accept call as member
+
+        // TODO: Url stuff
+
+    public sealed class LoopbackServer : IDisposable
     {
+        private Socket _listenSocket;
+        private Options _options;
+        private Uri _uri;
+
+        // Use CreateServerAsync or similar to create
+        private LoopbackServer(Socket listenSocket, Options options)
+        {
+            _listenSocket = listenSocket;
+            _options = options;
+
+            var localEndPoint = (IPEndPoint)listenSocket.LocalEndPoint;
+            string host = options.Address.AddressFamily == AddressFamily.InterNetworkV6 ?
+                $"[{localEndPoint.Address}]" :
+                localEndPoint.Address.ToString();
+
+            string scheme = options.UseSsl ? "https" : "http";
+            if (options.WebSocketEndpoint)
+            {
+                scheme = options.UseSsl ? "wss" : "ws";
+            }
+
+            _uri = new Uri($"{scheme}://{host}:{localEndPoint.Port}/");
+        }
+
+        public void Dispose()
+        {
+            _listenSocket.Dispose();
+            _listenSocket = null;
+
+        }
+
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
 
         public class Options
@@ -30,7 +65,7 @@ namespace System.Net.Test.Common
             public Func<Stream, Stream> ResponseStreamWrapper { get; set; }
         }
 
-        public static async Task CreateServerAsync(Func<Socket, Uri, Task> funcAsync, Options options = null)
+        public static async Task CreateServerAsync(Func<LoopbackServer, Uri, Task> funcAsync, Options options = null)
         {
             options = options ?? new Options();
 
@@ -39,24 +74,14 @@ namespace System.Net.Test.Common
                 listenSocket.Bind(new IPEndPoint(options.Address, 0));
                 listenSocket.Listen(options.ListenBacklog);
 
-                var localEndPoint = (IPEndPoint)listenSocket.LocalEndPoint;
-                string host = options.Address.AddressFamily == AddressFamily.InterNetworkV6 ? 
-                    $"[{localEndPoint.Address}]" :
-                    localEndPoint.Address.ToString();
-
-                string scheme = options.UseSsl ? "https" : "http";
-                if (options.WebSocketEndpoint)
+                using (var server = new LoopbackServer(listenSocket, options))
                 {
-                    scheme = options.UseSsl ? "wss" : "ws";
+                    await funcAsync(server, server._uri);
                 }
-
-                var url = new Uri($"{scheme}://{host}:{localEndPoint.Port}/");
-
-                await funcAsync(listenSocket, url);
             }
         }
 
-        public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<Socket, Task> serverFunc)
+        public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc)
         {
             return CreateServerAsync(async (server, uri) =>
             {
@@ -77,7 +102,7 @@ namespace System.Net.Test.Common
                 .Where(a => a.IsIPv6LinkLocal)
                 .FirstOrDefault();
 
-        public static async Task<List<string>> ReadRequestAndSendResponseAsync(Socket server, string response = null, Options options = null)
+        public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null, Options options = null)
         {
             List<string> lines = null;
 
@@ -89,6 +114,7 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+        // TODO: REmove s
         public static async Task<List<string>> ReadWriteAcceptedAsync(Socket s, StreamReader reader, StreamWriter writer, string response = null)
         {
             // Read request line and headers. Skip any request body.
@@ -104,10 +130,11 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        public static async Task AcceptSocketAsync(Socket server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync, Options options = null)
+        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync, Options options = null)
         {
+            // TODO: Use options from server here
             options = options ?? new Options();
-            Socket s = await server.AcceptAsync().ConfigureAwait(false);
+            Socket s = await server._listenSocket.AcceptAsync().ConfigureAwait(false);
             s.NoDelay = true;
             try
             {

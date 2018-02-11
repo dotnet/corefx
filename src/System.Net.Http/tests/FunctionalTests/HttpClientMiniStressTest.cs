@@ -88,10 +88,9 @@ namespace System.Net.Http.Functional.Tests
                 {
                     client.Timeout = Timeout.InfiniteTimeSpan;
 
-                    var ep = (IPEndPoint)server.LocalEndPoint;
                     Task<string>[] tasks =
                         (from i in Enumerable.Range(0, numRequests)
-                         select client.GetStringAsync($"http://{ep.Address}:{ep.Port}"))
+                         select client.GetStringAsync(url))
                          .ToArray();
 
                     Assert.All(tasks, t =>
