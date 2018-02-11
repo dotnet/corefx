@@ -115,12 +115,17 @@ namespace System
             {
                 // TODO: Would be good to be able to update local ref here
 
-                // TODO: Possible buffer over/underflow here if custom bogus comparer? What to do?
-                //       This is the reason for "catch (IndexOutOfRangeException) => IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);"
-                // NOTE: Inserted check to ensure no out of bounds
                 // TODO: For primitives and internal comparers the range checks can be eliminated
+
                 while (left < (hi - 1) && comparer.LessThan(Unsafe.Add(ref keys, ++left), pivot)) ;
+                // Check if bad comparable/comparer
+                if (left == (hi - 1) && comparer.LessThan(Unsafe.Add(ref keys, left), pivot))
+                    ThrowHelper.ThrowArgumentException_BadComparer(comparer);
+
                 while (right > lo && comparer.LessThan(pivot, Unsafe.Add(ref keys, --right))) ;
+                // Check if bad comparable/comparer
+                if (right == lo && comparer.LessThan(pivot, Unsafe.Add(ref keys, right)))
+                    ThrowHelper.ThrowArgumentException_BadComparer(comparer);
 
                 if (left >= right)
                     break;

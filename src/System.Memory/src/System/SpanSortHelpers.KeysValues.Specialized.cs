@@ -71,12 +71,15 @@ namespace System
                 Sort(ref specificKeys, ref values, length, new UInt64DirectComparer());
                 return true;
             }
-            else if (typeof(TKey) == typeof(float))
+            // Array.Sort only uses NaNPrepass when both key and value are the same,
+            // to give exactly the same result we have to do the same.
+            // Not only that, the comparisons will then be different since when using normal sort
+            // code the IComparable<> path is different than the specialized.
+            else if (typeof(TKey) == typeof(float) && typeof(TValue) == typeof(float))
             {
                 ref var specificKeys = ref Unsafe.As<TKey, float>(ref keys);
-                // Array.Sort only uses NaNPrepass when both key and value are the same,
-                // to give exactly the same result we have to do the same.
-                if (typeof(TValue) == typeof(float))
+                // Array.Sort only uses NaNPrepass when both key and value are the same
+                //if (typeof(TValue) == typeof(float))
                 {
                     // Comparison to NaN is always false, so do a linear pass 
                     // and swap all NaNs to the front of the array
@@ -90,18 +93,21 @@ namespace System
                         Sort(ref afterNaNsKeys, ref afterNaNsValues, remaining, new SingleDirectComparer());
                     }
                 }
-                else
-                {
-                    Sort(ref specificKeys, ref values, length, new SingleDirectComparer());
-                }
+                //else
+                //{
+                //    Sort(ref specificKeys, ref values, length, new SingleDirectComparer());
+                //}
                 return true;
             }
-            else if (typeof(TKey) == typeof(double))
+            // Array.Sort only uses NaNPrepass when both key and value are the same,
+            // to give exactly the same result we have to do the same.
+            // Not only that, the comparisons will then be different since when using normal sort
+            // code the IComparable<> path is different than the specialized.
+            else if (typeof(TKey) == typeof(double) && typeof(TValue) == typeof(double))
             {
                 ref var specificKeys = ref Unsafe.As<TKey, double>(ref keys);
-                // Array.Sort only uses NaNPrepass when both key and value are the same,
-                // to give exactly the same result we have to do the same.
-                if (typeof(TValue) == typeof(double))
+                // Array.Sort only uses NaNPrepass when both key and value are the same
+                //if (typeof(TValue) == typeof(double))
                 {
                     // Comparison to NaN is always false, so do a linear pass 
                     // and swap all NaNs to the front of the array
@@ -115,10 +121,10 @@ namespace System
                         Sort(ref afterNaNsKeys, ref afterNaNsValues, remaining, new DoubleDirectComparer());
                     }
                 }
-                else
-                {
-                    Sort(ref specificKeys, ref values, length, new DoubleDirectComparer());
-                }
+                //else
+                //{
+                //    Sort(ref specificKeys, ref values, length, new DoubleDirectComparer());
+                //}
                 return true;
             }
             // TODO: Specialize for string if necessary. What about the == null checks?

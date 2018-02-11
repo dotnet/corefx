@@ -28,21 +28,21 @@ namespace System.SpanTests
         static TheoryData<ISortCases> CreateSortCases(int maxLength)
         {
             var cases = new ISortCases[] {
-                new LengthZeroSortCases(),
-                new LengthOneSortCases(),
-                new AllLengthTwoSortCases(),
-                new AllLengthThreeSortCases(),
-                new AllLengthFourSortCases(),
-                new FillerSortCases(maxLength, new ConstantSpanFiller(42) ),
-                new FillerSortCases(maxLength, new DecrementingSpanFiller() ),
-                new FillerSortCases(maxLength, new ModuloDecrementingSpanFiller(25) ),
-                new FillerSortCases(maxLength, new ModuloDecrementingSpanFiller(256) ),
-                new FillerSortCases(maxLength, new IncrementingSpanFiller() ),
-                new FillerSortCases(maxLength, new MedianOfThreeKillerSpanFiller() ),
-                new FillerSortCases(maxLength, new PartialRandomShuffleSpanFiller(new IncrementingSpanFiller(), 0.2, 16281) ),
-                new FillerSortCases(maxLength, new RandomSpanFiller(1873318) ),
-                // TODO: Add with some -1 that can be replaced with null or NaN or something
-            };
+            new LengthZeroSortCases(),
+            new LengthOneSortCases(),
+            new AllLengthTwoSortCases(),
+            new AllLengthThreeSortCases(),
+            new AllLengthFourSortCases(),
+            new FillerSortCases(maxLength, new ConstantSpanFiller(42) ),
+            new FillerSortCases(maxLength, new DecrementingSpanFiller() ),
+            new FillerSortCases(maxLength, new ModuloDecrementingSpanFiller(25) ),
+            new FillerSortCases(maxLength, new ModuloDecrementingSpanFiller(256) ),
+            new FillerSortCases(maxLength, new IncrementingSpanFiller() ),
+            new FillerSortCases(maxLength, new MedianOfThreeKillerSpanFiller() ),
+            new FillerSortCases(maxLength, new PartialRandomShuffleSpanFiller(new IncrementingSpanFiller(), 0.2, 16281) ),
+            new FillerSortCases(maxLength, new RandomSpanFiller(1873318) ),
+            // TODO: Add with some -1 that can be replaced with null or NaN or something
+        };
             var allCases = cases.Concat(cases.Select(c => new PadAndSliceSortCases(c, 2)))
                 .Concat(cases.Select(c => new StepwiseSpecialSortCases(c, 3)));
             var theoryData = new TheoryData<ISortCases>();
@@ -90,8 +90,8 @@ namespace System.SpanTests
         public static void Sort_KeysValues_UInt8_Int32_PatternWithRepeatedKeys_ArraySort_DifferentOutputs()
         {
             var keys = new byte[]{ 237, 236, 235, 234, 233, 232, 231, 230, 229, 228, 227, 226, 225, 224, 223, 222, 221, 220, 219, 218, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 207, 206, 205, 204, 203, 202, 201, 200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140, 139, 138, 137, 136, 135, 134, 133, 132, 131, 130, 129, 128, 127, 126, 125, 124, 123, 122, 121, 120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 101, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
-                , 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 254, 253, 252, 251, 250, 249, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 237, 236, 235, 234, 233, 232, 231, 230, 229, 228, 227, 226, 225, 224, 223, 222, 221, 220, 219, 218, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 207, 206, 205, 204, 203, 202, 201, 200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140, 139, 138, 137, 136, 135, 134, 133, 132, 131, 130, 129, 128, 127, 126, 125, 124, 123, 122, 121, 120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 101, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 5,
-                2, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+            , 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 254, 253, 252, 251, 250, 249, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 237, 236, 235, 234, 233, 232, 231, 230, 229, 228, 227, 226, 225, 224, 223, 222, 221, 220, 219, 218, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 207, 206, 205, 204, 203, 202, 201, 200, 199, 198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184, 183, 182, 181, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140, 139, 138, 137, 136, 135, 134, 133, 132, 131, 130, 129, 128, 127, 126, 125, 124, 123, 122, 121, 120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 101, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 5,
+            2, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
             var values = Enumerable.Range(0, keys.Length).ToArray();
 
             var arraySortKeysNoComparer = (byte[])keys.Clone();
@@ -116,6 +116,9 @@ namespace System.SpanTests
             TestSort(keysSegment, valuesSegment, new StructCustomComparer<byte>());
         }
 
+        // Array message for bogus comparer:
+        // System.ArgumentException : Unable to sort because the IComparer.Compare() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results.IComparer: ''.
+            
         [Fact]
         [Trait(SortTrait, SortTraitValue)]
         public static void Sort_Int32_BogusComparer()
@@ -124,24 +127,33 @@ namespace System.SpanTests
         }
         [Fact]
         [Trait(SortTrait, SortTraitValue)]
+        public static void Sort_Keys_BogusComparable_ConstantPattern()
+        {
+            var s = new ArraySegment<BogusComparable>(Enumerable.Range(0, 17).Select(i => new BogusComparable(42)).ToArray());
+            TestSort(s);
+        }
+
+
+        [Fact]
+        [Trait(SortTrait, SortTraitValue)]
         public static void Sort_KeysValues_Single_Single_NaN()
         {
             TestSort(new ArraySegment<float>(new[] { float.NaN, 0f, 0f, float.NaN }),
-                     new ArraySegment<float>(new[] { 1f, 2f, 3f, 4f }));
+                        new ArraySegment<float>(new[] { 1f, 2f, 3f, 4f }));
         }
         [Fact]
         [Trait(SortTrait, SortTraitValue)]
         public static void Sort_KeysValues_Double_Double_NaN()
         {
             TestSort(new ArraySegment<double>(new[] { double.NaN, 0.0, 0.0, double.NaN }),
-                     new ArraySegment<double>(new[] { 1d, 2d, 3d, 4d }));
+                        new ArraySegment<double>(new[] { 1d, 2d, 3d, 4d }));
         }
         [Fact]
         [Trait(SortTrait, SortTraitValue)]
         public static void Sort_KeysValues_Single_Int32_NaN()
         {
-            TestSort(new ArraySegment<float>(new [] { float.NaN, 0f, 0f, float.NaN }),
-                     new ArraySegment<int>(new[] { 1, 2, 3, 4 }));
+            TestSort(new ArraySegment<float>(new[] { float.NaN, 0f, 0f, float.NaN }),
+                        new ArraySegment<int>(new[] { 1, 2, 3, 4 }));
             // Array.Sort only uses NaNPrePass when both key and value are float
             // Array.Sort outputs: double.NaN, double.NaN, 0, 0, 
             //                              1,          4, 2, 3
@@ -151,7 +163,7 @@ namespace System.SpanTests
         public static void Sort_KeysValues_Double_Int32_NaN()
         {
             TestSort(new ArraySegment<double>(new[] { double.NaN, 0.0, 0.0, double.NaN }),
-                     new ArraySegment<int>(new[] { 1, 2, 3, 4 }));
+                        new ArraySegment<int>(new[] { 1, 2, 3, 4 }));
             // Array.Sort only uses NaNPrePass when both key and value are double
             // Array.Sort outputs: double.NaN, double.NaN, 0, 0, 
             //                              1,          4, 2, 3
@@ -168,7 +180,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int8(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -176,7 +188,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt8(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -184,7 +196,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int16(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -192,7 +204,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt16(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -200,7 +212,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -208,7 +220,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -216,7 +228,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int64(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -224,7 +236,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt64(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -232,7 +244,7 @@ namespace System.SpanTests
         {
             Test_Keys_Single(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -240,7 +252,7 @@ namespace System.SpanTests
         {
             Test_Keys_Double(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -248,7 +260,7 @@ namespace System.SpanTests
         {
             Test_Keys_Boolean(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -256,7 +268,7 @@ namespace System.SpanTests
         {
             Test_Keys_Char(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -264,7 +276,7 @@ namespace System.SpanTests
         {
             Test_Keys_String(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -272,7 +284,7 @@ namespace System.SpanTests
         {
             Test_Keys_ComparableStructInt32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -431,7 +443,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int8_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -439,7 +451,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt8_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -447,7 +459,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int16_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -455,7 +467,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt16_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -463,7 +475,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int32_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -471,7 +483,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt32_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -479,7 +491,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int64_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -487,7 +499,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt64_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -495,7 +507,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Single_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -503,7 +515,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Double_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -511,7 +523,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Boolean_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -519,7 +531,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Char_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -527,7 +539,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_String_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -535,7 +547,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_ComparableStructInt32_Int32(sortCases);
         }
-        
+
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -731,31 +743,31 @@ namespace System.SpanTests
             }
         }
 
-        static void Test_Keys_Int8(ISortCases sortCases) => 
+        static void Test_Keys_Int8(ISortCases sortCases) =>
             Test(sortCases, i => (sbyte)i, sbyte.MinValue);
-        static void Test_Keys_UInt8(ISortCases sortCases) => 
+        static void Test_Keys_UInt8(ISortCases sortCases) =>
             Test(sortCases, i => (byte)i, byte.MaxValue);
-        static void Test_Keys_Int16(ISortCases sortCases) => 
+        static void Test_Keys_Int16(ISortCases sortCases) =>
             Test(sortCases, i => (short)i, short.MinValue);
-        static void Test_Keys_UInt16(ISortCases sortCases) => 
+        static void Test_Keys_UInt16(ISortCases sortCases) =>
             Test(sortCases, i => (ushort)i, ushort.MaxValue);
-        static void Test_Keys_Int32(ISortCases sortCases) => 
+        static void Test_Keys_Int32(ISortCases sortCases) =>
             Test(sortCases, i => (int)i, int.MinValue);
-        static void Test_Keys_UInt32(ISortCases sortCases) => 
+        static void Test_Keys_UInt32(ISortCases sortCases) =>
             Test(sortCases, i => (uint)i, uint.MaxValue);
-        static void Test_Keys_Int64(ISortCases sortCases) => 
+        static void Test_Keys_Int64(ISortCases sortCases) =>
             Test(sortCases, i => (long)i, long.MinValue);
-        static void Test_Keys_UInt64(ISortCases sortCases) => 
+        static void Test_Keys_UInt64(ISortCases sortCases) =>
             Test(sortCases, i => (ulong)i, ulong.MaxValue);
-        static void Test_Keys_Single(ISortCases sortCases) => 
+        static void Test_Keys_Single(ISortCases sortCases) =>
             Test(sortCases, i => (float)i, float.NaN);
-        static void Test_Keys_Double(ISortCases sortCases) => 
+        static void Test_Keys_Double(ISortCases sortCases) =>
             Test(sortCases, i => (double)i, double.NaN);
-        static void Test_Keys_Boolean(ISortCases sortCases) => 
+        static void Test_Keys_Boolean(ISortCases sortCases) =>
             Test(sortCases, i => i % 2 == 0, false);
-        static void Test_Keys_Char(ISortCases sortCases) => 
+        static void Test_Keys_Char(ISortCases sortCases) =>
             Test(sortCases, i => (char)i, char.MaxValue);
-        static void Test_Keys_String(ISortCases sortCases) => 
+        static void Test_Keys_String(ISortCases sortCases) =>
             Test(sortCases, i => i.ToString("D9"), null);
         static void Test_Keys_ComparableStructInt32(ISortCases sortCases) =>
             Test(sortCases, i => new ComparableStructInt32(i), new ComparableStructInt32(int.MinValue));
@@ -791,14 +803,21 @@ namespace System.SpanTests
         {
             var expected = new ArraySegment<TKey>((TKey[])keysToSort.Array.Clone(),
                 keysToSort.Offset, keysToSort.Count);
-            Array.Sort(expected.Array, expected.Offset, expected.Count);
 
-            Span<TKey> keysSpan = keysToSort;
-            keysSpan.Sort();
+            var expectedException = RunAndCatchException(() =>
+                Array.Sort(expected.Array, expected.Offset, expected.Count));
 
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                keysSpan.Sort();
+            });
+
+            AssertExceptionEquals(expectedException, actualException);
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expected.Array, keysToSort.Array);
         }
+
         static void TestSort<TKey, TComparer>(
             ArraySegment<TKey> keysToSort,
             TComparer comparer)
@@ -806,10 +825,17 @@ namespace System.SpanTests
         {
             var expected = new ArraySegment<TKey>((TKey[])keysToSort.Array.Clone(),
                 keysToSort.Offset, keysToSort.Count);
-            Array.Sort(expected.Array, expected.Offset, expected.Count, comparer);
 
-            Span<TKey> keysSpan = keysToSort;
-            keysSpan.Sort(comparer);
+            var expectedException = RunAndCatchException(() =>
+                Array.Sort(expected.Array, expected.Offset, expected.Count, comparer));
+
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                keysSpan.Sort(comparer);
+            });
+
+            AssertExceptionEquals(expectedException, actualException);
 
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expected.Array, keysToSort.Array);
@@ -821,19 +847,26 @@ namespace System.SpanTests
             var expected = new ArraySegment<TKey>((TKey[])keysToSort.Array.Clone(),
                 keysToSort.Offset, keysToSort.Count);
             // Array.Sort doesn't have a comparison version for segments
+            Exception expectedException = null;
             if (expected.Offset == 0 && expected.Count == expected.Array.Length)
             {
-                Array.Sort(expected.Array, comparison);
+                expectedException = RunAndCatchException(() =>
+                    Array.Sort(expected.Array, comparison));
             }
             else
             {
-                Array.Sort(expected.Array, expected.Offset, expected.Count, 
-                    new ComparisonComparer<TKey>(comparison));
+                expectedException = RunAndCatchException(() =>
+                    Array.Sort(expected.Array, expected.Offset, expected.Count,
+                    new ComparisonComparer<TKey>(comparison)));
             }
 
-            Span<TKey> keysSpan = keysToSort;
-            keysSpan.Sort(comparison);
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                keysSpan.Sort(comparison);
+            });
 
+            AssertExceptionEquals(expectedException, actualException);
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expected.Array, keysToSort.Array);
         }
@@ -871,7 +904,7 @@ namespace System.SpanTests
         static void Test_KeysValues_BogusComparable_Int32(ISortCases sortCases) =>
             Test(sortCases, i => new BogusComparable(i), null, i => i);
 
-        static void Test<TKey, TValue>(ISortCases sortCase, 
+        static void Test<TKey, TValue>(ISortCases sortCase,
             Func<int, TKey> toKey, TKey specialKey, Func<int, TValue> toValue)
             where TKey : IComparable<TKey>
         {
@@ -908,12 +941,18 @@ namespace System.SpanTests
                 valuesToSort.Offset, valuesToSort.Count);
             Assert.Equal(expectedKeys.Offset, expectedValues.Offset);
             Assert.Equal(expectedKeys.Count, expectedValues.Count);
-            Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count);
 
-            Span<TKey> keysSpan = keysToSort;
-            Span<TValue> valuesSpan = valuesToSort;
-            keysSpan.Sort(valuesSpan);
+            var expectedException = RunAndCatchException(() =>
+                Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count));
 
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                Span<TValue> valuesSpan = valuesToSort;
+                keysSpan.Sort(valuesSpan);
+            });
+
+            AssertExceptionEquals(expectedException, actualException);
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expectedKeys.Array, keysToSort.Array);
             Assert.Equal(expectedValues.Array, valuesToSort.Array);
@@ -927,12 +966,18 @@ namespace System.SpanTests
                 keysToSort.Offset, keysToSort.Count);
             var expectedValues = new ArraySegment<TValue>((TValue[])valuesToSort.Array.Clone(),
                 valuesToSort.Offset, valuesToSort.Count);
-            Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count, comparer);
 
-            Span<TKey> keysSpan = keysToSort;
-            Span<TValue> valuesSpan = valuesToSort;
-            keysSpan.Sort(valuesSpan, comparer);
+            var expectedException = RunAndCatchException(() =>
+                Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count, comparer));
 
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                Span<TValue> valuesSpan = valuesToSort;
+                keysSpan.Sort(valuesSpan, comparer);
+            });
+
+            AssertExceptionEquals(expectedException, actualException);
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expectedKeys.Array, keysToSort.Array);
             Assert.Equal(expectedValues.Array, valuesToSort.Array);
@@ -946,13 +991,17 @@ namespace System.SpanTests
             var expectedValues = new ArraySegment<TValue>((TValue[])valuesToSort.Array.Clone(),
                 valuesToSort.Offset, valuesToSort.Count);
             // Array.Sort doesn't have a comparison version for segments
-            Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count,
-                new ComparisonComparer<TKey>(comparison));
+            var expectedException = RunAndCatchException(() =>
+                Array.Sort(expectedKeys.Array, expectedValues.Array, expectedKeys.Offset, expectedKeys.Count, new ComparisonComparer<TKey>(comparison)));
 
-            Span<TKey> keysSpan = keysToSort;
-            Span<TValue> valuesSpan = valuesToSort;
-            keysSpan.Sort(valuesSpan, comparison);
+            var actualException = RunAndCatchException(() =>
+            {
+                Span<TKey> keysSpan = keysToSort;
+                Span<TValue> valuesSpan = valuesToSort;
+                keysSpan.Sort(valuesSpan, comparison);
+            });
 
+            AssertExceptionEquals(expectedException, actualException);
             // We assert the full arrays are as expected, to check for possible under/overflow
             Assert.Equal(expectedKeys.Array, keysToSort.Array);
             Assert.Equal(expectedValues.Array, valuesToSort.Array);
@@ -1097,7 +1146,7 @@ namespace System.SpanTests
             }
 
             public override string ToString()
-                => GetType().Name.Replace(nameof(ISortCases).Remove(0, 1), string.Empty) + 
+                => GetType().Name.Replace(nameof(ISortCases).Remove(0, 1), string.Empty) +
                 $":{_slicePadding} " + _sortCases.ToString();
         }
         public class StepwiseSpecialSortCases : ISortCases
@@ -1437,6 +1486,36 @@ namespace System.SpanTests
                 {
                     span[i] = toValue(random.Next());
                 }
+            }
+        }
+
+        static Exception RunAndCatchException(Action sort)
+        {
+            try
+            {
+                sort();
+            }
+            catch (Exception e)
+            {
+                return e;
+            }
+            return null;
+        }
+
+        static void AssertExceptionEquals(Exception expectedException, Exception actualException)
+        {
+            if (expectedException != null)
+            {
+                Assert.IsType(expectedException.GetType(), actualException);
+                if (expectedException.Message != actualException.Message)
+                {
+                    Assert.StartsWith("Unable to sort because the IComparable.CompareTo() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparable: '", actualException.Message);
+                    Assert.EndsWith("'.", actualException.Message);
+                }
+            }
+            else
+            {
+                Assert.Null(actualException);
             }
         }
     }

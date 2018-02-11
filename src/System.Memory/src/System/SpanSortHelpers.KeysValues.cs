@@ -190,6 +190,8 @@ namespace System
                 {
                     if (!S.TrySortSpecialized(ref keys, ref values, length))
                     {
+                        // NOTE: For Bogus Comparable the exception message will be different, when using Comparer<TKey>.Default
+                        //       Since the exception message is thrown internally without knowledge of the comparer
                         S.Sort(ref keys, ref values, length);
                     }
                 }
