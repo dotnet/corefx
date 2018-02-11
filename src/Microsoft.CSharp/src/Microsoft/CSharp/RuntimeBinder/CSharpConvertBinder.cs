@@ -49,10 +49,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private CSharpConversionKind ConversionKind { get; }
 
-        public bool IsChecked { get; }
-
-        public Type CallingContext { get; }
-
         private readonly RuntimeBinder _binder;
 
         /// <summary>
@@ -70,8 +66,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             base(type, conversionKind == CSharpConversionKind.ExplicitConversion)
         {
             ConversionKind = conversionKind;
-            IsChecked = isChecked;
-            CallingContext = callingContext;
             _binder = new RuntimeBinder(callingContext, isChecked);
         }
 

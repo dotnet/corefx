@@ -29,10 +29,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         internal bool IsCompoundAssignment { get; }
 
-        public bool IsChecked { get; }
-
-        public Type CallingContext { get; }
-
         private readonly CSharpArgumentInfo[] _argumentInfo;
 
         CSharpArgumentInfo ICSharpBinder.GetArgumentInfo(int index) => _argumentInfo[index];
@@ -56,8 +52,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             base(BinderHelper.CreateCallInfo(ref argumentInfo, 2)) // discard 2 arguments: the target object and the value
         {
             IsCompoundAssignment = isCompoundAssignment;
-            IsChecked = isChecked;
-            CallingContext = callingContext;
             _argumentInfo = argumentInfo as CSharpArgumentInfo[];
             _binder = new RuntimeBinder(callingContext, isChecked);
         }

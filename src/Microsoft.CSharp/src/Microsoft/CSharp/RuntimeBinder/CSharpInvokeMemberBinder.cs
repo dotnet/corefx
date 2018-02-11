@@ -32,8 +32,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public Type CallingContext { get; }
 
-        public bool IsChecked => false;
-
         public Type[] TypeArguments { get; }
 
         private readonly CSharpArgumentInfo[] _argumentInfo;

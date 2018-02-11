@@ -39,10 +39,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public bool IsBinderThatCanHaveRefReceiver => false;
 
-        public bool IsChecked { get; }
-
-        public Type CallingContext { get; }
-
         private readonly CSharpArgumentInfo[] _argumentInfo;
 
         CSharpArgumentInfo ICSharpBinder.GetArgumentInfo(int index) => _argumentInfo[index];
@@ -63,8 +59,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             IEnumerable<CSharpArgumentInfo> argumentInfo) :
             base(operation)
         {
-            IsChecked = isChecked;
-            CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToArray(argumentInfo);
             Debug.Assert(_argumentInfo.Length == 1);
             _binder = new RuntimeBinder(callingContext, isChecked);

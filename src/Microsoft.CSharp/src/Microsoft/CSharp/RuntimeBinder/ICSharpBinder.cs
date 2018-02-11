@@ -10,8 +10,6 @@ namespace Microsoft.CSharp.RuntimeBinder
     internal interface ICSharpBinder
     {
         CSharpArgumentInfo GetArgumentInfo(int index);
-        Type CallingContext { get; }
-        bool IsChecked { get; }
 
         // This is true for any binder that is eligible to take value type receiver
         // objects as a ref (for mutable operations). Such as calls ("v.M(d)"),
@@ -22,7 +20,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         void PopulateSymbolTableWithName(Type callingType, ArgumentObject[] arguments);
 
         Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals);
+
         BindingFlag BindingFlags { get; }
+
         string Name { get; }
 
         Type ReturnType { get; }

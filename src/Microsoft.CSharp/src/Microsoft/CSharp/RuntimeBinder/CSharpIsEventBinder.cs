@@ -27,10 +27,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public string Name { get; }
 
-        public Type CallingContext { get; }
-
-        public bool IsChecked => false;
-
         private readonly RuntimeBinder _binder;
 
         /// <summary>
@@ -43,7 +39,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type callingContext)
         {
             Name = name;
-            CallingContext = callingContext;
             _binder = new RuntimeBinder(callingContext);
         }
 
