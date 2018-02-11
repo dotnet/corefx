@@ -787,7 +787,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Record the appropriate binary operator full signature from the given BinOpArgInfo. This assumes
             that any NullableType valued args should be lifted.
         */
-        private void RecordBinOpSigFromArgs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
+        private static void RecordBinOpSigFromArgs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
         {
             LiftFlags grflt = LiftFlags.None;
             CType typeSig1;
@@ -800,7 +800,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeSig1 = TypeManager.GetNullable(info.typeRaw1);
             }
             else
+            {
                 typeSig1 = info.typeRaw1;
+            }
 
             if (info.type2 != info.typeRaw2)
             {
@@ -809,7 +811,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 typeSig2 = TypeManager.GetNullable(info.typeRaw2);
             }
             else
+            {
                 typeSig2 = info.typeRaw2;
+            }
 
             prgbofs.Add(new BinOpFullSig(typeSig1, typeSig2, BindEnumBinOp, OpSigFlags.Value, grflt, BinOpFuncKind.EnumBinOp));
         }
@@ -839,6 +843,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return false;
                 }
+
                 RecordBinOpSigFromArgs(prgbofs, info);
                 return true;
             }
