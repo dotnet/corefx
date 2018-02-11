@@ -21,6 +21,8 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
+            private const string RequiredOpenSSLBackendName = "OpenSSL/1.0";
+
             private static readonly Interop.Http.SslCtxCallback s_sslCtxCallback = SslCtxCallback;
             private static readonly Interop.Ssl.AppVerifyCallback s_sslVerifyCallback = VerifyCertChain;
             private static readonly Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1");
@@ -127,12 +129,12 @@ namespace System.Net.Http
             {
                 if (certProvider != null)
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_clientcerts_notsupported, CurlVersionDescription, CurlSslVersionDescription));
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_clientcerts_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, RequiredOpenSSLBackendName));
                 }
 
                 if (easy._handler.CheckCertificateRevocationList)
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported, CurlVersionDescription, CurlSslVersionDescription));
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, RequiredOpenSSLBackendName));
                 }
 
                 if (easy._handler.ServerCertificateCustomValidationCallback != null)
@@ -145,7 +147,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_callback_notsupported, CurlVersionDescription, CurlSslVersionDescription));
+                        throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_callback_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, RequiredOpenSSLBackendName));
                     }
                 }
                 else
