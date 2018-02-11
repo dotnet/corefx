@@ -16,43 +16,31 @@ namespace Microsoft.CSharp.RuntimeBinder
 {
     internal sealed class RuntimeBinder
     {
-        #region Singleton Implementation
+        private static readonly object s_bindLock = new object();
 
-        private static readonly Lazy<RuntimeBinder> s_lazyInstance = new Lazy<RuntimeBinder>(() => new RuntimeBinder());
+        private readonly BindingContext _bindingContext;
+        private readonly ExpressionBinder _binder;
 
-        public static RuntimeBinder GetInstance()
+        public RuntimeBinder(Type contextType, bool isChecked = false)
         {
-            return s_lazyInstance.Value;
+            AggregateDeclaration context;
+            if (contextType != null)
+            {
+                lock (s_bindLock)
+                {
+                    AggregateSymbol agg = ((AggregateType)SymbolTable.GetCTypeFromType(contextType)).OwningAggregate;
+                    context = SymFactory.CreateAggregateDecl(agg, null);
+                }
+            }
+            else
+            {
+                context = null;
+            }
+
+            BindingContext bindingContext = new BindingContext(context, isChecked);
+            _bindingContext = bindingContext;
+            _binder = new ExpressionBinder(bindingContext);
         }
-
-        #endregion
-
-        /////////////////////////////////////////////////////////////////////////////////
-        // Members
-
-        private BindingContext _bindingContext;
-        private ExpressionBinder _binder;
-
-        private readonly object _bindLock = new object();
-
-        /////////////////////////////////////////////////////////////////////////////////
-        // Methods
-
-        #region BookKeeping
-        private RuntimeBinder()
-        {
-            Reset();
-        }
-
-        private void Reset()
-        {
-            _bindingContext = new BindingContext();
-            _binder = new ExpressionBinder(_bindingContext);
-        }
-
-        #endregion
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         public Expression Bind(ICSharpBinder payload, Expression[] parameters, DynamicMetaObject[] args, out DynamicMetaObject deferredBinding)
         {
@@ -73,7 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // ...subsequent calls that were cache hits, i.e., already bound, took less
             // than 1/1000 sec for the whole 4000 of them.
 
-            lock (_bindLock)
+            lock (s_bindLock)
             {
                 return BindCore(payload, parameters, args, out deferredBinding);
             }
@@ -87,7 +75,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Debug.Assert(args.Length >= 1);
 
-            InitializeCallingContext(payload);
             ArgumentObject[] arguments = CreateArgumentArray(payload, parameters, args);
 
             // On any given bind call, we populate the symbol table with any new
@@ -189,29 +176,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             deferredBinding = null;
             return false;
         }
-
-        private void InitializeCallingContext(ICSharpBinder payload)
-        {
-            // Set the context if the payload specifies it. Currently we only use this for calls.
-            Type t = payload.CallingContext;
-            BindingContext bindingContext = _bindingContext;
-
-            if (t != null)
-            {
-                AggregateSymbol agg = ((AggregateType)SymbolTable.GetCTypeFromType(t)).OwningAggregate;
-                bindingContext.ContextForMemberLookup = SymFactory.CreateAggregateDecl(agg, null);
-            }
-            else
-            {
-                // The binding context lives across invocations! If we don't reset this, then later calls might
-                // bind in a previous call's context.
-                bindingContext.ContextForMemberLookup = null;
-            }
-
-            bindingContext.Checked = payload.IsChecked;
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static Expression CreateExpressionTreeFromResult(Expression[] parameters, Scope pScope, Expr pResult)
         {

@@ -60,7 +60,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ResultIndexed = resultIndexed;
             CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToArray(argumentInfo);
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext);
         }
 
         /// <summary>

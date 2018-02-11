@@ -454,7 +454,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (Context.Checked)
                 {
                     // check if we failed because we are in checked mode...
-                    if (!canExplicitConversionBeBoundInUncheckedContext(expr, expr.Type, dest, flags | CONVERTTYPE.NOUDC))
+                    if (!CanExplicitConversionBeBoundInUncheckedContext(expr, expr.Type, dest, flags | CONVERTTYPE.NOUDC))
                     {
                         throw CantConvert(expr, dest);
                     }
@@ -506,11 +506,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Expr mustCast(Expr expr, CType dest, CONVERTTYPE flags) => mustCastCore(expr, dest, flags);
 
-        private Expr mustCastInUncheckedContext(Expr expr, CType dest, CONVERTTYPE flags)
-        {
-            BindingContext ctx = new BindingContext(Context);
-            return (new ExpressionBinder(ctx)).mustCast(expr, dest, flags);
-        }
+        private Expr MustCastInUncheckedContext(Expr expr, CType dest, CONVERTTYPE flags) =>
+            new ExpressionBinder(new BindingContext(Context)).mustCast(expr, dest, flags);
 
         // returns true if an explicit conversion exists from source type to dest type. flags is an optional parameter.
         private bool canCast(CType src, CType dest, CONVERTTYPE flags) => BindExplicitConversion(null, src, dest, flags);
@@ -1447,14 +1444,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Create the cast that was the original tree for this thing.
                 return exprConst;
             }
+
             return null;
         }
 
-        private bool canExplicitConversionBeBoundInUncheckedContext(Expr exprSrc, CType typeSrc, CType typeDest, CONVERTTYPE flags)
+        private bool CanExplicitConversionBeBoundInUncheckedContext(Expr exprSrc, CType typeSrc, CType typeDest, CONVERTTYPE flags)
         {
-            BindingContext ctx = new BindingContext(Context);
             Debug.Assert(typeDest != null);
-            return (new ExpressionBinder(ctx)).BindExplicitConversion(exprSrc, typeSrc, typeDest, flags);
+            return new ExpressionBinder(new BindingContext(Context)).BindExplicitConversion(exprSrc, typeSrc, typeDest, flags);
         }
     }
 

@@ -59,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             IsChecked = isChecked;
             CallingContext = callingContext;
             _argumentInfo = argumentInfo as CSharpArgumentInfo[];
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext, isChecked);
         }
 
         /// <summary>

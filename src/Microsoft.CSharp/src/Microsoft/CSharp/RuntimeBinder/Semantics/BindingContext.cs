@@ -11,8 +11,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class BindingContext
     {
-        public BindingContext()
+        public BindingContext(AggregateDeclaration context, bool isChecked)
         {
+            ContextForMemberLookup = context;
+            Checked = isChecked;
         }
 
         public BindingContext(BindingContext parent)
@@ -21,8 +23,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ContextForMemberLookup = parent.ContextForMemberLookup;
         }
 
-        public AggregateDeclaration ContextForMemberLookup { get; set; }
+        public AggregateDeclaration ContextForMemberLookup { get; }
 
-        public bool Checked { get; set; }
+        public bool Checked { get; }
     }
 }

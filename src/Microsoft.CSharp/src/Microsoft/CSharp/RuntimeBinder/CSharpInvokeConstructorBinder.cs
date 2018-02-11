@@ -49,7 +49,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Flags = flags;
             CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToArray(argumentInfo);
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext);
         }
 
         public override DynamicMetaObject Bind(DynamicMetaObject target, DynamicMetaObject[] args)

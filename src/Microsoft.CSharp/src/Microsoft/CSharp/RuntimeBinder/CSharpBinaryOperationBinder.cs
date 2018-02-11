@@ -80,7 +80,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CallingContext = callingContext;
             _argumentInfo = BinderHelper.ToArray(argumentInfo);
             Debug.Assert(_argumentInfo.Length == 2);
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext, isChecked);
         }
 
         /// <summary>

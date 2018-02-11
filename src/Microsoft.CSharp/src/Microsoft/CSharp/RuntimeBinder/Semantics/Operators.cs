@@ -2122,7 +2122,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             arg = binder.mustCast(arg, typeOp, CONVERTTYPE.NOUDC);
 
             Expr exprRes = binder.BindIntOp(ek, flags, arg, null, ptOp);
-            return binder.mustCastInUncheckedContext(exprRes, typeEnum, CONVERTTYPE.NOUDC);
+            return binder.MustCastInUncheckedContext(exprRes, typeEnum, CONVERTTYPE.NOUDC);
         }
 
         /*

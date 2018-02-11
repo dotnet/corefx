@@ -71,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             CallingContext = callingContext;
             TypeArguments = BinderHelper.ToArray(typeArguments);
             _argumentInfo = BinderHelper.ToArray(argumentInfo);
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext);
         }
 
         /// <summary>

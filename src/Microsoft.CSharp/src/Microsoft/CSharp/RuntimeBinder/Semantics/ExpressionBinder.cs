@@ -263,8 +263,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private delegate Expr PfnBindBinOp(ExpressionBinder binder, ExpressionKind ek, EXPRFLAG flags, Expr op1, Expr op2);
         private delegate Expr PfnBindUnaOp(ExpressionBinder binder, ExpressionKind ek, EXPRFLAG flags, Expr op);
 
-        private BindingContext Context;
-        public BindingContext GetContext() { return Context; }
+        public BindingContext Context { get; }
 
         public ExpressionBinder(BindingContext context)
         {

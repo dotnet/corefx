@@ -72,7 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ConversionKind = conversionKind;
             IsChecked = isChecked;
             CallingContext = callingContext;
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext, isChecked);
         }
 
         /// <summary>

@@ -44,7 +44,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Name = name;
             CallingContext = callingContext;
-            _binder = RuntimeBinder.GetInstance();
+            _binder = new RuntimeBinder(callingContext);
         }
 
         /// <summary>
