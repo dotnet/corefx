@@ -17,7 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Allocate a type array; used to represent a parameter list.
-        // We use a hash table to make sure that allocating the same type array twice 
+        // We use a hash table to make sure that allocating the same type array twice
         // returns the same value. This does two things:
         //
         // 1) Save a lot of memory.
@@ -73,13 +73,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                return obj is TypeArrayKey && Equals((TypeArrayKey)obj);
+                return obj is TypeArrayKey key && Equals(key);
             }
 
-            public override int GetHashCode()
-            {
-                return _hashCode;
-            }
+            public override int GetHashCode() => _hashCode;
         }
 
         private static readonly Dictionary<TypeArrayKey, TypeArray> s_tableTypeArrays =
@@ -87,7 +84,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static readonly TypeArray Empty = new TypeArray(Array.Empty<CType>());
 
-        public TypeArray(CType[] types)
+        private TypeArray(CType[] types)
         {
             Debug.Assert(types != null);
             Items = types;
@@ -112,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (ctype == 0)
             {
-                return TypeArray.Empty;
+                return Empty;
             }
 
             if (ctype == array.Count)
