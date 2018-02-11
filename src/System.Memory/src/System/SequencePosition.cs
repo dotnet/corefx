@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Numerics.Hashing;
 using System.ComponentModel;
 
@@ -56,6 +57,9 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashHelpers.Combine(_object?.GetHashCode() ?? 0, _integer);
+        public override int GetHashCode() => HashCode.Combine(Segment, Index);
+
+        /// <inheritdoc />
+        public override string ToString() => this == default ? "(default)" : Segment == null ? Index.ToString(): $"{Segment}[{Index}]";
     }
 }

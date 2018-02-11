@@ -966,12 +966,15 @@ namespace System.Numerics
             AssertValid();
 
             if (_bits == null)
+            {
+                // Diffuse bits for collections that depend on this.
                 return HashCode.Combine(_sign);
+            }
             
             var hashCode = new HashCode();
             hashCode.Add(_sign);
             for (int iv = _bits.Length; --iv >= 0;)
-                hashCode.Add(unchecked((int)_bits[iv]));
+                hashCode.Add(_bits[iv]);
             return hashCode.ToHashCode();
         }
 

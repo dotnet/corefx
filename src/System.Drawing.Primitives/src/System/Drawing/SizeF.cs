@@ -196,10 +196,7 @@ namespace System.Drawing
 
         public bool Equals(SizeF other) => this == other;
 
-        public override int GetHashCode() => HashCode.Combine(
-            Width,
-            Height
-        );
+        public override int GetHashCode() => HashCode.Combine(Width, Height);
 
         public PointF ToPointF() => (PointF)this;
 

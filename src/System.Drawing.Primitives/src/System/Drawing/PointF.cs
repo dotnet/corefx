@@ -145,10 +145,7 @@ namespace System.Drawing
 
         public bool Equals(PointF other) => this == other;
 
-        public override int GetHashCode() => HashCode.Combine(
-            X,
-            Y
-        );
+        public override int GetHashCode() => HashCode.Combine(X, Y);
 
         public override string ToString() => "{X=" + x.ToString() + ", Y=" + y.ToString() + "}";
     }

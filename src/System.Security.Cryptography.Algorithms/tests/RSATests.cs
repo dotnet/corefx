@@ -200,19 +200,22 @@ namespace System.Security.Cryptography.Algorithms.Tests
             var ctorTypes = new Type[] { typeof(RSAEncryptionPaddingMode), typeof(HashAlgorithmName) };
             ConstructorInfo paddingCtor = paddingType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, ctorTypes, null);
 
-            var padding0 = (RSAEncryptionPadding)paddingCtor.Invoke(new object[] { RSAEncryptionPaddingMode.Pkcs1, HashAlgorithmName.SHA1 });
-            var padding1 = (RSAEncryptionPadding)paddingCtor.Invoke(new object[] { RSAEncryptionPaddingMode.Pkcs1, HashAlgorithmName.SHA1 });
-            var padding2 = (RSAEncryptionPadding)paddingCtor.Invoke(new object[] { RSAEncryptionPaddingMode.Pkcs1, HashAlgorithmName.SHA512 });
-            var padding3 = (RSAEncryptionPadding)paddingCtor.Invoke(new object[] { RSAEncryptionPaddingMode.Oaep, HashAlgorithmName.SHA1 });
+            var padding0 = RSAEncryptionPadding.Pkcs1;
+            var padding1 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.MD5);
+            var padding2 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.SHA1);
+            var padding3 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.SHA1);
 
-            Assert.Equal(padding0, padding1);
-            Assert.Equal(padding0.GetHashCode(), padding1.GetHashCode());
+            Assert.Equal(padding0.GetHashCode(), padding0.GetHashCode());
+            Assert.Equal(padding2.GetHashCode(), padding3.GetHashCode());
+
+            // Don't check for NotEqual(HashCode) as this could randomly fail depending
+            // on the randomly selected seed for HashCode.
             
+            Assert.Equal(padding0, padding0);
+            Assert.Equal(padding2, padding3);
+            Assert.NotEqual(padding0, padding1);
+            Assert.NotEqual(padding1, padding2);
             Assert.NotEqual(padding0, padding2);
-            Assert.NotEqual(padding0.GetHashCode(), padding2.GetHashCode());
-            
-            Assert.NotEqual(padding0, padding3);
-            Assert.NotEqual(padding0.GetHashCode(), padding3.GetHashCode());
         }
 
         private sealed class EmptyRSA : RSA

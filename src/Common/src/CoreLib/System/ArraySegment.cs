@@ -100,14 +100,7 @@ namespace System
                 return 0;
             }
 
-            int hash = 5381;
-            hash = System.Numerics.Hashing.HashHelpers.Combine(hash, _offset);
-            hash = System.Numerics.Hashing.HashHelpers.Combine(hash, _count);
-
-            // The array hash is expected to be an evenly-distributed mixture of bits,
-            // so rather than adding the cost of another rotation we just xor it.
-            hash ^= _array.GetHashCode();
-            return hash;
+            return HashCode.Combine(_offset, _count, _array);
         }
 
         public void CopyTo(T[] destination) => CopyTo(destination, 0);

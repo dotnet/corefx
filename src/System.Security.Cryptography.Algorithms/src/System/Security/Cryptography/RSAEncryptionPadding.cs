@@ -82,10 +82,7 @@ namespace System.Security.Cryptography
             get { return _oaepHashAlgorithm; }
         }
 
-        public override int GetHashCode() => HashCode.Combine(
-            _mode,
-            _oaepHashAlgorithm
-        );
+        public override int GetHashCode() => HashCode.Combine(_mode, _oaepHashAlgorithm);
 
         public override bool Equals(object obj)
         {

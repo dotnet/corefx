@@ -245,12 +245,7 @@ namespace System.Drawing
         /// <summary>
         ///    Gets the hash code for this <see cref='System.Drawing.RectangleF'/>.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(
-            X,
-            Y,
-            Width,
-            Height
-        );
+        public override int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
 
         /// <summary>
         ///    <para>

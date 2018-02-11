@@ -5,6 +5,9 @@
     /*    This file includes static data used as compilation configuration for the rest of the code generation. 
         It is shared here to ensure that all generated code compiles with the same constants and configurations.    */
 
+    // The maximum number of fields that HashCode.Combine supports.
+    public const int MaximumCombineFields = 8;
+
     // The set of supported numeric types to compile
     public static Type[] supportedTypes = new[] 
     { 
@@ -144,6 +147,34 @@
     {
         string keyword = (type == allTypes.ToArray()[0]) ? "if" : "else if";
         return string.Format("{0} (typeof(T) == typeof({1}))", keyword, type.Name);
+    }
+
+    public string GenerateAcceleratedFastCombine(Type type, int numFields)
+    {
+        var builder = new StringBuilder("HashCode.Combine(");
+
+        for (int i = 0; i < numFields; i++)
+        {
+            if (i != 0) builder.Append(", ");
+            builder.AppendFormat("({0})(object)this[{1}]", type.Name, i);
+        }
+
+        builder.Append(")");
+        return builder.ToString();
+    }
+
+    public string GenerateFastCombine(Type type, int numFields)
+    {
+        var builder = new StringBuilder("HashCode.Combine(");
+
+        for (int i = 0; i < numFields; i++)
+        {
+            if (i != 0) builder.Append(", ");
+            builder.AppendFormat("this.{0}", GetRegisterFieldName(type, i));
+        }
+
+        builder.Append(")");
+        return builder.ToString();
     }
 
     public string MakeTypeComparisonCondition(Type type)

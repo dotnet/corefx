@@ -37,10 +37,7 @@ namespace System.Numerics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode() => HashCode.Combine(
-            X,
-            Y
-        );
+        public override int GetHashCode() => HashCode.Combine(X, Y);
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this Vector2 instance.

@@ -230,10 +230,7 @@ namespace System.Drawing
         ///       Returns a hash code.
         ///    </para>
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(
-            Width,
-            Height
-        );
+        public override int GetHashCode() => HashCode.Combine(Width, Height);
 
         /// <summary>
         ///    <para>

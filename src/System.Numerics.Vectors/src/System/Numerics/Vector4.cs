@@ -45,12 +45,7 @@ namespace System.Numerics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode() => HashCode.Combine(
-            X,
-            Y,
-            Z,
-            W
-        );
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z, W);
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this Vector4 instance.
