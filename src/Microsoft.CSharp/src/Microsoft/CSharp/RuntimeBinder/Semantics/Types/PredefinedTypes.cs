@@ -46,8 +46,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal static class PredefinedTypeFacts
     {
-        internal static string GetName(PredefinedType type) => s_types[(int)type].Name;
-
         internal static FUNDTYPE GetFundType(PredefinedType type) => s_types[(int)type].FundType;
 
         internal static Type GetAssociatedSystemType(PredefinedType type) => s_types[(int)type].AssociatedSystemType;
