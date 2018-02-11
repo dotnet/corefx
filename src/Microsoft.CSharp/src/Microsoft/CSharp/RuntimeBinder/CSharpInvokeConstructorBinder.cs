@@ -16,8 +16,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         public Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals)
             => runtimeBinder.DispatchPayload(this, arguments, locals);
 
-        public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
-            => RuntimeBinder.PopulateSymbolTableWithPayloadInformation(symbolTable, this, callingType, arguments);
+        public void PopulateSymbolTableWithName(Type callingType, ArgumentObject[] arguments)
+            => RuntimeBinder.PopulateSymbolTableWithPayloadInformation(this, callingType, arguments);
 
         public bool IsBinderThatCanHaveRefReceiver => true;
 

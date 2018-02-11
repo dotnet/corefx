@@ -17,8 +17,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 {
     internal sealed class SymbolTable
     {
-        private static readonly HashSet<Type> _typesWithConversionsLoaded = new HashSet<Type>();
-        private static readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
+        private static readonly HashSet<Type> s_typesWithConversionsLoaded = new HashSet<Type>();
+        private static readonly HashSet<NameHashKey> s_namesLoadedForEachType = new HashSet<NameHashKey>();
 
         private sealed class NameHashKey : IEquatable<NameHashKey>
         {
@@ -69,7 +69,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             NameHashKey key = new NameHashKey(callingType, name);
 
             // If we've already populated this name/type pair, then just leave.
-            if (_namesLoadedForEachType.Contains(key))
+            if (s_namesLoadedForEachType.Contains(key))
             {
                 return;
             }
@@ -89,7 +89,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal SymWithType LookupMember(
+        internal static SymWithType LookupMember(
             string name,
             Expr callingObject,
             ParentSymbol context,
@@ -136,7 +136,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region InheritanceHierarchy
         private static void AddNamesOnType(NameHashKey key)
         {
-            Debug.Assert(!_namesLoadedForEachType.Contains(key));
+            Debug.Assert(!s_namesLoadedForEachType.Contains(key));
 
             // We need to declare all of its inheritance hierarchy.
             List<Type> inheritance = CreateInheritanceHierarchyList(key.type);
@@ -157,7 +157,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     type = type.GetGenericTypeDefinition();
                 }
 
-                if (!_namesLoadedForEachType.Add(new NameHashKey(type, name)))
+                if (!s_namesLoadedForEachType.Add(new NameHashKey(type, name)))
                 {
                     continue;
                 }
@@ -1849,7 +1849,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 type = type.GetGenericTypeDefinition();
             }
 
-            if (!_typesWithConversionsLoaded.Add(type))
+            if (!s_typesWithConversionsLoaded.Add(type))
             {
                 return;
             }

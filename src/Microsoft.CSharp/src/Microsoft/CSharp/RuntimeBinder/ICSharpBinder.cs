@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         // are only dispatched dynamically when the receiver is dynamic, and hence boxed.
         bool IsBinderThatCanHaveRefReceiver { get; }
 
-        void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments);
+        void PopulateSymbolTableWithName(Type callingType, ArgumentObject[] arguments);
 
         Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals);
         BindingFlag BindingFlags { get; }

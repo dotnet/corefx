@@ -30,7 +30,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
         // Members
 
-        private SymbolTable _symbolTable;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
 
@@ -47,7 +46,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void Reset()
         {
-            _symbolTable = new SymbolTable();
             _bindingContext = new BindingContext();
             _binder = new ExpressionBinder(_bindingContext);
         }
@@ -94,21 +92,21 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // On any given bind call, we populate the symbol table with any new
             // conversions that we find for any of the types specified. We keep a
-            // running SymbolTable so that we don't have to reflect over types if 
+            // running SymbolTable so that we don't have to reflect over types if
             // we've seen them already in the table.
             //
             // Once we've loaded all the standard conversions into the symbol table,
             // we can call into the binder to bind the actual call.
 
-            payload.PopulateSymbolTableWithName(_symbolTable, arguments[0].Type, arguments);
+            payload.PopulateSymbolTableWithName(arguments[0].Type, arguments);
             AddConversionsForArguments(arguments);
 
             // When we do any bind, we perform the following steps:
             //
             // 1) Create a local variable scope which contains local variable symbols
             //    for each of the parameters, and the instance argument.
-            // 2) If we have operators, then we don't need to do lookup. Otherwise, 
-            //    look for the name and switch on the result - dispatch according to 
+            // 2) If we have operators, then we don't need to do lookup. Otherwise,
+            //    look for the name and switch on the result - dispatch according to
             //    the symbol kind. This results in an Expr being bound that is the expression.
             // 3) Create the EXPRRETURN which returns the call and wrap it in
             //    an EXPRBOUNDLAMBDA which uses the local variable scope
@@ -149,7 +147,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // (1) InvokeMember deferral.
             //
-            // This is the deferral for the d.Foo() scenario where Foo actually binds to a 
+            // This is the deferral for the d.Foo() scenario where Foo actually binds to a
             // field or property, and not a method group that is invocable. We defer to
             // the standard GetMember/Invoke pattern.
 
@@ -160,7 +158,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 MemberLookup mem = new MemberLookup();
                 Expr callingObject = CreateCallingObjectForCall(callPayload, arguments, locals);
 
-                SymWithType swt = _symbolTable.LookupMember(
+                SymWithType swt = SymbolTable.LookupMember(
                         callPayload.Name,
                         callingObject,
                         _bindingContext.ContextForMemberLookup,
@@ -239,7 +237,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (argInfo.IsByRefOrOut)
             {
                 // If we have a ref our an out parameter, make the byref type.
-                // If we have the receiver of a call or invoke that is ref, it must be because of 
+                // If we have the receiver of a call or invoke that is ref, it must be because of
                 // a struct caller. Don't persist the ref for that.
                 if (!(index == 0 && p.IsBinderThatCanHaveRefReceiver))
                 {
@@ -293,8 +291,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         /////////////////////////////////////////////////////////////////////////////////
 
         internal static void PopulateSymbolTableWithPayloadInformation(
-            SymbolTable symbolTable, ICSharpInvokeOrInvokeMemberBinder callOrInvoke, Type callingType,
-            ArgumentObject[] arguments)
+            ICSharpInvokeOrInvokeMemberBinder callOrInvoke, Type callingType, ArgumentObject[] arguments)
         {
             Type type;
 
@@ -317,7 +314,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 type);
 
             // If it looks like we're invoking a get_ or a set_, load the property as well.
-            // This is because we need COM indexed properties called via method calls to 
+            // This is because we need COM indexed properties called via method calls to
             // work the same as it used to.
             if (callOrInvoke.Name.StartsWith("set_", StringComparison.Ordinal) ||
                 callOrInvoke.Name.StartsWith("get_", StringComparison.Ordinal))
@@ -345,10 +342,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             BindCall(payload, CreateCallingObjectForCall(payload, arguments, locals), arguments, locals);
 
         /////////////////////////////////////////////////////////////////////////////////
-        // We take the ArgumentObjects to verify - if the parameter expression tells us 
+        // We take the ArgumentObjects to verify - if the parameter expression tells us
         // we have a ref parameter, but the argument object tells us we're not passed by ref,
         // then it means it was a ref that the compiler had to insert. This is used when
-        // we have a call off of a struct for example. If thats the case, don't treat the 
+        // we have a call off of a struct for example. If thats the case, don't treat the
         // local as a ref type.
 
         private static LocalVariableSymbol[] PopulateLocalScope(
@@ -357,7 +354,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ArgumentObject[] arguments,
             Expression[] parameterExpressions)
         {
-            // We use the compile time types for the local variables, and then 
+            // We use the compile time types for the local variables, and then
             // cast them to the runtime types for the expression tree.
             LocalVariableSymbol[] locals = new LocalVariableSymbol[parameterExpressions.Length];
 
@@ -367,7 +364,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 CType type = SymbolTable.GetCTypeFromType(parameter.Type);
 
                 // Make sure we're not setting ref for the receiver of a call - the argument
-                // will be marked as ref if we're calling off a struct, but we don't want 
+                // will be marked as ref if we're calling off a struct, but we don't want
                 // to persist that in our system.
                 // If we're the first param of a call or invoke, and we're ref, it must be
                 // because of structs. Don't persist the parameter modifier type.
@@ -601,7 +598,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            // If this is a WinRT type we have to add all collection interfaces that have this method 
+            // If this is a WinRT type we have to add all collection interfaces that have this method
             // as well so that overload resolution can find them.
             if (callingType.IsWindowsRuntimeType)
             {
@@ -765,7 +762,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             int arity = payload.TypeArguments?.Length ?? 0;
             MemberLookup mem = new MemberLookup();
 
-            SymWithType swt = _symbolTable.LookupMember(
+            SymWithType swt = SymbolTable.LookupMember(
                     payload.Name,
                     callingObject,
                     _bindingContext.ContextForMemberLookup,
@@ -794,7 +791,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             //
             // Our caller takes care of the rest.
 
-            // First we need to check the sym that we got back. If we got back a static 
+            // First we need to check the sym that we got back. If we got back a static
             // method, then we may be in the situation where the user called the method
             // via a simple name call through the phantom overload. If thats the case,
             // then we want to sub in a type instead of the object.
@@ -807,7 +804,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if ((payload.Flags & CSharpCallFlags.EventHookup) != 0)
             {
                 mem = new MemberLookup();
-                SymWithType swtEvent = _symbolTable.LookupMember(
+                SymWithType swtEvent = SymbolTable.LookupMember(
                         payload.Name.Split('_')[1],
                         callingObject,
                         _bindingContext.ContextForMemberLookup,
@@ -961,8 +958,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             ExpressionBinder.FillInArgInfoFromArgList(argInfo, arguments);
 
             // We need to substitute type parameters BEFORE getting the most derived one because
-            // we're binding against the base method, and the derived method may change the 
-            // generic arguments. 
+            // we're binding against the base method, and the derived method may change the
+            // generic arguments.
             TypeArray parameters = TypeManager.SubstTypeArray(methprop.Params, type, typeArgs);
             methprop = ExpressionBinder.GroupToArgsBinder.FindMostDerivedMethod(methprop, callingObject.Type);
             ExpressionBinder.GroupToArgsBinder.ReOrderArgsForNamedArguments(
@@ -1228,7 +1225,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             BindingFlag bindFlags = payload.BindingFlags;
 
             MemberLookup mem = new MemberLookup();
-            SymWithType swt = _symbolTable.LookupMember(name, callingObject, _bindingContext.ContextForMemberLookup, 0, mem, false, false);
+            SymWithType swt = SymbolTable.LookupMember(name, callingObject, _bindingContext.ContextForMemberLookup, 0, mem, false, false);
             if (swt == null)
             {
                 if (optionalIndexerArguments != null)
@@ -1243,7 +1240,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         {
                             throw ErrorHandling.Error(ErrorCode.ERR_BadIndexCount, type.GetArrayRank());
                         }
-                        
+
                         Debug.Assert(callingObject.Type is ArrayType);
                         return CreateArray(callingObject, optionalIndexerArguments);
                     }
@@ -1386,7 +1383,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ArgumentObject[] arguments,
             LocalVariableSymbol[] locals)
         {
-            // The IsEvent binder will never be called without an instance object. This 
+            // The IsEvent binder will never be called without an instance object. This
             // is because the compiler only gen's this code for dynamic dots.
 
             Expr callingObject = CreateLocal(arguments[0].Type, false, locals[0]);
@@ -1399,7 +1396,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.NullReferenceOnMemberException();
             }
 
-            SymWithType swt = _symbolTable.LookupMember(
+            SymWithType swt = SymbolTable.LookupMember(
                     binder.Name,
                     callingObject,
                     _bindingContext.ContextForMemberLookup,

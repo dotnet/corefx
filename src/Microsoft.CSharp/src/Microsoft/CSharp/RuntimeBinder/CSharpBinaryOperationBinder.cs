@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         public Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals)
             => runtimeBinder.BindBinaryOperation(this, arguments, locals);
 
-        public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
+        public void PopulateSymbolTableWithName(Type callingType, ArgumentObject[] arguments)
         {
             string name = Operation.GetCLROperatorName();
             Debug.Assert(name != null);
