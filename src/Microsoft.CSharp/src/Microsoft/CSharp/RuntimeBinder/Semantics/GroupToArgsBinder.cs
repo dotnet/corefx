@@ -100,20 +100,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            public GroupToArgsBinderResult GetResultsOfBind()
-            {
-                return _results;
-            }
-
-            private CSemanticChecker GetSemanticChecker()
-            {
-                return _pExprBinder.GetSemanticChecker();
-            }
+            public GroupToArgsBinderResult GetResultsOfBind() => _results;
 
             private static CType GetTypeQualifier(ExprMemberGroup pGroup)
             {
                 Debug.Assert(pGroup != null);
-
 
                 return (pGroup.Flags & EXPRFLAG.EXF_CTOR) != 0 ? pGroup.ParentType : pGroup.OptionalObject?.Type;
             }
@@ -930,7 +921,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     for (int ivar = 0; ivar < _pArguments.carg; ivar++)
                     {
                         CType var = _pCurrentParameters[ivar];
-                        bool constraintErrors = !TypeBind.CheckConstraints(GetSemanticChecker(), var, CheckConstraintsFlags.NoErrors);
+                        bool constraintErrors = !TypeBind.CheckConstraints(var, CheckConstraintsFlags.NoErrors);
                         if (constraintErrors && !DoesTypeArgumentsContainErrorSym(var))
                         {
                             _mpwiParamTypeConstraints.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
@@ -1097,7 +1088,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_results.BestResult.TypeArgs.Count > 0)
                     {
                         // Check method type variable constraints.
-                        TypeBind.CheckMethConstraints(GetSemanticChecker(), new MethWithInst(_results.BestResult));
+                        TypeBind.CheckMethConstraints(new MethWithInst(_results.BestResult));
                     }
                 }
             }
@@ -1115,7 +1106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_results.InaccessibleResult)
                 {
                     // We might have called this, but it is inaccessible...
-                    return GetSemanticChecker().ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
+                    return CSemanticChecker.ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
                 }
 
                 if (_misnamed)
@@ -1198,7 +1189,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_mpwiParamTypeConstraints)
                 {
                     // This will always report an error
-                    TypeBind.CheckMethConstraints(GetSemanticChecker(), new MethWithInst(_mpwiParamTypeConstraints));
+                    TypeBind.CheckMethConstraints(new MethWithInst(_mpwiParamTypeConstraints));
                     Debug.Fail("Unreachable");
                     return null;
                 }

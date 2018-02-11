@@ -38,7 +38,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class MemberLookup
     {
         // The inputs to Lookup.
-        private CSemanticChecker _pSemanticChecker;
         private CType _typeSrc;
         private CType _typeQual;
         private ParentSymbol _symWhere;
@@ -469,8 +468,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private CSemanticChecker GetSemanticChecker() { return _pSemanticChecker; }
-
         private RuntimeBinderException ReportBogus(SymWithType swt)
         {
             Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
@@ -521,17 +518,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             flags - See MemLookFlags.
                 TypeVarsAllowed only applies to the most derived type (not base types).
         ***************************************************************************************************/
-        public bool Lookup(CSemanticChecker checker, CType typeSrc, Expr obj, ParentSymbol symWhere, Name name, int arity, MemLookFlags flags)
+        public bool Lookup(CType typeSrc, Expr obj, ParentSymbol symWhere, Name name, int arity, MemLookFlags flags)
         {
             Debug.Assert((flags & ~MemLookFlags.All) == 0);
             Debug.Assert(obj == null || obj.Type != null);
             Debug.Assert(typeSrc is AggregateType);
-            Debug.Assert(checker != null);
 
             _prgtype = _rgtypeStart;
 
             // Save the inputs for error handling, etc.
-            _pSemanticChecker = checker;
             _typeSrc = typeSrc;
             _symWhere = symWhere;
             _name = name;
@@ -613,7 +608,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return !_swtInaccess.Sym.isUserCallable() && ((_flags & MemLookFlags.UserCallable) != 0)
                     ? ErrorHandling.Error(ErrorCode.ERR_CantCallSpecialMethod, _swtInaccess)
-                    : GetSemanticChecker().ReportAccessError(_swtInaccess, _symWhere, _typeQual);
+                    : CSemanticChecker.ReportAccessError(_swtInaccess, _symWhere, _typeQual);
             }
 
             if ((_flags & MemLookFlags.Ctor) != 0)

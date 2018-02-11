@@ -31,7 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         // Members
 
         private SymbolTable _symbolTable;
-        private CSemanticChecker _semanticChecker;
         private BindingContext _bindingContext;
         private ExpressionBinder _binder;
 
@@ -48,11 +47,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private void Reset()
         {
-            _semanticChecker = new CSemanticChecker();
-
-            _symbolTable = new SymbolTable(_semanticChecker);
-
-            _bindingContext = new BindingContext(_semanticChecker);
+            _symbolTable = new SymbolTable();
+            _bindingContext = new BindingContext();
             _binder = new ExpressionBinder(_bindingContext);
         }
 
@@ -265,7 +261,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // (which, in the worst case, may be object).
 
                 CType actualType = SymbolTable.GetCTypeFromType(t);
-                CType bestType = TypeManager.GetBestAccessibleType(_semanticChecker, _bindingContext.ContextForMemberLookup, actualType);
+                CType bestType = TypeManager.GetBestAccessibleType(_bindingContext.ContextForMemberLookup, actualType);
                 t = bestType.AssociatedSystemType;
             }
 

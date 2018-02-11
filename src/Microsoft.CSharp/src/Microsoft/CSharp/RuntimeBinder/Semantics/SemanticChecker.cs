@@ -18,10 +18,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     //
     // Semantic check methods on SymbolLoader
     //
-    internal sealed class CSemanticChecker
+    internal static class CSemanticChecker
     {
         // Generate an error if CType is static.
-        public void CheckForStaticClass(CType type)
+        public static void CheckForStaticClass(CType type)
         {
             if (type.IsStaticClass)
             {
@@ -60,8 +60,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Check the accessibility of the return CType.
-            CType CType = symCheck.getType();
-            if (CType == null)
+            CType type = symCheck.getType();
+            if (type == null)
             {
                 return ACCESSERROR.ACCESSERROR_NOERROR;
             }
@@ -72,10 +72,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Substitute on the CType.
             if (atsCheck.TypeArgsAll.Count > 0)
             {
-                CType = TypeManager.SubstType(CType, atsCheck);
+                type = TypeManager.SubstType(type, atsCheck);
             }
 
-            return CheckTypeAccess(CType, symWhere) ? ACCESSERROR.ACCESSERROR_NOERROR : ACCESSERROR.ACCESSERROR_NOACCESS;
+            return CheckTypeAccess(type, symWhere) ? ACCESSERROR.ACCESSERROR_NOERROR : ACCESSERROR.ACCESSERROR_NOACCESS;
         }
 
         public static bool CheckTypeAccess(CType type, Symbol symWhere)
@@ -252,7 +252,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static bool CheckBogus(Symbol sym) => (sym as PropertySymbol)?.Bogus ?? false;
 
-        public RuntimeBinderException ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)
+        public static RuntimeBinderException ReportAccessError(SymWithType swtBad, Symbol symWhere, CType typeQual)
         {
             Debug.Assert(!CheckAccess(swtBad.Sym, swtBad.GetType(), symWhere, typeQual) ||
                    !CheckTypeAccess(swtBad.GetType(), symWhere));

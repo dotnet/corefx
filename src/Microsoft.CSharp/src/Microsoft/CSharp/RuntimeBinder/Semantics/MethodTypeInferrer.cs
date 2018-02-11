@@ -1704,7 +1704,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // since we can never infer ref/out or pointer types here, we
             // are guaranteed a best accessible type.
 
-            _pFixedResults[iParam] = TypeManager.GetBestAccessibleType(_binder.GetSemanticChecker(), _binder.GetContext().ContextForMemberLookup, pBest);
+            _pFixedResults[iParam] = TypeManager.GetBestAccessibleType(_binder.GetContext().ContextForMemberLookup, pBest);
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // END RUNTIME BINDER ONLY CHANGE
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

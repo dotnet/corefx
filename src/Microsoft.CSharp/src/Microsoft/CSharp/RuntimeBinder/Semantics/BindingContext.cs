@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     // ----------------------------------------------------------------------------
@@ -13,22 +11,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class BindingContext
     {
-        public BindingContext(CSemanticChecker semanticChecker)
+        public BindingContext()
         {
-            Debug.Assert(semanticChecker != null);
-            SemanticChecker = semanticChecker;
         }
 
         public BindingContext(BindingContext parent)
-            : this(parent.SemanticChecker)
         {
             // We copy the context object, but leave checking false.
             ContextForMemberLookup = parent.ContextForMemberLookup;
         }
 
         public AggregateDeclaration ContextForMemberLookup { get; set; }
-
-        public CSemanticChecker SemanticChecker { get; }
 
         public bool Checked { get; set; }
     }

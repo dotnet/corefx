@@ -17,15 +17,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 {
     internal sealed class SymbolTable
     {
-        /////////////////////////////////////////////////////////////////////////////////
-        // Members
         private static readonly HashSet<Type> _typesWithConversionsLoaded = new HashSet<Type>();
         private static readonly HashSet<NameHashKey> _namesLoadedForEachType = new HashSet<NameHashKey>();
-
-        // Members from the managed binder.
-        private readonly CSemanticChecker _semanticChecker;
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private sealed class NameHashKey : IEquatable<NameHashKey>
         {
@@ -55,17 +48,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
-        internal SymbolTable(CSemanticChecker semanticChecker)
+        internal SymbolTable()
         {
-            _semanticChecker = semanticChecker;
-
             // Now populate object.
             LoadSymbolsFromType(typeof(object));
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static void PopulateSymbolTableWithName(
             string name,
@@ -129,7 +116,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             if (!mem.Lookup(
-                _semanticChecker,
                 type,
                 callingObject,
                 context,

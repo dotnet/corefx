@@ -425,7 +425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(!(expr is ExprMemberGroup));
             Debug.Assert(dest != null);
 
-            SemanticChecker.CheckForStaticClass(dest);
+            CSemanticChecker.CheckForStaticClass(dest);
             if (BindExplicitConversion(expr, expr.Type, dest, out Expr exprResult, flags))
             {
                 // Conversion works.

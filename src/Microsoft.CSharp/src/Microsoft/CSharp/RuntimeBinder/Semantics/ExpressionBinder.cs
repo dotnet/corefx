@@ -318,15 +318,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             };
         }
 
-        private CSemanticChecker SemanticChecker
-        {
-            get
-            {
-                return Context.SemanticChecker;
-            }
-        }
-        public CSemanticChecker GetSemanticChecker() { return SemanticChecker; }
-
         private static AggregateType GetPredefindType(PredefinedType pt)
         {
             Debug.Assert(pt != PredefinedType.PT_VOID); // use getVoidType()
