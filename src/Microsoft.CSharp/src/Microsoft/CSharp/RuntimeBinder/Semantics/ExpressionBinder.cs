@@ -352,7 +352,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ArrayType pArrayType = pOp1.Type as ArrayType;
             Debug.Assert(pArrayType != null);
             CType elementType = pArrayType.ElementType;
-            checkUnsafe(elementType); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(elementType); // added to the binder so we don't bind to pointer ops
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
 
@@ -469,7 +469,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType pFieldType = TypeManager.SubstType(fwt.Field().GetType(), fwt.GetType());
             pOptionalObject = AdjustMemberObject(fwt, pOptionalObject);
 
-            checkUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
 
             // lvalue if the object is an lvalue (or it's static) and the field is not readonly.
             // Since dynamic objects for fields come from locals or casts/conversions on locals
@@ -756,7 +756,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprCall BindUDUnopCall(Expr arg, CType typeArg, MethPropWithInst mpwi)
         {
             CType typeRet = TypeManager.SubstType(mpwi.Meth().RetType, mpwi.GetType());
-            checkUnsafe(typeRet); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(typeRet); // added to the binder so we don't bind to pointer ops
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mpwi);
             ExprCall call = ExprFactory.CreateCall(0, typeRet, mustConvert(arg, typeArg), pMemGroup, null);
             call.MethWithInst = new MethWithInst(mpwi);
@@ -864,7 +864,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // Report a bad operator types error to the user.
-        private RuntimeBinderException BadOperatorTypesError(Expr pOperand1, Expr pOperand2)
+        private static RuntimeBinderException BadOperatorTypesError(Expr pOperand1, Expr pOperand2)
         {
             // This is a hack, but we need to store the operation somewhere... the first argument's as
             // good a place as any.
@@ -978,22 +978,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private void PostBindMethod(MethWithInst pMWI)
+        private static void PostBindMethod(MethWithInst pMWI)
         {
             MethodSymbol meth = pMWI.Meth();
             if (meth.RetType != null)
             {
-                checkUnsafe(meth.RetType);
+                CheckUnsafe(meth.RetType);
 
                 // We need to check unsafe on the parameters as well, since we cannot check in conversion.
                 foreach (CType type in meth.Params.Items)
                 {
-                    checkUnsafe(type);
+                    CheckUnsafe(type);
                 }
             }
         }
 
-        private void PostBindProperty(PropWithType pwt, out MethWithType pmwtGet, out MethWithType pmwtSet)
+        private static void PostBindProperty(PropWithType pwt, out MethWithType pmwtGet, out MethWithType pmwtSet)
         {
             PropertySymbol prop = pwt.Prop();
             Debug.Assert(prop != null);
@@ -1007,7 +1007,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (prop.RetType != null)
             {
-                checkUnsafe(prop.RetType);
+                CheckUnsafe(prop.RetType);
             }
         }
 
@@ -1675,7 +1675,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return NameManager.GetPredefinedName(s_EK2NAME[ek - ExpressionKind.FirstOp]);
         }
 
-        private void checkUnsafe(CType type)
+        private static void CheckUnsafe(CType type)
         {
             if (type == null || type.IsUnsafe())
             {

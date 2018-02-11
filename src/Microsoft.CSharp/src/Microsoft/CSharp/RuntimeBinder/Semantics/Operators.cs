@@ -401,7 +401,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return bestSignature;
         }
 
-        private ExprBinOp bindNullEqualityComparison(ExpressionKind ek, BinOpArgInfo info)
+        private static ExprBinOp BindNullEqualityComparison(ExpressionKind ek, BinOpArgInfo info)
         {
             Expr arg1 = info.arg1;
             Expr arg2 = info.arg2;
@@ -481,7 +481,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // If we got no matches then it's possible that we're in the case
                 // x == null, where x is nullable.
-                return bindNullEqualityComparison(ek, info);
+                return BindNullEqualityComparison(ek, info);
             }
             else
             {
@@ -2276,7 +2276,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
           Report an ambiguous operator types error.
          */
-        private RuntimeBinderException AmbiguousOperatorError(Expr op1, Expr op2)
+        private static RuntimeBinderException AmbiguousOperatorError(Expr op1, Expr op2)
         {
             Debug.Assert(op1 != null);
 
@@ -2544,9 +2544,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             arg2 = mustConvert(arg2, Params[1]);
             ExprList args = ExprFactory.CreateList(arg1, arg2);
 
-            checkUnsafe(arg1.Type); // added to the binder so we don't bind to pointer ops
-            checkUnsafe(arg2.Type); // added to the binder so we don't bind to pointer ops
-            checkUnsafe(typeRet); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(arg1.Type); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(arg2.Type); // added to the binder so we don't bind to pointer ops
+            CheckUnsafe(typeRet); // added to the binder so we don't bind to pointer ops
 
 
             ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mpwi);

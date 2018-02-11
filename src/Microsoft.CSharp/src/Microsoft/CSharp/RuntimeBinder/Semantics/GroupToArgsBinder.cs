@@ -574,7 +574,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return optionalArgument;
             }
 
-            private MethodOrPropertySymbol FindMostDerivedMethod(MethodOrPropertySymbol pMethProp, Expr pObject) =>
+            private static MethodOrPropertySymbol FindMostDerivedMethod(MethodOrPropertySymbol pMethProp, Expr pObject) =>
                 FindMostDerivedMethod(pMethProp, pObject?.Type);
 
             public static MethodOrPropertySymbol FindMostDerivedMethod(MethodOrPropertySymbol pMethProp, CType pType)

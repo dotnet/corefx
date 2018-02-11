@@ -38,7 +38,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new byte[] /* OBJECT*/ {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3}
         };
 
-        private BetterType WhichMethodIsBetterTieBreaker(
+        private static BetterType WhichMethodIsBetterTieBreaker(
             CandidateFunctionMember node1,
             CandidateFunctionMember node2,
             CType pTypeThrough,
@@ -199,8 +199,7 @@ LAgain:
         // By rearranging the arguments as such we make sure that any specified named arguments appear in the same position for both
         // methods and we also maintain the relative order of the other parameters (the type long appears after int in the above example)
 
-        private TypeArray RearrangeNamedArguments(TypeArray pta, MethPropWithInst mpwi,
-            CType pTypeThrough, ArgInfos args)
+        private static TypeArray RearrangeNamedArguments(TypeArray pta, MethPropWithInst mpwi, CType pTypeThrough, ArgInfos args)
         {
 #if DEBUG
             // We never have a named argument that is in a position in the argument

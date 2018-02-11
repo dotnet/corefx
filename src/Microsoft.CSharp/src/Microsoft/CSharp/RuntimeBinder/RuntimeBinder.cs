@@ -213,10 +213,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expression CreateExpressionTreeFromResult(
-            Expression[] parameters,
-            Scope pScope,
-            Expr pResult)
+        private static Expression CreateExpressionTreeFromResult(Expression[] parameters, Scope pScope, Expr pResult)
         {
             // (3) - Place the result in a return statement and create the ExprBoundLambda.
             ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
@@ -978,14 +975,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 // Perform the correct conversion.
                 pArg = _binder.tryConvert(pArg, parameters[i]);
-                if (pList == null)
-                {
-                    pList = pArg;
-                }
-                else
-                {
-                    pList = ExprFactory.CreateList(pArg, pList);
-                }
+                pList = pList == null ? pArg : ExprFactory.CreateList(pArg, pList);
             }
 
             result.OptionalArguments = pList;
@@ -1055,20 +1045,15 @@ namespace Microsoft.CSharp.RuntimeBinder
                     result = _binder.BindStandardUnaryOperator(OperatorKind.OP_LOGNOT, result);
                 }
 
-                if (result == null)
-                {
-                    result = _binder.bindUDUnop(op == OperatorKind.OP_TRUE ? ExpressionKind.True : ExpressionKind.False, arg1);
-                }
+                return result
+                    ?? _binder.bindUDUnop(op == OperatorKind.OP_TRUE ? ExpressionKind.True : ExpressionKind.False, arg1)
+                    // If the result is STILL null, then that means theres no implicit conversion to bool,
+                    // and no user-defined operators for true and false. Just do a must convert to report
+                    // the error.
+                    ?? _binder.mustConvert(arg1, SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL));
 
-                // If the result is STILL null, then that means theres no implicit conversion to bool,
-                // and no user-defined operators for true and false. Just do a must convert to report
-                // the error.
-                if (result == null)
-                {
-                    result = _binder.mustConvert(arg1, SymbolLoader.GetPredefindType(PredefinedType.PT_BOOL));
-                }
-                return result;
             }
+
             return _binder.BindStandardUnaryOperator(op, arg1);
         }
         #endregion

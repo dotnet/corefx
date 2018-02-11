@@ -351,8 +351,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (BindImplicitConversion(expr, expr.Type, dest, out Expr exprResult, flags))
             {
                 // Conversion works.
-                checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
-                checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(dest); // added to the binder so we don't bind to pointer ops
                 return exprResult;
             }
 
@@ -400,8 +400,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (BindImplicitConversion(expr, expr.Type, dest, out Expr exprResult, flags))
             {
-                checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
-                checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(dest); // added to the binder so we don't bind to pointer ops
                 // Conversion works.
                 return exprResult;
             }
@@ -429,8 +429,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (BindExplicitConversion(expr, expr.Type, dest, out Expr exprResult, flags))
             {
                 // Conversion works.
-                checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
-                checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
+                CheckUnsafe(dest); // added to the binder so we don't bind to pointer ops
                 return exprResult;
             }
 
@@ -495,7 +495,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             throw CantConvert(expr, dest);
         }
 
-        private RuntimeBinderException CantConvert(Expr expr, CType dest)
+        private static RuntimeBinderException CantConvert(Expr expr, CType dest)
         {
             // Generic "can't convert" error.
             Debug.Assert(expr.Type != null);
@@ -1027,7 +1027,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private RuntimeBinderException HandleAmbiguity(CType typeSrc, CType typeDst, List<UdConvInfo> prguci, int iuciBestSrc, int iuciBestDst)
+        private static RuntimeBinderException HandleAmbiguity(CType typeSrc, CType typeDst, List<UdConvInfo> prguci, int iuciBestSrc, int iuciBestDst)
         {
             Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count);
             Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count);

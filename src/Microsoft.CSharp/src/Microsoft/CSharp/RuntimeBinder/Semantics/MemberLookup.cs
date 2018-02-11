@@ -468,7 +468,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private RuntimeBinderException ReportBogus(SymWithType swt)
+        private static RuntimeBinderException ReportBogus(SymWithType swt)
         {
             Debug.Assert(CSemanticChecker.CheckBogus(swt.Sym));
             MethodSymbol meth1 = swt.Prop().GetterMethod;
