@@ -9,7 +9,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         ////////////////////////////////////////////////////////////////////////////////
         // This table is used to implement the last set of 'better' conversion rules

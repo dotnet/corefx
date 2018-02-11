@@ -9,7 +9,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // consumed by the StatementBinder.
     // ----------------------------------------------------------------------------
 
-    internal sealed class BindingContext
+    internal readonly struct BindingContext
     {
         public BindingContext(AggregateDeclaration context, bool isChecked)
         {
@@ -21,6 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // We copy the context object, but leave checking false.
             ContextForMemberLookup = parent.ContextForMemberLookup;
+            Checked = false;
         }
 
         public AggregateDeclaration ContextForMemberLookup { get; }

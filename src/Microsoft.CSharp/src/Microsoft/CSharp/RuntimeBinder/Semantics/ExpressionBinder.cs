@@ -143,7 +143,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         None
     }
 
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         // ExpressionBinder - General Rules
         // 
@@ -309,10 +309,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // convert the indexes to ints
 
             CType pDestType = ChooseArrayIndexType(pOp2);
+            ExpressionBinder binder = this;
             Expr transformedIndices = pOp2.Map(
                 x =>
                 {
-                    Expr pTemp = mustConvert(x, pDestType);
+                    Expr pTemp = binder.mustConvert(x, pDestType);
                     return pDestType == pIntType
                         ? pTemp
                         : ExprFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, pDestType, pTemp);

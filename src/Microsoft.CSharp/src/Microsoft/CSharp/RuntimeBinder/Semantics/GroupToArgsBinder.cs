@@ -16,7 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // to the best applicable method in the group.
     // ----------------------------------------------------------------------------
 
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         internal sealed class GroupToArgsBinder
         {
@@ -60,7 +60,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public GroupToArgsBinder(ExpressionBinder exprBinder, BindingFlag bindFlags, ExprMemberGroup grp, ArgInfos args, ArgInfos originalArgs, NamedArgumentsKind namedArgumentsKind)
             {
                 Debug.Assert(grp != null);
-                Debug.Assert(exprBinder != null);
                 Debug.Assert(args != null);
 
                 _pExprBinder = exprBinder;

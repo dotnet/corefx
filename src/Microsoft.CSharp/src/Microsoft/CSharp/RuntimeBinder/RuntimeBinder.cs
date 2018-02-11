@@ -14,11 +14,10 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
-    internal sealed class RuntimeBinder
+    internal readonly struct RuntimeBinder
     {
         private static readonly object s_bindLock = new object();
 
-        private readonly BindingContext _bindingContext;
         private readonly ExpressionBinder _binder;
 
         public RuntimeBinder(Type contextType, bool isChecked = false)
@@ -37,9 +36,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 context = null;
             }
 
-            BindingContext bindingContext = new BindingContext(context, isChecked);
-            _bindingContext = bindingContext;
-            _binder = new ExpressionBinder(bindingContext);
+            _binder = new ExpressionBinder(new BindingContext(context, isChecked));
         }
 
         public Expression Bind(ICSharpBinder payload, Expression[] parameters, DynamicMetaObject[] args, out DynamicMetaObject deferredBinding)
@@ -148,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 SymWithType swt = SymbolTable.LookupMember(
                         callPayload.Name,
                         callingObject,
-                        _bindingContext.ContextForMemberLookup,
+                        _binder.Context.ContextForMemberLookup,
                         arity,
                         mem,
                         (callPayload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -220,7 +217,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // (which, in the worst case, may be object).
 
                 CType actualType = SymbolTable.GetCTypeFromType(t);
-                CType bestType = TypeManager.GetBestAccessibleType(_bindingContext.ContextForMemberLookup, actualType);
+                CType bestType = TypeManager.GetBestAccessibleType(_binder.Context.ContextForMemberLookup, actualType);
                 t = bestType.AssociatedSystemType;
             }
 
@@ -726,7 +723,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymWithType swt = SymbolTable.LookupMember(
                     payload.Name,
                     callingObject,
-                    _bindingContext.ContextForMemberLookup,
+                    _binder.Context.ContextForMemberLookup,
                     arity,
                     mem,
                     (payload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -768,7 +765,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 SymWithType swtEvent = SymbolTable.LookupMember(
                         payload.Name.Split('_')[1],
                         callingObject,
-                        _bindingContext.ContextForMemberLookup,
+                        _binder.Context.ContextForMemberLookup,
                         arity,
                         mem,
                         (payload.Flags & CSharpCallFlags.EventHookup) != 0,
@@ -1174,7 +1171,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             BindingFlag bindFlags = payload.BindingFlags;
 
             MemberLookup mem = new MemberLookup();
-            SymWithType swt = SymbolTable.LookupMember(name, callingObject, _bindingContext.ContextForMemberLookup, 0, mem, false, false);
+            SymWithType swt = SymbolTable.LookupMember(name, callingObject, _binder.Context.ContextForMemberLookup, 0, mem, false, false);
             if (swt == null)
             {
                 if (optionalIndexerArguments != null)
@@ -1348,7 +1345,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             SymWithType swt = SymbolTable.LookupMember(
                     binder.Name,
                     callingObject,
-                    _bindingContext.ContextForMemberLookup,
+                    _binder.Context.ContextForMemberLookup,
                     0,
                     mem,
                     false,
