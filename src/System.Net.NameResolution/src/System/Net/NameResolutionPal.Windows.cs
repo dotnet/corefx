@@ -404,7 +404,7 @@ namespace System.Net
 
                 // We can't just check that 'GetAddrInfoEx' exists, because it existed before supporting overlapped.
                 // The existance of 'GetAddrInfoExCancel' indicates that overlapped is supported.
-                return Interop.Kernel32.GetProcAddress(libHandle, nameof(Interop.Winsock.GetAddrInfoExCancel)) != IntPtr.Zero;
+                return Interop.Kernel32.GetProcAddress(libHandle, Interop.Winsock.GetAddrInfoExCancelFunctionName) != IntPtr.Zero;
             }
         }
 
@@ -446,7 +446,7 @@ namespace System.Net
         {
             try
             {
-                GetAddrInfoExState state = GetAddrInfoExState.FromHandle(context->QueryStateHandle);
+                GetAddrInfoExState state = GetAddrInfoExState.FromHandleAndFree(context->QueryStateHandle);
 
                 if (errorCode != SocketError.Success)
                 {
@@ -550,7 +550,7 @@ namespace System.Net
                 return GCHandle.ToIntPtr(handle);
             }
 
-            public static GetAddrInfoExState FromHandle(IntPtr handle)
+            public static GetAddrInfoExState FromHandleAndFree(IntPtr handle)
             {
                 GCHandle gcHandle = GCHandle.FromIntPtr(handle);
                 var state = (GetAddrInfoExState)gcHandle.Target;
@@ -573,7 +573,7 @@ namespace System.Net
             public static GetAddrInfoExContext* AllocateContext()
             {
                 var context = (GetAddrInfoExContext*)Marshal.AllocHGlobal(Size);
-                *context = new GetAddrInfoExContext();
+                *context = default;
 
                 return context;
             }

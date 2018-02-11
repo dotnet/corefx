@@ -38,11 +38,6 @@ namespace System.Net
             port.HostToNetworkBytes(buffer, 2);
         }
 
-        public static unsafe uint GetIPv4Address(byte[] buffer)
-        {
-            return GetIPv4Address(new ReadOnlySpan<byte>(buffer));
-        }
-
         public static unsafe uint GetIPv4Address(ReadOnlySpan<byte> buffer)
         {
             unchecked
@@ -52,11 +47,6 @@ namespace System.Net
                     (buffer[6] << 16 & 0x00FF0000) |
                     (buffer[7] << 24));
             }
-        }
-
-        public static void GetIPv6Address(byte[] buffer, Span<byte> address, out uint scope)
-        {
-            GetIPv6Address(new ReadOnlySpan<byte>(buffer), address, out scope);
         }
 
         public static unsafe void GetIPv6Address(ReadOnlySpan<byte> buffer, Span<byte> address, out uint scope)

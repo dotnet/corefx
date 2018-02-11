@@ -11,6 +11,8 @@ internal static partial class Interop
 {
     internal static partial class Winsock
     {
+        internal const string GetAddrInfoExCancelFunctionName = "GetAddrInfoExCancel";
+
         internal unsafe delegate void LPLOOKUPSERVICE_COMPLETION_ROUTINE([In] int dwError, [In] int dwBytes, [In] NativeOverlapped* lpOverlapped);
 
         [DllImport(Interop.Libraries.Ws2_32, ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
@@ -29,9 +31,6 @@ internal static partial class Interop
 
         [DllImport("ws2_32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern unsafe void FreeAddrInfoEx([In] AddressInfoEx* pAddrInfo);
-
-        [DllImport("ws2_32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern int GetAddrInfoExCancel([In] ref IntPtr lpHandle);
     }
 }
 

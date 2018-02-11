@@ -102,11 +102,6 @@ namespace System.Net
             ThrowOnFailure(err);
         }
 
-        public static unsafe uint GetIPv4Address(byte[] buffer)
-        {
-            return GetIPv4Address(new ReadOnlySpan<byte>(buffer));
-        }
-
         public static unsafe uint GetIPv4Address(ReadOnlySpan<byte> buffer)
         {
             uint ipAddress;
@@ -118,11 +113,6 @@ namespace System.Net
 
             ThrowOnFailure(err);
             return ipAddress;
-        }
-
-        public static void GetIPv6Address(byte[] buffer, Span<byte> address, out uint scope)
-        {
-            GetIPv6Address(new ReadOnlySpan<byte>(buffer), address, out scope);
         }
 
         public static unsafe void GetIPv6Address(ReadOnlySpan<byte> buffer, Span<byte> address, out uint scope)
