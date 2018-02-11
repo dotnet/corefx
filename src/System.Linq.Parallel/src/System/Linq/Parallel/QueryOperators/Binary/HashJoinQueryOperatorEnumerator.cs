@@ -33,11 +33,11 @@ namespace System.Linq.Parallel
     /// <typeparam name="TRightInput"></typeparam>
     /// <typeparam name="THashKey"></typeparam>
     /// <typeparam name="TOutput"></typeparam>
-    internal class HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, THashKey, TOutput>
+    internal class HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, THashKey, TOutput>
         : QueryOperatorEnumerator<TOutput, TLeftKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TLeftInput,THashKey>, TLeftKey> _leftSource; // Left (outer) data source. For probing.
-        private readonly QueryOperatorEnumerator<Pair<TRightInput,THashKey>, int> _rightSource; // Right (inner) data source. For building.
+        private readonly QueryOperatorEnumerator<Pair<TRightInput,THashKey>, TRightKey> _rightSource; // Right (inner) data source. For building.
         private readonly Func<TLeftInput, TRightInput, TOutput> _singleResultSelector; // Single result selector.
         private readonly Func<TLeftInput, IEnumerable<TRightInput>, TOutput> _groupResultSelector; // Group result selector.
         private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
@@ -60,7 +60,7 @@ namespace System.Linq.Parallel
 
         internal HashJoinQueryOperatorEnumerator(
             QueryOperatorEnumerator<Pair<TLeftInput,THashKey>, TLeftKey> leftSource,
-            QueryOperatorEnumerator<Pair<TRightInput,THashKey>, int> rightSource,
+            QueryOperatorEnumerator<Pair<TRightInput,THashKey>, TRightKey> rightSource,
             Func<TLeftInput, TRightInput, TOutput> singleResultSelector,
             Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
             IEqualityComparer<THashKey> keyComparer,
@@ -108,7 +108,7 @@ namespace System.Linq.Parallel
                 mutables._rightHashLookup = new HashLookup<THashKey, Pair<TRightInput, ListChunk<TRightInput>>>(_keyComparer);
 
                 Pair<TRightInput, THashKey> rightPair = default(Pair<TRightInput, THashKey>);
-                int rightKeyUnused = default(int);
+                TRightKey rightKeyUnused = default(TRightKey);
                 int i = 0;
                 while (_rightSource.MoveNext(ref rightPair, ref rightKeyUnused))
                 {

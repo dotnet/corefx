@@ -99,15 +99,30 @@ namespace System.Linq.Parallel
             PartitionedStream<Pair<TLeftInput,TKey>, TLeftKey> leftHashStream, PartitionedStream<TRightInput, TRightKey> rightPartitionedStream,
             IPartitionedStreamRecipient<TOutput> outputRecipient, int partitionCount, CancellationToken cancellationToken)
         {
-            PartitionedStream<Pair<TRightInput,TKey>, int> rightHashStream = ExchangeUtilities.HashRepartition(
-                rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken);
+            if (RightChild.OutputOrdered)
+            {
+                WrapPartitionedStreamHelper<TLeftKey, TRightKey>(leftHashStream,
+                    ExchangeUtilities.HashRepartitionOrdered(rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken),
+                    outputRecipient, partitionCount, cancellationToken);
+            }
+            else
+            {
+                WrapPartitionedStreamHelper<TLeftKey, int>(leftHashStream,
+                    ExchangeUtilities.HashRepartition(rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken),
+                    outputRecipient, partitionCount, cancellationToken);
+            }
+        }
 
+        private void WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
+            PartitionedStream<Pair<TLeftInput,TKey>, TLeftKey> leftHashStream, PartitionedStream<Pair<TRightInput,TKey>, TRightKey> rightHashStream,
+            IPartitionedStreamRecipient<TOutput> outputRecipient, int partitionCount, CancellationToken cancellationToken)
+        {
             PartitionedStream<TOutput, TLeftKey> outputStream = new PartitionedStream<TOutput, TLeftKey>(
                 partitionCount, leftHashStream.KeyComparer, OrdinalIndexState);
 
             for (int i = 0; i < partitionCount; i++)
             {
-                outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TKey, TOutput>(
+                outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, TKey, TOutput>(
                     leftHashStream[i], rightHashStream[i], null, _resultSelector, _keyComparer, cancellationToken);
             }
 
