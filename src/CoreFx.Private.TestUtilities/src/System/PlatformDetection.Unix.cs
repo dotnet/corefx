@@ -33,6 +33,7 @@ namespace System
         public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", 16, 4);
         public static bool IsUbuntu1704 => IsDistroAndVersion("ubuntu", 17, 4);
         public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
+        public static bool IsUbuntu1804 => IsDistroAndVersion("ubuntu", 18, 04);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
