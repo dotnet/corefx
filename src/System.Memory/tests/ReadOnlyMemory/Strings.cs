@@ -54,11 +54,33 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void AsReadOnlyMemory_NullString_Throws()
+        public static void AsReadOnlyMemory_NullString_Default()
         {
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory());
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory(0));
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory(0, 0));
+            ReadOnlyMemory<char> m = ((string)null).AsReadOnlyMemory();
+            m.Validate();
+            Assert.Equal(default, m);
+
+            m = ((string)null).AsReadOnlyMemory(0);
+            m.Validate();
+            Assert.Equal(default, m);
+
+            m = ((string)null).AsReadOnlyMemory(0, 0);
+            m.Validate();
+            Assert.Equal(default, m);
+        }
+
+        [Fact]
+        public static void NullAsReadOnlyMemoryNonZeroStartAndLength()
+        {
+            string str = null;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(-1));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsReadOnlyMemory(-1, -1));
         }
 
         [Fact]
