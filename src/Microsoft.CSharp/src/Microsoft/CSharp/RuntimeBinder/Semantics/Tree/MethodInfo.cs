@@ -149,5 +149,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw Error.InternalCompilerError();
             }
         }
+
+        public override object Object => MethodInfo;
     }
 }
