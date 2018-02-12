@@ -164,12 +164,69 @@ namespace System.Net.Test.Common
 
         // Compatibility methods
 
-#if true
+#if false
         public static Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
         {
             return server.AcceptConnectionAsync(connection => funcAsync(connection.Socket, connection.Stream, connection.Reader, connection.Writer));
         }
 #endif
+
+        // Original
+
+        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
+        {
+            Options options = server._options;
+            Socket s = await server._listenSocket.AcceptAsync().ConfigureAwait(false);
+            s.NoDelay = true;
+
+//            using (s)
+            try
+            {
+                Stream stream = new NetworkStream(s, ownsSocket: false);
+                if (options.UseSsl)
+                {
+                    var sslStream = new SslStream(stream, false, delegate
+                    { return true; });
+                    using (var cert = Configuration.Certificates.GetServerCertificate())
+                    {
+                        await sslStream.AuthenticateAsServerAsync(
+                            cert,
+                            clientCertificateRequired: true, // allowed but not required
+                            enabledSslProtocols: options.SslProtocols,
+                            checkCertificateRevocation: false).ConfigureAwait(false);
+                    }
+                    stream = sslStream;
+                }
+
+                if (options.ResponseStreamWrapper != null)
+                {
+                    stream = options.ResponseStreamWrapper(stream);
+                }
+
+                using (var reader = new StreamReader(stream, Encoding.ASCII))
+                //                using (var writer = new StreamWriter(options?.ResponseStreamWrapper?.Invoke(stream) ?? stream, Encoding.ASCII) { AutoFlush = true })
+                using (var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
+                {
+                    await funcAsync(s, stream, reader, writer).ConfigureAwait(false);
+                }
+            }
+#if true
+
+                finally
+                {
+                    try
+                    {
+//                        s.Shutdown(SocketShutdown.Send);
+                        s.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // In case the test itself disposes of the socket
+                    }
+                }
+#endif
+        }
+
     }
 
     // TODO: Make this nested

@@ -394,6 +394,7 @@ namespace System.Net.Http.Functional.Tests
                         LoopbackServer.ReadRequestAndSendResponseAsync(server,
                             $"{statusLine}\r\n" +
                             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "Content-Length: 0\r\n" +
                             "\r\n"));
                     using (HttpResponseMessage response = await getResponseTask)
                     {
