@@ -544,6 +544,8 @@ namespace System.Net.Http.Functional.Tests
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
         protected override Stream GetStream_ClientDisconnectOk(Stream s) => new DribbleStream(s, true);
 
+        // TODO: Move to separate class
+
         private sealed class DribbleStream : Stream
         {
             private readonly Stream _wrapped;
@@ -570,17 +572,35 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
 
-            public override bool CanRead => false;
-            public override bool CanSeek => false;
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                try
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        _wrapped.Write(buffer, offset + i, 1);
+                    }
+                }
+                catch (IOException) when (_clientDisconnectAllowed)
+                {
+                }
+            }
+
+            public override bool CanRead => _wrapped.CanRead;
+            public override bool CanSeek => _wrapped.CanSeek;
             public override bool CanWrite => _wrapped.CanWrite;
-            public override long Length => throw new NotSupportedException();
-            public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+            public override long Length => _wrapped.Length;
+            public override long Position { get => _wrapped.Position; set => _wrapped.Position = value; }
             public override void Flush() => _wrapped.Flush();
             public override Task FlushAsync(CancellationToken cancellationToken) => _wrapped.FlushAsync(cancellationToken);
-            public override int Read(byte[] buffer, int offset, int count) => throw new NotImplementedException();
-            public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
-            public override void SetLength(long value) => throw new NotImplementedException();
-            public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();
+            public override int Read(byte[] buffer, int offset, int count) => _wrapped.Read(buffer, offset, count);
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => _wrapped.ReadAsync(buffer, offset, count, cancellationToken);
+            public override long Seek(long offset, SeekOrigin origin) => _wrapped.Seek(offset, origin);
+            public override void SetLength(long value) => _wrapped.SetLength(value);
+            public override void CopyTo(Stream destination, int bufferSize) => _wrapped.CopyTo(destination, bufferSize);
+            public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) => _wrapped.CopyToAsync(destination, bufferSize, cancellationToken);
+            public override void Close() => _wrapped.Close();
+            protected override void Dispose(bool disposing) => _wrapped.Dispose();
         }
     }
 }

@@ -15,6 +15,12 @@ namespace System.Net.Test.Common
     // CONSIDER: Refactor into instance methods where appropriate.
     // One approach would be to leave existing static in place, but defer these to instance methods
 
+    // Here are some specific things I may or may not want to do:
+    // (1) Change CreateServerAsync callback to not have Uri.
+    // (2) Make Accept call an instance mehtod.
+    // (3) Separate parsing utils?  Probably not.  Just make methods on LoopbackConnection...
+    // (4) Introduce LoopbackConnection, so I don't have to have all those callback args.
+
     public sealed class LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
@@ -49,6 +55,8 @@ namespace System.Net.Test.Common
 
         public Uri Uri => _uri;
 
+        // TODO: Move to end
+        // TODO: Make Wrapper just StreamWrapper
         public class Options
         {
             public IPAddress Address { get; set; } = IPAddress.Loopback;
@@ -88,6 +96,7 @@ namespace System.Net.Test.Common
 
         public static string DefaultHttpResponse => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
 
+        // TODO: Rename
         public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
             List<string> lines = null;
@@ -100,6 +109,7 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+        // TODO: Refactor?
         public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
         {
             // Read request line and headers. Skip any request body.
@@ -115,46 +125,103 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
+        // TODO: Make this an instance method
+        public async Task AcceptConnectionAsync(Func<LoopbackConnection, Task> funcAsync)
         {
-            Options options = server._options;
-            Socket s = await server._listenSocket.AcceptAsync().ConfigureAwait(false);
-            s.NoDelay = true;
-            try
+            Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false);
+
+            using (s)
             {
+                s.NoDelay = true;
+
                 Stream stream = new NetworkStream(s, ownsSocket: false);
-                if (options.UseSsl)
+                if (_options.UseSsl)
                 {
-                    var sslStream = new SslStream(stream, false, delegate { return true; });
+                    var sslStream = new SslStream(stream, false, delegate
+                    { return true; });
                     using (var cert = Configuration.Certificates.GetServerCertificate())
                     {
                         await sslStream.AuthenticateAsServerAsync(
                             cert,
                             clientCertificateRequired: true, // allowed but not required
-                            enabledSslProtocols: options.SslProtocols,
+                            enabledSslProtocols: _options.SslProtocols,
                             checkCertificateRevocation: false).ConfigureAwait(false);
                     }
                     stream = sslStream;
                 }
 
-                using (var reader = new StreamReader(stream, Encoding.ASCII))
-                using (var writer = new StreamWriter(options?.ResponseStreamWrapper?.Invoke(stream) ?? stream, Encoding.ASCII) { AutoFlush = true })
+                if (_options.ResponseStreamWrapper != null)
                 {
-                    await funcAsync(s, stream, reader, writer).ConfigureAwait(false);
+                    stream = _options.ResponseStreamWrapper(stream);
+                }
+
+                using (var connection = new LoopbackConnection(s, stream))
+                {
+                    await funcAsync(connection);
                 }
             }
-            finally
+        }
+
+        // Compatibility methods
+
+#if true
+        public static Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
+        {
+            return server.AcceptConnectionAsync(connection => funcAsync(connection.Socket, connection.Stream, connection.Reader, connection.Writer));
+        }
+#endif
+    }
+
+    // TODO: Make this nested
+    public sealed class LoopbackConnection : IDisposable
+    {
+        private Socket _socket;
+        private Stream _stream;
+        private StreamReader _reader;
+        private StreamWriter _writer;
+
+        // TODO: Do we really need Socket here?
+        public LoopbackConnection(Socket socket, Stream stream)
+        {
+            _socket = socket;
+            _stream = stream;
+
+            _reader = new StreamReader(stream, Encoding.ASCII);
+            _writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
+        }
+
+        public Socket Socket => _socket;
+        public Stream Stream => _stream;
+        public StreamReader Reader => _reader;
+        public StreamWriter Writer => _writer;
+
+        public void Dispose()
+        {
+            _reader.Dispose();
+            _writer.Dispose();
+            _stream.Dispose();
+            _socket.Dispose();
+        }
+
+        public async Task<List<string>> ReadRequestHeaderAsync()
+        {
+            var lines = new List<string>();
+            string line;
+            while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
             {
-                try
-                {
-                    s.Shutdown(SocketShutdown.Send);
-                    s.Dispose();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // In case the test itself disposes of the socket
-                }
+                lines.Add(line);
             }
+
+            return lines;
+        }
+
+        public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(string response = null)
+        {
+            List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
+
+            await _writer.WriteAsync(response ?? LoopbackServer.DefaultHttpResponse).ConfigureAwait(false);
+
+            return lines;
         }
     }
 }
