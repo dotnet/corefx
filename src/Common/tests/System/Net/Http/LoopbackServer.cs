@@ -125,7 +125,6 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        // TODO: Make this an instance method
         public async Task AcceptConnectionAsync(Func<LoopbackConnection, Task> funcAsync)
         {
             Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false);
@@ -137,6 +136,9 @@ namespace System.Net.Test.Common
                 Stream stream = new NetworkStream(s, ownsSocket: false);
                 if (_options.UseSsl)
                 {
+                    // TODO: Fix this nasty use of delegate
+                    // TODO: Merge SSL host stuff here?
+
                     var sslStream = new SslStream(stream, false, delegate
                     { return true; });
                     using (var cert = Configuration.Certificates.GetServerCertificate())
@@ -164,69 +166,10 @@ namespace System.Net.Test.Common
 
         // Compatibility methods
 
-#if false
         public static Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
         {
             return server.AcceptConnectionAsync(connection => funcAsync(connection.Socket, connection.Stream, connection.Reader, connection.Writer));
         }
-#endif
-
-        // Original
-
-        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
-        {
-            Options options = server._options;
-            Socket s = await server._listenSocket.AcceptAsync().ConfigureAwait(false);
-            s.NoDelay = true;
-
-//            using (s)
-            try
-            {
-                Stream stream = new NetworkStream(s, ownsSocket: false);
-                if (options.UseSsl)
-                {
-                    var sslStream = new SslStream(stream, false, delegate
-                    { return true; });
-                    using (var cert = Configuration.Certificates.GetServerCertificate())
-                    {
-                        await sslStream.AuthenticateAsServerAsync(
-                            cert,
-                            clientCertificateRequired: true, // allowed but not required
-                            enabledSslProtocols: options.SslProtocols,
-                            checkCertificateRevocation: false).ConfigureAwait(false);
-                    }
-                    stream = sslStream;
-                }
-
-                if (options.ResponseStreamWrapper != null)
-                {
-                    stream = options.ResponseStreamWrapper(stream);
-                }
-
-                using (var reader = new StreamReader(stream, Encoding.ASCII))
-                //                using (var writer = new StreamWriter(options?.ResponseStreamWrapper?.Invoke(stream) ?? stream, Encoding.ASCII) { AutoFlush = true })
-                using (var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true })
-                {
-                    await funcAsync(s, stream, reader, writer).ConfigureAwait(false);
-                }
-            }
-#if true
-
-                finally
-                {
-                    try
-                    {
-//                        s.Shutdown(SocketShutdown.Send);
-                        s.Dispose();
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // In case the test itself disposes of the socket
-                    }
-                }
-#endif
-        }
-
     }
 
     // TODO: Make this nested
@@ -272,6 +215,7 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+        // TODO: Split into two methods.
         public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(string response = null)
         {
             List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
