@@ -837,6 +837,7 @@ namespace System.Net.Http.Functional.Tests
                                 $"HTTP/1.1 {statusCode} OK\r\n" +
                                 $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
                                 $"Location: {redirectUrl}\r\n" +
+                                "Content-Length: 0\r\n" +
                                 "\r\n"));
 
                         using (HttpResponseMessage response = await getResponseTask)
