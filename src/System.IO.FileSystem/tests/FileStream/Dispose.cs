@@ -4,6 +4,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.Diagnostics;
 using System.IO;
 using Xunit;
 
@@ -114,6 +115,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Dispose_ThrowDuringFlushWriteBuffer_FalseArgWontThrow()
         {
             RemoteInvoke(() =>
