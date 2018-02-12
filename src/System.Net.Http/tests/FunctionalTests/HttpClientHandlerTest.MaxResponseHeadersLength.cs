@@ -119,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, reader, writer) =>
                     {
-                        Task serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, responseHeaders);
+                        Task serverTask = LoopbackServer.ReadWriteAcceptedAsync(reader, writer, responseHeaders);
 
                         if (shouldSucceed)
                         {

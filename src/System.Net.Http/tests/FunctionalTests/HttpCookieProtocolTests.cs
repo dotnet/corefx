@@ -530,13 +530,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 await LoopbackServer.AcceptSocketAsync(server, async (_, stream, reader, writer) =>
                 {
-                    List<string> request1Lines = await LoopbackServer.ReadWriteAcceptedAsync(null, reader, writer, 
-                        $"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nWWW-Authenticate: Basic realm=\"WallyWorld\"\r\nSet-Cookie: A=1; Path=/\r\n\r\n");
+                    List<string> request1Lines = await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, $"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nWWW-Authenticate: Basic realm=\"WallyWorld\"\r\nSet-Cookie: A=1; Path=/\r\n\r\n");
 
                     Assert.Equal(0, request1Lines.Count(s => s.StartsWith("Cookie:")));
 
-                    List<string> request2Lines = await LoopbackServer.ReadWriteAcceptedAsync(null, reader, writer,
-                        $"HTTP/1.1 200 OK\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: B=2; Path=/\r\n\r\n{s_simpleContent}");
+                    List<string> request2Lines = await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, $"HTTP/1.1 200 OK\r\nContent-Length: {s_simpleContent.Length}\r\nSet-Cookie: B=2; Path=/\r\n\r\n{s_simpleContent}");
 
                     Assert.Contains($"Cookie: A=1", request2Lines);
                     Assert.Equal(1, request2Lines.Count(s => s.StartsWith("Cookie:")));

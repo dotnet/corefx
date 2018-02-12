@@ -102,20 +102,19 @@ namespace System.Net.Test.Common
                 .Where(a => a.IsIPv6LinkLocal)
                 .FirstOrDefault();
 
-        public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null, Options options = null)
+        public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
             List<string> lines = null;
 
             await AcceptSocketAsync(server, async (s, stream, reader, writer) =>
             {
-                lines = await ReadWriteAcceptedAsync(s, reader, writer, response);
-            }, options);
+                lines = await ReadWriteAcceptedAsync(reader, writer, response);
+            });
 
             return lines;
         }
 
-        // TODO: REmove s
-        public static async Task<List<string>> ReadWriteAcceptedAsync(Socket s, StreamReader reader, StreamWriter writer, string response = null)
+        public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
         {
             // Read request line and headers. Skip any request body.
             var lines = new List<string>();
@@ -130,10 +129,9 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync, Options options = null)
+        public static async Task AcceptSocketAsync(LoopbackServer server, Func<Socket, Stream, StreamReader, StreamWriter, Task> funcAsync)
         {
-            // TODO: Use options from server here
-            options = options ?? new Options();
+            Options options = server._options;
             Socket s = await server._listenSocket.AcceptAsync().ConfigureAwait(false);
             s.NoDelay = true;
             try

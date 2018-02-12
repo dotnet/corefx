@@ -55,10 +55,10 @@ namespace System.Net.Http.Functional.Tests
                 await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                 {
                     // Initial response
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, s_simpleResponse);
+                    await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, s_simpleResponse);
 
                     // Second response: Read request headers, then close connection
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "");
+                    await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, "");
                     s.Close();
 
                     // Client should reconnect.  Accept that connection and send response.
@@ -103,17 +103,17 @@ namespace System.Net.Http.Functional.Tests
                 await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                 {
                     // Initial response
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, s_simpleResponse);
+                    await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, s_simpleResponse);
 
                     // Second response: Read request headers, then close connection
-                    List<string> lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "");
+                    List<string> lines = await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, "");
                     Assert.Contains("Expect: 100-continue", lines);
                     s.Close();
 
                     // Client should reconnect.  Accept that connection and send response.
                     await LoopbackServer.AcceptSocketAsync(server, async (s2, stream2, reader2, writer2) =>
                     {
-                        List<string> lines2 = await LoopbackServer.ReadWriteAcceptedAsync(s2, reader2, writer2, "");
+                        List<string> lines2 = await LoopbackServer.ReadWriteAcceptedAsync(reader2, writer2, "");
                         Assert.Contains("Expect: 100-continue", lines2);
 
                         await writer2.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");

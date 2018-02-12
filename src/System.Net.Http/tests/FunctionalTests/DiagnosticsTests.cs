@@ -287,7 +287,7 @@ namespace System.Net.Http.Functional.Tests
                                 (s, stream, reader, writer) =>
                                 {
                                     tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
+                                    return LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
                                 });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));
@@ -612,7 +612,7 @@ namespace System.Net.Http.Functional.Tests
                                 (s, stream, reader, writer) =>
                                 {
                                     tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
+                                    return LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
                                 });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));

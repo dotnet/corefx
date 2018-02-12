@@ -341,7 +341,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     _output.WriteLine(url.ToString());
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server),
                         client.GetAsync(url));
                 }, options);
             }
@@ -359,7 +359,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     _output.WriteLine(url.ToString());
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server),
                         client.GetAsync(url));
                 }, options);
             }
@@ -1133,9 +1133,9 @@ namespace System.Net.Http.Functional.Tests
                     Task serverTask =
                         LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                         {
-                            await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, partialResponse);
+                            await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, partialResponse);
                             await tcs.Task;
-                        }, null);
+                        });
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
                     tcs.SetResult(true);
@@ -1169,7 +1169,7 @@ namespace System.Net.Http.Functional.Tests
                             }
                         }
                         catch { }
-                    }, null);
+                    });
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
                     cts.Cancel();

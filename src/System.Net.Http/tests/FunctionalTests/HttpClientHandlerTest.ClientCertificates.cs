@@ -239,8 +239,8 @@ namespace System.Net.Http.Functional.Tests
                     {
                         SslStream sslStream = Assert.IsType<SslStream>(stream);
                         Assert.Equal(cert, sslStream.RemoteCertificate);
-                        await LoopbackServer.ReadWriteAcceptedAsync(socket, reader, writer);
-                    }, options));
+                        await LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
+                    }));
             };
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>

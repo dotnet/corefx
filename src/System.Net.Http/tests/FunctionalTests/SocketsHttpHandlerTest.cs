@@ -287,8 +287,7 @@ namespace System.Net.Http.Functional.Tests
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                     await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, serverReader, serverWriter) =>
                     {
-                        Task<List<string>> serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, serverReader, serverWriter,
-                            $"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
+                        Task<List<string>> serverTask = LoopbackServer.ReadWriteAcceptedAsync(serverReader, serverWriter, $"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
 
                         await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
