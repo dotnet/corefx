@@ -212,20 +212,5 @@ namespace System.Net.Test.Common
         {
             return server.ReadRequestAndSendResponseAsync(response ?? GetDefaultHttpResponse());
         }
-
-        public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
-        {
-            // Read request line and headers. Skip any request body.
-            var lines = new List<string>();
-            string line;
-            while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
-            {
-                lines.Add(line);
-            }
-
-            await writer.WriteAsync(response ?? GetDefaultHttpResponse()).ConfigureAwait(false);
-
-            return lines;
-        }
     }
 }

@@ -1131,10 +1131,9 @@ namespace System.Net.Http.Functional.Tests
                         $"{chunkSize}\r\n";
 
                     var tcs = new TaskCompletionSource<bool>();
-                    Task serverTask =
-                        LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    Task serverTask = server.AcceptConnectionAsync(async connection =>
                         {
-                            await LoopbackServer.ReadWriteAcceptedAsync(reader, writer, partialResponse);
+                            await connection.ReadRequestHeaderAndSendResponseAsync(partialResponse);
                             await tcs.Task;
                         });
 

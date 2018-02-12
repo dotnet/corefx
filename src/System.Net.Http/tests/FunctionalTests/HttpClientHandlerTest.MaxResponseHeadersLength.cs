@@ -117,9 +117,9 @@ namespace System.Net.Http.Functional.Tests
                     }
                     Task<HttpResponseMessage> getAsync = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, reader, writer) =>
+                    await server.AcceptConnectionAsync(async connection =>
                     {
-                        Task serverTask = LoopbackServer.ReadWriteAcceptedAsync(reader, writer, responseHeaders);
+                        Task serverTask = connection.ReadRequestHeaderAndSendResponseAsync(responseHeaders);
 
                         if (shouldSucceed)
                         {
