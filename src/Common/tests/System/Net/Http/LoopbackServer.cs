@@ -109,6 +109,11 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+        public Task<List<string>> ReadRequestAndSendDefaultResponseAsync()
+        {
+            return ReadRequestAndSendResponseAsync(DefaultHttpResponse);
+        }
+
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
         {
             Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false);
