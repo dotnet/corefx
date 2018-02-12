@@ -43,18 +43,21 @@ namespace System.IO.Pipes
 
             if (IsCurrentUserOnly)
             {
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-                pipeSecurity = new PipeSecurity();
+                using (WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent())
+                {
+                    SecurityIdentifier identifier = currentIdentity.Owner;
+                    PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                    pipeSecurity = new PipeSecurity();
 
-                pipeSecurity.AddAccessRule(rule);
-                pipeSecurity.SetOwner(identifier);
+                    pipeSecurity.AddAccessRule(rule);
+                    pipeSecurity.SetOwner(identifier);
+                }
 
-                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
+                // PipeOptions.CurrentUserOnly is special since it doesn't match directly to a corresponding Win32 valid flag.
+                // Remove it, while keeping others untouched since historically this has been used as a way to pass flags to CreateNamedPipe
+                // that were not defined in the enumeration.
                 options &= ~PipeOptions.CurrentUserOnly;
             }
-
-            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
 
             int openMode = ((int)direction) |
                            (maxNumberOfServerInstances == 1 ? Interop.Kernel32.FileOperations.FILE_FLAG_FIRST_PIPE_INSTANCE : 0) |
