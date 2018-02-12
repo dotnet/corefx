@@ -14,8 +14,6 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
-            private const string RequiredOpenSSLBackendName = "SecureTransport";
-
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
             {
                 Debug.Assert(
@@ -45,7 +43,7 @@ namespace System.Net.Http
                             SR.net_http_libcurl_revocation_notsupported_sslbackend,
                             CurlVersionDescription,
                             CurlSslVersionDescription,
-                            RequiredOpenSSLBackendName));
+                            Interop.Http.SecureTransportDescription));
                 }
 
                 if (easy._handler.ServerCertificateCustomValidationCallback != null)
