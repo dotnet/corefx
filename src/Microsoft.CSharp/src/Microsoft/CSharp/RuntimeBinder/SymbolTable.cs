@@ -15,7 +15,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
-    internal sealed class SymbolTable
+    internal static class SymbolTable
     {
         private static readonly HashSet<Type> s_typesWithConversionsLoaded = new HashSet<Type>();
         private static readonly HashSet<NameHashKey> s_namesLoadedForEachType = new HashSet<NameHashKey>();
@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             public bool Equals(NameHashKey other) => other != null && type.Equals(other.type) && name.Equals(other.name);
 
-#if  DEBUG 
+#if  DEBUG
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
 #endif
             public override bool Equals(object obj)
@@ -1124,7 +1124,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static Type GetTypeByName(ref Type cachedResult, string name)
         {
+#pragma warning disable 252
             if ((object)cachedResult == s_Sentinel)
+#pragma warning restore 252
             {
                 System.Threading.Interlocked.CompareExchange(ref cachedResult, Type.GetType(name, throwOnError: false), s_Sentinel);
             }

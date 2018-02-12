@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class TypeTable
+    internal static class TypeTable
     {
         private readonly struct KeyPair<TKey1, TKey2> : IEquatable<KeyPair<TKey1, TKey2>>
         {

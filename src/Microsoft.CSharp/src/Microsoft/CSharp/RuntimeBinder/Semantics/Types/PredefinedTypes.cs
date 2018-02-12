@@ -9,7 +9,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class PredefinedTypes
+    internal static class PredefinedTypes
     {
         private static readonly AggregateSymbol[] s_predefSymbols = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
 

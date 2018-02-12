@@ -7,7 +7,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class SymFactory
+    internal static class SymFactory
     {
         private static Symbol NewBasicSymbol(
             SYMKIND kind,

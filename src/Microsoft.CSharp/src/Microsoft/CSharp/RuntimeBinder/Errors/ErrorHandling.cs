@@ -9,7 +9,7 @@ using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder.Errors
 {
-    internal sealed class ErrorHandling
+    internal static class ErrorHandling
     {
         public static RuntimeBinderException Error(ErrorCode id, params ErrArg[] args)
         {
