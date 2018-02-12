@@ -12,20 +12,6 @@ using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
-    // CONSIDER: Refactor into instance methods where appropriate.
-    // One approach would be to leave existing static in place, but defer these to instance methods
-
-    // Here are some specific things I may or may not want to do:
-    // (1) Change CreateServerAsync callback to not have Uri.
-    // (2) Make Accept call an instance mehtod.
-    // (3) Separate parsing utils?  Probably not.  Just make methods on LoopbackConnection...
-    // (4) Introduce LoopbackConnection, so I don't have to have all those callback args.
-
-        // Also:
-        // Consider whether more places should use CreateServerAndClientAsync.
-        // This would allow us to construct the HttpClient and managed its lifetime.
-        // Also, we'd need to allow an overload that takes an HttpClientHandler.
-
     public sealed class LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
@@ -60,6 +46,8 @@ namespace System.Net.Test.Common
 
         public Uri Uri => _uri;
 
+        // CONSIDER: In theory the callback here doesn't need to have the Uri anymore, since it's available on LoopbackServer.
+
         public static async Task CreateServerAsync(Func<LoopbackServer, Uri, Task> funcAsync, Options options = null)
         {
             options = options ?? new Options();
@@ -78,7 +66,6 @@ namespace System.Net.Test.Common
 
         // CONSIDER: Should this create the HttpClient as well?
         // Look at usage patterns and see if this makes sense.
-        // However, for now, let's hold off on making everyone use this, until we have a better sense of the pattern.
 
         public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc)
         {
@@ -91,10 +78,9 @@ namespace System.Net.Test.Common
             });
         }
 
-        // TODO: Should this be a method?
-        public static string DefaultHttpResponse => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
+        private static string GetDefaultHttpResponse() => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
 
-        // TODO: Rename?  Add the point that we're accepting and then closing a connection?
+        // TODO: Rename?  To indicate that we're accepting and then closing a connection?
         public async Task<List<string>> ReadRequestAndSendResponseAsync(string response)
         {
             List<string> lines = null;
@@ -111,7 +97,7 @@ namespace System.Net.Test.Common
 
         public Task<List<string>> ReadRequestAndSendDefaultResponseAsync()
         {
-            return ReadRequestAndSendResponseAsync(DefaultHttpResponse);
+            return ReadRequestAndSendResponseAsync(GetDefaultHttpResponse());
         }
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
@@ -211,7 +197,7 @@ namespace System.Net.Test.Common
 
             public Task<List<string>> ReadRequestHeaderAndSendDefaultResponseAsync()
             {
-                return ReadRequestHeaderAndSendResponseAsync(DefaultHttpResponse);
+                return ReadRequestHeaderAndSendResponseAsync(GetDefaultHttpResponse());
             }
         }
 
@@ -222,10 +208,9 @@ namespace System.Net.Test.Common
             return server.AcceptConnectionAsync(connection => funcAsync(connection.Socket, connection.Stream, connection.Reader, connection.Writer));
         }
 
-        // TODO: Split into two, one for default and other for not?  How common is default even?
         public static Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
-            return server.ReadRequestAndSendResponseAsync(response ?? DefaultHttpResponse);
+            return server.ReadRequestAndSendResponseAsync(response ?? GetDefaultHttpResponse());
         }
 
         public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
@@ -238,7 +223,7 @@ namespace System.Net.Test.Common
                 lines.Add(line);
             }
 
-            await writer.WriteAsync(response ?? DefaultHttpResponse).ConfigureAwait(false);
+            await writer.WriteAsync(response ?? GetDefaultHttpResponse()).ConfigureAwait(false);
 
             return lines;
         }
