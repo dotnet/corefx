@@ -229,10 +229,10 @@ namespace System.Net.Http.Functional.Tests
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         client.GetAsync(url),
-                        LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                        server.AcceptConnectionAsync(async connection =>
                         {
-                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(stream).SslProtocol);
-                            await LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
+                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(connection.Stream).SslProtocol);
+                            await connection.ReadRequestHeaderAndSendDefaultResponseAsync();
                         }));
                 }, options);
             }

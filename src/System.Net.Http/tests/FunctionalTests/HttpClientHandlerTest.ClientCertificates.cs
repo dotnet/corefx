@@ -235,11 +235,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 await TestHelper.WhenAllCompletedOrAnyFailed(
                     client.GetStringAsync(url),
-                    LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                    server.AcceptConnectionAsync(async connection =>
                     {
-                        SslStream sslStream = Assert.IsType<SslStream>(stream);
+                        SslStream sslStream = Assert.IsType<SslStream>(connection.Stream);
                         Assert.Equal(cert, sslStream.RemoteCertificate);
-                        await LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
+                        await connection.ReadRequestHeaderAndSendDefaultResponseAsync();
                     }));
             };
 

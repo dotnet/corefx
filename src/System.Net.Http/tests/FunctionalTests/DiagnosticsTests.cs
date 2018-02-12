@@ -283,11 +283,10 @@ namespace System.Net.Http.Functional.Tests
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             CancellationTokenSource tcs = new CancellationTokenSource();
-                            Task request = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) =>
+                            Task request = server.AcceptConnectionAsync(connection =>
                                 {
                                     tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
+                                    return connection.ReadRequestHeaderAndSendDefaultResponseAsync();
                                 });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));
@@ -608,12 +607,11 @@ namespace System.Net.Http.Functional.Tests
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             CancellationTokenSource tcs = new CancellationTokenSource();
-                            Task request = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) =>
-                                {
-                                    tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(reader, writer);
-                                });
+                            Task request = server.AcceptConnectionAsync(connection =>
+                            {
+                                tcs.Cancel();
+                                return connection.ReadRequestHeaderAndSendDefaultResponseAsync();
+                            });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));
                         }).Wait();
