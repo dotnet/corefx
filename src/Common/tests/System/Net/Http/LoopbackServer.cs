@@ -94,16 +94,20 @@ namespace System.Net.Test.Common
             });
         }
 
+        // TODO: Should this be a method?
         public static string DefaultHttpResponse => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
 
-        // TODO: Rename
+        // TODO: Rename?  Add the point that we're accepting and then closing a connection?
+        // TODO: Split into two, one for default and other for not?  How common is default even?
         public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
             List<string> lines = null;
 
-            await AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+            // Note, we assume there's no request body.  We'll close the connection after reading the request header
+            // and sending the response.
+            await server.AcceptConnectionAsync(async connection =>
             {
-                lines = await ReadWriteAcceptedAsync(reader, writer, response);
+                lines = await connection.ReadRequestHeaderAndSendResponseAsync(response ?? DefaultHttpResponse);
             });
 
             return lines;
@@ -125,7 +129,7 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        public async Task AcceptConnectionAsync(Func<LoopbackConnection, Task> funcAsync)
+        public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
         {
             Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false);
 
@@ -157,10 +161,69 @@ namespace System.Net.Test.Common
                     stream = _options.ResponseStreamWrapper(stream);
                 }
 
-                using (var connection = new LoopbackConnection(s, stream))
+                using (var connection = new Connection(s, stream))
                 {
                     await funcAsync(connection);
                 }
+            }
+        }
+
+        public sealed class Connection : IDisposable
+        {
+            private Socket _socket;
+            private Stream _stream;
+            private StreamReader _reader;
+            private StreamWriter _writer;
+
+            // TODO: Do we really need Socket here?
+            public Connection(Socket socket, Stream stream)
+            {
+                _socket = socket;
+                _stream = stream;
+
+                _reader = new StreamReader(stream, Encoding.ASCII);
+                _writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
+            }
+
+            public Socket Socket => _socket;
+            public Stream Stream => _stream;
+            public StreamReader Reader => _reader;
+            public StreamWriter Writer => _writer;
+
+            public void Dispose()
+            {
+                _reader.Dispose();
+                _writer.Dispose();
+                _stream.Dispose();
+                _socket.Dispose();
+            }
+
+            public async Task<List<string>> ReadRequestHeaderAsync()
+            {
+                var lines = new List<string>();
+                string line;
+                while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
+                {
+                    lines.Add(line);
+                }
+
+                return lines;
+            }
+
+            // TODO: Find instance(s) of this that use "" and change to call above
+            public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(string response)
+            {
+                List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
+
+                await _writer.WriteAsync(response ?? DefaultHttpResponse).ConfigureAwait(false);
+
+                return lines;
+            }
+
+            // TODO: Split into two methods.
+            public Task<List<string>> ReadRequestHeaderAndSendDefaultResponseAsync()
+            {
+                return ReadRequestHeaderAndSendResponseAsync(DefaultHttpResponse);
             }
         }
 
@@ -172,57 +235,4 @@ namespace System.Net.Test.Common
         }
     }
 
-    // TODO: Make this nested
-    public sealed class LoopbackConnection : IDisposable
-    {
-        private Socket _socket;
-        private Stream _stream;
-        private StreamReader _reader;
-        private StreamWriter _writer;
-
-        // TODO: Do we really need Socket here?
-        public LoopbackConnection(Socket socket, Stream stream)
-        {
-            _socket = socket;
-            _stream = stream;
-
-            _reader = new StreamReader(stream, Encoding.ASCII);
-            _writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
-        }
-
-        public Socket Socket => _socket;
-        public Stream Stream => _stream;
-        public StreamReader Reader => _reader;
-        public StreamWriter Writer => _writer;
-
-        public void Dispose()
-        {
-            _reader.Dispose();
-            _writer.Dispose();
-            _stream.Dispose();
-            _socket.Dispose();
-        }
-
-        public async Task<List<string>> ReadRequestHeaderAsync()
-        {
-            var lines = new List<string>();
-            string line;
-            while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
-            {
-                lines.Add(line);
-            }
-
-            return lines;
-        }
-
-        // TODO: Split into two methods.
-        public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(string response = null)
-        {
-            List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
-
-            await _writer.WriteAsync(response ?? LoopbackServer.DefaultHttpResponse).ConfigureAwait(false);
-
-            return lines;
-        }
-    }
 }
