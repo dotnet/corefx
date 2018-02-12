@@ -215,7 +215,10 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_NoSpecifiedProtocol_DefaultsToTls12()
         {
             if (!BackendSupportsSslConfiguration)
+            {
                 return;
+            }
+
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {

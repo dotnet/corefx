@@ -21,6 +21,11 @@ namespace System.Net.Test.Common
     // (3) Separate parsing utils?  Probably not.  Just make methods on LoopbackConnection...
     // (4) Introduce LoopbackConnection, so I don't have to have all those callback args.
 
+        // Also:
+        // Consider whether more places should use CreateServerAndClientAsync.
+        // This would allow us to construct the HttpClient and managed its lifetime.
+        // Also, we'd need to allow an overload that takes an HttpClientHandler.
+
     public sealed class LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
@@ -71,6 +76,10 @@ namespace System.Net.Test.Common
             }
         }
 
+        // CONSIDER: Should this create the HttpClient as well?
+        // Look at usage patterns and see if this makes sense.
+        // However, for now, let's hold off on making everyone use this, until we have a better sense of the pattern.
+
         public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc)
         {
             return CreateServerAsync(async (server, uri) =>
@@ -90,28 +99,12 @@ namespace System.Net.Test.Common
         {
             List<string> lines = null;
 
-            // Note, we assume there's no request body.  We'll close the connection after reading the request header
-            // and sending the response.
+            // Note, we assume there's no request body.  
+            // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {
                 lines = await connection.ReadRequestHeaderAndSendResponseAsync(response);
             });
-
-            return lines;
-        }
-
-        // TODO: Refactor?
-        public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
-        {
-            // Read request line and headers. Skip any request body.
-            var lines = new List<string>();
-            string line;
-            while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
-            {
-                lines.Add(line);
-            }
-
-            await writer.WriteAsync(response ?? DefaultHttpResponse).ConfigureAwait(false);
 
             return lines;
         }
@@ -127,11 +120,7 @@ namespace System.Net.Test.Common
                 Stream stream = new NetworkStream(s, ownsSocket: false);
                 if (_options.UseSsl)
                 {
-                    // TODO: Fix this nasty use of delegate
-                    // TODO: Merge SSL host stuff here?
-
-                    var sslStream = new SslStream(stream, false, delegate
-                    { return true; });
+                    var sslStream = new SslStream(stream, false, delegate { return true; });
                     using (var cert = Configuration.Certificates.GetServerCertificate())
                     {
                         await sslStream.AuthenticateAsServerAsync(
@@ -172,7 +161,6 @@ namespace System.Net.Test.Common
             private StreamReader _reader;
             private StreamWriter _writer;
 
-            // TODO: Do we really need Socket here?
             public Connection(Socket socket, Stream stream)
             {
                 _socket = socket;
@@ -207,17 +195,15 @@ namespace System.Net.Test.Common
                 return lines;
             }
 
-            // TODO: Find instance(s) of this that use "" and change to call above
             public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(string response)
             {
                 List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
 
-                await _writer.WriteAsync(response ?? DefaultHttpResponse).ConfigureAwait(false);
+                await _writer.WriteAsync(response).ConfigureAwait(false);
 
                 return lines;
             }
 
-            // TODO: Split into two methods.
             public Task<List<string>> ReadRequestHeaderAndSendDefaultResponseAsync()
             {
                 return ReadRequestHeaderAndSendResponseAsync(DefaultHttpResponse);
@@ -235,6 +221,21 @@ namespace System.Net.Test.Common
         public static Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
             return server.ReadRequestAndSendResponseAsync(response ?? DefaultHttpResponse);
+        }
+
+        public static async Task<List<string>> ReadWriteAcceptedAsync(StreamReader reader, StreamWriter writer, string response = null)
+        {
+            // Read request line and headers. Skip any request body.
+            var lines = new List<string>();
+            string line;
+            while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
+            {
+                lines.Add(line);
+            }
+
+            await writer.WriteAsync(response ?? DefaultHttpResponse).ConfigureAwait(false);
+
+            return lines;
         }
     }
 }
