@@ -39,7 +39,7 @@ internal static partial class Interop
                 Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(255), "should have enough space for the max file name");
                 Debug.Assert(Name != null, "should not have a null name");
 
-                ReadOnlySpan<byte> nameBytes = NameLength == -1
+                ReadOnlySpan<byte> nameBytes = (NameLength == -1)
                     // In this case the struct was allocated via struct dirent *readdir(DIR *dirp);
                     ? new ReadOnlySpan<byte>(Name, new ReadOnlySpan<byte>(Name, 255).IndexOf<byte>(0))
                     : new ReadOnlySpan<byte>(Name, NameLength);
@@ -56,10 +56,7 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_OpenDir", SetLastError = true)]
-        internal static extern SafeDirectoryHandle OpenDir(string path);
-
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_OpenDir", SetLastError = true)]
-        internal static extern IntPtr OpenDir_IntPtr(string path);
+        internal static extern IntPtr OpenDir(string path);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetReadDirRBufferSize", SetLastError = false)]
         internal static extern int GetReadDirRBufferSize();

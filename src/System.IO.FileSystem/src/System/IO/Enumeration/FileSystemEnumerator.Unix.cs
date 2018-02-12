@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
+using System.Threading;
 
 namespace System.IO.Enumeration
 {
@@ -46,7 +47,7 @@ namespace System.IO.Enumeration
             // We need to initialize the directory handle up front to ensure
             // we immediately throw IO exceptions for missing directory/etc.
             _directoryHandle = CreateDirectoryHandle(_rootDirectory);
-            if (_directoryHandle == null)
+            if (_directoryHandle == IntPtr.Zero)
                 _lastEntryFound = true;
 
             _currentPath = _rootDirectory;
@@ -67,7 +68,7 @@ namespace System.IO.Enumeration
 
         private IntPtr CreateDirectoryHandle(string path)
         {
-            IntPtr handle = Interop.Sys.OpenDir_IntPtr(path);
+            IntPtr handle = Interop.Sys.OpenDir(path);
             if (handle == IntPtr.Zero)
             {
                 Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
@@ -83,8 +84,9 @@ namespace System.IO.Enumeration
 
         private void CloseDirectoryHandle()
         {
-            Interop.Sys.CloseDir(_directoryHandle);
-            _directoryHandle = IntPtr.Zero;
+            IntPtr handle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
+            if (handle != IntPtr.Zero)
+                Interop.Sys.CloseDir(_directoryHandle);
         }
 
         public bool MoveNext()
