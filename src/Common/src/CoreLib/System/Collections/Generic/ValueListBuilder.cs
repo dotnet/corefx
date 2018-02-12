@@ -21,6 +21,8 @@ namespace System.Collections.Generic
             _pos = 0;
         }
 
+        public ref T this[int index] => ref _span[index];
+
         public int Length => _pos;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,6 +34,13 @@ namespace System.Collections.Generic
 
             _span[pos] = item;
             _pos = pos + 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T Pop()
+        {
+            _pos--;
+            return _span[_pos];
         }
 
         public ReadOnlySpan<T> AsReadOnlySpan()

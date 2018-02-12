@@ -42,6 +42,9 @@
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Generic\ValueListBuilder.cs">
+      <Link>Common\System\Collections\Generic\ValueListBuilder.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Files that enable compiled feature -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
@@ -58,6 +61,7 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.Buffers" />
   </ItemGroup>
   <!-- References required for compiled feature -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
