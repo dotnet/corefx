@@ -86,16 +86,15 @@ namespace System.Net.Test.Common
         public static string DefaultHttpResponse => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
 
         // TODO: Rename?  Add the point that we're accepting and then closing a connection?
-        // TODO: Split into two, one for default and other for not?  How common is default even?
-        public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
+        public async Task<List<string>> ReadRequestAndSendResponseAsync(string response)
         {
             List<string> lines = null;
 
             // Note, we assume there's no request body.  We'll close the connection after reading the request header
             // and sending the response.
-            await server.AcceptConnectionAsync(async connection =>
+            await AcceptConnectionAsync(async connection =>
             {
-                lines = await connection.ReadRequestHeaderAndSendResponseAsync(response ?? DefaultHttpResponse);
+                lines = await connection.ReadRequestHeaderAndSendResponseAsync(response);
             });
 
             return lines;
@@ -231,6 +230,11 @@ namespace System.Net.Test.Common
         {
             return server.AcceptConnectionAsync(connection => funcAsync(connection.Socket, connection.Stream, connection.Reader, connection.Writer));
         }
-    }
 
+        // TODO: Split into two, one for default and other for not?  How common is default even?
+        public static Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
+        {
+            return server.ReadRequestAndSendResponseAsync(response ?? DefaultHttpResponse);
+        }
+    }
 }
