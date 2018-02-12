@@ -20,18 +20,18 @@ namespace Microsoft.CSharp.RuntimeBinder
         private static readonly HashSet<Type> s_typesWithConversionsLoaded = new HashSet<Type>();
         private static readonly HashSet<NameHashKey> s_namesLoadedForEachType = new HashSet<NameHashKey>();
 
-        private sealed class NameHashKey : IEquatable<NameHashKey>
+        private readonly struct NameHashKey : IEquatable<NameHashKey>
         {
-            internal readonly Type type;
-            internal readonly string name;
+            internal Type Type { get; }
+            internal string Name { get; }
 
             public NameHashKey(Type type, string name)
             {
-                this.type = type;
-                this.name = name;
+                Type = type;
+                Name = name;
             }
 
-            public bool Equals(NameHashKey other) => other != null && type.Equals(other.type) && name.Equals(other.name);
+            public bool Equals(NameHashKey other) => Type.Equals(other.Type) && Name.Equals(other.Name);
 
 #if  DEBUG
             [ExcludeFromCodeCoverage] // Typed overload should always be the method called.
@@ -39,13 +39,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                return Equals(obj as NameHashKey);
+                return obj is NameHashKey key &&  Equals(key);
             }
 
-            public override int GetHashCode()
-            {
-                return type.GetHashCode() ^ name.GetHashCode();
-            }
+            public override int GetHashCode() => Type.GetHashCode() ^ Name.GetHashCode();
         }
 
         internal static void PopulateSymbolTableWithName(
@@ -139,10 +136,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             Debug.Assert(!s_namesLoadedForEachType.Contains(key));
 
             // We need to declare all of its inheritance hierarchy.
-            List<Type> inheritance = CreateInheritanceHierarchyList(key.type);
+            List<Type> inheritance = CreateInheritanceHierarchyList(key.Type);
 
             // Now add every method as it appears in the inheritance hierarchy.
-            AddNamesInInheritanceHierarchy(key.name, inheritance);
+            AddNamesInInheritanceHierarchy(key.Name, inheritance);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
