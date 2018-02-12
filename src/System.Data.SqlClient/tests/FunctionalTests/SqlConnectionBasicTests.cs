@@ -89,6 +89,21 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
+        [Theory]
+        [InlineData("RandomStringForTargetServer", true)]
+        [InlineData(null, false)]
+        [InlineData("", false)]
+        public void RetrieveWorkstationId(string workstation, bool withDispose)
+        {
+            string connectionString = $"Workstation Id={workstation}";
+            SqlConnection conn = new SqlConnection(connectionString);
+            if(withDispose)
+            {
+                conn.Dispose();
+            }
+            Assert.Equal(Environment.MachineName, conn.WorkstationId);
+        }
+
         [Fact]
         public void ConnectionTimeoutTestWithThread()
         {
