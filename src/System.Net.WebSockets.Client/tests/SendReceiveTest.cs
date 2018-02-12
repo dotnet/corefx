@@ -381,7 +381,7 @@ namespace System.Net.WebSockets.Client.Tests
         {
             var options = new LoopbackServer.Options { WebSocketEndpoint = true };
 
-            Func<ClientWebSocket, Socket, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
+            Func<ClientWebSocket, LoopbackServer, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
             {
                 AutoResetEvent pendingReceiveAsyncPosted =  new AutoResetEvent(false);
 
@@ -397,7 +397,7 @@ namespace System.Net.WebSockets.Client.Tests
                     // Close the underlying connection prematurely (without sending a WebSocket Close frame).
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
-                }, options);
+                });
 
                 // Initiate a connection attempt.
                 var cts = new CancellationTokenSource(TimeOutMilliseconds);

@@ -89,7 +89,7 @@ namespace System.Net.WebSockets.Client.Tests
         {
             var options = new LoopbackServer.Options { UseSsl = true, WebSocketEndpoint = true };
 
-            Func<ClientWebSocket, Socket, Uri, X509Certificate2, Task> connectToServerWithClientCert = async (clientSocket, server, url, clientCert) =>
+            Func<ClientWebSocket, LoopbackServer, Uri, X509Certificate2, Task> connectToServerWithClientCert = async (clientSocket, server, url, clientCert) =>
             {
                 // Start listening for incoming connections on the server side.
                 Task acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
@@ -103,7 +103,7 @@ namespace System.Net.WebSockets.Client.Tests
                         // Complete the WebSocket upgrade over the secure channel. After this is done, the client-side
                         // ConnectAsync should complete.
                         Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(socket, reader, writer));
-                    }, options);
+                    });
 
                 // Initiate a connection attempt with a client certificate configured on the socket.
                 clientSocket.Options.ClientCertificates.Add(clientCert);
