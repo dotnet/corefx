@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
+    // CONSIDER: Refactor into instance methods where appropriate.
+    // One approach would be to leave existing static in place, but defer these to instance methods
+
     public sealed class LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
@@ -47,6 +50,8 @@ namespace System.Net.Test.Common
             _listenSocket.Dispose();
             _listenSocket = null;
         }
+
+        // TODO: Move to HttpsTestServer? But then, why does that exist at all?
 
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
 
