@@ -4,13 +4,9 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,9 +47,7 @@ namespace System.Net.Test.Common
             _listenSocket = null;
         }
 
-        // TODO: Move to HttpsTestServer? But then, why does that exist at all?
-
-        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
+        public Uri Uri => _uri;
 
         public class Options
         {
@@ -93,14 +87,6 @@ namespace System.Net.Test.Common
         }
 
         public static string DefaultHttpResponse => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
-
-        public static IPAddress GetIPv6LinkLocalAddress() =>
-            NetworkInterface
-                .GetAllNetworkInterfaces()
-                .SelectMany(i => i.GetIPProperties().UnicastAddresses)
-                .Select(a => a.Address)
-                .Where(a => a.IsIPv6LinkLocal)
-                .FirstOrDefault();
 
         public static async Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {

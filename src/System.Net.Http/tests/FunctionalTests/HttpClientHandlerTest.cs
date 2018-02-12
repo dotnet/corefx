@@ -336,7 +336,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClient client = CreateHttpClient())
             {
-                var options = new LoopbackServer.Options { Address = LoopbackServer.GetIPv6LinkLocalAddress() };
+                var options = new LoopbackServer.Options { Address = TestHelper.GetIPv6LinkLocalAddress() };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     _output.WriteLine(url.ToString());
