@@ -32,10 +32,12 @@ namespace System.IO.Tests
         [Fact]
         public void OpenErrorDoesNotHappenAgainOnMoveNext()
         {
-            IgnoreErrors ie = new IgnoreErrors(Path.GetRandomFileName());
-            Assert.Equal(1, ie.ErrorCount);
-            Assert.False(ie.MoveNext());
-            Assert.Equal(1, ie.ErrorCount);
+            using (IgnoreErrors ie = new IgnoreErrors(Path.GetRandomFileName()))
+            {
+                Assert.Equal(1, ie.ErrorCount);
+                Assert.False(ie.MoveNext());
+                Assert.Equal(1, ie.ErrorCount);
+            }
         }
     }
 }

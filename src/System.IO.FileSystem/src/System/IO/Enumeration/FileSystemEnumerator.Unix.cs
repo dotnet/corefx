@@ -86,7 +86,7 @@ namespace System.IO.Enumeration
         {
             IntPtr handle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
             if (handle != IntPtr.Zero)
-                Interop.Sys.CloseDir(_directoryHandle);
+                Interop.Sys.CloseDir(handle);
         }
 
         public bool MoveNext()
