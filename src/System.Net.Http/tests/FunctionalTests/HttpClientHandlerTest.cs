@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -249,8 +250,8 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
-                var credentialString = _credential.UserName + ":" + _credential.Password;
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentialString);
+                string credentialString = _credential.UserName + ":" + _credential.Password;
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialString);
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
                     statusCode: statusCode,

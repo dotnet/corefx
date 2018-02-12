@@ -851,7 +851,7 @@ namespace System.Net.Http
                 foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
                 {
                     if (string.Equals(header.Key, HttpKnownHeaderNames.ContentLength, StringComparison.OrdinalIgnoreCase) ||
-                        !copyAuthHeaders && string.Equals(header.Key, HttpKnownHeaderNames.Authorization, StringComparison.OrdinalIgnoreCase))
+                        (!copyAuthHeaders && string.Equals(header.Key, HttpKnownHeaderNames.Authorization, StringComparison.OrdinalIgnoreCase)))
                     {
                         // avoid overriding libcurl's handling via INFILESIZE/POSTFIELDSIZE
                         continue;
