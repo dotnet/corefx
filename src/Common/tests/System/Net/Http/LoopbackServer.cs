@@ -80,8 +80,7 @@ namespace System.Net.Test.Common
 
         private static string GetDefaultHttpResponse() => $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n";
 
-        // TODO: Rename?  To indicate that we're accepting and then closing a connection?
-        public async Task<List<string>> ReadRequestAndSendResponseAsync(string response)
+        public async Task<List<string>> AcceptConnectionSendResponseAndCloseAsync(string response)
         {
             List<string> lines = null;
 
@@ -95,9 +94,9 @@ namespace System.Net.Test.Common
             return lines;
         }
 
-        public Task<List<string>> ReadRequestAndSendDefaultResponseAsync()
+        public Task<List<string>> AcceptConnectionSendDefaultResponseAndCloseAsync()
         {
-            return ReadRequestAndSendResponseAsync(GetDefaultHttpResponse());
+            return AcceptConnectionSendResponseAndCloseAsync(GetDefaultHttpResponse());
         }
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
@@ -210,7 +209,7 @@ namespace System.Net.Test.Common
 
         public static Task<List<string>> ReadRequestAndSendResponseAsync(LoopbackServer server, string response = null)
         {
-            return server.ReadRequestAndSendResponseAsync(response ?? GetDefaultHttpResponse());
+            return server.AcceptConnectionSendResponseAndCloseAsync(response ?? GetDefaultHttpResponse());
         }
     }
 }

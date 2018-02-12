@@ -63,7 +63,7 @@ namespace System.Net.Http.Functional.Tests
                 });
 
                 // Client should reconnect.  Accept that connection and send response.
-                await server.ReadRequestAndSendResponseAsync(s_simpleResponse);
+                await server.AcceptConnectionSendResponseAndCloseAsync(s_simpleResponse);
             });
         }
 

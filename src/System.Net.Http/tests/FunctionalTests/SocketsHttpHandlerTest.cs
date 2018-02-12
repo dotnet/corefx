@@ -381,7 +381,7 @@ namespace System.Net.Http.Functional.Tests
                     for (int i = 0; i < 2; i++)
                     {
                         Task<string> request = client.GetStringAsync(uri);
-                        await server.ReadRequestAndSendDefaultResponseAsync();
+                        await server.AcceptConnectionSendDefaultResponseAndCloseAsync();
                         await request;
 
                         if (i == 0)

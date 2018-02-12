@@ -36,7 +36,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = new HttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(uri);
-                    Task<List<string>> serverTask = server.ReadRequestAndSendDefaultResponseAsync();
+                    Task<List<string>> serverTask = server.AcceptConnectionSendDefaultResponseAndCloseAsync();
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
@@ -69,7 +69,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Headers.Host = hostname;
                     request.Headers.Referrer = uri;
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-                    Task<List<string>> serverTask = server.ReadRequestAndSendDefaultResponseAsync();
+                    Task<List<string>> serverTask = server.AcceptConnectionSendDefaultResponseAndCloseAsync();
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
