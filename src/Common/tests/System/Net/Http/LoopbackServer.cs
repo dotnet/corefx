@@ -16,10 +16,6 @@ using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
-    // TODO: Expose Accept call as member
-
-        // TODO: Url stuff
-
     public sealed class LoopbackServer : IDisposable
     {
         private Socket _listenSocket;
@@ -50,7 +46,6 @@ namespace System.Net.Test.Common
         {
             _listenSocket.Dispose();
             _listenSocket = null;
-
         }
 
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
