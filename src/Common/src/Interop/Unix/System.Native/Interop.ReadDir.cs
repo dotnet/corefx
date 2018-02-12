@@ -50,13 +50,16 @@ internal static partial class Interop
 
                 int charCount = Encoding.UTF8.GetChars(nameBytes, buffer);
                 ReadOnlySpan<char> value = buffer.Slice(0, charCount);
-                Debug.Assert(value.IndexOf('\0') == -1, "should not have embedded nulls");
+                Debug.Assert(NameLength != -1 || value.IndexOf('\0') == -1, "should not have embedded nulls if we parsed the end of string");
                 return value;
             }
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_OpenDir", SetLastError = true)]
         internal static extern SafeDirectoryHandle OpenDir(string path);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_OpenDir", SetLastError = true)]
+        internal static extern IntPtr OpenDir_IntPtr(string path);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetReadDirRBufferSize", SetLastError = false)]
         internal static extern int GetReadDirRBufferSize();
@@ -74,13 +77,13 @@ internal static partial class Interop
         /// 
         /// Call <see cref="ReadBufferSize"/> to see what size buffer to allocate.
         /// </summary>
-        internal static int ReadDir(SafeDirectoryHandle dir, Span<byte> buffer, ref DirectoryEntry entry)
+        internal static int ReadDir(IntPtr dir, Span<byte> buffer, ref DirectoryEntry entry)
         {
             // The calling pattern for ReadDir is described in src/Native/Unix/System.Native/pal_io.cpp|.h
             Debug.Assert(buffer.Length >= ReadBufferSize, "should have a big enough buffer for the raw data");
 
             // ReadBufferSize is zero when the native implementation does not support reading into a buffer.
-            return ReadDirR(dir.DangerousGetHandle(), ref MemoryMarshal.GetReference(buffer), ReadBufferSize, ref entry);
+            return ReadDirR(dir, ref MemoryMarshal.GetReference(buffer), ReadBufferSize, ref entry);
         }
     }
 }

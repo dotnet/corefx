@@ -4,9 +4,7 @@
 
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
-using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Enumeration
 {
@@ -22,7 +20,7 @@ namespace System.IO.Enumeration
         private readonly object _lock = new object();
 
         private string _currentPath;
-        private SafeDirectoryHandle _directoryHandle;
+        private IntPtr _directoryHandle;
         private bool _lastEntryFound;
         private Queue<string> _pending;
 
@@ -67,18 +65,16 @@ namespace System.IO.Enumeration
             }
         }
 
-        private SafeDirectoryHandle CreateDirectoryHandle(string path)
+        private IntPtr CreateDirectoryHandle(string path)
         {
-            // TODO: https://github.com/dotnet/corefx/issues/26715
-            // - Use IntPtr handle directly
-            SafeDirectoryHandle handle = Interop.Sys.OpenDir(path);
-            if (handle.IsInvalid)
+            IntPtr handle = Interop.Sys.OpenDir_IntPtr(path);
+            if (handle == IntPtr.Zero)
             {
                 Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
                 if ((_options.IgnoreInaccessible && IsAccessError(info.RawErrno))
                     || ContinueOnError(info.RawErrno))
                 {
-                    return null;
+                    return IntPtr.Zero;
                 }
                 throw Interop.GetExceptionForIoErrno(info, path, isDirectory: true);
             }
@@ -87,8 +83,8 @@ namespace System.IO.Enumeration
 
         private void CloseDirectoryHandle()
         {
-            _directoryHandle?.Dispose();
-            _directoryHandle = null;
+            Interop.Sys.CloseDir(_directoryHandle);
+            _directoryHandle = IntPtr.Zero;
         }
 
         public bool MoveNext()
