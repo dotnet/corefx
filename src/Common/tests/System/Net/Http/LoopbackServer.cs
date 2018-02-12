@@ -55,18 +55,6 @@ namespace System.Net.Test.Common
 
         public Uri Uri => _uri;
 
-        // TODO: Move to end
-        // TODO: Make Wrapper just StreamWrapper
-        public class Options
-        {
-            public IPAddress Address { get; set; } = IPAddress.Loopback;
-            public int ListenBacklog { get; set; } = 1;
-            public bool UseSsl { get; set; } = false;
-            public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
-            public bool WebSocketEndpoint { get; set; } = false;
-            public Func<Stream, Stream> ResponseStreamWrapper { get; set; }
-        }
-
         public static async Task CreateServerAsync(Func<LoopbackServer, Uri, Task> funcAsync, Options options = null)
         {
             options = options ?? new Options();
@@ -156,9 +144,9 @@ namespace System.Net.Test.Common
                     stream = sslStream;
                 }
 
-                if (_options.ResponseStreamWrapper != null)
+                if (_options.StreamWrapper != null)
                 {
-                    stream = _options.ResponseStreamWrapper(stream);
+                    stream = _options.StreamWrapper(stream);
                 }
 
                 using (var connection = new Connection(s, stream))
@@ -166,6 +154,16 @@ namespace System.Net.Test.Common
                     await funcAsync(connection);
                 }
             }
+        }
+
+        public class Options
+        {
+            public IPAddress Address { get; set; } = IPAddress.Loopback;
+            public int ListenBacklog { get; set; } = 1;
+            public bool UseSsl { get; set; } = false;
+            public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+            public bool WebSocketEndpoint { get; set; } = false;
+            public Func<Stream, Stream> StreamWrapper { get; set; }
         }
 
         public sealed class Connection : IDisposable

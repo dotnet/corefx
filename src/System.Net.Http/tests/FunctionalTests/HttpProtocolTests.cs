@@ -37,7 +37,7 @@ namespace System.Net.Http.Functional.Tests
                     var requestLines = await serverTask;
                     Assert.Equal($"GET {url.PathAndQuery} HTTP/1.0", requestLines[0]);
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace System.Net.Http.Functional.Tests
                     var requestLines = await serverTask;
                     Assert.Equal($"GET {url.PathAndQuery} HTTP/1.1", requestLines[0]);
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Theory]
@@ -102,7 +102,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync(exceptionType, (() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask)));
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk});
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk});
         }
 
         [Theory]
@@ -144,7 +144,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync(exceptionType, (() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask)));
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [Theory]
@@ -172,7 +172,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(responseMinorVersion, response.Version.Minor);
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Theory]
@@ -216,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
                         }
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
@@ -255,7 +255,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(async () => await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
@@ -331,7 +331,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(async () => await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [Theory]
@@ -402,7 +402,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(expectedReason, response.ReasonPhrase);
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         public static IEnumerable<string> GetInvalidStatusLine()
@@ -510,7 +510,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]   // Does not support LF-only
@@ -536,7 +536,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal("TestServer", response.Headers.Server.ToString());
                     }
                 }
-            }, new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
     }
 
