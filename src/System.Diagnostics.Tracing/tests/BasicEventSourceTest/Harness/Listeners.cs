@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 using Microsoft.Diagnostics.Tracing.Etlx;
@@ -145,7 +145,7 @@ namespace BasicEventSourceTests
         }
     }
 
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
     /**************************************************************************/
     /* Concrete implementation of the Listener abstraction */
 

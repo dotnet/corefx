@@ -14,7 +14,7 @@ using Microsoft.Diagnostics.Tracing;
 using System.Diagnostics.Tracing;
 #endif
 using Xunit;
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 #endif
@@ -26,7 +26,6 @@ namespace BasicEventSourceTests
     public class TestShutdown
     {
 
-        // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
         // TODO: Depends on desktop APIs (AppDomainSetup and Evidence).
 #if USE_ETW && FALSE
         /// <summary>

@@ -24,7 +24,7 @@ namespace BasicEventSourceTests
 {
     public class TestsWriteEvent
     {
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
         /// <summary>
         /// Tests WriteEvent using the manifest based mechanism.   
         /// Tests the ETW path. 
@@ -62,7 +62,7 @@ namespace BasicEventSourceTests
         {
             Test_WriteEvent(new EventListenerListener(true), false);
         }
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
         /// <summary>
         /// Tests WriteEvent using the self-describing mechanism.   
         /// Tests both the ETW and TraceListener paths. 
@@ -156,7 +156,7 @@ namespace BasicEventSourceTests
                         Assert.Equal(evt.PayloadValue(0, "arg1"), "one");
                         Assert.Equal(evt.PayloadValue(1, "arg2"), "two");
                     }));
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Basic/EventWithManyTypeArgs",
                     delegate ()
@@ -200,7 +200,7 @@ namespace BasicEventSourceTests
                         Assert.Equal("s0", (string)evt.PayloadValue(0, "s0"));
                         Assert.Equal("s8", (string)evt.PayloadValue(8, "s8"));
                     }));
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Activity/EventWithXferWeirdArgs",
                     delegate ()
@@ -431,7 +431,7 @@ namespace BasicEventSourceTests
             }
         }
 
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
         /// <summary>
         /// Tests sending complex data (class, arrays etc) from WriteEvent 
         /// Tests the EventListener case
@@ -520,7 +520,7 @@ namespace BasicEventSourceTests
             Test_WriteEvent_ByteArray(false, new EventListenerListener(true));
         }
 
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
         /// <summary>
         /// Tests sending complex data (class, arrays etc) from WriteEvent 
         /// Uses Manifest format
@@ -550,7 +550,7 @@ namespace BasicEventSourceTests
             }
         }
 
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
         /// <summary>
         /// Tests sending complex data (class, arrays etc) from WriteEvent 
         /// Uses Self-Describing format
