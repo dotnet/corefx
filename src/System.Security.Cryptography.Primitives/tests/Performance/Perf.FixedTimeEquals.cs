@@ -11,20 +11,6 @@ namespace System.Security.Cryptography.Primitives.Tests.Performance
     public class Perf_FixedTimeEquals
     {
         private const int IterationCountFor256Bit = 300000;
-        private static bool _isValid;
-
-        static Perf_FixedTimeEquals()
-        {
-            _isValid = CryptographicOperations.FixedTimeEquals(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty);
-        }
-
-        [Benchmark(InnerIterationCount = IterationCountFor256Bit)]
-        public static void FixedTimeEquals_256Bit_AaaaWarmup()
-        {
-            MeasureFixedTimeEquals(
-                "741202531e19d673ad7fff334594549e7c81a285dd02865ddd12530612a96336",
-                "0000000000000000000000000000000000000000000000000000000000000000");
-        }
 
         [Benchmark(InnerIterationCount = IterationCountFor256Bit)]
         public static void FixedTimeEquals_256Bit_Equal()
@@ -67,22 +53,6 @@ namespace System.Security.Cryptography.Primitives.Tests.Performance
         }
 
         [Benchmark(InnerIterationCount = IterationCountFor256Bit)]
-        public static void FixedTimeEquals_256Bit_AllBitsDifferent2()
-        {
-            MeasureFixedTimeEquals(
-                "741202531e19d673ad7fff334594549e7c81a285dd02865ddd12530612a96336",
-                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        }
-
-        [Benchmark(InnerIterationCount = IterationCountFor256Bit)]
-        public static void FixedTimeEquals_256Bit_AllBitsDifferent3()
-        {
-            MeasureFixedTimeEquals(
-                "741202531e19d673ad7fff334594549e7c81a285dd02865ddd12530612a96336",
-                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        }
-
-        [Benchmark(InnerIterationCount = IterationCountFor256Bit)]
         public static void FixedTimeEquals_256Bit_VersusZero()
         {
             MeasureFixedTimeEquals(
@@ -118,8 +88,6 @@ namespace System.Security.Cryptography.Primitives.Tests.Performance
             {
                 throw new InvalidOperationException();
             }
-
-            Assert.True(_isValid);
 
             byte[] a = baseValueHex.HexToByteArray();
             byte[] b = errorVectorHex.HexToByteArray();
