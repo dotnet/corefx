@@ -934,17 +934,35 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public static void GetFullPath_BasePath_InvalidInput()
+        public static void GetFullPath_BasePath_InvalidInput_Windows()
         {
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("tmp", null));
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath(@"c:\git\corefx", null));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath("", @"foo\bar"));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", @"foo\bar"));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"C:\git", @"foo\bar"));
-        }
+			AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath("", null));
+			AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath("tmp", null));
+			AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath(@"c:\git\corefx", null));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath("", @"foo\bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", @"foo\bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"C:\git", @"foo\bar"));
+			AssertExtensions.Throws<ArgumentException>("path", () => Path.GetFullPath(null, @"foo\bar"));
+			AssertExtensions.Throws<ArgumentException>("path", () => Path.GetFullPath(null, @"C:\foo\bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"C:\gi\0t", @"c:\foo\bar"));
+		}
 
-        public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData()
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void GetFullPath_BasePath_InvalidInput_Unix()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath("", null));
+            AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath("tmp", null));
+            AssertExtensions.Throws<ArgumentNullException>("basePath", () => Path.GetFullPath(@"\home", null));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath("", @"foo\bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", @"foo\bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"\home", @"foo\bar"));
+			AssertExtensions.Throws<ArgumentException>("path", () => Path.GetFullPath(null, @"foo/bar"));
+			AssertExtensions.Throws<ArgumentException>("path", () => Path.GetFullPath(null, @"/foo/bar"));
+			Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"/gi\0t", @"/foo/bar"));
+		}
+
+        public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData_Windows()
         {
             string curDir = @"c:\git\corefx";
             yield return new object[] { curDir, curDir, curDir };
@@ -1024,11 +1042,11 @@ namespace System.IO.Tests
             yield return new object[] { @"\", curDir, Path.GetPathRoot(curDir) };
 
             // Specific drive rooted
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, Path.GetPathRoot(curDir) + @"tmp\foo" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) +@"tmp"  };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp", curDir, Path.GetPathRoot(curDir) + @"tmp" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":", curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, curDir + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, curDir + @"tmp\foo" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, curDir + @"tmp"  };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp", curDir, curDir + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":", curDir, curDir };
             yield return new object[] { Path.GetPathRoot(curDir)[0], curDir, curDir + Path.DirectorySeparatorChar + Path.GetPathRoot(curDir)[0] };
 
             yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
@@ -1040,24 +1058,11 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData))]
+        [MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData_Windows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public static void GetFullPath_BasicExpansions(string path, string basePath, string expected)
+        public static void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
-        }
-
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public static void GetFullPath_BasePath_InvalidInput_Unix()
-        {
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("tmp", null));
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath(@"\home", null));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath("", @"foo\bar"));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", @"foo\bar"));
-            Assert.Throws<ArgumentException>(() => Path.GetFullPath(@"\home", @"foo\bar"));
         }
 
         public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData_Unix()
