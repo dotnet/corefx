@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Security.Cryptography.Primitives.Tests
@@ -23,32 +22,29 @@ namespace System.Security.Cryptography.Primitives.Tests
             byte[] rented = ArrayPool<byte>.Shared.Rent(byteLength);
             Span<byte> testSpan = new Span<byte>(rented, 0, byteLength);
 
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            bool hasData = false;
+
+            // i should really only iterate when byteLength is 1, and then
+            // only 1/256 executions.
+            //
+            // The chances of this failing are 1 in 1.2e24, unless the RNG is broken.
+            for (int i = 0; i < 10 && !hasData; i++)
             {
-                bool hasData = false;
+                RandomNumberGenerator.Fill(testSpan);
 
-                // i should really only iterate when byteLength is 1, and then
-                // only 1/256 executions.
-                //
-                // The chances of this failing are 1 in 1.2e24, unless the RNG is broken.
-                for (int i = 0; i < 10 && !hasData; i++)
+                for (int j = 0; j < testSpan.Length; j++)
                 {
-                    rng.GetBytes(testSpan);
-
-                    for (int j = 0; j < testSpan.Length; j++)
+                    if (testSpan[j] != 0)
                     {
-                        if (testSpan[j] != 0)
-                        {
-                            hasData = true;
-                            break;
-                        }
+                        hasData = true;
+                        break;
                     }
                 }
+            }
 
-                if (!hasData)
-                {
-                    throw new InvalidOperationException("RNG provided all zero-values");
-                }
+            if (!hasData)
+            {
+                throw new InvalidOperationException("RNG provided all zero-values");
             }
 
             // This test cannot guarantee the effect of the memory being cleared
