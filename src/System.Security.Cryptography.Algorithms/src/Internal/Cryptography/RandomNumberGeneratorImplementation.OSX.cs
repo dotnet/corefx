@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
@@ -14,14 +13,6 @@ namespace System.Security.Cryptography
             Debug.Assert(count > 0);
 
             Interop.AppleCrypto.GetRandomBytes(ref pbBuffer, count);
-        }
-
-        internal static void FillSpan(Span<byte> data)
-        {
-            if (data.Length > 0)
-            {
-                GetBytes(ref MemoryMarshal.GetReference(data), data.Length);
-            }
         }
     }
 }

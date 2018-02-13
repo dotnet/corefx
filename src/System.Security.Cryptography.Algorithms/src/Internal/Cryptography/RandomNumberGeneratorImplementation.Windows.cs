@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
@@ -16,14 +15,6 @@ namespace System.Security.Cryptography
             Interop.BCrypt.NTSTATUS status = Interop.BCrypt.BCryptGenRandom(ref pbBuffer, count);
             if (status != Interop.BCrypt.NTSTATUS.STATUS_SUCCESS)
                 throw Interop.BCrypt.CreateCryptographicException(status);
-        }
-
-        internal static void FillSpan(Span<byte> data)
-        {
-            if (data.Length > 0)
-            {
-                GetBytes(ref MemoryMarshal.GetReference(data), data.Length);
-            }
         }
     }
 }
