@@ -66,7 +66,7 @@ namespace System.IO.Tests
 
 
         [Fact]
-        public void Dispose_ThrowDuringFlushWriteBuffer_TrueArgThrows()
+        public void Dispose_CallsVirtualDisposeTrueArg_ThrowsDuringFlushWriteBuffer_DisposeThrows()
         {
             RemoteInvoke(() =>
             {
@@ -76,10 +76,7 @@ namespace System.IO.Tests
                     fscreate.WriteByte(0);
                 }
                 bool writeDisposeInvoked = false;
-                Action<bool> writeDisposeMethod = (disposing) =>
-                {
-                    writeDisposeInvoked = true;
-                };
+                Action<bool> writeDisposeMethod = _ => writeDisposeInvoked = true;
                 using (var fsread = new FileStream(fileName, FileMode.Open, FileAccess.Read))
                 {
                     Action act = () => // separate method to avoid JIT lifetime-extension issues
@@ -115,8 +112,8 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void Dispose_ThrowDuringFlushWriteBuffer_FalseArgWontThrow()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing fix for https://github.com/dotnet/coreclr/pull/16250")]
+        public void NoDispose_CallsVirtualDisposeFalseArg_ThrowsDuringFlushWriteBuffer_FinalizerWontThrow()
         {
             RemoteInvoke(() =>
             {
@@ -140,7 +137,8 @@ namespace System.IO.Tests
                     };
                     act();
                     
-                    // make sure finalizer gets called and doesnt throw exception
+                    // Dispose is not getting called here.
+                    // instead, make sure finalizer gets called and doesnt throw exception
                     for (int i = 0; i < 2; i++)
                     {
                         GC.Collect();
