@@ -5,6 +5,7 @@
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
+using Microsoft.Diagnostics.Tracing.Etlx;
 #endif
 using System;
 using System.Collections.Generic;
@@ -248,6 +249,10 @@ namespace BasicEventSourceTests
             if (data.ProviderGuid == EventTraceProviderID)
                 return;
 
+            // Ignore kernel events.
+            if (data.ProviderGuid == KernelProviderID)
+                return;
+
             // Ignore manifest events. 
             if ((int)data.ID == 0xFFFE)
                 return;
@@ -255,6 +260,7 @@ namespace BasicEventSourceTests
         }
 
         private static readonly Guid EventTraceProviderID = new Guid("9e814aad-3204-11d2-9a82-006008a86939");
+        private static readonly Guid KernelProviderID = new Guid("9e814aad-3204-11d2-9a82-006008a86939");
 
         /// <summary>
         /// EtwEvent implements the 'Event' abstraction for ETW events (it has a TraceEvent in it) 
