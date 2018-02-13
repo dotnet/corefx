@@ -214,7 +214,9 @@ namespace System.Net.Http
                 transportContext = sslStream.TransportContext;
             }
 
-            return new HttpConnection(this, stream, transportContext);
+            return _maxConnections == int.MaxValue ?
+                new HttpConnection(this, stream, transportContext) :
+                new HttpConnectionWithFinalizer(this, stream, transportContext); // finalizer needed to signal the pool when a connection is dropped
         }
 
         public async ValueTask<HttpConnection> UpgradeConnectionToTls(HttpRequestMessage request,  Stream stream, CancellationToken cancellationToken)

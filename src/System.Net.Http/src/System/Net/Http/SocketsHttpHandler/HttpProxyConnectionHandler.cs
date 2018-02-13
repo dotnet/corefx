@@ -27,8 +27,8 @@ namespace System.Net.Http
             _innerHandler = innerHandler;
             _proxy = settings._proxy ?? ConstructSystemProxy();
             _defaultCredentials = settings._defaultProxyCredentials;
-            _connectionPools = new HttpConnectionPools(settings, settings._maxConnectionsPerServer, usingProxy: true);
-            _tlsConnectionPools = new HttpConnectionPools(settings, settings._maxConnectionsPerServer, usingProxy: false);
+            _connectionPools = new HttpConnectionPools(settings, usingProxy: true);
+            _tlsConnectionPools = new HttpConnectionPools(settings, usingProxy: false);
         }
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
