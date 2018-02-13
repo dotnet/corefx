@@ -371,8 +371,9 @@ namespace System.Net.Http
                         SetCookieOption(newUri);
                     }
 
-                    if(newUri.Scheme == Uri.UriSchemeHttp && _requestMessage.RequestUri.Scheme == Uri.UriSchemeHttps) {
-                        EventSourceTrace("Insecure https to http redirect blocked.");
+                    if (newUri.Scheme == Uri.UriSchemeHttp && _requestMessage.RequestUri.Scheme == Uri.UriSchemeHttps)
+                    {
+                        EventSourceTrace($"Insecure https to http redirect from {_requestMessage.RequestUri} to {newUri} blocked.");
                     }
                 }
 
