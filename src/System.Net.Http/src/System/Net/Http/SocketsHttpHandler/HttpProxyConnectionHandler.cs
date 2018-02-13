@@ -14,9 +14,10 @@ namespace System.Net.Http
     {
         private readonly HttpMessageHandler _innerHandler;
         private readonly IWebProxy _proxy;
+        private readonly ICredentials _defaultCredentials;
         private readonly HttpConnectionPools _connectionPools;
+        private readonly HttpConnectionPools _tlsConnectionPools; // connections upgraded to TLS
         private bool _disposed;
-        private readonly HttpConnectionSettings _settings;
 
         public HttpProxyConnectionHandler(HttpConnectionSettings settings, HttpMessageHandler innerHandler)
         {
@@ -25,8 +26,9 @@ namespace System.Net.Http
 
             _innerHandler = innerHandler;
             _proxy = settings._proxy ?? ConstructSystemProxy();
-            _settings = settings;
+            _defaultCredentials = settings._defaultProxyCredentials;
             _connectionPools = new HttpConnectionPools(settings, settings._maxConnectionsPerServer, usingProxy: true);
+            _tlsConnectionPools = new HttpConnectionPools(settings, settings._maxConnectionsPerServer, usingProxy: false);
         }
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -63,10 +65,8 @@ namespace System.Net.Http
             Uri proxyUri, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpResponseMessage response;
-            string sslHostName = null;
             HttpRequestMessage savedRequest = null;
             HttpConnectionPool sslPool = null;
-            HttpConnection connection = null;
 
             if (proxyUri.Scheme != UriScheme.Http)
             {
@@ -77,10 +77,10 @@ namespace System.Net.Http
             {
                 response = await GetConnectionAndSendAsync(request, proxyUri, cancellationToken).ConfigureAwait(false);
             } else {
-                sslHostName = ConnectHelper.GetSslHostName(request);
+                string sslHostName = ConnectHelper.GetSslHostName(request);
                 HttpConnectionKey key = new HttpConnectionKey(request.RequestUri.IdnHost, request.RequestUri.Port, sslHostName);
-                sslPool = _connectionPools.GetOrAddPool(key);
-                connection = await sslPool.GetConnectionAsync(request, cancellationToken, true).ConfigureAwait(false);
+                sslPool = _tlsConnectionPools.GetOrAddPool(key);
+                HttpConnection connection = await sslPool.GetConnectionAsync(request, cancellationToken, true).ConfigureAwait(false);
                 if (connection == null)
                 {
                     // Get plain connection to proxy.
@@ -102,7 +102,7 @@ namespace System.Net.Http
                     {
                         NetworkCredential credential =
                             _proxy.Credentials?.GetCredential(proxyUri, AuthenticationHelper.Basic) ??
-                            _settings._defaultProxyCredentials?.GetCredential(proxyUri, AuthenticationHelper.Basic);
+                            _defaultCredentials?.GetCredential(proxyUri, AuthenticationHelper.Basic);
 
                         if (credential != null)
                         {
@@ -121,7 +121,7 @@ namespace System.Net.Http
                     {
                         NetworkCredential credential =
                             _proxy.Credentials?.GetCredential(proxyUri, AuthenticationHelper.Digest) ??
-                            _settings._defaultProxyCredentials?.GetCredential(proxyUri, AuthenticationHelper.Digest);
+                            _defaultCredentials?.GetCredential(proxyUri, AuthenticationHelper.Digest);
 
                         if (credential != null)
                         {
@@ -163,7 +163,8 @@ namespace System.Net.Http
             if (savedRequest != null && response.StatusCode == HttpStatusCode.OK)
             {
                 // CONNECT Request was successful.
-                await connection.UpgradeToTls(_settings, sslHostName, sslPool,cancellationToken);
+                Stream oldStream = await response.Content.ReadAsStreamAsync();
+                HttpConnection connection = await sslPool.UpgradeConnectionToTls(savedRequest, oldStream, cancellationToken).ConfigureAwait(false);
                 response = await connection.SendAsync(savedRequest, cancellationToken).ConfigureAwait(false);
             }
 
