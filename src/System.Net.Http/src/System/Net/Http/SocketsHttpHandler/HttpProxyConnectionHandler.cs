@@ -176,6 +176,10 @@ namespace System.Net.Http
             {
                 _disposed = true;
                 _connectionPools.Dispose();
+                if (_proxy is IDisposable obj)
+                {
+                    obj.Dispose();
+                }
             }
 
             base.Dispose(disposing);
