@@ -221,18 +221,22 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
-        public async Task GetAsync_CancelPendingRequests_DoesntCancelReadAsyncOnResponseStream()
+        [Theory]
+        [InlineData(CancellationMode.CancelPendingRequests, false)]
+        [InlineData(CancellationMode.DisposeHttpClient, true)]
+        [InlineData(CancellationMode.CancelPendingRequests, false)]
+        [InlineData(CancellationMode.DisposeHttpClient, true)]
+        public async Task GetAsync_CancelPendingRequests_DoesntCancelReadAsyncOnResponseStream(CancellationMode mode, bool copyToAsync)
         {
             if (IsNetfxHandler)
             {
-                // throws ObjectDisposedException as part of Stream.CopyToAsync
+                // throws ObjectDisposedException as part of Stream.CopyToAsync/ReadAsync
                 return;
             }
             if (IsCurlHandler)
             {
                 // Issue #27065
-                // throws OperationCanceledException from Stream.CopyToAsync
+                // throws OperationCanceledException from Stream.CopyToAsync/ReadAsync
                 return;
             }
 
@@ -242,7 +246,7 @@ namespace System.Net.Http.Functional.Tests
 
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
-                    var responseHeadersSent = new TaskCompletionSource<bool>();
+                    var clientReadSomeBody = new TaskCompletionSource<bool>();
                     var clientFinished = new TaskCompletionSource<bool>();
 
                     var responseContentSegment = new string('s', 3000);
@@ -258,12 +262,14 @@ namespace System.Net.Http.Functional.Tests
                             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
                             $"Content-Length: {contentLength}\r\n" +
                             $"\r\n");
-                        responseHeadersSent.TrySetResult(true);
 
                         for (int i = 0; i < responseSegments; i++)
                         {
-                            if (i > 0) await Task.Delay(1);
                             await writer.WriteAsync(responseContentSegment);
+                            if (i == 0)
+                            {
+                                await clientReadSomeBody.Task;
+                            }
                         }
 
                         await clientFinished.Task;
@@ -275,10 +281,28 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpResponseMessage resp = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                     using (Stream respStream = await resp.Content.ReadAsStreamAsync())
                     {
-                        await responseHeadersSent.Task;
-                        client.CancelPendingRequests(); // should not cancel the operation, as using ResponseHeadersRead
                         var result = new MemoryStream();
-                        await respStream.CopyToAsync(result, 10, new CancellationTokenSource().Token);
+                        int b = respStream.ReadByte();
+                        Assert.NotEqual(-1, b);
+                        result.WriteByte((byte)b);
+
+                        Cancel(mode, client, null); // should not cancel the operation, as using ResponseHeadersRead
+                        clientReadSomeBody.SetResult(true);
+
+                        if (copyToAsync)
+                        {
+                            await respStream.CopyToAsync(result, 10, new CancellationTokenSource().Token);
+                        }
+                        else
+                        {
+                            byte[] buffer = new byte[10];
+                            int bytesRead;
+                            while ((bytesRead = await respStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                result.Write(buffer, 0, bytesRead);
+                            }
+                        }
+
                         Assert.Equal(contentLength, result.Length);
                     }
 
@@ -383,17 +407,17 @@ namespace System.Net.Http.Functional.Tests
         {
             if ((mode & CancellationMode.Token) != 0)
             {
-                cts.Cancel();
+                cts?.Cancel();
             }
 
             if ((mode & CancellationMode.CancelPendingRequests) != 0)
             {
-                client.CancelPendingRequests();
+                client?.CancelPendingRequests();
             }
 
             if ((mode & CancellationMode.DisposeHttpClient) != 0)
             {
-                client.Dispose();
+                client?.Dispose();
             }
         }
 
