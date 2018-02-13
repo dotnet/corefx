@@ -83,7 +83,7 @@ namespace System.Data.Tests
             //Cheking Set
             dc.AutoIncrement = true;
             // Checking Get
-            Assert.Equal(true, dc.AutoIncrement);
+            Assert.Equal(false, dc.AutoIncrement);
         }
 
         [Fact]
