@@ -381,15 +381,15 @@ namespace System.Net.WebSockets.Client.Tests
         {
             var options = new LoopbackServer.Options { WebSocketEndpoint = true };
 
-            Func<ClientWebSocket, Socket, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
+            Func<ClientWebSocket, LoopbackServer, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
             {
                 AutoResetEvent pendingReceiveAsyncPosted =  new AutoResetEvent(false);
 
                 // Start listening for incoming connections on the server side.
-                Task<List<string>> acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                Task acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
                 {
                     // Complete the WebSocket upgrade. After this is done, the client-side ConnectAsync should complete.
-                    Assert.True(await LoopbackServer.WebSocketHandshakeAsync(socket, reader, writer));
+                    Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(socket, reader, writer));
 
                     // Wait for client-side ConnectAsync to complete and for a pending ReceiveAsync to be posted.
                     pendingReceiveAsyncPosted.WaitOne(TimeOutMilliseconds);
@@ -397,9 +397,7 @@ namespace System.Net.WebSockets.Client.Tests
                     // Close the underlying connection prematurely (without sending a WebSocket Close frame).
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
-
-                    return null;
-                }, options);
+                });
 
                 // Initiate a connection attempt.
                 var cts = new CancellationTokenSource(TimeOutMilliseconds);

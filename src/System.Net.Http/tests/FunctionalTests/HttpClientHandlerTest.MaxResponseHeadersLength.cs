@@ -90,7 +90,6 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                         cts.Cancel();
                         await serverTask;
-                        return null;
                     });
                 }
             });
@@ -118,9 +117,9 @@ namespace System.Net.Http.Functional.Tests
                     }
                     Task<HttpResponseMessage> getAsync = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, reader, writer) =>
+                    await server.AcceptConnectionAsync(async connection =>
                     {
-                        Task serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, responseHeaders);
+                        Task serverTask = connection.ReadRequestHeaderAndSendResponseAsync(responseHeaders);
 
                         if (shouldSucceed)
                         {
@@ -132,8 +131,6 @@ namespace System.Net.Http.Functional.Tests
                             await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                             try { await serverTask; } catch { }
                         }
-                        
-                        return null;
                     });
                 }
             });
