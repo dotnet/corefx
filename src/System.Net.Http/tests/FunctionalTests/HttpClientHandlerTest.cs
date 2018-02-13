@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -238,6 +239,30 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                }
+            }
+        }
+
+        [OuterLoop]
+        [Theory, MemberData(nameof(RedirectStatusCodes))]
+        public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                string credentialString = _credential.UserName + ":" + _credential.Password;
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialString);
+                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.RemoteEchoServer,
+                    hops: 1);
+                _output.WriteLine("Uri: {0}", uri);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    string responseText = await response.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseText);
+                    Assert.False(TestHelper.JsonMessageContainsKey(responseText, "Authorization"));
                 }
             }
         }
@@ -979,66 +1004,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public async Task GetAsync_DefaultCoookieContainer_NoCookieSent()
-        {
-            using (HttpClient client = CreateHttpClient())
-            {
-                using (HttpResponseMessage httpResponse = await client.GetAsync(Configuration.Http.RemoteEchoServer))
-                {
-                    string responseText = await httpResponse.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseText);
-                    Assert.False(TestHelper.JsonMessageContainsKey(responseText, "Cookie"));
-                }
-            }
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [InlineData("cookieName1", "cookieValue1")]
-        public async Task GetAsync_SetCookieContainer_CookieSent(string cookieName, string cookieValue)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            var cookieContainer = new CookieContainer();
-            cookieContainer.Add(Configuration.Http.RemoteEchoServer, new Cookie(cookieName, cookieValue));
-            handler.CookieContainer = cookieContainer;
-            using (var client = new HttpClient(handler))
-            {
-                using (HttpResponseMessage httpResponse = await client.GetAsync(Configuration.Http.RemoteEchoServer))
-                {
-                    Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
-                    string responseText = await httpResponse.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseText);
-                    Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, cookieName, cookieValue));
-                }
-            }
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [InlineData("cookieName1", "cookieValue1")]
-        public async Task GetAsync_RedirectResponseHasCookie_CookieSentToFinalUri(string cookieName, string cookieValue)
-        {
-            Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                secure: false,
-                statusCode: 302,
-                destinationUri: Configuration.Http.RemoteEchoServer,
-                hops: 1);
-            using (HttpClient client = CreateHttpClient())
-            {
-                client.DefaultRequestHeaders.Add(
-                    "X-SetCookie",
-                    string.Format("{0}={1};Path=/", cookieName, cookieValue));
-                using (HttpResponseMessage httpResponse = await client.GetAsync(uri))
-                {
-                    string responseText = await httpResponse.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseText);
-                    Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, cookieName, cookieValue));
-                }
-            }
-        }
-
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(NotWindowsUAPOrBeforeVersion1709)), MemberData(nameof(HeaderWithEmptyValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(string name, string value, Uri uri)
         {
@@ -1072,105 +1037,6 @@ namespace System.Net.Http.Functional.Tests
                     Assert.True(TestHelper.JsonMessageContainsKeyValue(responseText, name, value));
                 }
             }
-        }
-
-        private static KeyValuePair<string, string> GenerateCookie(string name, char repeat, int overallHeaderValueLength)
-        {
-            string emptyHeaderValue = $"{name}=; Path=/";
-
-            Debug.Assert(overallHeaderValueLength > emptyHeaderValue.Length);
-
-            int valueCount = overallHeaderValueLength - emptyHeaderValue.Length;
-            string value = new string(repeat, valueCount);
-
-            return new KeyValuePair<string, string>(name, value);
-        }
-
-        public static IEnumerable<object[]> CookieNameValuesAndUseCookies()
-        {
-            foreach (bool useCookies in new[] { true, false })
-            {
-                // WinHttpHandler calls WinHttpQueryHeaders to iterate through multiple Set-Cookie header values,
-                // using an initial buffer size of 128 chars. If the buffer is not large enough, WinHttpQueryHeaders
-                // returns an insufficient buffer error, allowing WinHttpHandler to try again with a larger buffer.
-                // Sometimes when WinHttpQueryHeaders fails due to insufficient buffer, it still advances the
-                // iteration index, which would cause header values to be missed if not handled correctly.
-                //
-                // In particular, WinHttpQueryHeader behaves as follows for the following header value lengths:
-                //  * 0-127 chars: succeeds, index advances from 0 to 1.
-                //  * 128-255 chars: fails due to insufficient buffer, index advances from 0 to 1.
-                //  * 256+ chars: fails due to insufficient buffer, index stays at 0.
-                //
-                // The below overall header value lengths were chosen to exercise reading header values at these
-                // edges, to ensure WinHttpHandler does not miss multiple Set-Cookie headers.
-
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 126), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 127), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 128), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 129), useCookies };
-
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 254), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 255), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 256), useCookies };
-                yield return new object[] { GenerateCookie(name: "foo", repeat: 'a', overallHeaderValueLength: 257), useCookies };
-
-                yield return new object[]
-                {
-                    new KeyValuePair<string, string>(
-                        ".AspNetCore.Antiforgery.Xam7_OeLcN4",
-                        "CfDJ8NGNxAt7CbdClq3UJ8_6w_4661wRQZT1aDtUOIUKshbcV4P0NdS8klCL5qGSN-PNBBV7w23G6MYpQ81t0PMmzIN4O04fqhZ0u1YPv66mixtkX3iTi291DgwT3o5kozfQhe08-RAExEmXpoCbueP_QYM"),
-                    useCookies
-                };
-            }
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [MemberData(nameof(CookieNameValuesAndUseCookies))]
-        public async Task GetAsync_ResponseWithSetCookieHeaders_AllCookiesRead(KeyValuePair<string, string> cookie1, bool useCookies)
-        {
-            var cookie2 = new KeyValuePair<string, string>(".AspNetCore.Session", "RAExEmXpoCbueP_QYM");
-            var cookie3 = new KeyValuePair<string, string>("name", "value");
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                {
-                    handler.UseCookies = useCookies;
-
-                    using (var client = new HttpClient(handler))
-                    {
-                        Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                        await TestHelper.WhenAllCompletedOrAnyFailed(
-                            getResponseTask,
-                            LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                                $"HTTP/1.1 200 OK\r\n" +
-                                $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                                $"Set-Cookie: {cookie1.Key}={cookie1.Value}; Path=/\r\n" +
-                                $"Set-Cookie   : {cookie2.Key}={cookie2.Value}; Path=/\r\n" + // space before colon to verify header is trimmed and recognized
-                                $"Set-Cookie: {cookie3.Key}={cookie3.Value}; Path=/\r\n" +
-                                "\r\n"));
-
-                        using (HttpResponseMessage response = await getResponseTask)
-                        {
-                            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                            CookieCollection cookies = handler.CookieContainer.GetCookies(url);
-                            if (useCookies)
-                            {
-                                Assert.Equal(3, cookies.Count);
-                                Assert.Equal(cookie1.Value, cookies[cookie1.Key].Value);
-                                Assert.Equal(cookie2.Value, cookies[cookie2.Key].Value);
-                                Assert.Equal(cookie3.Value, cookies[cookie3.Key].Value);
-                            }
-                            else
-                            {
-                                Assert.Equal(0, cookies.Count);
-                            }
-                        }
-                    }
-                }
-            });
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -1337,6 +1203,24 @@ namespace System.Net.Http.Functional.Tests
                     await serverTask;
                 }
             });
+        }
+
+        [Fact]
+        public async Task SendAsync_TransferEncodingSetButNoRequestContent_Throws()
+        {
+            if (IsNetfxHandler)
+            {
+                // no exception thrown
+                return;
+            }
+
+            var req = new HttpRequestMessage(HttpMethod.Post, "http://bing.com");
+            req.Headers.TransferEncodingChunked = true;
+            using (HttpClient c = CreateHttpClient())
+            {
+                HttpRequestException error = await Assert.ThrowsAsync<HttpRequestException>(() => c.SendAsync(req));
+                Assert.IsType<InvalidOperationException>(error.InnerException);
+            }
         }
 
         [OuterLoop] // TODO: Issue #11345
