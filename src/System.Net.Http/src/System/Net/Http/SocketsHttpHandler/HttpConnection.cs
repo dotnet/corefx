@@ -43,6 +43,7 @@ namespace System.Net.Http
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
         private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
+        public static readonly HttpMethod s_httpConnectMethod = new HttpMethod("CONNECT");
 
         private readonly HttpConnectionPool _pool;
         private readonly Stream _stream;
@@ -239,15 +240,24 @@ namespace System.Net.Http
                 await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
 
-                if (_usingProxy)
+                if (request.Method == s_httpConnectMethod)
                 {
-                    // Proxied requests contain full URL
-                    Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
-                    await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
-                    await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                    // RFC 7231 #section-4.3.6.
+                    // Write only CONNECT foo.com:345 HTTP/1.1
+                    await WriteAsciiStringAsync(ConnectHelper.GetHostName(request), cancellationToken).ConfigureAwait(false);
+                    await WriteAsciiStringAsync(String.Format(":{0}", request.RequestUri.Port), cancellationToken).ConfigureAwait(false);
                 }
-
-                await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
+                else
+                {
+                    if (_usingProxy)
+                    {
+                        // Proxied requests contain full URL
+                        Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
+                        await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
+                        await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                    }
+                    await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
+                }
 
                 // Fall back to 1.1 for all versions other than 1.0
                 Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0); // guaranteed by Version class
@@ -375,14 +385,14 @@ namespace System.Net.Http
                     _readLength = bytesRead;
                 }
 
-                // The request is no longer retryable; either we received data from the _readAheadTask, 
+                // The request is no longer retryable; either we received data from the _readAheadTask,
                 // or there was no _readAheadTask because this is the first request on the connection.
                 _canRetry = false;
 
                 // Parse the response status line.
                 var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
                 ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
-                
+
                 // If we sent an Expect: 100-continue header, handle the response accordingly.
                 if (allowExpect100ToContinue != null)
                 {
@@ -453,6 +463,16 @@ namespace System.Net.Http
                 {
                     responseStream = EmptyReadStream.Instance;
                     ReturnConnectionToPool();
+                }
+                else if (request.Method == s_httpConnectMethod && response.StatusCode == HttpStatusCode.OK)
+                {
+                    // Successful response to CONNECT does not have body.
+                    // What ever comes next should be opaque.
+                    responseStream = new RawConnectionStream(this);
+                    // Put connection back to the pool if we upgraded to tunnel.
+                    // We cannot use it for normal HTTP requests any more.
+                    _connectionClose = true;
+
                 }
                 else if (response.Content.Headers.ContentLength != null)
                 {
