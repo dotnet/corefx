@@ -90,10 +90,11 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Theory]
-        [InlineData("RandomStringForTargetServer", true)]
-        [InlineData(null, false)]
-        [InlineData("", false)]
-        public void RetrieveWorkstationId(string workstation, bool withDispose)
+        [InlineData("RandomStringForTargetServer", false, true)]
+        [InlineData("RandomStringForTargetServer", true, false)]
+        [InlineData(null, false, false)]
+        [InlineData("", false, false)]
+        public void RetrieveWorkstationId(string workstation, bool withDispose, bool shouldMatchSetWorkstationId)
         {
             string connectionString = $"Workstation Id={workstation}";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -101,7 +102,8 @@ namespace System.Data.SqlClient.Tests
             {
                 conn.Dispose();
             }
-            Assert.Equal(Environment.MachineName, conn.WorkstationId);
+            string expected = shouldMatchSetWorkstationId ? workstation : Environment.MachineName;
+            Assert.Equal(expected, conn.WorkstationId);
         }
 
         [Fact]
