@@ -63,6 +63,7 @@ namespace BasicEventSourceTests
 
 #if USE_ETW
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/27106")]
         public void Test_Write_Metric_ETW()
         {
 

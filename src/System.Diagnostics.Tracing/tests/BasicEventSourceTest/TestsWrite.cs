@@ -414,6 +414,7 @@ namespace BasicEventSourceTests
         /// </summary>
         [Fact]
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/27106")]
         public void Test_Write_T_In_Manifest_Serialization()
         {
             using (var eventListener = new EventListenerListener())
