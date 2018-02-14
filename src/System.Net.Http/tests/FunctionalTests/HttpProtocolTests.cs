@@ -112,27 +112,47 @@ namespace System.Net.Http.Functional.Tests
         }
 #endif
 
-        [Fact]
-        public async Task ConnectionReuseTest()
+        // Okay, things seem more normal now.
+        // Connections are reused when hostname matches, but not when they aren't.
+        // Both WinHttpHandler and SocketsHttpHandler seem to behave this way consistently.
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task DoConnectionReuseTest(bool useIp1, bool useIp2)
         {
+            IPAddress localhost = Dns.GetHostAddresses("localhost")[0];
+            Assert.True(localhost.Equals(IPAddress.Loopback) || localhost.Equals(IPAddress.IPv6Loopback));
+
+            Console.WriteLine($"Localhost IP = {localhost}");
+
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
+                    Uri localhostUri = new Uri($"http://localhost:{url.Port}/");
                     using (HttpClient client = CreateHttpClient())
                     {
-                        (await client.GetAsync(url)).Dispose();
-                        (await client.GetAsync(url)).Dispose();
+                        (await client.GetAsync(useIp1 ? url : localhostUri)).Dispose();
+                        (await client.GetAsync(useIp2 ? url : localhostUri)).Dispose();
                     }
                 },
                 async server =>
                 {
+                    TaskCompletionSource<bool> connectionAccepted = new TaskCompletionSource<bool>();
+
                     // We expect both requests to come in on the same connection
                     Task acceptTask1 = server.AcceptConnectionAsync(async connection =>
                     {
+                        connectionAccepted.SetResult(true);
+
                         List<string> requestLines1 = await connection.ReadRequestHeaderAndSendResponseAsync();
                         List<string> requestLines2 = await connection.ReadRequestHeaderAndSendResponseAsync();
                     });
 
+                    // Wait for first connection to be established, then post another accept
+                    await connectionAccepted.Task;
                     Task acceptTask2 = server.AcceptConnectionAsync(connection =>
                     {
                         throw new Exception("Client attempted second connection");
@@ -140,9 +160,8 @@ namespace System.Net.Http.Functional.Tests
 
                     Task completedTask = await Task.WhenAny(acceptTask1, acceptTask2);
                     await completedTask; // propagate error, if any, from whichever finished
-                });
+                }, new LoopbackServer.Options() { Address = localhost });
         }
-
     }
 
 #if true
