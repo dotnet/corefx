@@ -107,6 +107,10 @@ namespace System
             private readonly int _stringSectionNumOffsets;
             /// <summary>The number of bytes in the strings table of the database.</summary>
             private readonly int _stringTableNumBytes;
+            /// <summary>Wether or not to read the number section as 32-bit integers.</summary>
+            private readonly bool _readAs32Bit;
+            /// <summary>The size of the integers on the number section.</summary>
+            private readonly int _sizeOfInt;
 
             /// <summary>Extended / user-defined entries in the terminfo database.</summary>
             private readonly Dictionary<string, string> _extendedStrings;
@@ -122,11 +126,11 @@ namespace System
                 const int MagicLegacyNumber = 0x11A; // magic number octal 0432 for legacy ncurses terminfo
                 const int Magic32BitNumber = 0x21E; // magic number octal 01036 for new ncruses terminfo
                 short magic = ReadInt16(data, 0);
-                bool readAs32Bit =
+                _readAs32Bit =
                     magic == MagicLegacyNumber ? false :
                     magic == Magic32BitNumber ? true :
                     throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, Convert.ToString(magic, 8))); // magic number was not recognized. Printing the magic number in octal.
-                
+                _sizeOfInt = (_readAs32Bit) ? 4 : 2;
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
                 _boolSectionNumBytes = ReadInt16(data, 4);
@@ -150,7 +154,7 @@ namespace System
                 // (Note that the extended section also includes other Booleans and numbers, but we don't
                 // have any need for those now, so we don't parse them.)
                 int extendedBeginning = RoundUpToEven(StringsTableOffset + _stringTableNumBytes);
-                _extendedStrings = ParseExtendedStrings(data, extendedBeginning, readAs32Bit) ?? new Dictionary<string, string>();
+                _extendedStrings = ParseExtendedStrings(data, extendedBeginning, _readAs32Bit) ?? new Dictionary<string, string>();
             }
 
             /// <summary>The name of the associated terminfo, if any.</summary>
@@ -281,7 +285,7 @@ namespace System
             /// The offset into data where the string offsets section begins.  We index into this section
             /// to find the location within the strings table where a string value exists.
             /// </summary>
-            private int StringOffsetsOffset { get { return NumbersOffset + (_numberSectionNumShorts * 2); } }
+            private int StringOffsetsOffset { get { return NumbersOffset + (_numberSectionNumShorts * _sizeOfInt); } }
 
             /// <summary>The offset into data where the string table exists.</summary>
             private int StringsTableOffset { get { return StringOffsetsOffset + (_stringSectionNumOffsets * 2); } }
@@ -390,8 +394,8 @@ namespace System
                 // null-terminated strings.
                 int extendedStringTableStart =
                     extendedOffsetsStart +
-                    (extendedStringCount * sizeOfIntValuesInBytes) + // and past all of the string offsets
-                    ((extendedBoolCount + extendedNumberCount + extendedStringCount) * sizeOfIntValuesInBytes); // and past all of the name offsets
+                    (extendedStringCount * 2) + // and past all of the string offsets
+                    ((extendedBoolCount + extendedNumberCount + extendedStringCount) * 2); // and past all of the name offsets
 
                 // Get the location where the extended string table ends.  We shouldn't read past this.
                 int extendedStringTableEnd =
@@ -412,7 +416,7 @@ namespace System
                 int lastEnd = 0;
                 for (int i = 0; i < extendedStringCount; i++)
                 {
-                    int offset = extendedStringTableStart + ReadInt(data, extendedOffsetsStart + (i * sizeOfIntValuesInBytes), readAs32Bit);
+                    int offset = extendedStringTableStart + ReadInt16(data, extendedOffsetsStart + (i * 2));
                     if (offset < 0 || offset >= data.Length)
                     {
                         // If the offset is invalid, bail.
@@ -476,7 +480,7 @@ namespace System
             /// <returns>The 32-bit value read.</returns>
             private static int ReadInt32(byte[] buffer, int pos)
             {
-                return (int)(buffer[pos] | 
+                return (int)((buffer[pos] & 0xff) | 
                              buffer[pos + 1] << 8 | 
                              buffer[pos + 2] << 16 | 
                              buffer[pos + 3] << 24);
