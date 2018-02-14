@@ -18,10 +18,10 @@ namespace System.Diagnostics
     {
         private static readonly UTF8Encoding s_utf8NoBom =
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-        private static bool s_sigchildHandlerRegistered = false;
+        private static volatile bool s_sigchildHandlerRegistered = false;
         private static readonly object s_sigchildGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
-        private static readonly ReaderWriterLock s_processStartLock = new ReaderWriterLock();
+        private static readonly ReaderWriterLockSlim s_processStartLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -309,7 +309,7 @@ namespace System.Diagnostics
 
             // Lock to avoid races with OnSigChild
             // By using a ReaderWriterLock we allow multiple processes to start concurrently.
-            s_processStartLock.AcquireReaderLock(Timeout.Infinite);
+            s_processStartLock.EnterReadLock();
             try
             {
                 // Invoke the shim fork/execve routine.  It will create pipes for all requested
@@ -334,7 +334,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                s_processStartLock.ReleaseReaderLock();
+                s_processStartLock.ExitReadLock();
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -751,14 +751,14 @@ namespace System.Diagnostics
         private static void OnSigChild(bool reapAll)
         {
             // Lock to avoid races with Process.Start
-            s_processStartLock.AcquireWriterLock(Timeout.Infinite);
+            s_processStartLock.EnterWriteLock();
             try
             {
                 ProcessWaitState.CheckChildren(reapAll);
             }
             finally
             {
-                s_processStartLock.ReleaseWriterLock();
+                s_processStartLock.ExitWriteLock();
             }
         }
     }
