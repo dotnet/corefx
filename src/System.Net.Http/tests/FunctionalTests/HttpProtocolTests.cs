@@ -11,6 +11,147 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    public class HttpProtocolTests2 : HttpClientTestBase
+    {
+#if false
+        [Fact]
+        public async Task LoopbackTest()
+        {
+            IPAddress localhost = Dns.GetHostAddresses("localhost")[0];
+            Assert.True(localhost.Equals(IPAddress.Loopback) || localhost.Equals(IPAddress.IPv6Loopback));
+
+            Console.WriteLine($"Localhost IP = {localhost}");
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    Console.WriteLine($"Url = {url}");
+                    HttpClientHandler handler = CreateHttpClientHandler();
+                    handler.UseProxy = false;
+                    using (HttpClient client = new HttpClient(handler))
+                    {
+                        (await client.GetAsync($"http://localhost:{url.Port}/")).Dispose();
+                    }
+                },
+                async server =>
+                {
+                    // We expect both requests to come in on the same connection
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        List<string> requestLines1 = await connection.ReadRequestHeaderAndSendResponseAsync();
+//                        Assert.True(requestLines1[0].Contains("http://localhost/"));
+
+                        Console.WriteLine("Received request 1:");
+                        foreach (var l in requestLines1)
+                            Console.WriteLine(l);
+                    });
+                },
+                new LoopbackServer.Options() { Address = localhost });
+        }
+#endif
+
+        // TODO: 
+        // Just as a quick test, try changing the second GetAsync to be localhost as well, just to make sure I'm not
+        // doing anything stupid that would cause the connection to not be reused.
+
+#if false
+        // THis is probably not the right place for this.
+        [Fact]
+        public async Task GetAsyncConnectionTest()
+        {
+            IPAddress localhost = Dns.GetHostAddresses("localhost")[0];
+            Assert.True(localhost.Equals(IPAddress.Loopback) || localhost.Equals(IPAddress.IPv6Loopback));
+
+            Console.WriteLine($"Localhost IP = {localhost}");
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    Console.WriteLine($"Url = {url}");
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        // This is a quick test to ensure connection reuse.
+                        // Either way, it seems to fail for WinHttpHandler.  What's up with that?
+//                        (await client.GetAsync($"http://localhost:{url.Port}/")).Dispose();
+//                        (await client.GetAsync($"http://localhost:{url.Port}/")).Dispose();
+                        (await client.GetAsync(url)).Dispose();   // url will contain the IP address
+                        (await client.GetAsync(url)).Dispose();   // url will contain the IP address
+                    }
+                },
+                async server =>
+                {
+                    // TODO: Do two accepts here.  The second is expected to timeout, but if it doesn't, then that's an error.
+
+                    // We expect both requests to come in on the same connection
+                    Task acceptTask1 = server.AcceptConnectionAsync(async connection =>
+                    {
+                        List<string> requestLines1 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                        //                        Assert.True(requestLines1[0].Contains("http://localhost/"));
+
+                        Console.WriteLine("Received request 1:");
+                        foreach (var l in requestLines1)
+                            Console.WriteLine(l);
+
+                        List<string> requestLines2 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                        //                        Assert.True(requestLines2[0].Contains(server.Uri.ToString())); // server.Uri will contain the IP address
+
+                        Console.WriteLine("Received request 2:");
+                        foreach (var l in requestLines2)
+                            Console.WriteLine(l);
+                    });
+
+                    Task acceptTask2 = server.AcceptConnectionAsync(connection =>
+                    {
+                        throw new Exception("Client attempted second connection");
+                    });
+
+                    Task completedTask = await Task.WhenAny(acceptTask1, acceptTask2);
+                    await completedTask; // propagate error, if any, from whichever finished
+
+                }, new LoopbackServer.Options() { Address = localhost });
+        }
+#endif
+
+        [Fact]
+        public async Task ConnectionReuseTest()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        (await client.GetAsync(url)).Dispose();
+                        (await client.GetAsync(url)).Dispose();
+                    }
+                },
+                async server =>
+                {
+                    // We expect both requests to come in on the same connection
+                    Task acceptTask1 = server.AcceptConnectionAsync(async connection =>
+                    {
+                        List<string> requestLines1 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                        List<string> requestLines2 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                    });
+
+                    Task acceptTask2 = server.AcceptConnectionAsync(connection =>
+                    {
+                        throw new Exception("Client attempted second connection");
+                    });
+
+                    Task completedTask = await Task.WhenAny(acceptTask1, acceptTask2);
+                    await completedTask; // propagate error, if any, from whichever finished
+                });
+        }
+
+    }
+
+#if true
+    public sealed class SocketsHttpHandler_HttpProtocolTests2 : HttpProtocolTests2
+    {
+        protected override bool UseSocketsHttpHandler => true;
+    }
+#endif
+
     public class HttpProtocolTests : HttpClientTestBase
     {
         protected virtual Stream GetStream(Stream s) => s;
