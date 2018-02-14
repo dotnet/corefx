@@ -8,18 +8,20 @@ using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
-    internal ref struct ValueListBuilder<T>
+    internal ref struct ResizableValueListBuilder<T>
     {
         private Span<T> _span;
         private T[] _arrayFromPool;
         private int _pos;
 
-        public ValueListBuilder(Span<T> initialSpan)
+        public ResizableValueListBuilder(Span<T> initialSpan)
         {
             _span = initialSpan;
             _arrayFromPool = null;
             _pos = 0;
         }
+
+        public ref T this[int index] => ref _span[index];
 
         public int Length => _pos;
 
@@ -32,6 +34,13 @@ namespace System.Collections.Generic
 
             _span[pos] = item;
             _pos = pos + 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T Pop()
+        {
+            _pos--;
+            return _span[_pos];
         }
 
         public ReadOnlySpan<T> AsReadOnlySpan()
