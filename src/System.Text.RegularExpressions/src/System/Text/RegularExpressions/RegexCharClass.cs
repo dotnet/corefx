@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.RegularExpressions
 {
@@ -739,22 +740,17 @@ namespace System.Text.RegularExpressions
         /// </summary>
         internal static bool IsSingleton(string set)
         {
-            if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
-                (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]))
-                return true;
-            else
-                return false;
+            return (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
+                (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]));
         }
 
         internal static bool IsSingletonInverse(string set)
         {
-            if (set[FLAGS] == 1 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
-                (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]))
-                return true;
-            else
-                return false;
+            return (set[FLAGS] == 1 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
+                (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsSubtraction(string charClass)
         {
             return (charClass.Length > SETSTART + charClass[SETLENGTH] + charClass[CATEGORYLENGTH]);
