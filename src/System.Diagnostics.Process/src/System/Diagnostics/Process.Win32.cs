@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,6 +30,8 @@ namespace System.Diagnostics
 
         private unsafe bool StartWithShellExecuteEx(ProcessStartInfo startInfo)
         {
+            string arguments;
+
             if (!string.IsNullOrEmpty(startInfo.UserName) || startInfo.Password != null)
                 throw new InvalidOperationException(SR.CantStartAsUser);
 
@@ -46,9 +50,18 @@ namespace System.Diagnostics
             if (startInfo._environmentVariables != null)
                 throw new InvalidOperationException(SR.CantUseEnvVars);
 
+            if (startInfo != null && startInfo.ArgumentList.Count > 0)
+            {
+                arguments = PasteArguments.Paste(startInfo.ArgumentList, false);
+            }
+            else
+            {
+                arguments = startInfo.Arguments;
+            }
+
             fixed (char* fileName = startInfo.FileName.Length > 0 ? startInfo.FileName : null)
             fixed (char* verb = startInfo.Verb.Length > 0 ? startInfo.Verb : null)
-            fixed (char* parameters = startInfo.Arguments.Length > 0 ? startInfo.Arguments : null)
+            fixed (char* parameters = arguments.Length > 0 ? arguments : null)
             fixed (char* directory = startInfo.WorkingDirectory.Length > 0 ? startInfo.WorkingDirectory : null)
             {
                 Interop.Shell32.SHELLEXECUTEINFO shellExecuteInfo = new Interop.Shell32.SHELLEXECUTEINFO()

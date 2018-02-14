@@ -22,6 +22,7 @@ namespace System.Diagnostics
         private string _directory;
         private string _userName;
         private string _verb;
+        private readonly IReadOnlyCollection<string> _argumentList = Array.Empty<string>();
         private ProcessWindowStyle _windowStyle;
 
         internal DictionaryWrapper _environmentVariables;
@@ -53,12 +54,29 @@ namespace System.Diagnostics
         }
 
         /// <devdoc>
+        ///     Specifies the name of the application that is to be started, as well as a set
+        ///     of command line arguments to pass to the application.
+        /// </devdoc>
+        public ProcessStartInfo(string fileName, IReadOnlyCollection<string> argumentList)
+        {
+            _fileName = fileName;
+
+            if (argumentList != null)
+                _argumentList = argumentList;
+        }
+
+        /// <devdoc>
         ///     Specifies the set of command line arguments to use when starting the application.
         /// </devdoc>
         public string Arguments
         {
             get => _arguments ?? string.Empty;
             set => _arguments = value;
+        }
+
+        public IReadOnlyCollection<string> ArgumentList
+        {
+            get => _argumentList;
         }
 
         public bool CreateNoWindow { get; set; }

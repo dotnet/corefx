@@ -40,5 +40,77 @@ namespace System.Diagnostics.Tests
 
             Assert.Same(encoding, process.StandardInput.Encoding);
         }
+
+        [Fact]
+        public void StartProcessWithArgumentList()
+        {
+            List<string> argList = new List<string>();
+            argList.Add("arg1");
+            argList.Add("arg2");
+
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+
+            try
+            {
+                testProcess.Start();
+                Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
+            }
+            finally
+            {
+                if (!testProcess.HasExited)
+                    testProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact]
+        public void StartProcessWithSameArgumentList()
+        {
+            List<string> argList = new List<string>();
+            argList.Add("arg1");
+            argList.Add("arg2");
+
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
+            Process testProcess = CreateProcess();
+            Process secondTestProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            try
+            {
+                testProcess.Start();
+                Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
+                secondTestProcess.StartInfo = psi;
+                secondTestProcess.Start();
+                Assert.Equal(string.Empty, secondTestProcess.StartInfo.Arguments);
+            }
+            finally
+            {
+                if (!testProcess.HasExited)
+                    testProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+
+                if (!secondTestProcess.HasExited)
+                    secondTestProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact]
+        public void BothArgumentAndArgumentListSet()
+        {
+            List<string> argList = new List<string>();
+            argList.Add("arg1");
+            argList.Add("arg2");
+
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
+            psi.Arguments = "arg3";
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            Assert.Throws<InvalidOperationException>(() => testProcess.Start());
+        }
     }
 }

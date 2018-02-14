@@ -1198,6 +1198,10 @@ namespace System.Diagnostics
             {
                 throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
             }
+            if (!string.IsNullOrEmpty(startInfo.Arguments) && startInfo.ArgumentList.Count > 0)
+            {
+                throw new InvalidOperationException(SR.ArgumentAndArgumentListInitialized);
+            }
 
             //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            
             if (_disposed)
