@@ -17,9 +17,7 @@ def osGroupMap = ['Windows 7':'Windows_NT',
                   'Windows_NT':'Windows_NT',
                   'Ubuntu14.04':'Linux',
                   'Ubuntu16.04':'Linux',
-                  'Ubuntu16.10':'Linux',
                   'Debian8.4':'Linux',
-                  'Fedora24':'Linux',
                   'OSX10.12':'OSX',
                   'CentOS7.1': 'Linux',
                   'RHEL7.2': 'Linux',
@@ -29,9 +27,7 @@ def osShortName = ['Windows 7' : 'win7',
                    'Windows_NT' : 'windows_nt',
                    'Ubuntu14.04' : 'ubuntu14.04',
                    'Ubuntu16.04' : 'ubuntu16.04',
-                   'Ubuntu16.10' : 'ubuntu16.10',
                    'Debian8.4' : 'debian8.4',
-                   'Fedora24' : 'fedora24',
                    'OSX10.12' : 'osx',
                    'CentOS7.1' : 'centos7.1',
                    'RHEL7.2' : 'rhel7.2',
@@ -40,11 +36,11 @@ def osShortName = ['Windows 7' : 'win7',
 def buildArchConfiguration = ['Debug': 'x86',
                               'Release': 'x64']
 
-def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1',
-                                        'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux']]
+def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1',
+                                        'RHEL7.2', 'Debian8.4', 'OSX10.12', 'PortableLinux']]
 
-def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1',
-                                        'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux']]
+def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1',
+                                        'RHEL7.2', 'Debian8.4', 'OSX10.12', 'PortableLinux']]
 
 // **************************
 // Define code coverage build

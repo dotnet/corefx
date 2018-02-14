@@ -57,6 +57,7 @@ configurations.each { config ->
     // Add optional PR trigger for Outerloop test runs
     params.TestOuter = true
     pipeline.triggerPipelineOnGithubPRComment("Outerloop ${triggerName}", params)
+    pipeline.triggerPipelinePeriodically('@daily', params)
 }}}
 
 JobReport.Report.generateJobReport(out)
