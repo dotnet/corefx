@@ -894,8 +894,8 @@ namespace System.Net.Http
                      (responseMessage.StatusCode >= HttpStatusCode.RedirectKeepVerb && responseMessage.StatusCode <= (HttpStatusCode)308)) &&
                     state.RequestMessage.RequestUri.Scheme == Uri.UriSchemeHttps && responseMessage.Headers.Location?.Scheme == Uri.UriSchemeHttp)
                 {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SendAsync: Insecure https to http redirect from" +
-                        $"{state.RequestMessage.RequestUri} to {responseMessage.Headers.Location} blocked.");
+                    WinHttpTraceHelper.Trace("WinHttpHandler.SendAsync: Insecure https to http redirect from {0} to {1} blocked.",
+                        state.RequestMessage.RequestUri.ToString(), responseMessage.Headers.Location.ToString());
                 }
             }
             catch (Exception ex)
