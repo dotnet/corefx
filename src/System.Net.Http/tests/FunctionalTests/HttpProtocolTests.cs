@@ -162,6 +162,52 @@ namespace System.Net.Http.Functional.Tests
                     await completedTask; // propagate error, if any, from whichever finished
                 }, new LoopbackServer.Options() { Address = localhost });
         }
+
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task DoProxyConnectionReuseTest(bool sameTargetHost)
+        {
+            Uri uri1 = new Uri("http://foo.com/");
+            Uri uri2 = (sameTargetHost ? uri1 : new Uri("http://foo.com/"));
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    HttpClientHandler handler = CreateHttpClientHandler();
+                    handler.UseProxy = true;
+                    handler.Proxy = new WebProxy(url);
+                    using (HttpClient client = new HttpClient(handler))
+                    {
+                        (await client.GetAsync(uri1)).Dispose();
+                        (await client.GetAsync(uri2)).Dispose();
+                    }
+                },
+                async server =>
+                {
+                    TaskCompletionSource<bool> connectionAccepted = new TaskCompletionSource<bool>();
+
+                    // We expect both requests to come in on the same connection
+                    Task acceptTask1 = server.AcceptConnectionAsync(async connection =>
+                    {
+                        connectionAccepted.SetResult(true);
+
+                        List<string> requestLines1 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                        List<string> requestLines2 = await connection.ReadRequestHeaderAndSendResponseAsync();
+                    });
+
+                    // Wait for first connection to be established, then post another accept
+                    await connectionAccepted.Task;
+                    Task acceptTask2 = server.AcceptConnectionAsync(connection =>
+                    {
+                        throw new Exception("Client attempted second connection");
+                    });
+
+                    Task completedTask = await Task.WhenAny(acceptTask1, acceptTask2);
+                    await completedTask; // propagate error, if any, from whichever finished
+                });
+        }
     }
 
 #if true
