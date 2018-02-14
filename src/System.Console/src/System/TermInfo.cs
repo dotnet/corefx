@@ -360,11 +360,11 @@ namespace System
                 }
 
                 // Read in extended counts, and exit out if we got any incorrect info
-                int extendedBoolCount = ReadInt(data, extendedBeginning, readAs32Bit);
-                int extendedNumberCount = ReadInt(data, extendedBeginning + (sizeOfIntValuesInBytes * 1), readAs32Bit);
-                int extendedStringCount = ReadInt(data, extendedBeginning + (sizeOfIntValuesInBytes * 2), readAs32Bit);
-                int extendedStringNumOffsets = ReadInt(data, extendedBeginning + (sizeOfIntValuesInBytes * 3), readAs32Bit);
-                int extendedStringTableByteSize = ReadInt(data, extendedBeginning + (sizeOfIntValuesInBytes * 4), readAs32Bit);
+                int extendedBoolCount = ReadInt16(data, extendedBeginning);
+                int extendedNumberCount = ReadInt16(data, extendedBeginning + (2 * 1));
+                int extendedStringCount = ReadInt16(data, extendedBeginning + (2 * 2));
+                int extendedStringNumOffsets = ReadInt16(data, extendedBeginning + (2 * 3));
+                int extendedStringTableByteSize = ReadInt16(data, extendedBeginning + (2 * 4));
                 if (extendedBoolCount < 0 ||
                     extendedNumberCount < 0 ||
                     extendedStringCount < 0 ||
