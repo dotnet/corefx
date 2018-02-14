@@ -453,8 +453,10 @@ extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOpt
 {
     assert(status != nullptr);
 
+    siginfo_t siginfo;
     int32_t result;
-    while (CheckInterrupted(result = waitpid(pid, status, static_cast<int>(options))));
+    while (CheckInterrupted(result = waitid(P_PID, static_cast<id_t>(pid), &siginfo, static_cast<int>(options))));
+    *status = siginfo.si_status;
     return result;
 }
 
