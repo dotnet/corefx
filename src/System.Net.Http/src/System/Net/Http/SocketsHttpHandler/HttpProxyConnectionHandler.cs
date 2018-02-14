@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,7 +63,7 @@ namespace System.Net.Http
         {
             if (proxyUri.Scheme != UriScheme.Http)
             {
-                throw new InvalidOperationException(SR.net_http_invalid_proxy_scheme);
+                throw new NotSupportedException(SR.net_http_invalid_proxy_scheme);
             }
 
             if (!HttpUtilities.IsSupportedNonSecureScheme(request.RequestUri.Scheme))
