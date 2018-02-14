@@ -344,6 +344,53 @@ namespace System.Collections.ObjectModel.Tests
             //TODO write more tests, and also such including comparer
         }
 
+        /// <summary>
+        /// Verifies that all range methods tunnel down to the existing virtual methods of <see cref="Collection{T}"/>,
+        /// so that inheritors can always override the base behavior.
+        /// </summary>
+        [Fact]
+        public static void TestMethodTunneling()
+        {
+            var strings = new[] { "alpha", "bravo" };
+            ExceptionObservableCollection oc;
+            void reset(params string[] initialValues) =>
+                oc = new ExceptionObservableCollection(initialValues);
+
+            reset();
+            //AddRange
+            Assert.Throws<NotSupportedException>(() => oc.AddRange(strings));
+            Assert.Throws<NotSupportedException>(() => oc.AddRange(strings.Take(1)));
+
+            //InsertRange
+            Assert.Throws<NotSupportedException>(() => oc.InsertRange(0, strings));
+            Assert.Throws<NotSupportedException>(() => oc.InsertRange(0, strings.Take(1)));
+            
+            reset(strings);
+            Assert.Throws<NotSupportedException>(() => oc.InsertRange(1, strings));
+            Assert.Throws<NotSupportedException>(() => oc.InsertRange(1, strings.Take(1)));
+            
+            //RemoveRange
+            reset(strings);
+            Assert.Throws<NotSupportedException>(() => oc.RemoveRange(1, 1));
+            reset(strings);
+            Assert.Throws<NotSupportedException>(() => oc.RemoveRange(0, 2));
+            reset(strings);
+            Assert.Throws<NotSupportedException>(() => oc.RemoveRange(0, 1)); 
+        }
+
+        class ExceptionObservableCollection : ObservableCollection<string>
+        {
+            public ExceptionObservableCollection(params string[] initialValues) : base(initialValues)
+            {
+            }
+
+            protected override void ClearItems() => throw new NotSupportedException();
+            protected override void InsertItem(int index, string item) => throw new NotSupportedException();
+            protected override void MoveItem(int oldIndex, int newIndex) => throw new NotSupportedException();
+            protected override void RemoveItem(int index) => throw new NotSupportedException();
+            protected override void SetItem(int index, string item) => throw new NotSupportedException();
+        }
+
 
     }
 

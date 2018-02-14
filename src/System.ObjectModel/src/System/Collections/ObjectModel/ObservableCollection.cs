@@ -32,6 +32,9 @@ namespace System.Collections.ObjectModel
 
         private SimpleMonitor _monitor; // Lazily allocated only when a subclass calls BlockReentrancy() or during serialization. Do not rename (binary serialization)
 
+        [NonSerialized]
+        private bool _direct;
+
         //TODO should serialize?
         [NonSerialized]
         private DeferredEventsCollection _deferredEvents;
@@ -131,9 +134,9 @@ namespace System.Collections.ObjectModel
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException(nameof(collection));      
+                throw new ArgumentNullException(nameof(collection));
             if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);     
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (index > Count)
                 throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_ArgExceedsSize);
 
@@ -151,14 +154,20 @@ namespace System.Collections.ObjectModel
 
             CheckReentrancy();
 
-            //expand the following couple of lines when adding more constructors.
-            var target = (List<T>)Items;
-            target.InsertRange(index, collection);
-
-            OnEssentialPropertiesChanged();
-
             if (!(collection is IList list))
                 list = new List<T>(collection);
+
+            /*
+            //replaced to ensure we always tunnel down to Collection<T>'s virtual methods.
+            var target = (List<T>)Items;            
+            target.InsertRange(index, collection);
+            */
+
+            using (new SkipNotifications(this))
+                for (int i = 0; i < list.Count; i++)
+                    InsertItem(index + i, (T)list[i]);
+
+            OnEssentialPropertiesChanged();
 
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, index));
         }
@@ -200,25 +209,26 @@ namespace System.Collections.ObjectModel
             var clusters = new Dictionary<int, List<T>>();
             var lastIndex = -1;
             List<T> lastCluster = null;
-            foreach (T item in collection)
-            {
-                var index = IndexOf(item);
-                if (index < 0)
+            using (new SkipNotifications(this))
+                foreach (T item in collection)
                 {
-                    continue;
-                }
+                    var index = IndexOf(item);
+                    if (index < 0)
+                    {
+                        continue;
+                    }
 
-                Items.RemoveAt(index);
+                    RemoveItem(index);
 
-                if (lastIndex == index && lastCluster != null)
-                {
-                    lastCluster.Add(item);
+                    if (lastIndex == index && lastCluster != null)
+                    {
+                        lastCluster.Add(item);
+                    }
+                    else
+                    {
+                        clusters[lastIndex = index] = lastCluster = new List<T> { item };
+                    }
                 }
-                else
-                {
-                    clusters[lastIndex = index] = lastCluster = new List<T> { item };
-                }
-            }
 
             OnEssentialPropertiesChanged();
 
@@ -322,34 +332,35 @@ namespace System.Collections.ObjectModel
             using (BlockReentrancy())
             using (new DeferredEventsCollection(this))
             {
-                for (var i = 0; i < count; i++, index++)
-                {
-                    T item = Items[index];
-                    if (match(item))
+                using (new SkipNotifications(this))
+                    for (var i = 0; i < count; i++, index++)
                     {
-                        Items.RemoveAt(index);
-                        removedCount++;
-
-                        if (clusterIndex == index)
+                        T item = Items[index];
+                        if (match(item))
                         {
-                            Debug.Assert(cluster != null);
-                            cluster.Add(item);
-                        }
-                        else
-                        {
-                            cluster = new List<T> { item };
-                            clusterIndex = index;
-                        }
+                            RemoveItem(index);
+                            removedCount++;
 
-                        index--;
+                            if (clusterIndex == index)
+                            {
+                                Debug.Assert(cluster != null);
+                                cluster.Add(item);
+                            }
+                            else
+                            {
+                                cluster = new List<T> { item };
+                                clusterIndex = index;
+                            }
+
+                            index--;
+                        }
+                        else if (clusterIndex > -1)
+                        {
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
+                            clusterIndex = -1;
+                            cluster = null;
+                        }
                     }
-                    else if (clusterIndex > -1)
-                    {
-                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
-                        clusterIndex = -1;
-                        cluster = null;
-                    }
-                }
 
                 if (clusterIndex > -1)
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
@@ -381,17 +392,22 @@ namespace System.Collections.ObjectModel
 
             if (count == 1)
             {
-                RemoveItem(index);
+                this.RemoveItem(index);
                 return;
             }
 
-            //Items will always be List<T>, see constructors
             var items = (List<T>)Items;
             List<T> removedItems = items.GetRange(index, count);
+            /*
+            //replaced to ensure we always tunnel down to virtual methods.
+            CheckReentrancy();                                  
+            items.RemoveRange(index, count);
+            */
 
             CheckReentrancy();
-
-            items.RemoveRange(index, count);
+            using (new SkipNotifications(this))
+                for (int i = index; i < index + count; i++)
+                    RemoveItem(index);
 
             OnEssentialPropertiesChanged();
 
@@ -463,7 +479,7 @@ namespace System.Collections.ObjectModel
                 throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_ArgExceedsSize);
 
             if (collection == null)
-                throw new ArgumentNullException(nameof(collection));  
+                throw new ArgumentNullException(nameof(collection));
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
 
@@ -492,6 +508,7 @@ namespace System.Collections.ObjectModel
 
             using (BlockReentrancy())
             using (new DeferredEventsCollection(this))
+            using (new SkipNotifications(this))
             {
                 var rangeCount = index + count;
                 var addedCount = list.Count;
@@ -514,7 +531,7 @@ namespace System.Collections.ObjectModel
                     }
                     else
                     {
-                        Items[i] = @new;
+                        SetItem(i, @new);
 
                         if (newCluster == null)
                         {
@@ -536,14 +553,19 @@ namespace System.Collections.ObjectModel
 
                 //exceeding position
                 if (count != addedCount)
-                {     
+                {
                     var items = (List<T>)Items;
                     if (count > addedCount)
                     {
                         var removedCount = rangeCount - addedCount;
                         T[] removed = new T[removedCount];
-                        items.CopyTo(i, removed, 0, removed.Length);
-                        items.RemoveRange(i, removedCount);
+
+                        for (int remIndex = Count - 1; remIndex >= i; remIndex--)
+                        {
+                            removed[remIndex - i] = Items[remIndex];
+                            RemoveItem(remIndex);
+                        }
+
                         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
                     }
                     else
@@ -553,18 +575,20 @@ namespace System.Collections.ObjectModel
                         for (int j = k; j < addedCount; j++)
                         {
                             T @new = list[j];
-                            added[j - k] = @new;
+                            var addIndex = j - k;
+                            added[addIndex] = @new;
+                            InsertItem(i + addIndex, @new);
                         }
-                        items.InsertRange(i, added);
+
                         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
                     }
 
                     OnEssentialPropertiesChanged();
                 }
-                else if(changesMade)
+                else if (changesMade)
                 {
                     OnIndexerPropertyChanged();
-                }  
+                }
             }
         }
 
@@ -644,6 +668,12 @@ namespace System.Collections.ObjectModel
         /// </exception>
         protected override void RemoveItem(int index)
         {
+            if (_direct)
+            {
+                base.RemoveItem(index);
+                return;
+            }
+
             CheckReentrancy();
             T removedItem = this[index];
 
@@ -659,6 +689,12 @@ namespace System.Collections.ObjectModel
         /// </summary>
         protected override void InsertItem(int index, T item)
         {
+            if (_direct)
+            {
+                base.InsertItem(index, item);
+                return;
+            }
+
             CheckReentrancy();
             base.InsertItem(index, item);
 
@@ -672,6 +708,12 @@ namespace System.Collections.ObjectModel
         /// </summary>
         protected override void SetItem(int index, T item)
         {
+            if (_direct)
+            {
+                base.SetItem(index, item);
+                return;
+            }
+
             if (Equals(this[index], item))
                 return;
 
@@ -879,7 +921,7 @@ namespace System.Collections.ObjectModel
 
             oldCluster.Clear();
             newCluster.Clear();
-        }      
+        }
 
         private SimpleMonitor EnsureMonitorInitialized()
         {
@@ -951,6 +993,21 @@ namespace System.Collections.ObjectModel
                 _collection._deferredEvents = null;
                 foreach (var args in this)
                     _collection.OnCollectionChanged(args);
+            }
+        }
+
+        private sealed class SkipNotifications : IDisposable
+        {
+            private readonly ObservableCollection<T> _collection;
+            public SkipNotifications(ObservableCollection<T> collection)
+            {
+                _collection = collection;
+                _collection._direct = true;
+            }
+
+            public void Dispose()
+            {
+                _collection._direct = false;
             }
         }
 
