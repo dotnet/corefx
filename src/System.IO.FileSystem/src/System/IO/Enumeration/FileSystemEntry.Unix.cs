@@ -21,8 +21,8 @@ namespace System.IO.Enumeration
             ref FileSystemEntry entry,
             Interop.Sys.DirectoryEntry directoryEntry,
             ReadOnlySpan<char> directory,
-            string rootDirectory,
-            string originalRootDirectory,
+            ReadOnlySpan<char> rootDirectory,
+            ReadOnlySpan<char> originalRootDirectory,
             Span<char> pathBuffer)
         {
             entry._directoryEntry = directoryEntry;
@@ -54,7 +54,6 @@ namespace System.IO.Enumeration
             FileStatus.Initialize(ref entry._status, isDirectory);
             return isDirectory;
         }
-
 
         private ReadOnlySpan<char> FullPath
         {
@@ -99,12 +98,12 @@ namespace System.IO.Enumeration
         /// <summary>
         /// The full path of the root directory used for the enumeration.
         /// </summary>
-        public string RootDirectory { get; private set; }
+        public ReadOnlySpan<char> RootDirectory { get; private set; }
 
         /// <summary>
         /// The root directory for the enumeration as specified in the constructor.
         /// </summary>
-        public string OriginalRootDirectory { get; private set; }
+        public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
         public FileAttributes Attributes => _status.GetAttributes(FullPath, FileName);
         public long Length => _status.GetLength(FullPath);
