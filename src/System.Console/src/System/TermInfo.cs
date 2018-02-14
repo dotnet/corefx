@@ -119,21 +119,14 @@ namespace System
                 _term = term;
                 _data = data;
 
-                const int magicLegacyNumber = 0x11A; // magic number octal 0432 for legacy ncurses terminfo
-                const int magic32BitNumber = 0x21E; // magic number octal 01036 for new ncruses terminfo
-                bool reasAs32Bit = false; // default to legacy format
-
+                const int MagicLegacyNumber = 0x11A; // magic number octal 0432 for legacy ncurses terminfo
+                const int Magic32BitNumber = 0x21E; // magic number octal 01036 for new ncruses terminfo
                 short magic = ReadInt16(data, 0);
-
-                // See "man term" for the file format.
-                if (magic == magic32BitNumber)
-                {
-                    reasAs32Bit = true; // Using new ncurses format
-                }
-                else if (magic != magicLegacyNumber)
-                {
-                    throw new InvalidOperationException(SR.IO_TermInfoInvalid); // Did not recognize legacy or new magic numbers
-                }
+                bool readAs32Bit =
+                    magic == MagicLegacyNumber ? false :
+                    magic == Magic32BitNumber ? true :
+                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, Convert.ToString(magic, 8))); // magic number was not recognized. Printing the magic number in octal.
+                
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
                 _boolSectionNumBytes = ReadInt16(data, 4);
@@ -157,7 +150,7 @@ namespace System
                 // (Note that the extended section also includes other Booleans and numbers, but we don't
                 // have any need for those now, so we don't parse them.)
                 int extendedBeginning = RoundUpToEven(StringsTableOffset + _stringTableNumBytes);
-                _extendedStrings = ParseExtendedStrings(data, extendedBeginning, reasAs32Bit) ?? new Dictionary<string, string>();
+                _extendedStrings = ParseExtendedStrings(data, extendedBeginning, readAs32Bit) ?? new Dictionary<string, string>();
             }
 
             /// <summary>The name of the associated terminfo, if any.</summary>
@@ -463,17 +456,8 @@ namespace System
             /// <param name="pos">The position at which to read.</param>
             /// <param name="readAs32Bit">Whether or not to read value as 32-bit. Will read as 16-bit if set to false.</param>
             /// <returns>The value read.</returns>
-            private static int ReadInt(byte[] buffer, int pos, bool readAs32Bit)
-            {
-                if (readAs32Bit)
-                {
-                    return ReadInt32(buffer, pos);
-                }
-                else
-                {
-                    return ReadInt16(buffer, pos);
-                }
-            }
+            private static int ReadInt(byte[] buffer, int pos, bool readAs32Bit) =>
+                readAs32Bit ? ReadInt32(buffer, pos) : ReadInt16(buffer, pos);
 
             /// <summary>Read a 16-bit value from the buffer starting at the specified position.</summary>
             /// <param name="buffer">The buffer from which to read.</param>
