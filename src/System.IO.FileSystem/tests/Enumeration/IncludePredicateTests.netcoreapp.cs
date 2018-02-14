@@ -33,7 +33,7 @@ namespace System.IO.Tests.Enumeration
         }
 
         [Fact]
-        public void MatchCase()
+        public void CustomExtensionMatch()
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
             DirectoryInfo testSubdirectory = Directory.CreateDirectory(Path.Combine(testDirectory.FullName, "Subdirectory"));
