@@ -25,9 +25,9 @@
     <Reference Include="System.Security.Principal.Windows" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
-    <ReferenceFromRuntime Include="System.Private.Corelib" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Resources.ResourceManager" />
     <ProjectReference Include="..\..\System.IO.Pipes\src\System.IO.Pipes.csproj" />
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Security.AccessControl\src\System.Security.AccessControl.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
