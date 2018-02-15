@@ -533,44 +533,85 @@ namespace System.Diagnostics
             // A lock in Process ensures no new processes are spawned while we are checking.
             lock (s_childProcessWaitStates)
             {
-                // We track things to unref so we don't invalidate our iterator by changing s_childProcessWaitStates. 
-                ProcessWaitState firstToRemove = null;
-                List<ProcessWaitState> additionalToRemove = null;
-                foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)
+                bool checkAll = false;
+
+                // Check terminated processes.
+                int pid;
+                do
                 {
-                    ProcessWaitState pws = kv.Value;
-                    if (pws.TryReapChild())
+                    // Find a process that terminated without reaping it yet.
+                    int exitCode;
+                    pid = Interop.Sys.WaitIdExitedNoHang(-1, out exitCode, keepWaitable: true);
+                    if (pid > 0)
                     {
-                        if (firstToRemove == null)
+                        if (s_childProcessWaitStates.TryGetValue(pid, out ProcessWaitState pws))
                         {
-                            firstToRemove = pws;
+                            // Known Process.
+                            if (pws.TryReapChild())
+                            {
+                                pws.ReleaseRef();
+                            }
                         }
                         else
                         {
-                            if (additionalToRemove == null)
-                            {
-                                additionalToRemove = new List<ProcessWaitState>();
-                            }
-                            additionalToRemove.Add(pws);
+                            // unlikely: This is not a managed Process, so we are not responsible for reaping.
+                            // Fall back to checking all Processes.
+                            checkAll = true;
+                            break;
                         }
                     }
-                }
-
-                if (firstToRemove != null)
-                {
-                    firstToRemove.ReleaseRef();
-                    if (additionalToRemove != null)
+                    else if (pid == 0)
                     {
-                        foreach (ProcessWaitState pws in additionalToRemove)
+                        // No more terminated children.
+                    }
+                    else
+                    {
+                        // Unexpected.
+                        int errorCode = Marshal.GetLastWin32Error();
+                        Environment.FailFast("Error while checking for terminated children. errno = " + errorCode);
+                    }
+                } while (pid > 0);
+
+                if (checkAll)
+                {
+                    // We track things to unref so we don't invalidate our iterator by changing s_childProcessWaitStates. 
+                    ProcessWaitState firstToRemove = null;
+                    List<ProcessWaitState> additionalToRemove = null;
+                    foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)
+                    {
+                        ProcessWaitState pws = kv.Value;
+                        if (pws.TryReapChild())
                         {
-                            pws.ReleaseRef();
+                            if (firstToRemove == null)
+                            {
+                                firstToRemove = pws;
+                            }
+                            else
+                            {
+                                if (additionalToRemove == null)
+                                {
+                                    additionalToRemove = new List<ProcessWaitState>();
+                                }
+                                additionalToRemove.Add(pws);
+                            }
+                        }
+                    }
+
+                    if (firstToRemove != null)
+                    {
+                        firstToRemove.ReleaseRef();
+                        if (additionalToRemove != null)
+                        {
+                            foreach (ProcessWaitState pws in additionalToRemove)
+                            {
+                                pws.ReleaseRef();
+                            }
                         }
                     }
                 }
 
                 if (reapAll)
                 {
-                    int pid;
                     do
                     {
                         int exitCode;

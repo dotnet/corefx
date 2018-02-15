@@ -458,7 +458,11 @@ extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCod
         options |= WNOWAIT;
     }
     while (CheckInterrupted(result = waitid(idtype, static_cast<id_t>(pid), &siginfo, options)));
-    if (result == 0 && siginfo.si_signo == SIGCHLD)
+    if (idtype == P_ALL && result == -1 && errno == ECHILD)
+    {
+        result = 0;
+    }
+    else if (result == 0 && siginfo.si_signo == SIGCHLD)
     {
         if (siginfo.si_code == CLD_EXITED)
         {
