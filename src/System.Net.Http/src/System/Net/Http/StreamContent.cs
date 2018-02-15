@@ -34,7 +34,7 @@ namespace System.Net.Http
             InitializeContent(content, bufferSize);
         }
 
-        private void InitializeContent(stream content, int bufferSize)
+        private void InitializeContent(Stream content, int bufferSize)
         {
             if (content == null)
             {
