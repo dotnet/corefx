@@ -36,6 +36,8 @@ namespace System.Net.Http
             }
         }
 
+        internal void SetVersionUnchecked(Version value) => _version = value;
+
         public HttpContent Content
         {
             get { return _content; }
@@ -74,6 +76,8 @@ namespace System.Net.Http
             }
         }
 
+        internal void SetStatusCodeUnchecked(HttpStatusCode value) => _statusCode = value;
+
         public string ReasonPhrase
         {
             get
@@ -96,6 +100,8 @@ namespace System.Net.Http
                 _reasonPhrase = value; // It's OK to have a 'null' reason phrase.
             }
         }
+
+        internal void SetReasonPhraseUnchecked(string value) => _reasonPhrase = value;
 
         public HttpResponseHeaders Headers
         {
