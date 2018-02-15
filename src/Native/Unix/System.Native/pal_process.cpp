@@ -477,26 +477,6 @@ extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCod
     return result;
 }
 
-extern "C" int32_t SystemNative_WExitStatus(int32_t status)
-{
-    return WEXITSTATUS(status);
-}
-
-extern "C" int32_t SystemNative_WIfExited(int32_t status)
-{
-    return WIFEXITED(status);
-}
-
-extern "C" int32_t SystemNative_WIfSignaled(int32_t status)
-{
-    return WIFSIGNALED(status);
-}
-
-extern "C" int32_t SystemNative_WTermSig(int32_t status)
-{
-    return WTERMSIG(status);
-}
-
 extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)
 {
     int32_t confValue = -1;

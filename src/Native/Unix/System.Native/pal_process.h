@@ -215,17 +215,6 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
 extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable);
 
 /**
- * The four functions below are wrappers around the platform-specific macros of the same name.
- */
-extern "C" int32_t SystemNative_WExitStatus(int32_t status);
-
-extern "C" int32_t SystemNative_WIfExited(int32_t status);
-
-extern "C" int32_t SystemNative_WIfSignaled(int32_t status);
-
-extern "C" int32_t SystemNative_WTermSig(int32_t status);
-
-/**
  * Gets the configurable limit or variable for system path or file descriptor options.
  *
  * Returns the requested variable value on success; if the variable does not have a limit, -1 is returned and errno
