@@ -304,21 +304,7 @@ namespace System.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 operator /(Vector4 value1, float value2)
         {
-            if (Vector.IsHardwareAccelerated)
-            {
-                return value1 / new Vector4(value2);
-            }
-            else
-            {
-                float invDiv = 1.0f / value2;
-
-                return new Vector4(
-                    value1.X * invDiv,
-                    value1.Y * invDiv,
-                    value1.Z * invDiv,
-                    value1.W * invDiv);
-            }
-
+            return value1 / new Vector4(value2);
         }
 
         /// <summary>
