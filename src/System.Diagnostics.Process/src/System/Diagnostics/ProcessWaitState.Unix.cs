@@ -354,85 +354,93 @@ namespace System.Diagnostics
         {
             Debug.Assert(!Monitor.IsEntered(_gate));
 
-            // Track the time the we start waiting.
-            long startTime = Stopwatch.GetTimestamp();
-
-            // Polling loop
-            while (true)
+            if (_isChild)
             {
-                bool createdTask = false;
-                CancellationTokenSource cts = null;
-                Task waitTask;
+                ManualResetEvent exitEvent = EnsureExitedEvent();
+                return exitEvent.WaitOne(millisecondsTimeout);
+            }
+            else
+            {
+                // Track the time the we start waiting.
+                long startTime = Stopwatch.GetTimestamp();
 
-                // We're in a polling loop... determine how much time remains
-                int remainingTimeout = millisecondsTimeout == Timeout.Infinite ?
-                    Timeout.Infinite :
-                    (int)Math.Max(millisecondsTimeout - ((Stopwatch.GetTimestamp() - startTime) / (double)Stopwatch.Frequency * 1000), 0);
-
-                lock (_gate)
+                // Polling loop
+                while (true)
                 {
-                    // If we already know that the process exited, we're done.
-                    if (_exited)
-                    {
-                        return true;
-                    }
+                    bool createdTask = false;
+                    CancellationTokenSource cts = null;
+                    Task waitTask;
 
-                    // If a timeout of 0 was supplied, then we simply need to poll
-                    // to see if the process has already exited.
-                    if (remainingTimeout == 0)
+                    // We're in a polling loop... determine how much time remains
+                    int remainingTimeout = millisecondsTimeout == Timeout.Infinite ?
+                        Timeout.Infinite :
+                        (int)Math.Max(millisecondsTimeout - ((Stopwatch.GetTimestamp() - startTime) / (double)Stopwatch.Frequency * 1000), 0);
+
+                    lock (_gate)
                     {
-                        // If there's currently a wait-in-progress, then we know the other process
-                        // hasn't exited (barring races and the polling interval).
-                        if (_waitInProgress != null)
+                        // If we already know that the process exited, we're done.
+                        if (_exited)
                         {
-                            return false;
+                            return true;
                         }
 
-                        // No one else is checking for the process' exit... so check.
-                        // We're currently holding the _gate lock, so we don't want to
-                        // allow CheckForNonChildExit to block indefinitely.
-                        CheckForNonChildExit();
-                        return _exited;
-                    }
+                        // If a timeout of 0 was supplied, then we simply need to poll
+                        // to see if the process has already exited.
+                        if (remainingTimeout == 0)
+                        {
+                            // If there's currently a wait-in-progress, then we know the other process
+                            // hasn't exited (barring races and the polling interval).
+                            if (_waitInProgress != null)
+                            {
+                                return false;
+                            }
 
-                    // The process has not yet exited (or at least we don't know it yet)
-                    // so we need to wait for it to exit, outside of the lock.
-                    // If there's already a wait in progress, we'll do so later
-                    // by waiting on that existing task.  Otherwise, we'll spin up
-                    // such a task.
-                    if (_waitInProgress != null)
+                            // No one else is checking for the process' exit... so check.
+                            // We're currently holding the _gate lock, so we don't want to
+                            // allow CheckForNonChildExit to block indefinitely.
+                            CheckForNonChildExit();
+                            return _exited;
+                        }
+
+                        // The process has not yet exited (or at least we don't know it yet)
+                        // so we need to wait for it to exit, outside of the lock.
+                        // If there's already a wait in progress, we'll do so later
+                        // by waiting on that existing task.  Otherwise, we'll spin up
+                        // such a task.
+                        if (_waitInProgress != null)
+                        {
+                            waitTask = _waitInProgress;
+                        }
+                        else
+                        {
+                            createdTask = true;
+                            CancellationToken token = remainingTimeout == Timeout.Infinite ?
+                                CancellationToken.None :
+                                (cts = new CancellationTokenSource(remainingTimeout)).Token;
+                            waitTask = WaitForExitAsync(token);
+                        }
+                    } // lock(_gate)
+
+                    if (createdTask)
                     {
-                        waitTask = _waitInProgress;
+                        // We created this task, and it'll get canceled automatically after our timeout.
+                        // This Wait should only wake up when either the process has exited or the timeout
+                        // has expired.  Either way, we'll loop around again; if the process exited, that'll
+                        // be caught first thing in the loop where we check _exited, and if it didn't exit,
+                        // our remaining time will be zero, so we'll do a quick remaining check and bail.
+                        waitTask.Wait();
+                        cts?.Dispose();
                     }
                     else
                     {
-                        createdTask = true;
-                        CancellationToken token = remainingTimeout == Timeout.Infinite ?
-                            CancellationToken.None :
-                            (cts = new CancellationTokenSource(remainingTimeout)).Token;
-                        waitTask = WaitForExitAsync(token);
+                        // It's someone else's task.  We'll wait for it to complete. This could complete
+                        // either because our remainingTimeout expired or because the task completed,
+                        // which could happen because the process exited or because whoever created
+                        // that task gave it a timeout.  In any case, we'll loop around again, and the loop
+                        // will catch these cases, potentially issuing another wait to make up any
+                        // remaining time.
+                        waitTask.Wait(remainingTimeout);
                     }
-                } // lock(_gate)
-
-                if (createdTask)
-                {
-                    // We created this task, and it'll get canceled automatically after our timeout.
-                    // This Wait should only wake up when either the process has exited or the timeout
-                    // has expired.  Either way, we'll loop around again; if the process exited, that'll
-                    // be caught first thing in the loop where we check _exited, and if it didn't exit,
-                    // our remaining time will be zero, so we'll do a quick remaining check and bail.
-                    waitTask.Wait();
-                    cts?.Dispose();
-                }
-                else
-                {
-                    // It's someone else's task.  We'll wait for it to complete. This could complete
-                    // either because our remainingTimeout expired or because the task completed,
-                    // which could happen because the process exited or because whoever created
-                    // that task gave it a timeout.  In any case, we'll loop around again, and the loop
-                    // will catch these cases, potentially issuing another wait to make up any
-                    // remaining time.
-                    waitTask.Wait(remainingTimeout);
                 }
             }
         }
