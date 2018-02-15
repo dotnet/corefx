@@ -11,8 +11,6 @@ namespace System.Net.Http
 {
     public class StreamContent : HttpContent
     {
-        private const int DefaultBufferSize = 4096;
-
         private Stream _content;
         private int _bufferSize;
         private bool _contentConsumed;
