@@ -49,5 +49,23 @@ namespace System.SpanTests
             var span = new ReadOnlySpan<string>(a);
             Assert.Equal("System.ReadOnlySpan<String>[3]", span.ToString());
         }
+
+        [Fact]
+        public static void ToString_SpanOverString()
+        {
+            string orig = "hello world";
+            Assert.Equal(orig, orig.AsReadOnlySpan().ToString());
+            Assert.Equal(orig.Substring(0, 5), orig.AsReadOnlySpan(0, 5).ToString());
+            Assert.Equal(orig.Substring(5), orig.AsReadOnlySpan(5).ToString());
+            Assert.Equal(orig.Substring(1, 3), orig.AsReadOnlySpan(1, 3).ToString());
+        }
+
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Optimization only applies to portable span.")]
+        [Fact]
+        public static void ToString_SpanOverFullString_ReturnsOriginal()
+        {
+            string orig = "hello world";
+            Assert.Same(orig, orig.AsReadOnlySpan().ToString());
+        }
     }
 }
