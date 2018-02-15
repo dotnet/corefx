@@ -449,14 +449,27 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
     syslog(static_cast<int>(priority), message, arg1);
 }
 
-extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions options)
+extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions waitPidOptions)
 {
     assert(status != nullptr);
 
     siginfo_t siginfo;
     int32_t result;
-    while (CheckInterrupted(result = waitid(P_PID, static_cast<id_t>(pid), &siginfo, static_cast<int>(options))));
-    *status = siginfo.si_status;
+    idtype_t idtype = pid == -1 ? P_ALL : P_PID;
+    int options = static_cast<int>(waitPidOptions) | WEXITED;
+    while (CheckInterrupted(result = waitid(idtype, static_cast<id_t>(pid), &siginfo, options)));
+    if (result == 0 && siginfo.si_signo == SIGCHLD)
+    {
+        if (siginfo.si_code == CLD_EXITED)
+        {
+            *status = siginfo.si_status;
+        }
+        else
+        {
+            *status = 128 + siginfo.si_status;
+        }
+        result = siginfo.si_pid;
+    }
     return result;
 }
 

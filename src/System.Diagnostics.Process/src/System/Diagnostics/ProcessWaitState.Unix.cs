@@ -506,16 +506,7 @@ namespace System.Diagnostics
 
                 if (waitResult == _processId)
                 {
-                    // Process has exited
-                    if (Interop.Sys.WIfExited(status))
-                    {
-                        _exitCode = Interop.Sys.WExitStatus(status);
-                    }
-                    else if (Interop.Sys.WIfSignaled(status))
-                    {
-                        const int ExitCodeSignalOffset = 128;
-                        _exitCode = ExitCodeSignalOffset + Interop.Sys.WTermSig(status);
-                    }
+                    _exitCode = status;
 
                     SetExited();
                     return true;
