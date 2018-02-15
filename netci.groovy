@@ -2,6 +2,7 @@
 
 import jobs.generation.Utilities;
 import jobs.generation.JobReport;
+import org.dotnet.ci.util.Agents
 
 // The input project name (e.g. dotnet/corefx)
 def project = GithubProject
@@ -16,9 +17,11 @@ def projectFolder = Utilities.getFolderName(project) + '/' + Utilities.getFolder
 def osGroupMap = ['Ubuntu14.04':'Linux',
                   'Ubuntu16.04':'Linux',
                   'Debian8.4':'Linux',
+                  'Fedora27': 'Linux',
                   'OSX':'OSX',
                   'Windows_NT':'Windows_NT',
                   'CentOS7.1': 'Linux',
+                  'OpenSUSE42.3': 'Linux',
                   'RHEL7.2': 'Linux']
 
 // Map of os -> nuget runtime
@@ -27,6 +30,8 @@ def targetNugetRuntimeMap = ['OSX' : 'osx.10.10-x64',
                              'Ubuntu16.04' : 'ubuntu.16.04-x64',
                              'Debian8.4' : 'debian.8-x64',
                              'CentOS7.1' : 'centos.7-x64',
+                             'Fedora27': 'fedora.27-x64',
+                             'OpenSUSE42.3' : 'opensuse.42.3-x64',
                              'RHEL7.2': 'rhel.7-x64']
 
 def osShortName = ['Windows 7' : 'win7',
@@ -36,7 +41,31 @@ def osShortName = ['Windows 7' : 'win7',
                    'Ubuntu16.04' : 'ubuntu16.04',
                    'CentOS7.1' : 'centos7.1',
                    'Debian8.4' : 'debian8.4',
+                   'OpenSUSE42.3' : 'opensuse42.3',
+                   'Fedora27' : 'fedora27',
                    'RHEL7.2' : 'rhel7.2']
+
+def outerloopLabelMap = ['Windows 7' : Agents.getAgentLabel('Windows 7', 'latest'),
+                         'Windows_NT' : Agents.getAgentLabel('Windows_NT', 'latest-elevated'),
+                         'Ubuntu14.04' : Agents.getAgentLabel('Ubuntu14.04', 'outer-latest'),
+                         'OSX' : Agents.getAgentLabel('OSX', 'latest'),
+                         'Ubuntu16.04' : Agents.getAgentLabel('Ubuntu16.04', 'outer-latest'),
+                         'Debian8.4' : Agents.getAgentLabel('Debian8.4', 'outer-latest'),
+                         'CentOS7.1' : Agents.getAgentLabel('CentOS7.1', 'outer-latest'),
+                         'RHEL7.2' : Agents.getAgentLabel('RHEL7.2', 'outer-latest'),
+                         'OpenSUSE42.3' : 'OpenSuse.423.Amd64.Open',
+                         'Fedora27' : 'Fedora.27.Amd64.Open',]
+
+def innerloopLabelMap = ['Windows 7' : Agents.getAgentLabel('Windows 7', 'latest'),
+                         'Windows_NT' : Agents.getAgentLabel('Windows_NT', 'latest'),
+                         'Ubuntu14.04' : Agents.getAgentLabel('Ubuntu14.04', 'latest'),
+                         'OSX' : Agents.getAgentLabel('OSX', 'latest'),
+                         'Ubuntu16.04' : Agents.getAgentLabel('Ubuntu16.04', 'latest'),
+                         'Debian8.4' : Agents.getAgentLabel('Debian8.4', 'latest'),
+                         'CentOS7.1' : Agents.getAgentLabel('CentOS7.1', 'latest'),
+                         'RHEL7.2' : Agents.getAgentLabel('RHEL7.2', 'latest'),
+                         'OpenSUSE42.3' : 'OpenSuse.423.Amd64.Open',
+                         'Fedora27' : 'Fedora.27.Amd64.Open',]
 
 // **************************
 // Define code coverage build
@@ -111,7 +140,7 @@ def osShortName = ['Windows 7' : 'win7',
 // Define outerloop testing for OSes that can build and run.  Run locally on each machine.
 // **************************
 [true, false].each { isPR ->
-    ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1', 'RHEL7.2', 'Debian8.4', 'OSX'].each { os ->
+    ['Windows 7', 'Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'CentOS7.1', 'OpenSUSE42.3', 'RHEL7.2', 'Fedora27', 'Debian8.4', 'OSX'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
@@ -130,14 +159,9 @@ def osShortName = ['Windows 7' : 'win7',
                 }
             }
 
-            // Set the affinity.  OS name matches the machine affinity.
-            if (os == 'Windows_NT') {
-                Utilities.setMachineAffinity(newJob, os, "latest-or-auto-elevated")
-            }
-            else if (osGroupMap[os] == 'Linux') {
-                Utilities.setMachineAffinity(newJob, os, 'outer-latest-or-auto')
-            } else {
-                Utilities.setMachineAffinity(newJob, os, 'latest-or-auto');
+            // Set the affinity.
+            newJob.with {
+                label(outerloopLabelMap[os])
             }
 
             // Set up standard options.
@@ -165,7 +189,7 @@ def osShortName = ['Windows 7' : 'win7',
 // **************************
 [true, false].each { isPR ->
     ['Debug', 'Release'].each { configurationGroup ->
-        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Debian8.4', 'CentOS7.1', 'RHEL7.2', 'OSX'].each { os ->
+        ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Debian8.4', 'CentOS7.1', 'OpenSUSE42.3', 'RHEL7.2', 'Fedora27', 'OSX'].each { os ->
             def osGroup = osGroupMap[os]
             def newJobName = "${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
@@ -192,7 +216,9 @@ def osShortName = ['Windows 7' : 'win7',
             }
 
             // Set the affinity.
-            Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+            newJob.with {
+                label(innerloopLabelMap[os])
+            }
             // Set up standard options.
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             // Add the unit test results
