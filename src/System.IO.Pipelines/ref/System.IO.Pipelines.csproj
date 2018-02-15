@@ -9,10 +9,14 @@
   <ItemGroup>
     <Compile Include="System.IO.Pipelines.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Reference Include="netstandard" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
-
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\System.Memory\ref\System.Memory.csproj" />
     <ProjectReference Include="..\..\System.Buffers\ref\System.Buffers.csproj" />
   </ItemGroup>
