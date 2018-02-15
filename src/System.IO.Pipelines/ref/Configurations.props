@@ -5,7 +5,7 @@
       netstandard1.1;
     </PackageConfigurations>
     <BuildConfigurations>
-      $(BuildConfigurations);
+      $(PackageConfigurations);
       netstandard;
     </BuildConfigurations>
   </PropertyGroup>
