@@ -36,7 +36,7 @@ namespace System.Net.Http
             }
         }
 
-        internal void SetVersionUnchecked(Version value) => _version = value;
+        internal void SetVersionWithoutValidation(Version value) => _version = value;
 
         public HttpContent Content
         {
@@ -76,7 +76,7 @@ namespace System.Net.Http
             }
         }
 
-        internal void SetStatusCodeUnchecked(HttpStatusCode value) => _statusCode = value;
+        internal void SetStatusCodeWithoutValidation(HttpStatusCode value) => _statusCode = value;
 
         public string ReasonPhrase
         {
@@ -101,7 +101,7 @@ namespace System.Net.Http
             }
         }
 
-        internal void SetReasonPhraseUnchecked(string value) => _reasonPhrase = value;
+        internal void SetReasonPhraseWithoutValidation(string value) => _reasonPhrase = value;
 
         public HttpResponseHeaders Headers
         {

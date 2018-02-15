@@ -43,8 +43,9 @@ namespace System.Net.Http
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
         private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
-        private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"), 0);
-        private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"), 0);
+        private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
+        private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
+        private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
         private static readonly string s_cancellationMessage = new OperationCanceledException().Message; // use same message as the default ctor
 
         private readonly HttpConnectionPool _pool;
@@ -655,19 +656,19 @@ namespace System.Net.Http
             ulong first8Bytes = BitConverter.ToUInt64(line);
             if (first8Bytes == s_http11Bytes)
             {
-                response.SetVersionUnchecked(HttpVersion.Version11);
+                response.SetVersionWithoutValidation(HttpVersion.Version11);
             }
             else if (first8Bytes == s_http10Bytes)
             {
-                response.SetVersionUnchecked(HttpVersion.Version10);
+                response.SetVersionWithoutValidation(HttpVersion.Version10);
             }
             else
             {
                 byte minorVersion = line[7];
-                line[7] = (byte)'1'; // Enable checking the first 7 bytes easily by comparing against HTTP/1.1
-                if (IsDigit(minorVersion) && BitConverter.ToUInt64(line) == s_http11Bytes)
+                if (IsDigit(minorVersion) &&
+                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes))
                 {
-                    response.SetVersionUnchecked(new Version(1, minorVersion - '0'));
+                    response.SetVersionWithoutValidation(new Version(1, minorVersion - '0'));
                 }
                 else
                 {
@@ -681,20 +682,32 @@ namespace System.Net.Http
             {
                 ThrowInvalidHttpResponse();
             }
-            response.SetStatusCodeUnchecked((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
+            response.SetStatusCodeWithoutValidation((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
 
             // Parse (optional) reason phrase
             if (line.Length == MinStatusLineLength)
             {
-                response.ReasonPhrase = string.Empty;
+                response.SetReasonPhraseWithoutValidation(string.Empty);
             }
             else if (line[MinStatusLineLength] == ' ')
             {
                 Span<byte> reasonBytes = line.Slice(MinStatusLineLength + 1);
                 string knownReasonPhrase = HttpStatusDescription.Get(response.StatusCode);
-                response.SetReasonPhraseUnchecked(knownReasonPhrase != null && EqualsOrdinal(knownReasonPhrase, reasonBytes) ?
-                    knownReasonPhrase :
-                    HttpRuleParser.DefaultHttpEncoding.GetString(reasonBytes));
+                if (knownReasonPhrase != null && EqualsOrdinal(knownReasonPhrase, reasonBytes))
+                {
+                    response.SetReasonPhraseWithoutValidation(knownReasonPhrase);
+                }
+                else
+                {
+                    try
+                    {
+                        response.ReasonPhrase = HttpRuleParser.DefaultHttpEncoding.GetString(reasonBytes);
+                    }
+                    catch (FormatException error)
+                    {
+                        ThrowInvalidHttpResponse(error);
+                    }
+                }
             }
             else
             {
