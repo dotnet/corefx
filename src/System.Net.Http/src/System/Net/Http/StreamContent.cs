@@ -19,19 +19,26 @@ namespace System.Net.Http
         private long _start;
 
         public StreamContent(Stream content)
-            : this(content, DefaultBufferSize)
         {
+            // Indicate that we should use default buffer size by setting size to 0.
+            InitializeContent(content, 0);
         }
 
         public StreamContent(Stream content, int bufferSize)
         {
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
+            }
+
+            InitializeContent(content, bufferSize);
+        }
+
+        private void InitializeContent(stream content, int bufferSize)
+        {
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content));
             }
 
             _content = content;
