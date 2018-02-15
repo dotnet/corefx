@@ -247,13 +247,16 @@ namespace System.Diagnostics
                     _exitedEvent = new ManualResetEvent(initialState: _exited);
                     if (!_exited)
                     {
-                        // If we haven't exited, we need to spin up an asynchronous operation that
-                        // will completed the exitedEvent when the other process exits. If there's already
-                        // another operation underway, then we'll just tack ours onto the end of it.
-                        _waitInProgress = _waitInProgress == null ?
-                            WaitForExitAsync() :
-                            _waitInProgress.ContinueWith((_, state) => ((ProcessWaitState)state).WaitForExitAsync(),
-                                this, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+                        if (!_isChild)
+                        {
+                            // If we haven't exited, we need to spin up an asynchronous operation that
+                            // will completed the exitedEvent when the other process exits. If there's already
+                            // another operation underway, then we'll just tack ours onto the end of it.
+                            _waitInProgress = _waitInProgress == null ?
+                                WaitForExitAsync() :
+                                _waitInProgress.ContinueWith((_, state) => ((ProcessWaitState)state).WaitForExitAsync(),
+                                    this, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+                        }
                     }
                 }
                 return _exitedEvent;
@@ -452,6 +455,7 @@ namespace System.Diagnostics
         {
             Debug.Assert(Monitor.IsEntered(_gate));
             Debug.Assert(_waitInProgress == null);
+            Debug.Assert(!_isChild);
 
             return _waitInProgress = Task.Run(async delegate // Task.Run used because of potential blocking in CheckForNonChildExit
             {
