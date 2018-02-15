@@ -26,8 +26,8 @@ namespace System.Text.RegularExpressions
         private const int EmittedSize = 56;
         private const int IntStackSize = 32;
 
-        private ResizableValueListBuilder<int> _emitted;
-        private ResizableValueListBuilder<int> _intStack;
+        private ValueListBuilder<int> _emitted;
+        private ValueListBuilder<int> _intStack;
         private readonly Dictionary<string, int> _stringHash;
         private readonly List<string> _stringTable;
         private Hashtable _caps;
@@ -35,8 +35,8 @@ namespace System.Text.RegularExpressions
 
         private RegexWriter(Span<int> emittedSpan, Span<int> intStackSpan)
         {
-            _emitted = new ResizableValueListBuilder<int>(emittedSpan);
-            _intStack = new ResizableValueListBuilder<int>(intStackSpan);
+            _emitted = new ValueListBuilder<int>(emittedSpan);
+            _intStack = new ValueListBuilder<int>(intStackSpan);
             _stringHash = new Dictionary<string, int>();
             _stringTable = new List<string>();
             _caps = null;

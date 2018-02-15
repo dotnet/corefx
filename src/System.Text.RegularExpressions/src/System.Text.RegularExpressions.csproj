@@ -33,7 +33,7 @@
     <Compile Include="System\Text\RegularExpressions\RegexReplacement.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexRunner.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexTree.cs" />
-    <Compile Include="System\Text\RegularExpressions\ResizableValueListBuilder.cs" />
+    <Compile Include="System\Text\RegularExpressions\ValueListBuilder.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexWriter.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexRunnerFactory.cs" />
     <!-- Common or Common-branched source files -->
@@ -42,6 +42,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Generic\ValueListBuilder.cs">
+      <Link>Common\System\Collections\Generic\ValueListBuilder.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Files that enable compiled feature -->
