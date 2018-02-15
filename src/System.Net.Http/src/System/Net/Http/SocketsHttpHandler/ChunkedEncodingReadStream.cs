@@ -155,8 +155,7 @@ namespace System.Net.Http
             {
                 ValidateCopyToArgs(this, destination, bufferSize);
 
-                return
-                    cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
+                return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
                     _connection != null ? CopyToAsyncCore(destination, bufferSize, cancellationToken) :
                     Task.CompletedTask;
             }

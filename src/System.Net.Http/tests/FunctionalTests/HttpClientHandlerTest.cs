@@ -1024,6 +1024,13 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("Content-Length      ")]
         public async Task GetAsync_InvalidHeaderNameValue_ThrowsHttpRequestException(string invalidHeader)
         {
+            if (IsCurlHandler && invalidHeader.Contains(':'))
+            {
+                // Issue #27172
+                // CurlHandler allows these headers as long as they have a colon.
+                return;
+            }
+
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (var client = CreateHttpClient())
@@ -1034,11 +1041,11 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task GetAsync_ManyDifferentRequestHeaders_SentCorrectly()
+        public async Task PostAsync_ManyDifferentRequestHeaders_SentCorrectly()
         {
             if (IsWinHttpHandler)
             {
-                // Issue #TODO_BEFORE_MERGE
+                // Issue #27171
                 // Fails consistently with:
                 // System.InvalidCastException: "Unable to cast object of type 'System.Object[]' to type 'System.Net.Http.WinHttpRequestState'"
                 // This appears to be due to adding the Expect: 100-continue header, which causes winhttp
@@ -1054,7 +1061,7 @@ namespace System.Net.Http.Functional.Tests
                 using (var client = CreateHttpClient())
                 {
                     byte[] contentArray = Encoding.ASCII.GetBytes("hello world");
-                    var request = new HttpRequestMessage(HttpMethod.Get, uri) { Content = new ByteArrayContent(contentArray) };
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(contentArray) };
 
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
                     request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue("utf-8"));
@@ -1140,8 +1147,11 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Contains("Access-Control-Request-Headers: GET", headersSet);
                     Assert.Contains("Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headersSet);
                     Assert.Contains("Cache-Control: no-cache", headersSet);
-                    Assert.Contains("Connection: close", headersSet);
-                    Assert.Contains("Cookie: $Version=1; Skin=new", headersSet);
+                    Assert.Contains("Connection: close", headersSet, StringComparer.OrdinalIgnoreCase); // NetFxHandler uses "Close" vs "close"
+                    if (!IsNetfxHandler)
+                    {
+                        Assert.Contains("Cookie: $Version=1; Skin=new", headersSet);
+                    }
                     Assert.Contains("Date: Tue, 15 Nov 1994 08:12:31 GMT", headersSet);
                     Assert.Contains("Expect: 100-continue", headersSet);
                     Assert.Contains("Forwarded: for=192.0.2.60;proto=http;by=203.0.113.43", headersSet);
@@ -1174,7 +1184,10 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Contains("X-Http-Method-Override: DELETE", headersSet);
                     Assert.Contains("X-ATT-DeviceId: GT-P7320/P7320XXLPG", headersSet);
                     Assert.Contains("X-Wap-Profile: http://wap.samsungmobile.com/uaprof/SGH-I777.xml", headersSet);
-                    Assert.Contains("Proxy-Connection: keep-alive", headersSet);
+                    if (!IsNetfxHandler)
+                    {
+                        Assert.Contains("Proxy-Connection: keep-alive", headersSet);
+                    }
                     Assert.Contains("X-UIDH: ...", headersSet);
                     Assert.Contains("X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql", headersSet);
                     Assert.Contains("X-Request-ID: f058ebd6-02f7-4d3f-942e-904344e8cde5, f058ebd6-02f7-4d3f-942e-904344e8cde5", headersSet);
@@ -1713,7 +1726,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 await server.AcceptConnectionAsync(async connection =>
                 {
-                    while (!string.IsNullOrEmpty(await connection.Reader.ReadLineAsync())) ;
+                    await connection.ReadRequestHeaderAsync();
                     await connection.Writer.WriteAsync("HTTP/1.1 200 OK\r\n");
                     switch (chunked)
                     {
