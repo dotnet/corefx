@@ -501,12 +501,12 @@ namespace System.Diagnostics
                 }
 
                 // Try to get the state of the child process
-                int status;
-                int waitResult = Interop.Sys.WaitPid(_processId, out status, Interop.Sys.WaitPidOptions.WNOHANG);
+                int exitCode;
+                int waitResult = Interop.Sys.WaitIdExitedNoHang(_processId, out exitCode, keepWaitable: false);
 
                 if (waitResult == _processId)
                 {
-                    _exitCode = status;
+                    _exitCode = exitCode;
 
                     SetExited();
                     return true;
@@ -573,8 +573,8 @@ namespace System.Diagnostics
                     int pid;
                     do
                     {
-                        int status;
-                        pid = Interop.Sys.WaitPid(-1, out status, Interop.Sys.WaitPidOptions.WNOHANG);
+                        int exitCode;
+                        pid = Interop.Sys.WaitIdExitedNoHang(-1, out exitCode, keepWaitable: false);
                     } while (pid > 0);
                 }
             }

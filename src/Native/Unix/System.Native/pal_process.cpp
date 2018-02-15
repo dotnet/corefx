@@ -32,10 +32,6 @@
 // Validate that our Signals enum values are correct for the platform
 static_assert(PAL_SIGKILL == SIGKILL, "");
 
-// Validate that our WaitPidOptions enum values are correct for the platform
-static_assert(PAL_WNOHANG == WNOHANG, "");
-static_assert(PAL_WUNTRACED == WUNTRACED, "");
-
 // Validate that our SysLogPriority values are correct for the platform
 static_assert(PAL_LOG_EMERG == LOG_EMERG, "");
 static_assert(PAL_LOG_ALERT == LOG_ALERT, "");
@@ -449,24 +445,28 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
     syslog(static_cast<int>(priority), message, arg1);
 }
 
-extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions waitPidOptions)
+extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable)
 {
-    assert(status != nullptr);
+    assert(exitCode != nullptr);
 
     siginfo_t siginfo;
     int32_t result;
     idtype_t idtype = pid == -1 ? P_ALL : P_PID;
-    int options = static_cast<int>(waitPidOptions) | WEXITED;
+    int options = WEXITED | WNOHANG;
+    if (keepWaitable != 0)
+    {
+        options |= WNOWAIT;
+    }
     while (CheckInterrupted(result = waitid(idtype, static_cast<id_t>(pid), &siginfo, options)));
     if (result == 0 && siginfo.si_signo == SIGCHLD)
     {
         if (siginfo.si_code == CLD_EXITED)
         {
-            *status = siginfo.si_status;
+            *exitCode = siginfo.si_status;
         }
         else
         {
-            *status = 128 + siginfo.si_status;
+            *exitCode = 128 + siginfo.si_status;
         }
         result = siginfo.si_pid;
     }
