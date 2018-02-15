@@ -91,13 +91,13 @@ namespace System.Text.RegularExpressions
         internal const int Loop = 26;                                   // m,x      * + ? {,}
         internal const int Lazyloop = 27;                               // m,x      *? +? ?? {,}?
 
-        internal const int Capture = 28;                                // n        ()
-        internal const int Group = 29;                                  //          (?:)
-        internal const int Require = 30;                                //          (?=) (?<=)
-        internal const int Prevent = 31;                                //          (?!) (?<!)
-        internal const int Greedy = 32;                                 //          (?>) (?<)
-        internal const int Testref = 33;                                //          (?(n) | )
-        internal const int Testgroup = 34;                              //          (?(...) | )
+        internal const int Capture = 28;                                // n        ()         - capturing group
+        internal const int Group = 29;                                  //          (?:)       - noncapturing group
+        internal const int Require = 30;                                //          (?=) (?<=) - lookahead and lookbehind assertions
+        internal const int Prevent = 31;                                //          (?!) (?<!) - negative lookahead and lookbehind assertions
+        internal const int Greedy = 32;                                 //          (?>)       - greedy subexpression
+        internal const int Testref = 33;                                //          (?(n) | )  - alternation, reference
+        internal const int Testgroup = 34;                              //          (?(...) | )- alternation, expression
 
         // RegexNode data members
 
