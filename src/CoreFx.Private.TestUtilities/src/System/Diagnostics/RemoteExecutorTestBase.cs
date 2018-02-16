@@ -181,7 +181,7 @@ namespace System.Diagnostics
                 MethodName = methodName;
             }
 
-            public Process Process { get; private set; }
+            public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
             public string AssemblyName { get; private set; }
             public string ClassName { get; private set; }
