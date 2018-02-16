@@ -55,16 +55,18 @@
     <!-- Possible TODO: With the CloudTest.Helix.targets refactor, we have the ability to specify variable timeout-->
     <TimeoutInSeconds Condition="'$(TimeoutInSeconds)' == ''">600</TimeoutInSeconds>
 
+    <!-- Detect whether we are on a product construction build via ProductBuildId. If so, set properties appropriately -->
+    <IsProdCon Condition="'$(ProductBuildId)'!=''">true</IsProdCon>
+	
     <!-- Set required properties for Helix Submission -->
-    <IsOfficial Condition="'$(OfficialBuildId)'!=''">true</IsOfficial>
+    <IsOfficial Condition="'$(IsProdCon)'=='' And '$(OfficialBuildId)'!=''">true</IsOfficial>
     <CurrentDate>$([System.DateTime]::Now.ToString(yyyyMMdd.mmss))</CurrentDate>
-
+	
     <HelixJobType Condition="'$(HelixJobType)'==''">test/functional/cli/</HelixJobType>
 
-    <!-- Detect whether we are on a product construction build via ProductBuildId. If so, set source appropriately -->
-    <HelixSource Condition="'$(HelixSource)'=='' And '$(IsOfficial)'!='' And '$(TestProduct)'!='' And '$(Branch)'!='' And '$(ProductBuildId)'!=''">prodcon/$(TestProduct)/$(Branch)/</HelixSource>
+    <HelixSource Condition="'$(HelixSource)'=='' And '$(IsProdCon)'=='true' And '$(TestProduct)'!='' And '$(Branch)'!=''">prodcon/$(TestProduct)/$(Branch)/</HelixSource>
     <HelixSource Condition="'$(HelixSource)'=='' And '$(IsOfficial)'!='' And '$(TestProduct)'!='' And '$(Branch)'!=''">official/$(TestProduct)/$(Branch)/</HelixSource>
-    <HelixSource Condition="'$(HelixSource)'=='' And '$(IsOfficial)'=='' And '$(TestProduct)'!='' And '$(Branch)'!=''">pr/$(TestProduct)/$(Branch)/</HelixSource>
+    <HelixSource Condition="'$(HelixSource)'=='' And '$(IsProdCon)'=='' And '$(IsOfficial)'=='' And '$(TestProduct)'!='' And '$(Branch)'!=''">pr/$(TestProduct)/$(Branch)/</HelixSource>
     <HelixSource Condition="'$(HelixSource)'==''">pr/unknown/</HelixSource>
 
     <!-- Local path for storing submission-related files -->
@@ -72,6 +74,7 @@
 
     <!-- Properties used for submission by CloudTest.Helix.Targets-->
     <BuildMoniker>$(CurrentDate)</BuildMoniker>
+    <BuildMoniker Condition="'$(IsProdCon)'=='true'">$(ProductBuildId)</BuildMoniker>
     <BuildMoniker Condition="'$(IsOfficial)'=='true'">$(OfficialBuildId)</BuildMoniker>
     <HelixArchLabel>$(ArchGroup)</HelixArchLabel>
     <HelixConfigLabel>$(ConfigurationGroup)</HelixConfigLabel>
