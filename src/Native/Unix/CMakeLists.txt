@@ -227,6 +227,11 @@ endfunction()
 include(configure.cmake)
 
 add_subdirectory(System.IO.Compression.Native)
+
+if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
+    add_compile_options(-Wno-zero-as-null-pointer-constant)
+endif()
+
 add_subdirectory(System.Native)
 add_subdirectory(System.Net.Http.Native)
 add_subdirectory(System.Net.Security.Native)
