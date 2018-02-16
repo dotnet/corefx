@@ -359,6 +359,14 @@ namespace System.Diagnostics
 
             if (_isChild)
             {
+                lock (_gate)
+                {
+                    // If we already know that the process exited, we're done.
+                    if (_exited)
+                    {
+                        return true;
+                    }
+                }
                 ManualResetEvent exitEvent = EnsureExitedEvent();
                 return exitEvent.WaitOne(millisecondsTimeout);
             }
