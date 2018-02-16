@@ -98,7 +98,7 @@ namespace System.SpanTests
         [Fact]
         public static void EndsWithNoMatch_StringComparison()
         {
-            for (int length = 1; length < 32; length++)
+            for (int length = 1; length < 150; length++)
             {
                 for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)
                 {
@@ -115,11 +115,21 @@ namespace System.SpanTests
                     var secondSpan = new ReadOnlySpan<char>(second);
                     Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.Ordinal));
 
-                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.CurrentCulture));
-                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
-                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.InvariantCulture));
-                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.InvariantCultureIgnoreCase));
                     Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.OrdinalIgnoreCase));
+
+                    // Different behavior depending on OS
+                    Assert.Equal(
+                        span.ToString().EndsWith(value.ToString(), StringComparison.CurrentCulture),
+                        span.EndsWith(value, StringComparison.CurrentCulture));
+                    Assert.Equal(
+                        span.ToString().EndsWith(value.ToString(), StringComparison.CurrentCulture),
+                        span.EndsWith(value, StringComparison.CurrentCulture));
+                    Assert.Equal(
+                        span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCulture),
+                        span.EndsWith(value, StringComparison.InvariantCulture));
+                    Assert.Equal(
+                        span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                        span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
                 }
             }
         }
@@ -185,13 +195,21 @@ namespace System.SpanTests
             value = new char[] { '\u0069', '\u0073', '\u0073', '\u0049' }; // issI
 
             Assert.False(span.EndsWith(value, StringComparison.Ordinal));
-            Assert.True(span.EndsWith(value, StringComparison.InvariantCulture));
-            Assert.True(span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
+            // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCulture),
+                span.EndsWith(value, StringComparison.InvariantCulture));
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
 
             value = new char[] { '\u0049', '\u0073', '\u0073', '\u0049' }; // IssI
             Assert.False(span.EndsWith(value, StringComparison.OrdinalIgnoreCase));
             Assert.False(span.EndsWith(value, StringComparison.InvariantCulture));
-            Assert.True(span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
+             // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
         }
 
         [Fact]
