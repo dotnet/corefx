@@ -56,11 +56,8 @@ namespace System.SpanTests
             Assert.Equal("System.Span<String>[3]", span.ToString());
         }
 
-        // This test is only relevant for portable span
-#if FEATURE_PORTABLE_SPAN
         [Fact]
-#endif
-        public static unsafe void ToStringFromString()
+        public static void ToStringSpanOverFullStringDoesNotReturnOriginal()
         {
             string original = TestHelpers.BuildString(10, 42);
 
@@ -83,27 +80,16 @@ namespace System.SpanTests
             Assert.Equal(original.Substring(0, 2), subString2);
             Assert.Equal(original.Substring(1, 2), subString3);
 
-            fixed (char* pOriginal = original)
-            fixed (char* pString1 = returnedString)
-            fixed (char* pString2 = returnedStringUsingSlice)
-            {
-                Assert.Equal((int)pOriginal, (int)pString1);
-                Assert.Equal((int)pOriginal, (int)pString2);
-            }
+            Assert.NotSame(original, returnedString);
+            Assert.NotSame(original, returnedStringUsingSlice);
 
-            fixed (char* pOriginal = original)
-            fixed (char* pSubString1 = subString1)
-            fixed (char* pSubString2 = subString2)
-            fixed (char* pSubString3 = subString3)
-            {
-                Assert.NotEqual((int)pOriginal, (int)pSubString1);
-                Assert.NotEqual((int)pOriginal, (int)pSubString2);
-                Assert.NotEqual((int)pOriginal, (int)pSubString3);
-                Assert.NotEqual((int)pSubString1, (int)pSubString2);
-                Assert.NotEqual((int)pSubString1, (int)pSubString3);
-                Assert.NotEqual((int)pSubString2, (int)pSubString3);
+            Assert.NotSame(original, subString1);
+            Assert.NotSame(original, subString2);
+            Assert.NotSame(original, subString3);
 
-            }
+            Assert.NotSame(subString1, subString2);
+            Assert.NotSame(subString1, subString3);
+            Assert.NotSame(subString2, subString3);
         }
     }
 }

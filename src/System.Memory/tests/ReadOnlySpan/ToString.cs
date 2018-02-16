@@ -50,11 +50,20 @@ namespace System.SpanTests
             Assert.Equal("System.ReadOnlySpan<String>[3]", span.ToString());
         }
 
-        // This test is only relevant for portable span
-#if FEATURE_PORTABLE_SPAN
         [Fact]
-#endif
-        public static unsafe void ToStringFromString()
+        public static void ToStringFromString()
+        {
+            string orig = "hello world";
+            Assert.Equal(orig, orig.AsReadOnlySpan().ToString());
+            Assert.Equal(orig.Substring(0, 5), orig.AsReadOnlySpan(0, 5).ToString());
+            Assert.Equal(orig.Substring(5), orig.AsReadOnlySpan(5).ToString());
+            Assert.Equal(orig.Substring(1, 3), orig.AsReadOnlySpan(1, 3).ToString());
+        }
+
+        // This test is only relevant for portable span
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Optimization only applies to portable span.")]
+        [Fact]
+        public static void ToStringSpanOverFullStringReturnsOriginal()
         {
             string original = TestHelpers.BuildString(10, 42);
             ReadOnlySpan<char> span = original.AsReadOnlySpan();
@@ -73,26 +82,16 @@ namespace System.SpanTests
             Assert.Equal(original.Substring(0, 2), subString2);
             Assert.Equal(original.Substring(1, 2), subString3);
 
-            fixed (char* pOriginal = original)
-            fixed (char* pString1 = returnedString)
-            fixed (char* pString2 = returnedStringUsingSlice)
-            {
-                Assert.Equal((int)pOriginal, (int)pString1);
-                Assert.Equal((int)pOriginal, (int)pString2);
-            }
+            Assert.Same(original, returnedString);
+            Assert.Same(original, returnedStringUsingSlice);
 
-            fixed (char* pOriginal = original)
-            fixed (char* pSubString1 = subString1)
-            fixed (char* pSubString2 = subString2)
-            fixed (char* pSubString3 = subString3)
-            {
-                Assert.NotEqual((int)pOriginal, (int)pSubString1);
-                Assert.NotEqual((int)pOriginal, (int)pSubString2);
-                Assert.NotEqual((int)pOriginal, (int)pSubString3);
-                Assert.NotEqual((int)pSubString1, (int)pSubString2);
-                Assert.NotEqual((int)pSubString1, (int)pSubString3);
-                Assert.NotEqual((int)pSubString2, (int)pSubString3);
-            }
+            Assert.NotSame(original, subString1);
+            Assert.NotSame(original, subString2);
+            Assert.NotSame(original, subString3);
+
+            Assert.NotSame(subString1, subString2);
+            Assert.NotSame(subString1, subString3);
+            Assert.NotSame(subString2, subString3);
         }
     }
 }
