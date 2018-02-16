@@ -7,6 +7,7 @@
 #include "pal_io.h"
 #include "pal_safecrt.h"
 #include "pal_utilities.h"
+#include <fcntl.h>
 
 #include <stdlib.h>
 #include <limits.h>
@@ -1255,12 +1256,35 @@ int32_t SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* so
     while ((accepted = accept4(fd, (struct sockaddr*)socketAddress, &addrLen, SOCK_CLOEXEC)) < 0 && errno == EINTR);
 #else
     while ((accepted = accept(fd, (struct sockaddr*)socketAddress, &addrLen)) < 0 && errno == EINTR);
+#if defined(FD_CLOEXEC)
+    // macOS does not have accept4 but it can set _CLOEXEC on descriptor.
+    if (accepted != -1)
+    {
+        if (fcntl(accepted, F_SETFD, FD_CLOEXEC) != 0)
+        {
+            int oldError = errno;
+            close(accepted);
+            *acceptedSocket = -1;
+            return SystemNative_ConvertErrorPlatformToPal(oldError);
+        }
+    }
+#endif
 #endif
     if (accepted == -1)
     {
         *acceptedSocket = -1;
         return SystemNative_ConvertErrorPlatformToPal(errno);
     }
+#if !defined(__linux__)
+    // On macOS and FreeBSD new socket inherits flags from accepting fd.
+    if (SystemNative_FcntlSetIsNonBlocking(accepted, 0) != 0)
+    {
+        int oldError = errno;
+        close(accepted);
+        *acceptedSocket = -1;
+        return SystemNative_ConvertErrorPlatformToPal(oldError);
+    }
+#endif
 
     assert(addrLen <= (socklen_t)*socketAddressLen);
     *socketAddressLen = (int32_t)addrLen;
