@@ -11,8 +11,6 @@ namespace System
 {
     public static partial class Environment
     {
-        const int SystemDirectoryAllocLimit = 260;
-
         private static string CurrentDirectoryCore
         {
             get
@@ -151,16 +149,12 @@ namespace System
         {
             get
             {
-                // The path will likely be under 32 characters, e.g. C:\Windows\system32
-                Span<char> buffer = stackalloc char[32];
+                Span<char> buffer = stackalloc char[260];
                 int requiredSize = Interop.Kernel32.GetSystemDirectoryW(buffer);
 
                 if (requiredSize > buffer.Length)
                 {
-                    if (requiredSize < SystemDirectoryAllocLimit)
-                        buffer = stackalloc char[requiredSize];
-                    else
-                        buffer = new char[requiredSize];
+                    buffer = new char[requiredSize];
                     requiredSize = Interop.Kernel32.GetSystemDirectoryW(buffer);
                 }
 
