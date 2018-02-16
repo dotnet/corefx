@@ -20,7 +20,7 @@ namespace System.Net.Security.Tests
         public async Task ClientOptions_ServerOptions_NotMutatedDuringAuthentication()
         {
             using (X509Certificate2 clientCert = Configuration.Certificates.GetClientCertificate())
-            using (X509Certificate2 serverCert = Configuration.Certificates.GetClientCertificate())
+            using (X509Certificate2 serverCert = Configuration.Certificates.GetServerCertificate())
             {
                 // Values used to populate client options
                 bool clientAllowRenegotiation = false;
