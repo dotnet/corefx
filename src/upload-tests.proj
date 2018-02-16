@@ -72,7 +72,8 @@
 
     <!-- Properties used for submission by CloudTest.Helix.Targets-->
     <BuildMoniker>$(CurrentDate)</BuildMoniker>
-    <BuildMoniker Condition="'$(IsOfficial)'=='true'">$(OfficialBuildId)</BuildMoniker>
+    <BuildMoniker Condition="'$(IsOfficial)'=='true' And '$(ProductBuildId)'==''">$(OfficialBuildId)</BuildMoniker>
+    <BuildMoniker Condition="'$(IsOfficial)'=='true' And '$(ProductBuildId)'!=''">$(ProductBuildId)</BuildMoniker>
     <HelixArchLabel>$(ArchGroup)</HelixArchLabel>
     <HelixConfigLabel>$(ConfigurationGroup)</HelixConfigLabel>
   </PropertyGroup>
