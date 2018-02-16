@@ -57,6 +57,47 @@ class Program
 
 **Warning:** BDN is going to restore the NuGet packages and install them in your `.nuget` folder. Please keep in mind that [you either have to remove them](./dogfooding.md#3---consuming-subsequent-code-changes-by-overwriting-the-binary-alternative-1) or [increase the version number](./dogfooding.md#3---consuming-subsequent-code-changes-by-overwriting-the-binary-alternative-2) after making some code changes and rebuilding the repo. **Otherwise, you are going to benchmark the same code over and over again**.
 
+As an alternative to rebuilding entire CoreFX to regenerate the NuGet packages, you can provide the list of files that need to be copied to the published self-contained app. The files should be the dlls which you are trying to optimize. You can even define two jobs, one for the state before your local changes and one with the changes:
+
+```cs
+public class LocalCoreFxConfig : ManualConfig
+{
+	public LocalCoreClrConfig()
+	{
+		Add(Job
+			.ShortRun
+			.With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
+				pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release", 
+				privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
+				displayName: "before"))
+			.AsBaseline()
+			.WithId("before"));
+
+		Add(Job
+			.ShortRun
+			.With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
+				pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release", 
+				privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
+				displayName: "after",
+				filesToCopy: new [] {
+					@"c:\Projects\forks\corefx\bin\AnyOS.AnyCPU.Release\System.Text.RegularExpressions\netcoreapp\System.Text.RegularExpressions.dll"
+				}))
+			.WithId("after"));
+
+		KeepBenchmarkFiles = true;
+		
+		// rest of the config..
+	}
+}
+```
+
+Once you run the benchmarks with such a config it should be clear if you have improved the performance or not (like in the example below):
+
+| Method |    Job | Toolchain | IsBaseline |      Mean |    Error |    StdDev | Scaled | ScaledSD |
+|------- |------- |---------- |----------- |----------:|---------:|----------:|-------:|---------:|
+| Sample |  after |     after |    Default | 35.077 us | 3.363 us | 0.1900 us |   8.64 |     0.15 |
+| Sample | before |    before |       True |  4.060 us | 1.465 us | 0.0828 us |   1.00 |     0.00 |
+
 # Benchmarking nightly CoreFX builds
 
 Since [0.10.12.433](https://ci.appveyor.com/project/dotnetfoundation/benchmarkdotnet/build/0.10.12.433/artifacts) BenchmarkDotNet knows [how to](./dogfooding.md#advanced-scenario---using-a-nightly-build-of-microsoftnetcoreap) build a self-contained app against nightly CoreFX build. You just need to provide it the version you would like to benchmark. You don't need to provide url to MyGet feed, the default value is "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json".
