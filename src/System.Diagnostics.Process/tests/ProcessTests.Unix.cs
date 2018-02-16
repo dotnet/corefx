@@ -386,6 +386,35 @@ namespace System.Diagnostics.Tests
             RunTestAsSudo((Func<int>)TestStartWithUserNameCannotElevate);
         }
 
+        /// <summary>
+        /// Tests whether child processes are reaped (cleaning up OS resources)
+        /// when they terminate.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
+        public void TestChildProcessCleanup()
+        {
+            using (Process process = Process.Start("/usr/bin/uname"))
+            {
+                // 'uname' will terminate soon. The process will then be reaped
+                // causing the '/proc/<pid>' directory to disappear.
+                bool procPidExists = true;
+                for (int attempt = 0; attempt < 20; attempt++)
+                {
+                    procPidExists = Directory.Exists("/proc/" + process.Id);
+                    if (procPidExists)
+                    {
+                        Thread.Sleep(50);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                Assert.False(procPidExists);
+            }
+        }
+
         public static int TestStartWithUserNameCannotElevate()
         {
             using (ProcessTests testObject = new ProcessTests())
