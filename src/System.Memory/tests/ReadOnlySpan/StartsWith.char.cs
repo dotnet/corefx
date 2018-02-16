@@ -121,17 +121,17 @@ namespace System.SpanTests
                     
                     // Different behavior depending on OS
                     Assert.Equal(
-                        span.ToString().StartsWith(value.ToString(), StringComparison.CurrentCulture),
-                        span.StartsWith(value, StringComparison.CurrentCulture));
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
+                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
                     Assert.Equal(
-                        span.ToString().StartsWith(value.ToString(), StringComparison.CurrentCulture),
-                        span.StartsWith(value, StringComparison.CurrentCulture));
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
+                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
                     Assert.Equal(
-                        span.ToString().StartsWith(value.ToString(), StringComparison.InvariantCulture),
-                        span.StartsWith(value, StringComparison.InvariantCulture));
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.InvariantCulture),
+                        firstSpan.StartsWith(secondSpan, StringComparison.InvariantCulture));
                     Assert.Equal(
-                        span.ToString().StartsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
-                        span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                        firstSpan.StartsWith(secondSpan, StringComparison.InvariantCultureIgnoreCase));
                 }
             }
         }
