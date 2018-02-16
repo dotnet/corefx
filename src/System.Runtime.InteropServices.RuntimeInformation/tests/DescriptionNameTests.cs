@@ -21,21 +21,10 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
             string osa = RuntimeInformation.OSArchitecture.ToString();
             string pra = RuntimeInformation.ProcessArchitecture.ToString();
             string frd = RuntimeInformation.FrameworkDescription.Trim();
-
-            Console.WriteLine($@"{dvs} OS={osd} OSVer={osv} OSArch={osa} Arch={pra} Framework={frd}");
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Unix interop")]
-        public void DumpRuntimeInformationToConsole2()
-        {
-            // Not really a test, but useful to dump to the log to
-            // sanity check that the test run or CI job
-            // was actually run on the OS that it claims to be on
             string lcr = PlatformDetection.LibcRelease;
             string lcv = PlatformDetection.LibcVersion;
 
-            Console.WriteLine($@"LibcRelease={lcr} LibcVersion={lcv}");
+            Console.WriteLine($@"{dvs} OS={osd} OSVer={osv} OSArch={osa} Arch={pra} Framework={frd} LibcRelease={lcr} LibcVersion={lcv}");
         }
 
         [Fact]

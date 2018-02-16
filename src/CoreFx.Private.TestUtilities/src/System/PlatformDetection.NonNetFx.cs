@@ -24,8 +24,7 @@ namespace System
 
         /// <summary>
         /// If gnulibc is available, returns the release, such as "stable".
-        /// If the libc is musl, currently returns empty string.
-        /// Otherwise returns "Glibc not found".
+        /// Otherwise (eg., Windows, musl) returns "glibc_not_found".
         /// </summary>
         public static string LibcRelease
         {
@@ -37,15 +36,14 @@ namespace System
                 }
                 catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
                 {
-                    return "Glibc not found";
+                    return "glibc_not_found";
                 }
             }
         }
 
         /// <summary>
         /// If gnulibc is available, returns the version, such as "2.22".
-        /// If the libc is musl, currently returns empty string. (In future could run "ldd -version".)
-        /// Otherwise returns "Glibc not found".
+        /// Otherwise (eg., Windows, musl) returns "glibc_not_found". (In future could run "ldd -version" for musl)
         /// </summary>
         public static string LibcVersion
         {
@@ -57,7 +55,7 @@ namespace System
                 }
                 catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
                 {
-                    return "Glibc not found";
+                    return "glibc_not_found";
                 }
             }
         }
