@@ -7,10 +7,6 @@
 
 #if PLATFORM_WINDOWS
 #define FEATURE_MANAGED_ETW
-
-#if !ES_BUILD_STANDALONE
-#define FEATURE_ACTIVITYSAMPLING
-#endif
 #endif // PLATFORM_WINDOWS
 
 #if ES_BUILD_STANDALONE
@@ -438,6 +434,8 @@ namespace System.Diagnostics.Tracing
             var pinCount = eventTypes.pinCount;
             var scratch = stackalloc byte[eventTypes.scratchSize];
             var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+            for(int i = 0; i < eventTypes.dataCount + 3; i++)
+                descriptors[i] = default(EventData);
 
             var pins = stackalloc GCHandle[pinCount];
             for (int i = 0; i < pinCount; i++)
@@ -542,7 +540,10 @@ namespace System.Diagnostics.Tracing
 
                 // We make a descriptor for each EventData, and because we morph strings to counted strings
                 // we may have 2 for each arg, so we allocate enough for this.  
-                var descriptors = stackalloc EventData[eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3];
+                var descriptorsLength = eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3;
+                var descriptors = stackalloc EventData[descriptorsLength];
+                for(int i = 0; i < descriptorsLength; i++)
+                    descriptors[i] = default(EventData);
 
                 fixed (byte*
                     pMetadata0 = this.providerMetadata,
@@ -618,6 +619,8 @@ namespace System.Diagnostics.Tracing
                     var pinCount = eventTypes.pinCount;
                     var scratch = stackalloc byte[eventTypes.scratchSize];
                     var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+                    for(int i=0; i<eventTypes.dataCount + 3; i++)
+                        descriptors[i] = default(EventData);
 
                     var pins = stackalloc GCHandle[pinCount];
                     for (int i = 0; i < pinCount; i++)

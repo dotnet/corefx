@@ -13,6 +13,8 @@ namespace System.Net
 {
     internal static partial class NameResolutionPal
     {
+        public const bool SupportsGetAddrInfoAsync = false;
+
         private static SocketError GetSocketErrorForErrno(int errno)
         {
             switch (errno)
@@ -194,30 +196,45 @@ namespace System.Net
             return SocketError.Success;
         }
 
+        internal static void GetAddrInfoAsync(DnsResolveAsyncResult asyncResult)
+        {
+            throw new NotSupportedException();
+        }
+
         public static unsafe string TryGetNameInfo(IPAddress addr, out SocketError socketError, out int nativeErrorCode)
         {
             byte* buffer = stackalloc byte[Interop.Sys.NI_MAXHOST + 1 /*for null*/];
 
-            // TODO #2891: Remove the copying step to improve performance. This requires a change in the contracts.
-            byte[] addressBuffer = addr.GetAddressBytes();
-
-            int error;
-            fixed (byte* rawAddress = &addressBuffer[0])
+            byte isIPv6;
+            int rawAddressLength;
+            if (addr.AddressFamily == AddressFamily.InterNetwork)
             {
-                error = Interop.Sys.GetNameInfo(
-                    rawAddress,
-                    unchecked((uint)addressBuffer.Length),
-                    addr.AddressFamily == AddressFamily.InterNetworkV6 ? (byte)1 : (byte)0,
-                    buffer,
-                    Interop.Sys.NI_MAXHOST,
-                    null,
-                    0,
-                    Interop.Sys.GetNameInfoFlags.NI_NAMEREQD);
+                isIPv6 = 0;
+                rawAddressLength = IPAddressParserStatics.IPv4AddressBytes;
             }
+            else
+            {
+                isIPv6 = 1;
+                rawAddressLength = IPAddressParserStatics.IPv6AddressBytes;
+            }
+
+            byte* rawAddress = stackalloc byte[rawAddressLength];
+            addr.TryWriteBytes(new Span<byte>(rawAddress, rawAddressLength), out int bytesWritten);
+            Debug.Assert(bytesWritten == rawAddressLength);
+
+            int error = Interop.Sys.GetNameInfo(
+                rawAddress,
+                (uint)rawAddressLength,
+                isIPv6,
+                buffer,
+                Interop.Sys.NI_MAXHOST,
+                null,
+                0,
+                Interop.Sys.GetNameInfoFlags.NI_NAMEREQD);
 
             socketError = GetSocketErrorForNativeError(error);
             nativeErrorCode = error;
-           return socketError != SocketError.Success ? null : Marshal.PtrToStringAnsi((IntPtr)buffer);
+            return socketError != SocketError.Success ? null : Marshal.PtrToStringAnsi((IntPtr)buffer);
         }
 
         public static string GetHostName()

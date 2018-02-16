@@ -4,16 +4,16 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Enumeration;
+using System.Linq;
 
 namespace System.IO
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
-        private string _name;
-
         public DirectoryInfo(string path)
         {
-            Init(originalPath: PathHelpers.ShouldReviseDirectoryPathToCurrent(path) ? "." : path,
+            Init(originalPath: path,
                   fullPath: Path.GetFullPath(path),
                   isNormalized: true);
         }
@@ -29,7 +29,7 @@ namespace System.IO
             OriginalPath = originalPath ?? throw new ArgumentNullException("path");
 
             fullPath = fullPath ?? originalPath;
-            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath), "should be fully qualified if normalized");
+            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath), $"'{fullPath}' should be fully qualified if normalized");
             fullPath = isNormalized ? fullPath : Path.GetFullPath(fullPath);
 
             _name = fileName ?? (PathHelpers.IsRoot(fullPath) ?
@@ -37,319 +37,143 @@ namespace System.IO
                     Path.GetFileName(PathHelpers.TrimEndingDirectorySeparator(fullPath)));
 
             FullPath = fullPath;
-            DisplayPath = PathHelpers.ShouldReviseDirectoryPathToCurrent(originalPath) ? "." : originalPath;
         }
-
-        public override string Name => _name;
 
         public DirectoryInfo Parent
         {
             get
             {
-                string s = FullPath;
-
-                // FullPath might end in either "parent\child" or "parent\child", and in either case we want 
+                // FullPath might end in either "parent\child" or "parent\child\", and in either case we want 
                 // the parent of child, not the child. Trim off an ending directory separator if there is one,
                 // but don't mangle the root.
-                if (!PathHelpers.IsRoot(s))
-                {
-                    s = PathHelpers.TrimEndingDirectorySeparator(s);
-                }
-
-                string parentName = Path.GetDirectoryName(s);
+                string parentName = Path.GetDirectoryName(PathHelpers.IsRoot(FullPath) ? FullPath : PathHelpers.TrimEndingDirectorySeparator(FullPath));
                 return parentName != null ? 
                     new DirectoryInfo(parentName, null) :
                     null;
             }
         }
 
-
         public DirectoryInfo CreateSubdirectory(string path)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            return CreateSubdirectoryHelper(path);
-        }
-
-        private DirectoryInfo CreateSubdirectoryHelper(string path)
-        {
-            Debug.Assert(path != null);
-
             PathHelpers.ThrowIfEmptyOrRootedPath(path);
 
-            string newDirs = Path.Combine(FullPath, path);
-            string fullPath = Path.GetFullPath(newDirs);
+            string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
             if (0 != string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, DisplayPath), nameof(path));
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
             }
 
             FileSystem.CreateDirectory(fullPath);
-
-            // Check for read permission to directory we hand back by calling this constructor.
             return new DirectoryInfo(fullPath);
         }
 
-        public void Create()
-        {
-            FileSystem.CreateDirectory(FullPath);
-        }
-
-        // Tests if the given path refers to an existing DirectoryInfo on disk.
-        // 
-        // Your application must have Read permission to the directory's
-        // contents.
-        //
-        public override bool Exists
-        {
-            get
-            {
-                try
-                {
-                    return ExistsCore;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
-
-        // Returns an array of Files in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "*.txt").
-        public FileInfo[] GetFiles(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-
-            return InternalGetFiles(searchPattern, SearchOption.TopDirectoryOnly);
-        }
-
-        // Returns an array of Files in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "*.txt").
-        public FileInfo[] GetFiles(string searchPattern, SearchOption searchOption)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
-
-            return InternalGetFiles(searchPattern, searchOption);
-        }
-
-        // Returns an array of Files in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "*.txt").
-        private FileInfo[] InternalGetFiles(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            IEnumerable<FileInfo> enumerable = (IEnumerable<FileInfo>)FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Files);
-            return EnumerableHelpers.ToArray(enumerable);
-        }
+        public void Create() => FileSystem.CreateDirectory(FullPath);
 
         // Returns an array of Files in the DirectoryInfo specified by path
-        public FileInfo[] GetFiles()
-        {
-            return InternalGetFiles("*", SearchOption.TopDirectoryOnly);
-        }
+        public FileInfo[] GetFiles() => GetFiles("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        // Returns an array of Directories in the current directory.
-        public DirectoryInfo[] GetDirectories()
-        {
-            return InternalGetDirectories("*", SearchOption.TopDirectoryOnly);
-        }
+        // Returns an array of Files in the current DirectoryInfo matching the 
+        // given search criteria (i.e. "*.txt").
+        public FileInfo[] GetFiles(string searchPattern) => GetFiles(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
+
+        public FileInfo[] GetFiles(string searchPattern, SearchOption searchOption)
+            => GetFiles(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
+
+        public FileInfo[] GetFiles(string searchPattern, EnumerationOptions enumerationOptions)
+            => ((IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, enumerationOptions)).ToArray();
+
+        // Returns an array of strongly typed FileSystemInfo entries which will contain a listing
+        // of all the files and directories.
+        public FileSystemInfo[] GetFileSystemInfos() => GetFileSystemInfos("*", enumerationOptions: EnumerationOptions.Compatible);
 
         // Returns an array of strongly typed FileSystemInfo entries in the path with the
         // given search criteria (i.e. "*.txt").
         public FileSystemInfo[] GetFileSystemInfos(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
+            => GetFileSystemInfos(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
-            return InternalGetFileSystemInfos(searchPattern, SearchOption.TopDirectoryOnly);
-        }
-
-        // Returns an array of strongly typed FileSystemInfo entries in the path with the
-        // given search criteria (i.e. "*.txt").
         public FileSystemInfo[] GetFileSystemInfos(string searchPattern, SearchOption searchOption)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
+            => GetFileSystemInfos(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
-            return InternalGetFileSystemInfos(searchPattern, searchOption);
-        }
+        public FileSystemInfo[] GetFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
+            => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions).ToArray();
 
-        // Returns an array of strongly typed FileSystemInfo entries in the path with the
-        // given search criteria (i.e. "*.txt").
-        private FileSystemInfo[] InternalGetFileSystemInfos(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            IEnumerable<FileSystemInfo> enumerable = FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Both);
-            return EnumerableHelpers.ToArray(enumerable);
-        }
-
-        // Returns an array of strongly typed FileSystemInfo entries which will contain a listing
-        // of all the files and directories.
-        public FileSystemInfo[] GetFileSystemInfos()
-        {
-            return InternalGetFileSystemInfos("*", SearchOption.TopDirectoryOnly);
-        }
+        // Returns an array of Directories in the current directory.
+        public DirectoryInfo[] GetDirectories() => GetDirectories("*", enumerationOptions: EnumerationOptions.Compatible);
 
         // Returns an array of Directories in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "System*" could match the System & System32
-        // directories).
-        public DirectoryInfo[] GetDirectories(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
+        // given search criteria (i.e. "System*" could match the System & System32 directories).
+        public DirectoryInfo[] GetDirectories(string searchPattern) => GetDirectories(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
-            return InternalGetDirectories(searchPattern, SearchOption.TopDirectoryOnly);
-        }
-
-        // Returns an array of Directories in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "System*" could match the System & System32
-        // directories).
         public DirectoryInfo[] GetDirectories(string searchPattern, SearchOption searchOption)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
+            => GetDirectories(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
-            return InternalGetDirectories(searchPattern, searchOption);
-        }
-
-        // Returns an array of Directories in the current DirectoryInfo matching the 
-        // given search criteria (i.e. "System*" could match the System & System32
-        // directories).
-        private DirectoryInfo[] InternalGetDirectories(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            IEnumerable<DirectoryInfo> enumerable = (IEnumerable<DirectoryInfo>)FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Directories);
-            return EnumerableHelpers.ToArray(enumerable);
-        }
+        public DirectoryInfo[] GetDirectories(string searchPattern, EnumerationOptions enumerationOptions)
+            => ((IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, enumerationOptions)).ToArray();
 
         public IEnumerable<DirectoryInfo> EnumerateDirectories()
-        {
-            return InternalEnumerateDirectories("*", SearchOption.TopDirectoryOnly);
-        }
+            => EnumerateDirectories("*", enumerationOptions: EnumerationOptions.Compatible);
 
         public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-
-            return InternalEnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly);
-        }
+            => EnumerateDirectories(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, SearchOption searchOption)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
+            => EnumerateDirectories(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
-            return InternalEnumerateDirectories(searchPattern, searchOption);
-        }
-
-        private IEnumerable<DirectoryInfo> InternalEnumerateDirectories(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            return (IEnumerable<DirectoryInfo>)FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Directories);
-        }
+        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, EnumerationOptions enumerationOptions)
+            => (IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, enumerationOptions);
 
         public IEnumerable<FileInfo> EnumerateFiles()
-        {
-            return InternalEnumerateFiles("*", SearchOption.TopDirectoryOnly);
-        }
+            => EnumerateFiles("*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-
-            return InternalEnumerateFiles(searchPattern, SearchOption.TopDirectoryOnly);
-        }
+        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern) => EnumerateFiles(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
+            => EnumerateFiles(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
-            return InternalEnumerateFiles(searchPattern, searchOption);
-        }
+        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, EnumerationOptions enumerationOptions)
+            => (IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, enumerationOptions);
 
-        private IEnumerable<FileInfo> InternalEnumerateFiles(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            return (IEnumerable<FileInfo>)FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Files);
-        }
-
-        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos()
-        {
-            return InternalEnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly);
-        }
+        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos() => EnumerateFileSystemInfos("*", enumerationOptions: EnumerationOptions.Compatible);
 
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern)
-        {
-            if (searchPattern == null)
-                throw new ArgumentNullException(nameof(searchPattern));
-
-            return InternalEnumerateFileSystemInfos(searchPattern, SearchOption.TopDirectoryOnly);
-        }
+            => EnumerateFileSystemInfos(searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, SearchOption searchOption)
+            => EnumerateFileSystemInfos(searchPattern, EnumerationOptions.FromSearchOption(searchOption));
+
+        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
+            => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
+
+        internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
+            string path,
+            string searchPattern,
+            SearchTarget searchTarget,
+            EnumerationOptions options)
         {
+            Debug.Assert(path != null);
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
 
-            return InternalEnumerateFileSystemInfos(searchPattern, searchOption);
-        }
+            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
 
-        private IEnumerable<FileSystemInfo> InternalEnumerateFileSystemInfos(string searchPattern, SearchOption searchOption)
-        {
-            Debug.Assert(searchPattern != null);
-            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-
-            return FileSystem.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Both);
-        }
-
-        // Returns the root portion of the given path. The resulting string
-        // consists of those rightmost characters of the path that constitute the
-        // root of the path. Possible patterns for the resulting string are: An
-        // empty string (a relative path on the current drive), "\" (an absolute
-        // path on the current drive), "X:" (a relative path on a given drive,
-        // where X is the drive letter), "X:\" (an absolute path on a given drive),
-        // and "\\server\share" (a UNC path for a given server and share name).
-        // The resulting string is null if path is null.
-        //
-
-        public DirectoryInfo Root
-        {
-            get
+            switch (searchTarget)
             {
-                string rootPath = Path.GetPathRoot(FullPath);
-
-                return new DirectoryInfo(rootPath);
+                case SearchTarget.Directories:
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
+                case SearchTarget.Files:
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
+                case SearchTarget.Both:
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
+                default:
+                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }
         }
+
+        public DirectoryInfo Root => new DirectoryInfo(Path.GetPathRoot(FullPath));
 
         public void MoveTo(string destDirName)
         {
@@ -357,26 +181,22 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(destDirName));
             if (destDirName.Length == 0)
                 throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destDirName));
-
             string destination = Path.GetFullPath(destDirName);
+
             string destinationWithSeparator = destination;
-            if (destinationWithSeparator[destinationWithSeparator.Length - 1] != Path.DirectorySeparatorChar)
+            if (!PathHelpers.EndsInDirectorySeparator(destinationWithSeparator))
                 destinationWithSeparator = destinationWithSeparator + PathHelpers.DirectorySeparatorCharAsString;
 
-            string fullSourcePath;
-            if (FullPath.Length > 0 && FullPath[FullPath.Length - 1] == Path.DirectorySeparatorChar)
-                fullSourcePath = FullPath;
-            else
-                fullSourcePath = FullPath + PathHelpers.DirectorySeparatorCharAsString;
+            string sourceWithSeparator = PathHelpers.EndsInDirectorySeparator(FullPath)
+                ? FullPath : FullPath + PathHelpers.DirectorySeparatorCharAsString;
 
-            StringComparison pathComparison = PathInternal.StringComparison;
-            if (string.Equals(fullSourcePath, destinationWithSeparator, pathComparison))
+            if (string.Equals(sourceWithSeparator, destinationWithSeparator, PathInternal.StringComparison))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
 
-            string sourceRoot = Path.GetPathRoot(fullSourcePath);
+            string sourceRoot = Path.GetPathRoot(sourceWithSeparator);
             string destinationRoot = Path.GetPathRoot(destinationWithSeparator);
 
-            if (!string.Equals(sourceRoot, destinationRoot, pathComparison))
+            if (!string.Equals(sourceRoot, destinationRoot, PathInternal.StringComparison))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check
@@ -384,7 +204,7 @@ namespace System.IO
             if (!Exists && !FileSystem.FileExists(FullPath))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, FullPath));
 
-            if (FileSystem.DirectoryExists(destinationWithSeparator))
+            if (FileSystem.DirectoryExists(destination))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, destinationWithSeparator));
 
             FileSystem.MoveDirectory(FullPath, destination);
@@ -398,22 +218,8 @@ namespace System.IO
             Invalidate();
         }
 
-        public override void Delete()
-        {
-            FileSystem.RemoveDirectory(FullPath, false);
-        }
+        public override void Delete() => FileSystem.RemoveDirectory(FullPath, recursive: false);
 
-        public void Delete(bool recursive)
-        {
-            FileSystem.RemoveDirectory(FullPath, recursive);
-        }
-
-        /// <summary>
-        /// Returns the original path. Use FullPath or Name properties for the path / directory name.
-        /// </summary>
-        public override string ToString()
-        {
-            return DisplayPath;
-        }
+        public void Delete(bool recursive) => FileSystem.RemoveDirectory(FullPath, recursive);
     }
 }

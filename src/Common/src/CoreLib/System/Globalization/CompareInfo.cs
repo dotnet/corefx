@@ -94,7 +94,7 @@ namespace System.Globalization
         **   culture    the ID of the culture
         **   assembly   the assembly which contains the sorting table.
         **Exceptions:
-        **  ArugmentNullException when the assembly is null
+        **  ArgumentNullException when the assembly is null
         **  ArgumentException if culture is invalid.
         ============================================================================*/
         // Assembly constructor should be deprecated, we don't act on the assembly information any more
@@ -121,7 +121,7 @@ namespace System.Globalization
         **   name      the name of the culture
         **   assembly  the assembly which contains the sorting table.
         **Exceptions:
-        **  ArugmentNullException when the assembly is null
+        **  ArgumentNullException when the assembly is null
         **  ArgumentException if name is invalid.
         ============================================================================*/
         // Assembly constructor should be deprecated, we don't act on the assembly information any more
@@ -653,6 +653,17 @@ namespace System.Globalization
             return StartsWith(source, prefix, options);
         }
 
+        internal bool IsPrefix(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
+        {
+            Debug.Assert(prefix.Length != 0);
+            Debug.Assert(source.Length != 0);
+            Debug.Assert((options & ValidIndexMaskOffFlags) == 0);
+            Debug.Assert(!_invariantMode);
+            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
+
+            return StartsWith(source, prefix, options);
+        }
+
         public virtual bool IsPrefix(string source, string prefix)
         {
             return (IsPrefix(source, prefix, 0));
@@ -703,6 +714,17 @@ namespace System.Globalization
             {
                 return source.EndsWith(suffix, (options & CompareOptions.IgnoreCase) != 0 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
+
+            return EndsWith(source, suffix, options);
+        }
+
+        internal bool IsSuffix(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
+        {
+            Debug.Assert(suffix.Length != 0);
+            Debug.Assert(source.Length != 0);
+            Debug.Assert((options & ValidIndexMaskOffFlags) == 0);
+            Debug.Assert(!_invariantMode);
+            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             return EndsWith(source, suffix, options);
         }
@@ -819,6 +841,11 @@ namespace System.Globalization
             if (count < 0 || startIndex > source.Length - count)
                 throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_Count);
 
+            if (source.Length == 0)
+            {
+                return -1;
+            }
+
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
                 return source.IndexOf(value.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase);
@@ -828,7 +855,7 @@ namespace System.Globalization
             // Ordinal can't be selected with other flags
             if ((options & ValidIndexMaskOffFlags) != 0 && (options != CompareOptions.Ordinal))
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
-            
+
             if (_invariantMode)
                 return IndexOfOrdinal(source, new string(value, 1), startIndex, count, ignoreCase: (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) != 0);
 
@@ -1259,7 +1286,7 @@ namespace System.Globalization
             }
 
             //
-            // GetHashCodeOfString does more parameters validation. basically will throw when  
+            // GetHashCodeOfString does more parameters validation. basically will throw when
             // having Ordinal, OrdinalIgnoreCase and StringSort
             //
 

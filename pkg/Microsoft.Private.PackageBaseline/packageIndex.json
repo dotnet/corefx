@@ -2120,6 +2120,12 @@
         "4.0.3.0": "4.5.0"
       }
     },
+    "System.IO.Pipelines": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
+      }
+    },
     "System.IO.Pipes": {
       "StableVersions": [
         "4.0.0",
@@ -4085,7 +4091,13 @@
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
-        "uap10.0.16300": "4.3.1.0"
+        "monoandroid10": "Any",
+        "monotouch10": "Any",
+        "uap10.0.16300": "4.3.1.0",
+        "xamarinios10": "Any",
+        "xamarinmac20": "Any",
+        "xamarintvos10": "Any",
+        "xamarinwatchos10": "Any"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.2.0",

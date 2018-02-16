@@ -47,7 +47,6 @@ namespace System
         public static bool IsDebian8 { get { throw null; } }
         public static bool IsDrawingSupported { get { throw null; } }
         public static bool IsFedora { get { throw null; } }
-        public static bool IsFedora27 { get { throw null; } }
         public static bool IsFullFramework { get { throw null; } }
         public static bool IsInvokingStaticConstructorsSupported { get { throw null; } }
         public static bool IsMacOsHighSierraOrHigher { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
@@ -60,7 +59,6 @@ namespace System
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
-        public static bool IsNotFedora27 { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
         public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
@@ -89,6 +87,8 @@ namespace System
         public static bool IsUbuntu1604 { get { throw null; } }
         public static bool IsUbuntu1704 { get { throw null; } }
         public static bool IsUbuntu1710 { get { throw null; } }
+        public static bool IsUbuntu1710OrHigher { get { throw null; } }
+        public static bool IsUbuntu1804 { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
@@ -103,6 +103,8 @@ namespace System
         public static bool IsInAppContainer { get { throw null; } }
         public static bool IsWinRTSupported { get { throw null; } }
         public static bool IsXmlDsigXsltTransformSupported { get { throw null; } }
+        public static string LibcRelease { get { throw null; } }
+        public static string LibcVersion { get { throw null; } }
         public static System.Version OSXVersion { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }

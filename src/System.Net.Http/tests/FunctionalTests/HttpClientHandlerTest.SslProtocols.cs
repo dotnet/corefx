@@ -46,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task SetProtocols_AfterRequest_ThrowsException()
         {
             if (!BackendSupportsSslConfiguration)
@@ -57,11 +57,11 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 });
                 Assert.Throws<InvalidOperationException>(() => handler.SslProtocols = SslProtocols.Tls12);
@@ -86,7 +86,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Theory]
         [InlineData(SslProtocols.Tls, false)]
         [InlineData(SslProtocols.Tls, true)]
         [InlineData(SslProtocols.Tls11, false)]
@@ -100,16 +100,16 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseManagedHandler)
+            if (UseSocketsHttpHandler)
             {
-                // TODO #26186: The managed handler is failing on some OSes.
+                // TODO #26186: SocketsHttpHandler is failing on some OSes.
                 return;
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 if (requestOnlyThisProtocol)
                 {
@@ -119,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 }, options);
             }
@@ -141,9 +141,9 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
-            if (UseManagedHandler)
+            if (UseSocketsHttpHandler)
             {
-                // TODO #26186: The managed handler is failing on some OSes.
+                // TODO #26186: SocketsHttpHandler is failing on some OSes.
                 return;
             }
 
@@ -197,7 +197,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseManagedHandler && !PlatformDetection.IsWindows10Version1607OrGreater)
+            if (UseSocketsHttpHandler && !PlatformDetection.IsWindows10Version1607OrGreater)
             {
                 // On Windows, https://github.com/dotnet/corefx/issues/21925#issuecomment-313408314
                 // On Linux, an older version of OpenSSL may permit negotiating SSLv3.
@@ -215,48 +215,57 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_NoSpecifiedProtocol_DefaultsToTls12()
         {
             if (!BackendSupportsSslConfiguration)
+            {
                 return;
+            }
+
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 var options = new LoopbackServer.Options { UseSsl = true };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         client.GetAsync(url),
-                        LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                        server.AcceptConnectionAsync(async connection =>
                         {
-                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(stream).SslProtocol);
-                            await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
-                            return null;
-                        }, options));
+                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(connection.Stream).SslProtocol);
+                            await connection.ReadRequestHeaderAndSendResponseAsync();
+                        }));
                 }, options);
             }
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Theory]
         [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
         [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
         [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
         public async Task GetAsync_AllowedSSLVersionDiffersFromServer_ThrowsException(
             SslProtocols allowedProtocol, SslProtocols acceptedProtocol, Type exceptedServerException)
         {
+
+            if (PlatformDetection.IsUbuntu1804)
+            {
+                //ActiveIssue #27023: [Ubuntu18.04] Tests failed:
+                return;
+            }
+
             if (!BackendSupportsSslConfiguration)
                 return;
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
                 handler.SslProtocols = allowedProtocol;
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedProtocol };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        Assert.ThrowsAsync(exceptedServerException, () => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
+                        Assert.ThrowsAsync(exceptedServerException, () => server.AcceptConnectionSendResponseAndCloseAsync()),
                         Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
                 }, options);
             }
@@ -264,14 +273,20 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(8538, TestPlatforms.Windows)]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotFedora27))] // TODO: make test unconditional when #26803 is fixed
+        [Fact]
         public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
         {
+            if (PlatformDetection.IsUbuntu1804)
+            {
+                //ActiveIssue #27023: [Ubuntu18.04] Tests failed:
+                return;
+            }
+
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
                 handler.SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 if (BackendSupportsSslConfiguration)
                 {
@@ -281,7 +296,7 @@ namespace System.Net.Http.Functional.Tests
                     await LoopbackServer.CreateServerAsync(async (server, url) =>
                     {
                         await TestHelper.WhenAllCompletedOrAnyFailed(
-                            Assert.ThrowsAsync<IOException>(() => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
+                            Assert.ThrowsAsync<IOException>(() => server.AcceptConnectionSendResponseAndCloseAsync()),
                             Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
                     }, options);
 
@@ -291,7 +306,7 @@ namespace System.Net.Http.Functional.Tests
                         await LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             await TestHelper.WhenAllCompletedOrAnyFailed(
-                                LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                                server.AcceptConnectionSendResponseAndCloseAsync(),
                                 client.GetAsync(url));
                         }, options);
                     }
@@ -303,7 +318,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7 && !PlatformDetection.IsFedora27; // TODO: remove IsFedora27 when #26803 is fixed
+        private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7;
         // TLS 1.2 may not be enabled on Win7
         // https://technet.microsoft.com/en-us/library/dn786418.aspx#BKMK_SchannelTR_TLS12
     }
