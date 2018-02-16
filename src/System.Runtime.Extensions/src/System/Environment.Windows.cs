@@ -11,6 +11,8 @@ namespace System
 {
     public static partial class Environment
     {
+        const int SystemDirectoryAllocLimit = 260;
+
         private static string CurrentDirectoryCore
         {
             get
@@ -155,7 +157,10 @@ namespace System
 
                 if (requiredSize > buffer.Length)
                 {
-                    buffer = new char[requiredSize];
+                    if (requiredSize < SystemDirectoryAllocLimit)
+                        buffer = stackalloc char[requiredSize];
+                    else
+                        buffer = new char[requiredSize];
                     requiredSize = Interop.Kernel32.GetSystemDirectoryW(buffer);
                 }
 
