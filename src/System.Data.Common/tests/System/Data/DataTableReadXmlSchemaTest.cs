@@ -485,7 +485,7 @@ namespace System.Data.Tests
                 Assert.Contains(@"AutoIncrementStep=""-2""", rawSchemaXML);
                 Assert.DoesNotContain("()1", rawSchemaXML);
                 Assert.DoesNotContain("()2", rawSchemaXML);
-            });
+            }).Dispose();
         }
 
         [Fact]
