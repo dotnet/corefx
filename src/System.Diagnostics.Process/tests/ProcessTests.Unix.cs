@@ -396,7 +396,7 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
         public void TestChildProcessCleanup()
         {
-            using (Process process = Process.Start("/usr/bin/uname"))
+            using (Process process = Process.Start("uname"))
             {
                 // 'uname' will terminate soon. The process will then be reaped
                 // causing the '/proc/<pid>' directory to disappear.
