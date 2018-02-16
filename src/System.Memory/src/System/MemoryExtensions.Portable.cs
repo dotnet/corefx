@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -12,6 +13,76 @@ namespace System
     /// </summary>
     public static partial class MemoryExtensions
     {
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+            string resultString = sourceString.ToLower(culture);
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsReadOnlySpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToLower(source, destination, CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+            string resultString = sourceString.ToUpper(culture);
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsReadOnlySpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToUpper(source, destination, CultureInfo.InvariantCulture);
+
         /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
         /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.

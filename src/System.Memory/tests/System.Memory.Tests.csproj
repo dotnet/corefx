@@ -117,7 +117,9 @@
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
+    <Compile Include="ReadOnlySpan\ToLower.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
+    <Compile Include="ReadOnlySpan\ToUpper.cs" />
     <Compile Include="ReadOnlySpan\TrimAnyCharacter.cs" />
     <Compile Include="ReadOnlySpan\TrimManyCharacters.cs" />
     <Compile Include="ReadOnlySpan\TrimWhiteSpace.cs" />
