@@ -43,15 +43,21 @@ namespace System.Text.RegularExpressions.Tests
         public void IsMatch()
         {
             var cacheSizeOld = Regex.CacheSize;
-            Regex.CacheSize = CacheSize;
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                {
-                    for (var i = 0; i < Benchmark.InnerIterationCount; i++)
-                        s_IsMatch = Regex.IsMatch("0123456789", _regexes[i]);
-                }
+            try
+            {
 
-            Regex.CacheSize = cacheSizeOld;
+                Regex.CacheSize = CacheSize;
+                foreach (var iteration in Benchmark.Iterations)
+                    using (iteration.StartMeasurement())
+                    {
+                        for (var i = 0; i < Benchmark.InnerIterationCount; i++)
+                            s_IsMatch = Regex.IsMatch("0123456789", _regexes[i]);
+                    }
+            }
+            finally
+            {
+                Regex.CacheSize = cacheSizeOld;
+            }
         }
     }
 }
