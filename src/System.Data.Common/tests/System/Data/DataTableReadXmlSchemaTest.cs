@@ -600,7 +600,7 @@ namespace System.Data.Tests
                 DataColumn rowIDColumn = table.Columns["RowID"];
                 Assert.Equal(-1, rowIDColumn.AutoIncrementSeed);
                 Assert.Equal(-2, rowIDColumn.AutoIncrementStep);
-            });
+            }).Dispose();
         }
 
         [Fact]
