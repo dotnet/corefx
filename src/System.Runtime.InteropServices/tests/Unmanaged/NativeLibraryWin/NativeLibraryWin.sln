@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27415.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeLibraryWin", "NativeLibraryWin.vcxproj", "{B635F1C2-09CE-443B-8CC5-77E5DE1E58FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B635F1C2-09CE-443B-8CC5-77E5DE1E58FA}.Release|x64.ActiveCfg = Release|x64
+		{B635F1C2-09CE-443B-8CC5-77E5DE1E58FA}.Release|x64.Build.0 = Release|x64
+		{B635F1C2-09CE-443B-8CC5-77E5DE1E58FA}.Release|x86.ActiveCfg = Release|Win32
+		{B635F1C2-09CE-443B-8CC5-77E5DE1E58FA}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0F1DE233-D2F6-4640-A6DF-875921F609EF}
+	EndGlobalSection
+EndGlobal

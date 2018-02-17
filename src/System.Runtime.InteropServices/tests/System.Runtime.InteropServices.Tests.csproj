@@ -50,6 +50,9 @@
     <Compile Include="System\Runtime\InteropServices\InterfaceTypeAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\LCIDConversionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalAsAttributeTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\NativeLibraryExtensions.cs" />
+    <Compile Include="System\Runtime\InteropServices\NativeLibraryTests.Windows.cs" />
+    <Compile Include="System\Runtime\InteropServices\NativeLibraryTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
     <Compile Include="System\Runtime\InteropServices\MarshalTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttributeTests.cs" />
@@ -74,6 +77,14 @@
     <Compile Include="System\Runtime\InteropServices\TypeLibTypeAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibVarAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\TypeLibVersionAttributeTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\NativeLibraryWin.x86.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dependencies\NativeLibraryWin.x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
