@@ -161,7 +161,6 @@ namespace System.ServiceProcess.Tests
                     catch (InvalidOperationException)
                     {
                         // Already stopped
-                        ServiceName = null;
                         return;
                     }
 
