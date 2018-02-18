@@ -1,0 +1,106 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.IO.Enumeration;
+using Xunit;
+
+namespace System.IO.Tests.Enumeration
+{
+    public class AttributeTests : FileSystemTest
+    {
+        private class DefaultFileAttributes : FileSystemEnumerator<string>
+        {
+            public DefaultFileAttributes(string directory, EnumerationOptions options)
+                : base(directory, options)
+            {
+            }
+
+            protected override bool ContinueOnError(int error)
+            {
+                Assert.False(true, $"Should not have errored {error}");
+                return false;
+            }
+
+            protected override bool ShouldIncludeEntry(ref FileSystemEntry entry)
+                => !entry.IsDirectory;
+
+            protected override string TransformEntry(ref FileSystemEntry entry)
+            {
+                string path = entry.ToFullPath();
+                File.Delete(path);
+
+                // Attributes require a stat call on Unix- ensure that we have the right attributes
+                // even if the returned file is deleted.
+                Assert.Equal(FileAttributes.Normal, entry.Attributes);
+                Assert.Equal(path, entry.ToFullPath());
+                return new string(entry.FileName);
+            }
+        }
+
+        [Fact]
+        public void FileAttributesAreExpected()
+        {
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(testDirectory.FullName, GetTestFileName()));
+
+            fileOne.Create().Dispose();
+
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Equal(FileAttributes.Archive, fileOne.Attributes);
+                fileOne.Attributes &= ~FileAttributes.Archive;
+            }
+
+            using (var enumerator = new DefaultFileAttributes(testDirectory.FullName, new EnumerationOptions()))
+            {
+                Assert.True(enumerator.MoveNext());
+                Assert.Equal(fileOne.Name, enumerator.Current);
+                Assert.False(enumerator.MoveNext());
+            }
+        }
+
+        private class DefaultDirectoryAttributes : FileSystemEnumerator<string>
+        {
+            public DefaultDirectoryAttributes(string directory, EnumerationOptions options)
+                : base(directory, options)
+            {
+            }
+
+            protected override bool ShouldIncludeEntry(ref FileSystemEntry entry)
+                => entry.IsDirectory;
+
+            protected override bool ContinueOnError(int error)
+            {
+                Assert.False(true, $"Should not have errored {error}");
+                return false;
+            }
+
+            protected override string TransformEntry(ref FileSystemEntry entry)
+            {
+                string path = entry.ToFullPath();
+                Directory.Delete(path);
+
+                // Attributes require a stat call on Unix- ensure that we have the right attributes
+                // even if the returned directory is deleted.
+                Assert.Equal(FileAttributes.Directory, entry.Attributes);
+                Assert.Equal(path, entry.ToFullPath());
+                return new string(entry.FileName);
+            }
+        }
+
+        [Fact]
+        public void DirectoryAttributesAreExpected()
+        {
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo subDirectory = Directory.CreateDirectory(Path.Combine(testDirectory.FullName, GetTestFileName()));
+
+            using (var enumerator = new DefaultDirectoryAttributes(testDirectory.FullName, new EnumerationOptions()))
+            {
+                Assert.True(enumerator.MoveNext());
+                Assert.Equal(subDirectory.Name, enumerator.Current);
+                Assert.False(enumerator.MoveNext());
+            }
+        }
+    }
+}
