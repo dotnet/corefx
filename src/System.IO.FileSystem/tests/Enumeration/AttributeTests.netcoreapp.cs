@@ -48,8 +48,11 @@ namespace System.IO.Tests.Enumeration
 
             if (PlatformDetection.IsWindows)
             {
-                Assert.Equal(FileAttributes.Archive, fileOne.Attributes);
-                fileOne.Attributes &= ~FileAttributes.Archive;
+                // Archive should always be set on a new file. Clear it and other expected flags to
+                // see that we get "Normal" as the default when enumerating.
+
+                Assert.True((fileOne.Attributes & FileAttributes.Archive) != 0);
+                fileOne.Attributes &= ~(FileAttributes.Archive | FileAttributes.NotContentIndexed);
             }
 
             using (var enumerator = new DefaultFileAttributes(testDirectory.FullName, new EnumerationOptions()))
@@ -94,6 +97,12 @@ namespace System.IO.Tests.Enumeration
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
             DirectoryInfo subDirectory = Directory.CreateDirectory(Path.Combine(testDirectory.FullName, GetTestFileName()));
+
+            if (PlatformDetection.IsWindows)
+            {
+                // Clear possible extra flags to see that we get Directory
+                subDirectory.Attributes &= ~FileAttributes.NotContentIndexed;
+            }
 
             using (var enumerator = new DefaultDirectoryAttributes(testDirectory.FullName, new EnumerationOptions()))
             {
