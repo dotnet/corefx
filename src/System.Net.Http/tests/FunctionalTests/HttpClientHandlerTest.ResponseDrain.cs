@@ -126,21 +126,77 @@ namespace System.Net.Http.Functional.Tests
                 },
                 async server =>
                 {
+                    string content = new string('a', totalSize);
+                    string response = (useTE ? LoopbackServer.GetSingleChunkHttpResponse(content: content) : LoopbackServer.GetHttpResponse(content: content));
                     await server.AcceptConnectionAsync(async connection =>
                     {
-                        string content = new string('a', totalSize);
-                        if (useTE)
-                        {
-                            var response = LoopbackServer.GetSingleChunkHttpResponse(content: content);
-                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
-                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
-                        }
-                        else
-                        {
-                            await connection.ReadRequestHeaderAndSendResponseAsync(content: content);
-                            await connection.ReadRequestHeaderAndSendResponseAsync(content: content);
-                        }
+                        await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                        await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
                     });
+                });
+        }
+
+        // See comment above for values here.
+
+        [Theory]
+        [InlineData(20000, 0, false)]
+        [InlineData(20000, 0, true)]
+        [InlineData(40000, 10000, false)]
+        [InlineData(40000, 10000, true)]
+        [InlineData(100000, 50000, false)]
+        [InlineData(100000, 50000, true)]
+        public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_KillsConnection(int totalSize, int readSize, bool useTE)
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    HttpClientHandler handler = CreateHttpClientHandler();
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
+                    handler.MaxConnectionsPerServer = 1;
+
+                    using (var client = new HttpClient(handler))
+                    {
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponse(response1, totalSize, useTE);
+
+                        // Read part but not all of response
+                        Stream responseStream = await response1.Content.ReadAsStreamAsync();
+                        await ReadToByteCount(responseStream, readSize);
+
+                        response1.Dispose();
+
+                        // Issue another request.  We'll confirm that it comes on a new connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponse(response2, totalSize, useTE);
+                        Assert.Equal(totalSize, (await response2.Content.ReadAsStringAsync()).Length);
+                    }
+                },
+                async server =>
+                {
+                    string content = new string('a', totalSize);
+                    string response = (useTE ? LoopbackServer.GetSingleChunkHttpResponse(content: content) : LoopbackServer.GetHttpResponse(content: content));
+                    Task t1 = server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.ReadRequestHeaderAsync();
+                        try
+                        {
+                            await connection.Writer.WriteAsync(response);
+                        }
+                        catch (Exception) { }     // Eat errors from client disconnect.
+                    });
+
+                    Task t2 = server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.ReadRequestHeaderAsync();
+                        try
+                        {
+                            await connection.Writer.WriteAsync(response);
+                        }
+                        catch (Exception) { }     // Eat errors from client disconnect.
+                    });
+
+                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { t1, t2 });
                 });
         }
 
