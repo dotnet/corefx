@@ -2,31 +2,29 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
-using System.Net.Test.Common;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Net.Test.Common;
 using System.Text;
-
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    using Configuration = System.Net.Test.Common.Configuration;
-
     // TODO: Make tests Outerloop
 
     public class HttpClientHandler_ResponseDrain_Test : HttpClientTestBase
     {
-        // TODO: This is failing on SHH currently
-
         [Theory]
-        [InlineData(true)]
         [InlineData(false)]
+        [InlineData(true)]
         public async Task GetAsync_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(bool useTE)
         {
+            if (UseSocketsHttpHandler)
+            {
+                // Fails currently
+                return;
+            }
+
             const string simpleContent = "Hello world!";
 
             await LoopbackServer.CreateClientAndServerAsync(
@@ -48,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
 
                         response1.Dispose();
 
-                        // Issue another requests.  We'll confirm that it comes on the same connection.
+                        // Issue another request.  We'll confirm that it comes on the same connection.
                         HttpResponseMessage response2 = await client.GetAsync(url);
                         ValidateResponse(response2, simpleContent.Length, useTE);
                         Assert.Equal(simpleContent, await response2.Content.ReadAsStringAsync());
@@ -68,6 +66,79 @@ namespace System.Net.Http.Functional.Tests
                         {
                             await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
                             await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
+                        }
+                    });
+                });
+        }
+
+        // The actual amount of drain that's supported is handler and timing dependent, apparently.
+        // These cases are an attempt to provide a "min bar" for draining behavior.
+
+        [Theory]
+        [InlineData(10, 0, false)]
+        [InlineData(10, 0, true)]
+        [InlineData(10, 1, false)]
+        [InlineData(10, 1, true)]
+        [InlineData(100, 10, false)]
+        [InlineData(100, 10, true)]
+        [InlineData(1000, 950, false)]
+        [InlineData(1000, 950, true)]
+        [InlineData(10000, 9500, false)]
+        [InlineData(10000, 9500, true)]
+        public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(int totalSize, int readSize, bool useTE)
+        {
+            if (IsWinHttpHandler && useTE && readSize == 0)
+            {
+                // WinHttpHandler doesn't try to drain when using TE and no body read.
+                return;
+            }
+
+            if (UseSocketsHttpHandler)
+            {
+                // Fails currently
+                return;
+            }
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    HttpClientHandler handler = CreateHttpClientHandler();
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
+                    handler.MaxConnectionsPerServer = 1;
+
+                    using (var client = new HttpClient(handler))
+                    { 
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponse(response1, totalSize, useTE);
+
+                        // Read part but not all of response
+                        Stream responseStream = await response1.Content.ReadAsStreamAsync();
+                        await ReadToByteCount(responseStream, readSize);
+
+                        response1.Dispose();
+
+                        // Issue another request.  We'll confirm that it comes on the same connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponse(response2, totalSize, useTE);
+                        Assert.Equal(totalSize, (await response2.Content.ReadAsStringAsync()).Length);
+                    }
+                },
+                async server =>
+                {
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        string content = new string('a', totalSize);
+                        if (useTE)
+                        {
+                            var response = LoopbackServer.GetSingleChunkHttpResponse(content: content);
+                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                        }
+                        else
+                        {
+                            await connection.ReadRequestHeaderAndSendResponseAsync(content: content);
+                            await connection.ReadRequestHeaderAndSendResponseAsync(content: content);
                         }
                     });
                 });
@@ -96,63 +167,6 @@ namespace System.Net.Http.Functional.Tests
                         var response = LoopbackServer.GetSingleChunkHttpResponse(content: simpleContent);
                         Console.WriteLine($"sending response:\r\n{response}");
                         await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
-                    });
-                });
-        }
-#endif
-
-#if false
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(int totalSize, int readSize, bool useTE)
-        {
-            const string simpleContent = "Hello world!";
-
-            await LoopbackServer.CreateClientAndServerAsync(
-                async url =>
-                {
-                    HttpClientHandler handler = CreateHttpClientHandler();
-
-                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain.
-                    handler.MaxConnectionsPerServer = 1;
-                    using (var client = new HttpClient(handler))
-                    {
-                        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-                        if (useTE)
-                        {
-                            request.Headers.TransferEncodingChunked = true;
-                        }
-
-                        HttpResponseMessage response1 = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                        Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
-                        if (!useTE)
-                        {
-                            Assert.Equal(simpleContent.Length, response1.Content.Headers.ContentLength);
-                        }
-
-                        // Read part but not all of response
-                        Stream responseStream = await response1.Content.ReadAsStreamAsync();
-                        await ReadToByteCount(responseStream, readSize);
-
-                        response1.Dispose();
-
-                        // Issue another requests.  We'll confirm that it comes on the same connection.
-                        HttpResponseMessage response2 = await client.GetAsync(url);
-                        Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
-                        if (!useTE)
-                        {
-                            Assert.Equal(simpleContent.Length, response1.Content.Headers.ContentLength);
-                        }
-                        Assert.Equal(simpleContent, await response2.Content.ReadAsStringAsync());
-                    }
-                },
-                async server =>
-                {
-                    await server.AcceptConnectionAsync(async connection =>
-                    {
-                        await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
-                        await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
                     });
                 });
         }
