@@ -20,14 +20,14 @@ namespace System.Net.Http.Functional.Tests
 
     public class HttpClientHandler_ResponseDrain_Test : HttpClientTestBase
     {
-        // TODO: Add TE test
         // TODO: This is failing on SHH currently
 
-        [Fact]
-        public async Task GetAsync_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetAsync_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(bool useTE)
         {
             const string simpleContent = "Hello world!";
-            Console.WriteLine("It's running!");
 
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
@@ -35,8 +35,7 @@ namespace System.Net.Http.Functional.Tests
                     using (var client = CreateHttpClient())
                     {
                         HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                        Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
-                        Assert.Equal(simpleContent.Length, response1.Content.Headers.ContentLength);
+                        ValidateResponse(response1, simpleContent.Length, useTE);
 
                         // Read up to exactly 1 byte before the end of the response
                         Stream responseStream = await response1.Content.ReadAsStreamAsync();
@@ -51,8 +50,100 @@ namespace System.Net.Http.Functional.Tests
 
                         // Issue another requests.  We'll confirm that it comes on the same connection.
                         HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponse(response2, simpleContent.Length, useTE);
+                        Assert.Equal(simpleContent, await response2.Content.ReadAsStringAsync());
+                    }
+                },
+                async server =>
+                {
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        if (useTE)
+                        {
+                            var response = LoopbackServer.GetSingleChunkHttpResponse(content: simpleContent);
+                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                            await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                        }
+                        else
+                        {
+                            await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
+                            await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
+                        }
+                    });
+                });
+        }
+
+#if false
+        [Fact]
+        public async Task StupidTest()
+        {
+            const string simpleContent = "Hello world!";
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    using (var client = CreateHttpClient())
+                    {
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponse(response1, simpleContent.Length, true);
+                        Assert.Equal(simpleContent, await response1.Content.ReadAsStringAsync());
+                    }
+                },
+                async server =>
+                {
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        var response = LoopbackServer.GetSingleChunkHttpResponse(content: simpleContent);
+                        Console.WriteLine($"sending response:\r\n{response}");
+                        await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                    });
+                });
+        }
+#endif
+
+#if false
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(int totalSize, int readSize, bool useTE)
+        {
+            const string simpleContent = "Hello world!";
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    HttpClientHandler handler = CreateHttpClientHandler();
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain.
+                    handler.MaxConnectionsPerServer = 1;
+                    using (var client = new HttpClient(handler))
+                    {
+                        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                        if (useTE)
+                        {
+                            request.Headers.TransferEncodingChunked = true;
+                        }
+
+                        HttpResponseMessage response1 = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                        Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+                        if (!useTE)
+                        {
+                            Assert.Equal(simpleContent.Length, response1.Content.Headers.ContentLength);
+                        }
+
+                        // Read part but not all of response
+                        Stream responseStream = await response1.Content.ReadAsStreamAsync();
+                        await ReadToByteCount(responseStream, readSize);
+
+                        response1.Dispose();
+
+                        // Issue another requests.  We'll confirm that it comes on the same connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
                         Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
-                        Assert.Equal(simpleContent.Length, response2.Content.Headers.ContentLength);
+                        if (!useTE)
+                        {
+                            Assert.Equal(simpleContent.Length, response1.Content.Headers.ContentLength);
+                        }
                         Assert.Equal(simpleContent, await response2.Content.ReadAsStringAsync());
                     }
                 },
@@ -64,6 +155,21 @@ namespace System.Net.Http.Functional.Tests
                         await connection.ReadRequestHeaderAndSendResponseAsync(content: simpleContent);
                     });
                 });
+        }
+#endif
+
+        private static void ValidateResponse(HttpResponseMessage response, int contentLength, bool useTE)
+        {
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            if (useTE)
+            {
+                Assert.True(response.Headers.TransferEncodingChunked);
+            }
+            else
+            {
+                Assert.Equal(contentLength, response.Content.Headers.ContentLength);
+            }
         }
 
         private static async Task<byte[]> ReadToByteCount(Stream stream, int byteCount)
@@ -88,32 +194,5 @@ namespace System.Net.Http.Functional.Tests
 
             return buffer;
         }
-
-        // TODO: TE test?
-        // TODO: tests with MaxConnections to ensure reuse
-#if false
-        [Theory]
-        [InlineData(1, 5, false)]
-        [InlineData(1, 5, true)]
-        [InlineData(2, 2, false)]
-        [InlineData(2, 2, true)]
-        [InlineData(3, 2, false)]
-        [InlineData(3, 2, true)]
-        [InlineData(3, 5, false)]
-        public async Task GetAsync_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(int maxConnections, int numRequests, bool secure)
-        {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
-            {
-                // Set MaxConnectionsPerServer to 1.  Otherwise, there may be a delay caused by doing the response drain,
-                // which could cause another connection to be established.
-
-                handler.MaxConnectionsPerServer = maxConnections;
-                await Task.WhenAll(
-                    from i in Enumerable.Range(0, numRequests)
-                    select client.GetAsync(secure ? Configuration.Http.RemoteEchoServer : Configuration.Http.SecureRemoteEchoServer));
-            }
-        }
-#endif
     }
 }
