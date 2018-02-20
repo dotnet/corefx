@@ -46,7 +46,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(cek);
+                Array.Clear(cek, 0, cek.Length);
                 cekPin.Free();
             }
         }
