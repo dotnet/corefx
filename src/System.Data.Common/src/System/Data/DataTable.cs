@@ -442,7 +442,7 @@ namespace System.Data
                 dc.Prefix = info.GetString(string.Format(formatProvider, "DataTable.DataColumn_{0}.Prefix", i));
 
                 string typeName = (string)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DataType", i), typeof(string));
-                dc.DataType = Type.GetType(typeName);
+                dc.DataType = Type.GetType(typeName, throwOnError: true);
                 dc.XmlDataType = (string)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.XmlDataType", i), typeof(string));
                 dc.SimpleType = (SimpleType)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.SimpleType", i), typeof(SimpleType));
 

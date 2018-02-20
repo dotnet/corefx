@@ -393,7 +393,7 @@ namespace System.Data.Tests
         public void DataColumnTypeSerialization()
         {
             DataTable dt = new DataTable("MyTable");
-            DataColumn dc = new DataColumn("dc", typeof(Int32));
+            DataColumn dc = new DataColumn("dc", typeof(int));
             dt.Columns.Add(dc);
             dt.RemotingFormat = SerializationFormat.Binary;
 
@@ -405,7 +405,7 @@ namespace System.Data.Tests
                 ms.Seek(0, SeekOrigin.Begin);
                 dtDeserialized = (DataTable)bf.Deserialize(ms);
             }
-            Assert.Equal(dc.DataType.ToString(), dtDeserialized.Columns[0].DataType.ToString());
+            Assert.Equal(dc.DataType, dtDeserialized.Columns[0].DataType);
         }
 
         [Fact]
