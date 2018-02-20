@@ -6,11 +6,7 @@ namespace System.Buffers
 {
     public readonly partial struct ReadOnlySequence<T>
     {
-        internal bool TryGetMemoryList(
-            out IMemoryList<T> startSegment,
-            out int startIndex,
-            out IMemoryList<T> endSegment,
-            out int endIndex)
+        internal bool TryGetMemoryList(out IMemoryList<T> startSegment, out int startIndex, out IMemoryList<T> endSegment, out int endIndex)
         {
 
             if (Start.Segment == null  || GetSequenceType() != SequenceType.MemoryList)
@@ -37,14 +33,14 @@ namespace System.Buffers
                 return false;
             }
 
-            var startIndex = GetIndex(Start.Index);
+            int startIndex = GetIndex(Start.Index);
             array = new ArraySegment<T>((T[])Start.Segment, startIndex, GetIndex(End.Index) - startIndex);
             return true;
         }
 
         internal bool TryGetOwnedMemory(out OwnedMemory<T> ownedMemory, out int start, out int length)
         {
-            if (Start.Segment == null  || GetSequenceType() != SequenceType.Array)
+            if (Start.Segment == null  || GetSequenceType() != SequenceType.OwnedMemory)
             {
                 ownedMemory = default;
                 start = 0;
@@ -58,12 +54,10 @@ namespace System.Buffers
             return true;
         }
 
-        internal bool TryGetReadOnlyMemory(
-            out ReadOnlyMemory<T> memory
-        )
+        internal bool TryGetReadOnlyMemory(out ReadOnlyMemory<T> memory)
         {
             // Currently ReadOnlyMemory is stored inside single segment of IMemoryList
-            if (TryGetMemoryList(out var startSegment, out var startIndex, out var endSegment, out var endIndex) &&
+            if (TryGetMemoryList(out IMemoryList<T> startSegment, out int startIndex, out IMemoryList<T> endSegment, out int endIndex) &&
                 startSegment == endSegment)
             {
                 memory = startSegment.Memory.Slice(startIndex, endIndex - startIndex);
