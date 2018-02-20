@@ -54,7 +54,7 @@ namespace System.Tests
             Assert.Equal(ignoreCase, sc.Equals(s1, s1b));
             Assert.Equal(ignoreCase, ((IEqualityComparer)sc).Equals(s1, s1b));
             
-            Assert.NotEqual(sc.GetHashCode(), sc.GetHashCode(bb));
+            Assert.NotEqual(sc.GetHashCode(aa), sc.GetHashCode(bb));
             Assert.NotEqual(0, ((IComparer)sc).Compare(aa, bb));
             Assert.False(sc.Equals(aa, bb));
             Assert.False(((IEqualityComparer)sc).Equals(aa, bb));
