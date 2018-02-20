@@ -119,15 +119,14 @@ namespace System.IO.Tests
             // { @"dir\\baz", "dir" }, https://github.com/dotnet/corefx/issues/27269
             { @"C:\foo", @"C:\" },
             { @"\foo", @"\" },
-            { @"C:foo", @"C:" },
-            { @"\\?\C:\foo", @"\\?\C:\" },
+            { @"C:foo", @"C:" }
         };
 
         public static TheoryData<string, string> GetDirectoryName_Windows_string_Test_Data => new TheoryData<string, string>
         {
-            { @" C:\dir\baz", @"C:\dir" },
+            // { @" C:\dir\baz", @"C:\dir" }, https://github.com/dotnet/corefx/issues/27269
             { @" dir\baz", " dir" },
-            { @" C:\dir\baz", @"C:\dir" },
+            // { @" C:\dir\baz", @"C:\dir" }, https://github.com/dotnet/corefx/issues/27269
         };
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
@@ -135,6 +134,19 @@ namespace System.IO.Tests
         public static void GetDirectoryName_Windows(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void GetDirectoryName_WindowsDevicePath()
+        {
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                Assert.Equal(@"\\?\C:", Path.GetDirectoryName(@"\\?\C:\foo"));
+            }
+            else
+            {
+                Assert.Equal(@"\\?\C:\", Path.GetDirectoryName(@"\\?\C:\foo"));
+            }
         }
 
         public static TheoryData<string, string> GetDirectoryName_Unix_Test_Data => new TheoryData<string, string>
@@ -900,7 +912,6 @@ namespace System.IO.Tests
         // https://github.com/dotnet/corefx/issues/11965
         [InlineData(@"\\LOCALHOST\share\test.txt.~SS", @"\\LOCALHOST\share\test.txt.~SS")]
         [InlineData(@"\\LOCALHOST\share1", @"\\LOCALHOST\share1")]
-        [InlineData(@"\\LOCALHOST\share2", @" \\LOCALHOST\share2")]
         [InlineData(@"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir")]
         [InlineData(@"\\LOCALHOST\share4", @"\\LOCALHOST\share4\.")]
         [InlineData(@"\\LOCALHOST\share5", @"\\LOCALHOST\share5\..")]

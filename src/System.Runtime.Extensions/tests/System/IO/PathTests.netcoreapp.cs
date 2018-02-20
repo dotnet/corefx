@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.IO.Tests
@@ -42,6 +43,9 @@ namespace System.IO.Tests
             Assert.Equal(string.Empty, new string(Path.GetDirectoryName(Path.GetPathRoot(curDir).AsReadOnlySpan())));
         }
 
+
+
+
         [Theory, MemberData(nameof(GetExtension_Test_Data))]
         public static void GetExtension_Span(string path, string expected)
         {
@@ -52,6 +56,52 @@ namespace System.IO.Tests
                 Assert.Equal(expected, new string(Path.GetExtension(path.AsReadOnlySpan())));
                 Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path.AsReadOnlySpan()));
             }
+        }
+
+        public static IEnumerable<object[]> GetFileName_VolumeTestData()
+        {
+            yield return new object[] { ":", ":" };
+            yield return new object[] { ".:", ".:" };
+            yield return new object[] { ".:.", ".:." };     // Not a valid drive letter
+            yield return new object[] { "file:", "file:" };
+            yield return new object[] { ":file", ":file" };
+            yield return new object[] { "file:exe", "file:exe" };
+            yield return new object[] { Path.Combine("baz", "file:exe"), "file:exe" };
+            yield return new object[] { Path.Combine("bar", "baz", "file:exe"), "file:exe" };
+        }
+
+        [ActiveIssue(27269)]
+        [Theory]
+        [MemberData(nameof(GetFileName_VolumeTestData))]
+        public static void GetFileName_Volume(string path, string expected)
+        {
+            // We used to break on ':' on Windows. This is a valid file name character for alternate data streams.
+            // Additionally the character can show up on unix volumes mounted to Windows.
+            Assert.Equal(expected, Path.GetFileName(path));
+            Assert.Equal(expected, new string(Path.GetFileName(path.AsReadOnlySpan())));
+        }
+
+        [ActiveIssue(27269)]
+        [Theory]
+        [InlineData("B:", "")]
+        [InlineData("A:.", ".")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void GetFileName_Volume_Windows(string path, string expected)
+        {
+            // With a valid drive letter followed by a colon, we have a root, but only on Windows.
+            Assert.Equal(expected, Path.GetFileName(path));
+            Assert.Equal(expected, new string(Path.GetFileName(path.AsReadOnlySpan())));
+        }
+
+        [Theory]
+        [InlineData("B:", "B:")]
+        [InlineData("A:.", "A:.")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void GetFileName_Volume_Unix(string path, string expected)
+        {
+            // No such thing as a drive relative path on Unix.
+            Assert.Equal(expected, Path.GetFileName(path));
+            Assert.Equal(expected, new string(Path.GetFileName(path.AsReadOnlySpan())));
         }
 
         [Theory]
