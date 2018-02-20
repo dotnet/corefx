@@ -26,6 +26,7 @@ namespace System.Net.Http.Headers
             Debug.Assert(!string.IsNullOrEmpty(name));
             Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
             Debug.Assert((headerType == HttpHeaderType.Custom) == (parser == null));
+            Debug.Assert(knownValues == null || headerType != HttpHeaderType.Custom);
 
             _name = name;
             _headerType = headerType;

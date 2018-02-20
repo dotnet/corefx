@@ -153,7 +153,9 @@ namespace System.Net.Http
 
         public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
 
-        private Memory<byte> RemainingBuffer => new Memory<byte>(_readBuffer, _readOffset, _readLength - _readOffset);
+        private int ReadBufferSize => _readBuffer.Length;
+
+        private ReadOnlyMemory<byte> RemainingBuffer => new ReadOnlyMemory<byte>(_readBuffer, _readOffset, _readLength - _readOffset);
 
         private void ConsumeFromRemainingBuffer(int bytesToConsume)
         {
@@ -656,9 +658,8 @@ namespace System.Net.Http
             }
         }
 
-        // TODO: Remove this overload once https://github.com/dotnet/roslyn/issues/17287 is addressed
-        // and the compiler doesn't lift the span temporary from the call site into the async state
-        // machine in debug builds.
+        // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
+        // and the compiler doesn't prevent using spans in async methods.
         private static void ParseStatusLine(ArraySegment<byte> line, HttpResponseMessage response) =>
             ParseStatusLine((Span<byte>)line, response);
 
@@ -736,9 +737,8 @@ namespace System.Net.Http
             }
         }
 
-        // TODO: Remove this overload once https://github.com/dotnet/roslyn/issues/17287 is addressed
-        // and the compiler doesn't lift the span temporary from the call site into the async state
-        // machine in debug builds.
+        // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
+        // and the compiler doesn't prevent using spans in async methods.
         private static void ParseHeaderNameValue(ArraySegment<byte> line, HttpResponseMessage response) =>
             ParseHeaderNameValue((Span<byte>)line, response);
 
@@ -1149,7 +1149,7 @@ namespace System.Net.Http
 
         private async ValueTask<int> ReadAsync(Memory<byte> destination)
         {
-            // This is called when reading the response body
+            // This is called when reading the response body.
 
             int remaining = _readLength - _readOffset;
             if (remaining > 0)
