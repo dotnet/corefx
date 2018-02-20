@@ -21,6 +21,10 @@ namespace System.Security.Cryptography.Pkcs
 
         public Rfc3161TimestampTokenInfo TokenInfo { get; private set; }
 
+        private Rfc3161TimestampToken()
+        {
+        }
+
         /// <summary>
         /// Get a SignedCms representation of the RFC3161 Timestamp Token.
         /// </summary>

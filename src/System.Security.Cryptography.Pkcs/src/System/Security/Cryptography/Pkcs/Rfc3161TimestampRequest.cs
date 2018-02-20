@@ -87,13 +87,8 @@ namespace System.Security.Cryptography.Pkcs
             {
                 resp = AsnSerializer.Deserialize<Rfc3161TimeStampResp>(source, AsnEncodingRules.DER, out bytesConsumed);
             }
-            catch (CryptographicException)
+            catch (CryptographicException) when (!shouldThrow)
             {
-                if (shouldThrow)
-                {
-                    throw;
-                }
-
                 bytesConsumed = 0;
                 status = Rfc3161RequestResponseStatus.DoesNotParse;
                 return false;
