@@ -28,5 +28,8 @@ namespace System.Net.Http
 
         public sealed override void CopyTo(Stream destination, int bufferSize) =>
             CopyToAsync(destination, bufferSize, CancellationToken.None).GetAwaiter().GetResult();
+
+        // Maximum request drain size, 16K.
+        protected const int s_maxDrainBytes = 16 * 1024;
     }
 }

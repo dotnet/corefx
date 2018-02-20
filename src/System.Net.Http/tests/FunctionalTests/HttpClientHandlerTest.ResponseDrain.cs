@@ -93,7 +93,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseSocketsHttpHandler)
+            if (UseSocketsHttpHandler && useTE)
             {
                 // Fails currently
                 return;
