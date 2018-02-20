@@ -98,21 +98,23 @@ namespace Internal.Cryptography.Pal.AnyOS
                         int saltLen = 0;
                         AsnReader reader = new AsnReader(asn.Parameters.Value, AsnEncodingRules.BER);
 
-                        if (reader.PeekTag() == Asn1Tag.Null)
+                        // DER NULL is considered the same as not present.
+                        // No call to ReadNull() is necessary because the serializer already verified that
+                        // there's no data after the [AnyValue] value.
+                        if (reader.PeekTag() != Asn1Tag.Null)
                         {
-                            // If it was NULL, don't read an OctetString
-                        }
-                        else if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
-                        {
-                            saltLen = contents.Length;
-                        }
-                        else
-                        {
-                            Span<byte> salt = stackalloc byte[KeyLengths.Rc4Max_128Bit / 8];
-
-                            if (!reader.TryCopyOctetStringBytes(salt, out saltLen))
+                            if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
                             {
-                                throw new CryptographicException();
+                                saltLen = contents.Length;
+                            }
+                            else
+                            {
+                                Span<byte> salt = stackalloc byte[KeyLengths.Rc4Max_128Bit / 8];
+
+                                if (!reader.TryCopyOctetStringBytes(salt, out saltLen))
+                                {
+                                    throw new CryptographicException();
+                                }
                             }
                         }
 

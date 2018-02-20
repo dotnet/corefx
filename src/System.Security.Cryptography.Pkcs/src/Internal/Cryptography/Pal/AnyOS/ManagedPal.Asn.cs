@@ -87,10 +87,16 @@ namespace Internal.Cryptography.Pal.AnyOS
                 // Sending the DateTime through ToLocalTime here will cause the right normalization
                 // of DateTimeKind.Unknown.
                 //
-                // Local => Local (noop) => UTC (in WriteUtcTime) (adjust, correct)
-                // UTC => Local (adjust) => UTC (adjust back, correct)
                 // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
-                writer.WriteUtcTime(utcTime.ToLocalTime());
+                if (utcTime.Kind == DateTimeKind.Unspecified)
+                {
+                    writer.WriteUtcTime(utcTime.ToLocalTime());
+                }
+                else
+                {
+                    writer.WriteUtcTime(utcTime);
+                }
+
                 return writer.Encode();
             }
         }

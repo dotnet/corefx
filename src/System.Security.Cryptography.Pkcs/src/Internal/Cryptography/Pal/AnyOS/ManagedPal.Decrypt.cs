@@ -5,6 +5,7 @@
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
@@ -60,11 +61,17 @@ namespace Internal.Cryptography.Pal.AnyOS
                     return null;
                 }
 
-                ReadOnlyMemory<byte>? encryptedContent = _envelopedData.EncryptedContentInfo.EncryptedContent;
+                // Pin CEK to prevent heap compaction from copying the data
+                GCHandle cekPin = GCHandle.Alloc(cek, GCHandleType.Pinned);
 
+                ReadOnlyMemory<byte>? encryptedContent = _envelopedData.EncryptedContentInfo.EncryptedContent;
                 if (encryptedContent == null)
                 {
                     exception = null;
+
+                    CryptographicOperations.ZeroMemory(cek);
+                    cekPin.Free();
+
                     return new ContentInfo(
                         new Oid(_envelopedData.EncryptedContentInfo.ContentType),
                         Array.Empty<byte>());
@@ -97,8 +104,13 @@ namespace Internal.Cryptography.Pal.AnyOS
                 }
                 finally
                 {
+                    CryptographicOperations.ZeroMemory(cek);
+                    cekPin.Free();
+                    cek = null;
+
                     Array.Clear(encryptedContentArray, 0, encryptedContentLength);
                     ArrayPool<byte>.Shared.Return(encryptedContentArray);
+                    encryptedContentArray = null;
                 }
 
                 if (_envelopedData.EncryptedContentInfo.ContentType == Oids.Pkcs7Data)
