@@ -506,12 +506,34 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void NameTest()
         {
-            var t = new Thread(() => { });
+            string name = "a";
+            Action waitForThread;
+            var t =
+                ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
+                {
+                    var ct = Thread.CurrentThread;
+                    Assert.Equal(name, ct.Name);
+                    Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
+                    Assert.Equal(name, ct.Name);
+                });
+            t.IsBackground = true;
             Assert.Null(t.Name);
-            t.Name = "a";
-            Assert.Equal("a", t.Name);
-            Assert.Throws<InvalidOperationException>(() => t.Name = "b");
-            Assert.Equal("a", t.Name);
+            t.Name = name;
+            Assert.Equal(name, t.Name);
+            Assert.Throws<InvalidOperationException>(() => t.Name = name + "b");
+            Assert.Equal(name, t.Name);
+            t.Start();
+            waitForThread();
+
+            ThreadTestHelpers.RunTestInBackgroundThread(() =>
+            {
+                var ct = Thread.CurrentThread;
+                Assert.Null(ct.Name);
+                ct.Name = name;
+                Assert.Equal(name, ct.Name);
+                Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
+                Assert.Equal(name, ct.Name);
+            });
         }
 
         [Fact]
@@ -893,7 +915,12 @@ namespace System.Threading.Threads.Tests
         {
             var e = new AutoResetEvent(false);
             Action waitForThread;
-            var t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, e.CheckedWait);
+            Thread t = null;
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
+                {
+                    e.CheckedWait();
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             Assert.Throws<InvalidOperationException>(() => t.Start(null));
             Assert.Throws<InvalidOperationException>(() => t.Start(t));
@@ -915,17 +942,29 @@ namespace System.Threading.Threads.Tests
             Assert.Throws<ThreadStateException>(() => t.Start(null));
             Assert.Throws<ThreadStateException>(() => t.Start(t));
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Null(parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Null(parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start();
             waitForThread();
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Null(parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Null(parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start(null);
             waitForThread();
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Equal(t, parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Same(t, parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start(t);
             waitForThread();
