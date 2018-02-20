@@ -4,8 +4,8 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class Perf_Regex_Cache
     {
-        private const int N = 50_000;
-        private const int UniqueRegsNum = (int)(N * 0.02);
+        private const int N = 40_000;
+        private const int UniqueRegsNum = (int)(N * 0.04);
         private const int CacheSize = (int)(N * 0.02);
         private static volatile bool s_IsMatch;
         private readonly string[] _regexes; // shuffled
@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions.Tests
         public Perf_Regex_Cache()
         {
             _regexes = new string[N];
-            // create:
+            // create: 
             {
                 var i = 0;
                 for (; i < UniqueRegsNum; i++)
@@ -28,7 +28,8 @@ namespace System.Text.RegularExpressions.Tests
                 for (; i < N; i++) _regexes[i] = _regexes[i % UniqueRegsNum];
             }
             // shuffle:
-            var random = new Random();
+			const int someSeed = 101;  // seed for reproducability
+            var random = new Random(someSeed);
             for (var i = 0; i < N; i++)
             {
                 var r = random.Next(i, N);
@@ -45,7 +46,6 @@ namespace System.Text.RegularExpressions.Tests
             var cacheSizeOld = Regex.CacheSize;
             try
             {
-
                 Regex.CacheSize = CacheSize;
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
