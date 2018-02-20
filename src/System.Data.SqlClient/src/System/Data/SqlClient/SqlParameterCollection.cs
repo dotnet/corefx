@@ -30,6 +30,21 @@ namespace System.Data.SqlClient
                 _isDirty = value;
             }
         }
+        override public bool IsFixedSize
+        {
+            get
+            {
+                return ((System.Collections.IList)InnerList).IsFixedSize;
+            }
+        }
+
+        override public bool IsReadOnly
+        {
+            get
+            {
+                return ((System.Collections.IList)InnerList).IsReadOnly;
+            }
+        }
 
         new public SqlParameter this[int index]
         {
