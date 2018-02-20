@@ -1053,6 +1053,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.CurrentCulture, false)]
         [InlineData("", "", StringComparison.CurrentCulture, true)]
         [InlineData("123", 123, StringComparison.CurrentCulture, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCulture, false)]
         // CurrentCultureIgnoreCase
         [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
         [InlineData("Hello", "hello", StringComparison.CurrentCultureIgnoreCase, true)]
@@ -1065,6 +1066,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.CurrentCultureIgnoreCase, false)]
         [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
         [InlineData("123", 123, StringComparison.CurrentCultureIgnoreCase, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCultureIgnoreCase, false)]
         // InvariantCulture
         [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
         [InlineData("Hello", "hello", StringComparison.InvariantCulture, false)]
@@ -1076,7 +1078,8 @@ namespace System.Tests
         [InlineData("Hello", "", StringComparison.InvariantCulture, false)]
         [InlineData("", "Hello", StringComparison.InvariantCulture, false)]
         [InlineData("", "", StringComparison.InvariantCulture, true)]
-        [InlineData("123", 123, StringComparison.InvariantCultureIgnoreCase, false)] // Not a string
+        [InlineData("123", 123, StringComparison.InvariantCulture, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCulture, false)]
         // InvariantCultureIgnoreCase
         [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
         [InlineData("Hello", "hello", StringComparison.InvariantCultureIgnoreCase, true)]
@@ -1089,6 +1092,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.InvariantCultureIgnoreCase, false)]
         [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
         [InlineData("123", 123, StringComparison.InvariantCultureIgnoreCase, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCultureIgnoreCase, false)]
         // Ordinal
         [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
         [InlineData("Hello", "hello", StringComparison.Ordinal, false)]
@@ -1101,6 +1105,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.Ordinal, false)]
         [InlineData("", "", StringComparison.Ordinal, true)]
         [InlineData("123", 123, StringComparison.Ordinal, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.Ordinal, false)]
         // OridinalIgnoreCase
         [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("HELLO", "hello", StringComparison.OrdinalIgnoreCase, true)]
@@ -1118,6 +1123,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.OrdinalIgnoreCase, false)]
         [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("123", 123, StringComparison.OrdinalIgnoreCase, false)] // Not a string
+        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.OrdinalIgnoreCase, false)]
         public static void Equals(string s1, object obj, StringComparison comparisonType, bool expected)
         {
             string s2 = obj as string;

@@ -32,6 +32,8 @@ namespace System.Tests
             String s1a = "Hello";
             String s1b = "HELLO";
             String s2 = "There";
+            String aa = "\0AAAAAAAAA";
+            String bb = "\0BBBBBBBBBBBB";
 
             Assert.True(sc.Equals(s1, s1a));
             Assert.True(sc.Equals(s1, s1a));
@@ -51,6 +53,13 @@ namespace System.Tests
 
             Assert.Equal(ignoreCase, sc.Equals(s1, s1b));
             Assert.Equal(ignoreCase, ((IEqualityComparer)sc).Equals(s1, s1b));
+            
+            Assert.NotEqual(sc.GetHashCode(), sc.GetHashCode(bb));
+            Assert.NotEqual(0, ((IComparer)sc).Compare(aa, bb));
+            Assert.False(sc.Equals(aa, bb));
+            Assert.False(((IEqualityComparer)sc).Equals(aa, bb));
+            Assert.True(sc.Compare(aa, bb) < 0);
+            Assert.True(((IComparer)sc).Compare(aa, bb) < 0);
 
             int result = sc.Compare(s1, s1b);
             if (ignoreCase)
