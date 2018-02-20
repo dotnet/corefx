@@ -19,7 +19,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public async Task GetAsync_DisposeBeforeReadingToEnd_DrainsRequestsAndReusesConnection(bool useTE)
         {
-            if (UseSocketsHttpHandler)
+            if (UseSocketsHttpHandler && useTE)
             {
                 // Fails currently
                 return;
@@ -90,6 +90,13 @@ namespace System.Net.Http.Functional.Tests
             if (IsWinHttpHandler && useTE && readSize == 0)
             {
                 // WinHttpHandler doesn't try to drain when using TE and no body read.
+                return;
+            }
+
+            if (IsCurlHandler && (useTE || readSize == 0))
+            {
+                // CurlHandler behaves inconsistently when TE is used.
+                // Also, it doesn't try to drain when no body is read.
                 return;
             }
 
