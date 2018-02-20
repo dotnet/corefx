@@ -48,7 +48,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             {
             }
 
-            protected internal struct InternalProtectedValueType
+            protected internal struct ProtectedInternalValueType
             {
             }
 
@@ -71,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
             public static dynamic InternalValueTypeArray() => new InternalValueType[2];
 
-            public static dynamic InternalProtectedValueTypeArray() => new InternalProtectedValueType[2];
+            public static dynamic ProtectedInternalValueTypeArray() => new ProtectedInternalValueType[2];
 
             private delegate int PrivateFunc<T>(T arg);
 
@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             public int Public;
             protected int Protected;
             internal int Internal;
-            protected internal int InternalProtected;
+            protected internal int ProtectedInternal;
             private protected int PrivateProtected;
 #pragma warning disable 414
             private int Private;
@@ -104,7 +104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
                 Public = 1;
                 Protected = 2;
                 Internal = 3;
-                InternalProtected = 4;
+                ProtectedInternal = 4;
                 PrivateProtected = 5;
                 Private = 6;
             }
@@ -118,7 +118,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
                 Assert.Equal(1, d.Public);
                 Assert.Equal(2, d.Protected);
                 Assert.Equal(3, d.Internal);
-                Assert.Equal(4, d.InternalProtected);
+                Assert.Equal(4, d.ProtectedInternal);
                 Assert.Equal(5, d.PrivateProtected);
             }
 
@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void AccessNestedInternalOnlySameAssembly()
         {
             Assert.NotNull(Container.InternalValueTypeArray()[1]);
-            Assert.NotNull(Container.InternalProtectedValueTypeArray()[1]);
+            Assert.NotNull(Container.ProtectedInternalValueTypeArray()[1]);
         }
 
         [Fact]
@@ -267,7 +267,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             dynamic d = new TypeWithFields();
             Assert.Equal(1, d.Public);
             Assert.Equal(3, d.Internal);
-            Assert.Equal(4, d.InternalProtected);
+            Assert.Equal(4, d.ProtectedInternal);
         }
 
         [Fact]
