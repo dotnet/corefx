@@ -1105,7 +1105,7 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.Ordinal, false)]
         [InlineData("", "", StringComparison.Ordinal, true)]
         [InlineData("123", 123, StringComparison.Ordinal, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.Ordinal, false)]
+        //[InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.Ordinal, false)] // "See https://github.com/dotnet/corefx/issues/27098"
         // OridinalIgnoreCase
         [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("HELLO", "hello", StringComparison.OrdinalIgnoreCase, true)]

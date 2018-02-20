@@ -26,6 +26,16 @@ namespace System.Tests
             VerifyComparer(StringComparer.OrdinalIgnoreCase, true);
         }
 
+        [Fact]
+        [ActiveIssue(27098, TargetFrameworkMonikers.NetFramework)]
+        public static void TestOrdinal_EmbeddedNull_ReturnsDifferentHashCodes()
+        {
+            StringComparer sc = StringComparer.Ordinal;
+            Assert.NotEqual(sc.GetHashCode("\0AAAAAAAAA"), sc.GetHashCode("\0BBBBBBBBBBBB"));
+            sc = StringComparer.OrdinalIgnoreCase;
+            Assert.NotEqual(sc.GetHashCode("\0AAAAAAAAA"), sc.GetHashCode("\0BBBBBBBBBBBB"));
+        }
+
         private static void VerifyComparer(StringComparer sc, bool ignoreCase)
         {
             String s1 = "Hello";
@@ -53,8 +63,11 @@ namespace System.Tests
 
             Assert.Equal(ignoreCase, sc.Equals(s1, s1b));
             Assert.Equal(ignoreCase, ((IEqualityComparer)sc).Equals(s1, s1b));
-            
-            Assert.NotEqual(sc.GetHashCode(aa), sc.GetHashCode(bb));
+
+            if (!PlatformDetection.IsFullFramework) // "See https://github.com/dotnet/corefx/issues/27098"
+            {
+                Assert.NotEqual(sc.GetHashCode(aa), sc.GetHashCode(bb));
+            }
             Assert.NotEqual(0, ((IComparer)sc).Compare(aa, bb));
             Assert.False(sc.Equals(aa, bb));
             Assert.False(((IEqualityComparer)sc).Equals(aa, bb));
