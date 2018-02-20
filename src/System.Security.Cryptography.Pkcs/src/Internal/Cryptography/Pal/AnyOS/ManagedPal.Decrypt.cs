@@ -69,7 +69,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 {
                     exception = null;
 
-                    CryptographicOperations.ZeroMemory(cek);
+                    Array.Clear(cek, 0, cek.Length);
                     cekPin.Free();
 
                     return new ContentInfo(
