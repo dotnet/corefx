@@ -373,7 +373,7 @@ namespace System.Net.Http
 
                     if (newUri.Scheme == Uri.UriSchemeHttp && _requestMessage.RequestUri.Scheme == Uri.UriSchemeHttps)
                     {
-                        EventSourceTrace($"Insecure https to http redirect: {0}", (_requestMessage.RequestUri, newUri));
+                        EventSourceTrace("Insecure https to http redirect: {0}", (_requestMessage.RequestUri, newUri));
                     }
                 }
 
