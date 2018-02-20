@@ -388,6 +388,25 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async Task ServerSendsGarbageAfterInitialRequest_SubsequentRequestUsesDifferentConnection()
+        {
+            using (HttpClient client = CreateHttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    // Make multiple requests iteratively.
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Task<string> request = client.GetStringAsync(uri);
+                        string response = LoopbackServer.GetHttpResponse() + "here is a bunch of garbage";
+                        await server.AcceptConnectionSendCustomResponseAndCloseAsync(response);
+                        await request;
+                    }
+                });
+            }
+        }
+
+        [Fact]
         public async Task ServerSendsConnectionClose_SubsequentRequestUsesDifferentConnection()
         {
             using (HttpClient client = CreateHttpClient())
