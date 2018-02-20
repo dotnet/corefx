@@ -18,17 +18,21 @@ namespace System.ServiceProcess.Tests
                 TestService testService;
                 if (args[0].StartsWith("PropagateExceptionFromOnStart"))
                 {
-                    Exception expectedException = new InvalidOperationException("Fail on startup.");
+                    var expectedException = new InvalidOperationException("Fail on startup.");
                     testService = new TestService(args[0], expectedException);
                     try
                     {
                         ServiceBase.Run(testService);
                     }
-                    catch(Exception actualException)
+                    catch (Exception actualException)
                     {
                         if (object.ReferenceEquals(expectedException, actualException))
                         {
                             testService.WriteStreamAsync(PipeMessageByteCode.ExceptionThrown).Wait();
+                        }
+                        else
+                        {
+                            throw actualException;
                         }
                     }
                 }
