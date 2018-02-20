@@ -36,9 +36,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void GetDirectoryName_EmptyThrows()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void GetDirectoryName_EmptyThrows_Desktop()
         {
             AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(string.Empty));
+        }
+
+        [Fact]
+        [ActiveIssue(27269)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void GetDirectoryName_Empty_Core()
+        {
+            Assert.Null(Path.GetDirectoryName(string.Empty));
         }
 
         [Theory,
@@ -60,19 +69,10 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void GetDirectoryName_SpaceThrowOnWindows_Core()
+        [ActiveIssue(27269)]
+        public static void GetDirectoryName_Space_Core()
         {
-            string path = " ";
-            Action action = () => Path.GetDirectoryName(path);
-            if (PlatformDetection.IsWindows)
-            {
-                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
-            }
-            else
-            {
-                // This is a valid path on Unix
-                action();
-            }
+            Assert.Null(Path.GetDirectoryName(" "));
         }
 
         public static TheoryData<string> GetDirectoryName_NonControl_Test_Data => new TheoryData<string>
@@ -116,12 +116,16 @@ namespace System.IO.Tests
             { @"..\..\files.txt", @"..\.." },
             { @"C:\", null },
             { @"C:", null },
+            // { @"dir\\baz", "dir" }, https://github.com/dotnet/corefx/issues/27269
+            { @"C:\foo", @"C:\" },
+            { @"\foo", @"\" },
+            { @"C:foo", @"C:" },
+            { @"\\?\C:\foo", @"\\?\C:\" },
         };
 
         public static TheoryData<string, string> GetDirectoryName_Windows_string_Test_Data => new TheoryData<string, string>
         {
             { @" C:\dir\baz", @"C:\dir" },
-            { @"dir\\baz", "dir" },
             { @" dir\baz", " dir" },
             { @" C:\dir\baz", @"C:\dir" },
         };
@@ -284,9 +288,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void GetPathRoot_EmptyThrows()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void GetPathRoot_EmptyThrows_Desktop()
         {
             AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(string.Empty));
+        }
+
+        [Fact]
+        [ActiveIssue(27269)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void GetPathRoot_EmptyIsNull_Core()
+        {
+            Assert.Null(Path.GetPathRoot(string.Empty));
         }
 
         [Fact]
