@@ -442,7 +442,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         public static void NegativeAccuracyThrows()
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>(
-                "accuracyInMicroseconds2",
+                "accuracyInMicroseconds",
                 () => new Rfc3161TimestampTokenInfo(
                     new Oid("0.0", "0.0"),
                     new Oid(Oids.Sha256),
