@@ -503,13 +503,17 @@ namespace System.Runtime.InteropServices
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(ReadOnlyMemory<T> memory) { throw null; }
         public static System.ReadOnlySpan<TTo> Cast<TFrom, TTo>(System.ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
         public static System.Span<TTo> Cast<TFrom, TTo>(System.Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
-        public static bool TryGetArray<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> array) { throw null; }
-        public static bool TryGetMemoryList<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.IMemoryList<T> startSegment, out int startIndex, out System.Buffers.IMemoryList<T> endSegment, out int endIndex) { throw null; }
-        public static bool TryGetOwnedMemory<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.OwnedMemory<T> ownedMemory, out int start, out int length) { throw null; }
-        public static bool TryGetReadOnlyMemory<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> readOnlyMemory) { throw null; }
 #if !FEATURE_PORTABLE_SPAN
         public static System.ReadOnlySpan<T> CreateReadOnlySpan<T>(ref T reference, int length) { throw null; }
         public static System.Span<T> CreateSpan<T>(ref T reference, int length) { throw null; }
 #endif
+    }
+
+    public static partial class SequenceMarshal
+    {
+        public static bool TryGetArray<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> array) { throw null; }
+        public static bool TryGetMemoryList<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.IMemoryList<T> startSegment, out int startIndex, out System.Buffers.IMemoryList<T> endSegment, out int endIndex) { throw null; }
+        public static bool TryGetOwnedMemory<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.OwnedMemory<T> ownedMemory, out int start, out int length) { throw null; }
+        public static bool TryGetReadOnlyMemory<T>(in System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> readOnlyMemory) { throw null; }
     }
 }
