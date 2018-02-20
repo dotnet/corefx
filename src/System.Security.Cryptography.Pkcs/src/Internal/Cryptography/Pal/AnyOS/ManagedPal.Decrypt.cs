@@ -5,7 +5,6 @@
 using System;
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
@@ -31,7 +30,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 _envelopedData = envelopedDataAsn;
             }
 
-            public override ContentInfo TryDecrypt(
+            public override unsafe ContentInfo TryDecrypt(
                 RecipientInfo recipientInfo,
                 X509Certificate2 cert,
                 X509Certificate2Collection originatorCerts,
@@ -56,61 +55,40 @@ namespace Internal.Cryptography.Pal.AnyOS
                     return null;
                 }
 
+                byte[] decrypted;
+
+                // Pin CEK to prevent it from getting copied during heap compaction.
+                fixed (byte* pinnedCek = cek)
+                {
+                    try
+                    {
+                        if (exception != null)
+                        {
+                            return null;
+                        }
+
+                        ReadOnlyMemory<byte>? encryptedContent = _envelopedData.EncryptedContentInfo.EncryptedContent;
+
+                        if (encryptedContent == null)
+                        {
+                            exception = null;
+
+                            return new ContentInfo(
+                                new Oid(_envelopedData.EncryptedContentInfo.ContentType),
+                                Array.Empty<byte>());
+                        }
+
+                        decrypted = DecryptContent(encryptedContent.Value, cek, out exception);
+                    }
+                    finally
+                    {
+                        Array.Clear(cek, 0, cek.Length);
+                    }
+                }
+
                 if (exception != null)
                 {
                     return null;
-                }
-
-                // Pin CEK to prevent heap compaction from copying the data
-                GCHandle cekPin = GCHandle.Alloc(cek, GCHandleType.Pinned);
-
-                ReadOnlyMemory<byte>? encryptedContent = _envelopedData.EncryptedContentInfo.EncryptedContent;
-                if (encryptedContent == null)
-                {
-                    exception = null;
-
-                    Array.Clear(cek, 0, cek.Length);
-                    cekPin.Free();
-
-                    return new ContentInfo(
-                        new Oid(_envelopedData.EncryptedContentInfo.ContentType),
-                        Array.Empty<byte>());
-                }
-
-                int encryptedContentLength = encryptedContent.Value.Length;
-                byte[] encryptedContentArray = ArrayPool<byte>.Shared.Rent(encryptedContentLength);
-                byte[] decrypted;
-
-                try
-                {
-                    encryptedContent.Value.CopyTo(encryptedContentArray);
-
-                    AlgorithmIdentifierAsn contentEncryptionAlgorithm =
-                        _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm;
-
-                    using (SymmetricAlgorithm alg = OpenAlgorithm(contentEncryptionAlgorithm))
-                    using (ICryptoTransform decryptor = alg.CreateDecryptor(cek, alg.IV))
-                    {
-                        decrypted = decryptor.OneShot(
-                            encryptedContentArray,
-                            0,
-                            encryptedContentLength);
-                    }
-                }
-                catch (CryptographicException e)
-                {
-                    exception = e;
-                    return null;
-                }
-                finally
-                {
-                    Array.Clear(cek, 0, cek.Length);
-                    cekPin.Free();
-                    cek = null;
-
-                    Array.Clear(encryptedContentArray, 0, encryptedContentLength);
-                    ArrayPool<byte>.Shared.Return(encryptedContentArray);
-                    encryptedContentArray = null;
                 }
 
                 if (_envelopedData.EncryptedContentInfo.ContentType == Oids.Pkcs7Data)
@@ -160,6 +138,41 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return new ContentInfo(
                     new Oid(_envelopedData.EncryptedContentInfo.ContentType),
                     decrypted);
+            }
+
+            private byte[] DecryptContent(ReadOnlyMemory<byte> encryptedContent, byte[] cek, out Exception exception)
+            {
+                exception = null;
+                int encryptedContentLength = encryptedContent.Length;
+                byte[] encryptedContentArray = ArrayPool<byte>.Shared.Rent(encryptedContentLength);
+
+                try
+                {
+                    encryptedContent.CopyTo(encryptedContentArray);
+
+                    AlgorithmIdentifierAsn contentEncryptionAlgorithm =
+                        _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm;
+
+                    using (SymmetricAlgorithm alg = OpenAlgorithm(contentEncryptionAlgorithm))
+                    using (ICryptoTransform decryptor = alg.CreateDecryptor(cek, alg.IV))
+                    {
+                        return decryptor.OneShot(
+                            encryptedContentArray,
+                            0,
+                            encryptedContentLength);
+                    }
+                }
+                catch (CryptographicException e)
+                {
+                    exception = e;
+                    return null;
+                }
+                finally
+                {
+                    Array.Clear(encryptedContentArray, 0, encryptedContentLength);
+                    ArrayPool<byte>.Shared.Return(encryptedContentArray);
+                    encryptedContentArray = null;
+                }
             }
 
             public override void Dispose()

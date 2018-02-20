@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
@@ -16,7 +14,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
-        public override byte[] Encrypt(
+        public override unsafe byte[] Encrypt(
             CmsRecipientCollection recipients,
             ContentInfo contentInfo,
             AlgorithmIdentifier contentEncryptionAlgorithm,
@@ -27,27 +25,27 @@ namespace Internal.Cryptography.Pal.AnyOS
                 contentInfo,
                 contentEncryptionAlgorithm,
                 out byte[] cek,
-                out GCHandle cekPin,
                 out byte[] parameterBytes);
 
-            Debug.Assert(cekPin.IsAllocated, "cekPin.IsAllocated");
-
-            try
+            // Pin the CEK to prevent it from getting copied during heap compaction.
+            fixed (byte* pinnedCek = cek)
             {
-                return Encrypt(
-                    recipients,
-                    contentInfo,
-                    contentEncryptionAlgorithm,
-                    originatorCerts,
-                    unprotectedAttributes,
-                    encryptedContent,
-                    cek,
-                    parameterBytes);
-            }
-            finally
-            {
-                Array.Clear(cek, 0, cek.Length);
-                cekPin.Free();
+                try
+                {
+                    return Encrypt(
+                        recipients,
+                        contentInfo,
+                        contentEncryptionAlgorithm,
+                        originatorCerts,
+                        unprotectedAttributes,
+                        encryptedContent,
+                        cek,
+                        parameterBytes);
+                }
+                finally
+                {
+                    Array.Clear(cek, 0, cek.Length);
+                }
             }
         }
 
@@ -153,15 +151,12 @@ namespace Internal.Cryptography.Pal.AnyOS
             ContentInfo contentInfo,
             AlgorithmIdentifier contentEncryptionAlgorithm,
             out byte[] cek,
-            out GCHandle cekPin,
             out byte[] parameterBytes)
         {
             using (SymmetricAlgorithm alg = OpenAlgorithm(contentEncryptionAlgorithm))
             using (ICryptoTransform encryptor = alg.CreateEncryptor())
             {
                 cek = alg.Key;
-                // Pin the CEK to prevent it from getting copied during heap compaction.
-                cekPin = GCHandle.Alloc(cek, GCHandleType.Pinned);
 
                 if (alg is RC2)
                 {
