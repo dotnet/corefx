@@ -541,6 +541,12 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(GetAsync_Chunked_VaryingSizeChunks_ReceivedCorrectly_MemberData))]
         public async Task GetAsync_Chunked_VaryingSizeChunks_ReceivedCorrectly(int maxChunkSize, string lineEnding, bool useCopyToAsync)
         {
+            if (!UseSocketsHttpHandler && lineEnding != "\r\n")
+            {
+                // Some handlers don't deal well with "\n" alone as the line ending
+                return;
+            }
+
             var rand = new Random(42);
             byte[] expectedData = new byte[100_000];
             rand.NextBytes(expectedData);
