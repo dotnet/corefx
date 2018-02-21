@@ -34,15 +34,15 @@ namespace System.Text.RegularExpressions
         public const int Boundary = 0x0040;
         public const int ECMABoundary = 0x0080;
 
-        private readonly List<RegexFC> _fcStack;
+        private readonly ValueListBuilder<RegexFC> _fcStack;
         private readonly ValueListBuilder<int> _intStack;
         private bool _skipAllChildren;      // don't process any more children at the current level
         private bool _skipchild;            // don't process the current child.
         private bool _failed;
 
-        private RegexFCD(ValueListBuilder<int> intStack)
+        private RegexFCD(ValueListBuilder<RegexFC> fcStack, ValueListBuilder<int> intStack)
         {
-            _fcStack = new List<RegexFC>(StackBufferSize);
+            _fcStack = fcStack;
             _intStack = intStack;
             _failed = false;
             _skipchild = false;
@@ -58,19 +58,26 @@ namespace System.Text.RegularExpressions
             // Create/rent buffers
             Span<int> intSpan = stackalloc int[StackBufferSize];
             var intStack = new ValueListBuilder<int>(intSpan);
+            RegexFC[] fcSpan = ArrayPool<RegexFC>.Shared.Rent(StackBufferSize);
+            var fcStack = new ValueListBuilder<RegexFC>(fcSpan);
 
-            RegexFCD s = new RegexFCD(intStack);
-            RegexFC fc = s.RegexFCFromRegexTree(t);
+            RegexFCD s = new RegexFCD(fcStack, intStack);
+            RegexFC? fc = s.RegexFCFromRegexTree(t);
 
-            // Return rented buffers
+            // Return rented buffers. Clear RegexFC buffer manually as only
+            // the reference to the RegexCharClass needs to be cleared.
+            for (int i = 0; i < fcStack.Length; i++)
+                fcStack[i].Dispose();
+            ArrayPool<RegexFC>.Shared.Return(fcSpan);
+            fcStack.Dispose();
             intStack.Dispose();
 
-            if (fc == null || fc._nullable)
+            if (fc == null || fc.Value._nullable)
                 return null;
 
             CultureInfo culture = ((t.Options & RegexOptions.CultureInvariant) != 0) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture;
 
-            return new RegexPrefix(fc.GetFirstChars(culture), fc.IsCaseInsensitive());
+            return new RegexPrefix(fc.Value.GetFirstChars(culture), fc.Value.CaseInsensitive);
         }
 
         /// <summary>
@@ -251,7 +258,7 @@ namespace System.Text.RegularExpressions
         /// through the tree and calls CalculateFC to emits code before
         /// and after each child of an interior node, and at each leaf.
         /// </summary>
-        private RegexFC RegexFCFromRegexTree(RegexTree tree)
+        private RegexFC? RegexFCFromRegexTree(RegexTree tree)
         {
             RegexNode curNode = tree.Root;
             int curChild = 0;
@@ -300,18 +307,10 @@ namespace System.Text.RegularExpressions
                 curChild++;
             }
 
-            if (_fcStack.Count == 0)
+            if (_fcStack.Length == 0)
                 return null;
 
-            return FCPop();
-        }
-
-        private RegexFC FCPop()
-        {
-            RegexFC item = _fcStack[_fcStack.Count - 1];
-            _fcStack.RemoveAt(_fcStack.Count - 1);
-
-            return item;
+            return _fcStack.Pop();
         }
 
         /// <summary>
@@ -353,27 +352,27 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case RegexNode.Empty:
-                    _fcStack.Add(new RegexFC(true));
+                    _fcStack.Append(new RegexFC(true));
                     break;
 
                 case RegexNode.Concatenate | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = _fcStack.Pop();
+                        RegexFC cumul = _fcStack[_fcStack.Length - 1];
 
                         _failed = !cumul.AddFC(child, true);
                     }
 
-                    if (!_fcStack[_fcStack.Count - 1]._nullable)
+                    if (!_fcStack[_fcStack.Length - 1]._nullable)
                         _skipAllChildren = true;
                     break;
 
                 case RegexNode.Testgroup | AfterChild:
                     if (CurIndex > 1)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = _fcStack.Pop();
+                        RegexFC cumul = _fcStack[_fcStack.Length - 1];
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -383,8 +382,8 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Testref | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = _fcStack.Pop();
+                        RegexFC cumul = _fcStack[_fcStack.Length - 1];
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -393,7 +392,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Loop | AfterChild:
                 case RegexNode.Lazyloop | AfterChild:
                     if (node.M == 0)
-                        _fcStack[_fcStack.Count - 1]._nullable = true;
+                        _fcStack[_fcStack.Length - 1]._nullable = true;
                     break;
 
                 case RegexNode.Group | BeforeChild:
@@ -407,7 +406,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Require | BeforeChild:
                 case RegexNode.Prevent | BeforeChild:
                     SkipChild();
-                    _fcStack.Add(new RegexFC(true));
+                    _fcStack.Append(new RegexFC(true));
                     break;
 
                 case RegexNode.Require | AfterChild:
@@ -416,39 +415,39 @@ namespace System.Text.RegularExpressions
 
                 case RegexNode.One:
                 case RegexNode.Notone:
-                    _fcStack.Add(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
+                    _fcStack.Append(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
                     break;
 
                 case RegexNode.Oneloop:
                 case RegexNode.Onelazy:
-                    _fcStack.Add(new RegexFC(node.Ch, false, node.M == 0, ci));
+                    _fcStack.Append(new RegexFC(node.Ch, false, node.M == 0, ci));
                     break;
 
                 case RegexNode.Notoneloop:
                 case RegexNode.Notonelazy:
-                    _fcStack.Add(new RegexFC(node.Ch, true, node.M == 0, ci));
+                    _fcStack.Append(new RegexFC(node.Ch, true, node.M == 0, ci));
                     break;
 
                 case RegexNode.Multi:
                     if (node.Str.Length == 0)
-                        _fcStack.Add(new RegexFC(true));
+                        _fcStack.Append(new RegexFC(true));
                     else if (!rtl)
-                        _fcStack.Add(new RegexFC(node.Str[0], false, false, ci));
+                        _fcStack.Append(new RegexFC(node.Str[0], false, false, ci));
                     else
-                        _fcStack.Add(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
+                        _fcStack.Append(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
                     break;
 
                 case RegexNode.Set:
-                    _fcStack.Add(new RegexFC(node.Str, false, ci));
+                    _fcStack.Append(new RegexFC(node.Str, false, ci));
                     break;
 
                 case RegexNode.Setloop:
                 case RegexNode.Setlazy:
-                    _fcStack.Add(new RegexFC(node.Str, node.M == 0, ci));
+                    _fcStack.Append(new RegexFC(node.Str, node.M == 0, ci));
                     break;
 
                 case RegexNode.Ref:
-                    _fcStack.Add(new RegexFC(RegexCharClass.AnyClass, true, false));
+                    _fcStack.Append(new RegexFC(RegexCharClass.AnyClass, true, false));
                     break;
 
                 case RegexNode.Nothing:
@@ -462,7 +461,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Start:
                 case RegexNode.EndZ:
                 case RegexNode.End:
-                    _fcStack.Add(new RegexFC(true));
+                    _fcStack.Append(new RegexFC(true));
                     break;
 
                 default:
@@ -471,16 +470,16 @@ namespace System.Text.RegularExpressions
         }
     }
 
-    internal sealed class RegexFC
+    internal struct RegexFC
     {
-        public RegexCharClass _cc;
+        private RegexCharClass _cc;
         public bool _nullable;
-        public bool _caseInsensitive;
 
         public RegexFC(bool nullable)
         {
             _cc = new RegexCharClass();
             _nullable = nullable;
+            CaseInsensitive = false;
         }
 
         public RegexFC(char ch, bool not, bool nullable, bool caseInsensitive)
@@ -499,7 +498,7 @@ namespace System.Text.RegularExpressions
                 _cc.AddRange(ch, ch);
             }
 
-            _caseInsensitive = caseInsensitive;
+            CaseInsensitive = caseInsensitive;
             _nullable = nullable;
         }
 
@@ -508,7 +507,7 @@ namespace System.Text.RegularExpressions
             _cc = RegexCharClass.Parse(charClass);
 
             _nullable = nullable;
-            _caseInsensitive = caseInsensitive;
+            CaseInsensitive = caseInsensitive;
         }
 
         public bool AddFC(RegexFC fc, bool concatenate)
@@ -532,22 +531,24 @@ namespace System.Text.RegularExpressions
                     _nullable = true;
             }
 
-            _caseInsensitive |= fc._caseInsensitive;
+            CaseInsensitive |= fc.CaseInsensitive;
             _cc.AddCharClass(fc._cc);
             return true;
         }
 
-        public String GetFirstChars(CultureInfo culture)
+        public bool CaseInsensitive { get; private set; }
+
+        public string GetFirstChars(CultureInfo culture)
         {
-            if (_caseInsensitive)
+            if (CaseInsensitive)
                 _cc.AddLowercase(culture);
 
             return _cc.ToStringClass();
         }
 
-        public bool IsCaseInsensitive()
+        public void Dispose()
         {
-            return _caseInsensitive;
+            _cc = null;
         }
     }
 }

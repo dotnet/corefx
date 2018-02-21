@@ -12,10 +12,10 @@ namespace System.Collections.Generic
     internal ref partial struct ValueListBuilder<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Pop()
+        public ref T Pop()
         {
             _pos--;
-            return _span[_pos];
+            return ref _span[_pos];
         }
     }
 }

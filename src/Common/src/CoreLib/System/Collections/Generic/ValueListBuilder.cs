@@ -13,12 +13,14 @@ namespace System.Collections.Generic
         private Span<T> _span;
         private T[] _arrayFromPool;
         private int _pos;
+        private readonly bool _clearArray;
 
-        public ValueListBuilder(Span<T> initialSpan)
+        public ValueListBuilder(Span<T> initialSpan, bool clearArray = false)
         {
             _span = initialSpan;
             _arrayFromPool = null;
             _pos = 0;
+            _clearArray = clearArray;
         }
 
         public int Length => _pos;
@@ -53,7 +55,7 @@ namespace System.Collections.Generic
         {
             if (_arrayFromPool != null)
             {
-                ArrayPool<T>.Shared.Return(_arrayFromPool);
+                ArrayPool<T>.Shared.Return(_arrayFromPool, clearArray: _clearArray);
                 _arrayFromPool = null;
             }
         }
@@ -69,7 +71,7 @@ namespace System.Collections.Generic
             _span = _arrayFromPool = array;
             if (toReturn != null)
             {
-                ArrayPool<T>.Shared.Return(toReturn);
+                ArrayPool<T>.Shared.Return(toReturn, clearArray: _clearArray);
             }
         }
     }
