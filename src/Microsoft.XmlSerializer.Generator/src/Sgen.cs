@@ -42,7 +42,7 @@ namespace Microsoft.XmlSerializer.Generator
                     string arg = args[i];
                     string value = string.Empty;
 
-                    if (arg.StartsWith("/") || arg.StartsWith("-"))
+                    if (arg.StartsWith("--"))
                     {
                         int colonPos = arg.IndexOf(":");
                         if (colonPos != -1)
@@ -73,7 +73,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         if (codePath != null)
                         {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, "--out", arg));
                         }
 
                         codePath = value;
@@ -93,7 +93,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         if (assembly != null)
                         {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
                         }
 
                         assembly = value;
@@ -124,7 +124,7 @@ namespace Microsoft.XmlSerializer.Generator
                         {
                             if (assembly != null)
                             {
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
                             }
 
                             assembly = originalArg;
@@ -341,12 +341,12 @@ namespace Microsoft.XmlSerializer.Generator
         // assumes all same case.        
         private bool ArgumentMatch(string arg, string formal)
         {
-            if (arg[0] != '/' && arg[0] != '-')
+            if (arg.Length<2 || (arg[0] != '-' || arg[1] != '-'))
             {
                 return false;
             }
 
-            arg = arg.Substring(1);
+            arg = arg.Substring(2);
             return (arg == formal || (arg.Length == 1 && arg[0] == formal[0]));
         }
 
@@ -404,16 +404,16 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHelp()
         {
             Console.Out.WriteLine(SR.Format(SR.HelpDescription));
-            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name.Substring(7)));
             Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
-            Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
-            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
-            Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
-            Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "--assembly:", "--a:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "--type:", "--t:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "--proxytypes", "--p"));
+            Console.Out.WriteLine(SR.Format(SR.HelpForce, "--force", "--f"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "--out:", "--o:"));
 
             Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "/?", "/help"));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "--?", "--help"));
         }
 
         private static string FormatMessage(bool parsableerrors, bool warning, string message)
