@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -22,27 +23,349 @@ namespace System
     /// </summary>
     public static class Span
     {
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase.
+        /// </summary>
+        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            if (GlobalizationMode.Invariant)
+                culture.TextInfo.ToLowerAsciiInvariant(source, destination);
+            else
+                culture.TextInfo.ChangeCase(source, destination, toUpper: false);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+        {
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            if (GlobalizationMode.Invariant)
+                CultureInfo.InvariantCulture.TextInfo.ToLowerAsciiInvariant(source, destination);
+            else
+                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: false);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase.
+        /// </summary>
+        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            if (GlobalizationMode.Invariant)
+                culture.TextInfo.ToUpperAsciiInvariant(source, destination);
+            else
+                culture.TextInfo.ChangeCase(source, destination, toUpper: true);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+        {
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            if (GlobalizationMode.Invariant)
+                CultureInfo.InvariantCulture.TextInfo.ToUpperAsciiInvariant(source, destination);
+            else
+                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: true);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Determines whether the beginning of the span matches the specified value when compared using the specified comparison option.
+        /// </summary>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (value.Length == 0)
+            {
+                StringSpanHelpers.CheckStringComparison(comparisonType);
+                return true;
+            }
+
+            switch (comparisonType)
+            {
+                case StringComparison.CurrentCulture:
+                    return StartsWithCultureHelper(span, value);
+
+                case StringComparison.CurrentCultureIgnoreCase:
+                    return StartsWithCultureIgnoreCaseHelper(span, value);
+
+                case StringComparison.InvariantCulture:
+                    return StartsWithCultureHelper(span, value, invariantCulture: true);
+
+                case StringComparison.InvariantCultureIgnoreCase:
+                    return StartsWithCultureIgnoreCaseHelper(span, value, invariantCulture: true);
+
+                case StringComparison.Ordinal:
+                    return StartsWithOrdinalHelper(span, value);
+
+                case StringComparison.OrdinalIgnoreCase:
+                    return StartsWithOrdinalIgnoreCaseHelper(span, value);
+
+                default:
+                    throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
+            }
+        }
+
+        internal static bool StartsWithCultureHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, bool invariantCulture = false)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (GlobalizationMode.Invariant)
+            {
+                return StartsWithOrdinalHelper(span, value);
+            }
+            if (span.Length == 0)
+            {
+                return false;
+            }
+            return invariantCulture ?
+                CompareInfo.Invariant.IsPrefix(span, value, CompareOptions.None) :
+                CultureInfo.CurrentCulture.CompareInfo.IsPrefix(span, value, CompareOptions.None);
+        }
+
+        internal static bool StartsWithCultureIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, bool invariantCulture = false)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (GlobalizationMode.Invariant)
+            {
+                return StartsWithOrdinalIgnoreCaseHelper(span, value);
+            }
+            if (span.Length == 0)
+            {
+                return false;
+            }
+            return invariantCulture ?
+                CompareInfo.Invariant.IsPrefix(span, value, CompareOptions.IgnoreCase) :
+                CultureInfo.CurrentCulture.CompareInfo.IsPrefix(span, value, CompareOptions.IgnoreCase);
+        }
+
+        internal static bool StartsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (span.Length < value.Length)
+            {
+                return false;
+            }
+            return CompareInfo.CompareOrdinalIgnoreCase(span.Slice(0, value.Length), value) == 0;
+        }
+
+        internal static unsafe bool StartsWithOrdinalHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (span.Length < value.Length)
+            {
+                return false;
+            }
+            return OrdinalHelper(span, value, value.Length);
+        }
+
+        internal static unsafe bool OrdinalHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, int length)
+        {
+            Debug.Assert(length != 0);
+            Debug.Assert(span.Length >= length);
+
+            fixed (char* ap = &MemoryMarshal.GetReference(span))
+            fixed (char* bp = &MemoryMarshal.GetReference(value))
+            {
+                char* a = ap;
+                char* b = bp;
+
+#if BIT64
+                // Single int read aligns pointers for the following long reads
+                if (length >= 2)
+                {
+                    if (*(int*)a != *(int*)b)
+                        return false;
+                    length -= 2;
+                    a += 2;
+                    b += 2;
+                }
+
+                while (length >= 12)
+                {
+                    if (*(long*)a != *(long*)b)
+                        return false;
+                    if (*(long*)(a + 4) != *(long*)(b + 4))
+                        return false;
+                    if (*(long*)(a + 8) != *(long*)(b + 8))
+                        return false;
+                    length -= 12;
+                    a += 12;
+                    b += 12;
+                }
+#else
+                while (length >= 10)
+                {
+                    if (*(int*)a != *(int*)b) return false;
+                    if (*(int*)(a+2) != *(int*)(b+2)) return false;
+                    if (*(int*)(a+4) != *(int*)(b+4)) return false;
+                    if (*(int*)(a+6) != *(int*)(b+6)) return false;
+                    if (*(int*)(a+8) != *(int*)(b+8)) return false;
+                    length -= 10; a += 10; b += 10;
+                }
+#endif
+
+                while (length >= 2)
+                {
+                    if (*(int*)a != *(int*)b)
+                        return false;
+                    length -= 2;
+                    a += 2;
+                    b += 2;
+                }
+
+                // PERF: This depends on the fact that the String objects are always zero terminated 
+                // and that the terminating zero is not included in the length. For even string sizes
+                // this compare can include the zero terminator. Bitwise OR avoids a branch.
+                return length == 0 | *a == *b;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the end of the span matches the specified value when compared using the specified comparison option.
+        /// </summary>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (value.Length == 0)
+            {
+                StringSpanHelpers.CheckStringComparison(comparisonType);
+                return true;
+            }
+
+            switch (comparisonType)
+            {
+                case StringComparison.CurrentCulture:
+                    return EndsWithCultureHelper(span, value);
+
+                case StringComparison.CurrentCultureIgnoreCase:
+                    return EndsWithCultureIgnoreCaseHelper(span, value);
+
+                case StringComparison.InvariantCulture:
+                    return EndsWithCultureHelper(span, value, invariantCulture: true);
+
+                case StringComparison.InvariantCultureIgnoreCase:
+                    return EndsWithCultureIgnoreCaseHelper(span, value, invariantCulture: true);
+
+                case StringComparison.Ordinal:
+                    return EndsWithOrdinalHelper(span, value);
+
+                case StringComparison.OrdinalIgnoreCase:
+                    return EndsWithOrdinalIgnoreCaseHelper(span, value);
+
+                default:
+                    throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
+            }
+        }
+
+        internal static bool EndsWithCultureHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, bool invariantCulture = false)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (GlobalizationMode.Invariant)
+            {
+                return EndsWithOrdinalHelper(span, value);
+            }
+            if (span.Length == 0)
+            {
+                return false;
+            }
+            return invariantCulture ?
+                CompareInfo.Invariant.IsSuffix(span, value, CompareOptions.None) :
+                CultureInfo.CurrentCulture.CompareInfo.IsSuffix(span, value, CompareOptions.None);
+        }
+
+        internal static bool EndsWithCultureIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, bool invariantCulture = false)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (GlobalizationMode.Invariant)
+            {
+                return EndsWithOrdinalIgnoreCaseHelper(span, value);
+            }
+            if (span.Length == 0)
+            {
+                return false;
+            }
+            return invariantCulture ?
+                CompareInfo.Invariant.IsSuffix(span, value, CompareOptions.IgnoreCase) :
+                CultureInfo.CurrentCulture.CompareInfo.IsSuffix(span, value, CompareOptions.IgnoreCase);
+        }
+
+        internal static bool EndsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (span.Length < value.Length)
+            {
+                return false;
+            }
+            return (CompareInfo.CompareOrdinalIgnoreCase(span.Slice(span.Length - value.Length), value) == 0);
+        }
+
+        internal static unsafe bool EndsWithOrdinalHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(value.Length != 0);
+
+            if (span.Length < value.Length)
+            {
+                return false;
+            }
+            return OrdinalHelper(span.Slice(span.Length - value.Length), value, value.Length);
+        }
+
         /// <summary>Creates a new <see cref="ReadOnlyMemory{char}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlyMemory<char>(text, 0, text.Length);
         }
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{char}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
 
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
@@ -52,14 +375,18 @@ namespace System
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{char}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
 
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
@@ -132,68 +459,16 @@ namespace System
         }
 
         /// <summary>
-        /// Casts a Span of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
-        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
-        /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source)
-            where TFrom : struct
-            where TTo : struct
-        {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(TFrom));
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(TTo));
-
-            return new Span<TTo>(
-                ref Unsafe.As<TFrom, TTo>(ref source.DangerousGetPinnableReference()),
-                checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>())));
-        }
-
-        /// <summary>
-        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
-        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
-        /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source)
-            where TFrom : struct
-            where TTo : struct
-        {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(TFrom));
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(TTo));
-
-            return new ReadOnlySpan<TTo>(
-                ref Unsafe.As<TFrom, TTo>(ref MemoryMarshal.GetReference(source)),
-                checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>())));
-        }
-
-        /// <summary>
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// reference (Nothing in Visual Basic).</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlySpan<char>(ref text.GetRawStringData(), text.Length);
         }
@@ -202,9 +477,7 @@ namespace System
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null
-        /// reference (Nothing in Visual Basic).
-        /// </exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
@@ -212,7 +485,11 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
 
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
@@ -224,9 +501,7 @@ namespace System
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null
-        /// reference (Nothing in Visual Basic).
-        /// </exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
@@ -234,21 +509,26 @@ namespace System
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
 
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new ReadOnlySpan<char>(ref Unsafe.Add(ref text.GetRawStringData(), start), length);
         }
-        
+
         internal static unsafe void ClearWithoutReferences(ref byte b, nuint byteLength)
         {
             if (byteLength == 0)
                 return;
-            
+
 #if CORECLR && (AMD64 || ARM64)
-            if (byteLength > 4096) goto PInvoke;
+            if (byteLength > 4096)
+                goto PInvoke;
             Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
             return;
 #else
@@ -555,8 +835,8 @@ namespace System
 
             return;
 #endif
-            
-            PInvoke:
+
+        PInvoke:
             RuntimeImports.RhZeroMemory(ref b, byteLength);
         }
 
