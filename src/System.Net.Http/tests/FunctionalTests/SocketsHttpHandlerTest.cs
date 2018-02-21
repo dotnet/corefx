@@ -4,10 +4,13 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -120,20 +123,209 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => true;
     }
 
-    // TODO #23141: Socket's don't support canceling individual operations, so ReadStream on NetworkStream
-    // isn't cancelable once the operation has started.  We either need to wrap the operation with one that's
-    // "cancelable", meaning that the underlying operation will still be running even though we've returned "canceled",
-    // or we need to just recognize that cancellation in such situations can be left up to the caller to do the
-    // same thing if it's really important.
-    //public sealed class SocketsHttpHandler_CancellationTest : CancellationTest
-    //{
-    //    public SocketsHttpHandler_CancellationTest(ITestOutputHelper output) : base(output) { }
-    //    protected override bool UseSocketsHttpHandler => true;
-    //}
+    public sealed class SocketsHttpHandler_HttpCookieProtocolTests : HttpCookieProtocolTests
+    {
+        protected override bool UseSocketsHttpHandler => true;
+    }
+
+    public sealed class SocketsHttpHandler_HttpClientHandler_Cancellation_Test : HttpClientHandler_Cancellation_Test
+    {
+        protected override bool UseSocketsHttpHandler => true;
+
+        [Fact]
+        public void ConnectTimeout_Default()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(Timeout.InfiniteTimeSpan, handler.ConnectTimeout);
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-2)]
+        [InlineData(int.MaxValue + 1L)]
+        public void ConnectTimeout_InvalidValues(long ms)
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => handler.ConnectTimeout = TimeSpan.FromMilliseconds(ms));
+            }
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(1)]
+        [InlineData(int.MaxValue - 1)]
+        [InlineData(int.MaxValue)]
+        public void ConnectTimeout_ValidValues_Roundtrip(long ms)
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                handler.ConnectTimeout = TimeSpan.FromMilliseconds(ms);
+                Assert.Equal(TimeSpan.FromMilliseconds(ms), handler.ConnectTimeout);
+            }
+        }
+
+        [Fact]
+        public void ConnectTimeout_SetAfterUse_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            using (var client = new HttpClient(handler))
+            {
+                handler.ConnectTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
+                client.GetAsync("http://" + Guid.NewGuid().ToString("N")); // ignoring failure
+                Assert.Equal(TimeSpan.FromMilliseconds(int.MaxValue), handler.ConnectTimeout);
+                Assert.Throws<InvalidOperationException>(() => handler.ConnectTimeout = TimeSpan.FromMilliseconds(1));
+            }
+        }
+
+        [OuterLoop]
+        [Fact]
+        public async Task ConnectTimeout_TimesOutSSLAuth_Throws()
+        {
+            var releaseServer = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = new SocketsHttpHandler())
+                using (var invoker = new HttpMessageInvoker(handler))
+                {
+                    handler.ConnectTimeout = TimeSpan.FromSeconds(1);
+
+                    var sw = Stopwatch.StartNew();
+                    await Assert.ThrowsAsync<OperationCanceledException>(() =>
+                        invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get,
+                            new UriBuilder(uri) { Scheme = "https" }.ToString()), default));
+                    sw.Stop();
+
+                    Assert.InRange(sw.ElapsedMilliseconds, 500, 30_000);
+                    releaseServer.SetResult(true);
+                }
+            }, server => releaseServer.Task); // doesn't establish SSL connection
+        }
+
+
+        [Fact]
+        public void Expect100ContinueTimeout_Default()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(TimeSpan.FromSeconds(1), handler.Expect100ContinueTimeout);
+            }
+        }
+
+        [Theory]
+        [InlineData(-2)]
+        [InlineData(int.MaxValue + 1L)]
+        public void Expect100ContinueTimeout_InvalidValues(long ms)
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => handler.Expect100ContinueTimeout = TimeSpan.FromMilliseconds(ms));
+            }
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(1)]
+        [InlineData(int.MaxValue - 1)]
+        [InlineData(int.MaxValue)]
+        public void Expect100ContinueTimeout_ValidValues_Roundtrip(long ms)
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                handler.Expect100ContinueTimeout = TimeSpan.FromMilliseconds(ms);
+                Assert.Equal(TimeSpan.FromMilliseconds(ms), handler.Expect100ContinueTimeout);
+            }
+        }
+
+        [Fact]
+        public void Expect100ContinueTimeout_SetAfterUse_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            using (var client = new HttpClient(handler))
+            {
+                handler.Expect100ContinueTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
+                client.GetAsync("http://" + Guid.NewGuid().ToString("N")); // ignoring failure
+                Assert.Equal(TimeSpan.FromMilliseconds(int.MaxValue), handler.Expect100ContinueTimeout);
+                Assert.Throws<InvalidOperationException>(() => handler.Expect100ContinueTimeout = TimeSpan.FromMilliseconds(1));
+            }
+        }
+
+        [OuterLoop("Incurs significant delay")]
+        [Fact]
+        public async Task Expect100Continue_WaitsExpectedPeriodOfTimeBeforeSendingContent()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = new SocketsHttpHandler())
+                using (var invoker = new HttpMessageInvoker(handler))
+                {
+                    TimeSpan delay = TimeSpan.FromSeconds(3);
+                    handler.Expect100ContinueTimeout = delay;
+
+                    var tcs = new TaskCompletionSource<bool>();
+                    var content = new SetTcsContent(new MemoryStream(new byte[1]), tcs);
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
+                    request.Headers.ExpectContinue = true;
+
+                    var sw = Stopwatch.StartNew();
+                    (await invoker.SendAsync(request, default)).Dispose();
+                    sw.Stop();
+
+                    Assert.InRange(sw.Elapsed, delay - TimeSpan.FromSeconds(.5), delay * 5); // arbitrary wiggle room
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestHeaderAsync();
+                    await connection.Reader.ReadAsync(new char[1]);
+                    await connection.SendResponseAsync();
+                });
+            });
+        }
+
+        private sealed class SetTcsContent : StreamContent
+        {
+            private readonly TaskCompletionSource<bool> _tcs;
+
+            public SetTcsContent(Stream stream, TaskCompletionSource<bool> tcs) : base(stream) => _tcs = tcs;
+
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                _tcs.SetResult(true);
+                return base.SerializeToStreamAsync(stream, context);
+            }
+        }
+    }
 
     public sealed class SocketsHttpHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
     {
         protected override bool UseSocketsHttpHandler => true;
+    }
+
+    public sealed class SocketsHttpHandler_HttpClientHandler_Authentication_Test : HttpClientHandler_Authentication_Test
+    {
+        protected override bool UseSocketsHttpHandler => true;
+
+        [Theory]
+        [MemberData(nameof(Authentication_SocketsHttpHandler_TestData))]
+        public async void SocketsHttpHandler_Authentication_Succeeds(string authenticateHeader, bool result)
+        {
+            await HttpClientHandler_Authentication_Succeeds(authenticateHeader, result);
+        }
+
+        public static IEnumerable<object[]> Authentication_SocketsHttpHandler_TestData()
+        {
+            // These test cases pass on SocketsHttpHandler, fail everywhere else.
+            // TODO: #27113: Fix failing authentication test cases on different httpclienthandlers.
+            yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
+            yield return new object[] { "Basic something digest something", true };
+            yield return new object[] { "Digest ", false };
+            yield return new object[] { "Digest realm=withoutquotes, nonce=withoutquotes", false };
+            yield return new object[] { "Digest realm=\"testrealm\", nonce=\"testnonce\", algorithm=\"myown\"", false };
+        }
     }
 
     public sealed class SocketsHttpHandler_HttpClientHandler_DuplexCommunication_Test : HttpClientTestBase
@@ -199,8 +391,35 @@ namespace System.Net.Http.Functional.Tests
 
                         // Send a byte from the server to the client.  The client will receive
                         // the byte on its own, with HttpClient stripping away the chunk encoding.
+                        // Read it in various ways.
                         serverStream.WriteByte(i);
-                        Assert.Equal(i, serverToClientStream.ReadByte());
+                        var buffer = new byte[1];
+                        switch (i % 6)
+                        {
+                            case 0:
+                                Assert.Equal(i, serverToClientStream.ReadByte());
+                                break;
+                            case 1:
+                                Assert.Equal(1, serverToClientStream.Read(buffer, 0, 1));
+                                Assert.Equal(i, buffer[0]);
+                                break;
+                            case 2:
+                                Assert.Equal(1, serverToClientStream.Read(new Span<byte>(buffer)));
+                                Assert.Equal(i, buffer[0]);
+                                break;
+                            case 3:
+                                Assert.Equal(1, await serverToClientStream.ReadAsync(buffer, 0, 1));
+                                Assert.Equal(i, buffer[0]);
+                                break;
+                            case 4:
+                                Assert.Equal(1, await serverToClientStream.ReadAsync(new Memory<byte>(buffer)));
+                                Assert.Equal(i, buffer[0]);
+                                break;
+                            case 5:
+                                Assert.Equal(1, await Task.Factory.FromAsync(serverToClientStream.BeginRead, serverToClientStream.EndRead, buffer, 0, 1, null));
+                                Assert.Equal(i, buffer[0]);
+                                break;
+                        }
                     }
 
                     clientToServerStream.DoneWriting();
@@ -272,7 +491,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => true;
 
         [Fact]
-        public async Task UpgradeConnection_Success()
+        public async Task UpgradeConnection_ReturnsReadableAndWritableStream()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -280,38 +499,106 @@ namespace System.Net.Http.Functional.Tests
                 {
                     // We need to use ResponseHeadersRead here, otherwise we will hang trying to buffer the response body.
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, serverReader, serverWriter) =>
+                    await server.AcceptConnectionAsync(async connection =>
                     {
-                        Task<List<string>> serverTask = LoopbackServer.ReadWriteAcceptedAsync(s, serverReader, serverWriter,
-                            $"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
+                        Task<List<string>> serverTask = connection.ReadRequestHeaderAndSendCustomResponseAsync($"HTTP/1.1 101 Switching Protocols\r\nDate: {DateTimeOffset.UtcNow:R}\r\n\r\n");
 
                         await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                         using (Stream clientStream = await (await getResponseTask).Content.ReadAsStreamAsync())
                         {
+                            // Boolean properties returning correct values
                             Assert.True(clientStream.CanWrite);
                             Assert.True(clientStream.CanRead);
                             Assert.False(clientStream.CanSeek);
 
-                            TextReader clientReader = new StreamReader(clientStream);
-                            TextWriter clientWriter = new StreamWriter(clientStream) { AutoFlush = true };
+                            // Not supported operations
+                            Assert.Throws<NotSupportedException>(() => clientStream.Length);
+                            Assert.Throws<NotSupportedException>(() => clientStream.Position);
+                            Assert.Throws<NotSupportedException>(() => clientStream.Position = 0);
+                            Assert.Throws<NotSupportedException>(() => clientStream.Seek(0, SeekOrigin.Begin));
+                            Assert.Throws<NotSupportedException>(() => clientStream.SetLength(0));
 
-                            const string helloServer = "hello server";
-                            const string helloClient = "hello client";
-                            const string goodbyeServer = "goodbye server";
-                            const string goodbyeClient = "goodbye client";
+                            // Invalid arguments
+                            var nonWritableStream = new MemoryStream(new byte[1], false);
+                            var disposedStream = new MemoryStream();
+                            disposedStream.Dispose();
+                            Assert.Throws<ArgumentNullException>(() => clientStream.CopyTo(null));
+                            Assert.Throws<ArgumentOutOfRangeException>(() => clientStream.CopyTo(Stream.Null, 0));
+                            Assert.Throws<ArgumentNullException>(() => { clientStream.CopyToAsync(null, 100, default); });
+                            Assert.Throws<ArgumentOutOfRangeException>(() => { clientStream.CopyToAsync(Stream.Null, 0, default); });
+                            Assert.Throws<ArgumentOutOfRangeException>(() => { clientStream.CopyToAsync(Stream.Null, -1, default); });
+                            Assert.Throws<NotSupportedException>(() => { clientStream.CopyToAsync(nonWritableStream, 100, default); });
+                            Assert.Throws<ObjectDisposedException>(() => { clientStream.CopyToAsync(disposedStream, 100, default); });
+                            Assert.Throws<ArgumentNullException>(() => clientStream.Read(null, 0, 100));
+                            Assert.Throws<ArgumentOutOfRangeException>(() => clientStream.Read(new byte[1], -1, 1));
+                            Assert.ThrowsAny<ArgumentException>(() => clientStream.Read(new byte[1], 2, 1));
+                            Assert.Throws<ArgumentOutOfRangeException>(() => clientStream.Read(new byte[1], 0, -1));
+                            Assert.ThrowsAny<ArgumentException>(() => clientStream.Read(new byte[1], 0, 2));
+                            Assert.Throws<ArgumentNullException>(() => clientStream.BeginRead(null, 0, 100, null, null));
+                            Assert.Throws<ArgumentOutOfRangeException>(() => clientStream.BeginRead(new byte[1], -1, 1, null, null));
+                            Assert.ThrowsAny<ArgumentException>(() => clientStream.BeginRead(new byte[1], 2, 1, null, null));
+                            Assert.Throws<ArgumentOutOfRangeException>(() => clientStream.BeginRead(new byte[1], 0, -1, null, null));
+                            Assert.ThrowsAny<ArgumentException>(() => clientStream.BeginRead(new byte[1], 0, 2, null, null));
+                            Assert.Throws<ArgumentNullException>(() => clientStream.EndRead(null));
+                            Assert.Throws<ArgumentNullException>(() => { clientStream.ReadAsync(null, 0, 100, default); });
+                            Assert.Throws<ArgumentOutOfRangeException>(() => { clientStream.ReadAsync(new byte[1], -1, 1, default); });
+                            Assert.ThrowsAny<ArgumentException>(() => { clientStream.ReadAsync(new byte[1], 2, 1, default); });
+                            Assert.Throws<ArgumentOutOfRangeException>(() => { clientStream.ReadAsync(new byte[1], 0, -1, default); });
+                            Assert.ThrowsAny<ArgumentException>(() => { clientStream.ReadAsync(new byte[1], 0, 2, default); });
 
-                            clientWriter.WriteLine(helloServer);
-                            Assert.Equal(helloServer, serverReader.ReadLine());
-                            serverWriter.WriteLine(helloClient);
-                            Assert.Equal(helloClient, clientReader.ReadLine());
-                            clientWriter.WriteLine(goodbyeServer);
-                            Assert.Equal(goodbyeServer, serverReader.ReadLine());
-                            serverWriter.WriteLine(goodbyeClient);
-                            Assert.Equal(goodbyeClient, clientReader.ReadLine());
+                            // Validate writing APIs on clientStream
+
+                            clientStream.WriteByte((byte)'!');
+                            clientStream.Write(new byte[] { (byte)'\r', (byte)'\n' }, 0, 2);
+                            Assert.Equal("!", await connection.Reader.ReadLineAsync());
+
+                            clientStream.Write(new Span<byte>(new byte[] { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)'\r', (byte)'\n' }));
+                            Assert.Equal("hello", await connection.Reader.ReadLineAsync());
+
+                            await clientStream.WriteAsync(new byte[] { (byte)'w', (byte)'o', (byte)'r', (byte)'l', (byte)'d', (byte)'\r', (byte)'\n' }, 0, 7);
+                            Assert.Equal("world", await connection.Reader.ReadLineAsync());
+
+                            await clientStream.WriteAsync(new Memory<byte>(new byte[] { (byte)'a', (byte)'n', (byte)'d', (byte)'\r', (byte)'\n' }, 0, 5));
+                            Assert.Equal("and", await connection.Reader.ReadLineAsync());
+
+                            await Task.Factory.FromAsync(clientStream.BeginWrite, clientStream.EndWrite, new byte[] { (byte)'b', (byte)'e', (byte)'y', (byte)'o', (byte)'n', (byte)'d', (byte)'\r', (byte)'\n' }, 0, 8, null);
+                            Assert.Equal("beyond", await connection.Reader.ReadLineAsync());
+
+                            clientStream.Flush();
+                            await clientStream.FlushAsync();
+
+                            // Validate reading APIs on clientStream
+                            await connection.Stream.WriteAsync(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"));
+                            var buffer = new byte[1];
+
+                            Assert.Equal('a', clientStream.ReadByte());
+
+                            Assert.Equal(1, clientStream.Read(buffer, 0, 1));
+                            Assert.Equal((byte)'b', buffer[0]);
+
+                            Assert.Equal(1, clientStream.Read(new Span<byte>(buffer, 0, 1)));
+                            Assert.Equal((byte)'c', buffer[0]);
+
+                            Assert.Equal(1, await clientStream.ReadAsync(buffer, 0, 1));
+                            Assert.Equal((byte)'d', buffer[0]);
+
+                            Assert.Equal(1, await clientStream.ReadAsync(new Memory<byte>(buffer, 0, 1)));
+                            Assert.Equal((byte)'e', buffer[0]);
+
+                            Assert.Equal(1, await Task.Factory.FromAsync(clientStream.BeginRead, clientStream.EndRead, buffer, 0, 1, null));
+                            Assert.Equal((byte)'f', buffer[0]);
+
+                            var ms = new MemoryStream();
+                            Task copyTask = clientStream.CopyToAsync(ms);
+
+                            string bigString = string.Concat(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyz", 1000));
+                            Task lotsOfDataSent = connection.Socket.SendAsync(Encoding.ASCII.GetBytes(bigString), SocketFlags.None);
+                            connection.Socket.Shutdown(SocketShutdown.Send);
+                            await copyTask;
+                            await lotsOfDataSent;
+                            Assert.Equal("ghijklmnopqrstuvwxyz" + bigString, Encoding.ASCII.GetString(ms.ToArray()));
                         }
-
-                        return null;
                     });
                 }
             });
@@ -322,7 +609,8 @@ namespace System.Net.Http.Functional.Tests
     {
         protected override bool UseSocketsHttpHandler => true;
 
-        // TODO: Currently the subsequent tests sometimes fail/hang with WinHttpHandler / CurlHandler.
+        // TODO: ISSUE #27272
+        // Currently the subsequent tests sometimes fail/hang with WinHttpHandler / CurlHandler.
         // In theory they should pass with any handler that does appropriate connection pooling.
         // We should understand why they sometimes fail there and ideally move them to be
         // used by all handlers this test project tests.
@@ -371,26 +659,38 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClient client = CreateHttpClient())
             {
-                await LoopbackServer.CreateServerAsync(async (listener, uri) =>
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
                 {
                     // Make multiple requests iteratively.
                     for (int i = 0; i < 2; i++)
                     {
                         Task<string> request = client.GetStringAsync(uri);
-                        await LoopbackServer.AcceptSocketAsync(listener, async (server, serverStream, serverReader, serverWriter) =>
+                        await server.AcceptConnectionSendResponseAndCloseAsync();
+                        await request;
+
+                        if (i == 0)
                         {
-                            while (!string.IsNullOrWhiteSpace(await serverReader.ReadLineAsync()));
-                            await serverWriter.WriteAsync(LoopbackServer.DefaultHttpResponse);
-                            await request;
+                            await Task.Delay(2000); // give client time to see the closing before next connect
+                        }
+                    }
+                });
+            }
+        }
 
-                            server.Shutdown(SocketShutdown.Both);
-                            if (i == 0)
-                            {
-                                await Task.Delay(2000); // give client time to see the closing before next connect
-                            }
-
-                            return null;
-                        });
+        [Fact]
+        public async Task ServerSendsGarbageAfterInitialRequest_SubsequentRequestUsesDifferentConnection()
+        {
+            using (HttpClient client = CreateHttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    // Make multiple requests iteratively.
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Task<string> request = client.GetStringAsync(uri);
+                        string response = LoopbackServer.GetHttpResponse() + "here is a bunch of garbage";
+                        await server.AcceptConnectionSendCustomResponseAndCloseAsync(response);
+                        await request;
                     }
                 });
             }
@@ -401,7 +701,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClient client = CreateHttpClient())
             {
-                await LoopbackServer.CreateServerAsync(async (listener, uri) =>
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
                 {
                     string responseBody =
                         "HTTP/1.1 200 OK\r\n" +
@@ -412,23 +712,18 @@ namespace System.Net.Http.Functional.Tests
 
                     // Make first request.
                     Task<string> request1 = client.GetStringAsync(uri);
-                    await LoopbackServer.AcceptSocketAsync(listener, async (server1, serverStream1, serverReader1, serverWriter1) =>
+                    await server.AcceptConnectionAsync(async connection1 =>
                     {
-                        while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
-                        await serverWriter1.WriteAsync(responseBody);
+                        await connection1.ReadRequestHeaderAndSendCustomResponseAsync(responseBody);
                         await request1;
 
                         // Make second request and expect it to be served from a different connection.
                         Task<string> request2 = client.GetStringAsync(uri);
-                        await LoopbackServer.AcceptSocketAsync(listener, async (server2, serverStream2, serverReader2, serverWriter2) =>
+                        await server.AcceptConnectionAsync(async connection2 =>
                         {
-                            while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
-                            await serverWriter2.WriteAsync(responseBody);
+                            await connection2.ReadRequestHeaderAndSendCustomResponseAsync(responseBody);
                             await request2;
-                            return null;
                         });
-
-                        return null;
                     });
                 });
             }
@@ -450,14 +745,13 @@ namespace System.Net.Http.Functional.Tests
 
                 using (HttpClient client = new HttpClient(handler))
                 {
-                    await LoopbackServer.CreateServerAsync(async (listener, uri) =>
+                    await LoopbackServer.CreateServerAsync(async (server, uri) =>
                     {
                         // Make first request.
                         Task<string> request1 = client.GetStringAsync(uri);
-                        await LoopbackServer.AcceptSocketAsync(listener, async (server1, serverStream1, serverReader1, serverWriter1) =>
+                        await server.AcceptConnectionAsync(async connection =>
                         {
-                            while (!string.IsNullOrWhiteSpace(await serverReader1.ReadLineAsync()));
-                            await serverWriter1.WriteAsync(LoopbackServer.DefaultHttpResponse);
+                            await connection.ReadRequestHeaderAndSendResponseAsync();
                             await request1;
 
                             // Wait a small amount of time before making the second request, to give the first request time to timeout.
@@ -465,15 +759,11 @@ namespace System.Net.Http.Functional.Tests
 
                             // Make second request and expect it to be served from a different connection.
                             Task<string> request2 = client.GetStringAsync(uri);
-                            await LoopbackServer.AcceptSocketAsync(listener, async (server2, serverStream2, serverReader2, serverWriter2) =>
+                            await server.AcceptConnectionAsync(async connection2 =>
                             {
-                                while (!string.IsNullOrWhiteSpace(await serverReader2.ReadLineAsync()));
-                                await serverWriter2.WriteAsync(LoopbackServer.DefaultHttpResponse);
+                                await connection2.ReadRequestHeaderAndSendResponseAsync();
                                 await request2;
-                                return null;
                             });
-
-                            return null;
                         });
                     });
                 }
@@ -808,6 +1098,86 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Throws(expectedExceptionType, () => handler.UseCookies = false);
                 Assert.Throws(expectedExceptionType, () => handler.UseProxy = false);
             }
+        }
+    }
+
+    public sealed class SocketsHttpHandler_ExternalConfiguration_Test : HttpClientTestBase
+    {
+        private const string EnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER";
+        private const string AppContextSettingName = "System.Net.Http.UseSocketsHttpHandler";
+
+        private static bool UseSocketsHttpHandlerEnvironmentVariableIsNotSet =>
+            string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnvironmentVariableSettingName));
+
+        [ConditionalTheory(nameof(UseSocketsHttpHandlerEnvironmentVariableIsNotSet))]
+        [InlineData("true", true)]
+        [InlineData("TRUE", true)]
+        [InlineData("tRuE", true)]
+        [InlineData("1", true)]
+        [InlineData("0", false)]
+        [InlineData("false", false)]
+        [InlineData("helloworld", false)]
+        [InlineData("", false)]
+        public void HttpClientHandler_SettingEnvironmentVariableChangesDefault(string envVarValue, bool expectedUseSocketsHandler)
+        {
+            RemoteInvoke((innerEnvVarValue, innerExpectedUseSocketsHandler) =>
+            {
+                Environment.SetEnvironmentVariable(EnvironmentVariableSettingName, innerEnvVarValue);
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.Equal(bool.Parse(innerExpectedUseSocketsHandler), IsSocketsHttpHandler(handler));
+                }
+                return SuccessExitCode;
+            }, envVarValue, expectedUseSocketsHandler.ToString()).Dispose();
+        }
+
+        [Fact]
+        public void HttpClientHandler_SettingAppContextChangesDefault()
+        {
+            RemoteInvoke(() =>
+            {
+                AppContext.SetSwitch(AppContextSettingName, isEnabled: true);
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.True(IsSocketsHttpHandler(handler));
+                }
+
+                AppContext.SetSwitch(AppContextSettingName, isEnabled: false);
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.False(IsSocketsHttpHandler(handler));
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public void HttpClientHandler_AppContextOverridesEnvironmentVariable()
+        {
+            RemoteInvoke(() =>
+            {
+                Environment.SetEnvironmentVariable(EnvironmentVariableSettingName, "true");
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.True(IsSocketsHttpHandler(handler));
+                }
+
+                AppContext.SetSwitch(AppContextSettingName, isEnabled: false);
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.False(IsSocketsHttpHandler(handler));
+                }
+
+                AppContext.SetSwitch(AppContextSettingName, isEnabled: true);
+                Environment.SetEnvironmentVariable(EnvironmentVariableSettingName, null);
+                using (var handler = new HttpClientHandler())
+                {
+                    Assert.True(IsSocketsHttpHandler(handler));
+                }
+
+                return SuccessExitCode;
+            }).Dispose();
         }
     }
 }

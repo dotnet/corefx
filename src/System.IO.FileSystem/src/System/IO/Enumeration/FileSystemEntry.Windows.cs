@@ -13,8 +13,8 @@ namespace System.IO.Enumeration
             ref FileSystemEntry entry,
             Interop.NtDll.FILE_FULL_DIR_INFORMATION* info,
             ReadOnlySpan<char> directory,
-            string rootDirectory,
-            string originalRootDirectory)
+            ReadOnlySpan<char> rootDirectory,
+            ReadOnlySpan<char> originalRootDirectory)
         {
             entry._info = info;
             entry.Directory = directory;
@@ -32,12 +32,12 @@ namespace System.IO.Enumeration
         /// <summary>
         /// The full path of the root directory used for the enumeration.
         /// </summary>
-        public string RootDirectory { get; private set; }
+        public ReadOnlySpan<char> RootDirectory { get; private set; }
 
         /// <summary>
         /// The root directory for the enumeration as specified in the constructor.
         /// </summary>
-        public string OriginalRootDirectory { get; private set; }
+        public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
         /// <summary>
         /// The file name for this entry.
@@ -68,13 +68,7 @@ namespace System.IO.Enumeration
         public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
 
         public FileSystemInfo ToFileSystemInfo()
-        {
-            string fullPath = PathHelpers.CombineNoChecks(Directory, FileName);
-
-            return IsDirectory
-                ? DirectoryInfo.Create(fullPath, ref this)
-                : (FileSystemInfo)FileInfo.Create(fullPath, ref this);
-        }
+            => FileSystemInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
 
         /// <summary>
         /// Returns the full path for find results, based on the initially provided path.

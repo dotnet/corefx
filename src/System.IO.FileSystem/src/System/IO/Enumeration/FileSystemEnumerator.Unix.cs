@@ -4,9 +4,8 @@
 
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
-using Microsoft.Win32.SafeHandles;
+using System.Threading;
 
 namespace System.IO.Enumeration
 {
@@ -22,7 +21,7 @@ namespace System.IO.Enumeration
         private readonly object _lock = new object();
 
         private string _currentPath;
-        private SafeDirectoryHandle _directoryHandle;
+        private IntPtr _directoryHandle;
         private bool _lastEntryFound;
         private Queue<string> _pending;
 
@@ -42,13 +41,13 @@ namespace System.IO.Enumeration
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
         {
             _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _rootDirectory = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar);
+            _rootDirectory = PathHelpers.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
             _options = options ?? EnumerationOptions.Default;
 
             // We need to initialize the directory handle up front to ensure
             // we immediately throw IO exceptions for missing directory/etc.
             _directoryHandle = CreateDirectoryHandle(_rootDirectory);
-            if (_directoryHandle == null)
+            if (_directoryHandle == IntPtr.Zero)
                 _lastEntryFound = true;
 
             _currentPath = _rootDirectory;
@@ -67,18 +66,22 @@ namespace System.IO.Enumeration
             }
         }
 
-        private SafeDirectoryHandle CreateDirectoryHandle(string path)
+        private bool InternalContinueOnError(int error)
+            => (_options.IgnoreInaccessible && IsAccessError(error)) || ContinueOnError(error);
+
+        private static bool IsAccessError(int error)
+            => error == (int)Interop.Error.EACCES || error == (int)Interop.Error.EBADF
+                || error == (int)Interop.Error.EPERM;
+
+        private IntPtr CreateDirectoryHandle(string path)
         {
-            // TODO: https://github.com/dotnet/corefx/issues/26715
-            // - Use IntPtr handle directly
-            SafeDirectoryHandle handle = Interop.Sys.OpenDir(path);
-            if (handle.IsInvalid)
+            IntPtr handle = Interop.Sys.OpenDir(path);
+            if (handle == IntPtr.Zero)
             {
                 Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
-                if ((_options.IgnoreInaccessible && IsAccessError(info.RawErrno))
-                    || ContinueOnError(info.RawErrno))
+                if (InternalContinueOnError(info.RawErrno))
                 {
-                    return null;
+                    return IntPtr.Zero;
                 }
                 throw Interop.GetExceptionForIoErrno(info, path, isDirectory: true);
             }
@@ -87,8 +90,9 @@ namespace System.IO.Enumeration
 
         private void CloseDirectoryHandle()
         {
-            _directoryHandle?.Dispose();
-            _directoryHandle = null;
+            IntPtr handle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
+            if (handle != IntPtr.Zero)
+                Interop.Sys.CloseDir(handle);
         }
 
         public bool MoveNext()
@@ -109,25 +113,11 @@ namespace System.IO.Enumeration
                     if (_lastEntryFound)
                         return false;
 
-                    bool isDirectory = FileSystemEntry.Initialize(ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
+                    FileAttributes attributes = FileSystemEntry.Initialize(
+                        ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
+                    bool isDirectory = (attributes & FileAttributes.Directory) != 0;
 
-                    if (_options.AttributesToSkip != 0)
-                    {
-                        if ((_options.AttributesToSkip & ~(FileAttributes.Directory | FileAttributes.Hidden | FileAttributes.ReparsePoint)) == 0)
-                        {
-                            // These three we don't have to hit the disk again to evaluate
-                            if (((_options.AttributesToSkip & FileAttributes.Directory) != 0 && isDirectory)
-                                || ((_options.AttributesToSkip & FileAttributes.Hidden) != 0 && _entry.Name[0] == '.')
-                                || ((_options.AttributesToSkip & FileAttributes.ReparsePoint) != 0 && _entry.InodeType == Interop.Sys.NodeType.DT_LNK))
-                                continue;
-                        }
-                        else if ((_options.AttributesToSkip & entry.Attributes) != 0)
-                        {
-                            // Hitting Attributes on the FileSystemEntry will cause a stat call
-                            continue;
-                        }
-                    }
-
+                    bool isSpecialDirectory = false;
                     if (isDirectory)
                     {
                         // Subdirectory found
@@ -136,8 +126,27 @@ namespace System.IO.Enumeration
                             // "." or "..", don't process unless the option is set
                             if (!_options.ReturnSpecialDirectories)
                                 continue;
+                            isSpecialDirectory = true;
                         }
-                        else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
+                    }
+
+                    if (!isSpecialDirectory && _options.AttributesToSkip != 0)
+                    {
+                        if ((_options.AttributesToSkip & FileAttributes.ReadOnly) != 0)
+                        {
+                            // ReadOnly is the only attribute that requires hitting entry.Attributes (which hits the disk)
+                            attributes = entry.Attributes;
+                        }
+
+                        if ((_options.AttributesToSkip & attributes) != 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (isDirectory && !isSpecialDirectory)
+                    {
+                        if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
                             if (_pending == null)
@@ -170,8 +179,7 @@ namespace System.IO.Enumeration
                     break;
                 default:
                     // Error
-                    if ((_options.IgnoreInaccessible && IsAccessError(result))
-                        || ContinueOnError(result))
+                    if (InternalContinueOnError(result))
                     {
                         DirectoryFinished();
                         break;
@@ -188,10 +196,6 @@ namespace System.IO.Enumeration
             _currentPath = _pending.Dequeue();
             _directoryHandle = CreateDirectoryHandle(_currentPath);
         }
-
-        private static bool IsAccessError(int error)
-            => error == (int)Interop.Error.EACCES || error == (int)Interop.Error.EBADF
-                || error == (int)Interop.Error.EPERM;
 
         private void InternalDispose(bool disposing)
         {

@@ -207,6 +207,38 @@ namespace System.Net.Http
             }
         }
 
+        public TimeSpan ConnectTimeout
+        {
+            get => _settings._connectTimeout;
+            set
+            {
+                if ((value <= TimeSpan.Zero && value != Timeout.InfiniteTimeSpan) ||
+                    (value.TotalMilliseconds > int.MaxValue))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._connectTimeout = value;
+            }
+        }
+
+        public TimeSpan Expect100ContinueTimeout
+        {
+            get => _settings._expect100ContinueTimeout;
+            set
+            {
+                if ((value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan) ||
+                    (value.TotalMilliseconds > int.MaxValue))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._expect100ContinueTimeout = value;
+            }
+        }
+
         public IDictionary<string, object> Properties =>
             _settings._properties ?? (_settings._properties = new Dictionary<string, object>());
 
@@ -227,16 +259,13 @@ namespace System.Net.Http
             // (This isn't entirely complete, as some of the collections it contains aren't currently deeply cloned.)
             HttpConnectionSettings settings = _settings.Clone();
 
-            HttpMessageHandler handler = new HttpConnectionHandler(settings);
+            HttpConnectionPoolManager poolManager = new HttpConnectionPoolManager(settings);
+
+            HttpMessageHandler handler = new HttpConnectionHandler(poolManager);
 
             if (settings._useProxy && (settings._proxy != null || HttpProxyConnectionHandler.DefaultProxyConfigured))
             {
-                handler = new HttpProxyConnectionHandler(settings, handler);
-            }
-
-            if (settings._useCookies)
-            {
-                handler = new CookieHandler(CookieContainer, handler);
+                handler = new HttpProxyConnectionHandler(poolManager, settings._proxy, settings._defaultProxyCredentials, handler);
             }
 
             if (settings._credentials != null || settings._allowAutoRedirect)
@@ -264,17 +293,38 @@ namespace System.Net.Http
             CheckDisposed();
             HttpMessageHandler handler = _handler ?? SetupHandlerChain();
 
+            Exception error = ValidateAndNormalizeRequest(request);
+            if (error != null)
+            {
+                return Task.FromException<HttpResponseMessage>(error);
+            }
+
+            return handler.SendAsync(request, cancellationToken);
+        }
+
+        private Exception ValidateAndNormalizeRequest(HttpRequestMessage request)
+        {
             if (request.Version.Major == 0)
             {
-                return Task.FromException<HttpResponseMessage>(new NotSupportedException(SR.net_http_unsupported_version));
+                return new NotSupportedException(SR.net_http_unsupported_version);
             }
 
             // Add headers to define content transfer, if not present
-            if (request.Content != null &&
-                (!request.HasHeaders || request.Headers.TransferEncodingChunked != true) &&
-                request.Content.Headers.ContentLength == null)
+            if (request.HasHeaders && request.Headers.TransferEncodingChunked.GetValueOrDefault())
             {
-                // We have content, but neither Transfer-Encoding or Content-Length is set.
+                if (request.Content == null)
+                {
+                    return new HttpRequestException(SR.net_http_client_execution_error,
+                        new InvalidOperationException(SR.net_http_chunked_not_allowed_with_empty_content));
+                }
+
+                // Since the user explicitly set TransferEncodingChunked to true, we need to remove
+                // the Content-Length header if present, as sending both is invalid.
+                request.Content.Headers.ContentLength = null;
+            }
+            else if (request.Content != null && request.Content.Headers.ContentLength == null)
+            {
+                // We have content, but neither Transfer-Encoding nor Content-Length is set.
                 request.Headers.TransferEncodingChunked = true;
             }
 
@@ -283,7 +333,7 @@ namespace System.Net.Http
                 // HTTP 1.0 does not support chunking
                 if (request.Headers.TransferEncodingChunked == true)
                 {
-                    return Task.FromException<HttpResponseMessage>(new NotSupportedException(SR.net_http_unsupported_chunking));
+                    return new NotSupportedException(SR.net_http_unsupported_chunking);
                 }
 
                 // HTTP 1.0 does not support Expect: 100-continue; just disable it.
@@ -293,7 +343,7 @@ namespace System.Net.Http
                 }
             }
 
-            return handler.SendAsync(request, cancellationToken);
+            return null;
         }
     }
 }

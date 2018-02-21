@@ -46,8 +46,7 @@ namespace System.IO.Enumeration
                         modified = true;
                         if (i > 1 && i == length - 1 && expression[i - 1] == '*')
                         {
-                            sb.Length--;
-                            sb.Append('<'); // DOS_STAR (ends in *.)
+                            sb[sb.Length - 1] = '<'; // DOS_STAR (ends in *.)
                         }
                         else if (i < length - 1 && (expression[i + 1] == '?' || expression[i + 1] == '*'))
                         {
@@ -140,8 +139,9 @@ namespace System.IO.Enumeration
             char expressionChar;
 
             Span<int> temp = stackalloc int[0];
-            Span<int> priorMatches = stackalloc int[16];
             Span<int> currentMatches = stackalloc int[16];
+            Span<int> priorMatches = stackalloc int[16];
+            priorMatches.Clear();
 
             int maxState = expression.Length * 2;
             int currentState;

@@ -148,8 +148,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
-                            Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
-                                    (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
+                            Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 
@@ -169,10 +168,12 @@ namespace System.Net.Http.Functional.Tests
 
         [ActiveIssue(23771, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public void SendAsync_HttpTracingEnabled_Succeeds()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SendAsync_HttpTracingEnabled_Succeeds(bool useSsl)
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteInvoke(async (useSocketsHttpHandlerString, useSslString) =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Http", EventLevel.Verbose))
                 {
@@ -186,15 +187,16 @@ namespace System.Net.Http.Functional.Tests
                             await LoopbackServer.CreateServerAsync(async (server, url) =>
                             {
                                 await TestHelper.WhenAllCompletedOrAnyFailed(
-                                    LoopbackServer.ReadRequestAndSendResponseAsync(server),
+                                    server.AcceptConnectionSendResponseAndCloseAsync(),
                                     client.GetAsync(url));
                             });
 
                             // Do a post to a remote server
                             byte[] expectedData = Enumerable.Range(0, 20000).Select(i => unchecked((byte)i)).ToArray();
-                            HttpContent content = new ByteArrayContent(expectedData);
+                            Uri remoteServer = bool.Parse(useSslString) ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer;
+                            var content = new ByteArrayContent(expectedData);
                             content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(expectedData);
-                            using (HttpResponseMessage response = await client.PostAsync(Configuration.Http.RemoteEchoServer, content))
+                            using (HttpResponseMessage response = await client.PostAsync(remoteServer, content))
                             {
                                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                             }
@@ -209,7 +211,7 @@ namespace System.Net.Http.Functional.Tests
                 }
 
                 return SuccessExitCode;
-            }, UseSocketsHttpHandler.ToString()).Dispose();
+            }, UseSocketsHttpHandler.ToString(), useSsl.ToString()).Dispose();
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -284,11 +286,10 @@ namespace System.Net.Http.Functional.Tests
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             CancellationTokenSource tcs = new CancellationTokenSource();
-                            Task request = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) =>
+                            Task request = server.AcceptConnectionAsync(connection =>
                                 {
                                     tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
+                                    return connection.ReadRequestHeaderAndSendResponseAsync();
                                 });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));
@@ -358,8 +359,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
-                            Task<List<string>> requestLines = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) => LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer));
+                            Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
                             await Task.WhenAll(response, requestLines);
 
@@ -610,12 +610,11 @@ namespace System.Net.Http.Functional.Tests
                         LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             CancellationTokenSource tcs = new CancellationTokenSource();
-                            Task request = LoopbackServer.AcceptSocketAsync(server,
-                                (s, stream, reader, writer) =>
-                                {
-                                    tcs.Cancel();
-                                    return LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
-                                });
+                            Task request = server.AcceptConnectionAsync(connection =>
+                            {
+                                tcs.Cancel();
+                                return connection.ReadRequestHeaderAndSendResponseAsync();
+                            });
                             Task response = client.GetAsync(url, tcs.Token);
                             await Assert.ThrowsAnyAsync<Exception>(() => TestHelper.WhenAllCompletedOrAnyFailed(response, request));
                         }).Wait();

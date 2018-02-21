@@ -59,6 +59,11 @@
     <Compile Include="Enumeration\DosMatcherTests.netcoreapp.cs" />
     <Compile Include="Enumeration\MatchCasingTests.netcoreapp.cs" />
     <Compile Include="Enumeration\TrimmedPaths.netcoreapp.cs" />
+    <Compile Include="Enumeration\ErrorHandlingTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\IncludePredicateTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\PatternTransformTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\RootTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\AttributeTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
@@ -169,6 +174,9 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo.cs" />
     <!-- Helpers -->
+    <Compile Include="$(CommonTestPath)\System\Buffers\NativeOwnedMemory.cs">
+      <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>

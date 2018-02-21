@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO.Enumeration;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -34,32 +33,21 @@ namespace System.IO
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(path2));
         }
 
-        internal static bool IsRoot(string path)
-        {
-            return path.Length == PathInternal.GetRootLength(path);
-        }
+        internal static bool IsRoot(ReadOnlySpan<char> path)
+            => path.Length == PathInternal.GetRootLength(path);
 
-        internal static bool EndsInDirectorySeparator(string path)
-        {
-            return path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
-        }
+        internal static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
 
-        /// <summary>
-        /// Combines two paths. Does no validation of paths, only concatenates the paths
-        /// and places a directory separator between them if needed.
-        /// </summary>
-        internal static string CombineNoChecks(string first, ReadOnlySpan<char> second)
-        {
-            if (string.IsNullOrEmpty(first))
-                return second.Length == 0
-                    ? string.Empty
-                    : new string(second);
+        internal static string TrimEndingDirectorySeparator(string path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Substring(0, path.Length - 1) :
+                path;
 
-            if (second.Length == 0)
-                return first;
-
-            return CombineNoChecksInternal(first.AsReadOnlySpan(), second);
-        }
+        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
 
         /// <summary>
         /// Combines two paths. Does no validation of paths, only concatenates the paths
@@ -82,9 +70,9 @@ namespace System.IO
         /// Combines three paths. Does no validation of paths, only concatenates the paths
         /// and places a directory separator between them if needed.
         /// </summary>
-        internal static string CombineNoChecks(string first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
+        internal static string CombineNoChecks(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
         {
-            if (string.IsNullOrEmpty(first))
+            if (first.Length == 0)
                 return CombineNoChecks(second, third);
 
             if (second.Length == 0)
@@ -93,22 +81,7 @@ namespace System.IO
             if (third.Length == 0)
                 return CombineNoChecks(first, second);
 
-            return CombineNoChecksInternal(first.AsReadOnlySpan(), second, third);
-        }
-
-        /// <summary>
-        /// Combines two paths. Does no validation of paths, only concatenates the paths
-        /// and places a directory separator between them if needed.
-        /// </summary>
-        internal unsafe static string CombineNoChecks(string first, string second)
-        {
-            if (string.IsNullOrEmpty(first))
-                return string.IsNullOrEmpty(second) ? string.Empty : second;
-
-            if (string.IsNullOrEmpty(second))
-                return first;
-
-            return CombineNoChecksInternal(first.AsReadOnlySpan(), second.AsReadOnlySpan());
+            return CombineNoChecksInternal(first, second, third);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,17 +134,6 @@ namespace System.IO
                         new Span<char>((char*)state.Third, state.ThirdLength).CopyTo(destination.Slice(destination.Length - state.ThirdLength));
                     });
             }
-        }
-
-        /// <summary>
-        /// Returns true if the file name is "." or ".."
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe bool IsDotOrDotDot(ReadOnlySpan<char> fileName)
-        {
-            return !(fileName.Length > 2
-                || fileName[0] != '.'
-                || (fileName.Length == 2 && fileName[1] != '.'));
         }
 
         public static ReadOnlySpan<char> GetDirectoryNameNoChecks(ReadOnlySpan<char> path)

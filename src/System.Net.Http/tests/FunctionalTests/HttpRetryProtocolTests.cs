@@ -15,29 +15,9 @@ namespace System.Net.Http.Functional.Tests
     public class HttpRetryProtocolTests : HttpClientTestBase
     {
         private static readonly string s_simpleContent = "Hello World\r\n";
-        private static readonly string s_simpleResponse =
-            $"HTTP/1.1 200 OK\r\n" +
-            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-            $"Content-Length: {s_simpleContent.Length}\r\n" +
-            "\r\n" +
-            s_simpleContent;
 
         // Retry logic is supported by SocketsHttpHandler, CurlHandler, uap, and netfx.  Only WinHttp does not support. 
-        private bool IsRetrySupported =>
-            UseSocketsHttpHandler || !PlatformDetection.IsWindows || PlatformDetection.IsUap || PlatformDetection.IsFullFramework;
-
-        public static Task CreateServerAndClientAsync(Func<Uri, Task> clientFunc, Func<Socket, Task> serverFunc)
-        {
-            IPEndPoint ignored;
-            return LoopbackServer.CreateServerAsync(async (server, uri) =>
-            {
-                Task clientTask = clientFunc(uri);
-                Task serverTask = serverFunc(server);
-
-                await TestHelper.WhenAllCompletedOrAnyFailed(clientTask, serverTask);
-
-            }, out ignored);
-        }
+        private bool IsRetrySupported => !IsWinHttpHandler;
 
         [Fact]
         [ActiveIssue(26770, TargetFrameworkMonikers.NetFramework)]
@@ -48,7 +28,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            await CreateServerAndClientAsync(async url =>
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClient client = CreateHttpClient())
                 {
@@ -66,32 +46,28 @@ namespace System.Net.Http.Functional.Tests
             },
             async server =>
             {
-                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                // Accept first connection
+                await server.AcceptConnectionAsync(async connection =>
                 {
                     // Initial response
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, s_simpleResponse);
+                    await connection.ReadRequestHeaderAndSendResponseAsync(content: s_simpleContent);
 
                     // Second response: Read request headers, then close connection
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "");
-                    s.Close();
-
-                    // Client should reconnect.  Accept that connection and send response.
-                    await LoopbackServer.ReadRequestAndSendResponseAsync(server, s_simpleResponse);
-
-                    return null;
+                    await connection.ReadRequestHeaderAsync();
                 });
+
+                // Client should reconnect.  Accept that connection and send response.
+                await server.AcceptConnectionSendResponseAndCloseAsync(content: s_simpleContent);
             });
         }
 
         [Fact]
-        public async Task PostAsyncExpect100Continue_RetryOnConnectionClosed_Success()
+        public async Task PostAsyncExpect100Continue_FailsAfterContentSendStarted_Throws()
         {
-            if (!IsRetrySupported)
-            {
-                return;
-            }
+            var contentSending = new TaskCompletionSource<bool>();
+            var connectionClosed = new TaskCompletionSource<bool>();
 
-            await CreateServerAndClientAsync(async url =>
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClient client = CreateHttpClient())
                 {
@@ -100,68 +76,51 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
                     Assert.Equal(s_simpleContent, await response1.Content.ReadAsStringAsync());
 
-                    // Send second request.  Should reuse same connection.  
-                    // The server will close the connection, but HttpClient should retry the request.
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Headers.ExpectContinue = true;
-                    var content = new CustomContent();
-                    request.Content = content;
-
-                    HttpResponseMessage response2 = await client.SendAsync(request);
-                    Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
-                    Assert.Equal(s_simpleContent, await response1.Content.ReadAsStringAsync());
-
-                    Assert.Equal(1, content.SerializeCount);
+                    // Send second request on same connection.  When the Expect: 100-continue timeout
+                    // expires, the content will start to be serialized and will signal the server to
+                    // close the connection; then once the connection is closed, the send will be allowed
+                    // to continue and will fail.
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Headers.ExpectContinue = true; // use Expect: 100-continue when supported, but the test works regardless
+                    request.Content = new SynchronizedSendContent(contentSending, connectionClosed.Task);
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
                 }
             },
             async server =>
             {
-                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                // Accept connection
+                await server.AcceptConnectionAsync(async connection =>
                 {
+                    // Shut down the listen socket so no additional connections can happen
+                    server.ListenSocket.Close();
+
                     // Initial response
-                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, s_simpleResponse);
+                    await connection.ReadRequestHeaderAndSendResponseAsync(content: s_simpleContent);
 
                     // Second response: Read request headers, then close connection
-                    List<string> lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "");
+                    List<string> lines = await connection.ReadRequestHeaderAsync();
                     Assert.Contains("Expect: 100-continue", lines);
-                    s.Close();
-
-                    // Client should reconnect.  Accept that connection and send response.
-                    await LoopbackServer.AcceptSocketAsync(server, async (s2, stream2, reader2, writer2) =>
-                    {
-                        List<string> lines2 = await LoopbackServer.ReadWriteAcceptedAsync(s2, reader2, writer2, "");
-                        Assert.Contains("Expect: 100-continue", lines2);
-
-                        await writer2.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");
-
-                        string contentLine = await reader2.ReadLineAsync();
-                        Assert.Equal(s_simpleContent, contentLine + "\r\n");
-
-                        await writer2.WriteAsync(s_simpleResponse);
-
-                        return null;
-                    });
-
-                    return null;
+                    await contentSending.Task;
                 });
+                connectionClosed.SetResult(true);
             });
         }
 
-        class CustomContent : HttpContent
+        private sealed class SynchronizedSendContent : HttpContent
         {
-            private int _serializeCount;
+            private readonly Task _connectionClosed;
+            private readonly TaskCompletionSource<bool> _sendingContent;
 
-            public CustomContent()
+            public SynchronizedSendContent(TaskCompletionSource<bool> sendingContent, Task connectionClosed)
             {
-                _serializeCount = 0;
+                _connectionClosed = connectionClosed;
+                _sendingContent = sendingContent;
             }
-
-            public int SerializeCount => _serializeCount;
 
             protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
             {
-                _serializeCount++;
-
+                _sendingContent.SetResult(true);
+                await _connectionClosed;
                 await stream.WriteAsync(Encoding.UTF8.GetBytes(s_simpleContent));
             }
 

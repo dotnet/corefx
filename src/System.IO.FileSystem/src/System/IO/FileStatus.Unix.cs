@@ -35,62 +35,58 @@ namespace System.IO
 
         internal void Invalidate() => _fileStatusInitialized = -1;
 
+        internal bool IsReadOnly(ReadOnlySpan<char> path, bool continueOnError = false)
+        {
+            EnsureStatInitialized(path, continueOnError);
+            Interop.Sys.Permissions readBit, writeBit;
+            if (_fileStatus.Uid == Interop.Sys.GetEUid())
+            {
+                // User effectively owns the file
+                readBit = Interop.Sys.Permissions.S_IRUSR;
+                writeBit = Interop.Sys.Permissions.S_IWUSR;
+            }
+            else if (_fileStatus.Gid == Interop.Sys.GetEGid())
+            {
+                // User belongs to a group that effectively owns the file
+                readBit = Interop.Sys.Permissions.S_IRGRP;
+                writeBit = Interop.Sys.Permissions.S_IWGRP;
+            }
+            else
+            {
+                // Others permissions
+                readBit = Interop.Sys.Permissions.S_IROTH;
+                writeBit = Interop.Sys.Permissions.S_IWOTH;
+            }
+
+            return ((_fileStatus.Mode & (int)readBit) != 0 && // has read permission
+                (_fileStatus.Mode & (int)writeBit) == 0);     // but not write permission
+        }
+
         public FileAttributes GetAttributes(ReadOnlySpan<char> path, ReadOnlySpan<char> fileName)
         {
+            // IMPORTANT: Attribute logic must match the logic in FileSystemEntry
+
             EnsureStatInitialized(path);
 
             if (!_exists)
                 return (FileAttributes)(-1);
 
-            FileAttributes attrs = default;
+            FileAttributes attributes = default;
 
-            bool IsReadOnly(ref Interop.Sys.FileStatus fileStatus)
-            {
-                Interop.Sys.Permissions readBit, writeBit;
-                if (fileStatus.Uid == Interop.Sys.GetEUid())
-                {
-                    // User effectively owns the file
-                    readBit = Interop.Sys.Permissions.S_IRUSR;
-                    writeBit = Interop.Sys.Permissions.S_IWUSR;
-                }
-                else if (fileStatus.Gid == Interop.Sys.GetEGid())
-                {
-                    // User belongs to a group that effectively owns the file
-                    readBit = Interop.Sys.Permissions.S_IRGRP;
-                    writeBit = Interop.Sys.Permissions.S_IWGRP;
-                }
-                else
-                {
-                    // Others permissions
-                    readBit = Interop.Sys.Permissions.S_IROTH;
-                    writeBit = Interop.Sys.Permissions.S_IWOTH;
-                }
+            if (IsReadOnly(path))
+                attributes |= FileAttributes.ReadOnly;
 
-                return
-                    (fileStatus.Mode & (int)readBit) != 0 && // has read permission
-                    (fileStatus.Mode & (int)writeBit) == 0;  // but not write permission
-            }
-
-            if (_isDirectory) // this is the one attribute where we follow symlinks
-            {
-                attrs |= FileAttributes.Directory;
-            }
-            if (IsReadOnly(ref _fileStatus))
-            {
-                attrs |= FileAttributes.ReadOnly;
-            }
             if ((_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK)
-            {
-                attrs |= FileAttributes.ReparsePoint;
-            }
+                attributes |= FileAttributes.ReparsePoint;
+
+            if (_isDirectory)
+                attributes |= FileAttributes.Directory;
 
             // If the filename starts with a period, it's hidden.
             if (fileName.Length > 0 && fileName[0] == '.')
-            {
-                attrs |= FileAttributes.Hidden;
-            }
+                attributes |= FileAttributes.Hidden;
 
-            return attrs != default ? attrs : FileAttributes.Normal;
+            return attributes != default ? attributes : FileAttributes.Normal;
         }
 
         public void SetAttributes(string path, FileAttributes attributes)
@@ -146,9 +142,9 @@ namespace System.IO
             return _exists && InitiallyDirectory == _isDirectory;
         }
 
-        internal DateTimeOffset GetCreationTime(ReadOnlySpan<char> path)
+        internal DateTimeOffset GetCreationTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
-            EnsureStatInitialized(path);
+            EnsureStatInitialized(path, continueOnError);
             if (!_exists)
                 return DateTimeOffset.FromFileTime(0);
 
@@ -171,9 +167,9 @@ namespace System.IO
             SetLastAccessTime(path, time);
         }
 
-        internal DateTimeOffset GetLastAccessTime(ReadOnlySpan<char> path)
+        internal DateTimeOffset GetLastAccessTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
-            EnsureStatInitialized(path);
+            EnsureStatInitialized(path, continueOnError);
             if (!_exists)
                 return DateTimeOffset.FromFileTime(0);
             return UnixTimeToDateTimeOffset(_fileStatus.ATime, _fileStatus.ATimeNsec);
@@ -182,9 +178,9 @@ namespace System.IO
         internal void SetLastAccessTime(string path, DateTimeOffset time)
             => SetAccessWriteTimes(path, time.ToUnixTimeSeconds(), null);
 
-        internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path)
+        internal DateTimeOffset GetLastWriteTime(ReadOnlySpan<char> path, bool continueOnError = false)
         {
-            EnsureStatInitialized(path);
+            EnsureStatInitialized(path, continueOnError);
             if (!_exists)
                 return DateTimeOffset.FromFileTime(0);
             return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
@@ -211,9 +207,9 @@ namespace System.IO
             _fileStatusInitialized = -1;
         }
 
-        internal long GetLength(ReadOnlySpan<char> path)
+        internal long GetLength(ReadOnlySpan<char> path, bool continueOnError = false)
         {
-            EnsureStatInitialized(path);
+            EnsureStatInitialized(path, continueOnError);
             return _fileStatus.Size;
         }
 
@@ -227,7 +223,7 @@ namespace System.IO
             // storing those results separately.  We only report failure if the initial
             // lstat fails, as a broken symlink should still report info on exists, attributes, etc.
             _isDirectory = false;
-            if (PathInternal.EndsInDirectorySeparator(path))
+            if (path.Length > 1 && PathHelpers.EndsInDirectorySeparator(path))
                 path = path.Slice(0, path.Length - 1);
             int result = Interop.Sys.LStat(path, out _fileStatus);
             if (result < 0)
@@ -250,6 +246,8 @@ namespace System.IO
             }
 
             _exists = true;
+
+            // IMPORTANT: Is directory logic must match the logic in FileSystemEntry
             _isDirectory = (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
 
             // If we're a symlink, attempt to check the target to see if it is a directory
@@ -262,14 +260,14 @@ namespace System.IO
             _fileStatusInitialized = 0;
         }
 
-        internal void EnsureStatInitialized(ReadOnlySpan<char> path)
+        internal void EnsureStatInitialized(ReadOnlySpan<char> path, bool continueOnError = false)
         {
             if (_fileStatusInitialized == -1)
             {
                 Refresh(path);
             }
 
-            if (_fileStatusInitialized != 0)
+            if (_fileStatusInitialized != 0 && !continueOnError)
             {
                 int errno = _fileStatusInitialized;
                 _fileStatusInitialized = -1;

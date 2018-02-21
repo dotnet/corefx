@@ -98,7 +98,7 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string text)
         {
             if (text == null)
                 return default;
@@ -116,7 +116,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start)
         {
             if (text == null)
             {
@@ -141,7 +141,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start, int length)
         {
             if (text == null)
             {
@@ -158,7 +158,7 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text)
+        public static ReadOnlyMemory<char> AsMemory(this string text)
         {
             if (text == null)
                 return default;
@@ -173,7 +173,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start)
         {
             if (text == null)
             {
@@ -195,7 +195,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start, int length)
         {
             if (text == null)
             {

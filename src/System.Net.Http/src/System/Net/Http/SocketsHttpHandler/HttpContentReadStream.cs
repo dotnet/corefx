@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
@@ -13,20 +14,29 @@ namespace System.Net.Http
         {
         }
 
-        public override bool CanRead => true;
-        public override bool CanWrite => false;
+        public sealed override bool CanRead => true;
+        public sealed override bool CanWrite => false;
 
-        public override void Flush() { }
+        public sealed override void Flush() { }
+        public sealed override void WriteByte(byte value) => throw new NotSupportedException();
+        public sealed override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public sealed override void Write(ReadOnlySpan<byte> source) => throw new NotSupportedException();
+        public sealed override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public sealed override Task WriteAsync(ReadOnlyMemory<byte> destination, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-
-        public override int Read(byte[] buffer, int offset, int count)
+        public sealed override int Read(byte[] buffer, int offset, int count)
         {
             ValidateBufferArgs(buffer, offset, count);
             return ReadAsync(new Memory<byte>(buffer, offset, count), CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        public override void CopyTo(Stream destination, int bufferSize) =>
+        public sealed override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            ValidateBufferArgs(buffer, offset, count);
+            return ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
+        }
+
+        public sealed override void CopyTo(Stream destination, int bufferSize) =>
             CopyToAsync(destination, bufferSize, CancellationToken.None).GetAwaiter().GetResult();
     }
 }

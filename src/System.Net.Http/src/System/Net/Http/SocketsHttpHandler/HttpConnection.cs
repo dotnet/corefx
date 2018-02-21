@@ -10,14 +10,13 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    internal sealed partial class HttpConnection : IDisposable
+    internal partial class HttpConnection : IDisposable
     {
         /// <summary>Default size of the read buffer used for the connection.</summary>
         private const int InitialReadBufferSize =
@@ -29,11 +28,6 @@ namespace System.Net.Http
         /// <summary>Default size of the write buffer used for the connection.</summary>
         private const int InitialWriteBufferSize = InitialReadBufferSize;
         /// <summary>
-        /// Delay after which we'll send the request payload for ExpectContinue if
-        /// the server hasn't yet responded.
-        /// </summary>
-        private const int Expect100TimeoutMilliseconds = 1000;
-        /// <summary>
         /// Size after which we'll close the connection rather than send the payload in response
         /// to final error status code sent by the server when using Expect: 100-continue.
         /// </summary>
@@ -42,14 +36,18 @@ namespace System.Net.Http
         private static readonly byte[] s_contentLength0NewlineAsciiBytes = Encoding.ASCII.GetBytes("Content-Length: 0\r\n");
         private static readonly byte[] s_spaceHttp10NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.0\r\n");
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
-        private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
         private static readonly byte[] s_httpSchemeAndDelimiter = Encoding.ASCII.GetBytes(Uri.UriSchemeHttp + Uri.SchemeDelimiter);
+        private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
+        private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
+        private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
+        private static readonly string s_cancellationMessage = new OperationCanceledException().Message; // use same message as the default ctor
 
         private readonly HttpConnectionPool _pool;
         private readonly Stream _stream;
         private readonly TransportContext _transportContext;
         private readonly bool _usingProxy;
         private readonly byte[] _idnHostAsciiBytes;
+        private readonly WeakReference<HttpConnection> _weakThisRef;
 
         private HttpRequestMessage _currentRequest;
         private Task _sendRequestContentTask;
@@ -78,19 +76,21 @@ namespace System.Net.Http
             _pool = pool;
             _stream = stream;
             _transportContext = transportContext;
-            _usingProxy = pool.Pools.UsingProxy;
+            _usingProxy = pool.UsingProxy;
             _idnHostAsciiBytes = pool.IdnHostAsciiBytes;
 
             _writeBuffer = new byte[InitialWriteBufferSize];
             _readBuffer = new byte[InitialReadBufferSize];
 
+            _weakThisRef = new WeakReference<HttpConnection>(this);
+
             if (NetEventSource.IsEnabled)
             {
-                if (_stream is SslStream sslStream)
+                if (pool.IsSecure)
                 {
+                    var sslStream = (SslStream)_stream;
                     Trace(
-                        $"Secure connection created to {pool.Key.Host}:{pool.Key.Port}. " +
-                        $"SslHostName:{pool.Key.SslHostName}. " +
+                        $"Secure connection created to {pool}. " +
                         $"SslProtocol:{sslStream.SslProtocol}, " +
                         $"CipherAlgorithm:{sslStream.CipherAlgorithm}, CipherStrength:{sslStream.CipherStrength}, " +
                         $"HashAlgorithm:{sslStream.HashAlgorithm}, HashStrength:{sslStream.HashStrength}, " +
@@ -99,12 +99,14 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    Trace($"Connection created to {pool.Key.Host}:{pool.Key.Port}.");
+                    Trace($"Connection created to {pool}.");
                 }
             }
         }
 
-        public void Dispose()
+        public void Dispose() => Dispose(disposing: true);
+
+        protected void Dispose(bool disposing)
         {
             // Ensure we're only disposed once.  Dispose could be called concurrently, for example,
             // if the request and the response were running concurrently and both incurred an exception.
@@ -112,7 +114,11 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled) Trace("Connection closing.");
                 _pool.DecrementConnectionCount();
-                _stream.Dispose();
+                if (disposing)
+                {
+                    GC.SuppressFinalize(this);
+                    _stream.Dispose();
+                }
             }
         }
 
@@ -147,47 +153,80 @@ namespace System.Net.Http
 
         public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
 
-        private async Task WriteHeadersAsync(HttpHeaders headers, CancellationToken cancellationToken)
-        {
-            foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
-            {
-                await WriteAsciiStringAsync(header.Key, cancellationToken).ConfigureAwait(false);
-                await WriteTwoBytesAsync((byte)':', (byte)' ', cancellationToken).ConfigureAwait(false);
+        private int ReadBufferSize => _readBuffer.Length;
 
-                var values = (string[])header.Value; // typed as IEnumerable<string>, but always a string[]
-                Debug.Assert(values.Length > 0, "No values for header??");
-                if (values.Length > 0)
+        private ReadOnlyMemory<byte> RemainingBuffer => new ReadOnlyMemory<byte>(_readBuffer, _readOffset, _readLength - _readOffset);
+
+        private void ConsumeFromRemainingBuffer(int bytesToConsume)
+        {
+            Debug.Assert(bytesToConsume <= _readLength - _readOffset, $"{bytesToConsume} > {_readLength} - {_readOffset}");
+            _readOffset += bytesToConsume;
+        }
+
+        private async Task WriteHeadersAsync(HttpHeaders headers, string cookiesFromContainer)
+        {
+            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            {
+                if (header.Key.KnownHeader != null)
                 {
-                    await WriteStringAsync(values[0], cancellationToken).ConfigureAwait(false);
-                    for (int i = 1; i < values.Length; i++)
+                    await WriteBytesAsync(header.Key.KnownHeader.AsciiBytesWithColonSpace).ConfigureAwait(false);
+                }
+                else
+                {
+                    await WriteAsciiStringAsync(header.Key.Name).ConfigureAwait(false);
+                    await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
+                }
+
+                Debug.Assert(header.Value.Length > 0, "No values for header??");
+                if (header.Value.Length > 0)
+                {
+                    await WriteStringAsync(header.Value[0]).ConfigureAwait(false);
+
+                    if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
                     {
-                        await WriteTwoBytesAsync((byte)',', (byte)' ', cancellationToken).ConfigureAwait(false);
-                        await WriteStringAsync(values[i], cancellationToken).ConfigureAwait(false);
+                        await WriteTwoBytesAsync((byte)';', (byte)' ').ConfigureAwait(false);
+                        await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
+
+                        cookiesFromContainer = null;
+                    }
+
+                    for (int i = 1; i < header.Value.Length; i++)
+                    {
+                        await WriteTwoBytesAsync((byte)',', (byte)' ').ConfigureAwait(false);
+                        await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
                     }
                 }
 
-                await WriteTwoBytesAsync((byte)'\r', (byte)'\n', cancellationToken).ConfigureAwait(false);
+                await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
+            }
+
+            if (cookiesFromContainer != null)
+            {
+                await WriteAsciiStringAsync(HttpKnownHeaderNames.Cookie).ConfigureAwait(false);
+                await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
+                await WriteAsciiStringAsync(cookiesFromContainer).ConfigureAwait(false);
+                await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
             }
         }
 
-        private async Task WriteHostHeaderAsync(Uri uri, CancellationToken cancellationToken)
+        private async Task WriteHostHeaderAsync(Uri uri)
         {
-            await WriteBytesAsync(s_hostKeyAndSeparator, cancellationToken).ConfigureAwait(false);
+            await WriteBytesAsync(KnownHeaders.Host.AsciiBytesWithColonSpace).ConfigureAwait(false);
 
             await (_idnHostAsciiBytes != null ?
-                WriteBytesAsync(_idnHostAsciiBytes, cancellationToken) :
-                WriteAsciiStringAsync(uri.IdnHost, cancellationToken)).ConfigureAwait(false);
+                WriteBytesAsync(_idnHostAsciiBytes) :
+                WriteAsciiStringAsync(uri.IdnHost)).ConfigureAwait(false);
 
             if (!uri.IsDefaultPort)
             {
-                await WriteByteAsync((byte)':', cancellationToken).ConfigureAwait(false);
-                await WriteFormattedInt32Async(uri.Port, cancellationToken).ConfigureAwait(false);
+                await WriteByteAsync((byte)':').ConfigureAwait(false);
+                await WriteDecimalInt32Async(uri.Port).ConfigureAwait(false);
             }
 
-            await WriteTwoBytesAsync((byte)'\r', (byte)'\n', cancellationToken).ConfigureAwait(false);
+            await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
         }
 
-        private Task WriteFormattedInt32Async(int value, CancellationToken cancellationToken)
+        private Task WriteDecimalInt32Async(int value)
         {
             // Try to format into our output buffer directly.
             if (Utf8Formatter.TryFormat(value, new Span<byte>(_writeBuffer, _writeOffset, _writeBuffer.Length - _writeOffset), out int bytesWritten))
@@ -197,7 +236,20 @@ namespace System.Net.Http
             }
 
             // If we don't have enough room, do it the slow way.
-            return WriteAsciiStringAsync(value.ToString(CultureInfo.InvariantCulture), cancellationToken);
+            return WriteAsciiStringAsync(value.ToString());
+        }
+
+        private Task WriteHexInt32Async(int value)
+        {
+            // Try to format into our output buffer directly.
+            if (Utf8Formatter.TryFormat(value, new Span<byte>(_writeBuffer, _writeOffset, _writeBuffer.Length - _writeOffset), out int bytesWritten, 'X'))
+            {
+                _writeOffset += bytesWritten;
+                return Task.CompletedTask;
+            }
+
+            // If we don't have enough room, do it the slow way.
+            return WriteAsciiStringAsync(value.ToString("X", CultureInfo.InvariantCulture));
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -211,32 +263,43 @@ namespace System.Net.Http
 
             // Send the request.
             if (NetEventSource.IsEnabled) Trace($"Sending request: {request}");
+            CancellationTokenRegistration cancellationRegistration = RegisterCancellation(cancellationToken);
             try
             {
                 // Write request line
-                await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
-                await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
+                await WriteStringAsync(request.Method.Method).ConfigureAwait(false);
+                await WriteByteAsync((byte)' ').ConfigureAwait(false);
 
                 if (_usingProxy)
                 {
                     // Proxied requests contain full URL
                     Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
-                    await WriteBytesAsync(s_httpSchemeAndDelimiter, cancellationToken).ConfigureAwait(false);
-                    await WriteAsciiStringAsync(request.RequestUri.IdnHost, cancellationToken).ConfigureAwait(false);
+                    await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
+                    await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
                 }
 
-                await WriteStringAsync(request.RequestUri.PathAndQuery, cancellationToken).ConfigureAwait(false);
+                await WriteStringAsync(request.RequestUri.PathAndQuery).ConfigureAwait(false);
 
                 // Fall back to 1.1 for all versions other than 1.0
                 Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0); // guaranteed by Version class
                 bool isHttp10 = request.Version.Minor == 0 && request.Version.Major == 1;
-                await WriteBytesAsync(isHttp10 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
-                                      cancellationToken).ConfigureAwait(false);
+                await WriteBytesAsync(isHttp10 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes).ConfigureAwait(false);
+
+                // Determine cookies to send
+                string cookiesFromContainer = null;
+                if (_pool.Settings._useCookies)
+                {
+                    cookiesFromContainer = _pool.Settings._cookieContainer.GetCookieHeader(request.RequestUri);
+                    if (cookiesFromContainer == "")
+                    {
+                        cookiesFromContainer = null;
+                    }
+                }
 
                 // Write request headers
-                if (request.HasHeaders)
+                if (request.HasHeaders || cookiesFromContainer != null)
                 {
-                    await WriteHeadersAsync(request.Headers, cancellationToken).ConfigureAwait(false);
+                    await WriteHeadersAsync(request.Headers, cookiesFromContainer).ConfigureAwait(false);
                 }
 
                 if (request.Content == null)
@@ -245,30 +308,30 @@ namespace System.Net.Http
                     // unless this is a method that never has a body.
                     if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head)
                     {
-                        await WriteBytesAsync(s_contentLength0NewlineAsciiBytes, cancellationToken).ConfigureAwait(false);
+                        await WriteBytesAsync(s_contentLength0NewlineAsciiBytes).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     // Write content headers
-                    await WriteHeadersAsync(request.Content.Headers, cancellationToken).ConfigureAwait(false);
+                    await WriteHeadersAsync(request.Content.Headers, cookiesFromContainer: null).ConfigureAwait(false);
                 }
 
                 // Write special additional headers.  If a host isn't in the headers list, then a Host header
                 // wasn't sent, so as it's required by HTTP 1.1 spec, send one based on the Request Uri.
                 if (!request.HasHeaders || request.Headers.Host == null)
                 {
-                    await WriteHostHeaderAsync(request.RequestUri, cancellationToken).ConfigureAwait(false);
+                    await WriteHostHeaderAsync(request.RequestUri).ConfigureAwait(false);
                 }
 
                 // CRLF for end of headers.
-                await WriteTwoBytesAsync((byte)'\r', (byte)'\n', cancellationToken).ConfigureAwait(false);
+                await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
 
                 Debug.Assert(_sendRequestContentTask == null);
                 if (request.Content == null)
                 {
                     // We have nothing more to send, so flush out any headers we haven't yet sent.
-                    await FlushAsync(cancellationToken).ConfigureAwait(false);
+                    await FlushAsync().ConfigureAwait(false);
                 }
                 else
                 {
@@ -277,13 +340,18 @@ namespace System.Net.Http
                     // to ensure the headers and content are sent.
                     bool transferEncodingChunked = request.HasHeaders && request.Headers.TransferEncodingChunked == true;
                     HttpContentWriteStream stream = transferEncodingChunked ? (HttpContentWriteStream)
-                        new ChunkedEncodingWriteStream(this, cancellationToken) :
-                        new ContentLengthWriteStream(this, cancellationToken);
+                        new ChunkedEncodingWriteStream(this) :
+                        new ContentLengthWriteStream(this);
 
                     if (!request.HasHeaders || request.Headers.ExpectContinue != true)
                     {
-                        // Send the request content asynchronously.
-                        Task sendTask = _sendRequestContentTask = SendRequestContentAsync(request, stream);
+                        // Send the request content asynchronously.  Note that elsewhere in SendAsync we don't pass
+                        // the cancellation token around, as we simply register with it for the duration of the
+                        // method in order to dispose of this connection and wake up any operations.  But SendRequestContentAsync
+                        // is special in that it ends up dealing with an external entity, the request HttpContent provided
+                        // by the caller to this handler, and we could end up blocking as part of getting that content,
+                        // which won't be affected by disposing this connection. Thus, we do pass the token in here.
+                        Task sendTask = _sendRequestContentTask = SendRequestContentAsync(request, stream, cancellationToken);
                         if (sendTask.IsFaulted)
                         {
                             // Technically this isn't necessary: if the task failed, it will have stored the exception
@@ -300,7 +368,7 @@ namespace System.Net.Http
                         // We're sending an Expect: 100-continue header. We need to flush headers so that the server receives
                         // all of them, and we need to do so before initiating the send, as once we do that, it effectively
                         // owns the right to write, and we don't want to concurrently be accessing the write buffer.
-                        await FlushAsync(cancellationToken).ConfigureAwait(false);
+                        await FlushAsync().ConfigureAwait(false);
 
                         // Create a TCS we'll use to block the request content from being sent, and create a timer that's used
                         // as a fail-safe to unblock the request content if we don't hear back from the server in a timely manner.
@@ -308,13 +376,14 @@ namespace System.Net.Http
                         allowExpect100ToContinue = new TaskCompletionSource<bool>();
                         var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
-                            allowExpect100ToContinue, TimeSpan.FromMilliseconds(Expect100TimeoutMilliseconds), Timeout.InfiniteTimeSpan);
-                        _sendRequestContentTask = SendRequestContentWithExpect100ContinueAsync(request, allowExpect100ToContinue.Task, stream, expect100Timer);
+                            allowExpect100ToContinue, _pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan);
+                        _sendRequestContentTask = SendRequestContentWithExpect100ContinueAsync(
+                            request, allowExpect100ToContinue.Task, stream, expect100Timer, cancellationToken);
                     }
                 }
 
                 // Start to read response.
-                _allowedReadLineBytes = _pool.Pools.Settings._maxResponseHeadersLength * 1024;
+                _allowedReadLineBytes = _pool.Settings._maxResponseHeadersLength * 1024;
 
                 // We should not have any buffered data here; if there was, it should have been treated as an error
                 // by the previous request handling.  (Note we do not support HTTP pipelining.)
@@ -347,9 +416,9 @@ namespace System.Net.Http
                 _canRetry = false;
 
                 // Parse the response status line.
-                var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
-                ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
-                
+                var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionResponseContent() };
+                ParseStatusLine(await ReadNextLineAsync().ConfigureAwait(false), response);
+
                 // If we sent an Expect: 100-continue header, handle the response accordingly.
                 if (allowExpect100ToContinue != null)
                 {
@@ -376,12 +445,12 @@ namespace System.Net.Http
                         if (response.StatusCode == HttpStatusCode.Continue)
                         {
                             // We got our continue header.  Read the subsequent empty line and parse the additional status line.
-                            if (!LineIsEmpty(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false)))
+                            if (!LineIsEmpty(await ReadNextLineAsync().ConfigureAwait(false)))
                             {
                                 ThrowInvalidHttpResponse();
                             }
 
-                            ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
+                            ParseStatusLine(await ReadNextLineAsync().ConfigureAwait(false), response);
                         }
                     }
                 }
@@ -389,7 +458,7 @@ namespace System.Net.Http
                 // Parse the response headers.
                 while (true)
                 {
-                    ArraySegment<byte> line = await ReadNextLineAsync(cancellationToken).ConfigureAwait(false);
+                    ArraySegment<byte> line = await ReadNextLineAsync().ConfigureAwait(false);
                     if (LineIsEmpty(line))
                     {
                         break;
@@ -414,9 +483,16 @@ namespace System.Net.Http
                     _sendRequestContentTask = null;
                 }
 
+                // We're about to create the response stream, at which point responsibility for canceling
+                // the remainder of the response lies with the stream.  Thus we dispose of our registration
+                // here (if an exception has occurred or does occur while creating/returning the stream,
+                // we'll still dispose of it in the catch below as part of Dispose'ing the connection).
+                cancellationRegistration.Dispose();
+                cancellationToken.ThrowIfCancellationRequested(); // in case cancellation may have disposed of the stream
+
                 // Create the response stream.
                 HttpContentStream responseStream;
-                if (request.Method == HttpMethod.Head || (int)response.StatusCode == 204 || (int)response.StatusCode == 304)
+                if (request.Method == HttpMethod.Head || response.StatusCode == HttpStatusCode.NoContent || response.StatusCode == HttpStatusCode.NotModified)
                 {
                     responseStream = EmptyReadStream.Instance;
                     ReturnConnectionToPool();
@@ -446,40 +522,96 @@ namespace System.Net.Http
                 {
                     responseStream = new ConnectionCloseReadStream(this);
                 }
-                ((HttpConnectionContent)response.Content).SetStream(responseStream);
+                ((HttpConnectionResponseContent)response.Content).SetStream(responseStream);
 
                 if (NetEventSource.IsEnabled) Trace($"Received response: {response}");
+
+                // Process Set-Cookie headers.
+                if (_pool.Settings._useCookies)
+                {
+                    CookieHelper.ProcessReceivedCookies(response, _pool.Settings._cookieContainer);
+                }
+
                 return response;
             }
             catch (Exception error)
             {
+                // Clean up the cancellation registration in case we're still registered.
+                cancellationRegistration.Dispose();
+
                 // Make sure to complete the allowExpect100ToContinue task if it exists.
                 allowExpect100ToContinue?.TrySetResult(false);
 
                 if (NetEventSource.IsEnabled) Trace($"Error sending request: {error}");
                 Dispose();
 
-                if (_pendingException != null)
+                // At this point, we're going to throw an exception; we just need to
+                // determine which exception to throw.
+
+                if (ShouldWrapInOperationCanceledException(error, cancellationToken))
+                {
+                    // Cancellation was requested, so assume that the failure is due to
+                    // the cancellation request. This is a bit unorthodox, as usually we'd
+                    // prioritize a non-OperationCanceledException over a cancellation
+                    // request to avoid losing potentially pertinent information.  But given
+                    // the cancellation design where we tear down the underlying connection upon
+                    // a cancellation request, which can then result in a myriad of different
+                    // exceptions (argument exceptions, object disposed exceptions, socket exceptions,
+                    // etc.), as a middle ground we treat it as cancellation, but still propagate the
+                    // original information as the inner exception, for diagnostic purposes.
+                    throw CreateOperationCanceledException(_pendingException ?? error, cancellationToken);
+                }
+                else if (_pendingException != null)
                 {
                     // If we incurred an exception in non-linear control flow such that
                     // the exception didn't bubble up here (e.g. concurrent sending of
                     // the request content), use that error instead.
                     throw new HttpRequestException(SR.net_http_client_execution_error, _pendingException);
                 }
-
-                // Otherwise, propagate this exception, wrapping it if necessary to
-                // match exception type expectations.
-                if (error is InvalidOperationException || error is IOException)
+                else if (error is InvalidOperationException || error is IOException)
                 {
+                    // If it's an InvalidOperationException or an IOException, for consistency
+                    // with other handlers we wrap the exception in an HttpRequestException.
                     throw new HttpRequestException(SR.net_http_client_execution_error, error);
                 }
-                throw;
+                else
+                {
+                    // Otherwise, just allow the original exception to propagate.
+                    throw;
+                }
             }
         }
 
+        private CancellationTokenRegistration RegisterCancellation(CancellationToken cancellationToken)
+        {
+            // Cancellation design:
+            // - We register with the SendAsync CancellationToken for the duration of the SendAsync operation.
+            // - We register with the Read/Write/CopyToAsync methods on the response stream for each such individual operation.
+            // - The registration disposes of the connection, tearing it down and causing any pending operations to wake up.
+            // - Because such a tear down can result in a variety of different exception types, we check for a cancellation
+            //   request and prioritize that over other exceptions, wrapping the actual exception as an inner of an OCE.
+            // - A weak reference to this HttpConnection is stored in the cancellation token, to prevent the token from
+            //   artificially keeping this connection alive.
+            return cancellationToken.Register(s =>
+            {
+                var weakThisRef = (WeakReference<HttpConnection>)s;
+                if (weakThisRef.TryGetTarget(out HttpConnection strongThisRef))
+                {
+                    if (NetEventSource.IsEnabled) strongThisRef.Trace("Cancellation requested. Disposing of the connection.");
+                    strongThisRef.Dispose();
+                }
+            }, _weakThisRef);
+        }
+
+        internal static bool ShouldWrapInOperationCanceledException(Exception error, CancellationToken cancellationToken) =>
+            !(error is OperationCanceledException) && cancellationToken.IsCancellationRequested;
+
+        internal static Exception CreateOperationCanceledException(Exception error, CancellationToken cancellationToken) =>
+            new OperationCanceledException(s_cancellationMessage, error, cancellationToken);
+
         private static bool LineIsEmpty(ArraySegment<byte> line) => line.Count == 0;
 
-        private async Task SendRequestContentAsync(HttpRequestMessage request, HttpContentWriteStream stream)
+        private async Task SendRequestContentAsync(HttpRequestMessage request, HttpContentWriteStream stream, CancellationToken cancellationToken)
         {
             // Now that we're sending content, prohibit retries on this connection.
             _canRetry = false;
@@ -487,13 +619,13 @@ namespace System.Net.Http
             try
             {
                 // Copy all of the data to the server.
-                await request.Content.CopyToAsync(stream, _transportContext).ConfigureAwait(false);
+                await request.Content.CopyToAsync(stream, _transportContext, cancellationToken).ConfigureAwait(false);
 
                 // Finish the content; with a chunked upload, this includes writing the terminating chunk.
                 await stream.FinishAsync().ConfigureAwait(false);
 
                 // Flush any content that might still be buffered.
-                await FlushAsync(stream.RequestCancellationToken).ConfigureAwait(false);
+                await FlushAsync().ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -505,7 +637,7 @@ namespace System.Net.Http
         }
 
         private async Task SendRequestContentWithExpect100ContinueAsync(
-            HttpRequestMessage request, Task<bool> allowExpect100ToContinueTask, HttpContentWriteStream stream, Timer expect100Timer)
+            HttpRequestMessage request, Task<bool> allowExpect100ToContinueTask, HttpContentWriteStream stream, Timer expect100Timer, CancellationToken cancellationToken)
         {
             // Wait until we receive a trigger notification that it's ok to continue sending content.
             // This will come either when the timer fires or when we receive a response status line from the server.
@@ -518,7 +650,7 @@ namespace System.Net.Http
             if (sendRequestContent)
             {
                 if (NetEventSource.IsEnabled) Trace($"Sending request content for Expect: 100-continue.");
-                await SendRequestContentAsync(request, stream).ConfigureAwait(false);
+                await SendRequestContentAsync(request, stream, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -526,39 +658,45 @@ namespace System.Net.Http
             }
         }
 
-        // TODO: Remove this overload once https://github.com/dotnet/roslyn/issues/17287 is addressed
-        // and the compiler doesn't lift the span temporary from the call site into the async state
-        // machine in debug builds.
-        private void ParseStatusLine(ArraySegment<byte> line, HttpResponseMessage response) =>
+        // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
+        // and the compiler doesn't prevent using spans in async methods.
+        private static void ParseStatusLine(ArraySegment<byte> line, HttpResponseMessage response) =>
             ParseStatusLine((Span<byte>)line, response);
 
-        private void ParseStatusLine(Span<byte> line, HttpResponseMessage response)
+        private static void ParseStatusLine(Span<byte> line, HttpResponseMessage response)
         {
             // We sent the request version as either 1.0 or 1.1.
             // We expect a response version of the form 1.X, where X is a single digit as per RFC.
 
-            const int MinStatusLineLength = 12;     // "HTTP/1.1 123" 
-
-            if (line.Length < MinStatusLineLength ||
-                line[0] != 'H' ||
-                line[1] != 'T' ||
-                line[2] != 'T' ||
-                line[3] != 'P' ||
-                line[4] != '/' ||
-                line[5] != '1' ||
-                line[6] != '.' ||
-                line[8] != ' ')
+            // Validate the beginning of the status line and set the response version.
+            const int MinStatusLineLength = 12; // "HTTP/1.x 123" 
+            if (line.Length < MinStatusLineLength || line[8] != ' ')
             {
                 ThrowInvalidHttpResponse();
             }
 
-            // Set the response HttpVersion
-            byte minorVersion = line[7];
-            response.Version =
-                minorVersion == '1' ? HttpVersion.Version11 :
-                minorVersion == '0' ? HttpVersion.Version10 :
-                !IsDigit(minorVersion) ? throw new HttpRequestException(SR.net_http_invalid_response) :
-                new Version(1, minorVersion - '0');
+            ulong first8Bytes = BitConverter.ToUInt64(line);
+            if (first8Bytes == s_http11Bytes)
+            {
+                response.SetVersionWithoutValidation(HttpVersion.Version11);
+            }
+            else if (first8Bytes == s_http10Bytes)
+            {
+                response.SetVersionWithoutValidation(HttpVersion.Version10);
+            }
+            else
+            {
+                byte minorVersion = line[7];
+                if (IsDigit(minorVersion) &&
+                    line.Slice(0, 7).SequenceEqual(s_http1DotBytes))
+                {
+                    response.SetVersionWithoutValidation(new Version(1, minorVersion - '0'));
+                }
+                else
+                {
+                    ThrowInvalidHttpResponse();
+                }
+            }
 
             // Set the status code
             byte status1 = line[9], status2 = line[10], status3 = line[11];
@@ -566,36 +704,45 @@ namespace System.Net.Http
             {
                 ThrowInvalidHttpResponse();
             }
-
-            response.StatusCode =
-                (HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
+            response.SetStatusCodeWithoutValidation((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
 
             // Parse (optional) reason phrase
             if (line.Length == MinStatusLineLength)
             {
-                response.ReasonPhrase = string.Empty;
+                response.SetReasonPhraseWithoutValidation(string.Empty);
             }
-            else if (line[MinStatusLineLength] != ' ')
-            {
-                ThrowInvalidHttpResponse();
-            }
-            else
+            else if (line[MinStatusLineLength] == ' ')
             {
                 Span<byte> reasonBytes = line.Slice(MinStatusLineLength + 1);
                 string knownReasonPhrase = HttpStatusDescription.Get(response.StatusCode);
-                response.ReasonPhrase = knownReasonPhrase != null && EqualsOrdinal(knownReasonPhrase, reasonBytes) ?
-                                            knownReasonPhrase :
-                                            HttpRuleParser.DefaultHttpEncoding.GetString(reasonBytes);
+                if (knownReasonPhrase != null && EqualsOrdinal(knownReasonPhrase, reasonBytes))
+                {
+                    response.SetReasonPhraseWithoutValidation(knownReasonPhrase);
+                }
+                else
+                {
+                    try
+                    {
+                        response.ReasonPhrase = HttpRuleParser.DefaultHttpEncoding.GetString(reasonBytes);
+                    }
+                    catch (FormatException error)
+                    {
+                        ThrowInvalidHttpResponse(error);
+                    }
+                }
+            }
+            else
+            {
+                ThrowInvalidHttpResponse();
             }
         }
 
-        // TODO: Remove this overload once https://github.com/dotnet/roslyn/issues/17287 is addressed
-        // and the compiler doesn't lift the span temporary from the call site into the async state
-        // machine in debug builds.
-        private void ParseHeaderNameValue(ArraySegment<byte> line, HttpResponseMessage response) =>
+        // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
+        // and the compiler doesn't prevent using spans in async methods.
+        private static void ParseHeaderNameValue(ArraySegment<byte> line, HttpResponseMessage response) =>
             ParseHeaderNameValue((Span<byte>)line, response);
 
-        private void ParseHeaderNameValue(Span<byte> line, HttpResponseMessage response)
+        private static void ParseHeaderNameValue(Span<byte> line, HttpResponseMessage response)
         {
             Debug.Assert(line.Length > 0);
 
@@ -605,21 +752,21 @@ namespace System.Net.Http
                 pos++;
                 if (pos == line.Length)
                 {
-                    // Ignore invalid header line that doesn't contain ':'.
-                    return;
+                    // Invalid header line that doesn't contain ':'.
+                    ThrowInvalidHttpResponse();
                 }
             }
 
             if (pos == 0)
             {
-                // Ignore invalid empty header name.
-                return;
+                // Invalid empty header name.
+                ThrowInvalidHttpResponse();
             }
 
             if (!HeaderDescriptor.TryGet(line.Slice(0, pos), out HeaderDescriptor descriptor))
             {
-                // Ignore invalid header name
-                return;
+                // Invalid header name
+                ThrowInvalidHttpResponse();
             }
 
             // Eat any trailing whitespace
@@ -628,15 +775,15 @@ namespace System.Net.Http
                 pos++;
                 if (pos == line.Length)
                 {
-                    // Ignore invalid header line that doesn't contain ':'.
-                    return;
+                    // Invalid header line that doesn't contain ':'.
+                    ThrowInvalidHttpResponse();
                 }
             }
 
             if (line[pos++] != ':')
             {
-                // Ignore invalid header line that doesn't contain ':'.
-                return;
+                // Invalid header line that doesn't contain ':'.
+                ThrowInvalidHttpResponse();
             }
 
             // Skip whitespace after colon
@@ -668,7 +815,7 @@ namespace System.Net.Http
             _writeOffset += source.Length;
         }
 
-        private async Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        private async Task WriteAsync(ReadOnlyMemory<byte> source)
         {
             int remaining = _writeBuffer.Length - _writeOffset;
 
@@ -684,14 +831,14 @@ namespace System.Net.Http
                 // Fit what we can in the current write buffer and flush it.
                 WriteToBuffer(source.Slice(0, remaining));
                 source = source.Slice(remaining);
-                await FlushAsync(cancellationToken).ConfigureAwait(false);
+                await FlushAsync().ConfigureAwait(false);
             }
 
             if (source.Length >= _writeBuffer.Length)
             {
                 // Large write.  No sense buffering this.  Write directly to stream.
                 // CONSIDER: May want to be a bit smarter here?  Think about how large writes should work...
-                await WriteToStreamAsync(source, cancellationToken).ConfigureAwait(false);
+                await WriteToStreamAsync(source).ConfigureAwait(false);
             }
             else
             {
@@ -700,13 +847,13 @@ namespace System.Net.Http
             }
         }
 
-        private Task WriteWithoutBufferingAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        private Task WriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
         {
             if (_writeOffset == 0)
             {
                 // There's nothing in the write buffer we need to flush.
                 // Just write the supplied data out to the stream.
-                return WriteToStreamAsync(source, cancellationToken);
+                return WriteToStreamAsync(source);
             }
 
             int remaining = _writeBuffer.Length - _writeOffset;
@@ -717,40 +864,40 @@ namespace System.Net.Http
                 // the content to the write buffer and then flush it, so that we
                 // can do a single send rather than two.
                 WriteToBuffer(source);
-                return FlushAsync(cancellationToken);
+                return FlushAsync();
             }
 
             // There's data in the write buffer and the data we're writing doesn't fit after it.
             // Do two writes, one to flush the buffer and then another to write the supplied content.
-            return FlushThenWriteWithoutBufferingAsync(source, cancellationToken);
+            return FlushThenWriteWithoutBufferingAsync(source);
         }
 
-        private async Task FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        private async Task FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
         {
-            await FlushAsync(cancellationToken).ConfigureAwait(false);
-            await WriteToStreamAsync(source, cancellationToken).ConfigureAwait(false);
+            await FlushAsync().ConfigureAwait(false);
+            await WriteToStreamAsync(source).ConfigureAwait(false);
         }
 
-        private Task WriteByteAsync(byte b, CancellationToken cancellationToken)
+        private Task WriteByteAsync(byte b)
         {
             if (_writeOffset < _writeBuffer.Length)
             {
                 _writeBuffer[_writeOffset++] = b;
                 return Task.CompletedTask;
             }
-            return WriteByteSlowAsync(b, cancellationToken);
+            return WriteByteSlowAsync(b);
         }
 
-        private async Task WriteByteSlowAsync(byte b, CancellationToken cancellationToken)
+        private async Task WriteByteSlowAsync(byte b)
         {
             Debug.Assert(_writeOffset == _writeBuffer.Length);
-            await WriteToStreamAsync(_writeBuffer, cancellationToken).ConfigureAwait(false);
+            await WriteToStreamAsync(_writeBuffer).ConfigureAwait(false);
 
             _writeBuffer[0] = b;
             _writeOffset = 1;
         }
 
-        private Task WriteTwoBytesAsync(byte b1, byte b2, CancellationToken cancellationToken)
+        private Task WriteTwoBytesAsync(byte b1, byte b2)
         {
             if (_writeOffset <= _writeBuffer.Length - 2)
             {
@@ -759,16 +906,16 @@ namespace System.Net.Http
                 buffer[_writeOffset++] = b2;
                 return Task.CompletedTask;
             }
-            return WriteTwoBytesSlowAsync(b1, b2, cancellationToken);
+            return WriteTwoBytesSlowAsync(b1, b2);
         }
 
-        private async Task WriteTwoBytesSlowAsync(byte b1, byte b2, CancellationToken cancellationToken)
+        private async Task WriteTwoBytesSlowAsync(byte b1, byte b2)
         {
-            await WriteByteAsync(b1, cancellationToken).ConfigureAwait(false);
-            await WriteByteAsync(b2, cancellationToken).ConfigureAwait(false);
+            await WriteByteAsync(b1).ConfigureAwait(false);
+            await WriteByteAsync(b2).ConfigureAwait(false);
         }
 
-        private Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken)
+        private Task WriteBytesAsync(byte[] bytes)
         {
             if (_writeOffset <= _writeBuffer.Length - bytes.Length)
             {
@@ -776,10 +923,10 @@ namespace System.Net.Http
                 _writeOffset += bytes.Length;
                 return Task.CompletedTask;
             }
-            return WriteBytesSlowAsync(bytes, cancellationToken);
+            return WriteBytesSlowAsync(bytes);
         }
 
-        private async Task WriteBytesSlowAsync(byte[] bytes, CancellationToken cancellationToken)
+        private async Task WriteBytesSlowAsync(byte[] bytes)
         {
             int offset = 0;
             while (true)
@@ -798,13 +945,13 @@ namespace System.Net.Http
                 }
                 else if (_writeOffset == _writeBuffer.Length)
                 {
-                    await WriteToStreamAsync(_writeBuffer, cancellationToken).ConfigureAwait(false);
+                    await WriteToStreamAsync(_writeBuffer).ConfigureAwait(false);
                     _writeOffset = 0;
                 }
             }
         }
 
-        private Task WriteStringAsync(string s, CancellationToken cancellationToken)
+        private Task WriteStringAsync(string s)
         {
             // If there's enough space in the buffer to just copy all of the string's bytes, do so.
             // Unlike WriteAsciiStringAsync, validate each char along the way.
@@ -826,10 +973,10 @@ namespace System.Net.Http
 
             // Otherwise, fall back to doing a normal slow string write; we could optimize away
             // the extra checks later, but the case where we cross a buffer boundary should be rare.
-            return WriteStringAsyncSlow(s, cancellationToken);
+            return WriteStringAsyncSlow(s);
         }
 
-        private Task WriteAsciiStringAsync(string s, CancellationToken cancellationToken)
+        private Task WriteAsciiStringAsync(string s)
         {
             // If there's enough space in the buffer to just copy all of the string's bytes, do so.
             int offset = _writeOffset;
@@ -846,10 +993,10 @@ namespace System.Net.Http
 
             // Otherwise, fall back to doing a normal slow string write; we could optimize away
             // the extra checks later, but the case where we cross a buffer boundary should be rare.
-            return WriteStringAsyncSlow(s, cancellationToken);
+            return WriteStringAsyncSlow(s);
         }
 
-        private async Task WriteStringAsyncSlow(string s, CancellationToken cancellationToken)
+        private async Task WriteStringAsyncSlow(string s)
         {
             for (int i = 0; i < s.Length; i++)
             {
@@ -858,28 +1005,55 @@ namespace System.Net.Http
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
-                await WriteByteAsync((byte)c, cancellationToken).ConfigureAwait(false);
+                await WriteByteAsync((byte)c).ConfigureAwait(false);
             }
         }
 
-        private Task FlushAsync(CancellationToken cancellationToken)
+        private Task FlushAsync()
         {
             if (_writeOffset > 0)
             {
-                Task t = WriteToStreamAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, _writeOffset), cancellationToken);
+                Task t = WriteToStreamAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, _writeOffset));
                 _writeOffset = 0;
                 return t;
             }
             return Task.CompletedTask;
         }
 
-        private Task WriteToStreamAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        private Task WriteToStreamAsync(ReadOnlyMemory<byte> source)
         {
             if (NetEventSource.IsEnabled) Trace($"Writing {source.Length} bytes.");
-            return _stream.WriteAsync(source, cancellationToken);
+            return _stream.WriteAsync(source);
         }
 
-        private async ValueTask<ArraySegment<byte>> ReadNextLineAsync(CancellationToken cancellationToken)
+        private bool TryReadNextLine(out ReadOnlySpan<byte> line)
+        {
+            var buffer = new ReadOnlySpan<byte>(_readBuffer, _readOffset, _readLength - _readOffset);
+            int length = buffer.IndexOf((byte)'\n');
+            if (length < 0)
+            {
+                if (_allowedReadLineBytes < buffer.Length)
+                {
+                    ThrowInvalidHttpResponse();
+                }
+
+                line = default;
+                return false;
+            }
+
+            int bytesConsumed = length + 1;
+            _readOffset += bytesConsumed;
+            _allowedReadLineBytes -= bytesConsumed;
+            if (_allowedReadLineBytes < 0)
+            {
+                ThrowInvalidHttpResponse();
+            }
+
+            line = buffer.Slice(0, length > 0 && buffer[length - 1] == '\r' ? length - 1 : length);
+            return true;
+        }
+
+        private async ValueTask<ArraySegment<byte>> ReadNextLineAsync()
         {
             int previouslyScannedBytes = 0;
             while (true)
@@ -914,12 +1088,12 @@ namespace System.Net.Http
                 {
                     ThrowInvalidHttpResponse();
                 }
-                await FillAsync(cancellationToken).ConfigureAwait(false);
+                await FillAsync().ConfigureAwait(false);
             }
         }
 
         // Throws IOException on EOF.  This is only called when we expect more data.
-        private async Task FillAsync(CancellationToken cancellationToken)
+        private async Task FillAsync()
         {
             Debug.Assert(_readAheadTask == null);
 
@@ -954,7 +1128,7 @@ namespace System.Net.Http
                 _readLength = remaining;
             }
 
-            int bytesRead = await _stream.ReadAsync(new Memory<byte>(_readBuffer, _readLength, _readBuffer.Length - _readLength), cancellationToken).ConfigureAwait(false);
+            int bytesRead = await _stream.ReadAsync(new Memory<byte>(_readBuffer, _readLength, _readBuffer.Length - _readLength)).ConfigureAwait(false);
 
             if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
             if (bytesRead == 0)
@@ -973,9 +1147,9 @@ namespace System.Net.Http
             _readOffset += buffer.Length;
         }
 
-        private async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+        private async ValueTask<int> ReadAsync(Memory<byte> destination)
         {
-            // This is called when reading the response body
+            // This is called when reading the response body.
 
             int remaining = _readLength - _readOffset;
             if (remaining > 0)
@@ -996,7 +1170,7 @@ namespace System.Net.Http
             // No data in read buffer. 
             // Do an unbuffered read directly against the underlying stream.
             Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
-            int count = await _stream.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
+            int count = await _stream.ReadAsync(destination).ConfigureAwait(false);
             if (NetEventSource.IsEnabled) Trace($"Received {count} bytes.");
             return count;
         }
@@ -1010,35 +1184,29 @@ namespace System.Net.Http
             _readOffset += count;
         }
 
-        private async Task CopyToAsync(Stream destination, CancellationToken cancellationToken)
+        private Task CopyToUntilEofAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             Debug.Assert(destination != null);
 
             int remaining = _readLength - _readOffset;
-            if (remaining > 0)
-            {
-                await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
-            }
+            return remaining > 0 ?
+                CopyToUntilEofWithExistingBufferedDataAsync(destination, cancellationToken) :
+                _stream.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
 
-            while (true)
-            {
-                _readOffset = 0;
+        private async Task CopyToUntilEofWithExistingBufferedDataAsync(Stream destination, CancellationToken cancellationToken)
+        {
+            int remaining = _readLength - _readOffset;
+            Debug.Assert(remaining > 0);
 
-                // Don't use FillAsync here as it will throw on EOF.
-                Debug.Assert(_readAheadTask == null);
-                _readLength = await _stream.ReadAsync(_readBuffer, cancellationToken).ConfigureAwait(false);
-                if (_readLength == 0)
-                {
-                    // End of stream
-                    break;
-                }
+            await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
+            _readLength = _readOffset = 0;
 
-                await CopyFromBufferAsync(destination, _readLength, cancellationToken).ConfigureAwait(false);
-            }
+            await _stream.CopyToAsync(destination).ConfigureAwait(false);
         }
 
         // Copy *exactly* [length] bytes into destination; throws on end of stream.
-        private async Task CopyToAsync(Stream destination, ulong length, CancellationToken cancellationToken)
+        private async Task CopyToExactLengthAsync(Stream destination, ulong length, CancellationToken cancellationToken)
         {
             Debug.Assert(destination != null);
             Debug.Assert(length > 0);
@@ -1061,7 +1229,7 @@ namespace System.Net.Http
 
             while (true)
             {
-                await FillAsync(cancellationToken).ConfigureAwait(false);
+                await FillAsync().ConfigureAwait(false);
 
                 remaining = (ulong)_readLength < length ? _readLength : (int)length;
                 await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
@@ -1130,6 +1298,13 @@ namespace System.Net.Http
                 }
             }
 
+            // If we have extraneous data in the read buffer, don't reuse the connection;
+            // otherwise we'd interpret this as part of the next response.
+            if (_readOffset != _readLength)
+            {
+                _connectionClose = true;
+            }
+
             // If server told us it's closing the connection, don't put this back in the pool.
             // And if we incurred an error while transferring request content, also skip the pool.
             if (!_connectionClose &&
@@ -1137,8 +1312,7 @@ namespace System.Net.Http
             {
                 try
                 {
-                    // Null out the associated request before the connection is potentially reused by another.
-                    _currentRequest = null;
+                    // Any remaining request content has completed successfully.  Drop it.
                     _sendRequestContentTask = null;
 
                     // When putting a connection back into the pool, we initiate a pre-emptive
@@ -1148,7 +1322,6 @@ namespace System.Net.Http
                     // at any point to understand if the connection has been closed or if errant data
                     // has been sent on the connection by the server, either of which would mean we
                     // should close the connection and not use it for subsequent requests.
-                    Debug.Assert(_readLength == _readOffset, $"{_readLength} != {_readOffset}");
                     _readAheadTask = _stream.ReadAsync(_readBuffer, 0, _readBuffer.Length);
 
                     // Put connection back in the pool.
@@ -1185,7 +1358,7 @@ namespace System.Net.Http
             return true;
         }
 
-        public override string ToString() => $"{nameof(HttpConnection)}({_pool.Key})"; // Description for diagnostic purposes
+        public sealed override string ToString() => $"{nameof(HttpConnection)}({_pool})"; // Description for diagnostic purposes
 
         private static void ThrowInvalidHttpResponse() => throw new HttpRequestException(SR.net_http_invalid_response);
 
@@ -1198,5 +1371,14 @@ namespace System.Net.Http
                 _currentRequest?.GetHashCode() ?? 0,  // request ID
                 memberName,                   // method name
                 ToString() + ": " + message); // message
+    }
+
+    internal sealed class HttpConnectionWithFinalizer : HttpConnection
+    {
+        public HttpConnectionWithFinalizer(HttpConnectionPool pool, Stream stream, TransportContext transportContext) : base(pool, stream, transportContext) { }
+
+        // This class is separated from HttpConnection so we only pay the price of having a finalizer
+        // when it's actually needed, e.g. when MaxConnectionsPerServer is enabled.
+        ~HttpConnectionWithFinalizer() => Dispose(disposing: false);
     }
 }

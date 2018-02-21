@@ -30,19 +30,30 @@ namespace System.Net.Http
 
         internal TimeSpan _pooledConnectionLifetime = HttpHandlerDefaults.DefaultPooledConnectionLifetime;
         internal TimeSpan _pooledConnectionIdleTimeout = HttpHandlerDefaults.DefaultPooledConnectionIdleTimeout;
+        internal TimeSpan _expect100ContinueTimeout = HttpHandlerDefaults.DefaultExpect100ContinueTimeout;
+        internal TimeSpan _connectTimeout = HttpHandlerDefaults.DefaultConnectTimeout;
 
         internal SslClientAuthenticationOptions _sslOptions;
 
         internal IDictionary<string, object> _properties;
 
-        public HttpConnectionSettings Clone() =>
-            new HttpConnectionSettings()
+        public HttpConnectionSettings Clone()
+        {
+            // Force creation of the cookie container if needed, so the original and clone share the same instance.
+            if (_useCookies && _cookieContainer == null)
+            {
+                _cookieContainer = new CookieContainer();
+            }
+
+            return new HttpConnectionSettings()
             {
                 _allowAutoRedirect = _allowAutoRedirect,
                 _automaticDecompression = _automaticDecompression,
                 _cookieContainer = _cookieContainer,
+                _connectTimeout = _connectTimeout,
                 _credentials = _credentials,
                 _defaultProxyCredentials = _defaultProxyCredentials,
+                _expect100ContinueTimeout = _expect100ContinueTimeout,
                 _maxAutomaticRedirections = _maxAutomaticRedirections,
                 _maxConnectionsPerServer = _maxConnectionsPerServer,
                 _maxResponseHeadersLength = _maxResponseHeadersLength,
@@ -55,5 +66,6 @@ namespace System.Net.Http
                 _useCookies = _useCookies,
                 _useProxy = _useProxy,
             };
+        }
     }
 }

@@ -28,17 +28,14 @@ namespace System.Net.Http.Functional.Tests
                     request.Version = HttpVersion.Version10;
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-                    Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     var requestLines = await serverTask;
                     Assert.Equal($"GET {url.PathAndQuery} HTTP/1.0", requestLines[0]);
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Fact]
@@ -52,17 +49,14 @@ namespace System.Net.Http.Functional.Tests
                     request.Version = HttpVersion.Version11;
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-                    Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     var requestLines = await serverTask;
                     Assert.Equal($"GET {url.PathAndQuery} HTTP/1.1", requestLines[0]);
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Theory]
@@ -89,10 +83,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Version = new Version(0, minorVersion);
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-                    Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
                     if (exceptionType == null)
                     {
@@ -105,7 +96,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync(exceptionType, (() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask)));
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk});
         }
 
         [Theory]
@@ -132,10 +123,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Version = new Version(majorVersion, minorVersion);
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-                    Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
                     if (exceptionType == null)
                     {
@@ -148,7 +136,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync(exceptionType, (() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask)));
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [Theory]
@@ -165,9 +153,8 @@ namespace System.Net.Http.Functional.Tests
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
                     Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            $"HTTP/1.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n");
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
@@ -177,7 +164,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(responseMinorVersion, response.Version.Minor);
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [Theory]
@@ -197,9 +184,8 @@ namespace System.Net.Http.Functional.Tests
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
                     Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            $"HTTP/1.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n");
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
@@ -222,7 +208,7 @@ namespace System.Net.Http.Functional.Tests
                         }
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
@@ -243,9 +229,8 @@ namespace System.Net.Http.Functional.Tests
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
                     Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/0.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            $"HTTP/0.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n");
 
                     if (reportAs10)
                     {
@@ -262,7 +247,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(async () => await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Uap ignores response version if not 1.0 or 1.1
@@ -300,9 +285,8 @@ namespace System.Net.Http.Functional.Tests
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
                     Task<List<string>> serverTask =
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/{responseMajorVersion}.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream_ClientDisconnectOk });
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            $"HTTP/{responseMajorVersion}.{responseMinorVersion} 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n");
 
                     if (reportAs00)
                     {
@@ -339,7 +323,7 @@ namespace System.Net.Http.Functional.Tests
                         await Assert.ThrowsAsync<HttpRequestException>(async () => await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
         [Theory]
@@ -399,18 +383,18 @@ namespace System.Net.Http.Functional.Tests
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         getResponseTask,
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
                             $"{statusLine}\r\n" +
                             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                            "\r\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream }));
+                            "Content-Length: 0\r\n" +
+                            "\r\n"));
                     using (HttpResponseMessage response = await getResponseTask)
                     {
                         Assert.Equal(expectedStatusCode, (int)response.StatusCode);
                         Assert.Equal(expectedReason, response.ReasonPhrase);
                     }
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         public static IEnumerable<string> GetInvalidStatusLine()
@@ -419,13 +403,14 @@ namespace System.Net.Http.Functional.Tests
             yield return "HTTP/A.1 200 OK";
             yield return "HTTP/X.Y.Z 200 OK";
             
-            // Only pass on .NET Core Windows & ManagedHandler.
+            // Only pass on .NET Core Windows & SocketsHttpHandler.
             if (PlatformDetection.IsNetCore && PlatformDetection.IsWindows)
             {
                 yield return "HTTP/0.1 200 OK";
                 yield return "HTTP/3.5 200 OK";
                 yield return "HTTP/1.12 200 OK";
                 yield return "HTTP/12.1 200 OK";
+                yield return "HTTP/1.1 200 O\rK";
             }
 
             // Skip these test cases on CurlHandler since the behavior is different.
@@ -458,8 +443,6 @@ namespace System.Net.Http.Functional.Tests
                 yield return "ABCD/1.1 200 OK";
                 yield return "HTTP/1.1";
                 yield return "HTTP\\1.1 200 OK";
-                // ActiveIssue: #26946
-                // yield return "HTTP/1.1 200 O\rK";
                 yield return "NOTHTTP/1.1 200 OK";
             }
         }
@@ -476,18 +459,17 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_ReasonPhraseHasLF_BehaviorDifference()
         {
-            string responseString = "HTTP/1.1 200 O\nK";
+            string responseString = "HTTP/1.1 200 O\n";
             int expectedStatusCode = 200;
             string expectedReason = "O";
 
-            if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
+            if (IsNetfxHandler)
             {
-                // WinHttpHandler, .NET Framework, and CurlHandler will throw HttpRequestException.
+                // .NET Framework will throw HttpRequestException.
                 await GetAsyncThrowsExceptionHelper(responseString);
             }
             else
             {
-                // UAP and ManagedHandler will allow LF ending.
                 await GetAsyncSuccessHelper(responseString, expectedStatusCode, expectedReason);
             }
         }
@@ -512,14 +494,12 @@ namespace System.Net.Http.Functional.Tests
             {
                 using (HttpClient client = CreateHttpClient())
                 {
-                    Task ignoredServerTask = LoopbackServer.ReadRequestAndSendResponseAsync(
-                        server,
-                        responseString + "\r\nContent-Length: 0\r\n\r\n",
-                        new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                    Task ignoredServerTask = server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                        responseString + "\r\nContent-Length: 0\r\n\r\n");
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
                 }
-            });
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]   // Does not support LF-only
@@ -533,9 +513,8 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                        $"HTTP/1.1 200 OK{lineEnding}Date: {DateTimeOffset.UtcNow:R}{lineEnding}Server: TestServer{lineEnding}Content-Length: 0{lineEnding}{lineEnding}",
-                        new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+                    Task<List<string>> serverTask = server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                        $"HTTP/1.1 200 OK{lineEnding}Date: {DateTimeOffset.UtcNow:R}{lineEnding}Server: TestServer{lineEnding}Content-Length: 0{lineEnding}{lineEnding}");
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
@@ -546,6 +525,75 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal("TestServer", response.Headers.Server.ToString());
                     }
                 }
+            }, new LoopbackServer.Options { StreamWrapper = GetStream });
+        }
+
+        public static IEnumerable<object> GetAsync_Chunked_VaryingSizeChunks_ReceivedCorrectly_MemberData()
+        {
+            foreach (int maxChunkSize in new[] { 1, 10_000 })
+                foreach (string lineEnding in new[] { "\n", "\r\n" })
+                    foreach (bool useCopyToAsync in new[] { false, true })
+                        yield return new object[] { maxChunkSize, lineEnding, useCopyToAsync };
+        }
+
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(GetAsync_Chunked_VaryingSizeChunks_ReceivedCorrectly_MemberData))]
+        public async Task GetAsync_Chunked_VaryingSizeChunks_ReceivedCorrectly(int maxChunkSize, string lineEnding, bool useCopyToAsync)
+        {
+            if (!UseSocketsHttpHandler && lineEnding != "\r\n")
+            {
+                // Some handlers don't deal well with "\n" alone as the line ending
+                return;
+            }
+
+            var rand = new Random(42);
+            byte[] expectedData = new byte[100_000];
+            rand.NextBytes(expectedData);
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpMessageInvoker client = new HttpMessageInvoker(CreateHttpClientHandler()))
+                using (HttpResponseMessage resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri), CancellationToken.None))
+                using (Stream respStream = await resp.Content.ReadAsStreamAsync())
+                {
+                    var actualData = new MemoryStream();
+
+                    if (useCopyToAsync)
+                    {
+                        await respStream.CopyToAsync(actualData);
+                    }
+                    else
+                    {
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = await respStream.ReadAsync(buffer)) > 0)
+                        {
+                            actualData.Write(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    Assert.Equal<byte>(expectedData, actualData.ToArray());
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestHeaderAsync();
+
+                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK{lineEnding}Transfer-Encoding: chunked{lineEnding}{lineEnding}");
+                    for (int bytesSent = 0; bytesSent < expectedData.Length;)
+                    {
+                        int bytesRemaining = expectedData.Length - bytesSent;
+                        int bytesToSend = rand.Next(1, Math.Min(bytesRemaining, maxChunkSize + 1));
+                        await connection.Writer.WriteAsync(bytesToSend.ToString("X") + lineEnding);
+                        await connection.Stream.WriteAsync(new Memory<byte>(expectedData, bytesSent, bytesToSend));
+                        await connection.Writer.WriteAsync(lineEnding);
+                        bytesSent += bytesToSend;
+                    }
+                    await connection.Writer.WriteAsync($"0{lineEnding}");
+                    await connection.Writer.WriteAsync(lineEnding);
+                });
             });
         }
     }
@@ -554,44 +602,5 @@ namespace System.Net.Http.Functional.Tests
     {
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
         protected override Stream GetStream_ClientDisconnectOk(Stream s) => new DribbleStream(s, true);
-
-        private sealed class DribbleStream : Stream
-        {
-            private readonly Stream _wrapped;
-            private readonly bool _clientDisconnectAllowed;
-
-            public DribbleStream(Stream wrapped, bool clientDisconnectAllowed = false)
-            {
-                _wrapped = wrapped;
-                _clientDisconnectAllowed = clientDisconnectAllowed;
-            }
-
-            public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                try
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        await _wrapped.WriteAsync(buffer, offset + i, 1);
-                        await Task.Yield(); // introduce short delays, enough to send packets individually but not so long as to extend test duration significantly
-                    }
-                }
-                catch (IOException) when (_clientDisconnectAllowed)
-                {
-                }
-            }
-
-            public override bool CanRead => false;
-            public override bool CanSeek => false;
-            public override bool CanWrite => _wrapped.CanWrite;
-            public override long Length => throw new NotSupportedException();
-            public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-            public override void Flush() => _wrapped.Flush();
-            public override Task FlushAsync(CancellationToken cancellationToken) => _wrapped.FlushAsync(cancellationToken);
-            public override int Read(byte[] buffer, int offset, int count) => throw new NotImplementedException();
-            public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
-            public override void SetLength(long value) => throw new NotImplementedException();
-            public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();
-        }
     }
 }
