@@ -16,13 +16,14 @@ namespace System.IO.Enumeration
         private ReadOnlySpan<char> _fullPath;
         private ReadOnlySpan<char> _fileName;
         private fixed char _fileNameBuffer[FileNameBufferSize];
+        private FileAttributes _initialAttributes;
 
         internal static FileAttributes Initialize(
             ref FileSystemEntry entry,
             Interop.Sys.DirectoryEntry directoryEntry,
             ReadOnlySpan<char> directory,
-            string rootDirectory,
-            string originalRootDirectory,
+            ReadOnlySpan<char> rootDirectory,
+            ReadOnlySpan<char> originalRootDirectory,
             Span<char> pathBuffer)
         {
             entry._directoryEntry = directoryEntry;
@@ -51,7 +52,7 @@ namespace System.IO.Enumeration
             entry._status = default;
             FileStatus.Initialize(ref entry._status, isDirectory);
 
-            FileAttributes attributes = FileAttributes.Normal;
+            FileAttributes attributes = default;
             if (directoryEntry.InodeType == Interop.Sys.NodeType.DT_LNK)
                 attributes |= FileAttributes.ReparsePoint;
             if (isDirectory)
@@ -59,9 +60,12 @@ namespace System.IO.Enumeration
             if (directoryEntry.Name[0] == '.')
                 attributes |= FileAttributes.Hidden;
 
+            if (attributes == default)
+                attributes = FileAttributes.Normal;
+
+            entry._initialAttributes = attributes;
             return attributes;
         }
-
 
         private ReadOnlySpan<char> FullPath
         {
@@ -106,18 +110,24 @@ namespace System.IO.Enumeration
         /// <summary>
         /// The full path of the root directory used for the enumeration.
         /// </summary>
-        public string RootDirectory { get; private set; }
+        public ReadOnlySpan<char> RootDirectory { get; private set; }
 
         /// <summary>
         /// The root directory for the enumeration as specified in the constructor.
         /// </summary>
-        public string OriginalRootDirectory { get; private set; }
+        public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
-        public FileAttributes Attributes => _status.GetAttributes(FullPath, FileName);
-        public long Length => _status.GetLength(FullPath);
-        public DateTimeOffset CreationTimeUtc => _status.GetCreationTime(FullPath);
-        public DateTimeOffset LastAccessTimeUtc => _status.GetLastAccessTime(FullPath);
-        public DateTimeOffset LastWriteTimeUtc => _status.GetLastWriteTime(FullPath);
+        // Windows never fails getting attributes, length, or time as that information comes back
+        // with the native enumeration struct. As such we must not throw here.
+
+        public FileAttributes Attributes
+            // It would be hard to rationalize if the attributes change after our initial find.
+            => _initialAttributes | (_status.IsReadOnly(FullPath, continueOnError: true) ? FileAttributes.ReadOnly : 0);
+
+        public long Length => _status.GetLength(FullPath, continueOnError: true);
+        public DateTimeOffset CreationTimeUtc => _status.GetCreationTime(FullPath, continueOnError: true);
+        public DateTimeOffset LastAccessTimeUtc => _status.GetLastAccessTime(FullPath, continueOnError: true);
+        public DateTimeOffset LastWriteTimeUtc => _status.GetLastWriteTime(FullPath, continueOnError: true);
         public bool IsDirectory => _status.InitiallyDirectory;
 
         public FileSystemInfo ToFileSystemInfo()
