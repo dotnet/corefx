@@ -506,20 +506,25 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void NameTest()
         {
-            string name = "a";
+            string name = Guid.NewGuid().ToString("N");
             Action waitForThread;
             var t =
                 ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
                 {
                     var ct = Thread.CurrentThread;
                     Assert.Equal(name, ct.Name);
+                    Assert.Throws<InvalidOperationException>(() => ct.Name = null);
                     Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
                     Assert.Equal(name, ct.Name);
                 });
             t.IsBackground = true;
             Assert.Null(t.Name);
+            t.Name = null;
+            t.Name = null;
+            Assert.Null(t.Name);
             t.Name = name;
             Assert.Equal(name, t.Name);
+            Assert.Throws<InvalidOperationException>(() => t.Name = null);
             Assert.Throws<InvalidOperationException>(() => t.Name = name + "b");
             Assert.Equal(name, t.Name);
             t.Start();
@@ -529,8 +534,12 @@ namespace System.Threading.Threads.Tests
             {
                 var ct = Thread.CurrentThread;
                 Assert.Null(ct.Name);
+                ct.Name = null;
+                ct.Name = null;
+                Assert.Null(ct.Name);
                 ct.Name = name;
                 Assert.Equal(name, ct.Name);
+                Assert.Throws<InvalidOperationException>(() => ct.Name = null);
                 Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
                 Assert.Equal(name, ct.Name);
             });
