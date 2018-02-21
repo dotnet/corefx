@@ -73,7 +73,7 @@ namespace System.Net.Test.Common
             return CreateServerAsync(server => funcAsync(server, server.Uri), options);
         }
 
-        public static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc)
+        public static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc, Options options = null)
         {
             return CreateServerAsync(async server =>
             {
@@ -81,7 +81,7 @@ namespace System.Net.Test.Common
                 Task serverTask = serverFunc(server);
 
                 await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
-            });
+            }, options);
         }
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
@@ -320,6 +320,12 @@ namespace System.Net.Test.Common
                 while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
                 {
                     lines.Add(line);
+                }
+
+                // TODO: Should really detect null above
+                if (lines.Count == 0)
+                {
+                    throw new Exception("No request received");
                 }
 
                 return lines;
