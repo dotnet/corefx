@@ -53,6 +53,30 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ToUpperOverlapping()
+        {
+            var expectedSource = new char[3] { 'b', 'C', 'B' };
+            var expectedDestination = new char[3] { 'B', 'C', 'B' };
+
+            {
+                char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+            {
+                char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
+        [Fact]
         public static void LengthMismatchToUpper()
         {
             {

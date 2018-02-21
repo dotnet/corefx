@@ -54,6 +54,30 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ToLowerOverlapping()
+        {
+            var expectedSource = new char[3] { 'B', 'c', 'b' };
+            var expectedDestination = new char[3] { 'b', 'c', 'b' };
+
+            {
+                char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+            {
+                char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
+        [Fact]
         public static void LengthMismatchToLower()
         {
             {

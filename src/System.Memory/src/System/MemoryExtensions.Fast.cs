@@ -19,6 +19,8 @@ namespace System
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
         /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="culture"/> is null.
         /// </exception>
@@ -31,6 +33,8 @@ namespace System
         /// </summary>
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
         public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
             => Span.ToLowerInvariant(source, destination);
 
@@ -41,6 +45,8 @@ namespace System
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
         /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="culture"/> is null.
         /// </exception>
@@ -53,6 +59,8 @@ namespace System
         /// </summary>
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
         public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
             => Span.ToUpperInvariant(source, destination);
 
