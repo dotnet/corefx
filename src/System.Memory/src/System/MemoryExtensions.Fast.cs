@@ -12,6 +12,45 @@ namespace System
     public static partial class MemoryExtensions
     {
         /// <summary>
+        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => Span.Contains(span, value, comparisonType);
+
+        /// <summary>
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
+        /// when compared using the specified <paramref name="comparisonType"/> option.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => Span.Equals(span, value, comparisonType);
+
+        /// <summary>
+        /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
+        /// and returns an integer that indicates their relative position in the sort order.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => Span.CompareTo(span, value, comparisonType);
+
+        /// <summary>
+        /// Reports the zero-based index of the first occurrence of the specified <paramref name="value"/> in the current <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="matchedLength">Returns the length of the matched span.</param>
+        /// </summary>
+        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType, out int matchedLength)
+            => Span.IndexOf(span, value, comparisonType, out matchedLength);
+
+        /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
         /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>

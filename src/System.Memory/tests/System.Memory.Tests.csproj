@@ -16,6 +16,8 @@
     <!-- Tests specific to the fast span -->
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="ReadOnlySpan\Contains.cs" />
+    <Compile Include="ReadOnlySpan\IndexOf.charSpan.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="ReadOnlySpan\AsBytes.cs" />
     <Compile Include="ReadOnlySpan\AsReadOnlySpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
+    <Compile Include="ReadOnlySpan\CompareTo.cs" />
     <Compile Include="ReadOnlySpan\CopyTo.cs" />
     <Compile Include="ReadOnlySpan\CtorArray.cs" />
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
@@ -88,6 +91,7 @@
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
+    <Compile Include="ReadOnlySpan\Equals.cs" />
     <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
     <Compile Include="ReadOnlySpan\GetHashCode.cs" />
     <Compile Include="ReadOnlySpan\ImplicitConversion.cs" />
