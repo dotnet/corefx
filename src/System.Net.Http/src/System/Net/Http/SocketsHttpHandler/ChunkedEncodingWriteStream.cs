@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,12 +15,6 @@ namespace System.Net.Http
 
             public ChunkedEncodingWriteStream(HttpConnection connection) : base(connection)
             {
-            }
-
-            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ignored)
-            {
-                ValidateBufferArgs(buffer, offset, count);
-                return WriteAsync(new Memory<byte>(buffer, offset, count), ignored);
             }
 
             public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken ignored)
@@ -49,24 +42,11 @@ namespace System.Net.Http
 
             private async Task WriteChunkAsync(ReadOnlyMemory<byte> source)
             {
-                // Write chunk length -- hex representation of count
-                bool digitWritten = false;
-                for (int i = 7; i >= 0; i--)
-                {
-                    int shift = i * 4;
-                    int mask = 0xF << shift;
-                    int digit = (source.Length & mask) >> shift;
-                    if (digitWritten || digit != 0)
-                    {
-                        await _connection.WriteByteAsync((byte)(digit < 10 ? '0' + digit : 'A' + digit - 10)).ConfigureAwait(false);
-                        digitWritten = true;
-                    }
-                }
-
-                // End chunk length
+                // Write chunk length in hex followed by \r\n
+                await _connection.WriteHexInt32Async(source.Length).ConfigureAwait(false);
                 await _connection.WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
 
-                // Write chunk contents
+                // Write chunk contents followed by \r\n
                 await _connection.WriteAsync(source).ConfigureAwait(false);
                 await _connection.WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
 
@@ -78,10 +58,7 @@ namespace System.Net.Http
                 // and if all of the headers and content fit in the write buffer that we've actually sent the request.
                 await _connection.FlushAsync().ConfigureAwait(false);
             }
-
-            public override Task FlushAsync(CancellationToken ignored) => // see comment on WriteAsync about "ignored"
-                _connection.FlushAsync();
-
+            
             public override async Task FinishAsync()
             {
                 // Send 0 byte chunk to indicate end, then final CrLf

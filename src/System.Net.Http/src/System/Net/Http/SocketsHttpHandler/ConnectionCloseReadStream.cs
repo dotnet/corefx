@@ -16,12 +16,6 @@ namespace System.Net.Http
             {
             }
 
-            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                ValidateBufferArgs(buffer, offset, count);
-                return ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
-            }
-
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -74,41 +68,45 @@ namespace System.Net.Http
                 return bytesRead;
             }
 
-            public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+            public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
             {
-                if (destination == null)
-                {
-                    throw new ArgumentNullException(nameof(destination));
-                }
-                if (bufferSize <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(bufferSize));
-                }
+                ValidateCopyToArgs(this, destination, bufferSize);
 
-                cancellationToken.ThrowIfCancellationRequested();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return Task.FromCanceled(cancellationToken);
+                }
 
                 if (_connection == null)
                 {
-                    // Response body fully consumed
-                    return;
+                    // null if response body fully consumed
+                    return Task.CompletedTask;
                 }
 
-                Task copyTask = _connection.CopyToAsync(destination);
-                if (!copyTask.IsCompletedSuccessfully)
+                Task copyTask = _connection.CopyToUntilEofAsync(destination, bufferSize, cancellationToken);
+                if (copyTask.IsCompletedSuccessfully)
                 {
-                    CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
-                    try
-                    {
-                        await copyTask.ConfigureAwait(false);
-                    }
-                    catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
-                    {
-                        throw CreateOperationCanceledException(exc, cancellationToken);
-                    }
-                    finally
-                    {
-                        ctr.Dispose();
-                    }
+                    Finish();
+                    return Task.CompletedTask;
+                }
+
+                return CompleteCopyToAsync(copyTask, cancellationToken);
+            }
+
+            private async Task CompleteCopyToAsync(Task copyTask, CancellationToken cancellationToken)
+            {
+                CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
+                try
+                {
+                    await copyTask.ConfigureAwait(false);
+                }
+                catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
+                {
+                    throw CreateOperationCanceledException(exc, cancellationToken);
+                }
+                finally
+                {
+                    ctr.Dispose();
                 }
 
                 // If cancellation is requested and tears down the connection, it could cause the copy
@@ -117,6 +115,11 @@ namespace System.Net.Http
                 // been requested, we assume the copy completed due to cancellation and throw.
                 cancellationToken.ThrowIfCancellationRequested();
 
+                Finish();
+            }
+
+            private void Finish()
+            {
                 // We cannot reuse this connection, so close it.
                 _connection.Dispose();
                 _connection = null;

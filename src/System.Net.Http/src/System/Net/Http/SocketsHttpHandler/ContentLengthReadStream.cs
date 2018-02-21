@@ -21,12 +21,6 @@ namespace System.Net.Http
                 _contentBytesRemaining = contentLength;
             }
 
-            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                ValidateBufferArgs(buffer, offset, count);
-                return ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
-            }
-
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -89,43 +83,52 @@ namespace System.Net.Http
                 return bytesRead;
             }
 
-            public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+            public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
             {
-                if (destination == null)
-                {
-                    throw new ArgumentNullException(nameof(destination));
-                }
-                if (bufferSize <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(bufferSize));
-                }
+                ValidateCopyToArgs(this, destination, bufferSize);
 
-                cancellationToken.ThrowIfCancellationRequested();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return Task.FromCanceled(cancellationToken);
+                }
 
                 if (_connection == null)
                 {
-                    // Response body fully consumed
-                    return;
+                    // null if response body fully consumed
+                    return Task.CompletedTask;
                 }
 
-                Task copyTask = _connection.CopyToAsync(destination, _contentBytesRemaining);
-                if (!copyTask.IsCompletedSuccessfully)
+                Task copyTask = _connection.CopyToExactLengthAsync(destination, _contentBytesRemaining, cancellationToken);
+                if (copyTask.IsCompletedSuccessfully)
                 {
-                    CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
-                    try
-                    {
-                        await copyTask.ConfigureAwait(false);
-                    }
-                    catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
-                    {
-                        throw CreateOperationCanceledException(exc, cancellationToken);
-                    }
-                    finally
-                    {
-                        ctr.Dispose();
-                    }
+                    Finish();
+                    return Task.CompletedTask;
                 }
 
+                return CompleteCopyToAsync(copyTask, cancellationToken);
+            }
+
+            private async Task CompleteCopyToAsync(Task copyTask, CancellationToken cancellationToken)
+            {
+                CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
+                try
+                {
+                    await copyTask.ConfigureAwait(false);
+                }
+                catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
+                {
+                    throw CreateOperationCanceledException(exc, cancellationToken);
+                }
+                finally
+                {
+                    ctr.Dispose();
+                }
+
+                Finish();
+            }
+
+            private void Finish()
+            {
                 _contentBytesRemaining = 0;
                 _connection.ReturnConnectionToPool();
                 _connection = null;
