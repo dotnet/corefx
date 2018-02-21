@@ -17,9 +17,9 @@ namespace System.Globalization.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("compareInfo", () => ((CompareInfo)null).GetStringComparer(CompareOptions.None));
 
-            AssertExtensions.Throws<ArgumentException>("options", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer((CompareOptions)0xFFFF));
-            AssertExtensions.Throws<ArgumentException>("options", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer(CompareOptions.Ordinal | CompareOptions.IgnoreCase));
-            AssertExtensions.Throws<ArgumentException>("options", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer(CompareOptions.OrdinalIgnoreCase | CompareOptions.IgnoreCase));
+            AssertExtensions.Throws<ArgumentException>("compareOptions", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer((CompareOptions)0xFFFF));
+            AssertExtensions.Throws<ArgumentException>("compareOptions", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer(CompareOptions.Ordinal | CompareOptions.IgnoreCase));
+            AssertExtensions.Throws<ArgumentException>("compareOptions", () => new CultureInfo("tr-TR").CompareInfo.GetStringComparer(CompareOptions.OrdinalIgnoreCase | CompareOptions.IgnoreCase));
         }
 
         [Theory]
