@@ -54,10 +54,10 @@ namespace System.SpanTests
         public static void ToStringFromString()
         {
             string orig = "hello world";
-            Assert.Equal(orig, orig.AsReadOnlySpan().ToString());
-            Assert.Equal(orig.Substring(0, 5), orig.AsReadOnlySpan(0, 5).ToString());
-            Assert.Equal(orig.Substring(5), orig.AsReadOnlySpan(5).ToString());
-            Assert.Equal(orig.Substring(1, 3), orig.AsReadOnlySpan(1, 3).ToString());
+            Assert.Equal(orig, orig.AsSpan().ToString());
+            Assert.Equal(orig.Substring(0, 5), orig.AsSpan(0, 5).ToString());
+            Assert.Equal(orig.Substring(5), orig.AsSpan(5).ToString());
+            Assert.Equal(orig.Substring(1, 3), orig.AsSpan(1, 3).ToString());
         }
 
         // This test is only relevant for portable span
@@ -66,7 +66,7 @@ namespace System.SpanTests
         public static void ToStringSpanOverFullStringReturnsOriginal()
         {
             string original = TestHelpers.BuildString(10, 42);
-            ReadOnlySpan<char> span = original.AsReadOnlySpan();
+            ReadOnlySpan<char> span = original.AsSpan();
 
             string returnedString = span.ToString();
             string returnedStringUsingSlice = span.Slice(0, original.Length).ToString();

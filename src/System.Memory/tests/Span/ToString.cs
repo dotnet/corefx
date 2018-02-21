@@ -61,7 +61,7 @@ namespace System.SpanTests
         {
             string original = TestHelpers.BuildString(10, 42);
 
-            ReadOnlyMemory<char> readOnlyMemory = original.AsReadOnlyMemory();
+            ReadOnlyMemory<char> readOnlyMemory = original.AsMemory();
             Memory<char> memory = MemoryMarshal.AsMemory(readOnlyMemory);
 
             Span<char> span = memory.Span;

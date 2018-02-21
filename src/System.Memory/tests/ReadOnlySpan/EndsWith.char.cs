@@ -311,7 +311,7 @@ namespace System.SpanTests
         [InlineData("", "a", StringComparison.OrdinalIgnoreCase, false)]
         public static void EndsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
-            Assert.Equal(expected, s.AsReadOnlySpan().EndsWith(value.AsReadOnlySpan(), comparisonType));
+            Assert.Equal(expected, s.AsSpan().EndsWith(value.AsSpan(), comparisonType));
         }
 
         [Theory]
@@ -319,11 +319,11 @@ namespace System.SpanTests
         [InlineData(StringComparison.OrdinalIgnoreCase)]
         public static void EndsWith_NullInStrings(StringComparison comparison)
         {
-            Assert.True("\0test".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.True("te\0st".AsReadOnlySpan().EndsWith("e\0st".AsReadOnlySpan(), comparison));
-            Assert.False("te\0st".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.False("test\0".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.False("test".AsReadOnlySpan().EndsWith("\0st".AsReadOnlySpan(), comparison));
+            Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.True("te\0st".AsSpan().EndsWith("e\0st".AsSpan(), comparison));
+            Assert.False("te\0st".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test\0".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test".AsSpan().EndsWith("\0st".AsSpan(), comparison));
         }
 
         // NOTE: This is by design. Unix ignores the null characters (i.e. null characters have no weights for the string comparison).
@@ -337,11 +337,11 @@ namespace System.SpanTests
         [InlineData(StringComparison.InvariantCultureIgnoreCase)]
         public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
         {
-            Assert.True("\0test".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.True("te\0st".AsReadOnlySpan().EndsWith("e\0st".AsReadOnlySpan(), comparison));
-            Assert.False("te\0st".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.False("test\0".AsReadOnlySpan().EndsWith("test".AsReadOnlySpan(), comparison));
-            Assert.False("test".AsReadOnlySpan().EndsWith("\0st".AsReadOnlySpan(), comparison));
+            Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.True("te\0st".AsSpan().EndsWith("e\0st".AsSpan(), comparison));
+            Assert.False("te\0st".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test\0".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test".AsSpan().EndsWith("\0st".AsSpan(), comparison));
         }
     }
 }
