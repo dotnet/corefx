@@ -88,14 +88,13 @@ namespace System.IO.Enumeration
         {
             get
             {
-                if (_directoryEntry.Name != null)
+                if (_directoryEntry.NameLength != 0 && _fileName.Length == 0)
                 {
                     fixed (char* c = _fileNameBuffer)
                     {
                         Span<char> buffer = new Span<char>(c, FileNameBufferSize);
                         _fileName = _directoryEntry.GetName(buffer);
                     }
-                    _directoryEntry.Name = null;
                 }
 
                 return _fileName;
