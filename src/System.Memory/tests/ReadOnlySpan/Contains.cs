@@ -175,7 +175,7 @@ namespace System.SpanTests
         [InlineData("Hello", "", true)]
         public static void Contains(string s, string value, bool expected)
         {
-            Assert.Equal(expected, s.AsReadOnlySpan().Contains(value.AsReadOnlySpan(), StringComparison.Ordinal));
+            Assert.Equal(expected, s.AsSpan().Contains(value.AsSpan(), StringComparison.Ordinal));
         }
     }
 }

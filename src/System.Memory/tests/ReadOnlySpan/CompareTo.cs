@@ -178,12 +178,6 @@ namespace System.SpanTests
         [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCulture, -1)]
         [InlineData("A", 0, "B", 0, 1, StringComparison.CurrentCulture, -1)]
         [InlineData("B", 0, "A", 0, 1, StringComparison.CurrentCulture, 1)]
-        //[InlineData(null, 0, null, 0, 0, StringComparison.CurrentCulture, 0)]
-        //[InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCulture, 1)]
-        //[InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCulture, -1)]
-        //[InlineData(null, -1, null, -1, -1, StringComparison.CurrentCulture, 0)]
-        //[InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCulture, 1)]
-        //[InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCulture, -1)]
         // CurrentCultureIgnoreCase
         [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
         [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
@@ -193,21 +187,12 @@ namespace System.SpanTests
         [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
         [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCultureIgnoreCase, -1)]
-        //[InlineData(null, 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 0)]
-        //[InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 1)]
-        //[InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCultureIgnoreCase, -1)]
-        //[InlineData(null, -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 0)]
-        //[InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 1)]
-        //[InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCultureIgnoreCase, -1)]
         // InvariantCulture
         [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.InvariantCulture, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCulture, 1)]
         [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.InvariantCulture, 1)]
         [InlineData("hello", 2, "HELLO", 2, 3, StringComparison.InvariantCulture, -1)]
-        //[InlineData(null, 0, null, 0, 0, StringComparison.InvariantCulture, 0)]
-        //[InlineData("Hello", 0, null, 0, 5, StringComparison.InvariantCulture, 1)]
-        //[InlineData(null, 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1)]
         // InvariantCultureIgnoreCase
         [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0)]
         [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0)]
@@ -217,9 +202,6 @@ namespace System.SpanTests
         [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0)]
         [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.InvariantCultureIgnoreCase, -1)]
-        //[InlineData(null, 0, null, 0, 0, StringComparison.InvariantCultureIgnoreCase, 0)]
-        //[InlineData("Hello", 0, null, 0, 5, StringComparison.InvariantCultureIgnoreCase, 1)]
-        //[InlineData(null, 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1)]
         // Ordinal
         [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.Ordinal, 1)]
@@ -263,12 +245,6 @@ namespace System.SpanTests
         [InlineData("abcdefghijkxxxxxxxxxxxxxx", 0, "abcdefghijlxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: third long compare is different
         [InlineData("abcdexxxxxxxxxxxxxxxxxxxx", 0, "abcdfxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: second int compare is different
         [InlineData("abcdefghixxxxxxxxxxxxxxxx", 0, "abcdefghjxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: fourth int compare is different
-        //[InlineData(null, 0, null, 0, 0, StringComparison.Ordinal, 0)]
-        //[InlineData("Hello", 0, null, 0, 5, StringComparison.Ordinal, 1)]
-        //[InlineData(null, 0, "Hello", 0, 5, StringComparison.Ordinal, -1)]
-        //[InlineData(null, -1, null, -1, -1, StringComparison.Ordinal, 0)]
-        //[InlineData("foo", -1, null, -1, -1, StringComparison.Ordinal, 1)]
-        //[InlineData(null, -1, "foo", -1, -1, StringComparison.Ordinal, -1)]
         // OrdinalIgnoreCase
         [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
         [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
@@ -292,13 +268,10 @@ namespace System.SpanTests
         [InlineData("_", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
         [InlineData("`", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
         [InlineData("`", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        //[InlineData(null, 0, null, 0, 0, StringComparison.OrdinalIgnoreCase, 0)]
-        //[InlineData("Hello", 0, null, 0, 5, StringComparison.OrdinalIgnoreCase, 1)]
-        //[InlineData(null, 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1)]
         public static void Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType, int expected)
         {
-            ReadOnlySpan<char> span = length <= (strA.Length - indexA) ? strA.AsReadOnlySpan(indexA, length) : strA.AsReadOnlySpan(indexA);
-            ReadOnlySpan<char> value = length <= (strB.Length - indexB) ? strB.AsReadOnlySpan(indexB, length) : strB.AsReadOnlySpan(indexB);
+            ReadOnlySpan<char> span = length <= (strA.Length - indexA) ? strA.AsSpan(indexA, length) : strA.AsSpan(indexA);
+            ReadOnlySpan<char> value = length <= (strB.Length - indexB) ? strB.AsSpan(indexB, length) : strB.AsSpan(indexB);
             //Assert.True(expected == Math.Sign(span.CompareTo(value, comparisonType)), span.ToString() + "|" + value.ToString() + "|" + length);
             Assert.Equal(expected, Math.Sign(span.CompareTo(value, comparisonType)));
         }

@@ -65,7 +65,7 @@ namespace System.SpanTests
                 IsSafeForCurrentCultureComparisons(s)
                 && IsSafeForCurrentCultureComparisons(target.ToString());
 
-            ReadOnlySpan<char> span = s.AsReadOnlySpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             var charArray = new char[1];
             charArray[0] = target;
             ReadOnlySpan<char> targetSpan = charArray;
@@ -135,7 +135,7 @@ namespace System.SpanTests
         [InlineData("Hello", "l\0o", -1)]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
-            Assert.Equal(expected, s.AsReadOnlySpan().IndexOf(value.AsReadOnlySpan(), StringComparison.Ordinal, out _));
+            Assert.Equal(expected, s.AsSpan().IndexOf(value.AsSpan(), StringComparison.Ordinal, out _));
         }
 
         [Theory]
@@ -145,25 +145,25 @@ namespace System.SpanTests
             bool ignoringCase = comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.CurrentCultureIgnoreCase;
 
             // First find the substring.  We should be able to with all comparison types.
-            Assert.Equal(startIndex, s.AsReadOnlySpan().IndexOf(value.AsReadOnlySpan(), comparison, out _)); // in the whole string
-            Assert.Equal(0, s.AsReadOnlySpan(startIndex).IndexOf(value.AsReadOnlySpan(), comparison, out _)); // starting at substring
+            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _)); // in the whole string
+            Assert.Equal(0, s.AsSpan(startIndex).IndexOf(value.AsSpan(), comparison, out _)); // starting at substring
             if (startIndex > 0)
             {
-                Assert.Equal(1, s.AsReadOnlySpan(startIndex - 1).IndexOf(value.AsReadOnlySpan(), comparison, out _)); // starting just before substring
+                Assert.Equal(1, s.AsSpan(startIndex - 1).IndexOf(value.AsSpan(), comparison, out _)); // starting just before substring
             }
-            Assert.Equal(-1, s.AsReadOnlySpan(startIndex + 1).IndexOf(value.AsReadOnlySpan(), comparison, out _)); // starting just after start of substring
+            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison, out _)); // starting just after start of substring
 
             // Shouldn't be able to find the substring if the count is less than substring's length
-            Assert.Equal(-1, s.AsReadOnlySpan(0, value.Length - 1).IndexOf(value.AsReadOnlySpan(), comparison, out _));
+            Assert.Equal(-1, s.AsSpan(0, value.Length - 1).IndexOf(value.AsSpan(), comparison, out _));
 
             // Now double the source.  Make sure we find the first copy of the substring.
             int halfLen = s.Length;
             s += s;
-            Assert.Equal(startIndex, s.AsReadOnlySpan().IndexOf(value.AsReadOnlySpan(), comparison, out _));
+            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _));
 
             // Now change the case of a letter.
             s = s.ToUpperInvariant();
-            Assert.Equal(ignoringCase ? startIndex : -1, s.AsReadOnlySpan().IndexOf(value.AsReadOnlySpan(), comparison, out _));
+            Assert.Equal(ignoringCase ? startIndex : -1, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _));
         }
 
         public static IEnumerable<object[]> AllSubstringsAndComparisons(string source)
@@ -197,15 +197,15 @@ namespace System.SpanTests
 
             string str = "Turkish I \u0131s TROUBL\u0130NG!";
             string valueString = "\u0130";
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
             Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
             Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal, out _));
             Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
 
             valueString = "\u0131";
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
             Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal, out _));
@@ -223,14 +223,14 @@ namespace System.SpanTests
 
             string str = "Turkish I \u0131s TROUBL\u0130NG!";
             string valueString = "\u0130";
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
             valueString = "\u0131";
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
@@ -246,14 +246,14 @@ namespace System.SpanTests
 
             string str = "Turkish I \u0131s TROUBL\u0130NG!";
             string valueString = "\u0130";
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
             valueString = "\u0131";
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
@@ -266,8 +266,8 @@ namespace System.SpanTests
             string str = "dzsdzs";
             string valueString = "ddzs";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -294,8 +294,8 @@ namespace System.SpanTests
             string str = "dzsdzs";
             string valueString = "ddzs";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -312,8 +312,8 @@ namespace System.SpanTests
             string str = "Exhibit a\u0300\u00C0";
             string valueString = "\u00C0";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -324,7 +324,7 @@ namespace System.SpanTests
             Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
 
             valueString = "a\u0300"; // this diacritic combines with preceding character
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
             Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal, out _));
@@ -339,8 +339,8 @@ namespace System.SpanTests
             string str = "Exhibit a\u0300\u00C0";
             string valueString = "\u00C0";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -349,7 +349,7 @@ namespace System.SpanTests
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
             valueString = "a\u0300"; // this diacritic combines with preceding character
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
@@ -362,8 +362,8 @@ namespace System.SpanTests
             string str = "Foo\u0400Bar";
             string valueString = "\u0400";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -374,7 +374,7 @@ namespace System.SpanTests
             Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
 
             valueString = "bar";
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
             Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal, out _));
@@ -389,8 +389,8 @@ namespace System.SpanTests
             string str = "Foo\u0400Bar";
             string valueString = "\u0400";
 
-            ReadOnlySpan<char> s = str.AsReadOnlySpan();
-            ReadOnlySpan<char> value = valueString.AsReadOnlySpan();
+            ReadOnlySpan<char> s = str.AsSpan();
+            ReadOnlySpan<char> value = valueString.AsSpan();
 
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
@@ -399,7 +399,7 @@ namespace System.SpanTests
             Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 
             valueString = "bar";
-            value = valueString.AsReadOnlySpan();
+            value = valueString.AsSpan();
             Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
             Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
 

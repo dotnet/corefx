@@ -232,7 +232,7 @@ namespace System.SpanTests
         [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
         public static void Equals(string s1, string s2, StringComparison comparisonType, bool expected)
         {
-            Assert.Equal(expected, s1.AsReadOnlySpan().Equals(s2.AsReadOnlySpan(), comparisonType));
+            Assert.Equal(expected, s1.AsSpan().Equals(s2.AsSpan(), comparisonType));
         }
 
         public static IEnumerable<object[]> Equals_EncyclopaediaData()
@@ -256,7 +256,7 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = new CultureInfo("se-SE");
-            Assert.Equal(expected, source.AsReadOnlySpan().Equals(target.AsReadOnlySpan(), comparison));
+            Assert.Equal(expected, source.AsSpan().Equals(target.AsSpan(), comparison));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
