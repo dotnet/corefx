@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
@@ -201,9 +202,34 @@ namespace System.SpanTests
         [InlineData("", "")]
         public static void ToUpper(string s, string expected)
         {
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        private static IEnumerable<object[]> ToUpper_Culture_TestData()
+        {
+            yield return new object[] { "h\u0069 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
+            yield return new object[] { "h\u0131 world", "H\u0049 WORLD", new CultureInfo("tr-TR") };
+
+            yield return new object[] { "h\u0069 world", "H\u0049 WORLD", new CultureInfo("en-US") };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", new CultureInfo("en-US") };
+            yield return new object[] { "h\u0131 world", "H\u0049 WORLD", new CultureInfo("en-US") };
+
+            yield return new object[] { "h\u0069 world", "H\u0049 WORLD", CultureInfo.InvariantCulture };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", CultureInfo.InvariantCulture };
+            yield return new object[] { "h\u0131 world", "H\u0131 WORLD", CultureInfo.InvariantCulture };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUpper_Culture_TestData))]
+        public static void Test_ToUpper_Culture(string actual, string expected, CultureInfo culture)
+        {
+            ReadOnlySpan<char> source = actual.AsSpan();
+            Span<char> destination = new char[source.Length];
+            Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
         }
 
@@ -214,21 +240,21 @@ namespace System.SpanTests
 
             string s = "H\u0069 World";
             string expected = "H\u0130 WORLD";
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0130 World";
             expected = "H\u0130 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0131 World";
             expected = "H\u0049 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
@@ -241,21 +267,21 @@ namespace System.SpanTests
 
             string s = "H\u0069 World";
             string expected = "H\u0049 WORLD";
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0130 World";
             expected = "H\u0130 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0131 World";
             expected = "H\u0049 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
@@ -268,21 +294,21 @@ namespace System.SpanTests
 
             string s = "H\u0069 World";
             string expected = "H\u0049 WORLD";
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0130 World";
             expected = "H\u0130 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
 
             s = "H\u0131 World";
             expected = "H\u0131 WORLD";
-            source = s.AsReadOnlySpan();
+            source = s.AsSpan();
             destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
@@ -294,7 +320,7 @@ namespace System.SpanTests
         [InlineData("", "")]
         public static void ToUpperInvariant(string s, string expected)
         {
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToUpperInvariant(destination));
             Assert.Equal(expected, destination.ToString());

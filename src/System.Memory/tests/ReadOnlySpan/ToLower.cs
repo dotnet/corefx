@@ -202,7 +202,7 @@ namespace System.SpanTests
         [InlineData("", "")]
         public static void ToLower(string s, string expected)
         {
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
             Assert.Equal(expected, destination.ToString());
@@ -223,18 +223,11 @@ namespace System.SpanTests
             yield return new object[] { "H\u0131 World", "h\u0131 world", CultureInfo.InvariantCulture };
         }
 
-        [Fact]
-        public static void Test_ToLower_Culture()
+        [Theory]
+        [MemberData(nameof(ToLower_Culture_TestData))]
+        public static void Test_ToLower_Culture(string actual, string expected, CultureInfo culture)
         {
-            foreach (var testdata in ToLower_Culture_TestData())
-            {
-                ToLower_Culture((string)testdata[0], (string)testdata[1], (CultureInfo)testdata[2]);
-            }
-        }
-
-        private static void ToLower_Culture(string actual, string expected, CultureInfo culture)
-        {
-            ReadOnlySpan<char> source = actual.AsReadOnlySpan();
+            ReadOnlySpan<char> source = actual.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToLower(destination, culture));
             Assert.Equal(expected, destination.ToString());
@@ -246,7 +239,7 @@ namespace System.SpanTests
         [InlineData("", "")]
         public static void ToLowerInvariant(string s, string expected)
         {
-            ReadOnlySpan<char> source = s.AsReadOnlySpan();
+            ReadOnlySpan<char> source = s.AsSpan();
             Span<char> destination = new char[source.Length];
             Assert.Equal(source.Length, source.ToLowerInvariant(destination));
             Assert.Equal(expected, destination.ToString());
@@ -299,8 +292,8 @@ namespace System.SpanTests
         {
             CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
 
-            ReadOnlySpan<char> sourceLower = lowerForm.AsReadOnlySpan();
-            ReadOnlySpan<char> sourceUpper = upperForm.AsReadOnlySpan();
+            ReadOnlySpan<char> sourceLower = lowerForm.AsSpan();
+            ReadOnlySpan<char> sourceUpper = upperForm.AsSpan();
             Span<char> destinationLower = new char[sourceUpper.Length];
             Span<char> destinationUpper = new char[sourceLower.Length];
 

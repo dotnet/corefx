@@ -37,7 +37,7 @@ namespace System
             string sourceString = source.ToString();
             string resultString = sourceString.ToLower(culture);
             Debug.Assert(sourceString.Length == resultString.Length);
-            resultString.AsReadOnlySpan().CopyTo(destination);
+            resultString.AsSpan().CopyTo(destination);
             return source.Length;
         }
 
@@ -76,7 +76,7 @@ namespace System
             string sourceString = source.ToString();
             string resultString = sourceString.ToUpper(culture);
             Debug.Assert(sourceString.Length == resultString.Length);
-            resultString.AsReadOnlySpan().CopyTo(destination);
+            resultString.AsSpan().CopyTo(destination);
             return source.Length;
         }
 
