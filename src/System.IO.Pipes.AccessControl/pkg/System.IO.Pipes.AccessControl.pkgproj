@@ -12,6 +12,9 @@
     </HarvestIncludePaths>
     <HarvestIncludePaths Include="runtimes/win/lib/netstandard1.3;lib/netstandard1.3" />
     <InboxOnTargetFramework Include="$(UAPvNextTFM)" />
+    <File Include="$(PlaceHolderFile)">  
+      <TargetPath>runtimes/win/lib/$(UAPvNextTFM)</TargetPath>  
+    </File>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

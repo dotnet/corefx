@@ -6,7 +6,7 @@
     <ProjectGuid>{40059634-BB03-4A6F-8657-CCE2D376BC8B}</ProjectGuid>
     <IncludeDefaultReferences Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">false</IncludeDefaultReferences>
     <AllowUnsafeBlocks Condition="'$(TargetGroup)' == 'netstandard'">true</AllowUnsafeBlocks>
-    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_AccessControl</GeneratePlatformNotSupportedAssemblyMessage>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_AccessControl</GeneratePlatformNotSupportedAssemblyMessage>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
@@ -25,9 +25,9 @@
     <Reference Include="System.Security.Principal.Windows" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
-    <ReferenceFromRuntime Include="System.Private.Corelib" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Resources.ResourceManager" />
     <ProjectReference Include="..\..\System.IO.Pipes\src\System.IO.Pipes.csproj" />
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Security.AccessControl\src\System.Security.AccessControl.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
