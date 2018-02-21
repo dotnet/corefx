@@ -120,14 +120,14 @@ namespace System.Text.RegularExpressions
             PatchJump(0, _emitted.Length);
             Emit(RegexCode.Stop);
 
-            RegexPrefix fcPrefix = RegexFCD.FirstChars(tree);
+            RegexPrefix? fcPrefix = RegexFCD.FirstChars(tree);
             RegexPrefix prefix = RegexFCD.Prefix(tree);
             bool rtl = ((tree.Options & RegexOptions.RightToLeft) != 0);
 
             CultureInfo culture = (tree.Options & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture;
             RegexBoyerMoore bmPrefix;
 
-            if (prefix != null && prefix.Prefix.Length > 0)
+            if (prefix.Prefix.Length > 0)
                 bmPrefix = new RegexBoyerMoore(prefix.Prefix, prefix.CaseInsensitive, rtl, culture);
             else
                 bmPrefix = null;

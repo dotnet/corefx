@@ -11,12 +11,15 @@
 // This step is as simple as walking the tree and emitting
 // sequences of codes.
 
+using System.Buffers;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace System.Text.RegularExpressions
 {
-    internal sealed class RegexFCD
+    internal ref struct RegexFCD
     {
+        private const int StackBufferSize = 32;
         private const int BeforeChild = 64;
         private const int AfterChild = 128;
 
@@ -31,27 +34,36 @@ namespace System.Text.RegularExpressions
         public const int Boundary = 0x0040;
         public const int ECMABoundary = 0x0080;
 
-        private int[] _intStack;
-        private int _intDepth;
-        private RegexFC[] _fcStack;
-        private int _fcDepth;
+        private readonly List<RegexFC> _fcStack;
+        private readonly ValueListBuilder<int> _intStack;
         private bool _skipAllChildren;      // don't process any more children at the current level
         private bool _skipchild;            // don't process the current child.
-        private bool _failed = false;
+        private bool _failed;
 
-        private RegexFCD()
+        private RegexFCD(ValueListBuilder<int> intStack)
         {
-            _fcStack = new RegexFC[32];
-            _intStack = new int[32];
+            _fcStack = new List<RegexFC>(StackBufferSize);
+            _intStack = intStack;
+            _failed = false;
+            _skipchild = false;
+            _skipAllChildren = false;
         }
 
         /// <summary>
-        /// Takes a RegexTree and computes the set of chars that can start it.
+        /// This is the one of the only two functions that should be called from outside.
+        /// It takes a RegexTree and computes the set of chars that can start it.
         /// </summary>
-        public static RegexPrefix FirstChars(RegexTree t)
+        public static RegexPrefix? FirstChars(RegexTree t)
         {
-            RegexFCD s = new RegexFCD();
+            // Create/rent buffers
+            Span<int> intSpan = stackalloc int[StackBufferSize];
+            var intStack = new ValueListBuilder<int>(intSpan);
+
+            RegexFCD s = new RegexFCD(intStack);
             RegexFC fc = s.RegexFCFromRegexTree(t);
+
+            // Return rented buffers
+            intStack.Dispose();
 
             if (fc == null || fc._nullable)
                 return null;
@@ -210,14 +222,22 @@ namespace System.Text.RegularExpressions
         {
             StringBuilder sb = new StringBuilder();
 
-            if (0 != (anchors & Beginning)) sb.Append(", Beginning");
-            if (0 != (anchors & Start)) sb.Append(", Start");
-            if (0 != (anchors & Bol)) sb.Append(", Bol");
-            if (0 != (anchors & Boundary)) sb.Append(", Boundary");
-            if (0 != (anchors & ECMABoundary)) sb.Append(", ECMABoundary");
-            if (0 != (anchors & Eol)) sb.Append(", Eol");
-            if (0 != (anchors & End)) sb.Append(", End");
-            if (0 != (anchors & EndZ)) sb.Append(", EndZ");
+            if (0 != (anchors & Beginning))
+                sb.Append(", Beginning");
+            if (0 != (anchors & Start))
+                sb.Append(", Start");
+            if (0 != (anchors & Bol))
+                sb.Append(", Bol");
+            if (0 != (anchors & Boundary))
+                sb.Append(", Boundary");
+            if (0 != (anchors & ECMABoundary))
+                sb.Append(", ECMABoundary");
+            if (0 != (anchors & Eol))
+                sb.Append(", Eol");
+            if (0 != (anchors & End))
+                sb.Append(", End");
+            if (0 != (anchors & EndZ))
+                sb.Append(", EndZ");
 
             if (sb.Length >= 2)
                 return (sb.ToString(2, sb.Length - 2));
@@ -225,81 +245,6 @@ namespace System.Text.RegularExpressions
             return "None";
         }
 #endif
-
-        /*
-         * To avoid recursion, we use a simple integer stack.
-         * This is the push.
-         */
-        private void PushInt(int I)
-        {
-            if (_intDepth >= _intStack.Length)
-            {
-                int[] expanded = new int[_intDepth * 2];
-
-                Array.Copy(_intStack, 0, expanded, 0, _intDepth);
-
-                _intStack = expanded;
-            }
-
-            _intStack[_intDepth++] = I;
-        }
-
-        /*
-         * True if the stack is empty.
-         */
-        private bool IntIsEmpty()
-        {
-            return _intDepth == 0;
-        }
-
-        /*
-         * This is the pop.
-         */
-        private int PopInt()
-        {
-            return _intStack[--_intDepth];
-        }
-
-        /*
-          * We also use a stack of RegexFC objects.
-          * This is the push.
-          */
-        private void PushFC(RegexFC fc)
-        {
-            if (_fcDepth >= _fcStack.Length)
-            {
-                RegexFC[] expanded = new RegexFC[_fcDepth * 2];
-
-                Array.Copy(_fcStack, 0, expanded, 0, _fcDepth);
-                _fcStack = expanded;
-            }
-
-            _fcStack[_fcDepth++] = fc;
-        }
-
-        /*
-         * True if the stack is empty.
-         */
-        private bool FCIsEmpty()
-        {
-            return _fcDepth == 0;
-        }
-
-        /*
-         * This is the pop.
-         */
-        private RegexFC PopFC()
-        {
-            return _fcStack[--_fcDepth];
-        }
-
-        /*
-         * This is the top.
-         */
-        private RegexFC TopFC()
-        {
-            return _fcStack[_fcDepth - 1];
-        }
 
         /// <summary>
         /// The main FC computation. It does a shortcutted depth-first walk
@@ -327,7 +272,7 @@ namespace System.Text.RegularExpressions
                     {
                         curNode = curNode.Children[curChild];
                         // this stack is how we get a depth first walk of the tree.
-                        PushInt(curChild);
+                        _intStack.Append(curChild);
                         curChild = 0;
                     }
                     else
@@ -342,10 +287,10 @@ namespace System.Text.RegularExpressions
                 // the end of a leaf node.
                 _skipAllChildren = false;
 
-                if (IntIsEmpty())
+                if (_intStack.Length == 0)
                     break;
 
-                curChild = PopInt();
+                curChild = _intStack.Pop();
                 curNode = curNode.Next;
 
                 CalculateFC(curNode.NType | AfterChild, curNode, curChild);
@@ -355,10 +300,18 @@ namespace System.Text.RegularExpressions
                 curChild++;
             }
 
-            if (FCIsEmpty())
+            if (_fcStack.Count == 0)
                 return null;
 
-            return PopFC();
+            return FCPop();
+        }
+
+        private RegexFC FCPop()
+        {
+            RegexFC item = _fcStack[_fcStack.Count - 1];
+            _fcStack.RemoveAt(_fcStack.Count - 1);
+
+            return item;
         }
 
         /// <summary>
@@ -400,27 +353,27 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case RegexNode.Empty:
-                    PushFC(new RegexFC(true));
+                    _fcStack.Add(new RegexFC(true));
                     break;
 
                 case RegexNode.Concatenate | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = PopFC();
-                        RegexFC cumul = TopFC();
+                        RegexFC child = FCPop();
+                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
 
                         _failed = !cumul.AddFC(child, true);
                     }
 
-                    if (!TopFC()._nullable)
+                    if (!_fcStack[_fcStack.Count - 1]._nullable)
                         _skipAllChildren = true;
                     break;
 
                 case RegexNode.Testgroup | AfterChild:
                     if (CurIndex > 1)
                     {
-                        RegexFC child = PopFC();
-                        RegexFC cumul = TopFC();
+                        RegexFC child = FCPop();
+                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -430,8 +383,8 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Testref | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = PopFC();
-                        RegexFC cumul = TopFC();
+                        RegexFC child = FCPop();
+                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -440,7 +393,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Loop | AfterChild:
                 case RegexNode.Lazyloop | AfterChild:
                     if (node.M == 0)
-                        TopFC()._nullable = true;
+                        _fcStack[_fcStack.Count - 1]._nullable = true;
                     break;
 
                 case RegexNode.Group | BeforeChild:
@@ -454,7 +407,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Require | BeforeChild:
                 case RegexNode.Prevent | BeforeChild:
                     SkipChild();
-                    PushFC(new RegexFC(true));
+                    _fcStack.Add(new RegexFC(true));
                     break;
 
                 case RegexNode.Require | AfterChild:
@@ -463,39 +416,39 @@ namespace System.Text.RegularExpressions
 
                 case RegexNode.One:
                 case RegexNode.Notone:
-                    PushFC(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
+                    _fcStack.Add(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
                     break;
 
                 case RegexNode.Oneloop:
                 case RegexNode.Onelazy:
-                    PushFC(new RegexFC(node.Ch, false, node.M == 0, ci));
+                    _fcStack.Add(new RegexFC(node.Ch, false, node.M == 0, ci));
                     break;
 
                 case RegexNode.Notoneloop:
                 case RegexNode.Notonelazy:
-                    PushFC(new RegexFC(node.Ch, true, node.M == 0, ci));
+                    _fcStack.Add(new RegexFC(node.Ch, true, node.M == 0, ci));
                     break;
 
                 case RegexNode.Multi:
                     if (node.Str.Length == 0)
-                        PushFC(new RegexFC(true));
+                        _fcStack.Add(new RegexFC(true));
                     else if (!rtl)
-                        PushFC(new RegexFC(node.Str[0], false, false, ci));
+                        _fcStack.Add(new RegexFC(node.Str[0], false, false, ci));
                     else
-                        PushFC(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
+                        _fcStack.Add(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
                     break;
 
                 case RegexNode.Set:
-                    PushFC(new RegexFC(node.Str, false, ci));
+                    _fcStack.Add(new RegexFC(node.Str, false, ci));
                     break;
 
                 case RegexNode.Setloop:
                 case RegexNode.Setlazy:
-                    PushFC(new RegexFC(node.Str, node.M == 0, ci));
+                    _fcStack.Add(new RegexFC(node.Str, node.M == 0, ci));
                     break;
 
                 case RegexNode.Ref:
-                    PushFC(new RegexFC(RegexCharClass.AnyClass, true, false));
+                    _fcStack.Add(new RegexFC(RegexCharClass.AnyClass, true, false));
                     break;
 
                 case RegexNode.Nothing:
@@ -509,7 +462,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Start:
                 case RegexNode.EndZ:
                 case RegexNode.End:
-                    PushFC(new RegexFC(true));
+                    _fcStack.Add(new RegexFC(true));
                     break;
 
                 default:
@@ -595,43 +548,6 @@ namespace System.Text.RegularExpressions
         public bool IsCaseInsensitive()
         {
             return _caseInsensitive;
-        }
-    }
-
-    internal sealed class RegexPrefix
-    {
-        public string _prefix;
-        public bool _caseInsensitive;
-
-        private static RegexPrefix _empty = new RegexPrefix(string.Empty, false);
-
-        public RegexPrefix(string prefix, bool ci)
-        {
-            _prefix = prefix;
-            _caseInsensitive = ci;
-        }
-
-        public string Prefix
-        {
-            get
-            {
-                return _prefix;
-            }
-        }
-
-        public bool CaseInsensitive
-        {
-            get
-            {
-                return _caseInsensitive;
-            }
-        }
-        public static RegexPrefix Empty
-        {
-            get
-            {
-                return _empty;
-            }
         }
     }
 }

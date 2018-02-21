@@ -33,6 +33,99 @@ namespace System.Text.RegularExpressions
             runtrackcount = _code.TrackCount;
         }
 
+        protected override bool FindFirstChar()
+        {
+            if (0 != (_code._anchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.End)))
+            {
+                if (!_code._rightToLeft)
+                {
+                    if ((0 != (_code._anchors & RegexFCD.Beginning) && runtextpos > runtextbeg) ||
+                        (0 != (_code._anchors & RegexFCD.Start) && runtextpos > runtextstart))
+                    {
+                        runtextpos = runtextend;
+                        return false;
+                    }
+                    if (0 != (_code._anchors & RegexFCD.EndZ) && runtextpos < runtextend - 1)
+                    {
+                        runtextpos = runtextend - 1;
+                    }
+                    else if (0 != (_code._anchors & RegexFCD.End) && runtextpos < runtextend)
+                    {
+                        runtextpos = runtextend;
+                    }
+                }
+                else
+                {
+                    if ((0 != (_code._anchors & RegexFCD.End) && runtextpos < runtextend) ||
+                        (0 != (_code._anchors & RegexFCD.EndZ) && (runtextpos < runtextend - 1 ||
+                                                               (runtextpos == runtextend - 1 && CharAt(runtextpos) != '\n'))) ||
+                        (0 != (_code._anchors & RegexFCD.Start) && runtextpos < runtextstart))
+                    {
+                        runtextpos = runtextbeg;
+                        return false;
+                    }
+                    if (0 != (_code._anchors & RegexFCD.Beginning) && runtextpos > runtextbeg)
+                    {
+                        runtextpos = runtextbeg;
+                    }
+                }
+
+                if (_code._bmPrefix != null)
+                {
+                    return _code._bmPrefix.IsMatch(runtext, runtextpos, runtextbeg, runtextend);
+                }
+
+                return true; // found a valid start or end anchor
+            }
+            else if (_code._bmPrefix != null)
+            {
+                runtextpos = _code._bmPrefix.Scan(runtext, runtextpos, runtextbeg, runtextend);
+
+                if (runtextpos == -1)
+                {
+                    runtextpos = (_code._rightToLeft ? runtextbeg : runtextend);
+                    return false;
+                }
+
+                return true;
+            }
+            else if (_code._fcPrefix == null)
+            {
+                return true;
+            }
+
+            _rightToLeft = _code._rightToLeft;
+            _caseInsensitive = _code._fcPrefix.Value.CaseInsensitive;
+            string set = _code._fcPrefix.Value.Prefix;
+
+            if (RegexCharClass.IsSingleton(set))
+            {
+                char ch = RegexCharClass.SingletonChar(set);
+
+                for (int i = Forwardchars(); i > 0; i--)
+                {
+                    if (ch == Forwardcharnext())
+                    {
+                        Backwardnext();
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = Forwardchars(); i > 0; i--)
+                {
+                    if (RegexCharClass.CharInClass(Forwardcharnext(), set))
+                    {
+                        Backwardnext();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void Advance(int i)
         {
             _codepos += (i + 1);

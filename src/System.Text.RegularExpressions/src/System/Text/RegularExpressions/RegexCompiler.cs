@@ -76,7 +76,7 @@ namespace System.Text.RegularExpressions
         protected RegexCode _code;              // the RegexCode object (used for debugging only)
         protected int[] _codes;             // the RegexCodes being translated
         protected string[] _strings;           // the stringtable associated with the RegexCodes
-        protected RegexPrefix _fcPrefix;          // the possible first chars computed by RegexFCD
+        protected RegexPrefix? _fcPrefix;          // the possible first chars computed by RegexFCD
         protected RegexBoyerMoore _bmPrefix;          // a prefix as a boyer-moore machine
         protected int _anchors;           // the set of anchors
 
@@ -1448,19 +1448,19 @@ namespace System.Text.RegularExpressions
                 else
                     Rightcharnext();
 
-                if (_fcPrefix.CaseInsensitive)
+                if (_fcPrefix.Value.CaseInsensitive)
                     CallToLower();
 
-                if (!RegexCharClass.IsSingleton(_fcPrefix.Prefix))
+                if (!RegexCharClass.IsSingleton(_fcPrefix.Value.Prefix))
                 {
-                    Ldstr(_fcPrefix.Prefix);
+                    Ldstr(_fcPrefix.Value.Prefix);
                     Call(s_charInSetM);
 
                     BrtrueFar(l2);
                 }
                 else
                 {
-                    Ldc(RegexCharClass.SingletonChar(_fcPrefix.Prefix));
+                    Ldc(RegexCharClass.SingletonChar(_fcPrefix.Value.Prefix));
                     Beq(l2);
                 }
 
@@ -1468,7 +1468,7 @@ namespace System.Text.RegularExpressions
 
                 Ldloc(cV);
                 Ldc(0);
-                if (!RegexCharClass.IsSingleton(_fcPrefix.Prefix))
+                if (!RegexCharClass.IsSingleton(_fcPrefix.Value.Prefix))
                     BgtFar(l1);
                 else
                     Bgt(l1);
