@@ -313,9 +313,16 @@ namespace System.Net
                     string value = values[j];
                     if (!string.IsNullOrWhiteSpace(value))
                     {
-                        if (anyValues)
+                        if(anyValues)
                         {
-                            sb.Append(", ");
+                            if (key.Equals("Set-Cookie", StringComparison.InvariantCultureIgnoreCase) || key.Equals("Set-Cookie2", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                sb.Append("\r\n").Append(key).Append(": ");
+                            }
+                            else
+                            {
+                                sb.Append(", ");
+                            }
                         }
                         sb.Append(value);
                         anyValues = true;
