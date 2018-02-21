@@ -31,27 +31,15 @@ Since [0.10.12.433](https://ci.appveyor.com/project/dotnetfoundation/benchmarkdo
 **Hint:** If you are curious to know what BDN does internally you just need to apply `[KeepBenchmarkFiles]` attribute to your class or set `KeepBenchmarkFiles = true` in your config file. After runing the benchmarks you can find the auto-generated files in `%pathToBenchmarkApp\bin\Release\$TFM\` folder.
 
 ```cs
-public class LocalCoreFxConfig : ManualConfig
-{
-	public LocalCoreFxConfig()
-	{
-		Add(Job.ShortRun.With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
-			@"C:\Projects\forks\corefx\bin\packages\Release",
-			"4.5.0-preview2-26313-0")));
-
-		Add(DefaultConfig.Instance.GetExporters().ToArray());
-		Add(DefaultConfig.Instance.GetLoggers().ToArray());
-		Add(DefaultConfig.Instance.GetColumnProviders().ToArray());
-
-		Add(DisassemblyDiagnoser.Create(new DisassemblyDiagnoserConfig(printAsm: true, recursiveDepth: 2)));
-	}
-}
-
 class Program
 {
-    static void Main(string[] args) 
-        => BenchmarkSwitcher.FromAssembly(typeof(Program).GetTypeInfo().Assembly)
-            .Run(args, new LocalCoreFxConfig());
+    static void Main(string[] args)
+        => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
+            .Run(args, DefaultConfig.Instance.With(
+                Job.ShortRun.With(
+                    CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
+                        @"C:\Projects\forks\corefx\bin\packages\Release",
+                        "4.5.0-preview2-26313-0"))));
 }
 ```
 
@@ -60,35 +48,26 @@ class Program
 As an alternative to rebuilding entire CoreFX to regenerate the NuGet packages, you can provide the list of files that need to be copied to the published self-contained app. The files should be the dlls which you are trying to optimize. You can even define two jobs, one for the state before your local changes and one with the changes:
 
 ```cs
-public class LocalCoreFxConfig : ManualConfig
-{
-	public LocalCoreClrConfig()
-	{
-		Add(Job
-			.ShortRun
-			.With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
-				pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release", 
-				privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
-				displayName: "before"))
-			.AsBaseline()
-			.WithId("before"));
-
-		Add(Job
-			.ShortRun
-			.With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
-				pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release", 
-				privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
-				displayName: "after",
-				filesToCopy: new [] {
-					@"c:\Projects\forks\corefx\bin\AnyOS.AnyCPU.Release\System.Text.RegularExpressions\netcoreapp\System.Text.RegularExpressions.dll"
-				}))
-			.WithId("after"));
-
-		KeepBenchmarkFiles = true;
-		
-		// rest of the config..
-	}
-}
+static void Main(string[] args)
+    => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
+        .Run(args, DefaultConfig.Instance
+            .With(Job.ShortRun
+                .With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
+                    pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release",
+                    privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
+                    displayName: "before"))
+                .AsBaseline()
+                .WithId("before"))
+            .With(Job.ShortRun
+                .With(CustomCoreClrToolchain.CreateForLocalCoreFxBuild(
+                    pathToNuGetFolder: @"C:\Projects\forks\corefx\bin\packages\Release",
+                    privateCoreFxNetCoreAppVersion: "4.5.0-preview2-26313-0",
+                    displayName: "after",
+                    filesToCopy: new [] {
+					    @"c:\Projects\forks\corefx\bin\AnyOS.AnyCPU.Release\System.Text.RegularExpressions\netcoreapp\System.Text.RegularExpressions.dll"
+				    }))
+			    .WithId("after"))
+            .KeepBenchmarkFiles());
 ```
 
 Once you run the benchmarks with such a config it should be clear if you have improved the performance or not (like in the example below):
@@ -103,22 +82,19 @@ Once you run the benchmarks with such a config it should be clear if you have im
 Since [0.10.12.433](https://ci.appveyor.com/project/dotnetfoundation/benchmarkdotnet/build/0.10.12.433/artifacts) BenchmarkDotNet knows [how to](./dogfooding.md#advanced-scenario---using-a-nightly-build-of-microsoftnetcoreap) build a self-contained app against nightly CoreFX build. You just need to provide it the version you would like to benchmark. You don't need to provide url to MyGet feed, the default value is "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json".
 
 ```cs
-public class NightlyCoreFxConfig : ManualConfig
-{
-	public NightlyCoreFxConfig()
-	{
-		Add(Job.ShortRun.With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26215-01")));
-
-		// the rest of the config..
-	}
-}
+static void Main(string[] args)
+    => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
+        .Run(args, DefaultConfig.Instance
+            .With(Job.ShortRun
+                .With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26215-01"))));
 ```
 
 **Hint:** If you would like to compare the performance of different CoreFX versions, you just need to define multiple jobs, each using it's own toolchain.
 
 ```cs
-Add(Job.Default.With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26214-01", displayName: "before my change")));
-Add(Job.Default.With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26215-01", displayName: "after my change")));
+DefaultConfig.Instance
+    .With(Job.Default.With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26214-01", displayName: "before my change")));
+    .With(Job.Default.With(CustomCoreClrToolchain.CreateForNightlyCoreFxBuild("4.5.0-preview2-26215-01", displayName: "after my change")));
 ```
 
 # Benchmarking ANY CoreCLR and CoreFX builds
