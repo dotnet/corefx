@@ -5,10 +5,9 @@
     <PropertyGroup></PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\CoreFx.Private.TestUtilities\ref\CoreFx.Private.TestUtilities.csproj">
-            <SupportedFramework>netcoreapp2.0;net461;$(UAPvNextTFM);$(AllXamarinFrameworks)</SupportedFramework>
+            <SupportedFramework>netcoreapp2.0;net461;$(AllXamarinFrameworks)</SupportedFramework>
         </ProjectReference>
         <ProjectReference Include="..\..\src\CoreFx.Private.TestUtilities\src\CoreFx.Private.TestUtilities.csproj"/>
-        
     </ItemGroup>
     <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
