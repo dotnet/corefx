@@ -124,8 +124,8 @@ namespace System.SpanTests
                         firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
                         firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
                     Assert.Equal(
-                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
-                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCultureIgnoreCase),
+                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
                     Assert.Equal(
                         firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.InvariantCulture),
                         firstSpan.StartsWith(secondSpan, StringComparison.InvariantCulture));

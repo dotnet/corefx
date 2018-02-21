@@ -122,8 +122,8 @@ namespace System.SpanTests
                         firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
                         firstSpan.EndsWith(secondSpan, StringComparison.CurrentCulture));
                     Assert.Equal(
-                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
-                        firstSpan.EndsWith(secondSpan, StringComparison.CurrentCulture));
+                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.CurrentCultureIgnoreCase),
+                        firstSpan.EndsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
                     Assert.Equal(
                         firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.InvariantCulture),
                         firstSpan.EndsWith(secondSpan, StringComparison.InvariantCulture));
