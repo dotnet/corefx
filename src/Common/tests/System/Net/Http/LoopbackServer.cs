@@ -261,6 +261,17 @@ namespace System.Net.Test.Common
             "\r\n" +
             content;
 
+        public static string GetSingleChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+            $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+            "Transfer-Encoding: chunked\r\n" +
+            additionalHeaders +
+            "\r\n" +
+            $"{content.Length:X}\r\n" +
+            $"{content}\r\n" +
+            $"0\r\n" +
+            $"\r\n";
+
         public class Options
         {
             public IPAddress Address { get; set; } = IPAddress.Loopback;
@@ -320,6 +331,11 @@ namespace System.Net.Test.Common
                 while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
                 {
                     lines.Add(line);
+                }
+
+                if (line == null)
+                {
+                    throw new Exception("Unexpected EOF trying to read request header");
                 }
 
                 return lines;

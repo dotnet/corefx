@@ -133,6 +133,63 @@ namespace System.Net.Http
                 _connection.ReturnConnectionToPool();
                 _connection = null;
             }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    if (_connection != null && _contentBytesRemaining <= s_maxDrainBytes)
+                    {
+                        // Start the asynchronous drain.
+                        // It may complete synchronously, in which case the connection will be put back in the pool.
+                        // Ignore failures, and skip the call to base.Dispose -- it will be done by DrainAsync.
+                        Task ignore = DrainAsync();
+                        return;
+                    }
+                }
+
+                base.Dispose(disposing);
+            }
+
+            private void ConsumeBufferedBytes()
+            {
+                int bytesToConsume = _connection._readLength - _connection._readOffset;
+                Debug.Assert(bytesToConsume > 0);
+
+                if ((ulong)bytesToConsume > _contentBytesRemaining)
+                {
+                    bytesToConsume = (int)_contentBytesRemaining;
+                }
+
+                _connection._readOffset += bytesToConsume;
+                _contentBytesRemaining -= (ulong)bytesToConsume;
+            }
+
+            private async Task DrainAsync()
+            {
+                try
+                {
+                    Debug.Assert(_contentBytesRemaining > 0);
+
+                    if (_connection._readOffset < _connection._readLength)
+                    {
+                        ConsumeBufferedBytes();
+                    }
+
+                    while (_contentBytesRemaining > 0)
+                    {
+                        await _connection.FillAsync();
+                        ConsumeBufferedBytes();
+                    }
+
+                    _connection.ReturnConnectionToPool();
+                    _connection = null;
+                }
+                finally
+                {
+                    base.Dispose(true);
+                }
+            }
         }
     }
 }
