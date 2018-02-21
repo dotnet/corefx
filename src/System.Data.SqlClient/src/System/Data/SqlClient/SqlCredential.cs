@@ -16,47 +16,36 @@ namespace System.Data.SqlClient
         {
             if (userId == null)
             {
-                throw ADP.ArgumentNull("userId");
+                throw ADP.ArgumentNull(nameof(userId));
             }
 
             if (userId.Length > TdsEnums.MAXLEN_USERNAME)
             {
-                throw ADP.InvalidArgumentLength("userId", TdsEnums.MAXLEN_USERNAME);
+                throw ADP.InvalidArgumentLength(nameof(userId), TdsEnums.MAXLEN_USERNAME);
             }
 
             if (password == null)
             {
-                throw ADP.ArgumentNull("password");
+                throw ADP.ArgumentNull(nameof(password));
             }
 
             if (password.Length > TdsEnums.MAXLEN_PASSWORD)
             {
-                throw ADP.InvalidArgumentLength("password", TdsEnums.MAXLEN_PASSWORD);
+                throw ADP.InvalidArgumentLength(nameof(password), TdsEnums.MAXLEN_PASSWORD);
             }
 
             if (!password.IsReadOnly())
             {
-                throw ADP.MustBeReadOnly("password");
+                throw ADP.MustBeReadOnly(nameof(password));
             }
 
             _userId = userId;
             _password = password;
         }
 
-        public string UserId
-        {
-            get
-            {
-                return _userId;
-            }
-        }
+        public string UserId => _userId;
 
-        public SecureString Password
-        {
-            get
-            {
-                return _password;
-            }
-        }
+        public SecureString Password => _password;
+
     }
 }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -48,6 +52,21 @@ namespace System.Data.SqlClient.Tests
 
             // Verify non-null userId requirement
             Assert.Throws<ArgumentNullException>(() => new SqlCredential(null, password));
+
+        }
+
+        [Fact]
+        public static void Test_SqlCredential_Properties()
+        {
+            var userId = "user";
+            var password = new SecureString();
+            password.AppendChar('0');
+            password.MakeReadOnly();
+
+            var credential = new SqlCredential(userId, password);
+
+            Assert.Equal(userId, credential.UserId);
+            Assert.Equal(password, credential.Password);
 
         }
 
