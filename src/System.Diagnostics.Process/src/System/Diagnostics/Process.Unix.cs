@@ -110,6 +110,8 @@ namespace System.Diagnostics
                         }
                         catch
                         {
+                            _waitHandle?.Dispose();
+                            _waitHandle = null;
                             _watchingForExit = false;
                             throw;
                         }
@@ -324,13 +326,14 @@ namespace System.Diagnostics
                     out childPid,
                     out stdinFd, out stdoutFd, out stderrFd);
 
+                // Ensure we'll reap this process.
+                // note: SetProcessId will set this if we don't set it first.
+                _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true);
+
                 // Store the child's information into this Process object.
                 Debug.Assert(childPid >= 0);
                 SetProcessId(childPid);
                 SetProcessHandle(new SafeProcessHandle(childPid));
-
-                // Ensure we'll reap this process.
-                _waitStateHolder = new ProcessWaitState.Holder(_processId, isNewChild: true);
             }
             finally
             {
