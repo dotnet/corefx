@@ -1040,6 +1040,13 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
         }
 
+        [Fact]
+        [ActiveIssue(27098, TargetFrameworkMonikers.NetFramework)]
+        public static void GetHashCode_EmbeddedNull_ReturnsDifferentHashCodes()
+        {
+            Assert.NotEqual("\0AAAAAAAAA".GetHashCode(), "\0BBBBBBBBBBBB".GetHashCode());
+        }
+
         [Theory]
         // CurrentCulture
         [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
@@ -1105,7 +1112,6 @@ namespace System.Tests
         [InlineData("", "Hello", StringComparison.Ordinal, false)]
         [InlineData("", "", StringComparison.Ordinal, true)]
         [InlineData("123", 123, StringComparison.Ordinal, false)] // Not a string
-        //[InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.Ordinal, false)] // "See https://github.com/dotnet/corefx/issues/27098"
         // OridinalIgnoreCase
         [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("HELLO", "hello", StringComparison.OrdinalIgnoreCase, true)]
