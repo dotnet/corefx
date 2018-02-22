@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using Internal.Cryptography;
 using Microsoft.Win32.SafeHandles;
@@ -43,7 +44,8 @@ namespace System.Security.Cryptography
             public ECDsaOpenSsl(int keySize)
             {
                 KeySize = keySize;
-                _key = new ECOpenSsl(this);
+                // Setting KeySize wakes up _key.
+                Debug.Assert(_key != null);
             }
 
             /// <summary>
@@ -184,7 +186,9 @@ namespace System.Security.Cryptography
                     // Set the KeySize before FreeKey so that an invalid value doesn't throw away the key
                     base.KeySize = value;
 
-                    _key.Dispose();
+                    // This is the only place where _key can be null, because it's called by the constructor
+                    // which sets KeySize.
+                    _key?.Dispose();
                     _key = new ECOpenSsl(this);
                 }
             }
