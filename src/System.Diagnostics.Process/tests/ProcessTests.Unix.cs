@@ -440,6 +440,8 @@ namespace System.Diagnostics.Tests
                     processId = process.Id;
                     waitState = GetProcessWaitState(process);
 
+                    process.WaitForExit();
+
                     Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
                     Assert.True(GetWaitStateDictionary(childDictionary: true).Contains(processId));
                 }
