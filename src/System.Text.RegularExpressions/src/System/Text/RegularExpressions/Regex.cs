@@ -110,8 +110,10 @@ namespace System.Text.RegularExpressions
         internal RegexCode _code;                           // if interpreted, this is the code for RegexInterpreter
         internal bool _refsInitialized = false;
 
-        internal static LinkedList<CachedCodeEntry> s_livecode = new LinkedList<CachedCodeEntry>();// the cache of code and factories that are currently loaded
-        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode_dict = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>();
+        // the cache of code and factories that are currently loaded:
+        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>();
+        internal static CachedCodeEntry s_livecode_first = null;
+        internal static CachedCodeEntry s_livecode_last = null;
         internal static int s_cacheSize = 15;
 
         internal const int MaxOptionShift = 10;
@@ -366,9 +368,15 @@ namespace System.Text.RegularExpressions
                     {
                         while (s_livecode.Count > s_cacheSize)
                         {
-                            LinkedListNode<CachedCodeEntry> last = s_livecode.Last;
-                            s_livecode_dict.Remove(last.Value._key);
-                            s_livecode.RemoveLast();
+                            CachedCodeEntry last = s_livecode_last;
+                            s_livecode.Remove(last._key);
+
+                            // update linked list:
+                            s_livecode_last = last._next;
+                            if (last._next != null)
+                                last._next._previous = null;
+                            else  // last one removed
+                                s_livecode_first = null;
                         }
                     }
                 }
@@ -1035,15 +1043,36 @@ namespace System.Text.RegularExpressions
         {
             lock (s_livecode)
             {
-                s_livecode_dict.TryGetValue(key, out var entry);
-                if (entry != null)
+                s_livecode.TryGetValue(key, out var entry);
+                if (entry != null )
                 {
-                    s_livecode.Remove(entry);
-                    s_livecode.AddFirst(entry);
+                    CachePromoteLinkedListEntry(entry);
                     return entry;
                 }
             }
             return null;
+        }
+
+        private static void CachePromoteLinkedListEntry(CachedCodeEntry entry)
+        {
+            if (s_livecode_first != entry)
+            {
+                if (entry._previous != null)
+                {
+                    entry._previous._next = entry._next;
+                    entry._next._previous = entry._previous;  // not first so should exist _next
+                }
+
+                if (s_livecode_last == entry)
+                {
+                    s_livecode_last = entry._next;
+                }
+
+                s_livecode_first._next = entry;
+                entry._previous = s_livecode_first;
+                entry._next = null;
+                s_livecode_first = entry;
+            }
         }
 
         /*
@@ -1056,24 +1085,42 @@ namespace System.Text.RegularExpressions
             lock (s_livecode)
             {
                 // first look for it in the cache and move it to the head
-                s_livecode_dict.TryGetValue(key, out var entry);
+                s_livecode.TryGetValue(key, out var entry);
                 if (entry != null)
                 {
-                    s_livecode.Remove(entry);
-                    s_livecode.AddFirst(entry);
+                    CachePromoteLinkedListEntry(entry);
                     return entry;
                 }
                 // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
                 else if (s_cacheSize != 0)
                 {
                     newcached = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
-                    s_livecode_dict.Add(key, newcached);
-                    s_livecode.AddFirst(newcached);
-                    if (s_livecode.Count > s_cacheSize)
+                    s_livecode.Add(key, newcached);
+                    // put first in linked list:
                     {
-                        var last = s_livecode.Last;
-                        s_livecode_dict.Remove(last.Value._key);
-                        s_livecode.RemoveLast();
+                        if (s_livecode_first != null)
+                        {
+                            s_livecode_first._next = newcached;
+                            newcached._previous = s_livecode_first;
+                        }
+
+                        s_livecode_first = newcached;
+                        if (s_livecode_last == null)
+                        {
+                            s_livecode_last = newcached;
+                        }
+                        else
+                        {
+                            if (s_livecode.Count > s_cacheSize)
+                            {
+                                var last = s_livecode_last;
+                                s_livecode.Remove(last._key);
+
+                                last._next._previous = null;
+                                s_livecode_last = last._next;
+                                last._next = null;
+                            }
+                        }
                     }
                 }
             }
@@ -1166,6 +1213,8 @@ namespace System.Text.RegularExpressions
      */
     internal sealed class CachedCodeEntry
     {
+        internal CachedCodeEntry _next = null;
+        internal CachedCodeEntry _previous = null;
         internal CachedCodeEntryKey _key;
         internal RegexCode _code;
         internal Hashtable _caps;
