@@ -180,7 +180,7 @@ namespace System.Net.Tests
 
             response.Close();
 
-            string clientResponse = GetClientResponse(174);
+            string clientResponse = GetClientResponse(172);
             Assert.Contains($"\r\nSet-Cookie: name1=value1\r\n", clientResponse);
             Assert.Contains($"\r\nSet-Cookie: name2=value2\r\n", clientResponse);
         }
