@@ -140,12 +140,25 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(ControlWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Control whitespace in path throws ArgumentException
-        public void WindowsControlWhiteSpace(string component)
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlWhiteSpace_Desktop(string component)
         {
             // CreateSubdirectory will throw when passed a path with control whitespace e.g. "\t"
             string path = IOServices.RemoveTrailingSlash(GetTestFileName());
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
+        }
+
+        [ActiveIssue(27269)]
+        [Theory,
+            MemberData(nameof(ControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlWhiteSpace_Core(string component)
+        {
+            // CreateSubdirectory will throw when passed a path with control whitespace e.g. "\t"
+            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
+            Assert.Throws<IOException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
 
         [Theory,

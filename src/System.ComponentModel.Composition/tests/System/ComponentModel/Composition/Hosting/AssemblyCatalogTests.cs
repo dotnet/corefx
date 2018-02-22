@@ -109,6 +109,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
+        public static void Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO(Func<string, AssemblyCatalog> catalogCreator)
+        {
+            Assert.ThrowsAny<IOException>(() =>
+            {
+                var catalog = catalogCreator("??||>");
+            });
+        }
+
         public static void Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad(Func<string, AssemblyCatalog> catalogCreator)
         {
             string directory = Environment.GetFolderPath(Environment.SpecialFolder.System);
@@ -215,10 +223,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s);
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s);
             });
@@ -314,10 +333,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext());
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext());
             });
@@ -412,10 +442,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, (ICompositionElement)new AssemblyCatalog(s));
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, (ICompositionElement)new AssemblyCatalog(s));
             });
@@ -509,10 +550,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext(), (ICompositionElement)new AssemblyCatalog(s));
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext(), (ICompositionElement)new AssemblyCatalog(s));
             });
