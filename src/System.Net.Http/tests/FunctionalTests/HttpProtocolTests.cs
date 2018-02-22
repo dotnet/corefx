@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Sockets;
 using Xunit;
 
 namespace System.Net.Http.Functional.Tests
@@ -603,4 +604,104 @@ namespace System.Net.Http.Functional.Tests
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
         protected override Stream GetStream_ClientDisconnectOk(Stream s) => new DribbleStream(s, true);
     }
+
+    public class HttpProtocolTests2 : HttpClientTestBase
+    {
+
+        [Fact]
+        public async Task RequestDrainTest_SendAfterResponseReceived()
+        {
+            if (UseSocketsHttpHandler)
+            {
+                return;     // hangs
+            }
+
+            const string content = "Some content\r\n";  // single line terminated with CRLF so we can use ReadLineAsync to get body
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        await client.PostAsync(url, new MyContent(content));
+                        await client.PostAsync(url, new MyContent(content));
+                    }
+                },
+                async server =>
+                {
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        List<string> lines;
+                        string body;
+
+                        lines = await connection.ReadRequestHeaderAndSendResponseAsync();
+
+                        Console.WriteLine("First request:");
+                        foreach (var l in lines)
+                            Console.WriteLine(l);
+
+                        Console.WriteLine();
+
+                        body = await connection.Reader.ReadLineAsync();
+
+                        Console.WriteLine(body);
+
+                        Assert.Contains($"Content-Length: {content.Length}", lines);
+                        Assert.Equal(content, body + "\r\n");
+
+                        lines = await connection.ReadRequestHeaderAndSendResponseAsync();
+
+                        Console.WriteLine("Second request:");
+                        foreach (var l in lines)
+                            Console.WriteLine(l);
+
+                        Console.WriteLine();
+
+                        body = await connection.Reader.ReadLineAsync();
+
+                        Console.WriteLine(body);
+
+
+                        Assert.Contains($"Content-Length: {content.Length}", lines);
+                        Assert.Equal(content, body + "\r\n");
+                    });
+                });
+        }
+
+
+        class MyContent : HttpContent
+        {
+            string _content;
+
+            public MyContent(string content)
+            {
+                _content = content;
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                length = _content.Length;
+                return true;
+            }
+
+            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                // Flush to ensure request is sent
+                await stream.FlushAsync();
+
+                // Delay to try to let response be received
+                await Task.Delay(500);
+
+                await stream.WriteAsync(System.Text.Encoding.UTF8.GetBytes(_content));
+            }
+        }
+
+    }
+
+    public sealed class SocketsHttpHandler_HttpProtocolTests2 : HttpProtocolTests2
+    {
+        protected override bool UseSocketsHttpHandler => true;
+    }
+
+
 }
