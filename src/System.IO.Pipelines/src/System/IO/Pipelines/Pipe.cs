@@ -341,12 +341,12 @@ namespace System.IO.Pipelines
             lock (_sync)
             {
                 var examinedEverything = false;
-                if (examined.Segment == _commitHead)
+                if (examined.GetObject() == _commitHead)
                 {
-                    examinedEverything = _commitHead != null ? examined.Index == _commitHeadIndex - _commitHead.Start : examined.Index == 0;
+                    examinedEverything = _commitHead != null ? examined.GetInteger() == _commitHeadIndex - _commitHead.Start : examined.GetInteger() == 0;
                 }
 
-                if (consumed.Segment != null)
+                if (consumed.GetObject() != null)
                 {
                     if (_readHead == null)
                     {
@@ -354,13 +354,13 @@ namespace System.IO.Pipelines
                         return;
                     }
 
-                    var consumedSegment = (BufferSegment)consumed.Segment;
+                    var consumedSegment = (BufferSegment)consumed.GetObject();
 
                     returnStart = _readHead;
                     returnEnd = consumedSegment;
 
                     // Check if we crossed _maximumSizeLow and complete backpressure
-                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumed.Index).Length;
+                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumed.GetInteger()).Length;
                     long oldLength = _length;
                     _length -= consumedBytes;
 
@@ -373,7 +373,7 @@ namespace System.IO.Pipelines
                     // Check if we consumed entire last segment
                     // if we are going to return commit head we need to check that there is no writing operation that
                     // might be using tailspace
-                    if (consumed.Index == returnEnd.Length && _writingHead != returnEnd)
+                    if (consumed.GetInteger() == returnEnd.Length && _writingHead != returnEnd)
                     {
                         BufferSegment nextBlock = returnEnd.NextSegment;
                         if (_commitHead == returnEnd)
@@ -389,7 +389,7 @@ namespace System.IO.Pipelines
                     else
                     {
                         _readHead = consumedSegment;
-                        _readHeadIndex = consumed.Index;
+                        _readHeadIndex = consumed.GetInteger();
                     }
                 }
 

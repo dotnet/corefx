@@ -72,16 +72,14 @@ namespace System.Buffers
 
             while (source.Length > 0)
             {
-                int writeSize = destination.Length;
-
                 if (destination.Length == 0)
                 {
                     destination = bufferWriter.GetSpan(source.Length);
                 }
 
-                source.Slice(0, writeSize).CopyTo(destination);
-                bufferWriter.Advance(writeSize);
-                source = source.Slice(writeSize);
+                source.Slice(0, destination.Length).CopyTo(destination);
+                bufferWriter.Advance(destination.Length);
+                source = source.Slice(destination.Length);
                 destination = default;
             }
         }

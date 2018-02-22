@@ -199,11 +199,11 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task GetMemory_AjustsToPoolMaxBufferSize()
+        public void GetMemory_AdjustsToPoolMaxBufferSize()
         {
             PipeWriter buffer = Pipe.Writer;
             var memory = buffer.GetMemory(int.MaxValue);
-            Assert.True(4096, memory.Lenght);
+            Assert.Equal(4096, memory.Length);
         }
     }
 }
