@@ -84,6 +84,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
