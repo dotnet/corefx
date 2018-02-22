@@ -296,6 +296,10 @@ namespace System.Buffers
             public Memory<T> Memory { get; set; }
             public IMemoryList<T> Next { get; set; }
             public long RunningIndex { get; set; }
+            public IMemoryList<T> GetNext(long offset)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

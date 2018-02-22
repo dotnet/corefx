@@ -227,6 +227,7 @@ namespace System.Buffers
     {
         System.Memory<T> Memory { get; }
         System.Buffers.IMemoryList<T> Next { get; }
+        System.Buffers.IMemoryList<T> GetNext(long runningIndex);
         long RunningIndex { get; }
     }
     public partial interface IRetainable

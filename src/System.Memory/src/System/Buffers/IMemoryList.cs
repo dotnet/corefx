@@ -23,5 +23,10 @@ namespace System.Buffers
         /// The sum of node length before current.
         /// </summary>
         long RunningIndex { get; }
+
+        /// <summary>
+        /// Returns the <see cref="IMemoryList{T}"/> node that contains <paramref name="runningIndex"/>
+        /// </summary>
+        IMemoryList<T> GetNext(long runningIndex);
     }
 }
