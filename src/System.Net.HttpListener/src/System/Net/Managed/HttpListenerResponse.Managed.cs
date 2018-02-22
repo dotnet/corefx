@@ -313,7 +313,7 @@ namespace System.Net
                     string value = values[j];
                     if (!string.IsNullOrWhiteSpace(value))
                     {
-                        if(anyValues)
+                        if (anyValues)
                         {
                             if (key.Equals(HttpKnownHeaderNames.SetCookie, StringComparison.InvariantCultureIgnoreCase) ||
                                 key.Equals(HttpKnownHeaderNames.SetCookie2, StringComparison.InvariantCultureIgnoreCase))

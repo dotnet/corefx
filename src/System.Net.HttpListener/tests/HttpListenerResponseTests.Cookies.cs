@@ -176,7 +176,7 @@ namespace System.Net.Tests
         {
             HttpListenerResponse response = await GetResponse();
             response.Headers.Add("Set-Cookie", "name1=value1");
-             response.Headers.Add("Set-Cookie", "name2=value2");
+            response.Headers.Add("Set-Cookie", "name2=value2");
 
             response.Close();
 
@@ -184,7 +184,6 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nSet-Cookie: name1=value1\r\n", clientResponse);
             Assert.Contains($"\r\nSet-Cookie: name2=value2\r\n", clientResponse);
         }
-
 
         [Fact]
         public async Task AppendCookie_ValidCookie_AddsCookieToCollection()
