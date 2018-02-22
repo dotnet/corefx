@@ -232,21 +232,33 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 Type type = types[i];
 
-                if (type != null)
+                try
                 {
-                    bool isObsolete = false;
-                    object[] obsoleteAttributes = type.GetCustomAttributes(typeof(ObsoleteAttribute), false);
-                    foreach (object attribute in obsoleteAttributes)
+                    if (type != null)
                     {
-                        if (((ObsoleteAttribute)attribute).IsError)
+                        bool isObsolete = false;
+                        object[] obsoleteAttributes = type.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+                        foreach (object attribute in obsoleteAttributes)
                         {
-                            isObsolete = true;
-                            break;
+                            if (((ObsoleteAttribute)attribute).IsError)
+                            {
+                                isObsolete = true;
+                                break;
+                            }
+                        }
+
+                        if (isObsolete)
+                        {
+                            continue;
                         }
                     }
-
-                    if (isObsolete)
+                }
+                catch (FileNotFoundException e)
+                {
+                    if (warnings)
                     {
+                        Console.Out.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.InfoIgnoreType, type.FullName)));
+                        WriteWarning(e, parsableerrors);
                         continue;
                     }
                 }
