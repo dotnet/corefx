@@ -45,14 +45,6 @@ namespace System.Net.Http
                 // Write chunk contents followed by \r\n
                 await _connection.WriteAsync(source).ConfigureAwait(false);
                 await _connection.WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
-
-                // Flush the chunk.  This is reasonable from the standpoint of having just written a standalone piece
-                // of data, but is also necessary to support duplex communication, where a CopyToAsync is taking the
-                // data from content and writing it here; if there was no flush, we might not send the data until the
-                // source was empty, and it might be kept open to enable subsequent communication.  And it's necessary
-                // in general for at least the first write, as we need to ensure if it's the entirety of the content
-                // and if all of the headers and content fit in the write buffer that we've actually sent the request.
-                await _connection.FlushAsync().ConfigureAwait(false);
             }
             
             public override async Task FinishAsync()

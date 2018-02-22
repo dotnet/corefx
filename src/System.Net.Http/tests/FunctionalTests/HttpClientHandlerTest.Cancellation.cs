@@ -20,7 +20,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true, CancellationMode.Token)]
         public async Task PostAsync_CancelDuringRequestContentSend_TaskCanceledQuickly(bool chunkedTransfer, CancellationMode mode)
         {
-            if (IsWinHttpHandler || IsNetfxHandler)
+            if (!UseSocketsHttpHandler)
             {
                 // Issue #27063: hangs / doesn't cancel
                 return;
