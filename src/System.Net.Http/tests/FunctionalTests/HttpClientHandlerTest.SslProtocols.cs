@@ -240,19 +240,12 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
-        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
-        [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
+        [InlineData(SslProtocols.Tls11, SslProtocols.Tls)]
+        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11)]
+        [InlineData(SslProtocols.Tls, SslProtocols.Tls12)]
         public async Task GetAsync_AllowedSSLVersionDiffersFromServer_ThrowsException(
-            SslProtocols allowedProtocol, SslProtocols acceptedProtocol, Type exceptedServerException)
+            SslProtocols allowedProtocol, SslProtocols acceptedProtocol)
         {
-
-            if (PlatformDetection.IsUbuntu1804)
-            {
-                //ActiveIssue #27023: [Ubuntu18.04] Tests failed:
-                return;
-            }
-
             if (!BackendSupportsSslConfiguration)
                 return;
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -264,9 +257,25 @@ namespace System.Net.Http.Functional.Tests
                 var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedProtocol };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        Assert.ThrowsAsync(exceptedServerException, () => server.AcceptConnectionSendResponseAndCloseAsync()),
+                    bool gotExpectedException = false;
+                    Task serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
+                    try
+                    {
+                        await TestHelper.WhenAllCompletedOrAnyFailed(serverTask, 
                         Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                    }
+                    catch (IOException)
+                    {
+                        // Some SSL implementations simply close or reset connection after protocol mismatch.
+                        gotExpectedException = true;
+                    }
+                    catch (AuthenticationException)
+                    {
+                        // Some SSL implementations do sent Fatal Alert message before closing.
+                        gotExpectedException = true;
+                    }
+                    // We expect negotiation to fail so one or the other expected exception should be thrown.
+                    Assert.True(gotExpectedException);
                 }, options);
             }
         }
@@ -276,12 +285,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
         {
-            if (PlatformDetection.IsUbuntu1804)
-            {
-                //ActiveIssue #27023: [Ubuntu18.04] Tests failed:
-                return;
-            }
-
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
@@ -295,9 +298,24 @@ namespace System.Net.Http.Functional.Tests
                     options.SslProtocols = SslProtocols.Tls;
                     await LoopbackServer.CreateServerAsync(async (server, url) =>
                     {
-                        await TestHelper.WhenAllCompletedOrAnyFailed(
-                            Assert.ThrowsAsync<IOException>(() => server.AcceptConnectionSendResponseAndCloseAsync()),
-                            Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                        bool gotExpectedException = false;
+                        Task serverTask =  server.AcceptConnectionSendResponseAndCloseAsync();
+                        try
+                        {
+                            await TestHelper.WhenAllCompletedOrAnyFailed(serverTask, Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                        }
+                        catch (IOException)
+                        {
+                            // Some SSL implementations simply close or reset connection after protocol mismatch.
+                            gotExpectedException = true;
+                        }
+                        catch (System.Security.Authentication.AuthenticationException)
+                        {
+                            // Some SSL implementations do sent Fatal Alert message before closing.
+                            gotExpectedException = true;
+                        }
+                        // We expect negotiation to fail so one or the other expected exception should be thrown.
+                        Assert.True(gotExpectedException);
                     }, options);
 
                     foreach (var prot in new[] { SslProtocols.Tls11, SslProtocols.Tls12 })
