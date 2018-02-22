@@ -262,7 +262,9 @@ namespace System.Net.Http.Functional.Tests
                     try
                     {
                         await serverTask;
-                    } catch (Exception e) when (e is IOException || e is AuthenticationException) {
+                    }
+                    catch (Exception e) when (e is IOException || e is AuthenticationException)
+                    {
                         // Some SSL implementations simply close or reset connection after protocol mismatch.
                         // Newer OpenSSL sends Fatal Alert message before closing.
                         return;
@@ -296,7 +298,9 @@ namespace System.Net.Http.Functional.Tests
                         try
                         {
                             await serverTask;
-                        } catch (Exception e) when (e is IOException || e is AuthenticationException) {
+                        }
+                        catch (Exception e) when (e is IOException || e is AuthenticationException)
+                        {
                             // Some SSL implementations simply close or reset connection after protocol mismatch.
                             // Newer OpenSSL sends Fatal Alert message before closing.
                             return;
