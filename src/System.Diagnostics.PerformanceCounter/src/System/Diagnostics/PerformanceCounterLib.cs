@@ -322,7 +322,9 @@ namespace System.Diagnostics
             _categoryTable = null;
             //race with FindCustomCategory
             lock (_customCategoryTableLock)
+            {
                 _customCategoryTable = null;
+            }
         }
 
         internal void Close()
@@ -644,7 +646,9 @@ namespace System.Diagnostics
             lock (_customCategoryTableLock)
             {
                 if (_customCategoryTable == null)
+                {
                     _customCategoryTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                }
 
                 if (_customCategoryTable.ContainsKey(category))
                 {
