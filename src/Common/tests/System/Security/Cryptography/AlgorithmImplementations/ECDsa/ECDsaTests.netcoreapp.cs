@@ -20,7 +20,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         {
             AssertExtensions.Throws<ArgumentException>("hashAlgorithm", () => ecdsa.TrySignData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(null), out int bytesWritten));
             AssertExtensions.Throws<ArgumentException>("hashAlgorithm", () => ecdsa.TrySignData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(""), out int bytesWritten));
-            Assert.Throws<CryptographicException>(() => ecdsa.TrySignData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(Guid.NewGuid().ToString("N")), out int bytesWritten));
+            Assert.ThrowsAny<CryptographicException>(() => ecdsa.TrySignData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(Guid.NewGuid().ToString("N")), out int bytesWritten));
         }
 
         [Theory, MemberData(nameof(RealImplementations))]
@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         {
             AssertExtensions.Throws<ArgumentException>("hashAlgorithm", () => ecdsa.VerifyData(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty, new HashAlgorithmName(null)));
             AssertExtensions.Throws<ArgumentException>("hashAlgorithm", () => ecdsa.VerifyData(ReadOnlySpan<byte>.Empty, ReadOnlySpan<byte>.Empty, new HashAlgorithmName("")));
-            Assert.Throws<CryptographicException>(() => ecdsa.VerifyData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(Guid.NewGuid().ToString("N"))));
+            Assert.ThrowsAny<CryptographicException>(() => ecdsa.VerifyData(ReadOnlySpan<byte>.Empty, Span<byte>.Empty, new HashAlgorithmName(Guid.NewGuid().ToString("N"))));
         }
 
         private static byte[] TryWithOutputArray(Func<byte[], (bool, int)> func)
