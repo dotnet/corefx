@@ -26,7 +26,7 @@ namespace System.Net.Test.Common
             {
                 string headerName = _options.IsProxy ? "Proxy-Authorization" : "Authorization";
                 lines = await connection.ReadRequestHeaderAsync();
-                if (connection.GetRequestHeaderValue(headerName) == null)
+                if (GetRequestHeaderValue(lines, headerName) == null)
                 {
                     await connection.SendResponseAsync( _options.IsProxy ?
                                     HttpStatusCode.ProxyAuthenticationRequired : HttpStatusCode.Unauthorized, authenticateHeaders);

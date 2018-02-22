@@ -47,46 +47,49 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
-            var rightCreds = new NetworkCredential("rightusername", "rightpassword");
-            var wrongCreds = new NetworkCredential("wrongusername", "wrongpassword");
-            string expectCreds = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{rightCreds.UserName}:{rightCreds.Password}"));
+            var explicitProxyCreds = new NetworkCredential("rightusername", "rightpassword");
+            var defaultSystemProxyCreds = new NetworkCredential("wrongusername", "wrongpassword");
+            string expectCreds = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{explicitProxyCreds.UserName}:{explicitProxyCreds.Password}"));
 
             await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (var client = new HttpClient(handler))
                 {
-                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, rightCreds);
-                    handler.DefaultProxyCredentials = wrongCreds;
+                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, explicitProxyCreds);
+                    handler.DefaultProxyCredentials = defaultSystemProxyCreds;
 
-                    Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
+                    // URL does not matter. We will get response from "proxy" code bellow.
+                    Task<HttpResponseMessage> responseTask = client.GetAsync("http://notatrealserver.com/");
                     await proxyServer.AcceptConnectionAsync(async connection =>
                     {
-                        await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
-                        if (connection.GetRequestHeaderValue("Proxy-Authorization") == null)
+                        List<string> headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                        // Curl sends Basic auth without asking, other handlers wait for 407.
+                        if (!IsCurlHandler)
                         {
                             await connection.SendResponseAsync(HttpStatusCode.ProxyAuthenticationRequired, "Proxy-Authenticate: Basic\r\n");
-                            lines = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                            headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
                         }
-                        // Verify that we got rightCreds instead of wrongCreds (or nothing).
-                        Assert.Equal(expectCreds, connection.GetRequestHeaderValue("Proxy-Authorization"));
+                        // Verify that we got explicitProxyCreds.
+                        Assert.Equal(expectCreds, LoopbackServer.GetRequestHeaderValue(headers, "Proxy-Authorization"));
 
                         Task serverTask = connection.SendResponseAsync(HttpStatusCode.OK);
 
                         await TestHelper.WhenAllCompletedOrAnyFailed(serverTask, responseTask).ConfigureAwait(false);
                         HttpResponseMessage response = await responseTask.ConfigureAwait(false);
 
-                        Assert.True(response.StatusCode ==  HttpStatusCode.OK);
+                        Assert.Equal(response.StatusCode, HttpStatusCode.OK);
                     });
                 };
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
         [ActiveIssue(25640, TestPlatforms.Windows)] // TODO It should be enabled for SocketsHttpHandler on all platforms
-        public async void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
+        public async Task ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
             const string ExpectedUsername = "rightusername";
             const string ExpectedPassword = "rightpassword";
@@ -120,10 +123,9 @@ namespace System.Net.Http.Functional.Tests
                         Assert.True(response.StatusCode ==  HttpStatusCode.OK);
                     }
                     return SuccessExitCode;
-                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi });
-
+                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
                 if (useProxy)
-                {      
+                {
                     await proxyTask;
                 }
             }, options);
