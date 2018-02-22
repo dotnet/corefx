@@ -78,9 +78,9 @@ namespace System.Security.Cryptography
 
         internal int SetKeyAndGetSize(SecKeyPair keyPair)
         {
-            long size = GetKeySize(keyPair);
+            int size = GetKeySize(keyPair);
             SetKey(keyPair);
-            return (int)size;
+            return size;
         }
 
         private void SetKey(SecKeyPair keyPair)
@@ -163,17 +163,17 @@ namespace System.Security.Cryptography
                 newKeys = SecKeyPair.PublicOnly(publicKey);
             }
 
-            long size = GetKeySize(newKeys);
+            int size = GetKeySize(newKeys);
             SetKey(newKeys);
 
-            return (int)size;
+            return size;
         }
 
-        private static long GetKeySize(SecKeyPair newKeys)
+        private static int GetKeySize(SecKeyPair newKeys)
         {
             long size = Interop.AppleCrypto.EccGetKeySizeInBits(newKeys.PublicKey);
             Debug.Assert(size == 256 || size == 384 || size == 521, $"Unknown keysize ({size})");
-            return size;
+            return (int)size;
         }
 
         private static SafeSecKeyRefHandle ImportKey(ECParameters parameters)
@@ -232,60 +232,67 @@ namespace System.Security.Cryptography
 
             byte[] privateKeyBlob = reader.ReadOctetString();
 
-            // ECPrivateKey{CURVES:IOSet} ::= SEQUENCE {
-            //   version INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
-            //   privateKey OCTET STRING,
-            //   parameters [0] Parameters{{IOSet}} OPTIONAL,
-            //   publicKey  [1] BIT STRING OPTIONAL
-            // }
-            DerSequenceReader keyReader = new DerSequenceReader(privateKeyBlob);
-            version = keyReader.ReadInteger();
-
-            // We understand the version 1 format
-            if (version > 1)
+            try
             {
-                throw new CryptographicException();
+                // ECPrivateKey{CURVES:IOSet} ::= SEQUENCE {
+                //   version INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+                //   privateKey OCTET STRING,
+                //   parameters [0] Parameters{{IOSet}} OPTIONAL,
+                //   publicKey  [1] BIT STRING OPTIONAL
+                // }
+                DerSequenceReader keyReader = new DerSequenceReader(privateKeyBlob);
+                version = keyReader.ReadInteger();
+
+                // We understand the version 1 format
+                if (version > 1)
+                {
+                    throw new CryptographicException();
+                }
+
+                parameters.D = keyReader.ReadOctetString();
+
+                // Check for context specific 0
+                const byte ConstructedContextSpecific =
+                    DerSequenceReader.ContextSpecificTagFlag | DerSequenceReader.ConstructedFlag;
+
+                const byte ConstructedContextSpecific0 = (ConstructedContextSpecific | 0);
+                const byte ConstructedContextSpecific1 = (ConstructedContextSpecific | 1);
+
+                if (keyReader.PeekTag() != ConstructedContextSpecific0)
+                {
+                    throw new CryptographicException();
+                }
+
+                // Parameters ::= CHOICE {
+                //   ecParameters ECParameters,
+                //   namedCurve CURVES.&id({ CurveNames}),
+                //   implicitlyCA  NULL
+                // }
+                DerSequenceReader parametersReader = keyReader.ReadSequence();
+
+                if (parametersReader.PeekTag() != (int)DerSequenceReader.DerTag.ObjectIdentifier)
+                {
+                    throw new PlatformNotSupportedException(SR.Cryptography_ECC_NamedCurvesOnly);
+                }
+
+                parameters.Curve = ECCurve.CreateFromValue(parametersReader.ReadOidAsString());
+
+                // Check for context specific 1
+                if (keyReader.PeekTag() != ConstructedContextSpecific1)
+                {
+                    throw new CryptographicException();
+                }
+
+                keyReader = keyReader.ReadSequence();
+                byte[] encodedPoint = keyReader.ReadBitString();
+                ReadEncodedPoint(encodedPoint, ref parameters);
+
+                // We don't care about the rest of the blob here, but it's expected to not exist.
             }
-
-            parameters.D = keyReader.ReadOctetString();
-
-            // Check for context specific 0
-            const byte ConstructedContextSpecific =
-                DerSequenceReader.ContextSpecificTagFlag | DerSequenceReader.ConstructedFlag;
-
-            const byte ConstructedContextSpecific0 = (ConstructedContextSpecific | 0);
-            const byte ConstructedContextSpecific1 = (ConstructedContextSpecific | 1);
-
-            if (keyReader.PeekTag() != ConstructedContextSpecific0)
+            finally
             {
-                throw new CryptographicException();
+                Array.Clear(privateKeyBlob, 0, privateKeyBlob.Length);
             }
-
-            // Parameters ::= CHOICE {
-            //   ecParameters ECParameters,
-            //   namedCurve CURVES.&id({ CurveNames}),
-            //   implicitlyCA  NULL
-            // }
-            DerSequenceReader parametersReader = keyReader.ReadSequence();
-
-            if (parametersReader.PeekTag() != (int)DerSequenceReader.DerTag.ObjectIdentifier)
-            {
-                throw new PlatformNotSupportedException(SR.Cryptography_ECC_NamedCurvesOnly);
-            }
-
-            parameters.Curve = ECCurve.CreateFromValue(parametersReader.ReadOidAsString());
-
-            // Check for context specific 1
-            if (keyReader.PeekTag() != ConstructedContextSpecific1)
-            {
-                throw new CryptographicException();
-            }
-
-            keyReader = keyReader.ReadSequence();
-            byte[] encodedPoint = keyReader.ReadBitString();
-            ReadEncodedPoint(encodedPoint, ref parameters);
-
-            // We don't care about the rest of the blob here, but it's expected to not exist.
         }
 
         internal static void ReadSubjectPublicKeyInfo(this DerSequenceReader keyInfo, ref ECParameters parameters)

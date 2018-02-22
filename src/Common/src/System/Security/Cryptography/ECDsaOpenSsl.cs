@@ -184,7 +184,7 @@ namespace System.Security.Cryptography
                     // Set the KeySize before FreeKey so that an invalid value doesn't throw away the key
                     base.KeySize = value;
 
-                    _key?.Dispose();
+                    _key.Dispose();
                     _key = new ECOpenSsl(this);
                 }
             }

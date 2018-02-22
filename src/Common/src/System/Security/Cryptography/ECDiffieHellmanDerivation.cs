@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -39,7 +38,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static byte[] DeriveKeyFromHmac(
+        internal static unsafe byte[] DeriveKeyFromHmac(
             ECDiffieHellmanPublicKey otherPartyPublicKey,
             HashAlgorithmName hashAlgorithm,
             byte[] hmacKey,
@@ -57,39 +56,45 @@ namespace System.Security.Cryptography
             // HMAC(derived, prepend || derived || append)
 
             bool useSecretAsKey = hmacKey == null;
-            GCHandle pinHandle = default;
 
             if (useSecretAsKey)
             {
                 hmacKey = deriveSecretAgreement(otherPartyPublicKey, null);
                 Debug.Assert(hmacKey != null);
-                pinHandle = GCHandle.Alloc(hmacKey, GCHandleType.Pinned);
             }
 
-            using (IncrementalHash hash = IncrementalHash.CreateHMAC(hashAlgorithm, hmacKey))
+            // Reduce the likelihood of the value getting copied during heap compaction.
+            fixed (byte* pinnedHmacKey = hmacKey)
             {
-                hash.AppendData(secretPrepend);
-
-                if (useSecretAsKey)
+                try
                 {
-                    hash.AppendData(hmacKey);
+                    using (IncrementalHash hash = IncrementalHash.CreateHMAC(hashAlgorithm, hmacKey))
+                    {
+                        hash.AppendData(secretPrepend);
+
+                        if (useSecretAsKey)
+                        {
+                            hash.AppendData(hmacKey);
+                        }
+                        else
+                        {
+                            byte[] secretAgreement = deriveSecretAgreement(otherPartyPublicKey, hash);
+                            // We want the side effect, and it should not have returned the answer.
+                            Debug.Assert(secretAgreement == null);
+                        }
+
+                        hash.AppendData(secretAppend);
+                        return hash.GetHashAndReset();
+                    }
+                }
+                finally
+                {
                     Array.Clear(hmacKey, 0, hmacKey.Length);
-                    Debug.Assert(pinHandle.IsAllocated);
-                    pinHandle.Free();
                 }
-                else
-                {
-                    byte[] secretAgreement = deriveSecretAgreement(otherPartyPublicKey, hash);
-                    // We want the side effect, and it should not have returned the answer.
-                    Debug.Assert(secretAgreement == null);
-                }
-
-                hash.AppendData(secretAppend);
-                return hash.GetHashAndReset();
             }
         }
 
-        internal static byte[] DeriveKeyTls(
+        internal static unsafe byte[] DeriveKeyTls(
             ECDiffieHellmanPublicKey otherPartyPublicKey,
             ReadOnlySpan<byte> prfLabel,
             ReadOnlySpan<byte> prfSeed,
@@ -109,58 +114,61 @@ namespace System.Security.Cryptography
             const int Md5Size = 16;
 
             byte[] secretAgreement = deriveSecretAgreement(otherPartyPublicKey, null);
-            GCHandle handle = GCHandle.Alloc(secretAgreement, GCHandleType.Pinned);
+            Debug.Assert(secretAgreement != null);
 
-            try
+            // Reduce the likelihood of the value getting copied during heap compaction.
+            fixed (byte* pinnedSecretAgreement = secretAgreement)
             {
-                // https://tools.ietf.org/html/rfc4346#section-5
-                //
-                //    S1 and S2 are the two halves of the secret, and each is the same
-                //    length.  S1 is taken from the first half of the secret, S2 from the
-                //    second half.  Their length is created by rounding up the length of
-                //    the overall secret, divided by two; thus, if the original secret is
-                //    an odd number of bytes long, the last byte of S1 will be the same as
-                //    the first byte of S2.
-                //
-                int half = secretAgreement.Length / 2;
-                int odd = secretAgreement.Length & 1;
-
-                // PRF(secret, label, seed) = P_MD5(S1, label + seed) XOR
-                //                            P_SHA-1(S2, label + seed);
-
-                PHash(
-                    HashAlgorithmName.MD5,
-                    new ReadOnlySpan<byte>(secretAgreement, 0, half + odd),
-                    prfLabel,
-                    prfSeed,
-                    Md5Size,
-                    ret);
-
-                Span<byte> part2 = stackalloc byte[ret.Length];
-
-                PHash(
-                    HashAlgorithmName.SHA1,
-                    new ReadOnlySpan<byte>(secretAgreement, half, half + odd),
-                    prfLabel,
-                    prfSeed,
-                    Sha1Size,
-                    part2);
-
-                for (int i = 0; i < ret.Length; i++)
+                try
                 {
-                    ret[i] ^= part2[i];
-                }
+                    // https://tools.ietf.org/html/rfc4346#section-5
+                    //
+                    //    S1 and S2 are the two halves of the secret, and each is the same
+                    //    length.  S1 is taken from the first half of the secret, S2 from the
+                    //    second half.  Their length is created by rounding up the length of
+                    //    the overall secret, divided by two; thus, if the original secret is
+                    //    an odd number of bytes long, the last byte of S1 will be the same as
+                    //    the first byte of S2.
+                    //
+                    int half = secretAgreement.Length / 2;
+                    int odd = secretAgreement.Length & 1;
 
-                return ret;
-            }
-            finally
-            {
-                Array.Clear(secretAgreement, 0, secretAgreement.Length);
-                handle.Free();
+                    // PRF(secret, label, seed) = P_MD5(S1, label + seed) XOR
+                    //                            P_SHA-1(S2, label + seed);
+
+                    PHash(
+                        HashAlgorithmName.MD5,
+                        new ReadOnlySpan<byte>(secretAgreement, 0, half + odd),
+                        prfLabel,
+                        prfSeed,
+                        Md5Size,
+                        ret);
+
+                    Span<byte> part2 = stackalloc byte[ret.Length];
+
+                    PHash(
+                        HashAlgorithmName.SHA1,
+                        new ReadOnlySpan<byte>(secretAgreement, half, half + odd),
+                        prfLabel,
+                        prfSeed,
+                        Sha1Size,
+                        part2);
+
+                    for (int i = 0; i < ret.Length; i++)
+                    {
+                        ret[i] ^= part2[i];
+                    }
+
+                    return ret;
+                }
+                finally
+                {
+                    Array.Clear(secretAgreement, 0, secretAgreement.Length);
+                }
             }
         }
 
-        private static void PHash(
+        private static unsafe void PHash(
             HashAlgorithmName algorithmName,
             ReadOnlySpan<byte> secret,
             ReadOnlySpan<byte> prfLabel,
@@ -178,64 +186,69 @@ namespace System.Security.Cryptography
             // A(i) = HMAC_hash(secret, A(i-1))
             //
             // This is called via PRF, which turns (label || seed) into seed.
+
             byte[] secretTmp = new byte[secret.Length];
-            GCHandle pinHandle = GCHandle.Alloc(secretTmp, GCHandleType.Pinned);
-            secret.Slice(0, secretTmp.Length).CopyTo(secretTmp);
 
-            try
+            // Keep secretTmp pinned the whole time it has a secret in it, so it
+            // doesn't get copied around during heap compaction.
+            fixed (byte* pinnedSecretTmp = secretTmp)
             {
-                Span<byte> retSpan = ret;
+                secret.CopyTo(secretTmp);
 
-                using (IncrementalHash hasher = IncrementalHash.CreateHMAC(algorithmName, secretTmp))
+                try
                 {
-                    Span<byte> a = stackalloc byte[hashOutputSize];
-                    Span<byte> p = stackalloc byte[hashOutputSize];
+                    Span<byte> retSpan = ret;
 
-                    // A(1)
-                    hasher.AppendData(prfLabel);
-                    hasher.AppendData(prfSeed);
-
-                    if (!hasher.TryGetHashAndReset(a, out int bytesWritten) || bytesWritten != hashOutputSize)
+                    using (IncrementalHash hasher = IncrementalHash.CreateHMAC(algorithmName, secretTmp))
                     {
-                        throw new CryptographicException();
-                    }
+                        Span<byte> a = stackalloc byte[hashOutputSize];
+                        Span<byte> p = stackalloc byte[hashOutputSize];
 
-                    while (true)
-                    {
-                        // HMAC_hash(secret, A(i) || seed) => p
-                        hasher.AppendData(a);
+                        // A(1)
                         hasher.AppendData(prfLabel);
                         hasher.AppendData(prfSeed);
 
-                        if (!hasher.TryGetHashAndReset(p, out bytesWritten) || bytesWritten != hashOutputSize)
+                        if (!hasher.TryGetHashAndReset(a, out int bytesWritten) || bytesWritten != hashOutputSize)
                         {
                             throw new CryptographicException();
                         }
 
-                        int len = Math.Min(p.Length, retSpan.Length);
-
-                        p.Slice(0, len).CopyTo(retSpan);
-                        retSpan = retSpan.Slice(len);
-
-                        if (retSpan.Length == 0)
+                        while (true)
                         {
-                            return;
-                        }
+                            // HMAC_hash(secret, A(i) || seed) => p
+                            hasher.AppendData(a);
+                            hasher.AppendData(prfLabel);
+                            hasher.AppendData(prfSeed);
 
-                        // Build the next A(i)
-                        hasher.AppendData(a);
+                            if (!hasher.TryGetHashAndReset(p, out bytesWritten) || bytesWritten != hashOutputSize)
+                            {
+                                throw new CryptographicException();
+                            }
 
-                        if (!hasher.TryGetHashAndReset(a, out bytesWritten) || bytesWritten != hashOutputSize)
-                        {
-                            throw new CryptographicException();
+                            int len = Math.Min(p.Length, retSpan.Length);
+
+                            p.Slice(0, len).CopyTo(retSpan);
+                            retSpan = retSpan.Slice(len);
+
+                            if (retSpan.Length == 0)
+                            {
+                                return;
+                            }
+
+                            // Build the next A(i)
+                            hasher.AppendData(a);
+
+                            if (!hasher.TryGetHashAndReset(a, out bytesWritten) || bytesWritten != hashOutputSize)
+                            {
+                                throw new CryptographicException();
+                            }
                         }
                     }
                 }
-            }
-            finally
-            {
-                Array.Clear(secretTmp, 0, secretTmp.Length);
-                pinHandle.Free();
+                finally
+                {
+                    Array.Clear(secretTmp, 0, secretTmp.Length);
+                }
             }
         }
     }

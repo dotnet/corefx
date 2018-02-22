@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Internal.Cryptography;
 using Microsoft.Win32.SafeHandles;
 using Internal.NativeCrypto;
 
@@ -142,7 +143,7 @@ internal static partial class Interop
 
                 if (error != ErrorCode.ERROR_SUCCESS && error != ErrorCode.NTE_BUFFER_TOO_SMALL)
                 {
-                    throw new CryptographicException((int)error);
+                    throw error.ToCryptographicException();
                 }
 
                 // Allocate memory for the key material and generate it
@@ -159,9 +160,11 @@ internal static partial class Interop
 
                 if (error != ErrorCode.ERROR_SUCCESS)
                 {
-                    throw new CryptographicException((int)error);
+                    throw error.ToCryptographicException();
                 }
 
+                // Just in case it shrank the answer once it had a buffer.
+                Array.Resize(ref keyMaterial, Math.Min(keySize, keyMaterial.Length));
                 return keyMaterial;
             }
         }
@@ -242,6 +245,5 @@ internal static partial class Interop
                 }
             }
         }
-
     }
 }

@@ -106,7 +106,6 @@ namespace System.Security.Cryptography
 
                 SafeEvpPKeyHandle ourKey = null;
                 SafeEvpPKeyHandle theirKey = null;
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
                 byte[] rented = null;
                 int secretLength = 0;
 
@@ -158,7 +157,7 @@ namespace System.Security.Cryptography
 
                         if (secretLength > StackAllocMax)
                         {
-                            rented = pool.Rent(secretLength);
+                            rented = ArrayPool<byte>.Shared.Rent(secretLength);
                             secret = new Span<byte>(rented, 0, secretLength);
                         }
                         else
@@ -192,7 +191,7 @@ namespace System.Security.Cryptography
                     if (rented != null)
                     {
                         Array.Clear(rented, 0, secretLength);
-                        pool.Return(rented);
+                        ArrayPool<byte>.Shared.Return(rented);
                     }
                 }
             }

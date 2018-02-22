@@ -43,9 +43,17 @@ namespace System.Security.Cryptography
             public override ECParameters ExportExplicitParameters(bool includePrivateParameters)
             {
                 byte[] blob = ExportFullKeyBlob(includePrivateParameters);
-                ECParameters ecparams = new ECParameters();
-                ECCng.ExportPrimeCurveParameters(ref ecparams, blob, includePrivateParameters);
-                return ecparams;
+
+                try
+                {
+                    ECParameters ecparams = new ECParameters();
+                    ECCng.ExportPrimeCurveParameters(ref ecparams, blob, includePrivateParameters);
+                    return ecparams;
+                }
+                finally
+                {
+                    Array.Clear(blob, 0, blob.Length);
+                }
             }
 
             public override ECParameters ExportParameters(bool includePrivateParameters)
@@ -53,20 +61,31 @@ namespace System.Security.Cryptography
                 ECParameters ecparams = new ECParameters();
 
                 string curveName = GetCurveName();
+                byte[] blob = null;
 
-                if (string.IsNullOrEmpty(curveName))
+                try
                 {
-                    byte[] fullKeyBlob = ExportFullKeyBlob(includePrivateParameters);
-                    ECCng.ExportPrimeCurveParameters(ref ecparams, fullKeyBlob, includePrivateParameters);
-                }
-                else
-                {
-                    byte[] keyBlob = ExportKeyBlob(includePrivateParameters);
-                    ECCng.ExportNamedCurveParameters(ref ecparams, keyBlob, includePrivateParameters);
-                    ecparams.Curve = ECCurve.CreateFromFriendlyName(curveName);
-                }
+                    if (string.IsNullOrEmpty(curveName))
+                    {
+                        blob = ExportFullKeyBlob(includePrivateParameters);
+                        ECCng.ExportPrimeCurveParameters(ref ecparams, blob, includePrivateParameters);
+                    }
+                    else
+                    {
+                        blob = ExportKeyBlob(includePrivateParameters);
+                        ECCng.ExportNamedCurveParameters(ref ecparams, blob, includePrivateParameters);
+                        ecparams.Curve = ECCurve.CreateFromFriendlyName(curveName);
+                    }
 
-                return ecparams;
+                    return ecparams;
+                }
+                finally
+                {
+                    if (blob != null)
+                    {
+                        Array.Clear(blob, 0, blob.Length);
+                    }
+                }
             }
         }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
