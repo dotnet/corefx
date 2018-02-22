@@ -76,8 +76,7 @@ namespace System.Buffers
 
                 if (destination.Length == 0)
                 {
-                    writeSize = Math.Min(source.Length, bufferWriter.MaxBufferSize);
-                    destination = bufferWriter.GetSpan(writeSize);
+                    destination = bufferWriter.GetSpan(source.Length);
                 }
 
                 source.Slice(0, writeSize).CopyTo(destination);

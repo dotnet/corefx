@@ -111,30 +111,33 @@ namespace System.IO.Pipelines
             _length = 0;
         }
 
-        internal Memory<byte> GetMemory(int minimumSize)
+        internal Memory<byte> GetMemory(int lengthHint)
         {
             if (_writerCompletion.IsCompleted)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
             }
 
-            if (minimumSize < 0)
+            if (lengthHint < 0)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
             lock (_sync)
             {
-                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(minimumSize);
+                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(lengthHint);
 
                 int bytesLeftInBuffer = segment.WritableBytes;
 
                 // If inadequate bytes left or if the segment is readonly
-                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < minimumSize || segment.ReadOnly)
+                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < lengthHint || segment.ReadOnly)
                 {
                     BufferSegment nextSegment = CreateSegmentUnsynchronized();
 
-                    nextSegment.SetMemory(_pool.Rent(Math.Max(_minimumSegmentSize, minimumSize)));
+                    var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, lengthHint);
+                    var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+
+                    nextSegment.SetMemory(_pool.Rent(adjustedToMaximumSize));
 
                     segment.SetNext(nextSegment);
 
