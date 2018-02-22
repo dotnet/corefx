@@ -46,7 +46,7 @@ namespace System.IO.Tests
         public void PathWithInvalidCharactersAsPath_Core(string invalidPath)
         {
             if (invalidPath.Contains('\0'))
-                Assert.Throws<ArgumentException>(() => Create(invalidPath));
+                Assert.Throws<ArgumentException>("path", () => Create(invalidPath));
             else
                 Assert.Throws<IOException>(() => Create(invalidPath));
         }

@@ -144,8 +144,6 @@ namespace System.IO.Tests
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void WindowsControlWhiteSpace_Desktop(string component)
         {
-            // CreateSubdirectory will throw when passed a path with control whitespace e.g. "\t"
-            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
 
@@ -156,8 +154,6 @@ namespace System.IO.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsControlWhiteSpace_Core(string component)
         {
-            // CreateSubdirectory will throw when passed a path with control whitespace e.g. "\t"
-            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
             Assert.Throws<IOException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
 
@@ -166,14 +162,10 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Simple whitespace is trimmed in path
         public void WindowsSimpleWhiteSpace(string component)
         {
-            // CreateSubdirectory trims all simple whitespace, returning us the parent directory
-            // that called CreateSubdirectory
-            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
             DirectoryInfo result = new DirectoryInfo(TestDirectory).CreateSubdirectory(component);
 
             Assert.True(Directory.Exists(result.FullName));
             Assert.Equal(TestDirectory, IOServices.RemoveTrailingSlash(result.FullName));
-
         }
 
         [Theory,
@@ -183,7 +175,6 @@ namespace System.IO.Tests
         {
             new DirectoryInfo(TestDirectory).CreateSubdirectory(path);
             Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
-
         }
 
         [Theory,
