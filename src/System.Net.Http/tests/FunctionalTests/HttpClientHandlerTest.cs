@@ -935,8 +935,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (IsWinHttpHandler &&
-                (PlatformDetection.IsWindows7 || (!string.IsNullOrEmpty(origFragment) && string.IsNullOrEmpty(redirFragment))))
+            if (IsWinHttpHandler)
             {
                 // According to https://tools.ietf.org/html/rfc7231#section-7.1.2,
                 // "If the Location value provided in a 3xx (Redirection) response does
@@ -945,7 +944,8 @@ namespace System.Net.Http.Functional.Tests
                 //  URI reference used to generate the request target(i.e., the
                 //  redirection inherits the original reference's fragment, if any)."
                 // WINHTTP is not doing this, and thus neither is WinHttpHandler.
-                // It also has issues with fragments on Windows 7.
+                // It also sometimes doesn't include the fragments for redirects
+                // even in other cases.
                 return;
             }
 
