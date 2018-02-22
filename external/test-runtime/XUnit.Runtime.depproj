@@ -102,6 +102,25 @@
     <PackageToInclude Include="$(XUnitRunnerPackageId)" />
   </ItemGroup>
 
+  <!-- Ensure that the native components of TraceEvent are restored into the runtime directory so that TraceEvent can pinvoke into them. -->
+  <ItemGroup>
+      <TraceEventNativeFiles
+          Include="$(PackagesDir)\Microsoft.Diagnostics.Tracing.TraceEvent\$(TraceEventPackageVersion)\lib\native\**\*.*" />
+  </ItemGroup>
+  <Target Name="CopyTraceEventNativeFiles" AfterTargets="CoreCompile">
+      <Copy
+          SourceFiles="@(TraceEventNativeFiles)"
+          DestinationFiles="@(TraceEventNativeFiles->'$(TargetDir)%(RecursiveDir)%(FileName)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="BinPlaceTraceEventNativeFiles" AfterTargets="BinPlaceFiles">
+      <Copy
+          SourceFiles="@(TraceEventNativeFiles)"
+          DestinationFiles="@(TraceEventNativeFiles->'$(NETCoreAppTestSharedFrameworkPath)%(RecursiveDir)%(FileName)%(Extension)')"
+          UseHardlinksIfPossible="true"
+          SkipUnchangedFiles="true" />
+  </Target>
+
   <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
     <UAPToolsPackageVersion>1.0.17</UAPToolsPackageVersion>
   </PropertyGroup>
