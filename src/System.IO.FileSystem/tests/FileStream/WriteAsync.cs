@@ -418,7 +418,7 @@ namespace System.IO.Tests
                         }
                     } while (!tokenSource.Token.IsCancellationRequested);
                 }
-            } while (DateTime.UtcNow - testStartTime <= testRunTime);
+            } while (DateTime.UtcNow - testStartTime <= testRunTime && totalBytesWritten < 10000000);
         }
     }
 
