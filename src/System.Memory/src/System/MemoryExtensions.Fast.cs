@@ -63,7 +63,8 @@ namespace System
         /// a temporary location before the destination is overwritten.</remarks>
         public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
             => Span.ToUpperInvariant(source, destination);
-        
+
+        /// <summary>
         /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
         /// <param name="span">The source span.</param>
