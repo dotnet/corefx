@@ -19,7 +19,19 @@ namespace System.Runtime.InteropServices
         public static bool IsOSPlatform(OSPlatform osPlatform)
         {
             string name = s_osPlatformName ?? (s_osPlatformName = Interop.Sys.GetUnixName());
-            return osPlatform.Equals(name);
+            if (osPlatform.Equals(name))
+		    return true;
+	    if (osPlatform.Equals (OSPlatform.OSX)){
+		    return OSPlatform.tvOS.Equals (name) ||
+			    OSPlatform.watchOS.Equals (name) ||
+			    OSPlatform.iOS.Equals (name) ||
+			    OSPlatform.macOS.Equals (name);
+	    }
+	    if (osPlatform.Equals (OSPlatform.Linux)){
+		    return OSPlatform.Tizen.Equals (name) ||
+			    OSPlatform.Android.Equals (name);
+	    }
+	    return false;
         }
 
         public static string OSDescription
