@@ -128,7 +128,7 @@ namespace System.Security.Cryptography
                     innerCryptoStream.FlushFinalBlock();
                 }
             }
-            else
+            else if (_canWrite)
             {
                 _stream.Flush();
             }
