@@ -25,6 +25,16 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public async Task ClientAsyncAuthenticate_SslStreamClientServerNone_UseStrongCryptoSet()
+        {
+            SslProtocols protocol = SslProtocols.None;
+            await ClientAsyncSslHelper(protocol, protocol);
+
+            // Additional manual verification.
+            // Step into the code and verify that the 'UseStrongCrypto' flag is being set.
+        }
+
+        [Fact]
         public async Task ClientAsyncAuthenticate_ServerRequireEncryption_ConnectWithEncryption()
         {
             await ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption);
