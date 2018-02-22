@@ -9,9 +9,7 @@ namespace System.IO
         /// <summary>
         /// Returns fully normalized path.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="allowTrailingSeparator"></param>
-        internal unsafe static ReadOnlySpan<char> FastNormalizePath(string path, bool allowTrailingSeparator = false)
+        internal static ReadOnlySpan<char> FastNormalizePath(string path, bool allowTrailingSeparator = false)
         {
             if (path.IndexOf('\0') != -1)
                 return ReadOnlySpan<char>.Empty;

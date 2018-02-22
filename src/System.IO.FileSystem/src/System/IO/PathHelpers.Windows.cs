@@ -11,10 +11,9 @@ namespace System.IO
         /// <summary>
         /// Return fully normalized path. It uses ArrayPool to reduce allocation.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="allowTrailingSeparator"></param>
-        internal unsafe static ReadOnlySpan<char> FastNormalizePath(string path, bool allowTrailingSeparator = false)
+        internal static ReadOnlySpan<char> FastNormalizePath(string path, bool allowTrailingSeparator = false)
         {
+            PooledBuffer pooledBuffer = new PooledBuffer();
             if (path.IndexOf('\0') != -1)
                 return ReadOnlySpan<char>.Empty;
 
@@ -28,28 +27,16 @@ namespace System.IO
                 return path.AsSpan();
             }
 
-            uint result = 260;
             char[] buffer = null;
+            uint result = PathInternal.MaxShortPath;
 
-            do
+            while (buffer == null || result > buffer.Length)
             {
-                if (buffer != null)
-                    ArrayPool<char>.Shared.Return(buffer);
+                buffer = pooledBuffer.Rent((int)result);
+                result = Interop.Kernel32.GetFullPathWraper(path, (uint)buffer.Length, buffer);                               
+            }
 
-                buffer = ArrayPool<char>.Shared.Rent((int)result);
-
-                fixed (char* c = buffer)
-                {
-                    result = Interop.Kernel32.GetFullPathNameW(path, (uint)buffer.Length, c, IntPtr.Zero);
-                }
-
-                if (result == 0)
-                {
-                    return ReadOnlySpan<char>.Empty;
-                }
-            } while (result > buffer.Length);
-
-            if (buffer[result - 1] == '\\')
+            if (result != 0 && buffer[result - 1] == '\\')
             {
                 if (!allowTrailingSeparator)
                 {
@@ -64,6 +51,26 @@ namespace System.IO
             }
 
             return new ReadOnlySpan<char>(buffer, 0, (int)result);
+        }
+    }
+
+    internal struct PooledBuffer : IDisposable
+    {
+        public char[] _buffer;
+
+        public char[] Rent(int minLength)
+        {
+            if (_buffer != null)
+                ArrayPool<char>.Shared.Return(_buffer);
+
+            return _buffer = ArrayPool<char>.Shared.Rent(minLength);
+        }
+
+        public void Dispose()
+        {
+            if (_buffer != null)
+                ArrayPool<char>.Shared.Return(_buffer);
+            _buffer = null;
         }
     }
 }
