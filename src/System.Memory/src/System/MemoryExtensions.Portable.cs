@@ -35,7 +35,11 @@ namespace System
                 return -1;
 
             string sourceString = source.ToString();
+#if !netstandard11
             string resultString = sourceString.ToLower(culture);
+#else
+            string resultString = culture.TextInfo.ToLower(sourceString);
+#endif
             Debug.Assert(sourceString.Length == resultString.Length);
             resultString.AsSpan().CopyTo(destination);
             return source.Length;
@@ -74,7 +78,11 @@ namespace System
                 return -1;
 
             string sourceString = source.ToString();
+#if !netstandard11
             string resultString = sourceString.ToUpper(culture);
+#else
+            string resultString = culture.TextInfo.ToUpper(sourceString);
+#endif
             Debug.Assert(sourceString.Length == resultString.Length);
             resultString.AsSpan().CopyTo(destination);
             return source.Length;
