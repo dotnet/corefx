@@ -250,7 +250,7 @@ namespace System.Buffers
                 return endIndex - startIndex;
             }
 
-            return (endSegment.RunningIndex - start.Next.RunningIndex) // Length of data in between first and last segment
+            return start.Next.GetLength(endSegment) // Length of data in between first and last segment
                    + (start.Memory.Length - startIndex) // Length of data in first segment
                    + endIndex; // Length of data in last segment
         }
@@ -279,7 +279,7 @@ namespace System.Buffers
                     IMemoryList<T> segment = (IMemoryList<T>)position.Segment;
                     IMemoryList<T> memoryList = (IMemoryList<T>)start.Segment;
 
-                    if (segment.RunningIndex - startIndex > memoryList.RunningIndex - endIndex)
+                    if (segment.GetLength(memoryList) + endIndex - startIndex > 0)
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
@@ -291,14 +291,31 @@ namespace System.Buffers
             }
         }
 
-        private class ReadOnlySequenceSegment : IMemoryList<T>
+        private sealed class ReadOnlySequenceSegment : IMemoryList<T>
         {
             public Memory<T> Memory { get; set; }
-            public IMemoryList<T> Next { get; set; }
-            public long RunningIndex { get; set; }
-            public IMemoryList<T> GetNext(long offset)
+            public IMemoryList<T> Next { get; } = null;
+
+            public IMemoryList<T> GetNext(long offset, out int localOffset)
             {
-                throw new NotImplementedException();
+                if (offset < Memory.Length)
+                {
+                    localOffset = (int)offset;
+                    return this;
+                }
+
+                localOffset = 0;
+                return null;
+            }
+
+            public long GetLength(IMemoryList<T> memoryList)
+            {
+                if (memoryList != this)
+                {
+                    ThrowHelper.ThrowInvalidOperationException();
+                }
+
+                return 0;
             }
         }
     }

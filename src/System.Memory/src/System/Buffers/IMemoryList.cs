@@ -18,15 +18,13 @@ namespace System.Buffers
         /// The next node.
         /// </summary>
         IMemoryList<T> Next { get; }
-
         /// <summary>
-        /// The sum of node length before current.
+        ///
         /// </summary>
-        long RunningIndex { get; }
-
+        IMemoryList<T> GetNext(long offset, out int localOffset);
         /// <summary>
-        /// Returns the <see cref="IMemoryList{T}"/> node that contains <paramref name="runningIndex"/>
+        ///
         /// </summary>
-        IMemoryList<T> GetNext(long runningIndex);
+        long GetLength(IMemoryList<T> memoryList);
     }
 }
