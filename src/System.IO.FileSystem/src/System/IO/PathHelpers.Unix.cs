@@ -21,7 +21,7 @@ namespace System.IO
             if (path.Length == 0 || (!allowTrailingSeparator && path[path.Length - 1] == '\\'))
                 return ReadOnlySpan<char>.Empty;
 
-            return path.AsReadOnlySpan();
+            return path.AsSpan();
         }
     }
 }

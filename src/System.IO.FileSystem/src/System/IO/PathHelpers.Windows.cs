@@ -22,10 +22,10 @@ namespace System.IO
             {
                 if (path.Length > 4 && path[path.Length - 1] == '\\' && path[path.Length - 2] != ':')
                 {
-                    return allowTrailingSeparator ? path.AsReadOnlySpan().Slice(0, path.Length - 1) : ReadOnlySpan<char>.Empty;
+                    return allowTrailingSeparator ? path.AsSpan().Slice(0, path.Length - 1) : ReadOnlySpan<char>.Empty;
                 }
 
-                return path.AsReadOnlySpan();
+                return path.AsSpan();
             }
 
             uint result = 260;
