@@ -177,12 +177,16 @@ namespace System.Net.Tests
             HttpListenerResponse response = await GetResponse();
             response.Headers.Add("Set-Cookie", "name1=value1");
             response.Headers.Add("Set-Cookie", "name2=value2");
+            response.Headers.Add("Set-Cookie", "name3=value3");
+            response.Headers.Add("Set-Cookie", "name4=value4");
 
             response.Close();
 
-            string clientResponse = GetClientResponse(172);
+            string clientResponse = GetClientResponse(224);
             Assert.Contains($"\r\nSet-Cookie: name1=value1\r\n", clientResponse);
             Assert.Contains($"\r\nSet-Cookie: name2=value2\r\n", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie: name3=value3\r\n", clientResponse);
+            Assert.Contains($"\r\nSet-Cookie: name4=value4\r\n", clientResponse);
         }
 
         [Fact]
