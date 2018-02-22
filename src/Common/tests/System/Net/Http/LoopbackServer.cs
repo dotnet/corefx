@@ -147,6 +147,29 @@ namespace System.Net.Test.Common
             return lines;
         }
 
+        public static string GetRequestHeaderValue(List<string> headers, string name)
+        {
+            foreach (string line in headers)
+            {
+                string[] tokens = line.Split(':', 2);
+                if (name.Equals(tokens[0], StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return tokens[1].Trim();
+                }
+            }
+            return null;
+        }
+
+        public static string GetRequestMethod(List<string> headers)
+        {
+
+            if (headers != null && headers.Count > 1)
+            {
+                return headers[0].Split()[1].Trim();
+            }
+            return null;
+        }
+
         // Stolen from HttpStatusDescription code in the product code
         private static string GetStatusDescription(HttpStatusCode code)
         {
@@ -304,7 +327,6 @@ namespace System.Net.Test.Common
             private Stream _stream;
             private StreamReader _reader;
             private StreamWriter _writer;
-            internal List<string> _requestHeaders;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -338,31 +360,9 @@ namespace System.Net.Test.Common
                 _socket.Dispose();
             }
 
-            public string GetRequestHeaderValue(string name)
-            {
-                foreach (string line in _requestHeaders)
-                {
-                    string[] tokens = line.Split(':', 2);
-                    if (name.Equals(tokens[0], StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        return tokens[1].Trim();
-                    }
-                }
-                return null;
-            }
-
-            public string GetRequestMethod()
-            {
-                if (_requestHeaders != null && _requestHeaders.Count > 1)
-                {
-                    return _requestHeaders[0].Split()[1].Trim();
-                }
-                return null;
-            }
-
             public async Task<List<string>> ReadRequestHeaderAsync()
             {
-                List <string> lines = new List<string>();
+                var lines = new List<string>();
                 string line;
                 while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
                 {
