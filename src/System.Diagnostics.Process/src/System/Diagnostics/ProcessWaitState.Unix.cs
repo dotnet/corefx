@@ -534,16 +534,14 @@ namespace System.Diagnostics
                 else if (waitResult == 0)
                 {
                     // Process is still running
-                    return false;
                 }
-                else if (waitResult == -1)
+                else
                 {
-                    Debug.Fail("Unexpected errno value from waitpid");
+                    // Unexpected.
+                    int errorCode = Marshal.GetLastWin32Error();
+                    Environment.FailFast("Error while reaping child. errno = " + errorCode);
                 }
-                else Debug.Fail("Unexpected process ID from waitpid.");
-
-                SetExited();
-                return true;
+                return false;
             }
         }
 
