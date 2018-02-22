@@ -385,6 +385,8 @@ namespace System.IO.Tests
             byte[] dataToWrite = new byte[MaximumWriteSize];
             rand.NextBytes(dataToWrite);
 
+            int totalBytesWritten = 0;
+
             string writeFileName = GetTestFilePath();
             do
             {
@@ -411,6 +413,8 @@ namespace System.IO.Tests
                                 // 90%: Async write
                                 await WriteAsync(stream, dataToWrite, 0, bytesToWrite, tokenSource.Token);
                             }
+
+                            totalBytesWritten += bytesToWrite;
                         }
                         catch (TaskCanceledException)
                         {
