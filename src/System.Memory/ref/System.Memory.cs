@@ -165,8 +165,10 @@ namespace System
     {
         private readonly object _dummy;
         public SequencePosition(object segment, int index) { throw null; }
-        public int Index { get { throw null; } }
-        public object Segment { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public int GetInteger() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public object GetObject() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.SequencePosition position) { throw null; }
@@ -219,9 +221,8 @@ namespace System.Buffers
     public partial interface IBufferWriter<T>
     {
         void Advance(int count);
-        System.Memory<T> GetMemory(int minimumLength = 0);
-        System.Span<T> GetSpan(int minimumLength = 0);
-        int MaxBufferSize { get; }
+        System.Memory<T> GetMemory(int lengthHint = 0);
+        System.Span<T> GetSpan(int lengthHint = 0);
     }
     public partial interface IMemoryList<T>
     {

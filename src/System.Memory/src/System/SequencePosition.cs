@@ -13,29 +13,35 @@ namespace System
     /// </summary>
     public readonly struct SequencePosition : IEquatable<SequencePosition>
     {
+        private readonly object _segment;
+
+        private readonly int _index;
+
         /// <summary>
         /// Creates new <see cref="SequencePosition"/>
         /// </summary>
         public SequencePosition(object segment, int index)
         {
-            Segment = segment;
-            Index = index;
+            _segment = segment;
+            _index = index;
         }
 
         /// <summary>
         /// Segment of memory this <see cref="SequencePosition"/> points to.
         /// </summary>
-        public object Segment { get; }
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public object GetObject() => _segment;
 
         /// <summary>
         /// Index inside segment of memory this <see cref="SequencePosition"/> points to.
         /// </summary>
-        public int Index { get; }
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public int GetInteger() => _index;
 
         /// <summary>
         /// Returns true if left and right point at the same segment and have the same index.
         /// </summary>
-        public static bool operator ==(SequencePosition left, SequencePosition right) => left.Index == right.Index && left.Segment == right.Segment;
+        public static bool operator ==(SequencePosition left, SequencePosition right) => left._index== right._index && left._segment == right._segment;
 
         /// <summary>
         /// Returns true if left and right do not point at the same segment and have the same index.
@@ -51,9 +57,9 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashHelpers.Combine(Segment?.GetHashCode() ?? 0, Index);
+        public override int GetHashCode() => HashHelpers.Combine(_segment?.GetHashCode() ?? 0, _index);
 
         /// <inheritdoc />
-        public override string ToString() => this == default ? "(default)" : Segment == null ? Index.ToString(): $"{Segment}[{Index}]";
+        public override string ToString() => this == default ? "(default)" : _segment == null ? _index.ToString(): $"{_segment}[{_index}]";
     }
 }

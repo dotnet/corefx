@@ -9,7 +9,7 @@ namespace System.Buffers
         internal bool TryGetMemoryList(out IMemoryList<T> startSegment, out int startIndex, out IMemoryList<T> endSegment, out int endIndex)
         {
 
-            if (Start.Segment == null  || GetSequenceType() != SequenceType.MemoryList)
+            if (Start.GetObject() == null  || GetSequenceType() != SequenceType.MemoryList)
             {
                 startSegment = null;
                 endSegment = null;
@@ -18,29 +18,29 @@ namespace System.Buffers
                 return false;
             }
 
-            startIndex = GetIndex(Start.Index);
-            endIndex = GetIndex(End.Index);
-            startSegment = (IMemoryList<T>)Start.Segment;
-            endSegment = (IMemoryList<T>)End.Segment;
+            startIndex = GetIndex(Start.GetInteger());
+            endIndex = GetIndex(End.GetInteger());
+            startSegment = (IMemoryList<T>)Start.GetObject();
+            endSegment = (IMemoryList<T>)End.GetObject();
             return true;
         }
 
         internal bool TryGetArray(out ArraySegment<T> array)
         {
-            if (Start.Segment == null  || GetSequenceType() != SequenceType.Array)
+            if (Start.GetObject() == null  || GetSequenceType() != SequenceType.Array)
             {
                 array = default;
                 return false;
             }
 
-            int startIndex = GetIndex(Start.Index);
-            array = new ArraySegment<T>((T[])Start.Segment, startIndex, GetIndex(End.Index) - startIndex);
+            int startIndex = GetIndex(Start.GetInteger());
+            array = new ArraySegment<T>((T[])Start.GetObject(), startIndex, GetIndex(End.GetInteger()) - startIndex);
             return true;
         }
 
         internal bool TryGetOwnedMemory(out OwnedMemory<T> ownedMemory, out int start, out int length)
         {
-            if (Start.Segment == null  || GetSequenceType() != SequenceType.OwnedMemory)
+            if (Start.GetObject() == null  || GetSequenceType() != SequenceType.OwnedMemory)
             {
                 ownedMemory = default;
                 start = 0;
@@ -48,9 +48,9 @@ namespace System.Buffers
                 return false;
             }
 
-            ownedMemory = (OwnedMemory<T>)Start.Segment;
-            start = GetIndex(Start.Index);
-            length = GetIndex(End.Index) - start;
+            ownedMemory = (OwnedMemory<T>)Start.GetObject();
+            start = GetIndex(Start.GetInteger());
+            length = GetIndex(End.GetInteger()) - start;
             return true;
         }
 
