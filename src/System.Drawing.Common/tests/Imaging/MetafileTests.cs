@@ -88,6 +88,7 @@ namespace System.Drawing.Imaging.Tests
             yield return new object[] { string.Empty };
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData("bad\0name")]
         [InlineData("")]
@@ -461,6 +462,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData("bad\0path")]
         [InlineData("")]
@@ -745,6 +747,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData("bad\0path")]
         [InlineData("")]
@@ -935,6 +938,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData("bad\0path")]
         [InlineData("")]
