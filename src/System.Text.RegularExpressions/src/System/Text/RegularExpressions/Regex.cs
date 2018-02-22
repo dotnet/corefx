@@ -365,11 +365,11 @@ namespace System.Text.RegularExpressions
                     lock (s_livecode)
                     {
                         while (s_livecode.Count > s_cacheSize)
-						{
-							var last = s_livecode.Last;
-							s_livecode_dict.Remove(last.Value._key);
-							s_livecode.RemoveLast();
-						}
+                        {
+                            LinkedListNode<CachedCodeEntry> last = s_livecode.Last;
+                            s_livecode_dict.Remove(last.Value._key);
+                            s_livecode.RemoveLast();
+                        }
                     }
                 }
             }
@@ -1035,9 +1035,9 @@ namespace System.Text.RegularExpressions
         {
             lock (s_livecode)
             {
-                if (s_livecode_dict.ContainsKey(key))
+                s_livecode_dict.TryGetValue(key, out var entry);
+                if (entry != null)
                 {
-                    var entry = s_livecode_dict[key];
                     s_livecode.Remove(entry);
                     s_livecode.AddFirst(entry);
                     return entry;
@@ -1056,15 +1056,15 @@ namespace System.Text.RegularExpressions
             lock (s_livecode)
             {
                 // first look for it in the cache and move it to the head
-                if (s_livecode_dict.ContainsKey(key))
+                s_livecode_dict.TryGetValue(key, out var entry);
+                if (entry != null)
                 {
-                    var entry = s_livecode_dict[key];
                     s_livecode.Remove(entry);
                     s_livecode.AddFirst(entry);
                     return entry;
                 }
                 // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
-                else if(s_cacheSize != 0)
+                else if (s_cacheSize != 0)
                 {
                     newcached = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
                     s_livecode_dict.Add(key, newcached);
