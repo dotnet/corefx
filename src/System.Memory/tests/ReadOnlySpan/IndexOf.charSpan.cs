@@ -76,31 +76,31 @@ namespace System.SpanTests
             {
                 if (startIndex == 0)
                 {
-                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.Ordinal, out _));
-                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase, out _));
+                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.Ordinal));
+                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
 
                     // To be safe we only want to run CurrentCulture comparisons if
                     // we know the results will not vary depending on location
                     if (safeForCurrentCulture)
                     {
-                        Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.CurrentCulture, out _));
+                        Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.CurrentCulture));
                     }
                 }
 
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.Ordinal, out _));
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase, out _));
+                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.Ordinal));
+                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
 
                 if (safeForCurrentCulture)
                 {
-                    Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.CurrentCulture, out _));
+                    Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.CurrentCulture));
                 }
             }
-            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.Ordinal, out _));
-            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.Ordinal));
+            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
 
             if (safeForCurrentCulture)
             {
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.CurrentCulture, out _));
+                Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.CurrentCulture));
             }
         }
 
@@ -135,7 +135,7 @@ namespace System.SpanTests
         [InlineData("Hello", "l\0o", -1)]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
-            Assert.Equal(expected, s.AsSpan().IndexOf(value.AsSpan(), StringComparison.Ordinal, out _));
+            Assert.Equal(expected, s.AsSpan().IndexOf(value.AsSpan(), StringComparison.Ordinal));
         }
 
         [Theory]
@@ -145,25 +145,25 @@ namespace System.SpanTests
             bool ignoringCase = comparison == StringComparison.OrdinalIgnoreCase || comparison == StringComparison.CurrentCultureIgnoreCase;
 
             // First find the substring.  We should be able to with all comparison types.
-            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _)); // in the whole string
-            Assert.Equal(0, s.AsSpan(startIndex).IndexOf(value.AsSpan(), comparison, out _)); // starting at substring
+            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison)); // in the whole string
+            Assert.Equal(0, s.AsSpan(startIndex).IndexOf(value.AsSpan(), comparison)); // starting at substring
             if (startIndex > 0)
             {
-                Assert.Equal(1, s.AsSpan(startIndex - 1).IndexOf(value.AsSpan(), comparison, out _)); // starting just before substring
+                Assert.Equal(1, s.AsSpan(startIndex - 1).IndexOf(value.AsSpan(), comparison)); // starting just before substring
             }
-            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison, out _)); // starting just after start of substring
+            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison)); // starting just after start of substring
 
             // Shouldn't be able to find the substring if the count is less than substring's length
-            Assert.Equal(-1, s.AsSpan(0, value.Length - 1).IndexOf(value.AsSpan(), comparison, out _));
+            Assert.Equal(-1, s.AsSpan(0, value.Length - 1).IndexOf(value.AsSpan(), comparison));
 
             // Now double the source.  Make sure we find the first copy of the substring.
             int halfLen = s.Length;
             s += s;
-            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _));
+            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison));
 
             // Now change the case of a letter.
             s = s.ToUpperInvariant();
-            Assert.Equal(ignoringCase ? startIndex : -1, s.AsSpan().IndexOf(value.AsSpan(), comparison, out _));
+            Assert.Equal(ignoringCase ? startIndex : -1, s.AsSpan().IndexOf(value.AsSpan(), comparison));
         }
 
         public static IEnumerable<object[]> AllSubstringsAndComparisons(string source)
@@ -199,17 +199,17 @@ namespace System.SpanTests
             string valueString = "\u0130";
             ReadOnlySpan<char> s = str.AsSpan();
             ReadOnlySpan<char> value = valueString.AsSpan();
-            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             valueString = "\u0131";
             value = valueString.AsSpan();
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -226,13 +226,13 @@ namespace System.SpanTests
             ReadOnlySpan<char> s = str.AsSpan();
             ReadOnlySpan<char> value = valueString.AsSpan();
 
-            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             valueString = "\u0131";
             value = valueString.AsSpan();
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -249,13 +249,13 @@ namespace System.SpanTests
             ReadOnlySpan<char> s = str.AsSpan();
             ReadOnlySpan<char> value = valueString.AsSpan();
 
-            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             valueString = "\u0131";
             value = valueString.AsSpan();
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -279,11 +279,11 @@ namespace System.SpanTests
              If CurrentCultureIgnoreCase is specified, ICU will use 'secondary' collation rules
              which ignore the contraction collation weights (defined as 'tertiary' rules)
             */
-            Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
+            Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, s.IndexOf(value, StringComparison.CurrentCulture));
 
-            Assert.Equal(0, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(0, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -300,8 +300,8 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -318,17 +318,17 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             valueString = "a\u0300"; // this diacritic combines with preceding character
             value = valueString.AsSpan();
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -345,13 +345,13 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             valueString = "a\u0300"; // this diacritic combines with preceding character
             value = valueString.AsSpan();
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -368,17 +368,17 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             valueString = "bar";
             value = valueString.AsSpan();
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal, out _));
-            Assert.Equal(4, s.IndexOf(value, StringComparison.OrdinalIgnoreCase, out _));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal));
+            Assert.Equal(4, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }
@@ -395,13 +395,13 @@ namespace System.SpanTests
             CultureInfo backupCulture = CultureInfo.CurrentCulture;
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             valueString = "bar";
             value = valueString.AsSpan();
-            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture, out _));
-            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase, out _));
+            Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
+            Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
             Thread.CurrentThread.CurrentCulture = backupCulture;
         }

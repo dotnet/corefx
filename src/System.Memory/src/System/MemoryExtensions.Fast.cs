@@ -45,10 +45,9 @@ namespace System
         /// <param name="span">The source span.</param>
         /// <param name="value">The value to seek within the source span.</param>
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
-        /// <param name="matchedLength">Returns the length of the matched span.</param>
         /// </summary>
-        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType, out int matchedLength)
-            => Span.IndexOf(span, value, comparisonType, out matchedLength);
+        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => Span.IndexOf(span, value, comparisonType);
 
         /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
