@@ -15,7 +15,7 @@ namespace System.SpanTests
         private const string SoftHyphen = "\u00AD";
 
         [Fact]
-        public static unsafe void ZeroLengthEquals_StringComparison()
+        public static void ZeroLengthEquals_StringComparison()
         {
             char[] a = { '4', '5', '6' };
             var span = new ReadOnlySpan<char>(a);

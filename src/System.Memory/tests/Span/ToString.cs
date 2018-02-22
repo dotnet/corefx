@@ -49,7 +49,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static unsafe void ToStringForSpanOfString()
+        public static void ToStringForSpanOfString()
         {
             string[] a = { "a", "b", "c" };
             var span = new Span<string>(a);

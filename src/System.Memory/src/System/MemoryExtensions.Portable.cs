@@ -19,7 +19,7 @@ namespace System
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
         /// </summary>
         public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
-            => return (IndexOf(span, value, comparisonType) >= 0);
+            => (IndexOf(span, value, comparisonType) >= 0);
 
         /// <summary>
         /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
@@ -29,7 +29,14 @@ namespace System
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
         /// </summary>
         public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
-            => span.ToString().Equals(value.ToString(), comparisonType);
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.SequenceEqual<char>(value);
+            }
+
+            return span.ToString().Equals(value.ToString(), comparisonType);
+        }
 
         /// <summary>
         /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
@@ -48,7 +55,14 @@ namespace System
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
         /// </summary>
         public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
-            => span.ToString().IndexOf(value.ToString(), comparisonType);
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.IndexOf<char>(value);
+            }
+
+            return span.ToString().IndexOf(value.ToString(), comparisonType);
+        }
 
         /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
