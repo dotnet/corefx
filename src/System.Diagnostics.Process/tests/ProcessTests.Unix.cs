@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Security;
@@ -415,6 +417,58 @@ namespace System.Diagnostics.Tests
                 }
                 Assert.False(procPidExists);
             }
+        }
+
+        /// <summary>
+        /// Tests the ProcessWaitState reference count drops to zero.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Test validates Unix implementation
+        public void TestProcessWaitStateReferenceCount()
+        {
+            using (var exitedEventSemaphore = new SemaphoreSlim(0, 1))
+            {
+                object waitState = null;
+                int processId = -1;
+                using (var process = new Process())
+                {
+                    process.StartInfo.FileName = "uname";
+                    process.EnableRaisingEvents = true;
+                    process.Exited += (o,e) => exitedEventSemaphore.Release();
+                    process.Start();
+
+                    processId = process.Id;
+                    waitState = GetProcessWaitState(process);
+
+                    Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
+                    Assert.True(GetWaitStateDictionary(childDictionary: true).Contains(processId));
+                }
+                exitedEventSemaphore.Wait();
+
+                Assert.Equal(0, GetWaitStateReferenceCount(waitState));
+                Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
+                Assert.False(GetWaitStateDictionary(childDictionary: true).Contains(processId));
+            }
+        }
+
+        private static IDictionary GetWaitStateDictionary(bool childDictionary)
+        {
+            Assembly assembly = typeof(Process).Assembly;
+            Type waitStateType = assembly.GetType("System.Diagnostics.ProcessWaitState");
+            FieldInfo dictionaryField = waitStateType.GetField(childDictionary ? "s_childProcessWaitStates" : "s_processWaitStates", BindingFlags.NonPublic | BindingFlags.Static);
+            return (IDictionary)dictionaryField.GetValue(null);
+        }
+
+        private static object GetProcessWaitState(Process p)
+        {
+            MethodInfo getWaitState = typeof(Process).GetMethod("GetWaitState", BindingFlags.NonPublic | BindingFlags.Instance);
+            return getWaitState.Invoke(p, null);
+        }
+
+        private static int GetWaitStateReferenceCount(object waitState)
+        {
+            FieldInfo referenCountField = waitState.GetType().GetField("_outstandingRefCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (int)referenCountField.GetValue(waitState);
         }
 
         public static int TestStartWithUserNameCannotElevate(string realUserName)
