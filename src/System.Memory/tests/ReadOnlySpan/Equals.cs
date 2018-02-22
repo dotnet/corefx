@@ -12,8 +12,6 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
-        private const string SoftHyphen = "\u00AD";
-
         [Fact]
         public static void ZeroLengthEquals_StringComparison()
         {
