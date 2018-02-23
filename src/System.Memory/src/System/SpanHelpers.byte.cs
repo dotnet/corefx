@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 
 #if !netstandard
 using Internal.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 #endif
 
 #if !netstandard11
@@ -1042,8 +1043,15 @@ namespace System
                 }
             }
 
-            // Single LEA instruction with jitted const (using function result)
-            return i * 8 + LocateLastFoundByte(candidate);
+            if (IntPtr.Size == 8 && Bmi1.IsSupported)
+            {
+                return i * 8 + (int)Bmi1.TrailingZeroCount(candidate) >> 3;
+            }
+            else
+            {
+                // Single LEA instruction with jitted const (using function result)
+                return i * 8 + LocateLastFoundByte(candidate);
+            }
         }
 #endif
 
