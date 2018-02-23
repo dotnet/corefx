@@ -203,7 +203,7 @@ namespace System.IO.Pipelines.Tests
         {
             PipeWriter buffer = Pipe.Writer;
             var memory = buffer.GetMemory(int.MaxValue);
-            Assert.Equal(4096, memory.Length);
+            Assert.True(memory.Length > 4096);
         }
     }
 }
