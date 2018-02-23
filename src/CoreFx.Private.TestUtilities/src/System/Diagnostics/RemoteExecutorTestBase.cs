@@ -250,14 +250,13 @@ namespace System.Diagnostics
                 }
             }
 
-            ~RemoteInvokeHandle()
-            {
+            // https://github.com/dotnet/corefx/issues/27366
+            //~RemoteInvokeHandle()
+            //{
                 // Finalizer flags tests that omitted the explicit Dispose() call; they must have it, or they aren't
                 // waiting on the remote execution
-                
-                // https://github.com/dotnet/corefx/issues/27366
                 // Dispose(disposing: false);
-            }
+            //}
 
             private sealed class RemoteExecutionException : XunitException
             {
