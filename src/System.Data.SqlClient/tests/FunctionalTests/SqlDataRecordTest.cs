@@ -319,7 +319,7 @@ namespace System.Data.SqlClient.Tests
 
         [Theory]
         [ClassData(typeof(GetXXXBadTypeTestData))]
-        public void GetXXX_ThrowsIfBadType(Action<SqlDataRecord> getXXX)
+        public void GetXXX_ThrowsIfBadType(Func<SqlDataRecord, object> getXXX)
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
@@ -331,23 +331,35 @@ namespace System.Data.SqlClient.Tests
 
         }
 
+        [Theory]
+        [ClassData(typeof(GetXXXCheckValueTestData))]
+        public void GetXXX_ReturnValue(SqlDbType dbType, object value, Func<SqlDataRecord, object> getXXX)
+        {
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", dbType)
+            };
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetValue(0, value);
+            Assert.Equal(value, getXXX(record));
 
+        }
     }
 
     public class GetXXXBadTypeTestData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetGuid(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt16(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt32(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt64(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetFloat(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDouble(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDecimal(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDateTime(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDateTimeOffset(0)) };
-            yield return new object[] { new Action<SqlDataRecord>(r => r.GetTimeSpan(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetGuid(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetInt16(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetInt32(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetInt64(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetFloat(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetDouble(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetDecimal(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetDateTime(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetDateTimeOffset(0)) };
+            yield return new object[] { new Func<SqlDataRecord, object>(r => r.GetTimeSpan(0)) };
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -356,6 +368,27 @@ namespace System.Data.SqlClient.Tests
         }
     }
 
+    public class GetXXXCheckValueTestData : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return new object[] { SqlDbType.UniqueIdentifier, Guid.NewGuid(), new Func<SqlDataRecord, object>(r => r.GetGuid(0)) };
+            yield return new object[] { SqlDbType.SmallInt, (Int16)123, new Func<SqlDataRecord, object>(r => r.GetInt16(0)) };
+            yield return new object[] { SqlDbType.Int, 123456, new Func<SqlDataRecord, object>(r => r.GetInt32(0)) };
+            yield return new object[] { SqlDbType.BigInt, (Int64)123456789, new Func<SqlDataRecord, object>(r => r.GetInt64(0)) };
+            yield return new object[] { SqlDbType.Float, (Double)1.2, new Func<SqlDataRecord, object>(r => r.GetDouble(0)) };
+            yield return new object[] { SqlDbType.Real, (Single)1.2, new Func<SqlDataRecord, object>(r => r.GetFloat(0)) };
+            yield return new object[] { SqlDbType.Decimal, 1.2m, new Func<SqlDataRecord, object>(r => r.GetDecimal(0)) };
+            yield return new object[] { SqlDbType.DateTime, DateTime.Now, new Func<SqlDataRecord, object>(r => r.GetDateTime(0)) };
+            yield return new object[] { SqlDbType.DateTimeOffset, new DateTimeOffset(DateTime.Now), new Func<SqlDataRecord, object>(r => r.GetDateTimeOffset(0)) };
+            yield return new object[] { SqlDbType.Time, TimeSpan.FromHours(1), new Func<SqlDataRecord, object>(r => r.GetTimeSpan(0)) };
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
     [SqlUserDefinedType(Format.UserDefined)]
     public class TestUdt
     {
