@@ -188,9 +188,13 @@ namespace System.Security.Cryptography
             _impl.SignData(inputStream, HashAlgorithmNames.ObjToHashAlgorithmName(halg), RSASignaturePadding.Pkcs1);
 
         public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding) =>
+            padding == null ? throw new ArgumentNullException(nameof(padding)) :
+            padding != RSASignaturePadding.Pkcs1 ? throw PaddingModeNotSupported() : 
             _impl.SignHash(hash, hashAlgorithm, padding);
 
         public override bool TrySignHash(ReadOnlySpan<byte> hash, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten) =>
+            padding == null ? throw new ArgumentNullException(nameof(padding)) :
+            padding != RSASignaturePadding.Pkcs1 ? throw PaddingModeNotSupported() :
             _impl.TrySignHash(hash, destination, hashAlgorithm, padding, out bytesWritten);
 
         public byte[] SignHash(byte[] rgbHash, string str)
