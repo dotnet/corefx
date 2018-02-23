@@ -147,8 +147,6 @@ namespace System.Text.RegularExpressions
             int anchors = RegexFCD.Anchors(tree);
             int[] emitted = _emitted.AsSpan().ToArray();
 
-            
-
             return new RegexCode(emitted, _stringTable, _trackCount, _caps, capsize, bmPrefix, fcPrefix, anchors, rtl);
         }
 

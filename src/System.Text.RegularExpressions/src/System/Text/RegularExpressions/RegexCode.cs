@@ -352,7 +352,7 @@ namespace System.Text.RegularExpressions
             int i;
 
             Debug.WriteLine("Direction:  " + (RightToLeft ? "right-to-left" : "left-to-right"));
-            Debug.WriteLine("Firstchars: " + (FCPrefix == null ? "n/a" : RegexCharClass.SetDescription(FCPrefix.Value.Prefix)));
+            Debug.WriteLine("Firstchars: " + (FCPrefix == null ? "n/a" : RegexCharClass.SetDescription(FCPrefix.GetValueOrDefault().Prefix)));
             Debug.WriteLine("Prefix:     " + (BMPrefix == null ? "n/a" : Regex.Escape(BMPrefix.ToString())));
             Debug.WriteLine("Anchors:    " + RegexFCD.AnchorDescription(Anchors));
             Debug.WriteLine("");

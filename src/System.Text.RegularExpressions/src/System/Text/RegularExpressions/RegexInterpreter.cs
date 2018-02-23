@@ -414,8 +414,8 @@ namespace System.Text.RegularExpressions
             }
 
             _rightToLeft = _code.RightToLeft;
-            _caseInsensitive = _code.FCPrefix.Value.CaseInsensitive;
-            string set = _code.FCPrefix.Value.Prefix;
+            _caseInsensitive = _code.FCPrefix.GetValueOrDefault().CaseInsensitive;
+            string set = _code.FCPrefix.GetValueOrDefault().Prefix;
 
             if (RegexCharClass.IsSingleton(set))
             {

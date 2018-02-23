@@ -1401,7 +1401,7 @@ namespace System.Text.RegularExpressions
                 Ldc(0);
                 Ret();
             }
-            else if (_fcPrefix == null)
+            else if (!_fcPrefix.HasValue)
             {
                 Ldc(1);
                 Ret();
@@ -1448,19 +1448,19 @@ namespace System.Text.RegularExpressions
                 else
                     Rightcharnext();
 
-                if (_fcPrefix.Value.CaseInsensitive)
+                if (_fcPrefix.GetValueOrDefault().CaseInsensitive)
                     CallToLower();
 
-                if (!RegexCharClass.IsSingleton(_fcPrefix.Value.Prefix))
+                if (!RegexCharClass.IsSingleton(_fcPrefix.GetValueOrDefault().Prefix))
                 {
-                    Ldstr(_fcPrefix.Value.Prefix);
+                    Ldstr(_fcPrefix.GetValueOrDefault().Prefix);
                     Call(s_charInSetM);
 
                     BrtrueFar(l2);
                 }
                 else
                 {
-                    Ldc(RegexCharClass.SingletonChar(_fcPrefix.Value.Prefix));
+                    Ldc(RegexCharClass.SingletonChar(_fcPrefix.GetValueOrDefault().Prefix));
                     Beq(l2);
                 }
 
@@ -1468,7 +1468,7 @@ namespace System.Text.RegularExpressions
 
                 Ldloc(cV);
                 Ldc(0);
-                if (!RegexCharClass.IsSingleton(_fcPrefix.Value.Prefix))
+                if (!RegexCharClass.IsSingleton(_fcPrefix.GetValueOrDefault().Prefix))
                     BgtFar(l1);
                 else
                     Bgt(l1);
