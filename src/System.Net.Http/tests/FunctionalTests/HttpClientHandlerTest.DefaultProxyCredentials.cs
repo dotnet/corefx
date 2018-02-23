@@ -43,6 +43,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
         [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
