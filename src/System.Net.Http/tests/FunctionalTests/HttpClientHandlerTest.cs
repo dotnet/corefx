@@ -201,7 +201,6 @@ namespace System.Net.Http.Functional.Tests
                     Content = new StreamContent(ms)
                 }))
                 {
-
                     Assert.Equal(3, ms.Position);
                     string output = await response.Content.ReadAsStringAsync();
                     Assert.Contains("\"Content-Length\": \"3\"", output);
@@ -214,7 +213,6 @@ namespace System.Net.Http.Functional.Tests
                     Content = new StreamContent(ms)
                 }))
                 {
-
                     Assert.Equal(3, ms.Position);
                     string output = await response.Content.ReadAsStringAsync();
                     Assert.Contains("\"Content-Length\": \"0\"", output);
