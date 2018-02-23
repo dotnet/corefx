@@ -45,9 +45,29 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        public bool SupportsSha2Oaep { get; } = !(RSA.Create() is RSACryptoServiceProvider);
+        public bool SupportsSha2Oaep { get; } =
+            !PlatformDetection.IsFullFramework || !(RSA.Create() is RSACryptoServiceProvider);
+
+        public bool SupportsPss { get; } = DeterminePssSupport();
 
         public bool SupportsDecryptingIntoExactSpaceRequired => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        private static bool DeterminePssSupport()
+        {
+            if (PlatformDetection.IsFullFramework)
+            {
+                return !(RSA.Create() is RSACryptoServiceProvider);
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // Darwin Kernel 17 is macOS High Sierra (10.13)
+                // macOS Sierra (10.12) reports algorithm not supported for RSA raw sign.
+                return Environment.OSVersion.Version >= new Version(17, 0);
+            }
+
+            return true;
+        }
     }
 
     public partial class RSAFactory
