@@ -14,7 +14,7 @@ PE/COFF Specification defines the structure of Debug Directory in section 5.1.1.
 
 ### CodeView Debug Directory Entry (type 2)
 
-*Version Major=0, Minor=0* of the data format:
+<a name="WindowsCodeViewEntry"></a>*Version Major=0, Minor=0* of the data format:
 
 | Offset | Size | Field          | Description                                                    |
 |:-------|:-----|:---------------|----------------------------------------------------------------|
@@ -101,4 +101,9 @@ When validating that Portable PDB matches the debug directory record check that 
 
 #### Windows PDB Checksum
 
-TODO
+If the symbol format is Windows PDB the checksum is calculated by hashing the entire content of the PDB file with the PDB signature comprising of 16B GUID and 4B timestamp zeroed.
+
+When validating that Windows PDB matches the debug directory record check that the checksums match and that the PDB signature (both GUID and timstamp values) match the data in the corresponding [Portable CodeView record](#WindowsCodeViewEntry). 
+
+> Note that when the debugger (or other tool) searches for the PDB only the GUID and Age are used to match the PDB. The timestamp of the CodeView debug directory entry does not need to match the timestamp stored in the PDB. However for the purpose of PDB checksum matching the timestamp has to match as well.
+
