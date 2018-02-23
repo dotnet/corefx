@@ -259,8 +259,9 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         Console.Out.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.InfoIgnoreType, type.FullName)));
                         WriteWarning(e, parsableerrors);
-                        continue;
                     }
+
+                    continue;
                 }
 
                 if (!proxyOnly)
