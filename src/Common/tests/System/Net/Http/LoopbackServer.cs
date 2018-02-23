@@ -151,7 +151,7 @@ namespace System.Net.Test.Common
         {
             foreach (string line in headers)
             {
-                string[] tokens = line.Split(':', 2);
+                string[] tokens = line.Split(':');
                 if (name.Equals(tokens[0], StringComparison.InvariantCultureIgnoreCase))
                 {
                     return tokens[1].Trim();
