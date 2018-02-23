@@ -315,8 +315,8 @@ namespace System.Net
                     {
                         if (anyValues)
                         {
-                            if (key.Equals(HttpKnownHeaderNames.SetCookie, StringComparison.InvariantCultureIgnoreCase) ||
-                                key.Equals(HttpKnownHeaderNames.SetCookie2, StringComparison.InvariantCultureIgnoreCase))
+                            if (key.Equals(HttpKnownHeaderNames.SetCookie, StringComparison.OrdinalIgnoreCase) ||
+                                key.Equals(HttpKnownHeaderNames.SetCookie2, StringComparison.OrdinalIgnoreCase))
                             {
                                 sb.Append("\r\n").Append(key).Append(": ");
                             }
