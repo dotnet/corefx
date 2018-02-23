@@ -66,7 +66,7 @@ namespace System.IO
             List<string> stackDir = new List<string>();
 
             // Attempt to figure out which directories don't exist, and only
-            // create the ones we need.  Note that InternalExists may fail due
+            // create the ones we need.  Note that FileExists may fail due
             // to Win32 ACL's preventing us from seeing a directory, and this
             // isn't threadsafe.
 
@@ -120,7 +120,7 @@ namespace System.IO
                     int currentError = Marshal.GetLastWin32Error();
                     // While we tried to avoid creating directories that don't
                     // exist above, there are at least two cases that will 
-                    // cause us to see ERROR_ALREADY_EXISTS here.  InternalExists 
+                    // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
                     // can fail because we didn't have permission to the 
                     // directory.  Secondly, another thread or process could
                     // create the directory between the time we check and the
@@ -131,7 +131,7 @@ namespace System.IO
                     else
                     {
                         // If there's a file in this directory's place, or if we have ERROR_ACCESS_DENIED when checking if the directory already exists throw.
-                        if (File.InternalExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
+                        if (FileExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
                         {
                             firstError = currentError;
                             errorString = name;
@@ -181,38 +181,6 @@ namespace System.IO
 
             return (lastError == 0) && (data.dwFileAttributes != -1)
                     && ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
-        }
-
-        public static IEnumerable<string> EnumeratePaths(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
-        {
-            FindEnumerableFactory.NormalizeInputs(ref fullPath, ref searchPattern);
-            switch (searchTarget)
-            {
-                case SearchTarget.Files:
-                    return FindEnumerableFactory.UserFiles(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Directories:
-                    return FindEnumerableFactory.UserDirectories(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Both:
-                    return FindEnumerableFactory.UserEntries(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(searchTarget));
-            }
-        }
-
-        public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
-        {
-            FindEnumerableFactory.NormalizeInputs(ref fullPath, ref searchPattern);
-            switch (searchTarget)
-            {
-                case SearchTarget.Directories:
-                    return FindEnumerableFactory.DirectoryInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Files:
-                    return FindEnumerableFactory.FileInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Both:
-                    return FindEnumerableFactory.FileSystemInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                default:
-                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
-            }
         }
 
         /// <summary>
@@ -289,36 +257,6 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
             return (FileAttributes)data.dwFileAttributes;
-        }
-
-        public static string GetCurrentDirectory()
-        {
-            StringBuilder sb = StringBuilderCache.Acquire(Interop.Kernel32.MAX_PATH + 1);
-            if (Interop.Kernel32.GetCurrentDirectory(sb.Capacity, sb) == 0)
-                throw Win32Marshal.GetExceptionForLastWin32Error();
-            string currentDirectory = sb.ToString();
-            // Note that if we have somehow put our command prompt into short
-            // file name mode (i.e. by running edlin or a DOS grep, etc), then
-            // this will return a short file name.
-            if (currentDirectory.IndexOf('~') >= 0)
-            {
-                int r = Interop.Kernel32.GetLongPathName(currentDirectory, sb, sb.Capacity);
-                if (r == 0 || r >= Interop.Kernel32.MAX_PATH)
-                {
-                    int errorCode = Marshal.GetLastWin32Error();
-                    if (r >= Interop.Kernel32.MAX_PATH)
-                        errorCode = Interop.Errors.ERROR_FILENAME_EXCED_RANGE;
-                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_INVALID_FUNCTION &&  // by design - enough said.
-                        errorCode != Interop.Errors.ERROR_ACCESS_DENIED)
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
-                }
-                currentDirectory = sb.ToString();
-            }
-            StringBuilderCache.Release(sb);
-
-            return currentDirectory;
         }
 
         public static DateTimeOffset GetCreationTime(string fullPath)
@@ -591,20 +529,6 @@ namespace System.IO
                 {
                     throw Win32Marshal.GetExceptionForLastWin32Error(fullPath);
                 }
-            }
-        }
-
-        public static void SetCurrentDirectory(string fullPath)
-        {
-            if (!Interop.Kernel32.SetCurrentDirectory(fullPath))
-            {
-                // If path doesn't exist, this sets last error to 2 (File 
-                // not Found).  LEGACY: This may potentially have worked correctly
-                // on Win9x, maybe.
-                int errorCode = Marshal.GetLastWin32Error();
-                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                    errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
             }
         }
 

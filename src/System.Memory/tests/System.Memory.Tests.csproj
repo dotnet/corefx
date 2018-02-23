@@ -67,6 +67,14 @@
     <Compile Include="Span\StartsWith.T.cs" />
     <Compile Include="Span\StartsWith.byte.cs" />
     <Compile Include="Span\ToArray.cs" />
+    <Compile Include="Span\ToString.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.cs" />
+    <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsBytes.cs" />
@@ -78,6 +86,7 @@
     <Compile Include="ReadOnlySpan\CtorPointerInt.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.char.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
@@ -106,9 +115,11 @@
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
     <Compile Include="ReadOnlySpan\Slice.cs" />
-    <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
+    <Compile Include="ReadOnlySpan\StartsWith.char.cs" />
+    <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
+    <Compile Include="ReadOnlySpan\ToString.cs" />
     <Compile Include="ReadOnlySpan\TrimAnyCharacter.cs" />
     <Compile Include="ReadOnlySpan\TrimManyCharacters.cs" />
     <Compile Include="ReadOnlySpan\TrimWhiteSpace.cs" />

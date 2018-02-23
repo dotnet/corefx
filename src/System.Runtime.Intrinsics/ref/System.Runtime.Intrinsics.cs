@@ -967,7 +967,7 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<double> ConvertToVector128Double(Vector128<float> value) { throw null; }
         public static Vector128<int> ConvertToVector128Int32WithTruncation(Vector128<float> value) { throw null; }
         public static Vector128<int> ConvertToVector128Int32WithTruncation(Vector128<double> value) { throw null; }
-        public static Vector128<uint> ConvertScalarToVector128UInt32Scalar(uint value) { throw null; }
+        public static Vector128<uint> ConvertScalarToVector128UInt32(uint value) { throw null; }
         public static Vector128<ulong> ConvertScalarToVector128UInt64(ulong value) { throw null; }
         public static Vector128<double> Divide(Vector128<double> left,  Vector128<double> right) { throw null; }
         public static Vector128<double> DivideScalar(Vector128<double> left, Vector128<double> right) { throw null; }
@@ -996,10 +996,6 @@ namespace System.Runtime.Intrinsics.X86
         public static void LoadFence() { throw null; }
         public static unsafe Vector128<double> LoadHigh(Vector128<double> lower, double* address) { throw null; }
         public static unsafe Vector128<double> LoadLow(Vector128<double> upper, double* address) { throw null; }
-        public static unsafe Vector128<sbyte> LoadScalarVector128(sbyte* address) { throw null; }
-        public static unsafe Vector128<byte> LoadScalarVector128(byte* address) { throw null; }
-        public static unsafe Vector128<short> LoadScalarVector128(short* address) { throw null; }
-        public static unsafe Vector128<ushort> LoadScalarVector128(ushort* address) { throw null; }
         public static unsafe Vector128<int> LoadScalarVector128(int* address) { throw null; }
         public static unsafe Vector128<uint> LoadScalarVector128(uint* address) { throw null; }
         public static unsafe Vector128<long> LoadScalarVector128(long* address) { throw null; }

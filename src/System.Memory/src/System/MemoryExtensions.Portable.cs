@@ -13,6 +13,42 @@ namespace System
     public static partial class MemoryExtensions
     {
         /// <summary>
+        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the end of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.EndsWith<char>(value);
+            }
+
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+            return sourceString.EndsWith(valueString, comparisonType);
+        }
+
+        /// <summary>
+        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the beginning of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.StartsWith<char>(value);
+            }
+
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+            return sourceString.StartsWith(valueString, comparisonType);
+        }
+
+        /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
         /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>
@@ -60,12 +96,12 @@ namespace System
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), StringAdjustment, text.Length);
         }
@@ -75,15 +111,19 @@ namespace System
         /// </summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -96,15 +136,19 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -113,11 +157,11 @@ namespace System
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text)
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
+        public static ReadOnlyMemory<char> AsMemory(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlyMemory<char>(text, 0, text.Length);
         }
@@ -125,14 +169,18 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -143,14 +191,18 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 

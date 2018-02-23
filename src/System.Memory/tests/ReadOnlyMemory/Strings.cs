@@ -22,7 +22,7 @@ namespace System.MemoryTests
         [MemberData(nameof(StringInputs))]
         public static void AsReadOnlyMemory_ToArray_Roundtrips(string input)
         {
-            ReadOnlyMemory<char> m = input.AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = input.AsMemory();
             Assert.Equal(input, new string(m.ToArray()));
         }
 
@@ -30,7 +30,7 @@ namespace System.MemoryTests
         [MemberData(nameof(StringInputs))]
         public static void AsReadOnlyMemory_Span_Roundtrips(string input)
         {
-            ReadOnlyMemory<char> m = input.AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = input.AsMemory();
             ReadOnlySpan<char> s = m.Span;
             Assert.Equal(input, new string(s.ToArray()));
         }
@@ -47,25 +47,47 @@ namespace System.MemoryTests
         [InlineData("0123456789", 5, 3)]
         public static void AsReadOnlyMemory_Slice_MatchesSubstring(string input, int offset, int count)
         {
-            ReadOnlyMemory<char> m = input.AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = input.AsMemory();
             Assert.Equal(input.Substring(offset, count), new string(m.Slice(offset, count).ToArray()));
             Assert.Equal(input.Substring(offset, count), new string(m.Slice(offset, count).Span.ToArray()));
             Assert.Equal(input.Substring(offset), new string(m.Slice(offset).ToArray()));
         }
 
         [Fact]
-        public static void AsReadOnlyMemory_NullString_Throws()
+        public static void AsReadOnlyMemory_NullString_Default()
         {
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory());
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory(0));
-            AssertExtensions.Throws<ArgumentNullException>("text", () => ((string)null).AsReadOnlyMemory(0, 0));
+            ReadOnlyMemory<char> m = ((string)null).AsMemory();
+            m.Validate();
+            Assert.Equal(default, m);
+
+            m = ((string)null).AsMemory(0);
+            m.Validate();
+            Assert.Equal(default, m);
+
+            m = ((string)null).AsMemory(0, 0);
+            m.Validate();
+            Assert.Equal(default, m);
+        }
+
+        [Fact]
+        public static void NullAsReadOnlyMemoryNonZeroStartAndLength()
+        {
+            string str = null;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(-1));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(-1, -1));
         }
 
         [Fact]
         public static void AsReadOnlyMemory_TryGetString_Roundtrips()
         {
             string input = "0123456789";
-            ReadOnlyMemory<char> m = input.AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = input.AsMemory();
             Assert.False(m.IsEmpty);
 
             Assert.True(m.TryGetString(out string text, out int start, out int length));
@@ -125,7 +147,7 @@ namespace System.MemoryTests
         [Fact]
         public static void AsReadOnlyMemory_TryGetArray_ReturnsFalse()
         {
-            ReadOnlyMemory<char> m = "0123456789".AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = "0123456789".AsMemory();
             Assert.False(MemoryMarshal.TryGetArray(m, out ArraySegment<char> array));
             Assert.Null(array.Array);
             Assert.Equal(0, array.Offset);
@@ -136,7 +158,7 @@ namespace System.MemoryTests
         public static unsafe void AsReadOnlyMemory_Retain_ExpectedPointerValue()
         {
             string input = "0123456789";
-            ReadOnlyMemory<char> m = input.AsReadOnlyMemory();
+            ReadOnlyMemory<char> m = input.AsMemory();
 
             using (MemoryHandle h = m.Retain(pin: false))
             {
@@ -162,16 +184,16 @@ namespace System.MemoryTests
             {
                 start = 0;
                 length = text.Length;
-                m = text.AsReadOnlyMemory();
+                m = text.AsMemory();
             }
             else if (length == -1)
             {
                 length = text.Length - start;
-                m = text.AsReadOnlyMemory(start);
+                m = text.AsMemory(start);
             }
             else
             {
-                m = text.AsReadOnlyMemory(start, length);
+                m = text.AsMemory(start, length);
             }
 
             Assert.Equal(length, m.Length);
@@ -191,21 +213,21 @@ namespace System.MemoryTests
         [MemberData(nameof(TestHelpers.StringSlice2ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
         public static unsafe void AsReadOnlyMemory_2Arg_OutOfRange(string text, int start)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsReadOnlyMemory(start));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsMemory(start));
         }
 
         [Theory]
         [MemberData(nameof(TestHelpers.StringSlice3ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
         public static unsafe void AsReadOnlyMemory_3Arg_OutOfRange(string text, int start, int length)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsReadOnlyMemory(start, length));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsMemory(start, length));
         }
 
         [Fact]
         public static void AsReadOnlyMemory_EqualsAndGetHashCode_ExpectedResults()
         {
-            ReadOnlyMemory<char> m1 = new string('a', 4).AsReadOnlyMemory();
-            ReadOnlyMemory<char> m2 = new string('a', 4).AsReadOnlyMemory();
+            ReadOnlyMemory<char> m1 = new string('a', 4).AsMemory();
+            ReadOnlyMemory<char> m2 = new string('a', 4).AsMemory();
 
             Assert.True(m1.Span.SequenceEqual(m2.Span));
             Assert.True(m1.Equals(m1));

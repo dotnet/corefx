@@ -21,8 +21,9 @@ namespace System.ServiceProcess.Tests
         private bool _disposed;
         private Task _waitClientConnect;
         private NamedPipeServerStream _serverStream;
+        private readonly Exception _exception;
 
-        public TestService(string serviceName)
+        public TestService(string serviceName, Exception throwException = null)
         {
             this.ServiceName = serviceName;
 
@@ -34,6 +35,7 @@ namespace System.ServiceProcess.Tests
             // We cannot easily test these so disable the events
             this.CanHandleSessionChangeEvent = false;
             this.CanHandlePowerEvent = false;
+            this._exception = throwException;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
             _waitClientConnect = this._serverStream.WaitForConnectionAsync();
@@ -75,6 +77,11 @@ namespace System.ServiceProcess.Tests
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
+            if (_exception != null)
+            {
+                throw _exception;
+            }
+
             if (args.Length == 4 && args[0] == "StartWithArguments")
             {
                 Debug.Assert(args[1] == "a");
@@ -90,12 +97,12 @@ namespace System.ServiceProcess.Tests
             WriteStreamAsync(PipeMessageByteCode.Stop).Wait();
         }
 
-        private async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
+        public async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
-            const int writeTimeout = 60000;
             Task writeCompleted;
             if (_waitClientConnect.IsCompleted)
             {
+                const int writeTimeout = 60000;
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
                     writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
@@ -109,7 +116,8 @@ namespace System.ServiceProcess.Tests
             }
             else
             {
-                throw new TimeoutException($"Client didn't connect to the pipe");
+                // We get here if the service is getting torn down before a client ever connected;
+                // some tests do this.
             }
         }
 
