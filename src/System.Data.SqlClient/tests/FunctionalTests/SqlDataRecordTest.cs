@@ -183,6 +183,64 @@ namespace System.Data.SqlClient.Tests
             Assert.Throws<ArgumentNullException>(() => record.GetValues(null));
         }
 
+        [Fact]
+        public void GetValues_IfValuesBiggerThanColumnCount_LastArrayItemKeptEmpty(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetString(0,"test");
+            record.SetSqlInt32(1,2);
+
+            object[] values = new object[5];
+            int columnCount = record.GetValues(values);
+
+            for (int i = 2; i < 5; i++)
+            {
+                Assert.Null(values[i]);                
+            }
+            Assert.Equal(2,columnCount);
+        }
+
+        [Fact]
+        public void GetValues_IfValuesShorterThanColumnCount_FillOnlyFirstColumn(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetString(0,"test");
+            record.SetSqlInt32(1,2);
+
+            object[] values = new object[1];
+            int columnCount = record.GetValues(values);
+
+            Assert.Equal("test",values[0]);
+            Assert.Equal(1,columnCount);
+        }
+
+        [Fact]
+        public void GetValues_FillsArrayAndRespectColumnOrder(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetString(0,"test");
+            record.SetSqlInt32(1,2);
+
+            object[] values = new object[2];
+            int columnCount = record.GetValues(values);
+
+            Assert.Equal("test",values[0]);
+            Assert.Equal(2,values[1]);
+            Assert.Equal(2,columnCount);
+        }
+
     }
     [SqlUserDefinedType(Format.UserDefined)]
     public class TestUdt{
