@@ -7,8 +7,7 @@ using System.Buffers;
 namespace System.Runtime.InteropServices
 {
     /// <summary>
-    /// Provides a collection of methods for interoperating with <see cref="Memory{T}"/>, <see cref="ReadOnlyMemory{T}"/>,
-    /// <see cref="Span{T}"/>, and <see cref="ReadOnlySpan{T}"/>.
+    /// Provides a collection of methods for interoperating with <see cref="ReadOnlySequence{T}"/>
     /// </summary>
     public static partial class SequenceMarshal
     {
@@ -26,7 +25,7 @@ namespace System.Runtime.InteropServices
         }
 
         /// <summary>
-        /// Get an array from the underlying <see cref="ReadOnlySequence{T}"/>.
+        /// Get an array segment from the underlying <see cref="ReadOnlySequence{T}"/>.
         /// If unable to get the array segment, return false with a default array segment.
         /// </summary>
         public static bool TryGetArray<T>(ReadOnlySequence<T> sequence, out ArraySegment<T> arraySegment)

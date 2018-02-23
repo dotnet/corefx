@@ -187,7 +187,7 @@ namespace System.IO.Pipelines
 
         private int GetSegmentSize(int sizeHint)
         {
-            // First we need to handle case where hint is smaller then minimum segment size
+            // First we need to handle case where hint is smaller than minimum segment size
             var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, sizeHint);
             // After that adjust it to fit into pools max buffer size
             var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);

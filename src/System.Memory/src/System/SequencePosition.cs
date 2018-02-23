@@ -26,13 +26,13 @@ namespace System
         }
 
         /// <summary>
-        /// Segment of memory this <see cref="SequencePosition"/> points to.
+        /// Returns object part of this <see cref="SequencePosition"/>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public object GetObject() => _segment;
 
         /// <summary>
-        /// Index inside segment of memory this <see cref="SequencePosition"/> points to.
+        /// Returns integer part of this <see cref="SequencePosition"/>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int GetInteger() => _index;

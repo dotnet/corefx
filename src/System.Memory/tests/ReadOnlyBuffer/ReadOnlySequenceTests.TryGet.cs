@@ -16,13 +16,13 @@ namespace System.Memory.Tests
         {
             var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
 
-            Assert.True(SequenceMarshal.TryGetArray(buffer, out var array));
+            Assert.True(SequenceMarshal.TryGetArray(buffer, out ArraySegment<byte> array));
             Assert.Equal(2, array.Offset);
             Assert.Equal(3, array.Count);
 
-            Assert.False(SequenceMarshal.TryGetMemoryList(buffer, out var _, out var _, out var _, out var _));
-            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out var _, out var _, out var _));
-            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out var _));
+            Assert.False(SequenceMarshal.TryGetMemoryList(buffer, out _, out _, out _, out _));
+            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out _, out _, out _));
+            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out _));
         }
 
         [Fact]
@@ -41,8 +41,8 @@ namespace System.Memory.Tests
             Assert.Equal(0, startIndex);
             Assert.Equal(3, endIndex);
 
-            Assert.False(SequenceMarshal.TryGetArray(buffer, out var array));
-            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out var _, out var _, out var _));
+            Assert.False(SequenceMarshal.TryGetArray(buffer, out _));
+            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out _, out _, out _));
         }
 
         [Fact]
@@ -51,14 +51,14 @@ namespace System.Memory.Tests
             var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
             var buffer = new ReadOnlySequence<byte>(ownedMemory, 2, 3);
 
-            Assert.True(SequenceMarshal.TryGetOwnedMemory(buffer, out var newOwnedMemory, out int start, out int length));
+            Assert.True(SequenceMarshal.TryGetOwnedMemory(buffer, out OwnedMemory<byte> newOwnedMemory, out int start, out int length));
             Assert.Equal(ownedMemory, newOwnedMemory);
             Assert.Equal(2, start);
             Assert.Equal(3, length);
 
-            Assert.False(SequenceMarshal.TryGetMemoryList(buffer, out var _, out var _, out var _, out var _));
-            Assert.False(SequenceMarshal.TryGetArray(buffer, out var _));
-            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out var _));
+            Assert.False(SequenceMarshal.TryGetMemoryList(buffer, out _, out _, out _, out _));
+            Assert.False(SequenceMarshal.TryGetArray(buffer, out _));
+            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out _));
         }
 
         [Fact]
@@ -76,9 +76,9 @@ namespace System.Memory.Tests
             Assert.Equal(2, startIndex);
             Assert.Equal(1, endIndex);
 
-            Assert.False(SequenceMarshal.TryGetArray(buffer, out var _));
-            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out var _, out var _, out var _));
-            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out var _));
+            Assert.False(SequenceMarshal.TryGetArray(buffer, out _));
+            Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out _, out _, out _));
+            Assert.False(SequenceMarshal.TryGetReadOnlyMemory(buffer, out _));
         }
     }
 }
