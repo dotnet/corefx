@@ -58,7 +58,7 @@ namespace System.Buffers
         /// <summary>
         /// Writes contents of <paramref name="source"/> to <paramref name="bufferWriter"/>
         /// </summary>
-        public static void Write<T, TBufferWriter>(this TBufferWriter bufferWriter, ReadOnlySpan<T> source) where TBufferWriter : IBufferWriter<T>
+        public static void Write<T>(this IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source)
         {
             Span<T> destination = bufferWriter.GetSpan();
 
