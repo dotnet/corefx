@@ -292,6 +292,17 @@ namespace System.Data.SqlClient.Tests
             Assert.Equal(1,record.GetOrdinal("Col2"));
         }
 
+        [Fact]
+        public void GetChar_ThrowsNotSupported(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.Char,100)
+            };
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetValue(0,'c');
+            Assert.Throws<NotSupportedException>(() => record.GetChar(0));
+        }
+
       
     }
     [SqlUserDefinedType(Format.UserDefined)]
