@@ -241,6 +241,58 @@ namespace System.Data.SqlClient.Tests
             Assert.Equal(2,columnCount);
         }
 
+        [Fact]
+        public void GetOrdinal_ThrowsAgumentNull_IfNameIsNull(){
+             SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Throws<ArgumentNullException>(() => record.GetOrdinal(null));
+        }
+
+        [Fact]
+        public void GetOrdinal_ThrowsOutOfRange_IfNameIsNotAColumn(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+
+            Assert.Throws<IndexOutOfRangeException>(() => record.GetOrdinal("outofrange"));
+            
+            Assert.Throws<IndexOutOfRangeException>(() => record.GetOrdinal("col1 "));
+
+        }
+
+        [Fact]
+        public void GetOrdinal_ReturnsIndexOfColumn(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Equal(1,record.GetOrdinal("col2"));
+        }
+        [Fact]
+        public void GetOrdinal_ReturnsIndexOfColumn_CaseInsensitive(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col2", SqlDbType.Int)
+            };            
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Equal(1,record.GetOrdinal("Col2"));
+        }
+
+      
     }
     [SqlUserDefinedType(Format.UserDefined)]
     public class TestUdt{
