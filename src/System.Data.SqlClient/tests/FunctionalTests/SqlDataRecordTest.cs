@@ -150,7 +150,14 @@ namespace System.Data.SqlClient.Tests
 
         [Fact]
         public void GetDataTypeName_ReturnsTypeFromMetaTypeIfNotUdt(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+            };
 
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Equal("nvarchar",record.GetDataTypeName(0));
         }
 
     }
