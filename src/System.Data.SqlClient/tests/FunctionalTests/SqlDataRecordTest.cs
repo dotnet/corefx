@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Data.SqlTypes;
 using Microsoft.SqlServer.Server;
 using Xunit;
@@ -137,7 +139,8 @@ namespace System.Data.SqlClient.Tests
             }
         }
         [Fact]
-        public void GetDataTypeName_ReturnsMetaDataTypeIfUdtType(){
+        public void GetDataTypeName_ReturnsMetaDataTypeIfUdtType()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.Udt,typeof(TestUdt),"sql_TestUdt")
@@ -145,11 +148,12 @@ namespace System.Data.SqlClient.Tests
 
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            Assert.Equal("System.Data.SqlClient.Tests.TestUdt",record.GetDataTypeName(0));
+            Assert.Equal("System.Data.SqlClient.Tests.TestUdt", record.GetDataTypeName(0));
         }
 
         [Fact]
-        public void GetDataTypeName_ReturnsTypeFromMetaTypeIfNotUdt(){
+        public void GetDataTypeName_ReturnsTypeFromMetaTypeIfNotUdt()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50)
@@ -157,10 +161,11 @@ namespace System.Data.SqlClient.Tests
 
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            Assert.Equal("nvarchar",record.GetDataTypeName(0));
+            Assert.Equal("nvarchar", record.GetDataTypeName(0));
         }
         [Fact]
-        public void GetFieldType_ReturnMetaTypeClassType(){
+        public void GetFieldType_ReturnMetaTypeClassType()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50)
@@ -168,11 +173,12 @@ namespace System.Data.SqlClient.Tests
 
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            Assert.Equal(typeof(string),record.GetFieldType(0));
+            Assert.Equal(typeof(string), record.GetFieldType(0));
         }
 
         [Fact]
-        public void GetValues_ThrowsIfNull(){
+        public void GetValues_ThrowsIfNull()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50)
@@ -184,129 +190,175 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
-        public void GetValues_IfValuesBiggerThanColumnCount_LastArrayItemKeptEmpty(){
+        public void GetValues_IfValuesBiggerThanColumnCount_LastArrayItemKeptEmpty()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
-            record.SetString(0,"test");
-            record.SetSqlInt32(1,2);
+            record.SetString(0, "test");
+            record.SetSqlInt32(1, 2);
 
             object[] values = new object[5];
             int columnCount = record.GetValues(values);
 
             for (int i = 2; i < 5; i++)
             {
-                Assert.Null(values[i]);                
+                Assert.Null(values[i]);
             }
-            Assert.Equal(2,columnCount);
+            Assert.Equal(2, columnCount);
         }
 
         [Fact]
-        public void GetValues_IfValuesShorterThanColumnCount_FillOnlyFirstColumn(){
+        public void GetValues_IfValuesShorterThanColumnCount_FillOnlyFirstColumn()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
-            record.SetString(0,"test");
-            record.SetSqlInt32(1,2);
+            record.SetString(0, "test");
+            record.SetSqlInt32(1, 2);
 
             object[] values = new object[1];
             int columnCount = record.GetValues(values);
 
-            Assert.Equal("test",values[0]);
-            Assert.Equal(1,columnCount);
+            Assert.Equal("test", values[0]);
+            Assert.Equal(1, columnCount);
         }
 
         [Fact]
-        public void GetValues_FillsArrayAndRespectColumnOrder(){
+        public void GetValues_FillsArrayAndRespectColumnOrder()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
-            record.SetString(0,"test");
-            record.SetSqlInt32(1,2);
+            record.SetString(0, "test");
+            record.SetSqlInt32(1, 2);
 
             object[] values = new object[2];
             int columnCount = record.GetValues(values);
 
-            Assert.Equal("test",values[0]);
-            Assert.Equal(2,values[1]);
-            Assert.Equal(2,columnCount);
+            Assert.Equal("test", values[0]);
+            Assert.Equal(2, values[1]);
+            Assert.Equal(2, columnCount);
         }
 
         [Fact]
-        public void GetOrdinal_ThrowsAgumentNull_IfNameIsNull(){
-             SqlMetaData[] metaData = new SqlMetaData[]
-            {
+        public void GetOrdinal_ThrowsAgumentNull_IfNameIsNull()
+        {
+            SqlMetaData[] metaData = new SqlMetaData[]
+           {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+           };
             SqlDataRecord record = new SqlDataRecord(metaData);
 
             Assert.Throws<ArgumentNullException>(() => record.GetOrdinal(null));
         }
 
         [Fact]
-        public void GetOrdinal_ThrowsOutOfRange_IfNameIsNotAColumn(){
+        public void GetOrdinal_ThrowsOutOfRange_IfNameIsNotAColumn()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
 
 
             Assert.Throws<IndexOutOfRangeException>(() => record.GetOrdinal("outofrange"));
-            
+
             Assert.Throws<IndexOutOfRangeException>(() => record.GetOrdinal("col1 "));
 
         }
 
         [Fact]
-        public void GetOrdinal_ReturnsIndexOfColumn(){
+        public void GetOrdinal_ReturnsIndexOfColumn()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            Assert.Equal(1,record.GetOrdinal("col2"));
+            Assert.Equal(1, record.GetOrdinal("col2"));
         }
         [Fact]
-        public void GetOrdinal_ReturnsIndexOfColumn_CaseInsensitive(){
+        public void GetOrdinal_ReturnsIndexOfColumn_CaseInsensitive()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.NVarChar,50),
                 new SqlMetaData("col2", SqlDbType.Int)
-            };            
+            };
             SqlDataRecord record = new SqlDataRecord(metaData);
 
-            Assert.Equal(1,record.GetOrdinal("Col2"));
+            Assert.Equal(1, record.GetOrdinal("Col2"));
         }
 
         [Fact]
-        public void GetChar_ThrowsNotSupported(){
+        public void GetChar_ThrowsNotSupported()
+        {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
                 new SqlMetaData("col1", SqlDbType.Char,100)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
-            record.SetValue(0,'c');
+            record.SetValue(0, 'c');
             Assert.Throws<NotSupportedException>(() => record.GetChar(0));
         }
 
-      
+        [Theory]
+        [ClassData(typeof(GetXXXBadTypeTestData))]
+        public void GetXXX_ThrowsIfBadType(Action<SqlDataRecord> getXXX)
+        {
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,1)
+            };
+            SqlDataRecord record = new SqlDataRecord(metaData);
+            record.SetValue(0, "a");
+            Assert.Throws<InvalidCastException>(() => getXXX(record));
+
+        }
+
+
     }
+
+    public class GetXXXBadTypeTestData : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetGuid(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt16(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt32(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetInt64(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetFloat(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDouble(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDecimal(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDateTime(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetDateTimeOffset(0)) };
+            yield return new object[] { new Action<SqlDataRecord>(r => r.GetTimeSpan(0)) };
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
     [SqlUserDefinedType(Format.UserDefined)]
-    public class TestUdt{
+    public class TestUdt
+    {
 
     }
 }
