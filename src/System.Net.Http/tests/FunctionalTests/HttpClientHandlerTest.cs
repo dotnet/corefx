@@ -189,6 +189,40 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async void SendAsync_ContentStream_ShouldNotBeReset()
+        {
+            using (var client = new HttpClient(CreateHttpClientHandler()))
+            using (var ms = new MemoryStream(new byte[] { 1, 2, 3 }))
+            {
+                client.BaseAddress = Configuration.Http.RemoteEchoServer;
+                using (HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage
+                {
+                    Method = HttpMethod.Put,
+                    Content = new StreamContent(ms)
+                }))
+                {
+
+                    Assert.Equal(3, ms.Position);
+                    string output = await response.Content.ReadAsStringAsync();
+                    Assert.Contains("\"Content-Length\": \"3\"", output);
+                }
+
+                // Send request again using same content stream.
+                using (HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage
+                {
+                    Method = HttpMethod.Put,
+                    Content = new StreamContent(ms)
+                }))
+                {
+
+                    Assert.Equal(3, ms.Position);
+                    string output = await response.Content.ReadAsStringAsync();
+                    Assert.Contains("\"Content-Length\": \"0\"", output);
+                }
+            }
+        }
+
+        [Fact]
         public void Credentials_SetGet_Roundtrips()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
