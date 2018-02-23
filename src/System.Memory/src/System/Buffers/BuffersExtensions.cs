@@ -77,9 +77,10 @@ namespace System.Buffers
                     destination = bufferWriter.GetSpan(source.Length);
                 }
 
-                source.Slice(0, destination.Length).CopyTo(destination);
-                bufferWriter.Advance(destination.Length);
-                source = source.Slice(destination.Length);
+                int writeSize = Math.Min(destination.Length, source.Length);
+                source.Slice(0, writeSize).CopyTo(destination);
+                bufferWriter.Advance(writeSize);
+                source = source.Slice(writeSize);
                 destination = default;
             }
         }

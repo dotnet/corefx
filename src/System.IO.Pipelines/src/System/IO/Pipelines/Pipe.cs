@@ -148,7 +148,7 @@ namespace System.IO.Pipelines
             return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
         }
 
-        private BufferSegment AllocateWriteHeadUnsynchronized(int count)
+        private BufferSegment AllocateWriteHeadUnsynchronized(int lengthHint)
         {
             BufferSegment segment = null;
 
@@ -157,7 +157,7 @@ namespace System.IO.Pipelines
                 // Try to return the tail so the calling code can append to it
                 int remaining = _commitHead.WritableBytes;
 
-                if (count <= remaining && remaining > 0)
+                if (lengthHint <= remaining && remaining > 0)
                 {
                     // Free tail space of the right amount, use that
                     segment = _commitHead;
@@ -168,7 +168,11 @@ namespace System.IO.Pipelines
             {
                 // No free tail space, allocate a new segment
                 segment = CreateSegmentUnsynchronized();
-                segment.SetMemory(_pool.Rent(Math.Max(_minimumSegmentSize, count)));
+
+                var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, lengthHint);
+                var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+
+                segment.SetMemory(_pool.Rent(adjustedToMaximumSize));
             }
 
             if (_commitHead == null)
