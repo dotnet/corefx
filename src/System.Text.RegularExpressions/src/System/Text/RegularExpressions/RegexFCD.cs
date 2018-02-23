@@ -40,10 +40,10 @@ namespace System.Text.RegularExpressions
         private bool _skipchild;            // don't process the current child.
         private bool _failed;
 
-        private RegexFCD(ValueListBuilder<RegexFC> fcStack, ValueListBuilder<int> intStack)
+        private RegexFCD(Span<RegexFC> fcStack, Span<int> intStack)
         {
-            _fcStack = fcStack;
-            _intStack = intStack;
+            _fcStack = new ValueListBuilder<RegexFC>(fcStack);
+            _intStack = new ValueListBuilder<int>(intStack);
             _failed = false;
             _skipchild = false;
             _skipAllChildren = false;
@@ -56,21 +56,15 @@ namespace System.Text.RegularExpressions
         public static RegexPrefix? FirstChars(RegexTree t)
         {
             // Create/rent buffers
-            Span<int> intSpan = stackalloc int[StackBufferSize];
-            var intStack = new ValueListBuilder<int>(intSpan);
             RegexFC[] fcSpan = ArrayPool<RegexFC>.Shared.Rent(StackBufferSize);
-            var fcStack = new ValueListBuilder<RegexFC>(fcSpan);
+            Span<int> intSpan = stackalloc int[StackBufferSize];
 
-            RegexFCD s = new RegexFCD(fcStack, intStack);
+            RegexFCD s = new RegexFCD(fcSpan, intSpan);
             RegexFC? fc = s.RegexFCFromRegexTree(t);
+            s.Dispose();
 
-            // Return rented buffers. Clear RegexFC buffer manually as only
-            // the reference to the RegexCharClass needs to be cleared.
-            for (int i = 0; i < fcStack.Length; i++)
-                fcStack[i].Dispose();
+            // Return rented buffer
             ArrayPool<RegexFC>.Shared.Return(fcSpan);
-            fcStack.Dispose();
-            intStack.Dispose();
 
             if (fc == null || fc.Value._nullable)
                 return null;
@@ -252,6 +246,19 @@ namespace System.Text.RegularExpressions
             return "None";
         }
 #endif
+
+        /// <summary>
+        /// Return rented buffers. Clear RegexFC buffer manually as only
+        /// the reference to the RegexCharClass needs to be cleared.
+        /// </summary>
+        public void Dispose()
+        {
+            for (int i = 0; i < _fcStack.Length; i++)
+                _fcStack[i].Dispose();
+
+            _fcStack.Dispose();
+            _intStack.Dispose();
+        }
 
         /// <summary>
         /// The main FC computation. It does a shortcutted depth-first walk
