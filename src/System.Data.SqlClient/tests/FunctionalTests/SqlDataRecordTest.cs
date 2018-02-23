@@ -159,6 +159,17 @@ namespace System.Data.SqlClient.Tests
 
             Assert.Equal("nvarchar",record.GetDataTypeName(0));
         }
+        [Fact]
+        public void GetFieldType_ReturnMetaTypeClassType(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+            };
+
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Equal(typeof(string),record.GetFieldType(0));
+        }
 
     }
     [SqlUserDefinedType(Format.UserDefined)]
