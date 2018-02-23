@@ -103,7 +103,7 @@ When validating that Portable PDB matches the debug directory record check that 
 
 If the symbol format is Windows PDB the checksum is calculated by hashing the entire content of the PDB file with the PDB signature comprising of 16B GUID and 4B timestamp zeroed.
 
-When validating that Windows PDB matches the debug directory record check that the checksums match and that the PDB signature (both GUID and timstamp values) match the data in the corresponding [Portable CodeView record](#WindowsCodeViewEntry). 
+When validating that Windows PDB matches the debug directory record check that the checksums match and that the PDB signature (both GUID and timestamp values) match the data in the corresponding [CodeView record](#WindowsCodeViewEntry). 
 
 > Note that when the debugger (or other tool) searches for the PDB only the GUID and Age are used to match the PDB. The timestamp of the CodeView debug directory entry does not need to match the timestamp stored in the PDB. However for the purpose of PDB checksum matching the timestamp has to match as well.
 
