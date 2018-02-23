@@ -646,8 +646,8 @@ namespace System.Security.Cryptography
                 CheckReturn(ret);
 
                 Debug.Assert(
-                    ret == signature.Length,
-                    $"RSA_private_encrypt returned {ret} when {signature.Length} was expected");
+                    ret == bytesRequired,
+                    $"RSA_private_encrypt returned {ret} when {bytesRequired} was expected");
 
                 bytesWritten = ret;
                 return true;
