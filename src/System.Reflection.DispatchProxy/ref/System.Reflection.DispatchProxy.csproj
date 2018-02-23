@@ -3,12 +3,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{7DF3C428-AAD6-41C7-98E6-6CACFD5C391E}</ProjectGuid>
-    <PackageTargetFramework>netstandard2.0;uap10.0.16299</PackageTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <SuppressPackageTargetFrameworkCompatibility Include="uap10.0.16299" />
     <Compile Include="System.Reflection.DispatchProxy.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

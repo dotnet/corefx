@@ -832,6 +832,8 @@
       "InboxOn": {
         "monoandroid10": "Any",
         "monotouch10": "Any",
+        "netcoreapp2.0": "Any",
+        "uap10.0.16299": "Any",
         "net45": "4.0.0.0",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
