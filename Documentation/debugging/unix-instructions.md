@@ -73,7 +73,7 @@ lldb-3.9 -O "settings set target.exec-search-paths /home/parallels/Downloads/Sys
   - set `program` to the full path to `dotnet` in the bin directory.
     - something like `corefx/bin/testhost/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `cwd` to the test bin directory.
-    - using the System.Net.Sockets example, should be something like `corefx/bin/tests/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+    - using the System.Net.Sockets example, it should be something like `corefx/bin/tests/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `args` to the command line arguments to pass to the test
     - something like: `[ "xunit.console.netcore.exe", "<test>.dll", "-notrait", .... ]`
     - to run a specific test, you can append something like: `[ "method", "System.Net.Sockets.Tests.{ClassName}.{TestMethodName}", ...]`
