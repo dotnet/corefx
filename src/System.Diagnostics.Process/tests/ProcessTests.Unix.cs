@@ -398,25 +398,69 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
         public void TestChildProcessCleanup()
         {
-            using (Process process = Process.Start("uname"))
+            using (Process process = CreateShortProcess())
             {
-                // 'uname' will terminate soon. The process will then be reaped
-                // causing the '/proc/<pid>' directory to disappear.
-                bool procPidExists = true;
-                for (int attempt = 0; attempt < 20; attempt++)
-                {
-                    procPidExists = Directory.Exists("/proc/" + process.Id);
-                    if (procPidExists)
-                    {
-                        Thread.Sleep(50);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                Assert.False(procPidExists);
+                process.Start();
+                bool processReaped = TryWaitProcessReaped(process.Id, timeout: 1000);
+                Assert.True(processReaped);
             }
+        }
+
+        /// <summary>
+        /// Tests whether child processes are reaped (cleaning up OS resources)
+        /// when they terminate after the Process was Disposed.
+        /// </summary>
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
+        public void TestChildProcessCleanupAfterDispose(bool shortProcess, bool enableEvents)
+        {
+            // We test using a long and short process. The long process will terminate after Dispose,
+            // The short process will terminate at the same time, possibly revealing race conditions.
+            int processId = -1;
+            using (Process process = shortProcess ? CreateShortProcess() : CreateSleepProcess(durationMs: 500))
+            {
+                process.Start();
+                processId = process.Id;
+                if (enableEvents)
+                {
+                    // Dispose will disable the Exited event.
+                    // We enable it to check this doesn't cause issues for process reaping.
+                    process.EnableRaisingEvents = true;
+                }
+            }
+            bool processReaped = TryWaitProcessReaped(processId, timeout: 1000);
+            Assert.True(processReaped);
+        }
+
+        private static Process CreateShortProcess()
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "uname";
+            return process;
+        }
+
+        private static bool TryWaitProcessReaped(int pid, int timeout)
+        {
+            const int sleepTime = 50;
+            // When the process is reaped, the '/proc/<pid>' directory to disappears.
+            bool procPidExists = true;
+            for (int attempt = 0; attempt < (timeout / sleepTime); attempt++)
+            {
+                procPidExists = Directory.Exists("/proc/" + pid);
+                if (procPidExists)
+                {
+                    Thread.Sleep(sleepTime);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return !procPidExists;
         }
 
         /// <summary>
@@ -430,9 +474,8 @@ namespace System.Diagnostics.Tests
             {
                 object waitState = null;
                 int processId = -1;
-                using (var process = new Process())
+                using (var process = CreateShortProcess())
                 {
-                    process.StartInfo.FileName = "uname";
                     process.EnableRaisingEvents = true;
                     process.Exited += (o,e) => exitedEventSemaphore.Release();
                     process.Start();
