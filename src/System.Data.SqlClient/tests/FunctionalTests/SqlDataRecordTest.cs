@@ -171,6 +171,18 @@ namespace System.Data.SqlClient.Tests
             Assert.Equal(typeof(string),record.GetFieldType(0));
         }
 
+        [Fact]
+        public void GetValues_ThrowsIfNull(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+            };
+
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Throws<ArgumentNullException>(() => record.GetValues(null));
+        }
+
     }
     [SqlUserDefinedType(Format.UserDefined)]
     public class TestUdt{
