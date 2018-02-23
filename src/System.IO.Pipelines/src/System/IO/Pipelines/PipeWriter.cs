@@ -37,10 +37,10 @@ namespace System.IO.Pipelines
         public abstract void Advance(int bytes);
 
         /// <inheritdoc />
-        public abstract Memory<byte> GetMemory(int lengthHint = 0);
+        public abstract Memory<byte> GetMemory(int sizeHint = 0);
 
         /// <inheritdoc />
-        public abstract Span<byte> GetSpan(int lengthHint = 0);
+        public abstract Span<byte> GetSpan(int sizeHint = 0);
 
         /// <summary>
         /// Writes <paramref name="source"/> to the pipe and makes data accessible to <see cref="PipeReader"/>

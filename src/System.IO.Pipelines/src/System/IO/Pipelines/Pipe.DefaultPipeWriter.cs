@@ -30,9 +30,9 @@ namespace System.IO.Pipelines
 
             public override void Advance(int bytes) => _pipe.Advance(bytes);
 
-            public override Memory<byte> GetMemory(int lengthHint = 0) => _pipe.GetMemory(lengthHint);
+            public override Memory<byte> GetMemory(int sizeHint = 0) => _pipe.GetMemory(sizeHint);
 
-            public override Span<byte> GetSpan(int lengthHint = 0) => _pipe.GetMemory(lengthHint).Span;
+            public override Span<byte> GetSpan(int sizeHint = 0) => _pipe.GetMemory(sizeHint).Span;
 
             public bool IsCompleted => _pipe.IsFlushAsyncCompleted;
 

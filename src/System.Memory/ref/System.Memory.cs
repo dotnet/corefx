@@ -221,8 +221,8 @@ namespace System.Buffers
     public partial interface IBufferWriter<T>
     {
         void Advance(int count);
-        System.Memory<T> GetMemory(int lengthHint = 0);
-        System.Span<T> GetSpan(int lengthHint = 0);
+        System.Memory<T> GetMemory(int sizeHint = 0);
+        System.Span<T> GetSpan(int sizeHint = 0);
     }
     public partial interface IMemoryList<T>
     {
@@ -281,7 +281,7 @@ namespace System.Buffers
         public static void CopyTo<T>(this System.Buffers.ReadOnlySequence<T> sequence, System.Span<T> destination) { }
         public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
         public static T[] ToArray<T>(this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
-        public static void Write<T>(this System.Buffers.IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source) { }
+        public static void Write<T, TBufferWriter>(this TBufferWriter bufferWriter, ReadOnlySpan<T> source) where TBufferWriter: System.Buffers.IBufferWriter<T> { }
     }
     public readonly partial struct ReadOnlySequence<T>
     {

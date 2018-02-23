@@ -111,33 +111,29 @@ namespace System.IO.Pipelines
             _length = 0;
         }
 
-        internal Memory<byte> GetMemory(int lengthHint)
+        internal Memory<byte> GetMemory(int sizeHint)
         {
             if (_writerCompletion.IsCompleted)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
             }
 
-            if (lengthHint < 0)
+            if (sizeHint < 0)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
             lock (_sync)
             {
-                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(lengthHint);
+                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(sizeHint);
 
                 int bytesLeftInBuffer = segment.WritableBytes;
 
                 // If inadequate bytes left or if the segment is readonly
-                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < lengthHint || segment.ReadOnly)
+                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint || segment.ReadOnly)
                 {
                     BufferSegment nextSegment = CreateSegmentUnsynchronized();
-
-                    var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, lengthHint);
-                    var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
-
-                    nextSegment.SetMemory(_pool.Rent(adjustedToMaximumSize));
+                    nextSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
                     segment.SetNext(nextSegment);
 
@@ -148,7 +144,7 @@ namespace System.IO.Pipelines
             return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
         }
 
-        private BufferSegment AllocateWriteHeadUnsynchronized(int lengthHint)
+        private BufferSegment AllocateWriteHeadUnsynchronized(int sizeHint)
         {
             BufferSegment segment = null;
 
@@ -157,7 +153,7 @@ namespace System.IO.Pipelines
                 // Try to return the tail so the calling code can append to it
                 int remaining = _commitHead.WritableBytes;
 
-                if (lengthHint <= remaining && remaining > 0)
+                if (sizeHint <= remaining && remaining > 0)
                 {
                     // Free tail space of the right amount, use that
                     segment = _commitHead;
@@ -168,11 +164,7 @@ namespace System.IO.Pipelines
             {
                 // No free tail space, allocate a new segment
                 segment = CreateSegmentUnsynchronized();
-
-                var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, lengthHint);
-                var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
-
-                segment.SetMemory(_pool.Rent(adjustedToMaximumSize));
+                segment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
             }
 
             if (_commitHead == null)
@@ -191,6 +183,15 @@ namespace System.IO.Pipelines
             _writingHead = segment;
 
             return segment;
+        }
+
+        private int GetSegmentSize(int sizeHint)
+        {
+            // First we need to handle case where hint is smaller then minimum segment size
+            var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, sizeHint);
+            // After that adjust it to fit into pools max buffer size
+            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+            return adjustedToMaximumSize;
         }
 
         private BufferSegment CreateSegmentUnsynchronized()

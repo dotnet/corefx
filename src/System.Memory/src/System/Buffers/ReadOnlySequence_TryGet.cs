@@ -8,7 +8,6 @@ namespace System.Buffers
     {
         internal bool TryGetMemoryList(out IMemoryList<T> startSegment, out int startIndex, out IMemoryList<T> endSegment, out int endIndex)
         {
-
             if (Start.GetObject() == null  || GetSequenceType() != SequenceType.MemoryList)
             {
                 startSegment = null;

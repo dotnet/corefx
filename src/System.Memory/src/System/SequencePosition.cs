@@ -14,7 +14,6 @@ namespace System
     public readonly struct SequencePosition : IEquatable<SequencePosition>
     {
         private readonly object _segment;
-
         private readonly int _index;
 
         /// <summary>
