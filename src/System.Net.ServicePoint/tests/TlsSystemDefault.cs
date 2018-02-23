@@ -12,13 +12,13 @@ namespace System.Net.Tests
         [Fact]
         public void ServicePointManager_SecurityProtocolDefault_Ok()
         {
-            RemoteInvoke(() => Assert.Equal(SecurityProtocolType.SystemDefault, ServicePointManager.SecurityProtocol)).Dispose();
+            RemoteInvoke(() => Assert.Equal(SecurityProtocolType.SystemDefault, ServicePointManager.SecurityProtocol));
         }
 
         [Fact]
         public void ServicePointManager_CheckAllowedProtocols_SystemDefault_Allowed()
         {
-            RemoteInvoke(() => ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault).Dispose();
+            RemoteInvoke(() => ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault);
         }
     }
 }

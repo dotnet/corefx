@@ -72,9 +72,7 @@ namespace System.Diagnostics
             // Return the handle to the process, which may or not be started
             return new RemoteInvokeHandle(options.Start ?
                 Process.Start(psi) :
-                new Process() { StartInfo = psi }, options,
-                a.FullName, t.FullName, method.Name
-                );
+                new Process() { StartInfo = psi }, options);
         }
     }
 }
