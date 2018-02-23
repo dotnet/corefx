@@ -462,7 +462,7 @@ namespace System.Net.WebSockets.Client.Tests
                         await Assert.ThrowsAsync<WebSocketException>(() => ReceiveAsync(clientSocket, recvSegment, cts.Token));
                     Assert.Equal(WebSocketError.ConnectionClosedPrematurely, newReceiveException.WebSocketErrorCode);
 
-                    Assert.Equal(WebSocketState.Open, clientSocket.State);
+                    Assert.Equal(WebSocketState.Aborted, clientSocket.State);
                     Assert.Null(clientSocket.CloseStatus);
                 }
             };
