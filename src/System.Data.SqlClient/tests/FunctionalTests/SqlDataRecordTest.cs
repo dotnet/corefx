@@ -136,6 +136,26 @@ namespace System.Data.SqlClient.Tests
                 Assert.Equal(DBNull.Value, record.GetValue(i));
             }
         }
+        [Fact]
+        public void GetDataTypeName_ReturnsMetaDataTypeIfUdtType(){
+            SqlMetaData[] metaData = new SqlMetaData[]
+            {
+                new SqlMetaData("col1", SqlDbType.Udt,typeof(TestUdt),"sql_TestUdt")
+            };
+
+            SqlDataRecord record = new SqlDataRecord(metaData);
+
+            Assert.Equal("System.Data.SqlClient.Tests.TestUdt",record.GetDataTypeName(0));
+        }
+
+        [Fact]
+        public void GetDataTypeName_ReturnsTypeFromMetaTypeIfNotUdt(){
+
+        }
+
+    }
+    [SqlUserDefinedType(Format.UserDefined)]
+    public class TestUdt{
 
     }
 }
