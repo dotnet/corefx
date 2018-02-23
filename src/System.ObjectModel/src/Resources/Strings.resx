@@ -76,6 +76,9 @@
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
   </data>
+  <data name="ArgumentOutOfRange_ArgExceedsSize" xml:space="preserve">
+    <value>The specified range exceeds the collection size.</value>
+  </data>
   <data name="IndexCannotBeNegative" xml:space="preserve">
     <value>Index cannot be negative.</value>
   </data>
