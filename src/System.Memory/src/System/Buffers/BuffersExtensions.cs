@@ -70,13 +70,24 @@ namespace System.Buffers
                 return;
             }
 
-            while (source.Length > 0)
+            WriteMultiSegment(bufferWriter, source, destination);
+        }
+
+        private static void WriteMultiSegment<T>(IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source, Span<T> destination)
+        {
+            while (true)
             {
                 int writeSize = Math.Min(destination.Length, source.Length);
                 source.Slice(0, writeSize).CopyTo(destination);
                 bufferWriter.Advance(writeSize);
                 source = source.Slice(writeSize);
-                destination = bufferWriter.GetSpan(source.Length);
+                if (source.Length > 0)
+                {
+                    destination = bufferWriter.GetSpan(source.Length);
+                    continue;
+                }
+
+                return;
             }
         }
     }
