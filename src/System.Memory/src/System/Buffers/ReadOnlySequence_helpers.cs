@@ -170,7 +170,9 @@ namespace System.Buffers
         private static SequencePosition SeekMultiSegment(IMemoryList<byte> start, int startIndex, IMemoryList<byte> end, int endPosition, long count)
         {
             var memoryList = start.GetNext(startIndex + count, out int localOffset);
-            if (memoryList == null || memoryList.GetLength(end) < 0)
+            if (memoryList == null ||
+                (memoryList == end && localOffset > endPosition) ||
+                memoryList.GetLength(end) < 0)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException_CountOutOfRange();
             }
@@ -245,7 +247,8 @@ namespace System.Buffers
                     IMemoryList<T> segment = (IMemoryList<T>)position.Segment;
                     IMemoryList<T> memoryList = (IMemoryList<T>)start.Segment;
 
-                    if ((memoryList == segment &&  startIndex < endIndex) || segment.GetLength(memoryList) < 0 )
+                    var segmentDistance = segment.GetLength(memoryList);
+                    if (segmentDistance < 0 || (segmentDistance == 0 && startIndex < endIndex))
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
