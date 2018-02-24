@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.MemoryTests;
+using System.Threading;
 using Xunit;
 
 namespace System.Memory.Tests
@@ -13,6 +14,10 @@ namespace System.Memory.Tests
         [Fact]
         public void SegmentStartIsConsideredInBoundsCheck()
         {
+            while (!System.Diagnostics.Debugger.IsAttached)
+            {
+                Thread.Sleep(100);
+            }
             // 0               50           100    0             50             100
             // [                ##############] -> [##############                ]
             //                         ^c1            ^c2

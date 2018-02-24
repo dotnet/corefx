@@ -15,27 +15,34 @@ namespace System.Memory.Tests
 
         public long GetLength(IMemoryList<byte> memoryList)
         {
-            var current = this;
+            BufferSegment current = this;
             long length = 0;
-            while (current != memoryList || current == null)
+            while (current != memoryList && current != null)
             {
                 length += current.Memory.Length;
-                current = current.Next;
+                current = (BufferSegment)current.Next;
+            }
+
+            if (current != memoryList)
+            {
+                return -1;
             }
             return length;
         }
 
         public IMemoryList<byte> GetNext(long offset, out int localOffset)
         {
-            var current = this;
+            BufferSegment current = this;
             while (current != null)
             {
-                if (offset < current.Memory.Length)
+                var currentLength = current.Memory.Length;
+                if (offset <= currentLength)
                 {
                     localOffset = (int)offset;
-                    return this;
+                    return current;
                 }
 
+                offset -= currentLength;
                 current = (BufferSegment)current.Next;
             }
 

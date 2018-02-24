@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace System.Memory.Tests
