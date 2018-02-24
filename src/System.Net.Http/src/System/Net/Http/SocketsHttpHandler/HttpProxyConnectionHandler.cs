@@ -50,7 +50,7 @@ namespace System.Net.Http
 
         private Task<HttpResponseMessage> GetConnectionAndSendAsync(HttpRequestMessage request, Uri proxyUri, CancellationToken cancellationToken)
         {
-            return _poolManager.SendAsync(request, proxyUri, cancellationToken);
+            return _poolManager.SendAsync(request, proxyUri, _proxy.Credentials ?? _defaultCredentials, cancellationToken);
         }
 
         private async Task<HttpResponseMessage> SendWithProxyAsync(

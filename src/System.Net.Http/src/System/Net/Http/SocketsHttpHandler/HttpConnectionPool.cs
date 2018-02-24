@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -21,6 +22,7 @@ namespace System.Net.Http
         private readonly string _host;
         private readonly int _port;
         private readonly Uri _proxyUri;
+        private readonly ICredentials _proxyCreds;
 
         /// <summary>List of idle connections stored in the pool.</summary>
         private readonly List<CachedConnection> _idleConnections = new List<CachedConnection>();
@@ -47,7 +49,7 @@ namespace System.Net.Http
         /// <summary>Initializes the pool.</summary>
         /// <param name="maxConnections">The maximum number of connections allowed to be associated with the pool at any given time.</param>
         /// 
-        public HttpConnectionPool(HttpConnectionPoolManager poolManager, string host, int port, string sslHostName, Uri proxyUri, int maxConnections)
+        public HttpConnectionPool(HttpConnectionPoolManager poolManager, string host, int port, string sslHostName, Uri proxyUri, ICredentials proxyCredentials, int maxConnections)
         {
             Debug.Assert(proxyUri == null ?
                     host != null && port != 0 :         // direct http or https connection
@@ -59,6 +61,7 @@ namespace System.Net.Http
             _host = host;
             _port = port;
             _proxyUri = proxyUri;
+            _proxyCreds = proxyCredentials;
             _maxConnections = maxConnections;
 
             if (sslHostName != null)
@@ -274,7 +277,54 @@ namespace System.Net.Http
             // TODO: For now, we don't support proxy authentication in this scenario.
             // This will get fixed when we refactor proxy auth handling.
 
-            HttpResponseMessage tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, cancellationToken).ConfigureAwait(false);
+            // TODO: shall we honor _preAuthenticate and send Basic auth when creds are available?
+            HttpResponseMessage tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, null, cancellationToken).ConfigureAwait(false);
+            if (tunnelResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired && _proxyCreds != null)
+            {
+                AuthenticationHeaderValue selectedAuth = AuthenticationHandler.GetSupportedAuthScheme(tunnelResponse.Headers.ProxyAuthenticate);
+
+                switch (selectedAuth != null ? selectedAuth.Scheme : null)
+                {
+                    case AuthenticationHelper.Digest:
+
+                        // Update digest response with new parameter from Proxy-Authenticate
+                        AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(selectedAuth.Parameter);
+
+                        if (await AuthenticationHelper.TrySetDigestAuthToken(tunnelRequest, _proxyCreds, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
+                        {
+                            tunnelResponse.Dispose();
+                            tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, null, cancellationToken).ConfigureAwait(false);
+
+                            // Retry in case of nonce timeout in server.
+                            if (tunnelResponse.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                foreach (AuthenticationHeaderValue ahv in tunnelResponse.Headers.ProxyAuthenticate)
+                                {
+                                    if (ahv.Scheme == AuthenticationHelper.Digest)
+                                    {
+                                        digestResponse = new AuthenticationHelper.DigestResponse(ahv.Parameter);
+                                        if (AuthenticationHelper.IsServerNonceStale(digestResponse) &&
+                                                await AuthenticationHelper.TrySetDigestAuthToken(tunnelRequest, _proxyCreds, digestResponse, HttpKnownHeaderNames.ProxyAuthorization).ConfigureAwait(false))
+                                        {
+                                                tunnelResponse.Dispose();
+                                                tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, null, cancellationToken).ConfigureAwait(false);
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            };
+                        }
+                        break;
+                  case AuthenticationHelper.Basic:
+                     tunnelResponse.Dispose();
+                     tunnelRequest.Headers.ProxyAuthorization = new AuthenticationHeaderValue(AuthenticationHelper.Basic,
+                            AuthenticationHelper.GetBasicTokenForCredential(_proxyCreds.GetCredential(_proxyUri, AuthenticationHelper.Basic)));
+
+                     tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, null, cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+            }
             if (tunnelResponse.StatusCode != HttpStatusCode.OK)
             {
                 throw new HttpRequestException(SR.Format(SR.net_http_proxy_tunnel_failed, _proxyUri, tunnelResponse.StatusCode));
