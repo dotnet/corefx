@@ -57,8 +57,5 @@ namespace System
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode() => HashHelpers.Combine(_object?.GetHashCode() ?? 0, _integer);
-
-        /// <inheritdoc />
-        public override string ToString() => this == default ? "(default)" : _object == null ? _integer.ToString(): $"{_object}[{_integer}]";
     }
 }
