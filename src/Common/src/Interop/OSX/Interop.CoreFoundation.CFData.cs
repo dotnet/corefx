@@ -62,14 +62,15 @@ internal static partial class Interop
                 cfData.DangerousAddRef(ref addedRef);
 
                 long length = CFDataGetLength(cfData).ToInt64();
-                if (destination.Length < length)
-                {
-                    bytesWritten = 0;
-                    return false;
-                }
 
                 if (length > 0)
                 {
+                    if (destination.Length < length)
+                    {
+                        bytesWritten = 0;
+                        return false;
+                    }
+
                     byte* dataBytes = CFDataGetBytePtr(cfData);
                     fixed (byte* destinationPtr = &MemoryMarshal.GetReference(destination))
                     {

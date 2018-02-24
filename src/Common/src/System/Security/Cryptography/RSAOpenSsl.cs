@@ -95,11 +95,12 @@ namespace System.Security.Cryptography
 
             int rsaSize = Interop.Crypto.RsaSize(key);
             byte[] buf = null;
+            Span<byte> destination = default;
 
             try
             {
                 buf = ArrayPool<byte>.Shared.Rent(rsaSize);
-                Span<byte> destination = new Span<byte>(buf, 0, rsaSize);
+                destination = new Span<byte>(buf, 0, rsaSize);
 
                 if (!TryDecrypt(key, data, destination, rsaPadding, oaepProcessor, out int bytesWritten))
                 {
@@ -111,11 +112,8 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                if (buf != null)
-                {
-                    Array.Clear(buf, 0, rsaSize);
-                    ArrayPool<byte>.Shared.Return(buf);
-                }
+                CryptographicOperations.ZeroMemory(destination);
+                ArrayPool<byte>.Shared.Return(buf);
             }
         }
 
@@ -196,7 +194,9 @@ namespace System.Security.Cryptography
             {
                 if (paddingBuf != null)
                 {
-                    Array.Clear(paddingBuf, 0, rsaSize);
+                    // DecryptBuf is paddingBuf if paddingBuf is not null, erase it before returning it.
+                    // If paddingBuf IS null then decryptBuf was destination, and shouldn't be cleared.
+                    CryptographicOperations.ZeroMemory(decryptBuf);
                     ArrayPool<byte>.Shared.Return(paddingBuf);
                 }
             }
@@ -225,7 +225,7 @@ namespace System.Security.Cryptography
 
             if (!encrypted || bytesWritten != buf.Length)
             {
-                Debug.Fail("TryEncrypt behaved unexpectedly");
+                Debug.Fail($"TryEncrypt behaved unexpectedly: {nameof(encrypted)}=={encrypted}, {nameof(bytesWritten)}=={bytesWritten}, {nameof(buf.Length)}=={buf.Length}");
                 throw new CryptographicException();
             }
 

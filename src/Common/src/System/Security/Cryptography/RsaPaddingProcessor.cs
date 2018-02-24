@@ -4,7 +4,7 @@
 
 using System.Buffers;
 using System.Buffers.Binary;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace System.Security.Cryptography
@@ -13,8 +13,8 @@ namespace System.Security.Cryptography
     {
         private static readonly byte[] s_eightZeros = new byte[8];
 
-        private static readonly Dictionary<HashAlgorithmName, RsaPaddingProcessor> s_lookup =
-            new Dictionary<HashAlgorithmName, RsaPaddingProcessor>();
+        private static readonly ConcurrentDictionary<HashAlgorithmName, RsaPaddingProcessor> s_lookup =
+            new ConcurrentDictionary<HashAlgorithmName, RsaPaddingProcessor>();
 
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly int _hLen;
@@ -25,36 +25,33 @@ namespace System.Security.Cryptography
             _hLen = hLen;
         }
 
+        internal static int BytesRequiredForBitCount(int keySizeInBits)
+        {
+            return (keySizeInBits + 7) / 8;
+        }
+
         internal int HashLength => _hLen;
 
         internal static RsaPaddingProcessor OpenProcessor(HashAlgorithmName hashAlgorithmName)
         {
-            lock (s_lookup)
-            {
-                if (s_lookup.TryGetValue(hashAlgorithmName, out RsaPaddingProcessor processor))
+            return s_lookup.GetOrAdd(
+                hashAlgorithmName,
+                alg =>
                 {
-                    return processor;
-                }
-
-                using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithmName))
-                {
-                    // SHA-2-512 is the biggest we expect
-                    Span<byte> stackDest = stackalloc byte[512 / 8];
-
-                    if (hasher.TryGetHashAndReset(stackDest, out int bytesWritten))
+                    using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithmName))
                     {
-                        processor = new RsaPaddingProcessor(hashAlgorithmName, bytesWritten);
-                    }
-                    else
-                    {
+                        // SHA-2-512 is the biggest we expect
+                        Span<byte> stackDest = stackalloc byte[512 / 8];
+
+                        if (hasher.TryGetHashAndReset(stackDest, out int bytesWritten))
+                        {
+                            return new RsaPaddingProcessor(hashAlgorithmName, bytesWritten);
+                        }
+
                         byte[] big = hasher.GetHashAndReset();
-                        processor = new RsaPaddingProcessor(hashAlgorithmName, big.Length);
+                        return new RsaPaddingProcessor(hashAlgorithmName, big.Length);
                     }
-                }
-
-                s_lookup[hashAlgorithmName] = processor;
-                return processor;
-            }
+                });
         }
 
         internal static void PadPkcs1Encryption(
@@ -284,7 +281,7 @@ namespace System.Security.Cryptography
         {
             // https://tools.ietf.org/html/rfc3447#section-9.1.1
             int emBits = keySize - 1;
-            int emLen = (emBits + 7) / 8;
+            int emLen = BytesRequiredForBitCount(emBits);
 
             if (mHash.Length != _hLen)
             {
@@ -371,7 +368,7 @@ namespace System.Security.Cryptography
         internal bool VerifyPss(ReadOnlySpan<byte> mHash, ReadOnlySpan<byte> em, int keySize)
         {
             int emBits = keySize - 1;
-            int emLen = (emBits + 7) / 8;
+            int emLen = BytesRequiredForBitCount(emBits);
 
             if (mHash.Length != _hLen)
             {

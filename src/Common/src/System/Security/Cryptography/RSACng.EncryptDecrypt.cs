@@ -52,7 +52,7 @@ namespace System.Security.Cryptography
             {
                 if (encrypt && data.Length == 0)
                 {
-                    int bufSize = (KeySize + 7) / 8;
+                    int bufSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
                     byte[] rented = ArrayPool<byte>.Shared.Rent(bufSize);
                     Span<byte> paddedMessage = new Span<byte>(rented, 0, bufSize);
 
@@ -126,7 +126,7 @@ namespace System.Security.Cryptography
             {
                 if (encrypt && data.Length == 0)
                 {
-                    int bufSize = (KeySize + 7) / 8;
+                    int bufSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
                     byte[] rented = ArrayPool<byte>.Shared.Rent(bufSize);
                     Span<byte> paddedMessage = new Span<byte>(rented, 0, bufSize);
 

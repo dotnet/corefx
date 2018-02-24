@@ -168,7 +168,8 @@ namespace System.Security.Cryptography
                 }
 
                 // The size of encrypt is always the keysize (in ceiling-bytes)
-                byte[] output = new byte[(KeySize + 7) / 8];
+                int outputSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
+                byte[] output = new byte[outputSize];
 
                 if (!TryEncrypt(data, output, padding, out int bytesWritten))
                 {
@@ -176,7 +177,7 @@ namespace System.Security.Cryptography
                     throw new CryptographicException();
                 }
 
-                Debug.Assert(bytesWritten == output.Length);
+                Debug.Assert(bytesWritten == outputSize);
                 return output;
             }
 
@@ -187,7 +188,7 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(padding));
                 }
 
-                int rsaSize = (KeySize + 7) / 8;
+                int rsaSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
 
                 if (destination.Length < rsaSize)
                 {
@@ -270,7 +271,7 @@ namespace System.Security.Cryptography
                     return Interop.AppleCrypto.RsaDecrypt(keys.PrivateKey, data, padding);
                 }
 
-                int maxOutputSize = (KeySize + 7) / 8;
+                int maxOutputSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
                 byte[] rented = ArrayPool<byte>.Shared.Rent(maxOutputSize);
                 Span<byte> contentsSpan = Span<byte>.Empty;
 
@@ -331,7 +332,7 @@ namespace System.Security.Cryptography
 
                 RsaPaddingProcessor processor = RsaPaddingProcessor.OpenProcessor(padding.OaepHashAlgorithm);
 
-                int bytesRequired = (KeySize + 7) / 8;
+                int bytesRequired = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
                 byte[] rented = ArrayPool<byte>.Shared.Rent(bytesRequired);
                 Span<byte> unpaddedData = Span<byte>.Empty;
 
@@ -395,7 +396,8 @@ namespace System.Security.Cryptography
                 }
 
                 // A signature will always be the keysize (in ceiling-bytes) in length.
-                byte[] output = new byte[(KeySize + 7) / 8];
+                int outputSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
+                byte[] output = new byte[outputSize];
 
                 if (!TrySignHash(hash, output, hashAlgorithm, padding, out int bytesWritten))
                 {
@@ -403,7 +405,7 @@ namespace System.Security.Cryptography
                     throw new CryptographicException();
                 }
 
-                Debug.Assert(bytesWritten == output.Length);
+                Debug.Assert(bytesWritten == outputSize);
                 return output;
             }
 
@@ -437,7 +439,7 @@ namespace System.Security.Cryptography
                 }
 
                 int keySize = KeySize;
-                int rsaSize = (keySize + 7) / 8;
+                int rsaSize = RsaPaddingProcessor.BytesRequiredForBitCount(keySize);
 
                 if (processor == null)
                 {
@@ -534,7 +536,7 @@ namespace System.Security.Cryptography
                     SafeSecKeyRefHandle publicKey = GetKeys().PublicKey;
 
                     int keySize = KeySize;
-                    int rsaSize = (keySize + 7) / 8;
+                    int rsaSize = RsaPaddingProcessor.BytesRequiredForBitCount(keySize);
 
                     if (signature.Length != rsaSize)
                     {
