@@ -13,34 +13,34 @@ namespace System
     /// </summary>
     public readonly struct SequencePosition : IEquatable<SequencePosition>
     {
-        private readonly object _segment;
-        private readonly int _index;
+        private readonly object _object;
+        private readonly int _integer;
 
         /// <summary>
         /// Creates new <see cref="SequencePosition"/>
         /// </summary>
-        public SequencePosition(object segment, int index)
+        public SequencePosition(object @object, int integer)
         {
-            _segment = segment;
-            _index = index;
+            _object = @object;
+            _integer = integer;
         }
 
         /// <summary>
         /// Returns object part of this <see cref="SequencePosition"/>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public object GetObject() => _segment;
+        public object GetObject() => _object;
 
         /// <summary>
         /// Returns integer part of this <see cref="SequencePosition"/>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public int GetInteger() => _index;
+        public int GetInteger() => _integer;
 
         /// <summary>
         /// Returns true if left and right point at the same segment and have the same index.
         /// </summary>
-        public static bool operator ==(SequencePosition left, SequencePosition right) => left._index== right._index && left._segment == right._segment;
+        public static bool operator ==(SequencePosition left, SequencePosition right) => left._integer== right._integer && left._object == right._object;
 
         /// <summary>
         /// Returns true if left and right do not point at the same segment and have the same index.
@@ -56,9 +56,9 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashHelpers.Combine(_segment?.GetHashCode() ?? 0, _index);
+        public override int GetHashCode() => HashHelpers.Combine(_object?.GetHashCode() ?? 0, _integer);
 
         /// <inheritdoc />
-        public override string ToString() => this == default ? "(default)" : _segment == null ? _index.ToString(): $"{_segment}[{_index}]";
+        public override string ToString() => this == default ? "(default)" : _object == null ? _integer.ToString(): $"{_object}[{_integer}]";
     }
 }
