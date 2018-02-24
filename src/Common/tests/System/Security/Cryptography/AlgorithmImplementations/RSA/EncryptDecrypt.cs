@@ -320,6 +320,7 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RoundtripEmptyArray()
         {
             using (RSA rsa = RSAFactory.Create(TestData.RSA2048Params))

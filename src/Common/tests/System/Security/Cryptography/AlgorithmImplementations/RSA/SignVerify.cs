@@ -1084,6 +1084,7 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [ConditionalFact(nameof(SupportsPss))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PssVerifyHash_MismatchedHashSize()
         {
             // This is a legal SHA-1 value, which we're going to use with SHA-2-256 instead.
@@ -1106,6 +1107,7 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [ConditionalFact(nameof(SupportsPss))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PssSignHash_MismatchedHashSize()
         {
             RSASignaturePadding padding = RSASignaturePadding.Pss;
