@@ -30,7 +30,7 @@ namespace System.Memory.Tests
             return length;
         }
 
-        public IMemoryList<byte> GetNext(long offset, out int localOffset)
+        public IMemoryList<byte> GetNext(long offset, out int localIndex)
         {
             BufferSegment current = this;
             while (current != null)
@@ -38,7 +38,7 @@ namespace System.Memory.Tests
                 var currentLength = current.Memory.Length;
                 if (offset <= currentLength)
                 {
-                    localOffset = (int)offset;
+                    localIndex = (int)offset;
                     return current;
                 }
 
@@ -46,7 +46,7 @@ namespace System.Memory.Tests
                 current = (BufferSegment)current.Next;
             }
 
-            localOffset = 0;
+            localIndex = 0;
             return null;
         }
 

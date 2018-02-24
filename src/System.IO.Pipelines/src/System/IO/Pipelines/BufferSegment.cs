@@ -80,15 +80,17 @@ namespace System.IO.Pipelines
 
         public IMemoryList<byte> GetNext(long offset, out int localIndex)
         {
-            var current = this;
+            BufferSegment current = this;
             while (current != null)
             {
-                if (offset < current.Memory.Length)
+                var currentLength = current.Memory.Length;
+                if (offset <= currentLength)
                 {
                     localIndex = (int)offset;
-                    return this;
+                    return current;
                 }
 
+                offset -= currentLength;
                 current = (BufferSegment)current.Next;
             }
 
