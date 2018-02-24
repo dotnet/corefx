@@ -59,12 +59,12 @@ namespace System.Security.Cryptography.Rsa.Tests
                 return !(RSA.Create() is RSACryptoServiceProvider);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // Darwin Kernel 17 is macOS High Sierra (10.13)
-                // macOS Sierra (10.12) reports algorithm not supported for RSA raw sign.
-                return Environment.OSVersion.Version >= new Version(17, 0);
-            }
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            //{
+            //    // Darwin Kernel 17 is macOS High Sierra (10.13)
+            //    // macOS Sierra (10.12) reports algorithm not supported for RSA raw sign.
+            //    return Environment.OSVersion.Version >= new Version(17, 0);
+            //}
 
             return true;
         }

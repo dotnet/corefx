@@ -338,5 +338,5 @@ extern "C" int32_t AppleCryptoNative_RsaVerificationPrimitive(
     // Since there's not an API which will give back the still-padded signature block with
     // kSecAlgorithmRSASignatureRaw, use the encryption primitive to achieve the same result.
     return RsaPrimitive(
-        publicKey, pbData, cbData, pDataOut, pErrorOut, kSecKeyAlgorithmRSAEncryptionRaw, SecKeyCreateDecryptedData);
+        publicKey, pbData, cbData, pDataOut, pErrorOut, kSecKeyAlgorithmRSAEncryptionRaw, SecKeyCreateEncryptedData);
 }
