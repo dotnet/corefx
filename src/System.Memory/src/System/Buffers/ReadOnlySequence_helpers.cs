@@ -245,8 +245,7 @@ namespace System.Buffers
                     IMemoryList<T> segment = (IMemoryList<T>)position.Segment;
                     IMemoryList<T> memoryList = (IMemoryList<T>)start.Segment;
 
-                    var segmentDistance = segment.GetLength(memoryList);
-                    if (segmentDistance < 0 || (segmentDistance == 0 && startIndex < endIndex))
+                    if ((memoryList == segment &&  startIndex < endIndex) || segment.GetLength(memoryList) < 0 )
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
@@ -265,7 +264,7 @@ namespace System.Buffers
 
             public IMemoryList<T> GetNext(long offset, out int localOffset)
             {
-                if (offset < Memory.Length)
+                if (offset <= Memory.Length)
                 {
                     localOffset = (int)offset;
                     return this;
