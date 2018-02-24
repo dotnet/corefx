@@ -168,10 +168,10 @@ namespace System.Data.SqlClient.SNI
         {
             if (_sniAsyncAttnPacket == null)
             {
-                _sniAsyncAttnPacket = new SNIPacket();
-                SetPacketData(_sniAsyncAttnPacket, SQL.AttentionHeader, TdsEnums.HEADER_LEN);
+                SNIPacket attnPacket = new SNIPacket();
+                SetPacketData(attnPacket, SQL.AttentionHeader, TdsEnums.HEADER_LEN);
+                _sniAsyncAttnPacket = attnPacket;
             }
-            
             return _sniAsyncAttnPacket;
         }
 
@@ -208,7 +208,8 @@ namespace System.Data.SqlClient.SNI
         {
             if (_sniPacket != null)
             {
-                _sniPacket.Release();
+                _sniPacket.Dispose();
+                _sniPacket = null;
             }
             lock (_writePacketLockObject)
             {
