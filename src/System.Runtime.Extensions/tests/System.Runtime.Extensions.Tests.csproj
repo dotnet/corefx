@@ -23,8 +23,8 @@
     <Compile Include="System\Convert.cs" />
     <Compile Include="System\EnvironmentTests.cs" />
     <Compile Include="System\IO\PathTests.cs" />
-    <Compile Include="System\IO\PathTests.Windows.netfx.cs" />
-    <Compile Include="System\IO\PathTests.Windows.cs" />
+    <Compile Include="System\IO\PathTests_Windows.netfx.cs" />
+    <Compile Include="System\IO\PathTests_Windows.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
     <Compile Include="System\AppDomainTests.cs" />
@@ -39,9 +39,9 @@
     <Compile Include="System\Random.netcoreapp.cs" />
     <Compile Include="System\IO\Path.IsPathFullyQualified.netcoreapp.cs" />
     <Compile Include="System\IO\PathTestsBase.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTests.Windows.netcoreapp.cs" />
+    <Compile Include="System\IO\PathTests_Windows.netcoreapp.cs" />
     <Compile Include="System\IO\PathTests.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTests.Unix.cs" />
+    <Compile Include="System\IO\PathTests_Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netstandard'">
     <Compile Include="System\BitConverterSpan.cs" />
