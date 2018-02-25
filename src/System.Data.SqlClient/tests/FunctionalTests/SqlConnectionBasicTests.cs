@@ -135,27 +135,18 @@ namespace System.Data.SqlClient.Tests
             Console.WriteLine($"ConnectionTimeoutTestWithThread: Elapsed Time {theMax} and threshold {threshold}");
         }
 
+        [OuterLoop("Can take up to 4 seconds")]
         [Fact]
         public void ExceptionsWithMinPoolSizeCanBeHandled()
         {
-            int count = 0;
-            int expected = 3;
             string connectionString = $"Data Source={Guid.NewGuid().ToString()};uid=random;pwd=asd;Connect Timeout=2; Min Pool Size=3";
-            while (count < expected)
+            for (int i = 0; i < 2; i++)
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    try
-                    {
-                        connection.Open();
-                    }
-                    catch (Exception)
-                    {
-                        count++;
-                    }
+                    Assert.ThrowsAny<Exception>(() => connection.Open());
                 }
             }
-            Assert.Equal(expected, count);
         }
 
         public class ConnectionWorker
