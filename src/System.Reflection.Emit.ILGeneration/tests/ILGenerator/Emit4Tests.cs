@@ -39,6 +39,30 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(result, resultValue);
         }
 
+        [Theory]
+        [InlineData(1, 1, 2)]
+        public void TestDynamicMethodEmitCalliStdCall(int a, int b, int result)
+        {
+            Type returnType = typeof(int);
+
+            var dynamicMethod = new DynamicMethod("F", returnType, new Type[] { typeof(IntPtr), typeof(int), typeof(int) });
+
+            ILGenerator il = dynamicMethod.GetILGenerator();
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldarg_2);
+            il.Emit(OpCodes.Ldarg_0);
+            il.EmitCalli(OpCodes.Calli, CallingConvention.StdCall, returnType, new Type[] { typeof(int), typeof(int) });
+            il.Emit(OpCodes.Ret);
+
+            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new FooFoo(Foo));
+
+            object resultValue = dynamicMethod
+                .Invoke(null, new object[] { funcPtr, a, b });
+
+            Assert.IsType(returnType, resultValue);
+            Assert.Equal(result, resultValue);
+        }
+
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate int FooFoo(int a, int b);
 
