@@ -10,10 +10,11 @@ namespace System.Reflection.Emit.Tests
 {
     public class ILGeneratorEmit4
     {
-        [Theory]
-        [InlineData(1, 1, 2)]
-        public void TestEmitCalliStdCall(int a, int b, int result)
+        [Fact]
+        public void TestEmitCalliStdCall()
         {
+            int a = 1, b = 1, result = 2;
+
             ModuleBuilder moduleBuilder = Helpers.DynamicModule();
             TypeBuilder typeBuilder = moduleBuilder.DefineType("T", TypeAttributes.Public);
             Type returnType = typeof(int);
@@ -40,10 +41,11 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(result, resultValue);
         }
 
-        [Theory]
-        [InlineData(1, 1, 2)]
-        public void TestDynamicMethodEmitCalliStdCall(int a, int b, int result)
+        [Fact]
+        public void TestDynamicMethodEmitCalliStdCall()
         {
+            int a = 1, b = 1, result = 2;
+
             Type returnType = typeof(int);
 
             var dynamicMethod = new DynamicMethod("F", returnType, new Type[] { typeof(IntPtr), typeof(int), typeof(int) });
@@ -64,10 +66,11 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(result, resultValue);
         }
 
-        [Theory]
-        [InlineData("Test string!", "!gnirts tseT")]
-        public void TestEmitCalliCdeclCall(string input, string result)
+        [Fact]
+        public void TestEmitCalliCdeclCall()
         {
+            string input = "Test string!", result = "!gnirts tseT";
+
             ModuleBuilder moduleBuilder = Helpers.DynamicModule();
             TypeBuilder typeBuilder = moduleBuilder.DefineType("T", TypeAttributes.Public);
             Type returnType = typeof(string);
@@ -93,10 +96,11 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(result, resultValue);
         }
 
-        [Theory]
-        [InlineData("Test string!", "!gnirts tseT")]
-        public void TestDynamicMethodEmitCalliCdeclCall(string input, string result)
+        [Fact]
+        public void TestDynamicMethodEmitCalliCdeclCall()
         {
+            string input = "Test string!", result = "!gnirts tseT";
+
             Type returnType = typeof(string);
 
             var dynamicMethod = new DynamicMethod("F", returnType, new Type[] { typeof(IntPtr), typeof(string) });
