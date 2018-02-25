@@ -125,6 +125,11 @@ namespace System.ServiceProcess.Tests
                 controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
                 Assert.Equal(ServiceControllerStatus.Running, controller.Status);
             }
+
+            controller.Stop();
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
+            controller.WaitForStatus(ServiceControllerStatus.Stopped, _testService.ControlTimeout);
+            Assert.Equal(ServiceControllerStatus.Stopped, controller.Status);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
