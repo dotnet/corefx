@@ -8,7 +8,7 @@ namespace System.IO.Tests
 {
     [PlatformSpecific(TestPlatforms.Windows)]
     [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-    public class PathTests_NetFX : PathTestsBase
+    public class PathTests_Windows_NetFX : PathTestsBase
     {
         [Theory,
             MemberData(nameof(TestData_EmbeddedNull)),

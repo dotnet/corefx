@@ -23,7 +23,7 @@
     <Compile Include="System\Convert.cs" />
     <Compile Include="System\EnvironmentTests.cs" />
     <Compile Include="System\IO\PathTests.cs" />
-    <Compile Include="System\IO\PathTests_Windows.netfx.cs" />
+    <Compile Include="System\IO\PathTests_Windows_NetFX.cs" />
     <Compile Include="System\IO\PathTests_Windows.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="System\Environment.UserName.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\Environment.MachineName.cs" />
-    <Compile Include="System\IO\Path.Combine.cs" />
+    <Compile Include="System\IO\PathTests_Combine.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\IO\PathTestsBase.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
