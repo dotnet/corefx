@@ -144,7 +144,8 @@ namespace System.Data.SqlClient.Tests
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    Assert.ThrowsAny<Exception>(() => connection.Open());
+                    Exception exception = Record.Exception(() => connection.Open());
+                    Assert.True(exception is InvalidOperationException || exception is SqlException, $"Unexpected exception: {exception}");
                 }
             }
         }
