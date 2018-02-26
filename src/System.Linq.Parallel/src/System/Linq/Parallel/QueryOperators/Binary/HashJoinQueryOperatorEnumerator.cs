@@ -101,70 +101,8 @@ namespace System.Linq.Parallel
             if (mutables == null)
             {
                 mutables = _mutables = new Mutables();
-#if DEBUG
-                int hashLookupCount = 0;
-                int hashKeyCollisions = 0;
-#endif
-                mutables._rightHashLookup = new HashLookup<THashKey, Pair<TRightInput, ListChunk<TRightInput>>>(_keyComparer);
 
-                Pair<TRightInput, THashKey> rightPair = default(Pair<TRightInput, THashKey>);
-                TRightKey rightKeyUnused = default(TRightKey);
-                int i = 0;
-                while (_rightSource.MoveNext(ref rightPair, ref rightKeyUnused))
-                {
-                    if ((i++ & CancellationState.POLL_INTERVAL) == 0)
-                        CancellationState.ThrowIfCanceled(_cancellationToken);
-
-                    TRightInput rightElement = rightPair.First;
-                    THashKey rightHashKey = rightPair.Second;
-
-                    // We ignore null keys.
-                    if (rightHashKey != null)
-                    {
-#if DEBUG
-                        hashLookupCount++;
-#endif
-
-                        // See if we've already stored an element under the current key. If not, we
-                        // lazily allocate a pair to hold the elements mapping to the same key.
-                        const int INITIAL_CHUNK_SIZE = 2;
-                        Pair<TRightInput, ListChunk<TRightInput>> currentValue = default(Pair<TRightInput, ListChunk<TRightInput>>);
-                        if (!mutables._rightHashLookup.TryGetValue(rightHashKey, ref currentValue))
-                        {
-                            currentValue = new Pair<TRightInput, ListChunk<TRightInput>>(rightElement, null);
-
-                            if (_groupResultSelector != null)
-                            {
-                                // For group joins, we also add the element to the list. This makes
-                                // it easier later to yield the list as-is.
-                                currentValue.Second = new ListChunk<TRightInput>(INITIAL_CHUNK_SIZE);
-                                currentValue.Second.Add(rightElement);
-                            }
-
-                            mutables._rightHashLookup.Add(rightHashKey, currentValue);
-                        }
-                        else
-                        {
-                            if (currentValue.Second == null)
-                            {
-                                // Lazily allocate a list to hold all but the 1st value. We need to
-                                // re-store this element because the pair is a value type.
-                                currentValue.Second = new ListChunk<TRightInput>(INITIAL_CHUNK_SIZE);
-                                mutables._rightHashLookup[rightHashKey] = currentValue;
-                            }
-
-                            currentValue.Second.Add(rightElement);
-#if DEBUG
-                            hashKeyCollisions++;
-#endif
-                        }
-                    }
-                }
-
-#if DEBUG
-                TraceHelpers.TraceInfo("ParallelJoinQueryOperator::MoveNext - built hash table [count = {0}, collisions = {1}]",
-                    hashLookupCount, hashKeyCollisions);
-#endif
+                mutables._rightHashLookup = BuildHashLookup();
             }
 
             // PROBE phase: So long as the source has a next element, return the match.
@@ -254,6 +192,77 @@ namespace System.Linq.Parallel
             mutables._currentRightMatchesIndex++;
 
             return true;
+        }
+
+        private HashLookup<THashKey, Pair<TRightInput, ListChunk<TRightInput>>> BuildHashLookup()
+        {
+#if DEBUG
+            int hashLookupCount = 0;
+            int hashKeyCollisions = 0;
+#endif
+
+            var lookup = new HashLookup<THashKey, Pair<TRightInput, ListChunk<TRightInput>>>(_keyComparer);
+
+            Pair<TRightInput, THashKey> rightPair = default(Pair<TRightInput, THashKey>);
+            TRightKey rightKeyUnused = default(TRightKey);
+            int i = 0;
+            while (_rightSource.MoveNext(ref rightPair, ref rightKeyUnused))
+            {
+                if ((i++ & CancellationState.POLL_INTERVAL) == 0)
+                    CancellationState.ThrowIfCanceled(_cancellationToken);
+
+                TRightInput rightElement = rightPair.First;
+                THashKey rightHashKey = rightPair.Second;
+
+                // We ignore null keys.
+                if (rightHashKey != null)
+                {
+#if DEBUG
+                    hashLookupCount++;
+#endif
+
+                    // See if we've already stored an element under the current key. If not, we
+                    // lazily allocate a pair to hold the elements mapping to the same key.
+                    const int INITIAL_CHUNK_SIZE = 2;
+                    Pair<TRightInput, ListChunk<TRightInput>> currentValue = default(Pair<TRightInput, ListChunk<TRightInput>>);
+                    if (!lookup.TryGetValue(rightHashKey, ref currentValue))
+                    {
+                        currentValue = new Pair<TRightInput, ListChunk<TRightInput>>(rightElement, null);
+
+                        if (_groupResultSelector != null)
+                        {
+                            // For group joins, we also add the element to the list. This makes
+                            // it easier later to yield the list as-is.
+                            currentValue.Second = new ListChunk<TRightInput>(INITIAL_CHUNK_SIZE);
+                            currentValue.Second.Add(rightElement);
+                        }
+
+                        lookup.Add(rightHashKey, currentValue);
+                    }
+                    else
+                    {
+                        if (currentValue.Second == null)
+                        {
+                            // Lazily allocate a list to hold all but the 1st value. We need to
+                            // re-store this element because the pair is a value type.
+                            currentValue.Second = new ListChunk<TRightInput>(INITIAL_CHUNK_SIZE);
+                            lookup[rightHashKey] = currentValue;
+                        }
+
+                        currentValue.Second.Add(rightElement);
+#if DEBUG
+                        hashKeyCollisions++;
+#endif
+                    }
+                }
+            }
+
+#if DEBUG
+            TraceHelpers.TraceInfo("ParallelJoinQueryOperator::BuildHashLookup - built hash table [count = {0}, collisions = {1}]",
+                hashLookupCount, hashKeyCollisions);
+#endif
+
+            return lookup;
         }
 
         protected override void Dispose(bool disposing)
