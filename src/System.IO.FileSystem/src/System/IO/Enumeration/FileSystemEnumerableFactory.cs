@@ -61,6 +61,7 @@ namespace System.IO.Enumeration
                     }
                     break;
                 case MatchType.Simple:
+                case MatchType.Regex:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(options));
@@ -78,6 +79,8 @@ namespace System.IO.Enumeration
                     return FileSystemName.MatchesSimpleExpression(expression, name, ignoreCase);
                 case MatchType.Win32:
                     return FileSystemName.MatchesWin32Expression(expression, name, ignoreCase);
+                case MatchType.Regex:
+                    return FileSystemName.MatchesRegularExpressionString(expression, name.ToString(), ignoreCase);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(options));
             }

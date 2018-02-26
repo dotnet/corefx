@@ -64,6 +64,8 @@
     <Compile Include="Enumeration\PatternTransformTests.netcoreapp.cs" />
     <Compile Include="Enumeration\RootTests.netcoreapp.cs" />
     <Compile Include="Enumeration\AttributeTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\MatchTypesTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\RegexMatcherTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
@@ -195,8 +197,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Matchers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
