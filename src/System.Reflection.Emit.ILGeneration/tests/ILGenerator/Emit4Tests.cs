@@ -97,7 +97,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void TestDynamicMethodTestEmitCalliNonBlittable()
+        public void TestDynamicMethodEmitCalliNonBlittable()
         {
             string input = "Test string!", result = "!gnirts tseT";
 
