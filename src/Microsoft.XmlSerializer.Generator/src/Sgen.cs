@@ -253,7 +253,7 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
                 }
-                //Ignore the FileNotFoundException for any type when call GetCustomAttributes
+                //Ignore the FileNotFoundException when call GetCustomAttributes e.g. if the type uses the attributes defined in a different assembly
                 catch (FileNotFoundException e)
                 {
                     if (warnings)
