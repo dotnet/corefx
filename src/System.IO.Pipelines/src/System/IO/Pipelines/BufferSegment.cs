@@ -78,6 +78,31 @@ namespace System.IO.Pipelines
 
         public Memory<byte> AvailableMemory { get; private set; }
 
+        public IMemoryList<byte> GetNext(long offset, out int localIndex)
+        {
+            BufferSegment current = this;
+            while (current != null)
+            {
+                var currentLength = current.Memory.Length;
+                if (offset <= currentLength)
+                {
+                    localIndex = (int)offset;
+                    return current;
+                }
+
+                offset -= currentLength;
+                current = (BufferSegment)current.Next;
+            }
+
+            localIndex = 0;
+            return null;
+        }
+
+        public long GetLength(IMemoryList<byte> memoryList)
+        {
+            return ((BufferSegment)memoryList).RunningIndex - RunningIndex;
+        }
+
         public Memory<byte> Memory { get; private set; }
 
         public int Length => End - Start;

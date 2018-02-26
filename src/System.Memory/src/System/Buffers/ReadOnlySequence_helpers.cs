@@ -90,7 +90,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal SequencePosition Seek(SequencePosition start, SequencePosition end, int count, bool checkEndReachable = true)
+        internal SequencePosition Seek(SequencePosition start, SequencePosition end, int count)
         {
             int startIndex = start.Index;
             int endIndex = end.Index;
@@ -106,7 +106,7 @@ namespace System.Buffers
                     {
                         return new SequencePosition(start.Segment, startIndex + count);
                     }
-                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count, checkEndReachable);
+                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count);
 
                 case SequenceType.OwnedMemory:
                 case SequenceType.Array:
@@ -130,7 +130,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal SequencePosition Seek(SequencePosition start, SequencePosition end, long count, bool checkEndReachable = true)
+        internal SequencePosition Seek(SequencePosition start, SequencePosition end, long count)
         {
             int startIndex = start.Index;
             int endIndex = end.Index;
@@ -147,7 +147,7 @@ namespace System.Buffers
                         // end.Index >= count + Index and end.Index is int
                         return new SequencePosition(start.Segment, startIndex + (int)count);
                     }
-                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count, checkEndReachable);
+                    return SeekMultiSegment((IMemoryList<byte>)start.Segment, startIndex, (IMemoryList<byte>)end.Segment, endIndex, count);
 
                 case SequenceType.OwnedMemory:
                 case SequenceType.Array:
@@ -167,54 +167,22 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static SequencePosition SeekMultiSegment(IMemoryList<byte> start, int startIndex, IMemoryList<byte> end, int endPosition, long count, bool checkEndReachable)
+        private static SequencePosition SeekMultiSegment(IMemoryList<byte> start, int startIndex, IMemoryList<byte> end, int endPosition, long count)
         {
-            SequencePosition result = default;
-            bool foundResult = false;
-            IMemoryList<byte> current = start;
-            int currentIndex = startIndex;
-
-            while (current != null)
-            {
-                // We need to loop up until the end to make sure start and end are connected
-                // if end is not trusted
-                if (!foundResult)
-                {
-                    var isEnd = current == end;
-                    int currentEnd = isEnd ? endPosition : current.Memory.Length;
-                    int currentLength = currentEnd - currentIndex;
-
-                    // We would prefer to put position in the beginning of next segment
-                    // then past the end of previous one, but only if we are not leaving current buffer
-                    if (currentLength > count ||
-                       (currentLength == count && isEnd))
-                    {
-                        result = new SequencePosition(current, currentIndex + (int)count);
-                        foundResult = true;
-                        if (!checkEndReachable)
-                        {
-                            break;
-                        }
-                    }
-
-                    count -= currentLength;
-                }
-
-                if (current.Next == null && current != end)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-                }
-
-                current = current.Next;
-                currentIndex = 0;
-            }
-
-            if (!foundResult)
+            var memoryList = start.GetNext(startIndex + count, out int localOffset);
+            if (memoryList == null ||
+                (memoryList == end && localOffset > endPosition) ||
+                memoryList.GetLength(end) < 0)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException_CountOutOfRange();
             }
 
-            return result;
+            if (localOffset == memoryList.Memory.Length && memoryList != end)
+            {
+                memoryList = memoryList.Next;
+                localOffset = 0;
+            }
+            return new SequencePosition(memoryList, localOffset);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -250,7 +218,7 @@ namespace System.Buffers
                 return endIndex - startIndex;
             }
 
-            return (endSegment.RunningIndex - start.Next.RunningIndex) // Length of data in between first and last segment
+            return start.Next.GetLength(endSegment) // Length of data in between first and last segment
                    + (start.Memory.Length - startIndex) // Length of data in first segment
                    + endIndex; // Length of data in last segment
         }
@@ -279,7 +247,8 @@ namespace System.Buffers
                     IMemoryList<T> segment = (IMemoryList<T>)position.Segment;
                     IMemoryList<T> memoryList = (IMemoryList<T>)start.Segment;
 
-                    if (segment.RunningIndex - startIndex > memoryList.RunningIndex - endIndex)
+                    var segmentDistance = segment.GetLength(memoryList);
+                    if (segmentDistance < 0 || (segmentDistance == 0 && startIndex < endIndex))
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                     }
@@ -291,11 +260,32 @@ namespace System.Buffers
             }
         }
 
-        private class ReadOnlySequenceSegment : IMemoryList<T>
+        private sealed class ReadOnlySequenceSegment : IMemoryList<T>
         {
             public Memory<T> Memory { get; set; }
-            public IMemoryList<T> Next { get; set; }
-            public long RunningIndex { get; set; }
+            public IMemoryList<T> Next { get; } = null;
+
+            public IMemoryList<T> GetNext(long offset, out int localOffset)
+            {
+                if (offset <= Memory.Length)
+                {
+                    localOffset = (int)offset;
+                    return this;
+                }
+
+                localOffset = 0;
+                return null;
+            }
+
+            public long GetLength(IMemoryList<T> memoryList)
+            {
+                if (memoryList != this)
+                {
+                    ThrowHelper.ThrowInvalidOperationException();
+                }
+
+                return 0;
+            }
         }
     }
 }

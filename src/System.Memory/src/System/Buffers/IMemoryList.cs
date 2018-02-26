@@ -20,8 +20,14 @@ namespace System.Buffers
         IMemoryList<T> Next { get; }
 
         /// <summary>
-        /// The sum of node length before current.
+        /// Returns <see cref="IMemoryList{T}"/> that contains <typeparamref name="T"/> item offset from beginning of current <see cref="IMemoryList{T}"/> by <paramref name="offset"/>.
+        /// <paramref name="localIndex"/> would contain index inside returned <see cref="IMemoryList{T}"/>
         /// </summary>
-        long RunningIndex { get; }
+        IMemoryList<T> GetNext(long offset, out int localIndex);
+
+        /// <summary>
+        /// Returns count of items between start of this <see cref="IMemoryList{T}"/> to <paramref name="memoryList"/>.
+        /// </summary>
+        long GetLength(IMemoryList<T> memoryList);
     }
 }

@@ -57,6 +57,18 @@ namespace System.Memory.Tests
             Assert.Equal(bufferSegment2, c1.Segment);
         }
 
+
+        [Fact]
+        public void GetPositionChecksEndIndex()
+        {
+            var bufferSegment1 = new BufferSegment(new byte[100]);
+            BufferSegment bufferSegment2 = bufferSegment1.Append(new byte[100]);
+
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 90);
+
+            Assert.Throws<ArgumentOutOfRangeException>(()=> buffer.GetPosition(buffer.Start, 200));
+        }
+
         [Fact]
         public void Create_WorksWithArray()
         {

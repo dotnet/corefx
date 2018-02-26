@@ -13,10 +13,42 @@ namespace System.Memory.Tests
             Memory = memory;
         }
 
-        /// <summary>
-        /// Combined length of all segments before this
-        /// </summary>
-        public long RunningIndex { get; private set; }
+        public long GetLength(IMemoryList<byte> memoryList)
+        {
+            BufferSegment current = this;
+            long length = 0;
+            while (current != memoryList && current != null)
+            {
+                length += current.Memory.Length;
+                current = (BufferSegment)current.Next;
+            }
+
+            if (current != memoryList)
+            {
+                return -1;
+            }
+            return length;
+        }
+
+        public IMemoryList<byte> GetNext(long offset, out int localIndex)
+        {
+            BufferSegment current = this;
+            while (current != null)
+            {
+                var currentLength = current.Memory.Length;
+                if (offset <= currentLength)
+                {
+                    localIndex = (int)offset;
+                    return current;
+                }
+
+                offset -= currentLength;
+                current = (BufferSegment)current.Next;
+            }
+
+            localIndex = 0;
+            return null;
+        }
 
         public Memory<byte> Memory { get; set; }
 
@@ -24,10 +56,7 @@ namespace System.Memory.Tests
 
         public BufferSegment Append(Memory<byte> memory)
         {
-            var segment = new BufferSegment(memory)
-            {
-                RunningIndex = RunningIndex + Memory.Length
-            };
+            var segment = new BufferSegment(memory);
             Next = segment;
             return segment;
         }
