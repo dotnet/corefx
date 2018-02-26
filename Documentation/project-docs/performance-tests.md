@@ -8,7 +8,9 @@ Building and Running Tests
 Performance test files (if present) are stored within a library's ```tests/Performance``` directory and contain test methods that are all marked with a perf-specific *Benchmark* attribute.
 
 **Step # 1:** Prior to running performance tests, a full build from the repo root must be completed: ```build -release```
+
 **Step # 2:** Change directory to the performance tests directory: ```cd path/to/library/tests/Performance```
+
 **Step # 3:** Build and run the tests:
  - Windows (using admin command shell): ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Windows_NT```
  - Linux: ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Linux```
