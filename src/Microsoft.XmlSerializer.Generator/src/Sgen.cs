@@ -341,20 +341,17 @@ namespace Microsoft.XmlSerializer.Generator
         // assumes all same case.        
         private bool ArgumentMatch(string arg, string formal)
         {
-            if (arg[0] != '-' || arg.Length==1)
+            if (arg[0] != '-' )
             {
                 return false;
             }
-            if (arg[1] == '-')
+            if (arg.Length>1 && arg[1] == '-')
             {
                 arg = arg.Substring(2);
                 return arg == formal;
             }
-            else
-            {
-                arg = arg.Substring(1);
-                return arg.Length == 1 && arg[0] == formal[0];
-            }
+            arg = arg.Substring(1);
+            return arg.Length == 1 && arg[0] == formal[0];
         }
 
         private void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, bool verbose, XmlReflectionImporter importer, bool parsableerrors)
