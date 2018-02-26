@@ -286,6 +286,6 @@
     <value>Could not connect to the pipe because it was not owned by the current user.</value>
   </data>
   <data name="UnauthorizedAccess_ClientIsNotCurrentUser" xml:space="preserve">
-    <value>Client connection refused because it was not owned by the current user.</value>
+    <value>Client connection (user id {0}) was refused because it was not owned by the current user (id {1}).</value>
   </data>
 </root>
