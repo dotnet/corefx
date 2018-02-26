@@ -91,7 +91,7 @@ namespace System.Net.Http
             return response;
         }
 
-        private static AuthenticationHeaderValue GetSupportedAuthScheme(HttpHeaderValueCollection<AuthenticationHeaderValue> authenticateValues)
+        public static AuthenticationHeaderValue GetSupportedAuthScheme(HttpHeaderValueCollection<AuthenticationHeaderValue> authenticateValues)
         {
             AuthenticationHeaderValue basicAuthenticationHeaderValue = null;
 

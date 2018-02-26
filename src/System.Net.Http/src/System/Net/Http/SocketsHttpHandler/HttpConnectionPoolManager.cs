@@ -139,14 +139,14 @@ namespace System.Net.Http
             }
         }
 
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Uri proxyUri, CancellationToken cancellationToken)
+        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Uri proxyUri, ICredentials proxyCredentials, CancellationToken cancellationToken)
         {
             HttpConnectionKey key = GetConnectionKey(request, proxyUri);
 
             HttpConnectionPool pool;
             while (!_pools.TryGetValue(key, out pool))
             {
-                pool = new HttpConnectionPool(this, key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
+                pool = new HttpConnectionPool(this, key.Host, key.Port, key.SslHostName, key.ProxyUri, proxyCredentials, _maxConnectionsPerServer);
                 if (_pools.TryAdd(key, pool))
                 {
                     // We need to ensure the cleanup timer is running if it isn't
