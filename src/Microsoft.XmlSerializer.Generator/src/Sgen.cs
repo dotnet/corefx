@@ -345,11 +345,15 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 return false;
             }
-            if (arg.Length>1 && arg[1] == '-')
+
+            // Full name format, eg: --assembly
+            if (arg.Length > 1 && arg[1] == '-')
             {
                 arg = arg.Substring(2);
                 return arg == formal;
             }
+
+            // Short name format, eg: -a
             arg = arg.Substring(1);
             return arg.Length == 1 && arg[0] == formal[0];
         }
