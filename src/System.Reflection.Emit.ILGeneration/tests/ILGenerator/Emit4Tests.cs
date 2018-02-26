@@ -11,7 +11,7 @@ namespace System.Reflection.Emit.Tests
     public class ILGeneratorEmit4
     {
         [Fact]
-        public void TestEmitCalliStdCall()
+        public void TestEmitCalliBlittable()
         {
             int a = 1, b = 1, result = 2;
 
@@ -31,7 +31,7 @@ namespace System.Reflection.Emit.Tests
             il.Emit(OpCodes.Ret);
 
             Type dynamicType = typeBuilder.CreateType();
-            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new FooFooStdCall(Foo));
+            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new Int32SumStdCall(Int32Sum));
 
             object resultValue = dynamicType
                 .GetMethod("F", BindingFlags.Public | BindingFlags.Static)
@@ -42,7 +42,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void TestDynamicMethodEmitCalliStdCall()
+        public void TestDynamicMethodEmitCalliBlittable()
         {
             int a = 1, b = 1, result = 2;
 
@@ -57,7 +57,7 @@ namespace System.Reflection.Emit.Tests
             il.EmitCalli(OpCodes.Calli, CallingConvention.StdCall, returnType, new Type[] { typeof(int), typeof(int) });
             il.Emit(OpCodes.Ret);
 
-            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new FooFooStdCall(Foo));
+            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new Int32SumStdCall(Int32Sum));
 
             object resultValue = dynamicMethod
                 .Invoke(null, new object[] { funcPtr, a, b });
@@ -67,7 +67,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void TestEmitCalliCdeclCall()
+        public void TestEmitCalliNonBlittable()
         {
             string input = "Test string!", result = "!gnirts tseT";
 
@@ -86,7 +86,7 @@ namespace System.Reflection.Emit.Tests
             il.Emit(OpCodes.Ret);
 
             Type dynamicType = typeBuilder.CreateType();
-            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new FooFooCdecl(Foo));
+            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new StringReverseCdecl(StringReverse));
 
             object resultValue = dynamicType
                 .GetMethod("F", BindingFlags.Public | BindingFlags.Static)
@@ -97,7 +97,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void TestDynamicMethodEmitCalliCdeclCall()
+        public void TestDynamicMethodTestEmitCalliNonBlittable()
         {
             string input = "Test string!", result = "!gnirts tseT";
 
@@ -111,7 +111,7 @@ namespace System.Reflection.Emit.Tests
             il.EmitCalli(OpCodes.Calli, CallingConvention.Cdecl, returnType, new Type[] { typeof(string) });
             il.Emit(OpCodes.Ret);
 
-            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new FooFooCdecl(Foo));
+            IntPtr funcPtr = Marshal.GetFunctionPointerForDelegate(new StringReverseCdecl(StringReverse));
 
             object resultValue = dynamicMethod
                 .Invoke(null, new object[] { funcPtr, input });
@@ -121,19 +121,13 @@ namespace System.Reflection.Emit.Tests
         }
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int FooFooStdCall(int a, int b);
+        private delegate int Int32SumStdCall(int a, int b);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate string FooFooCdecl(string a);
+        private delegate string StringReverseCdecl(string a);
 
-        public static int Foo(int a, int b)
-        {
-            return a + b;
-        }
+        private static int Int32Sum(int a, int b) => a + b;
 
-        public static string Foo(string a)
-        {
-            return string.Join("", a.Reverse());
-        }
+        private static string StringReverse(string a) => string.Join("", a.Reverse());
     }
 }
