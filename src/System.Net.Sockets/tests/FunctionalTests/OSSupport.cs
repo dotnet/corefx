@@ -81,7 +81,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ActiveIssue(25639)]
+        //[ActiveIssue(25639)]
         [Fact]
         public void IOControl_SIOCATMARK_Success()
         {
@@ -112,14 +112,14 @@ namespace System.Net.Sockets.Tests
                         Assert.Equal(1, client.Receive(received));
                         Assert.Equal(42, received[0]);
 
-                        Assert.Equal(1, client.Receive(received, SocketFlags.OutOfBand));
-                        Assert.Equal(43, received[0]);
-
                         Assert.True(SpinWait.SpinUntil(() =>
                         {
                             Assert.Equal(4, client.IOControl(IOControlCode.OobDataRead, null, siocatmarkResult));
                             return BitConverter.ToInt32(siocatmarkResult, 0) == 1;
                         }, 10_000));
+
+                        Assert.Equal(1, client.Receive(received, SocketFlags.OutOfBand));
+                        Assert.Equal(43, received[0]);
                     }
                 }
             }
