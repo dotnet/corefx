@@ -375,6 +375,15 @@ namespace System.Threading.Tasks.Tests
             TaskMethodBuilderT_UsesCompletedCache(result, shouldBeCached);
         }
 
+        [Fact]
+        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
+        public static void TaskMethodBuilderDecimal_DoesntUseCompletedCache()
+        {
+            TaskMethodBuilderT_UsesCompletedCache(0m, shouldBeCached: false);
+            TaskMethodBuilderT_UsesCompletedCache(0.0m, shouldBeCached: false);
+            TaskMethodBuilderT_UsesCompletedCache(42m, shouldBeCached: false);
+        }
+
         [Theory]
         [InlineData((string)null, true)]
         [InlineData("test", false)]
@@ -393,6 +402,11 @@ namespace System.Threading.Tasks.Tests
             atmb2.SetResult(result);
 
             Assert.Equal(shouldBeCached, object.ReferenceEquals(atmb1.Task, atmb2.Task));
+            if (result != null)
+            {
+                Assert.Equal(result.ToString(), atmb1.Task.Result.ToString());
+                Assert.Equal(result.ToString(), atmb2.Task.Result.ToString());
+            }
         }
 
         [Fact]
