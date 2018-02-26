@@ -30,7 +30,7 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public static void CreateServer_ConnectClient()
         {
-            var name = "test.named.pipe"; // GetUniquePipeName();
+            var name = GetUniquePipeName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             {
                 using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
