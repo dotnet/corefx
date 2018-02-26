@@ -30,13 +30,27 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public static void CreateServer_ConnectClient()
         {
-            var name = GetUniquePipeName();
+            var name = "test.named.pipe"; // GetUniquePipeName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             {
                 using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
                 {
                     // Should not fail to connect since both, the server and client have the same owner.
                     client.Connect();
+                }
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // On Unix domain socket should have different location in this case.
+        public static void CreateServerNotCurrentUserOnly_ClientCurrentUserOnly_ThrowsTimeout_OnUnix()
+        {
+            var name = GetUniquePipeName();
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte))
+            {
+                using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
+                { 
+                    Assert.Throws<TimeoutException>(() => client.Connect(1));
                 }
             }
         }

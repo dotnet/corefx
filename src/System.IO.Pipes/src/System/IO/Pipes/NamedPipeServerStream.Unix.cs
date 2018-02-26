@@ -41,6 +41,8 @@ namespace System.IO.Pipes
             // We don't have a good way to enforce maxNumberOfServerInstances across processes; we only factor it in
             // for streams created in this process.  Between processes, we behave similarly to maxNumberOfServerInstances == 1,
             // in that the second process to come along and create a stream will find the pipe already in existence and will fail.
+            var pipeNameServer = GetPipePath(".", pipeName, IsCurrentUserOnly);
+            System.Console.WriteLine("PipeServerName: " + pipeNameServer + " IsCurrentUserOnly: " + IsCurrentUserOnly);
             _instance = SharedServer.Get(GetPipePath(".", pipeName, IsCurrentUserOnly), maxNumberOfServerInstances);
 
             _direction = direction;
@@ -83,8 +85,25 @@ namespace System.IO.Pipes
         private void HandleAcceptedSocket(Socket acceptedSocket)
         {
             var serverHandle = new SafePipeHandle(acceptedSocket);
+
             try
             {
+                if (IsCurrentUserOnly)
+                {
+                    uint serverEUID = Interop.Sys.GetEUid();
+
+                    uint peerID;
+                    if (Interop.Sys.GetPeerID(serverHandle, out peerID) == -1)
+                    {
+                        throw CreateExceptionForLastError(_instance?.PipeName);
+                    }
+                    
+                    if (serverEUID != peerID)
+                    {
+                        throw new UnauthorizedAccessException(SR.UnauthorizedAccess_ClientIsNotCurrentUser);
+                    }
+                }
+
                 ConfigureSocket(acceptedSocket, serverHandle, _direction, _inBufferSize, _outBufferSize, _inheritability);
             }
             catch
