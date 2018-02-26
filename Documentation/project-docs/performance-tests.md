@@ -13,7 +13,7 @@ Performance test files (if present) are stored within a library's ```tests/Perfo
 
 **Step # 3:** Build and run the tests:
  - Windows (using admin command shell): ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Windows_NT```
- - Linux: ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Linux```
+ - Linux: ```<repo-root>/Tools/msbuild.sh /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Linux```
 
 **Note: Because build-tests.cmd/sh runs tests concurrently, do not use it for executing performance tests.**
 
