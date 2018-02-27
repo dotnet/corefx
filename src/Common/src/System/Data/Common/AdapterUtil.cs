@@ -485,7 +485,6 @@ namespace System.Data.Common
             return ArgumentOutOfRange(SR.ADP_InvalidSeekOrigin, parameterName);
         }
 
-        internal static readonly bool IsWindowsNT = (PlatformID.Win32NT == Environment.OSVersion.Platform);
         internal static void SetCurrentTransaction(Transaction transaction)
         {
             Transaction.Current = transaction;
