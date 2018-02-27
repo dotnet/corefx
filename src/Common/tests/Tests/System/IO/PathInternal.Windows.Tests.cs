@@ -163,7 +163,6 @@ namespace Tests.System.IO
             { @"\..", 1},
             { @"\tmp\..\..", 1},
             { @"\\", 2},
-            { @"\\\", 3},
         };
 
         [Theory,
@@ -191,9 +190,6 @@ namespace Tests.System.IO
             { @"Server\Share\..\", 13},
             { @"Server\Share\", 13},
             { @"Server\Share", 12},
-            { @"\\Server\Share", 14},
-            //{ @"\\Server\\Share", 15},
-            { @"\\\Server\Share", 15},
             { @"Server\Share\", 13},
             { @"Server\Share\\git", 13},
         };
@@ -216,9 +212,9 @@ namespace Tests.System.IO
             { @".\", 2},
             { @".\..\", 2},
             { @"..\", 3},
-            { @"\.\", 3},
-            { @"\..\", 4},
-            { @"\\..", 4},
+            { @"\.\", 0},
+            { @"\..\", 0},
+            { @"\\..", 0},
             { @"foo\..", 4},
             { @".", 1},
             { @"..", 2},
@@ -226,8 +222,8 @@ namespace Tests.System.IO
             { @"foo\", 4},
             { @"foo\\", 4},
             { @"..\foo", 3},
-            { @"\\\.\", 5},
-            { @"\\.\", 4},
+            { @"\\\.\", 0},
+            { @"\\.\", 0},
         };
 
         [Theory,

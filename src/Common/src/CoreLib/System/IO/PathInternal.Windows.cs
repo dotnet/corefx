@@ -219,9 +219,6 @@ namespace System.IO
                     // UNC (\\?\UNC\ or \\), scan past the next two directory separators at most
                     // (e.g. to \\?\UNC\Server\Share or \\Server\Share\)
                     i = uncRootLength;
-                    while (i < pathLength && (IsDirectorySeparator(path[i])))
-                        i++;
-
                     int n = 2; // Maximum separators to skip
                     while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0))
                         i++;
@@ -240,12 +237,12 @@ namespace System.IO
             else if (deviceSyntax && ((devicePrefixLength + 1 >= pathLength) || !(path[devicePrefixLength + 1] == VolumeSeparatorChar)))
             {
                 i = devicePrefixLength;
-                while (i < pathLength && (IsDirectorySeparator(path[i])))
-                    i++;
-
                 int n = 1; // Maximum separators to skip
                 while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0))
                     i++;
+
+                if (i == devicePrefixLength)
+                    i--;
             }
 
             return (i < pathLength && IsDirectorySeparator(path[i])) ? i + 1 : i;
