@@ -68,6 +68,22 @@ namespace System.IO
 
         /// <summary>
         /// Adds the extended path prefix (\\?\) if not already a device path, IF the path is not relative,
+        /// AND the path is more than 259 characters. (> MAX_PATH + null)
+        /// </summary>
+        internal static string EnsureExtendedPrefixOverMaxPath(string path)
+        {
+            if (path != null && path.Length >= MaxShortPath)
+            {
+                return EnsureExtendedPrefix(path);
+            }
+            else
+            {
+                return path;
+            }
+        }
+
+        /// <summary>
+        /// Adds the extended path prefix (\\?\) if not already a device path, IF the path is not relative,
         /// AND the path is more than 259 characters. (> MAX_PATH + null). This will also insert the extended
         /// prefix if the path ends with a period or a space. Trailing periods and spaces are normally eaten
         /// away from paths during normalization, but if we see such a path at this point it should be
