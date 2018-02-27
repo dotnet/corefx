@@ -130,6 +130,19 @@ namespace System.IO
         }
 
         /// <summary>
+        /// Returns true if the path is a device UNC (\\?\UNC\, \\.\UNC\)
+        /// </summary>
+        internal static bool IsDeviceUNC(ReadOnlySpan<char> path)
+        {
+            return path.Length >= UncExtendedPrefixLength
+                && IsDevice(path)
+                && IsDirectorySeparator(path[7])
+                && path[4] == 'U'
+                && path[5] == 'N'
+                && path[6] == 'C';
+        }
+
+        /// <summary>
         /// Returns true if the path uses the canonical form of extended syntax ("\\?\" or "\??\"). If the
         /// path matches exactly (cannot use alternate directory separators) Windows will skip normalization
         /// and path length checks.
@@ -177,30 +190,31 @@ namespace System.IO
             int i = 0;
             int volumeSeparatorLength = 2;  // Length to the colon "C:"
             int uncRootLength = 2;          // Length to the start of the server name "\\"
+            int devicePrefixLength = PathInternal.ExtendedPathPrefix.Length;
 
-            bool extendedSyntax = StartsWithOrdinal(path, ExtendedPathPrefix);
-            bool extendedUncSyntax = StartsWithOrdinal(path, UncExtendedPathPrefix);
-            if (extendedSyntax)
+            bool deviceSyntax = IsDevice(path);
+            bool deviceUnc = deviceSyntax && IsDeviceUNC(path);
+            if (deviceSyntax)
             {
                 // Shift the position we look for the root from to account for the extended prefix
-                if (extendedUncSyntax)
+                if (deviceUnc)
                 {
                     // "\\" -> "\\?\UNC\"
                     uncRootLength = UncExtendedPathPrefix.Length;
                 }
-                else
+                else if (devicePrefixLength + 1 < pathLength && path[devicePrefixLength + 1] == VolumeSeparatorChar && IsValidDriveChar(path[devicePrefixLength]))
                 {
                     // "C:" -> "\\?\C:"
-                    volumeSeparatorLength += ExtendedPathPrefix.Length;
+                    volumeSeparatorLength += devicePrefixLength;
                 }
             }
 
-            if ((!extendedSyntax || extendedUncSyntax) && pathLength > 0 && IsDirectorySeparator(path[0]))
+            if ((!deviceSyntax || deviceUnc) && pathLength > 0 && IsDirectorySeparator(path[0]))
             {
                 // UNC or simple rooted path (e.g. "\foo", NOT "\\?\C:\foo")
 
                 i = 1; //  Drive rooted (\foo) is one character
-                if (extendedUncSyntax || (pathLength > 1 && IsDirectorySeparator(path[1])))
+                if (deviceUnc || (pathLength > 1 && IsDirectorySeparator(path[1])))
                 {
                     // UNC (\\?\UNC\ or \\), scan past the next two directory separators at most
                     // (e.g. to \\?\UNC\Server\Share or \\Server\Share\)
@@ -220,7 +234,18 @@ namespace System.IO
                 if (pathLength >= volumeSeparatorLength + 1 && IsDirectorySeparator(path[volumeSeparatorLength]))
                     i++;
             }
-            return i;
+            else if (deviceSyntax && ((devicePrefixLength + 1 >= pathLength) || !(path[devicePrefixLength + 1] == VolumeSeparatorChar)))
+            {
+                i = devicePrefixLength;
+                int n = 1; // Maximum separators to skip
+                while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0))
+                    i++;
+
+                if (i == devicePrefixLength)
+                    i--;
+            }
+
+            return (i < pathLength && IsDirectorySeparator(path[i])) ? i + 1 : i;
         }
 
         private static bool StartsWithOrdinal(ReadOnlySpan<char> source, string value)
