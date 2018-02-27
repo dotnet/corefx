@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.ComponentModel.Composition.csproj">
-      <SupportedFramework>netcoreapp2.0;net45;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>uap10.0.16299;netcoreapp2.0;net45;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.ComponentModel.Composition.csproj" />
     <InboxOnTargetFramework Include="net45">
@@ -13,6 +13,10 @@
     <File Include="$(PlaceHolderFile)">
       <TargetPath>runtimes/win/lib/net45</TargetPath>
     </File>
+    <InboxOnTargetFramework Include="uap10.0.16299" />
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/win/lib/uap10.0.16299</TargetPath>
+    </File>
 
     <!-- This library used to be just a shim on netcoreapp2.0 and uap6.0 so it was part
          of the metapackages. That means that we have an InboxOn on the package index for
@@ -20,7 +24,7 @@
          the library for those platforms and have it be it's own package and take it out of
          the metapackages. We need a supression in order to acknowledge the breaking change. -->
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
-      <Value>.NETCoreApp;UAP</Value>
+      <Value>.NETCoreApp</Value>
     </ValidatePackageSuppression>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

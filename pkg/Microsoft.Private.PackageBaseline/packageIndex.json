@@ -826,8 +826,6 @@
         "4.2.1.0": "4.5.0"
       }
     },
-    /*The shim of System.ComponentModel.Composition shipped on netcoreapp2.0 and uap6.0 and we now have an implementation
-      for it. We did not include them on the InboxOn clause.*/
     "System.ComponentModel.Composition": {
       "InboxOn": {
         "monoandroid10": "Any",

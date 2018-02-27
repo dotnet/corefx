@@ -49,6 +49,12 @@
         System.Security.Principal.Windows;
       </Value>
     </ValidatePackageSuppression>
+    <!-- Permit missing Inbox since we this used to be a shim and it is now OOB -->
+    <ValidatePackageSuppression Include="PermitMissingInbox">
+        <Value>
+            System.ComponentModel.Composition;
+        </Value>
+    </ValidatePackageSuppression>
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

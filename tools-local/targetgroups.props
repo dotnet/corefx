@@ -23,14 +23,14 @@
       <NuGetTargetMonikerShort>uap10.0.16299</NuGetTargetMonikerShort>
       <UWPCompatible>true</UWPCompatible>
       <Imports>netcore50aot</Imports>
-      <CompatibleWith>uap10.0.16299;netstandard2.0</CompatibleWith>
+      <CompatibleWith>uap10.0.16299;netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="uap10.0.16299">
       <NuGetTargetMoniker>UAP,Version=v10.0.16299</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>uap10.0.16299</NuGetTargetMonikerShort>
       <UWPCompatible>true</UWPCompatible>
       <Imports>netcore50</Imports>
-      <CompatibleWith>netstandard2.0</CompatibleWith>
+      <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="uapvnextaot">
       <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
