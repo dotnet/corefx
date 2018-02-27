@@ -44,10 +44,10 @@ namespace System.IO.Tests
 
             fixed (char* c = output)
             {
-                Assert.True(Path.TryJoin(new Span<char>(c, output.Length), out int written, path1, path2));
+                Assert.True(Path.TryJoin(path1, path2, new Span<char>(c, output.Length), out int written));
                 if (expected.Length > 0)
                 {
-                    Assert.False(Path.TryJoin(Span<char>.Empty, out _, path1, path2));
+                    Assert.False(Path.TryJoin(path1, path2, Span<char>.Empty, out _));
                 }
                 Assert.Equal(expected, output);
                 Assert.Equal(expected.Length, written);
@@ -81,6 +81,23 @@ namespace System.IO.Tests
         public void JoinThreePaths(string path1, string path2, string path3, string expected)
         {
             Assert.Equal(expected, Path.Join(path1, path2, path3));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinThreePaths))]
+        public unsafe void TryJoinThreePaths(string path1, string path2, string path3, string expected)
+        {
+            string output = new string('\0', expected.Length);
+
+            fixed (char* c = output)
+            {
+                Assert.True(Path.TryJoin(path1, path2, path3, new Span<char>(c, output.Length), out int written));
+                if (expected.Length > 0)
+                {
+                    Assert.False(Path.TryJoin(path1, path2, path3, Span<char>.Empty, out _));
+                }
+                Assert.Equal(expected, output);
+                Assert.Equal(expected.Length, written);
+            }
         }
     }
 }

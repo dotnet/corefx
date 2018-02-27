@@ -1226,7 +1226,8 @@ namespace System.IO
         public static string GetRelativePath(string relativeTo, string path) { throw null; }
         public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2) { throw null; }
         public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3) { throw null; }
-        public static bool TryJoin(Span<char> destination, out int charsWritten, ReadOnlySpan<char> path1, ReadOnlySpan<char> path2) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten) { throw null; }
     }
 
     public partial class BinaryReader : System.IDisposable
