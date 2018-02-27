@@ -339,17 +339,5 @@ namespace System.Buffers
 
             return true;
         }
-
-        private class ReadOnlySequenceSegment : IMemoryList<T>
-        {
-            public ReadOnlySequenceSegment(ReadOnlyMemory<T> readOnlyMemory)
-            {
-                Memory = MemoryMarshal.AsMemory(readOnlyMemory);
-            }
-
-            public Memory<T> Memory { get; set; }
-            public IMemoryList<T> Next { get; set; }
-            public long RunningIndex { get; set; }
-        }
     }
 }
