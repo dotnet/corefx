@@ -13,7 +13,7 @@ namespace System.Net.Http
     {
         internal abstract class HttpContentReadStream : HttpContentStream
         {
-            private bool _disposed;
+            private int _disposed; // 0==no, 1==yes
 
             public HttpContentReadStream(HttpConnection connection) : base(connection)
             {
@@ -64,11 +64,10 @@ namespace System.Net.Http
                 // response stream and response content) will kick off multiple concurrent draining
                 // operations. Also don't delegate to the base if Dispose has already been called,
                 // as doing so will end up disposing of the connection before we're done draining.
-                if (_disposed)
+                if (Interlocked.Exchange(ref _disposed, 1) != 0)
                 {
                     return;
                 }
-                _disposed = true;
 
                 if (disposing && NeedsDrain)
                 {
