@@ -277,7 +277,7 @@ namespace System.Security.Cryptography
                 }
                 finally
                 {
-                    tmp.Clear();
+                    CryptographicOperations.ZeroMemory(tmp);
                     ArrayPool<byte>.Shared.Return(rented);
                 }
             }

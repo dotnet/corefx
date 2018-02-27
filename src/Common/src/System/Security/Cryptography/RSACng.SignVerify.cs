@@ -62,13 +62,13 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(padding));
             }
 
+            if (hash.Length != GetHashSizeInBytes(hashAlgorithm))
+            {
+                throw new CryptographicException(SR.Cryptography_SignHash_WrongSize);
+            }
+
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
             {
-                if (hash.Length != GetHashSizeInBytes(hashAlgorithm))
-                {
-                    throw new CryptographicException(SR.Cryptography_SignHash_WrongSize);
-                }
-
                 IntPtr namePtr = Marshal.StringToHGlobalUni(hashAlgorithmName);
                 try
                 {

@@ -27,7 +27,7 @@ namespace System.Security.Cryptography
 
         internal static int BytesRequiredForBitCount(int keySizeInBits)
         {
-            return (keySizeInBits + 7) / 8;
+            return (int)(((uint)keySizeInBits + 7) / 8);
         }
 
         internal int HashLength => _hLen;
@@ -86,7 +86,7 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             Span<byte> destination)
         {
-            // https://tools.ietf.org/html/rfc3447#section-7.1.2
+            // https://tools.ietf.org/html/rfc3447#section-7.1.1
 
             byte[] dbMask = null;
             Span<byte> dbMaskSpan = Span<byte>.Empty;
@@ -144,20 +144,14 @@ namespace System.Security.Cryptography
                     Mgf1(hasher, seed, dbMaskSpan);
 
                     // 2(f)
-                    for (int i = 0; i < dbMaskSpan.Length; i++)
-                    {
-                        db[i] ^= dbMaskSpan[i];
-                    }
+                    Xor(db, dbMaskSpan);
 
                     // 2(g)
                     Span<byte> seedMask = stackalloc byte[_hLen];
                     Mgf1(hasher, db, seedMask);
 
                     // 2(h)
-                    for (int i = 0; i < seedMask.Length; i++)
-                    {
-                        seed[i] ^= seedMask[i];
-                    }
+                    Xor(seed, seedMask);
 
                     // 2(i)
                     destination[0] = 0;
@@ -203,10 +197,7 @@ namespace System.Security.Cryptography
                 Mgf1(hasher, maskedDB, seed);
 
                 // seed = seedMask XOR maskedSeed
-                for (int i = 0; i < seed.Length; i++)
-                {
-                    seed[i] ^= maskedSeed[i];
-                }
+                Xor(seed, maskedSeed);
 
                 byte[] tmp = ArrayPool<byte>.Shared.Rent(source.Length);
 
@@ -217,10 +208,7 @@ namespace System.Security.Cryptography
                     Mgf1(hasher, seed, dbMask);
 
                     // DB = dbMask XOR maskedDB
-                    for (int i = 0; i < dbMask.Length; i++)
-                    {
-                        dbMask[i] ^= maskedDB[i];
-                    }
+                    Xor(dbMask, maskedDB);
 
                     ReadOnlySpan<byte> lHashPrime = dbMask.Slice(0, _hLen);
 
@@ -248,6 +236,8 @@ namespace System.Security.Cryptography
                     bool yIsZero = y == 0;
                     bool separatorMadeSense = separatorPos < dbMask.Length;
 
+                    // This intentionally uses non-short-circuiting operations to hide the timing
+                    // differential between the three failure cases
                     bool shouldContinue = lHashMatches & yIsZero & separatorMadeSense;
 
                     if (!shouldContinue)
@@ -346,10 +336,7 @@ namespace System.Security.Cryptography
                 Mgf1(hasher, hDest, dbMask);
 
                 // 10. Let maskedDB = DB XOR dbMask
-                for (int i = 0; i < dbMask.Length; i++)
-                {
-                    db[i] ^= dbMask[i];
-                }
+                Xor(db, dbMask);
 
                 // 11. Set the "unused" bits in the leftmost byte of maskedDB to 0.
                 int unusedBits = 8 * emLen - emBits;
@@ -367,6 +354,8 @@ namespace System.Security.Cryptography
 
         internal bool VerifyPss(ReadOnlySpan<byte> mHash, ReadOnlySpan<byte> em, int keySize)
         {
+            // https://tools.ietf.org/html/rfc3447#section-9.1.2
+
             int emBits = keySize - 1;
             int emLen = BytesRequiredForBitCount(emBits);
 
@@ -418,10 +407,7 @@ namespace System.Security.Cryptography
                     Mgf1(hasher, h, dbMask);
 
                     // 8. DB = maskedDB XOR dbMask
-                    for (int i = 0; i < dbMask.Length; i++)
-                    {
-                        dbMask[i] ^= maskedDb[i];
-                    }
+                    Xor(dbMask, maskedDb);
 
                     // 9. Set the unused bits of DB to 0
                     dbMask[0] &= usedBitsMask;
@@ -551,6 +537,22 @@ namespace System.Security.Cryptography
                 // Request new random bytes if necessary; dont re-use
                 // existing bytes since they were shifted down.
                 data = data.Slice(indexOfFirst0Byte);
+            }
+        }
+
+        /// <summary>
+        /// Bitwise XOR of <paramref name="b"/> into <paramref name="a"/>.
+        /// </summary>
+        private static void Xor(Span<byte> a, ReadOnlySpan<byte> b)
+        {
+            if (a.Length != b.Length)
+            {
+                throw new InvalidOperationException();
+            }
+
+            for (int i = 0; i < b.Length; i++)
+            {
+                a[i] ^= b[i];
             }
         }
     }
