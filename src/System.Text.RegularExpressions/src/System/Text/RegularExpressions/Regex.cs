@@ -361,23 +361,20 @@ namespace System.Text.RegularExpressions
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                s_cacheSize = value;
-                if (s_livecode.Count > s_cacheSize)
+                lock (s_livecode)
                 {
-                    lock (s_livecode)
+                    s_cacheSize = value;  // not to allow other thread to change it while we use cache
+                    while (s_livecode.Count > s_cacheSize)
                     {
-                        while (s_livecode.Count > s_cacheSize)
-                        {
-                            CachedCodeEntry last = s_livecode_last;
-                            s_livecode.Remove(last._key);
+                        CachedCodeEntry last = s_livecode_last;
+                        s_livecode.Remove(last._key);
 
-                            // update linked list:
-                            s_livecode_last = last._next;
-                            if (last._next != null)
-                                last._next._previous = null;
-                            else  // last one removed
-                                s_livecode_first = null;
-                        }
+                        // update linked list:
+                        s_livecode_last = last._next;
+                        if (last._next != null)
+                            last._next._previous = null;
+                        else  // last one removed
+                            s_livecode_first = null;
                     }
                 }
             }
@@ -1096,30 +1093,27 @@ namespace System.Text.RegularExpressions
                 {
                     newcached = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
                     s_livecode.Add(key, newcached);
-                    // put first in linked list:
+                    // put in linked list:
+                    if (s_livecode_first != null)
                     {
-                        if (s_livecode_first != null)
+                        s_livecode_first._next = newcached;
+                        newcached._previous = s_livecode_first;
+                    }
+                    s_livecode_first = newcached;
+                    if (s_livecode_last == null)
+                    {
+                        s_livecode_last = newcached;
+                    }
+                    else
+                    {
+                        if (s_livecode.Count > s_cacheSize)
                         {
-                            s_livecode_first._next = newcached;
-                            newcached._previous = s_livecode_first;
-                        }
+                            var last = s_livecode_last;
+                            s_livecode.Remove(last._key);
 
-                        s_livecode_first = newcached;
-                        if (s_livecode_last == null)
-                        {
-                            s_livecode_last = newcached;
-                        }
-                        else
-                        {
-                            if (s_livecode.Count > s_cacheSize)
-                            {
-                                var last = s_livecode_last;
-                                s_livecode.Remove(last._key);
-
-                                last._next._previous = null;
-                                s_livecode_last = last._next;
-                                last._next = null;
-                            }
+                            last._next._previous = null;
+                            s_livecode_last = last._next;
+                            last._next = null;
                         }
                     }
                 }
