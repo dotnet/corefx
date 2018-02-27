@@ -188,8 +188,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop]
         [Fact]
-        public async void SendAsync_ContentStream_ShouldNotBeReset()
+        public async Task SendAsync_ContentStream_ShouldNotBeReset()
         {
             using (var client = new HttpClient(CreateHttpClientHandler()))
             using (var ms = new MemoryStream(new byte[] { 1, 2, 3 }))
