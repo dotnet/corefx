@@ -250,7 +250,6 @@ namespace System.Diagnostics
                 }
             }
 
-            // https://github.com/dotnet/corefx/issues/27366
             ~RemoteInvokeHandle()
             {
                 // Finalizer flags tests that omitted the explicit Dispose() call; they must have it, or they aren't
