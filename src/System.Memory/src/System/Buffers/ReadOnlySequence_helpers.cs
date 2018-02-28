@@ -76,6 +76,61 @@ namespace System.Buffers
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ReadOnlyMemory<T> GetFirstBuffer(in SequencePosition start, in SequencePosition end)
+        {
+            SequenceType type;
+            int startIndex = 0;
+            int endIndex = 0;
+            object startObject = start.GetObject();
+            if (startObject != null)
+            {
+                GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out type, out startIndex, out endIndex);
+            }
+            else
+            {
+                type = SequenceType.Empty;
+            }
+
+            int length = endIndex - startIndex;
+            object endObject = end.GetObject();
+
+            if (type != SequenceType.MultiSegment && type != SequenceType.Empty && startObject != endObject)
+                ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+
+            ReadOnlyMemory<T> memory;
+            if (type == SequenceType.MultiSegment)
+            {
+                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
+                ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                memory = startSegment.Memory;
+            }
+            else if (type == SequenceType.Array)
+            {
+                Debug.Assert(startObject is T[]);
+
+                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
+            }
+            else if (type == SequenceType.OwnedMemory)
+            {
+                Debug.Assert(startObject is OwnedMemory<T>);
+
+                memory = (Unsafe.As<OwnedMemory<T>>(startObject)).Memory;
+            }
+            else if (typeof(T) == typeof(char) && type == SequenceType.String)
+            {
+                Debug.Assert(startObject is string);
+
+                memory = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
+            }
+            else
+            {
+                return default;
+            }
+
+            return memory.Slice(startIndex, length);
+        }
+
         private static SequencePosition GetBufferCrossSegment(int startIndex, object endObject, ref ReadOnlySequenceSegment<T> startSegment, ref int length)
         {
             Debug.Assert(startSegment != null);
