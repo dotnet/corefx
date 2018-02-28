@@ -50,10 +50,8 @@ namespace System.Net.Http
         private readonly WeakReference<HttpConnection> _weakThisRef;
 
         private HttpRequestMessage _currentRequest;
-        private Task _sendRequestContentTask;
         private readonly byte[] _writeBuffer;
         private int _writeOffset;
-        private Exception _pendingException;
         private int _allowedReadLineBytes;
 
         private Task<int> _readAheadTask;
@@ -257,6 +255,7 @@ namespace System.Net.Http
             TaskCompletionSource<bool> allowExpect100ToContinue = null;
             Debug.Assert(_currentRequest == null, $"Expected null {nameof(_currentRequest)}.");
             _currentRequest = request;
+            bool isConnectMethod = (request.Method == HttpMethod.Connect);
 
             Debug.Assert(!_canRetry);
             _canRetry = true;
@@ -270,15 +269,27 @@ namespace System.Net.Http
                 await WriteStringAsync(request.Method.Method).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ').ConfigureAwait(false);
 
-                if (_usingProxy)
+                if (isConnectMethod)
                 {
-                    // Proxied requests contain full URL
-                    Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
-                    await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
-                    await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                    // RFC 7231 #section-4.3.6.
+                    // Write only CONNECT foo.com:345 HTTP/1.1
+                    if (!request.HasHeaders || request.Headers.Host == null)
+                    {
+                        throw new HttpRequestException(SR.net_http_request_no_host);
+                    }
+                    await WriteAsciiStringAsync(request.Headers.Host).ConfigureAwait(false);
                 }
-
-                await WriteStringAsync(request.RequestUri.PathAndQuery).ConfigureAwait(false);
+                else
+                {
+                    if (_usingProxy)
+                    {
+                        // Proxied requests contain full URL
+                        Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
+                        await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
+                        await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                    }
+                    await WriteStringAsync(request.RequestUri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.UriEscaped)).ConfigureAwait(false);
+                }
 
                 // Fall back to 1.1 for all versions other than 1.0
                 Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0); // guaranteed by Version class
@@ -306,7 +317,7 @@ namespace System.Net.Http
                 {
                     // Write out Content-Length: 0 header to indicate no body,
                     // unless this is a method that never has a body.
-                    if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head)
+                    if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head && !isConnectMethod)
                     {
                         await WriteBytesAsync(s_contentLength0NewlineAsciiBytes).ConfigureAwait(false);
                     }
@@ -327,7 +338,7 @@ namespace System.Net.Http
                 // CRLF for end of headers.
                 await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
 
-                Debug.Assert(_sendRequestContentTask == null);
+                Task sendRequestContentTask = null;
                 if (request.Content == null)
                 {
                     // We have nothing more to send, so flush out any headers we haven't yet sent.
@@ -335,33 +346,12 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    // Asynchronously send the body if there is one.  This can run concurrently with receiving
-                    // the response. The write content streams will handle ensuring appropriate flushes are done
-                    // to ensure the headers and content are sent.
-                    bool transferEncodingChunked = request.HasHeaders && request.Headers.TransferEncodingChunked == true;
-                    HttpContentWriteStream stream = transferEncodingChunked ? (HttpContentWriteStream)
-                        new ChunkedEncodingWriteStream(this) :
-                        new ContentLengthWriteStream(this);
-
+                    // Send the body if there is one.  We prefer to serialize the sending of the content before
+                    // we try to receive any response, but if ExpectContinue has been set, we allow the sending
+                    // to run concurrently until we receive the final status line, at which point we wait for it.
                     if (!request.HasHeaders || request.Headers.ExpectContinue != true)
                     {
-                        // Send the request content asynchronously.  Note that elsewhere in SendAsync we don't pass
-                        // the cancellation token around, as we simply register with it for the duration of the
-                        // method in order to dispose of this connection and wake up any operations.  But SendRequestContentAsync
-                        // is special in that it ends up dealing with an external entity, the request HttpContent provided
-                        // by the caller to this handler, and we could end up blocking as part of getting that content,
-                        // which won't be affected by disposing this connection. Thus, we do pass the token in here.
-                        Task sendTask = _sendRequestContentTask = SendRequestContentAsync(request, stream, cancellationToken);
-                        if (sendTask.IsFaulted)
-                        {
-                            // Technically this isn't necessary: if the task failed, it will have stored the exception
-                            // and disposed of the stream, which will cause subsequent reads to fail.  This is also
-                            // only special-casing the case where the operation fails synchronously or at least very
-                            // quickly.  But it results in slightly nicer flow, and since we can handle this case,
-                            // we may as well do so.
-                            _sendRequestContentTask = null;
-                            sendTask.GetAwaiter().GetResult();
-                        }
+                        await SendRequestContentAsync(request, CreateRequestContentStream(request), cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
@@ -377,8 +367,8 @@ namespace System.Net.Http
                         var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
                             allowExpect100ToContinue, _pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan);
-                        _sendRequestContentTask = SendRequestContentWithExpect100ContinueAsync(
-                            request, allowExpect100ToContinue.Task, stream, expect100Timer, cancellationToken);
+                        sendRequestContentTask = SendRequestContentWithExpect100ContinueAsync(
+                            request, allowExpect100ToContinue.Task, CreateRequestContentStream(request), expect100Timer, cancellationToken);
                     }
                 }
 
@@ -411,8 +401,9 @@ namespace System.Net.Http
                     _readLength = bytesRead;
                 }
 
-                // The request is no longer retryable; either we received data from the _readAheadTask, 
+                // The request is no longer retryable; either we received data from the _readAheadTask,
                 // or there was no _readAheadTask because this is the first request on the connection.
+                // (We may have already set this as well if we sent request content.)
                 _canRetry = false;
 
                 // Parse the response status line.
@@ -455,6 +446,15 @@ namespace System.Net.Http
                     }
                 }
 
+                // Now that we've received our final status line, wait for the request content to fully send.
+                // In most common scenarios, the server won't send back a response until all of the request
+                // content has been received, so this task should generally already be complete.
+                if (sendRequestContentTask != null)
+                {
+                    await sendRequestContentTask.ConfigureAwait(false);
+                    sendRequestContentTask = null;
+                }
+
                 // Parse the response headers.
                 while (true)
                 {
@@ -472,17 +472,6 @@ namespace System.Net.Http
                     _connectionClose = true;
                 }
 
-                // Before creating the response stream, check to see if we're done sending any content,
-                // and propagate any exceptions that may have occurred.  The most common case is that
-                // the server won't send back response content until it's received the whole request,
-                // so the majority of the time this task will be complete.
-                Task sendRequestContentTask = _sendRequestContentTask;
-                if (sendRequestContentTask != null && sendRequestContentTask.IsCompleted)
-                {
-                    sendRequestContentTask.GetAwaiter().GetResult();
-                    _sendRequestContentTask = null;
-                }
-
                 // We're about to create the response stream, at which point responsibility for canceling
                 // the remainder of the response lies with the stream.  Thus we dispose of our registration
                 // here (if an exception has occurred or does occur while creating/returning the stream,
@@ -496,6 +485,16 @@ namespace System.Net.Http
                 {
                     responseStream = EmptyReadStream.Instance;
                     ReturnConnectionToPool();
+                }
+                else if (isConnectMethod && response.StatusCode == HttpStatusCode.OK)
+                {
+                    // Successful response to CONNECT does not have body.
+                    // What ever comes next should be opaque.
+                    responseStream = new RawConnectionStream(this);
+                    // Don't put connection back to the pool if we upgraded to tunnel.
+                    // We cannot use it for normal HTTP requests any more.
+                    _connectionClose = true;
+
                 }
                 else if (response.Content.Headers.ContentLength != null)
                 {
@@ -559,14 +558,7 @@ namespace System.Net.Http
                     // exceptions (argument exceptions, object disposed exceptions, socket exceptions,
                     // etc.), as a middle ground we treat it as cancellation, but still propagate the
                     // original information as the inner exception, for diagnostic purposes.
-                    throw CreateOperationCanceledException(_pendingException ?? error, cancellationToken);
-                }
-                else if (_pendingException != null)
-                {
-                    // If we incurred an exception in non-linear control flow such that
-                    // the exception didn't bubble up here (e.g. concurrent sending of
-                    // the request content), use that error instead.
-                    throw new HttpRequestException(SR.net_http_client_execution_error, _pendingException);
+                    throw CreateOperationCanceledException(error, cancellationToken);
                 }
                 else if (error is InvalidOperationException || error is IOException)
                 {
@@ -580,6 +572,15 @@ namespace System.Net.Http
                     throw;
                 }
             }
+        }
+
+        private HttpContentWriteStream CreateRequestContentStream(HttpRequestMessage request)
+        {
+            bool requestTransferEncodingChunked = request.HasHeaders && request.Headers.TransferEncodingChunked == true;
+            HttpContentWriteStream requestContentStream = requestTransferEncodingChunked ? (HttpContentWriteStream)
+                new ChunkedEncodingWriteStream(this) :
+                new ContentLengthWriteStream(this);
+            return requestContentStream;
         }
 
         private CancellationTokenRegistration RegisterCancellation(CancellationToken cancellationToken)
@@ -616,24 +617,14 @@ namespace System.Net.Http
             // Now that we're sending content, prohibit retries on this connection.
             _canRetry = false;
 
-            try
-            {
-                // Copy all of the data to the server.
-                await request.Content.CopyToAsync(stream, _transportContext, cancellationToken).ConfigureAwait(false);
+            // Copy all of the data to the server.
+            await request.Content.CopyToAsync(stream, _transportContext, cancellationToken).ConfigureAwait(false);
 
-                // Finish the content; with a chunked upload, this includes writing the terminating chunk.
-                await stream.FinishAsync().ConfigureAwait(false);
+            // Finish the content; with a chunked upload, this includes writing the terminating chunk.
+            await stream.FinishAsync().ConfigureAwait(false);
 
-                // Flush any content that might still be buffered.
-                await FlushAsync().ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                _pendingException = e;
-                if (NetEventSource.IsEnabled) Trace($"Error while sending request content: {e}");
-                Dispose();
-                throw;
-            }
+            // Flush any content that might still be buffered.
+            await FlushAsync().ConfigureAwait(false);
         }
 
         private async Task SendRequestContentWithExpect100ContinueAsync(
@@ -837,7 +828,7 @@ namespace System.Net.Http
             if (source.Length >= _writeBuffer.Length)
             {
                 // Large write.  No sense buffering this.  Write directly to stream.
-                // CONSIDER: May want to be a bit smarter here?  Think about how large writes should work...
+                // TODO #27362: CONSIDER: May want to be a bit smarter here?  Think about how large writes should work...
                 await WriteToStreamAsync(source).ConfigureAwait(false);
             }
             else
@@ -1246,56 +1237,11 @@ namespace System.Net.Http
         {
             Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
             Debug.Assert(_currentRequest != null, "Expected the connection to be associated with a request.");
-
-            // Disassociate the connection from a request.  If there's an in-flight request content still
-            // being sent, it'll see this nulled out and stop sending.  Also clear out other request-specific content.
-            _currentRequest = null;
-            _pendingException = null;
-
-            // Check to see if we're still sending request content.
-            Task sendRequestContentTask = _sendRequestContentTask;
-            if (sendRequestContentTask != null)
-            {
-                if (!sendRequestContentTask.IsCompleted)
-                {
-                    // We're still transferring request content.  Only put the connection back into the
-                    // pool when we're done transferring.
-                    if (NetEventSource.IsEnabled) Trace("Still transferring request content. Delaying returning connection to pool.");
-                    sendRequestContentTask.ContinueWith((_, state) =>
-                    {
-                        var innerConnection = (HttpConnection)state;
-                        if (NetEventSource.IsEnabled) innerConnection.Trace("Request content send completed.");
-                        innerConnection.ReturnConnectionToPoolCore();
-                    }, this, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
-                    return;
-                }
-
-                // We're done transferring request content.  Check whether we incurred an exception,
-                // and if we did, propagate it to our caller.
-                if (!sendRequestContentTask.IsCompletedSuccessfully)
-                {
-                    sendRequestContentTask.GetAwaiter().GetResult();
-                }
-            }
-
-            ReturnConnectionToPoolCore();
-        }
-
-        private void ReturnConnectionToPoolCore()
-        {
-            Debug.Assert(_sendRequestContentTask == null || _sendRequestContentTask.IsCompleted);
             Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
 
-            if (NetEventSource.IsEnabled)
+            if (NetEventSource.IsEnabled && _connectionClose)
             {
-                if (_connectionClose)
-                {
-                    Trace("Server requested connection be closed.");
-                }
-                if (_sendRequestContentTask != null && _sendRequestContentTask.IsFaulted)
-                {
-                    Trace($"Sending request content incurred an exception: {_sendRequestContentTask.Exception.InnerException}");
-                }
+                Trace("Server requested connection be closed.");
             }
 
             // If we have extraneous data in the read buffer, don't reuse the connection;
@@ -1307,13 +1253,12 @@ namespace System.Net.Http
 
             // If server told us it's closing the connection, don't put this back in the pool.
             // And if we incurred an error while transferring request content, also skip the pool.
-            if (!_connectionClose &&
-                (_sendRequestContentTask == null || _sendRequestContentTask.IsCompletedSuccessfully))
+            if (!_connectionClose)
             {
                 try
                 {
-                    // Any remaining request content has completed successfully.  Drop it.
-                    _sendRequestContentTask = null;
+                    // Disassociate the connection from a request.
+                    _currentRequest = null;
 
                     // When putting a connection back into the pool, we initiate a pre-emptive
                     // read on the stream.  When the connection is subsequently taken out of the
@@ -1328,9 +1273,10 @@ namespace System.Net.Http
                     _pool.ReturnConnection(this);
                     return;
                 }
-                catch
+                catch (Exception error)
                 {
                     // If reading throws, eat the error and don't pool the connection.
+                    if (NetEventSource.IsEnabled) Trace($"Error performing read ahead when returning connection to pool: {error}");
                 }
             }
 

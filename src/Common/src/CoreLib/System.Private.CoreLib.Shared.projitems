@@ -241,6 +241,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\MemberAccessException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Memory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MemoryDebugView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\MemoryExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\MemoryExtensions.Fast.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MethodAccessException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MidpointRounding.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MissingMethodException.cs" />
@@ -445,7 +447,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\OutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\PreserveSigAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\SafeBuffer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\StringBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\StructLayoutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\UnmanagedFunctionPointerAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\UnmanagedType.cs" />
@@ -486,8 +487,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Single.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Span.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Span.Fast.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\SpanDebugView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Span.NonGeneric.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanDebugView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.BinarySearch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.Byte.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.T.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\String.Manipulation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\String.Searching.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\StringSpanHelpers.cs" />
@@ -717,7 +722,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\Path.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathHelper.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathInternal.Windows.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathInternal.Windows.StringBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\DisableMediaInsertionPrompt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Security\SafeBSTRHandle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Security\SecureString.Windows.cs" />

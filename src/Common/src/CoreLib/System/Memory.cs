@@ -58,6 +58,26 @@ namespace System
             _length = array.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Memory(T[] array, int start)
+        {
+            if (array == null)
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException();
+                this = default;
+                return; // returns default
+            }
+            if (default(T) == null && array.GetType() != typeof(T[]))
+                ThrowHelper.ThrowArrayTypeMismatchException();
+            if ((uint)start > (uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            _object = array;
+            _index = start;
+            _length = array.Length - start;
+        }
+
         /// <summary>
         /// Creates a new memory over the portion of the target array beginning
         /// at 'start' index and ending at 'end' index (exclusive).
@@ -306,6 +326,16 @@ namespace System
             else if (_object is T[] arr)
             {
                 arraySegment = new ArraySegment<T>(arr, _index, _length);
+                return true;
+            }
+
+            if (_length == 0)
+            {
+#if FEATURE_PORTABLE_SPAN
+                arraySegment = new ArraySegment<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
+#else
+                arraySegment = ArraySegment<T>.Empty;
+#endif // FEATURE_PORTABLE_SPAN
                 return true;
             }
 
