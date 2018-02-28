@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
@@ -75,16 +76,64 @@ namespace System.IO.Tests
             Assert.All(TimeFunctions(), (function) =>
             {
                 var msec = 0;
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 5; i++)
                 {
-                    msec = function.Getter(item).Millisecond;
+                    DateTime time = function.Getter(item);
+                    msec = time.Millisecond;
                     if (msec != 0)
                         break;
+
+                    // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                    // not support millisecond granularity.
+
+                    // If it's 1/1000, or low grandularity, this may help:
+                    Thread.Sleep(1234);
+
+                    // If it's the OS/Filesystem often returns 0 for the millisecond part, this may
+                    // help prove it:
+                    Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")}");
 
                     item = GetExistingItem(); // try a new file/directory
                 }
 
                 Assert.NotEqual(0, msec);
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void TimesIncludeMillisecondPart_LogUnix()
+        {
+            // This test just logs what we're getting on Unix, so we can get more data
+            // about why the test above would not pass on Unix.
+            T item = GetExistingItem();
+            Assert.All(TimeFunctions(), (function) =>
+            {
+                var msec = 0;
+                for (int i = 0; i < 5; i++)
+                {
+                    DateTime time = function.Getter(item);
+                    msec = time.Millisecond;
+                    if (msec != 0)
+                        break;
+
+                    // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                    // not support millisecond granularity.
+
+                    // If it's 1/1000, or low grandularity, this may help:
+                    Thread.Sleep(1234);
+
+                    // If it's the OS/Filesystem often returns 0 for the millisecond part, this may
+                    // help prove it:
+                    Console.WriteLine($"On Unix, TimesIncludeMillisecondPart got a file time of {time.ToString("o")}");
+
+                    item = GetExistingItem(); // try a new file/directory
+                }
+
+                // Do not fail
+                //Assert.NotEqual(0, msec);
+                if (msec != 0)
+                    Console.WriteLine($"On Unix, TimesIncludeMillisecondPart PASSED");
             });
         }
 
