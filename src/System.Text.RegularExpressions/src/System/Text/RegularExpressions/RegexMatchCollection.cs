@@ -84,9 +84,9 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Provides an enumerator in the same order as Item[i].
         /// </summary>
-        public IEnumerator GetEnumerator() => new Enumerator(this);
+        public IEnumerator<Match> GetEnumerator() => new Enumerator(this);
 
-        IEnumerator<Match> IEnumerable<Match>.GetEnumerator() => new Enumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private Match GetMatch(int i)
         {
