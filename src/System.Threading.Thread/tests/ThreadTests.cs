@@ -1013,7 +1013,8 @@ namespace System.Threading.Threads.Tests
             Thread.SpinWait(0);
             Thread.SpinWait(1);
             Thread.Yield();
-            Thread.GetCurrentProcessorId();
+
+            Assert.True(Thread.GetCurrentProcessorId() >= 0);
         }
     }
 }
