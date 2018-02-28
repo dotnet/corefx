@@ -16,18 +16,24 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool TryGetBuffer(in SequencePosition start, in SequencePosition end, out ReadOnlyMemory<T> data, out SequencePosition next)
         {
+            SequenceType type;
+            int startIndex = 0;
+            int endIndex = 0;
             next = default;
-
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
+            object startObject = start.GetObject();
+            if (startObject != null)
+            {
+                GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out type, out startIndex, out endIndex);
+            }
+            else
+            {
+                type = SequenceType.Empty;
+            }
 
             int length = endIndex - startIndex;
-            object startObject = start.GetObject();
             object endObject = end.GetObject();
 
-            Debug.Assert(startObject != null);
-            Debug.Assert(endObject != null);
-
-            if (type != SequenceType.MultiSegment && startObject != endObject)
+            if (type != SequenceType.MultiSegment && type != SequenceType.Empty && startObject != endObject)
                 ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
             if (type == SequenceType.MultiSegment)
@@ -37,7 +43,7 @@ namespace System.Buffers
 
                 if (startSegment != endObject)
                 {
-                    next = GetBufferCrossSegment(startIndex, end, ref startSegment, ref length);
+                    next = GetBufferCrossSegment(startIndex, endObject, ref startSegment, ref length);
                 }
 
                 data = startSegment.Memory;
@@ -70,14 +76,14 @@ namespace System.Buffers
             return true;
         }
 
-        private static SequencePosition GetBufferCrossSegment(int startIndex, in SequencePosition end, ref ReadOnlySequenceSegment<T> startSegment, ref int length)
+        private static SequencePosition GetBufferCrossSegment(int startIndex, object endObject, ref ReadOnlySequenceSegment<T> startSegment, ref int length)
         {
             Debug.Assert(startSegment != null);
 
             ReadOnlySequenceSegment<T> nextSegment = startSegment.Next;
             int currentLength = startSegment.Memory.Length - startIndex;
 
-            while (currentLength == 0 && nextSegment != null)
+            while (currentLength == 0 && nextSegment != endObject && nextSegment != null)
             {
                 // Skip empty Segments
                 startSegment = nextSegment;
@@ -86,20 +92,30 @@ namespace System.Buffers
             }
 
             length = currentLength;
-            SequencePosition next;
-            if (nextSegment == null)
+            while (nextSegment != null && nextSegment.Memory.Length == 0)
             {
-                if (end.GetObject() != null)
-                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+                // Skip empty Next Segments
+                if (nextSegment == endObject)
+                {
+                    // Validated end reached, clear next as empty
+                    endObject = nextSegment = null;
+                    break;
+                }
 
-                next = default;
+                nextSegment = nextSegment.Next;
+            }
+
+            if (nextSegment != null)
+            {
+                return new SequencePosition(nextSegment, 0);
             }
             else
             {
-                next = new SequencePosition(nextSegment, 0);
-            }
+                if (endObject != null)
+                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-            return next;
+                return default;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -173,17 +189,13 @@ namespace System.Buffers
         {
             Debug.Assert(currentSegment != null);
             Debug.Assert(currentSegment.Next != null);
+            Debug.Assert(count >= 0);
 
-            if (count == 0)
-            {
-                // End of segment. Move to start of next.
-                currentSegment = currentSegment.Next;
-            }
-            else
-            {
-                // Not in this segment. Move to next
-                currentSegment = currentSegment.Next;
+            // End of segment. Move to start of next.
+            currentSegment = currentSegment.Next;
 
+            if (count > 0 || currentSegment.Memory.Length == 0)
+            {
                 while (currentSegment != null)
                 {
                     bool isCurrentAtEnd = currentSegment == endObject;
@@ -219,6 +231,10 @@ namespace System.Buffers
             while (current.Next != null)
             {
                 current = current.Next;
+                if (current == endSegment)
+                {
+                    return;
+                }
             }
 
             if (current != endSegment)
