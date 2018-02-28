@@ -11,7 +11,6 @@
 // This step is as simple as walking the tree and emitting
 // sequences of codes.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -244,6 +243,50 @@ namespace System.Text.RegularExpressions
 #endif
 
         /// <summary>
+        /// To avoid recursion, we use a simple integer stack.
+        /// </summary>
+        private void PushInt(int i)
+        {
+            _intStack.Append(i);
+        }
+
+        private bool IntIsEmpty()
+        {
+            return _intStack.Length == 0;
+        }
+
+        private int PopInt()
+        {
+            return _intStack.Pop();
+        }
+
+        /// <summary>
+        /// We also use a stack of RegexFC objects.
+        /// </summary>
+        private void PushFC(RegexFC fc)
+        {
+            _fcStack.Add(fc);
+        }
+
+        private bool FCIsEmpty()
+        {
+            return _fcStack.Count == 0;
+        }
+
+        private RegexFC PopFC()
+        {
+            RegexFC item = TopFC();
+            _fcStack.RemoveAt(_fcStack.Count - 1);
+
+            return item;
+        }
+
+        private RegexFC TopFC()
+        {
+            return _fcStack[_fcStack.Count - 1];
+        }
+
+        /// <summary>
         /// Return rented buffers. Clear RegexFC buffer manually as only
         /// the reference to the RegexCharClass needs to be cleared.
         /// </summary>
@@ -278,7 +321,7 @@ namespace System.Text.RegularExpressions
                     {
                         curNode = curNode.Children[curChild];
                         // this stack is how we get a depth first walk of the tree.
-                        _intStack.Append(curChild);
+                        PushInt(curChild);
                         curChild = 0;
                     }
                     else
@@ -293,10 +336,10 @@ namespace System.Text.RegularExpressions
                 // the end of a leaf node.
                 _skipAllChildren = false;
 
-                if (_intStack.Length == 0)
+                if (IntIsEmpty())
                     break;
 
-                curChild = _intStack.Pop();
+                curChild = PopInt();
                 curNode = curNode.Next;
 
                 CalculateFC(curNode.NType | AfterChild, curNode, curChild);
@@ -306,18 +349,10 @@ namespace System.Text.RegularExpressions
                 curChild++;
             }
 
-            if (_fcStack.Count == 0)
+            if (FCIsEmpty())
                 return null;
 
-            return FCPop();
-        }
-
-        private RegexFC FCPop()
-        {
-            RegexFC item = _fcStack[_fcStack.Count - 1];
-            _fcStack.RemoveAt(_fcStack.Count - 1);
-
-            return item;
+            return PopFC();
         }
 
         /// <summary>
@@ -359,27 +394,27 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case RegexNode.Empty:
-                    _fcStack.Add(new RegexFC(true));
+                    PushFC(new RegexFC(true));
                     break;
 
                 case RegexNode.Concatenate | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = PopFC();
+                        RegexFC cumul = TopFC();
 
                         _failed = !cumul.AddFC(child, true);
                     }
 
-                    if (!_fcStack[_fcStack.Count - 1]._nullable)
+                    if (!TopFC()._nullable)
                         _skipAllChildren = true;
                     break;
 
                 case RegexNode.Testgroup | AfterChild:
                     if (CurIndex > 1)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = PopFC();
+                        RegexFC cumul = TopFC();
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -389,8 +424,8 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Testref | AfterChild:
                     if (CurIndex != 0)
                     {
-                        RegexFC child = FCPop();
-                        RegexFC cumul = _fcStack[_fcStack.Count - 1];
+                        RegexFC child = PopFC();
+                        RegexFC cumul = TopFC();
 
                         _failed = !cumul.AddFC(child, false);
                     }
@@ -399,7 +434,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Loop | AfterChild:
                 case RegexNode.Lazyloop | AfterChild:
                     if (node.M == 0)
-                        _fcStack[_fcStack.Count - 1]._nullable = true;
+                        TopFC()._nullable = true;
                     break;
 
                 case RegexNode.Group | BeforeChild:
@@ -413,7 +448,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Require | BeforeChild:
                 case RegexNode.Prevent | BeforeChild:
                     SkipChild();
-                    _fcStack.Add(new RegexFC(true));
+                    PushFC(new RegexFC(true));
                     break;
 
                 case RegexNode.Require | AfterChild:
@@ -422,39 +457,39 @@ namespace System.Text.RegularExpressions
 
                 case RegexNode.One:
                 case RegexNode.Notone:
-                    _fcStack.Add(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
+                    PushFC(new RegexFC(node.Ch, NodeType == RegexNode.Notone, false, ci));
                     break;
 
                 case RegexNode.Oneloop:
                 case RegexNode.Onelazy:
-                    _fcStack.Add(new RegexFC(node.Ch, false, node.M == 0, ci));
+                    PushFC(new RegexFC(node.Ch, false, node.M == 0, ci));
                     break;
 
                 case RegexNode.Notoneloop:
                 case RegexNode.Notonelazy:
-                    _fcStack.Add(new RegexFC(node.Ch, true, node.M == 0, ci));
+                    PushFC(new RegexFC(node.Ch, true, node.M == 0, ci));
                     break;
 
                 case RegexNode.Multi:
                     if (node.Str.Length == 0)
-                        _fcStack.Add(new RegexFC(true));
+                        PushFC(new RegexFC(true));
                     else if (!rtl)
-                        _fcStack.Add(new RegexFC(node.Str[0], false, false, ci));
+                        PushFC(new RegexFC(node.Str[0], false, false, ci));
                     else
-                        _fcStack.Add(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
+                        PushFC(new RegexFC(node.Str[node.Str.Length - 1], false, false, ci));
                     break;
 
                 case RegexNode.Set:
-                    _fcStack.Add(new RegexFC(node.Str, false, ci));
+                    PushFC(new RegexFC(node.Str, false, ci));
                     break;
 
                 case RegexNode.Setloop:
                 case RegexNode.Setlazy:
-                    _fcStack.Add(new RegexFC(node.Str, node.M == 0, ci));
+                    PushFC(new RegexFC(node.Str, node.M == 0, ci));
                     break;
 
                 case RegexNode.Ref:
-                    _fcStack.Add(new RegexFC(RegexCharClass.AnyClass, true, false));
+                    PushFC(new RegexFC(RegexCharClass.AnyClass, true, false));
                     break;
 
                 case RegexNode.Nothing:
@@ -468,7 +503,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Start:
                 case RegexNode.EndZ:
                 case RegexNode.End:
-                    _fcStack.Add(new RegexFC(true));
+                    PushFC(new RegexFC(true));
                     break;
 
                 default:
