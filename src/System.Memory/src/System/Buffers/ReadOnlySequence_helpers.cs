@@ -40,33 +40,34 @@ namespace System.Buffers
                     next = GetBufferCrossSegment(startIndex, end, ref startSegment, ref length);
                 }
 
-                data = startSegment.Memory.Slice(startIndex, length);
+                data = startSegment.Memory;
             }
             else if (type == SequenceType.Array)
             {
                 Debug.Assert(startObject is T[]);
 
-                data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, length);
+                data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
             }
             else if (type == SequenceType.OwnedMemory)
             {
                 Debug.Assert(startObject is OwnedMemory<T>);
 
-                data = (Unsafe.As<OwnedMemory<T>>(startObject)).Memory.Slice(startIndex, length);
+                data = (Unsafe.As<OwnedMemory<T>>(startObject)).Memory;
             }
             else if (typeof(T) == typeof(char) && type == SequenceType.String)
             {
                 Debug.Assert(startObject is string);
 
-                var text = Unsafe.As<string>(startObject);
-                data = (ReadOnlyMemory<T>)(object)text.AsMemory(startIndex, length);
+                data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
             }
             else
             {
                 data = default;
+                return false;
             }
 
-            return type != SequenceType.Empty;
+            data = data.Slice(startIndex, length);
+            return true;
         }
 
         private static SequencePosition GetBufferCrossSegment(int startIndex, in SequencePosition end, ref ReadOnlySequenceSegment<T> startSegment, ref int length)
@@ -367,28 +368,29 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is T[]);
 
-                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, length);
+                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
             }
             else if (type == SequenceType.OwnedMemory)
             {
                 Debug.Assert(startObject is OwnedMemory<T>);
 
-                memory = Unsafe.As<OwnedMemory<T>>(startObject).Memory.Slice(startIndex, length);
+                memory = Unsafe.As<OwnedMemory<T>>(startObject).Memory;
             }
             else if (typeof(T) == typeof(char) && type == SequenceType.String)
             {
                 Debug.Assert(startObject is string);
 
                 var text = Unsafe.As<string>(startObject);
-                memory = (ReadOnlyMemory<T>)(object)text.AsMemory(startIndex, length);
+                memory = (ReadOnlyMemory<T>)(object)text.AsMemory();
             }
             else // ReadOnlySequenceSegment
             {
                 Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
 
-                memory = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject).Memory.Slice(startIndex, length);
+                memory = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject).Memory;
             }
 
+            memory = memory.Slice(startIndex, length);
             return true;
         }
 
