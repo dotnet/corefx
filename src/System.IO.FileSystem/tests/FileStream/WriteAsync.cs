@@ -385,14 +385,11 @@ namespace System.IO.Tests
             byte[] dataToWrite = new byte[MaximumWriteSize];
             rand.NextBytes(dataToWrite);
 
-            int totalBytesWritten = 0;
-
             string writeFileName = GetTestFilePath();
             do
             {
-                // Create a new token that expires between 100-1000ms
-                CancellationTokenSource tokenSource = new CancellationTokenSource();
-                tokenSource.CancelAfter(rand.Next(100, 1000));
+
+                int totalBytesWritten = 0;
 
                 using (var stream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write))
                 {                    
@@ -411,18 +408,15 @@ namespace System.IO.Tests
                             else
                             {
                                 // 90%: Async write
-                                await WriteAsync(stream, dataToWrite, 0, bytesToWrite, tokenSource.Token);
+                                await WriteAsync(stream, dataToWrite, 0, bytesToWrite);
                             }
 
                             totalBytesWritten += bytesToWrite;
                         }
-                        catch (TaskCanceledException)
-                        {
-                            Assert.True(tokenSource.Token.IsCancellationRequested, "Received cancellation exception before token expired");
-                        }
-                    } while (!tokenSource.Token.IsCancellationRequested);
+                    // Cap written bytes at 10 million to avoid writing too much to disk
+                    } while (totalBytesWritten < 10_000_000);
                 }
-            } while (DateTime.UtcNow - testStartTime <= testRunTime && totalBytesWritten < 10000000);
+            } while (DateTime.UtcNow - testStartTime <= testRunTime);
         }
     }
 
