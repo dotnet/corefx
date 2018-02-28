@@ -40,18 +40,18 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
         public unsafe void TryJoinTwoPaths(string path1, string path2, string expected)
         {
-            string output = new string('\0', expected.Length);
+            char[] output = new char[expected.Length];
 
-            fixed (char* c = output)
+            Assert.True(Path.TryJoin(path1, path2, new Span<char>(output), out int written));
+            Assert.Equal(expected.Length, written);
+            if (expected.Length > 0)
             {
-                Assert.True(Path.TryJoin(path1, path2, new Span<char>(c, output.Length), out int written));
-                if (expected.Length > 0)
-                {
-                    Assert.False(Path.TryJoin(path1, path2, Span<char>.Empty, out _));
-                }
-                Assert.Equal(expected, output);
-                Assert.Equal(expected.Length, written);
+                Assert.False(Path.TryJoin(path1, path2, Span<char>.Empty, out written));
+                Assert.Equal(0, written);
+                Assert.False(Path.TryJoin(path1, path2, new Span<char>(output, 0, output.Length - 1), out written));
+                Assert.Equal(0, written);
             }
+            Assert.Equal(expected, new string(output));
         }
 
         public static TheoryData<string, string, string, string> TestData_JoinThreePaths = new TheoryData<string, string, string, string>
@@ -86,18 +86,18 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TestData_JoinThreePaths))]
         public unsafe void TryJoinThreePaths(string path1, string path2, string path3, string expected)
         {
-            string output = new string('\0', expected.Length);
+            char[] output = new char[expected.Length];
 
-            fixed (char* c = output)
+            Assert.True(Path.TryJoin(path1, path2, path3, new Span<char>(output), out int written));
+            Assert.Equal(expected.Length, written);
+            if (expected.Length > 0)
             {
-                Assert.True(Path.TryJoin(path1, path2, path3, new Span<char>(c, output.Length), out int written));
-                if (expected.Length > 0)
-                {
-                    Assert.False(Path.TryJoin(path1, path2, path3, Span<char>.Empty, out _));
-                }
-                Assert.Equal(expected, output);
-                Assert.Equal(expected.Length, written);
+                Assert.False(Path.TryJoin(path1, path2, path3, Span<char>.Empty, out written));
+                Assert.Equal(0, written);
+                Assert.False(Path.TryJoin(path1, path2, path3, new Span<char>(output, 0, output.Length - 1), out written));
+                Assert.Equal(0, written);
             }
+            Assert.Equal(expected, new string(output));
         }
     }
 }
