@@ -63,24 +63,14 @@ namespace System.IO
         //
         public static bool Exists(string path)
         {
-            try
-            {
-                if (path == null)
-                    return false;
-                if (path.Length == 0)
-                    return false;
+            if (string.IsNullOrEmpty(path))
+                return false;
 
-                string fullPath = Path.GetFullPath(path);
+            ReadOnlySpan<char> pathSpan = PathHelpers.FastNormalizePath(path, allowTrailingSeparator: true);
+            if (pathSpan.IsEmpty)
+                return false;
 
-                return FileSystem.DirectoryExists(fullPath);
-            }
-            catch (ArgumentException) { }
-            catch (NotSupportedException) { }  // Security can throw this on ":"
-            catch (SecurityException) { }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
-
-            return false;
+            return pathSpan.Length == path.Length ? FileSystem.DirectoryExists(path) : FileSystem.DirectoryExists(new string(pathSpan));
         }
 
         public static void SetCreationTime(string path, DateTime creationTime)
