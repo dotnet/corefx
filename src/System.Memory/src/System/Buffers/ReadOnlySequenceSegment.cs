@@ -5,7 +5,7 @@
 namespace System.Buffers
 {
     /// <summary>
-    /// Represents a linked list of <see cref="Memory{T}"/> nodes.
+    /// Represents a linked list of <see cref="ReadOnlyMemory{T}"/> nodes.
     /// </summary>
     public abstract class ReadOnlySequenceSegment<T>
     {

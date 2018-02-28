@@ -19,10 +19,10 @@ namespace System.Buffers
             object startObject = start.GetObject();
             object endObject = end.GetObject();
 
-            if (type != SequenceType.Segment && startObject != endObject)
+            if (type != SequenceType.MultiSegment && startObject != endObject)
                 ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-            if (type == SequenceType.Segment)
+            if (type == SequenceType.MultiSegment)
             {
                 ReadOnlySequenceSegment<T> startSegment = (ReadOnlySequenceSegment<T>)startObject;
                 if (startSegment != endObject)
@@ -89,7 +89,7 @@ namespace System.Buffers
 
             object startSegment = start.GetObject();
             bool notInRange = endIndex - startIndex < count;
-            if (type == SequenceType.Segment)
+            if (type == SequenceType.MultiSegment)
             {
                 object endSegment = end.GetObject();
                 if (notInRange || startSegment != endSegment)
@@ -117,7 +117,7 @@ namespace System.Buffers
 
             object startSegment = start.GetObject();
             bool notInRange = endIndex - startIndex < count;
-            if (type == SequenceType.Segment)
+            if (type == SequenceType.MultiSegment)
             {
                 object endSegment = end.GetObject();
                 if (notInRange || startSegment != endSegment)
@@ -142,20 +142,25 @@ namespace System.Buffers
         private static SequencePosition SeekMultiSegment(object startSegment, int startIndex, object endSegment, int endPosition, long count)
         {
             var current = (ReadOnlySequenceSegment<T>)startSegment;
-
             int currentLength = current.Memory.Length - startIndex;
 
             if (currentLength == count)
             {
-                count = 0;
-                current = current.Next;
+                // End of segment. Move to start of next, if one exists
+                if (current.Next != null)
+                {
+                    count = 0;
+                    current = current.Next;
+                }
             }
             else if (currentLength > count)
             {
+                // Fully contained in this segment
                 count += startIndex;
             }
             else
             {
+                // Not in this segment. Move to next
                 count -= currentLength;
                 current = current.Next;
 
@@ -166,14 +171,17 @@ namespace System.Buffers
 
                     if (memoryLength > count || (memoryLength == count && isCurrentAtEnd))
                     {
+                        // Fully contained in this segment; or at end of segment but isn't a next one to move to
                         break;
                     }
 
+                    // Move to next
                     count -= memoryLength;
                     current = current.Next;
                 }
             }
 
+            // Hit the end of the segments but didn't reach the count
             if (current == null)
                 ThrowHelper.ThrowArgumentOutOfRangeException_CountOutOfRange();
 
@@ -199,7 +207,7 @@ namespace System.Buffers
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
-            if (type == SequenceType.Segment)
+            if (type == SequenceType.MultiSegment)
             {
                 object startSegment = start.GetObject();
                 object endSegment = end.GetObject();
@@ -226,7 +234,7 @@ namespace System.Buffers
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
-            if (type == SequenceType.Segment)
+            if (type == SequenceType.MultiSegment)
             {
                 object startSegment = start.GetObject();
                 object endSegment = end.GetObject();
@@ -265,7 +273,7 @@ namespace System.Buffers
         {
             GetTypeAndIndices(Start.GetInteger(), End.GetInteger(), out SequenceType type, out startIndex, out endIndex);
 
-            if (type != SequenceType.Segment)
+            if (type != SequenceType.MultiSegment)
             {
                 startSegment = null;
                 endSegment = null;

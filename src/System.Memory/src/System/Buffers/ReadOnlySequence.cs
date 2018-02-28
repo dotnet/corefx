@@ -398,7 +398,7 @@ namespace System.Buffers
 
         private enum SequenceType
         {
-            Segment = 0x00,
+            MultiSegment = 0x00,
             Array = 0x1,
             OwnedMemory = 0x2,
             String = 0x3,
