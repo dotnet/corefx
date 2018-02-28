@@ -127,6 +127,7 @@ namespace System.Threading
         [System.CLSCompliantAttribute(false)]
         public static void VolatileWrite(ref System.UIntPtr address, System.UIntPtr value) { }
         public static bool Yield() { throw null; }
+        public static int GetCurrentProcessorId() { throw null; }
     }
     public sealed partial class ThreadAbortException : System.SystemException
     {
