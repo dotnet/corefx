@@ -136,7 +136,7 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void Ctor_MemoryList_ValidatesArguments()
+        public void Ctor_ReadOnlySequenceSegment_ValidatesArguments()
         {
             var segment = new BufferSegment<byte>(new byte[] { 1, 2, 3, 4, 5 });
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, 6, segment, 0));
