@@ -944,7 +944,10 @@ namespace System.Diagnostics.Tests
                 FileName = @"http://www.microsoft.com"
             };
 
-            using (var p = Process.Start(info)) { }
+            using (var p = Process.Start(info))
+            {
+                Assert.NotNull(p);
+            }
         }
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
