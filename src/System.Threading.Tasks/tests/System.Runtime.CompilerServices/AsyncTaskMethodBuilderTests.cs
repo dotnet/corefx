@@ -375,6 +375,7 @@ namespace System.Threading.Tasks.Tests
             TaskMethodBuilderT_UsesCompletedCache(result, shouldBeCached);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/coreclr/pull/16588")]
         [Fact]
         [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilderDecimal_DoesntUseCompletedCache()
