@@ -943,6 +943,7 @@ namespace System.Diagnostics.Tests
                 UseShellExecute = true,
                 FileName = @"http://www.microsoft.com"
             };
+
             using (var p = Process.Start(info)) { }
         }
 
@@ -1074,7 +1075,6 @@ namespace System.Diagnostics.Tests
             return sb.ToString();
         }
 
-
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))] 
         public void ShellExecute_Nano_Fails_Start()
         {
@@ -1087,7 +1087,7 @@ namespace System.Diagnostics.Tests
                 FileName = tempFile
             };
 
-            Assert.Throws<PlatformNotSupportedException>(() => { using (var p = Process.Start(info)) { } });
+            Assert.Throws<PlatformNotSupportedException>(() => Process.Start(info));
         }
 
         public static TheoryData<bool> UseShellExecute
@@ -1107,6 +1107,7 @@ namespace System.Diagnostics.Tests
         private const int ERROR_FILE_NOT_FOUND = 0x2;
         private const int ERROR_BAD_EXE_FORMAT = 0xC1;
 
+        [Theory]
         [MemberData(nameof(UseShellExecute))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void StartInfo_BadVerb(bool useShellExecute)
@@ -1118,10 +1119,10 @@ namespace System.Diagnostics.Tests
                 Verb = "Zlorp"
             };
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(info)) { } });
-            Assert.Equal(ERROR_FILE_NOT_FOUND, e.NativeErrorCode);
+            Assert.Equal(ERROR_FILE_NOT_FOUND, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
         }
 
+        [Theory]
         [MemberData(nameof(UseShellExecute))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void StartInfo_BadExe(bool useShellExecute)
@@ -1141,8 +1142,7 @@ namespace System.Diagnostics.Tests
             if (PlatformDetection.IsWindowsNanoServer)
                 expected = ERROR_SUCCESS;
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(info)) { } });
-            Assert.Equal(expected, e.NativeErrorCode);
+            Assert.Equal(expected, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
         }
     }
 }

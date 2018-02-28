@@ -122,19 +122,19 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void ProcessStart_TryExitCommandAsFileName_ThrowsWin32Exception()
         {
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "exit", Arguments = "42" })) { } });
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "exit", Arguments = "42" }));
         }
 
         [Fact]
         public void ProcessStart_UseShellExecuteFalse_FilenameIsUrl_ThrowsWin32Exception()
         {
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "https://www.github.com/corefx" })) { } });
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "https://www.github.com/corefx" }));
         }
 
         [Fact]
         public void ProcessStart_TryOpenFolder_UseShellExecuteIsFalse_ThrowsWin32Exception()
         {
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() })) { } });
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
         }
 
         [Fact]
@@ -164,7 +164,7 @@ namespace System.Diagnostics.Tests
                     WorkingDirectory = workingDirectory
                 };
 
-                Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(psi)) { } });
+                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
                 Assert.NotEqual(0, e.NativeErrorCode);
             }
             else
@@ -179,7 +179,7 @@ namespace System.Diagnostics.Tests
         public void ProcessStart_UseShellExecuteTrue_OpenMissingFile_Throws()
         {
             string fileToOpen = Path.Combine(Environment.CurrentDirectory, "_no_such_file.TXT");
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen })) { } });
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -1201,14 +1201,14 @@ namespace System.Diagnostics.Tests
             }
             Assert.False(File.Exists(path));
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(path)) { } });
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
         [Fact]
         public void Start_NullStartInfo_ThrowsArgumentNullExceptionException()
         {
-            AssertExtensions.Throws<ArgumentNullException>("startInfo", () => { using (var p = Process.Start((ProcessStartInfo)null)) { } });
+            AssertExtensions.Throws<ArgumentNullException>("startInfo", () => Process.Start((ProcessStartInfo)null));
         }
 
         [Fact]
@@ -1591,9 +1591,9 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Starting process with authentication not supported on Unix
         public void Process_StartInvalidNamesTest()
         {
-            Assert.Throws<InvalidOperationException>(() => { using (var p = Process.Start(null, "userName", new SecureString(), "thisDomain")) { } });
-            Assert.Throws<InvalidOperationException>(() => { using (var p = Process.Start(string.Empty, "userName", new SecureString(), "thisDomain")) { } });
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start("exe", string.Empty, new SecureString(), "thisDomain")) { } });
+            Assert.Throws<InvalidOperationException>(() => Process.Start(null, "userName", new SecureString(), "thisDomain"));
+            Assert.Throws<InvalidOperationException>(() => Process.Start(string.Empty, "userName", new SecureString(), "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start("exe", string.Empty, new SecureString(), "thisDomain"));
         }
 
         [Fact]
@@ -1602,8 +1602,8 @@ namespace System.Diagnostics.Tests
         public void Process_StartWithInvalidUserNamePassword()
         {
             SecureString password = AsSecureString("Value");
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(GetCurrentProcessName(), "userName", password, "thisDomain")) { } });
-            Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(GetCurrentProcessName(), Environment.UserName, password, Environment.UserDomainName)) { } });
+            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), "userName", password, "thisDomain"));
+            Assert.Throws<Win32Exception>(() => Process.Start(GetCurrentProcessName(), Environment.UserName, password, Environment.UserDomainName));
         }
 
         [Fact]
