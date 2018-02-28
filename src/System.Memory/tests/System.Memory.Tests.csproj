@@ -71,8 +71,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.byte.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.char.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.byte.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.char.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.cs" />
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
@@ -150,6 +152,7 @@
     <Compile Include="MemoryMarshal\CastSpan.cs" />
     <Compile Include="MemoryMarshal\GetReference.cs" />
     <Compile Include="MemoryMarshal\TryGetArray.cs" />
+    <Compile Include="MemoryMarshal\TryGetOwnedMemory.cs" />
     <Compile Include="MemoryMarshal\ToEnumerable.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +207,11 @@
     <Compile Include="Base64\Base64DecoderUnitTests.cs" />
     <Compile Include="Base64\Base64EncoderUnitTests.cs" />
     <Compile Include="Base64\Base64TestHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Buffers\NativeOwnedMemory.cs">
+    <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
+  </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

@@ -615,6 +615,7 @@ namespace System
         /// <summary>
         /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SequenceCompareTo<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
             where T : IComparable<T>
         {
@@ -706,7 +707,7 @@ namespace System
         }
 
         /// <summary>
-        /// Creates a new  span over the portion of the target array.
+        /// Creates a new span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[] array)
@@ -715,7 +716,7 @@ namespace System
         }
 
         /// <summary>
-        /// Creates a new  span over the portion of the target array segment.
+        /// Creates a new span over the portion of the target array segment.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment)
@@ -750,6 +751,11 @@ namespace System
         /// Creates a new readonly memory over the entire target memory.
         /// </summary>
         public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) => memory;
+
+        /// <summary>
+        /// Creates a new memory over the portion of the target array.
+        /// </summary>
+        public static Memory<T> AsMemory<T>(this T[] array, int start) => new Memory<T>(array, start);
 
         /// <summary>
         /// Copies the contents of the array into the span. If the source
@@ -836,10 +842,10 @@ namespace System
         //
         //  Let's say there are two sequences, x and y. Let
         //
-        //      ref T xRef    = MemoryMarshal.GetReference(x)
-        //      uint  xLength = x.Length * Unsafe.SizeOf<T>()
-        //      ref T yRef    = MemoryMarshal.GetReference(y)
-        //      uint  yLength = y.Length * Unsafe.SizeOf<T>()
+        //      ref T xRef = MemoryMarshal.GetReference(x)
+        //      uint xLength = x.Length * Unsafe.SizeOf<T>()
+        //      ref T yRef = MemoryMarshal.GetReference(y)
+        //      uint yLength = y.Length * Unsafe.SizeOf<T>()
         //
         //  Visually, the two sequences are located somewhere in the 32-bit
         //  address space as follows:
@@ -895,18 +901,18 @@ namespace System
         //
         //  After substituting x2 and y2 with their respective definition:
         //
-        //      ==  (y1 < xLength) || (y1 + yLength > 2³²)
+        //      == (y1 < xLength) || (y1 + yLength > 2³²)
         //
         //  Since yLength can't be greater than the size of the address space,
         //  the overflow can be avoided as follows:
         //
-        //      ==  (y1 < xLength) || (y1 > 2³² - yLength)
+        //      == (y1 < xLength) || (y1 > 2³² - yLength)
         //
         //  However, 2³² cannot be stored in an unsigned 32-bit integer, so one
         //  more change is needed to keep doing everything with unsigned 32-bit
         //  integers:
         //
-        //      ==  (y1 < xLength) || (y1 > -yLength)
+        //      == (y1 < xLength) || (y1 > -yLength)
         //  
         //  Due to modulo arithmetic, this gives exactly same result *except* if
         //  yLength is zero, since 2³² - 0 is 0 and not 2³². So the case
@@ -1022,7 +1028,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		///     <paramref name = "comparable" /> is <see langword="null"/> .
+		/// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T>(
@@ -1046,7 +1052,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		///     <paramref name = "comparable" /> is <see langword="null"/> .
+		/// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparable>(
@@ -1072,7 +1078,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "comparer" /> is <see langword="null"/> .
+        /// <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(
@@ -1096,7 +1102,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		///     <paramref name = "comparable" /> is <see langword="null"/> .
+		/// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T>(
@@ -1120,7 +1126,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		///     <paramref name = "comparable" /> is <see langword="null"/> .
+		/// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparable>(
@@ -1146,7 +1152,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "comparer" /> is <see langword="null"/> .
+        /// <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(

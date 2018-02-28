@@ -15,7 +15,7 @@ namespace System
     internal static partial class SpanHelpers
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int BinarySearch<T, TComparable>(
+        public static int BinarySearch<T, TComparable>(
             this ReadOnlySpan<T> span, TComparable comparable)
             where TComparable : IComparable<T>
         {
@@ -25,7 +25,7 @@ namespace System
             return BinarySearch(ref MemoryMarshal.GetReference(span), span.Length, comparable);
         }
 
-        internal static int BinarySearch<T, TComparable>(
+        public static int BinarySearch<T, TComparable>(
             ref T spanStart, int length, TComparable comparable) 
             where TComparable : IComparable<T>
         {

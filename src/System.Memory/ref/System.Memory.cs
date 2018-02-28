@@ -169,8 +169,10 @@ namespace System
     {
         private readonly object _dummy;
         public SequencePosition(object segment, int index) { throw null; }
-        public int Index { get { throw null; } }
-        public object Segment { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public int GetInteger() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public object GetObject() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.SequencePosition position) { throw null; }
@@ -223,9 +225,8 @@ namespace System.Buffers
     public partial interface IBufferWriter<T>
     {
         void Advance(int count);
-        System.Memory<T> GetMemory(int minimumLength = 0);
-        System.Span<T> GetSpan(int minimumLength = 0);
-        int MaxBufferSize { get; }
+        System.Memory<T> GetMemory(int sizeHint = 0);
+        System.Span<T> GetSpan(int sizeHint = 0);
     }
     public partial interface IMemoryList<T>
     {
@@ -281,9 +282,9 @@ namespace System.Buffers
     }
     public static partial class BuffersExtensions
     {
-        public static void CopyTo<T>(this System.Buffers.ReadOnlySequence<T> sequence, System.Span<T> destination) { }
-        public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
-        public static T[] ToArray<T>(this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
+        public static void CopyTo<T>(in this System.Buffers.ReadOnlySequence<T> sequence, System.Span<T> destination) { }
+        public static System.Nullable<System.SequencePosition> PositionOf<T>(in this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
+        public static T[] ToArray<T>(in this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
         public static void Write<T>(this System.Buffers.IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source) { }
     }
     public readonly partial struct ReadOnlySequence<T>
@@ -318,7 +319,7 @@ namespace System.Buffers
         public partial struct Enumerator
         {
             private object _dummy;
-            public Enumerator(System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
+            public Enumerator(in System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
             public System.ReadOnlyMemory<T> Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }
@@ -511,5 +512,17 @@ namespace System.Runtime.InteropServices
         public static ref T GetReference<T>(System.Span<T> span) { throw null; }
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetArray<T>(System.ReadOnlyMemory<T> readOnlyMemory, out System.ArraySegment<T> arraySegment) { throw null; }
+        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory)
+            where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
+        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory, out int index, out int length)
+            where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
+    }
+
+    public static partial class SequenceMarshal
+    {
+        public static bool TryGetArray<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> arraySegment) { throw null; }
+        public static bool TryGetMemoryList<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.IMemoryList<T> startSegment, out int startIndex, out System.Buffers.IMemoryList<T> endSegment, out int endIndex) { throw null; }
+        public static bool TryGetOwnedMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.OwnedMemory<T> ownedMemory, out int start, out int length) { throw null; }
+        public static bool TryGetReadOnlyMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> readOnlyMemory) { throw null; }
     }
 }
