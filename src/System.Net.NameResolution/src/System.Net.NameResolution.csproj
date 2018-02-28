@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
+    <Compile Include="System\Net\NameResolutionPal.Windows.NetCoreApp.cs" Condition="'$(TargetGroup)' != 'uap'"/>
+    <Compile Include="System\Net\NameResolutionPal.Windows.Uap.cs" Condition="'$(TargetGroup)' == 'uap'"/>
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Windows.cs">
       <Link>Common\System\Net\ContextAwareResult.Windows.cs</Link>
     </Compile>
@@ -132,7 +134,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetProcAddress.cs">
       <Link>Interop\Windows\Kernel32\Interop.GetProcAddress.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs" Condition="'$(TargetGroup)' != 'uap'">
       <Link>Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
