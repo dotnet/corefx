@@ -6,10 +6,6 @@ namespace System.Net
 {
     internal static partial class NameResolutionPal
     {
-
-        private static bool GetAddrInfoExSupportsOverlapped()
-        {
-            return false;
-        }
+        private static bool GetAddrInfoExSupportsOverlapped() => false;
     }
 }

@@ -8,7 +8,6 @@ namespace System.Net
 {
     internal static partial class NameResolutionPal
     {
-
         private static bool GetAddrInfoExSupportsOverlapped()
         {
             using (SafeLibraryHandle libHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.Ws2_32, IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_SEARCH_SYSTEM32))
@@ -17,7 +16,7 @@ namespace System.Net
                     return false;
 
                 // We can't just check that 'GetAddrInfoEx' exists, because it existed before supporting overlapped.
-                // The existance of 'GetAddrInfoExCancel' indicates that overlapped is supported.
+                // The existence of 'GetAddrInfoExCancel' indicates that overlapped is supported.
                 return Interop.Kernel32.GetProcAddress(libHandle, Interop.Winsock.GetAddrInfoExCancelFunctionName) != IntPtr.Zero;
             }
         }

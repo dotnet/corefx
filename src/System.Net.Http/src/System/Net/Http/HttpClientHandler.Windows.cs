@@ -480,13 +480,5 @@ namespace System.Net.Http
                     _socketsHttpHandler.SendAsync(request, cancellationToken);
             }
         }
-
-        private void ThrowForModifiedManagedSslOptionsIfStarted()
-        {
-            // Hack to trigger an InvalidOperationException if a property that's stored on
-            // SslOptions is changed, since SslOptions itself does not do any such checks.
-            _socketsHttpHandler.SslOptions = _socketsHttpHandler.SslOptions;
-        }
-        
     }
 }

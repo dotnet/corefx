@@ -359,6 +359,7 @@
   <!-- WinHttpHandler implementation -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'uap'">
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.Win32.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />
   </ItemGroup>
   <!-- Compile the WinHttpHandler implementation into the System.Net.Http.dll binary.  This is a
@@ -381,6 +382,7 @@
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.Win32.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.Unix.cs" />
     <Compile Include="System\Net\Http\CurlHandler\CurlHandler.cs" />
     <Compile Include="System\Net\Http\CurlHandler\CurlHandler.EasyRequest.cs" />

@@ -375,13 +375,6 @@ namespace System.Net.Http
             }
         }
 
-        private void ThrowForModifiedManagedSslOptionsIfStarted()
-        {
-            // Hack to trigger an InvalidOperationException if a property that's stored on
-            // SslOptions is changed, since SslOptions itself does not do any such checks.
-            _socketsHttpHandler.SslOptions = _socketsHttpHandler.SslOptions;
-        }
-        
         public IDictionary<string, object> Properties => _curlHandler != null ?
             _curlHandler.Properties :
             _socketsHttpHandler.Properties;
