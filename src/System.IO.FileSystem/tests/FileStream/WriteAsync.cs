@@ -389,30 +389,28 @@ namespace System.IO.Tests
             do
             {
 
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
                 int totalBytesWritten = 0;
 
                 using (var stream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write))
                 {                    
                     do
                     {
-                        try
+                        // 20%: random write size
+                        int bytesToWrite = (rand.NextDouble() < 0.2 ? rand.Next(16, MaximumWriteSize) : NormalWriteSize);
+
+                        if (rand.NextDouble() < 0.1)
                         {
-                            // 20%: random write size
-                            int bytesToWrite = (rand.NextDouble() < 0.2 ? rand.Next(16, MaximumWriteSize) : NormalWriteSize);
-
-                            if (rand.NextDouble() < 0.1)
-                            {
-                                // 10%: Sync write
-                                stream.Write(dataToWrite, 0, bytesToWrite);
-                            }
-                            else
-                            {
-                                // 90%: Async write
-                                await WriteAsync(stream, dataToWrite, 0, bytesToWrite);
-                            }
-
-                            totalBytesWritten += bytesToWrite;
+                            // 10%: Sync write
+                            stream.Write(dataToWrite, 0, bytesToWrite);
                         }
+                        else
+                        {
+                            // 90%: Async write
+                            await WriteAsync(stream, dataToWrite, 0, bytesToWrite, tokenSource.Token);
+                        }
+
+                        totalBytesWritten += bytesToWrite;
                     // Cap written bytes at 10 million to avoid writing too much to disk
                     } while (totalBytesWritten < 10_000_000);
                 }
