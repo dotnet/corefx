@@ -70,7 +70,7 @@ namespace System.Diagnostics.Tests
             if (!s_allowedProgramsToRun.Any(program => IsProgramInstalled(program)))
             {
                 Console.WriteLine($"None of the following programs were installed on this machine: {string.Join(",", s_allowedProgramsToRun)}.");
-                Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory }));
+                Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = Environment.CurrentDirectory })) { } });
             }
         }
 
@@ -271,7 +271,7 @@ namespace System.Diagnostics.Tests
 
             Assert.Equal(0, chmod(path, mode));
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(path)) { } });
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
@@ -285,7 +285,7 @@ namespace System.Diagnostics.Tests
 
             Assert.Equal(0, chmod(path, mode)); // execute permissions
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(path)) { } });
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 

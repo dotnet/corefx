@@ -346,7 +346,7 @@ namespace System.Diagnostics.Tests
         public void TestWorkingDirectoryProperty()
         {
             CreateDefaultProcess();
-            
+
             // check defaults
             Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
 
@@ -498,7 +498,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("NewValue", kvpaOrdered[2].Value);
 
             psi.EnvironmentVariables.Remove("NewKey3");
-            Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
+            Assert.False(psi.Environment.Contains(new KeyValuePair<string, string>("NewKey3", "NewValue3")));
         }
 
         [Fact]
@@ -603,7 +603,7 @@ namespace System.Diagnostics.Tests
                     // modify the registry.
                     return;
                 }
-                
+
                 tempKey.Key.SetValue("", 123);
 
                 var info = new ProcessStartInfo { FileName = FileName };
@@ -626,7 +626,7 @@ namespace System.Diagnostics.Tests
                     // modify the registry.
                     return;
                 }
-                
+
                 tempKey.Key.SetValue("", "nosuchshell");
 
                 var info = new ProcessStartInfo { FileName = FileName };
@@ -653,7 +653,7 @@ namespace System.Diagnostics.Tests
                 }
 
                 extensionKey.Key.SetValue("", SubKeyValue);
-                
+
                 shellKey.Key.CreateSubKey("verb1");
                 shellKey.Key.CreateSubKey("NEW");
                 shellKey.Key.CreateSubKey("new");
@@ -746,7 +746,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<KeyNotFoundException>(() =>
             {
                 string stringout = environmentVariables["NewKey99"];
-            });            
+            });
 
             //Exception not thrown with invalid key
             Assert.Throws<ArgumentNullException>(() =>
@@ -943,8 +943,8 @@ namespace System.Diagnostics.Tests
                 UseShellExecute = true,
                 FileName = @"http://www.microsoft.com"
             };
-
-            Process.Start(info); // Returns null after navigating browser
+            // Returns null after navigating browser
+            using (var p = Process.Start(info)) { }
         }
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
@@ -1088,7 +1088,7 @@ namespace System.Diagnostics.Tests
                 FileName = tempFile
             };
 
-            Assert.Throws<PlatformNotSupportedException>(() => Process.Start(info));
+            Assert.Throws<PlatformNotSupportedException>(() => { using (var p = Process.Start(info)) { } });
         }
 
         public static TheoryData<bool> UseShellExecute
@@ -1119,7 +1119,8 @@ namespace System.Diagnostics.Tests
                 Verb = "Zlorp"
             };
 
-            Assert.Equal(ERROR_FILE_NOT_FOUND, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
+            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(info)) { } });
+            Assert.Equal(ERROR_FILE_NOT_FOUND, e.NativeErrorCode);
         }
 
         [MemberData(nameof(UseShellExecute))]
@@ -1141,7 +1142,8 @@ namespace System.Diagnostics.Tests
             if (PlatformDetection.IsWindowsNanoServer)
                 expected = ERROR_SUCCESS;
 
-            Assert.Equal(expected, Assert.Throws<Win32Exception>(() => Process.Start(info)).NativeErrorCode);
+            Win32Exception e = Assert.Throws<Win32Exception>(() => { using (var p = Process.Start(info)) { } });
+            Assert.Equal(expected, e.NativeErrorCode);
         }
     }
 }
