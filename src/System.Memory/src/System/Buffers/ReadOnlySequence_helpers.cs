@@ -323,6 +323,7 @@ namespace System.Buffers
                 return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
             }
 
+            Debug.Assert(startObject == endObject);
             // Single segment length
             return endIndex - startIndex;
         }
@@ -353,6 +354,7 @@ namespace System.Buffers
             }
             else if (startIndex <= endIndex)
             {
+                Debug.Assert(startObject == endObject);
                 // Single segment in bounds
                 return;
             }
