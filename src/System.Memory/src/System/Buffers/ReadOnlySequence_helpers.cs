@@ -83,7 +83,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, int count, bool checkEndReachable = true)
+        internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, int count)
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
@@ -94,14 +94,7 @@ namespace System.Buffers
                 object endSegment = end.GetObject();
                 if (notInRange || startSegment != endSegment)
                 {
-                    SequencePosition result = SeekMultiSegment(startSegment, startIndex, endSegment, endIndex, count);
-
-                    if (checkEndReachable)
-                    {
-                        CheckEndReachable(result.GetObject(), endSegment);
-                    }
-
-                    return result;
+                    return SeekMultiSegment(startSegment, startIndex, endSegment, endIndex, count);
                 }
             }
             else if (notInRange)
@@ -111,7 +104,7 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, long count, bool checkEndReachable = true)
+        internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, long count)
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
@@ -122,14 +115,7 @@ namespace System.Buffers
                 object endSegment = end.GetObject();
                 if (notInRange || startSegment != endSegment)
                 {
-                    SequencePosition result = SeekMultiSegment(startSegment, startIndex, endSegment, endIndex, count);
-
-                    if (checkEndReachable)
-                    {
-                        CheckEndReachable(result.GetObject(), endSegment);
-                    }
-
-                    return result;
+                    return SeekMultiSegment(startSegment, startIndex, endSegment, endIndex, count);
                 }
             }
             else if (notInRange)
@@ -188,7 +174,6 @@ namespace System.Buffers
             return new SequencePosition(current, (int)count);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void CheckEndReachable(object startSegment, object endSegment)
         {
             var current = (ReadOnlySequenceSegment<T>)startSegment;

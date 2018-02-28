@@ -189,8 +189,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(long start, long length)
         {
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start, false);
-            SequencePosition end = Seek(begin, _sequenceEnd, length, false);
+            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
+            SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -204,6 +204,12 @@ namespace System.Buffers
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
+            object beginObject = begin.GetObject();
+            object endObject = end.GetObject();
+            if (beginObject != endObject)
+            {
+                CheckEndReachable(beginObject, endObject);
+            }
             return SliceImpl(begin, end);
         }
 
@@ -216,7 +222,7 @@ namespace System.Buffers
         {
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = Seek(start, _sequenceEnd, length, false);
+            SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 
@@ -227,8 +233,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(int start, int length)
         {
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start, false);
-            SequencePosition end = Seek(begin, _sequenceEnd, length, false);
+            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
+            SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -242,6 +248,12 @@ namespace System.Buffers
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
+            object beginObject = begin.GetObject();
+            object endObject = end.GetObject();
+            if (beginObject != endObject)
+            {
+                CheckEndReachable(beginObject, endObject);
+            }
             return SliceImpl(begin, end);
         }
 
@@ -254,7 +266,7 @@ namespace System.Buffers
         {
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = Seek(start, _sequenceEnd, length, false);
+            SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 
@@ -293,7 +305,7 @@ namespace System.Buffers
                 return this;
             }
 
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start, false);
+            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             return SliceImpl(begin, _sequenceEnd);
         }
 
@@ -313,7 +325,7 @@ namespace System.Buffers
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);
 
-            return Seek(origin, _sequenceEnd, offset, false);
+            return Seek(origin, _sequenceEnd, offset);
         }
 
         /// <summary>
