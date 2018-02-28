@@ -171,14 +171,12 @@ namespace System.Buffers
         private static SequencePosition SeekMultiSegment(ReadOnlySequenceSegment<T> currentSegment, int startIndex, object endObject, int endPosition, long count)
         {
             Debug.Assert(currentSegment != null);
+            Debug.Assert(currentSegment.Next != null);
 
             if (count == 0)
             {
-                // End of segment. Move to start of next, if one exists
-                if (currentSegment.Next != null)
-                {
-                    currentSegment = currentSegment.Next;
-                }
+                // End of segment. Move to start of next.
+                currentSegment = currentSegment.Next;
             }
             else
             {
