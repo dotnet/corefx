@@ -364,7 +364,87 @@ namespace System.Net.WebSockets
         /// <param name="cancellationToken">The CancellationToken to use to cancel the websocket.</param>
         private Task SendFrameAsync(MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer, CancellationToken cancellationToken)
         {
-            return SendFrameFallbackAsync(opcode, endOfMessage, payloadBuffer, cancellationToken);
+            // TODO: #4900 SendFrameAsync should in theory typically complete synchronously, making it fast and allocation free.
+            // However, due to #4900, it almost always yields, resulting in all of the allocations involved in an async method
+            // yielding, e.g. the boxed state machine, the Action delegate, the MoveNextRunner, and the resulting Task, plus it's
+            // common that the awaited operation completes so fast after the await that we may end up allocating an AwaitTaskContinuation
+            // inside of the TaskAwaiter.  Since SendFrameAsync is such a core code path, until that can be fixed, we put some
+            // optimizations in place to avoid a few of those expenses, at the expense of more complicated code; for the common case,
+            // this code has fewer than half the number and size of allocations.  If/when that issue is fixed, this method should be deleted
+            // and replaced by SendFrameFallbackAsync, which is the same logic but in a much more easily understand flow.
+
+            // If a cancelable cancellation token was provided, that would require registering with it, which means more state we have to
+            // pass around (the CancellationTokenRegistration), so if it is cancelable, just immediately go to the fallback path.
+            // Similarly, it should be rare that there are multiple outstanding calls to SendFrameAsync, but if there are, again
+            // fall back to the fallback path.
+            return cancellationToken.CanBeCanceled || !_sendFrameAsyncLock.Wait(0) ?
+                SendFrameFallbackAsync(opcode, endOfMessage, payloadBuffer, cancellationToken) :
+                SendFrameLockAcquiredNonCancelableAsync(opcode, endOfMessage, payloadBuffer);
+        }
+
+        /// <summary>Sends a websocket frame to the network. The caller must hold the sending lock.</summary>
+        /// <param name="opcode">The opcode for the message.</param>
+        /// <param name="endOfMessage">The value of the FIN bit for the message.</param>
+        /// <param name="payloadBuffer">The buffer containing the payload data fro the message.</param>
+        private Task SendFrameLockAcquiredNonCancelableAsync(MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer)
+        {
+            Debug.Assert(_sendFrameAsyncLock.CurrentCount == 0, "Caller should hold the _sendFrameAsyncLock");
+
+            // If we get here, the cancellation token is not cancelable so we don't have to worry about it,
+            // and we own the semaphore, so we don't need to asynchronously wait for it.
+            Task writeTask = null;
+            bool releaseSemaphoreAndSendBuffer = true;
+            try
+            {
+                // Write the payload synchronously to the buffer, then write that buffer out to the network.
+                int sendBytes = WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer.Span);
+                writeTask = _stream.WriteAsync(_sendBuffer, 0, sendBytes, CancellationToken.None);
+
+                // If the operation happens to complete synchronously (or, more specifically, by
+                // the time we get from the previous line to here), release the semaphore, return
+                // the task, and we're done.
+                if (writeTask.IsCompleted)
+                {
+                    return writeTask;
+                }
+
+                // Up until this point, if an exception occurred (such as when accessing _stream or when
+                // calling GetResult), we want to release the semaphore and the send buffer. After this point,
+                // both need to be held until writeTask completes.
+                releaseSemaphoreAndSendBuffer = false;
+            }
+            catch (Exception exc)
+            {
+                return Task.FromException(
+                    exc is OperationCanceledException ? exc :
+                    _state == WebSocketState.Aborted ? CreateOperationCanceledException(exc) :
+                    new WebSocketException(WebSocketError.ConnectionClosedPrematurely, exc));
+            }
+            finally
+            {
+                if (releaseSemaphoreAndSendBuffer)
+                {
+                    _sendFrameAsyncLock.Release();
+                    ReleaseSendBuffer();
+                }
+            }
+
+            // The write was not yet completed.  Create and return a continuation that will
+            // release the semaphore and translate any exception that occurred.
+            return writeTask.ContinueWith((t, s) =>
+            {
+                var thisRef = (ManagedWebSocket)s;
+                thisRef._sendFrameAsyncLock.Release();
+                thisRef.ReleaseSendBuffer();
+
+                try { t.GetAwaiter().GetResult(); }
+                catch (Exception exc) when (!(exc is OperationCanceledException))
+                {
+                    throw thisRef._state == WebSocketState.Aborted ?
+                        CreateOperationCanceledException(exc) :
+                        new WebSocketException(WebSocketError.ConnectionClosedPrematurely, exc);
+                }
+            }, this, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
 
         private async Task SendFrameFallbackAsync(MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer, CancellationToken cancellationToken)
@@ -438,7 +518,7 @@ namespace System.Net.WebSockets
             {
                 // This exists purely to keep the connection alive; don't wait for the result, and ignore any failures.
                 // The call will handle releasing the lock.
-                Task t = SendFrameFallbackAsync(MessageOpcode.Ping, true, Memory<byte>.Empty, CancellationToken.None);
+                Task t = SendFrameLockAcquiredNonCancelableAsync(MessageOpcode.Ping, true, Memory<byte>.Empty);
 
                 // "Observe" any exception, ignoring it to prevent the unobserved exception event from being raised.
                 if (t.Status != TaskStatus.RanToCompletion)
