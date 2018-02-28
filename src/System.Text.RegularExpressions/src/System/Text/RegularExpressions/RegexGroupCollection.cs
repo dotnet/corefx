@@ -47,9 +47,9 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Provides an enumerator in the same order as Item[].
         /// </summary>
-        public IEnumerator GetEnumerator() => new Enumerator(this);
+        public IEnumerator<Group> GetEnumerator() => new Enumerator(this);
 
-        IEnumerator<Group> IEnumerable<Group>.GetEnumerator() => new Enumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private Group GetGroup(int groupnum)
         {
