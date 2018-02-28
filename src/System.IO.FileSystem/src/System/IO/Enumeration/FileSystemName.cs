@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace System.IO.Enumeration
 {
@@ -365,6 +366,32 @@ namespace System.IO.Enumeration
             currentState = priorMatches[matchCount - 1];
 
             return currentState == maxState;
+        }
+
+        /// <summary>
+        /// Return true if the given regular expression matches the given name.
+        /// </summary>
+        /// <remarks>
+        /// Uses single line, invariant, explicit capture mode.
+        /// </remarks>
+        public static bool MatchesRegularExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        {
+            RegexOptions options = RegexOptions.CultureInvariant | RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+            if (ignoreCase)
+                options |= RegexOptions.IgnoreCase;
+
+            // Performance isn't great here as we need to allocate. In the future we'll want to replace with a span-based,
+            // low allocating regex implementation.
+            return Regex.IsMatch(name.ToString(), expression.ToString(), options);
+        }
+
+        internal static bool MatchesRegularExpressionString(string expression, string name, bool ignoreCase = true)
+        {
+            RegexOptions options = RegexOptions.CultureInvariant | RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+            if (ignoreCase)
+                options |= RegexOptions.IgnoreCase;
+
+            return Regex.IsMatch(name, expression, options);
         }
     }
 }

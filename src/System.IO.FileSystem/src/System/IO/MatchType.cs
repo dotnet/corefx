@@ -15,6 +15,14 @@ namespace System.IO
         /// Match using Win32 DOS style matching semantics. '*', '?', '&lt;', '&gt;', and '"'
         /// are all considered wildcards.
         /// </summary>
-        Win32
+        Win32,
+
+        /// <summary>
+        /// Expression is treated as a regular expression.
+        /// </summary>
+        /// <remarks>
+        /// Single line, culture invariant, explicit capture matching is used.
+        /// </remarks>
+        Regex
     }
 }

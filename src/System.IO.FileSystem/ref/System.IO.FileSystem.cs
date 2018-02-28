@@ -226,7 +226,8 @@ namespace System.IO
     public enum MatchType
     {
         Simple,
-        Win32
+        Win32,
+        Regex
     }
     public enum MatchCasing
     {
@@ -301,5 +302,6 @@ namespace System.IO.Enumeration
         public static string TranslateWin32Expression(string expression) { throw null; }
         public static bool MatchesWin32Expression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
         public static bool MatchesSimpleExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchesRegularExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
     }
 }

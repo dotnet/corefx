@@ -321,6 +321,7 @@
     <Reference Include="System.Threading.Overlapped" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading" />
+    <Reference Include="System.Text.RegularExpressions" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Threading" />
