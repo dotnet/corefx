@@ -943,7 +943,6 @@ namespace System.Diagnostics.Tests
                 UseShellExecute = true,
                 FileName = @"http://www.microsoft.com"
             };
-            // Returns null after navigating browser
             using (var p = Process.Start(info)) { }
         }
 
