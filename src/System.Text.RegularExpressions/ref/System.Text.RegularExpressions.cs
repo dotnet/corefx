@@ -28,8 +28,8 @@ namespace System.Text.RegularExpressions
         public object SyncRoot { get { throw null; } }
         public void CopyTo(System.Array array, int arrayIndex) { }
         public void CopyTo(System.Text.RegularExpressions.Capture[] array, int arrayIndex) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
-        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Capture> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Capture>.GetEnumerator() { throw null; }
+        public System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Capture> GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         int System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.IndexOf(System.Text.RegularExpressions.Capture item) { throw null; }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.Insert(int index, System.Text.RegularExpressions.Capture item) { }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Capture>.RemoveAt(int index) { }

@@ -49,9 +49,9 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Provides an enumerator in the same order as Item[].
         /// </summary>
-        public IEnumerator GetEnumerator() => new Enumerator(this);
+        public IEnumerator<Capture> GetEnumerator() => new Enumerator(this);
 
-        IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator() => new Enumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Returns the set of captures for the group
