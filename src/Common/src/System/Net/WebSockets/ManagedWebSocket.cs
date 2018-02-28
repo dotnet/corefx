@@ -436,23 +436,17 @@ namespace System.Net.WebSockets
             bool acquiredLock = _sendFrameAsyncLock.Wait(0);
             if (acquiredLock)
             {
-                try
-                {
-                    // This exists purely to keep the connection alive; don't wait for the result, and ignore any failures.
-                    Task t = SendFrameFallbackAsync(MessageOpcode.Ping, true, Memory<byte>.Empty, CancellationToken.None);
+                // This exists purely to keep the connection alive; don't wait for the result, and ignore any failures.
+                // The call will handle releasing the lock.
+                Task t = SendFrameFallbackAsync(MessageOpcode.Ping, true, Memory<byte>.Empty, CancellationToken.None);
 
-                    // "Observe" any exception, ignoring it to prevent the unobserved exception event from being raised.
-                    if (t.Status != TaskStatus.RanToCompletion)
-                    {
-                        t.ContinueWith(p => { Exception ignored = p.Exception; },
-                            CancellationToken.None,
-                            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
-                            TaskScheduler.Default);
-                    }
-                }
-                finally
+                // "Observe" any exception, ignoring it to prevent the unobserved exception event from being raised.
+                if (t.Status != TaskStatus.RanToCompletion)
                 {
-                    _sendFrameAsyncLock.Release();
+                    t.ContinueWith(p => { Exception ignored = p.Exception; },
+                        CancellationToken.None,
+                        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
                 }
             }
             else
