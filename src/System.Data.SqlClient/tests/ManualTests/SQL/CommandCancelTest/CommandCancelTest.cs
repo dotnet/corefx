@@ -87,7 +87,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-
         [ActiveIssue(27574, TestPlatforms.AnyUnix)]
         [CheckConnStrSetupFact]
         public static void MultiThreadedCancel_NonAsync()
