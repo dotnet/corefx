@@ -15,8 +15,8 @@ namespace System.IO.Tests
             { AltSep, "", AltSep },
             { "", Sep, Sep },
             { "", AltSep, AltSep },
-            { Sep, Sep, new string(Path.DirectorySeparatorChar, 2) },
-            { AltSep, AltSep, new string(Path.AltDirectorySeparatorChar, 2) },
+            { Sep, Sep, $"{Sep}{Sep}" },
+            { AltSep, AltSep, $"{AltSep}{AltSep}" },
             { "a", "", "a" },
             { "", "a", "a" },
             { "a", "a", $"a{Sep}a" },
@@ -38,27 +38,31 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
-        public unsafe void TryJoinTwoPaths(string path1, string path2, string expected)
+        public void TryJoinTwoPaths(string path1, string path2, string expected)
         {
             char[] output = new char[expected.Length];
 
-            Assert.True(Path.TryJoin(path1, path2, new Span<char>(output), out int written));
+            Assert.True(Path.TryJoin(path1, path2, output, out int written));
             Assert.Equal(expected.Length, written);
+            Assert.Equal(expected, new string(output));
+
             if (expected.Length > 0)
             {
                 Assert.False(Path.TryJoin(path1, path2, Span<char>.Empty, out written));
                 Assert.Equal(0, written);
-                Assert.False(Path.TryJoin(path1, path2, new Span<char>(output, 0, output.Length - 1), out written));
+
+                output = new char[expected.Length - 1];
+                Assert.False(Path.TryJoin(path1, path2, output, out written));
                 Assert.Equal(0, written);
+                Assert.Equal(output, new char[output.Length]);
             }
-            Assert.Equal(expected, new string(output));
         }
 
         public static TheoryData<string, string, string, string> TestData_JoinThreePaths = new TheoryData<string, string, string, string>
         {
             { "", "", "", "" },
-            { Sep, Sep, Sep, new string(Path.DirectorySeparatorChar, 3) },
-            { AltSep, AltSep, AltSep, new string(Path.AltDirectorySeparatorChar, 3) },
+            { Sep, Sep, Sep, $"{Sep}{Sep}{Sep}" },
+            { AltSep, AltSep, AltSep, $"{AltSep}{AltSep}{AltSep}" },
             { "a", "", "", "a" },
             { "", "a", "", "a" },
             { "", "", "a", "a" },
@@ -84,20 +88,24 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(TestData_JoinThreePaths))]
-        public unsafe void TryJoinThreePaths(string path1, string path2, string path3, string expected)
+        public void TryJoinThreePaths(string path1, string path2, string path3, string expected)
         {
             char[] output = new char[expected.Length];
 
-            Assert.True(Path.TryJoin(path1, path2, path3, new Span<char>(output), out int written));
+            Assert.True(Path.TryJoin(path1, path2, path3, output, out int written));
             Assert.Equal(expected.Length, written);
+            Assert.Equal(expected, new string(output));
+
             if (expected.Length > 0)
             {
                 Assert.False(Path.TryJoin(path1, path2, path3, Span<char>.Empty, out written));
                 Assert.Equal(0, written);
-                Assert.False(Path.TryJoin(path1, path2, path3, new Span<char>(output, 0, output.Length - 1), out written));
+
+                output = new char[expected.Length - 1];
+                Assert.False(Path.TryJoin(path1, path2, path3, output, out written));
                 Assert.Equal(0, written);
+                Assert.Equal(output, new char[output.Length]);
             }
-            Assert.Equal(expected, new string(output));
         }
     }
 }
