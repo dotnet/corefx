@@ -1167,6 +1167,64 @@ public class DefaultValuesSetToNaN
     }
 }
 
+public class DefaultValuesSetToPositiveInfinity
+{
+    [DefaultValue(double.PositiveInfinity)]
+    public double DoubleProp { get; set; }
+
+    [DefaultValue(float.PositiveInfinity)]
+    public float FloatProp { get; set; }
+
+    [DefaultValue(Double.PositiveInfinity)]
+    public Double DoubleField;
+
+    [DefaultValue(Single.PositiveInfinity)]
+    public Single SingleField;
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as DefaultValuesSetToPositiveInfinity;
+        return other == null ? false :
+            other.DoubleProp == this.DoubleProp && other.FloatProp == this.FloatProp &&
+            other.DoubleField == this.DoubleField && other.SingleField == this.SingleField;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.DoubleProp.GetHashCode() ^ this.FloatProp.GetHashCode() ^
+            this.DoubleField.GetHashCode() ^ this.SingleField.GetHashCode();
+    }
+}
+
+public class DefaultValuesSetToNegativeInfinity
+{
+    [DefaultValue(double.NegativeInfinity)]
+    public double DoubleProp { get; set; }
+
+    [DefaultValue(float.NegativeInfinity)]
+    public float FloatProp { get; set; }
+
+    [DefaultValue(Double.NegativeInfinity)]
+    public Double DoubleField;
+
+    [DefaultValue(Single.NegativeInfinity)]
+    public Single SingleField;
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as DefaultValuesSetToNegativeInfinity;
+        return other == null ? false :
+            other.DoubleProp == this.DoubleProp && other.FloatProp == this.FloatProp &&
+            other.DoubleField == this.DoubleField && other.SingleField == this.SingleField;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.DoubleProp.GetHashCode() ^ this.FloatProp.GetHashCode() ^
+            this.DoubleField.GetHashCode() ^ this.SingleField.GetHashCode();
+    }
+}
+
 [XmlRoot("RootElement")]
 public class TypeWithMismatchBetweenAttributeAndPropertyType
 {

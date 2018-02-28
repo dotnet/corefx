@@ -39,7 +39,6 @@ public static partial class XmlSerializerTests
 #endif
 
     private static bool IsTimeSpanSerializationAvailable => !PlatformDetection.IsFullFramework || (AppContext.TryGetSwitch("Switch.System.Xml.EnableTimeSpanSerialization", out bool result) && result);
-
     [Fact]
     public static void Xml_TypeWithDateTimePropertyAsXmlTime()
     {
@@ -1596,11 +1595,12 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(actual.Collection);
         Assert.True(value.Collection.SequenceEqual(actual.Collection));
     }
-
+    
     [Fact]
     public static void Xml_DefaultValueAttributeSetToNaNTest()
     {
         var value = new DefaultValuesSetToNaN();
+        Console.Write(double.NaN);
         var actual = SerializeAndDeserialize(value,
 @"<?xml version=""1.0""?>
 <DefaultValuesSetToNaN xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
@@ -1609,6 +1609,38 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
   <DoubleProp>0</DoubleProp>
   <FloatProp>0</FloatProp>
 </DefaultValuesSetToNaN>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToPositiveInfinity>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToNegativeInfinity>");
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
     }

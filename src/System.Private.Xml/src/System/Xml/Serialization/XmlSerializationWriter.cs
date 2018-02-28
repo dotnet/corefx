@@ -4222,7 +4222,15 @@ namespace System.Xml.Serialization
                 {
                     if (double.IsNaN((Double)value))
                     {
-                        Writer.Write("double.NaN");
+                        Writer.Write("System.Double.NaN");
+                    }
+                    else if(double.IsPositiveInfinity((Double)value))
+                    {
+                        Writer.Write("System.Double.PositiveInfinity");
+                    }
+                    else if(double.IsNegativeInfinity((Double)value))
+                    {
+                        Writer.Write("System.Double.NegativeInfinity");
                     }
                     else
                     {
@@ -4245,6 +4253,14 @@ namespace System.Xml.Serialization
                     if (Single.IsNaN((Single)value))
                     {
                         Writer.Write("System.Single.NaN");
+                    }
+                    else if(Single.IsPositiveInfinity((Single)value))
+                    {
+                        Writer.Write("System.Single.PositiveInfinity");
+                    }
+                    else if (Single.IsNegativeInfinity((Single)value))
+                    {
+                        Writer.Write("System.Single.NegativeInfinity");
                     }
                     else
                     {
