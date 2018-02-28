@@ -67,8 +67,8 @@ namespace System.Text.RegularExpressions
         public object SyncRoot { get { throw null; } }
         public void CopyTo(System.Array array, int arrayIndex) { }
         public void CopyTo(System.Text.RegularExpressions.Group[] array, int arrayIndex) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
-        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Group> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Group>.GetEnumerator() { throw null; }
+        public System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Group> GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         int System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.IndexOf(System.Text.RegularExpressions.Group item) { throw null; }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.Insert(int index, System.Text.RegularExpressions.Group item) { }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Group>.RemoveAt(int index) { }
@@ -106,8 +106,8 @@ namespace System.Text.RegularExpressions
         public object SyncRoot { get { throw null; } }
         public void CopyTo(System.Array array, int arrayIndex) { }
         public void CopyTo(System.Text.RegularExpressions.Match[] array, int arrayIndex) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
-        System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Match> System.Collections.Generic.IEnumerable<System.Text.RegularExpressions.Match>.GetEnumerator() { throw null; }
+        public System.Collections.Generic.IEnumerator<System.Text.RegularExpressions.Match> GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         int System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.IndexOf(System.Text.RegularExpressions.Match item) { throw null; }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.Insert(int index, System.Text.RegularExpressions.Match item) { }
         void System.Collections.Generic.IList<System.Text.RegularExpressions.Match>.RemoveAt(int index) { }
