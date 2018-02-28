@@ -30,8 +30,8 @@ namespace System.Buffers
             if (type == SequenceType.MultiSegment)
             {
                 Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
-
                 ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+
                 if (startSegment != endObject)
                 {
                     next = GetBufferCrossSegment(startIndex, end, ref startSegment, ref length);
@@ -229,29 +229,23 @@ namespace System.Buffers
 
             if (type == SequenceType.MultiSegment)
             {
-                object startSegment = start.GetObject();
-                object endSegment = end.GetObject();
-                if (startSegment != endSegment)
+                object startObject = start.GetObject();
+                object endObject = end.GetObject();
+                if (startObject != endObject)
                 {
-                    return GetLengthMultiSegment(startSegment, startIndex, endSegment, endIndex);
+                    Debug.Assert(startObject != null);
+                    Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
+                    Debug.Assert(endObject != null);
+                    Debug.Assert(endObject is ReadOnlySequenceSegment<T>);
+
+                    var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                    var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+                    // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
+                    return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
                 }
             }
 
             return endIndex - startIndex;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static long GetLengthMultiSegment(object startSegment, int startIndex, object endSegment, int endIndex)
-        {
-            Debug.Assert(startSegment != null);
-            Debug.Assert(startSegment is ReadOnlySequenceSegment<T>);
-            Debug.Assert(endSegment != null);
-            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
-
-            var start = Unsafe.As<ReadOnlySequenceSegment<T>>(startSegment);
-            var end = Unsafe.As<ReadOnlySequenceSegment<T>>(endSegment);
-            // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
-            return end.RunningIndex - start.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -261,37 +255,31 @@ namespace System.Buffers
 
             if (type == SequenceType.MultiSegment)
             {
-                object startSegment = start.GetObject();
-                object endSegment = end.GetObject();
-
-                if (startSegment != endSegment)
+                object startObject = start.GetObject();
+                object endObject = end.GetObject();
+                if (startObject != endObject)
                 {
-                    BoundsCheckMultiSegment(startSegment, startIndex, endSegment, endIndex);
-                    return;
+                    Debug.Assert(startObject != null);
+                    Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
+                    Debug.Assert(endObject != null);
+                    Debug.Assert(endObject is ReadOnlySequenceSegment<T>);
+
+                    var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                    var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+
+                    // start.RunningIndex + startIndex <= end.RunningIndex + endIndex
+                    if (startSegment.RunningIndex - endIndex <= endSegment.RunningIndex - startIndex) // Rearranged to avoid overflow
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                    }
                 }
             }
 
             if (startIndex <= endIndex)
-            {
-                return;
-            }
-
-            ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void BoundsCheckMultiSegment(object startSegment, int startIndex, object endSegment, int endIndex)
-        {
-            Debug.Assert(startSegment != null);
-            Debug.Assert(startSegment is ReadOnlySequenceSegment<T>);
-            Debug.Assert(endSegment != null);
-            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
-
-            var start = Unsafe.As<ReadOnlySequenceSegment<T>>(startSegment);
-            var end = Unsafe.As<ReadOnlySequenceSegment<T>>(endSegment);
-
-            // start.RunningIndex + startIndex <= end.RunningIndex + endIndex
-            if (start.RunningIndex - endIndex <= end.RunningIndex - startIndex) // Rearranged to avoid overflow
             {
                 return;
             }
