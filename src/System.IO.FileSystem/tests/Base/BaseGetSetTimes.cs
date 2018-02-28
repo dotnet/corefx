@@ -86,12 +86,13 @@ namespace System.IO.Tests
                     // This case should only happen 1/1000 times, unless the OS/Filesystem does
                     // not support millisecond granularity.
 
-                    // If it's 1/1000, or low grandularity, this may help:
+                    // If it's 1/1000, or low granularity, this may help:
                     Thread.Sleep(1234);
 
                     // If it's the OS/Filesystem often returns 0 for the millisecond part, this may
-                    // help prove it:
-                    //Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")}");
+                    // help prove it. This should only be written 1/1000 runs, unless the test is going to
+                    // fail.
+                    Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")}");
 
                     item = GetExistingItem(); // try a new file/directory
                 }
@@ -110,7 +111,6 @@ namespace System.IO.Tests
             Assert.All(TimeFunctions(), (function) =>
             {
                 DateTime time = function.Getter(item);
-
                 Assert.Equal(0, time.Millisecond);
             });
         }
