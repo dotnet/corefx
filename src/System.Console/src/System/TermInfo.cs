@@ -107,7 +107,7 @@ namespace System
             private readonly int _stringSectionNumOffsets;
             /// <summary>The number of bytes in the strings table of the database.</summary>
             private readonly int _stringTableNumBytes;
-            /// <summary>Wether or not to read the number section as 32-bit integers.</summary>
+            /// <summary>Whether or not to read the number section as 32-bit integers.</summary>
             private readonly bool _readAs32Bit;
             /// <summary>The size of the integers on the number section.</summary>
             private readonly int _sizeOfInt;
@@ -129,7 +129,7 @@ namespace System
                 _readAs32Bit =
                     magic == MagicLegacyNumber ? false :
                     magic == Magic32BitNumber ? true :
-                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, Convert.ToString(magic, 8))); // magic number was not recognized. Printing the magic number in octal.
+                    throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, String.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
                 _sizeOfInt = (_readAs32Bit) ? 4 : 2;
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
