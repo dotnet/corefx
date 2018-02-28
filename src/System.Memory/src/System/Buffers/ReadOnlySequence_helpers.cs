@@ -4,7 +4,10 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+
+#if !netstandard
 using Internal.Runtime.CompilerServices;
+#endif
 
 namespace System.Buffers
 {
@@ -55,7 +58,8 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is string);
 
-                data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory(startIndex, length);
+                var text = Unsafe.As<string>(startObject);
+                data = (ReadOnlyMemory<T>)(object)text.AsMemory(startIndex, length);
             }
             else
             {
@@ -188,7 +192,7 @@ namespace System.Buffers
 
                     if (memoryLength > count || (memoryLength == count && isCurrentAtEnd))
                     {
-                        // Fully contained in this segment; or at end of segment but isn't a next one to move to
+                        // Fully contained in this segment; or at end of segment but there isn't a next one to move to
                         break;
                     }
 
@@ -377,7 +381,8 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is string);
 
-                memory = (ReadOnlyMemory<T>)(object)Unsafe.As<string>(startObject).AsMemory(startIndex, length);
+                var text = Unsafe.As<string>(startObject);
+                memory = (ReadOnlyMemory<T>)(object)text.AsMemory(startIndex, length);
             }
             else // ReadOnlySequenceSegment
             {
