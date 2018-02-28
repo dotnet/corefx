@@ -389,7 +389,6 @@ namespace System.IO.Tests
             do
             {
 
-                CancellationTokenSource tokenSource = new CancellationTokenSource();
                 int totalBytesWritten = 0;
 
                 using (var stream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write))
@@ -407,7 +406,7 @@ namespace System.IO.Tests
                         else
                         {
                             // 90%: Async write
-                            await WriteAsync(stream, dataToWrite, 0, bytesToWrite, tokenSource.Token);
+                            await WriteAsync(stream, dataToWrite, 0, bytesToWrite);
                         }
 
                         totalBytesWritten += bytesToWrite;
