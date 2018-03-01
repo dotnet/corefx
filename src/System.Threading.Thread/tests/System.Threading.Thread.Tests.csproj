@@ -13,6 +13,9 @@
     <Compile Include="ThreadExceptionEventArgsTests.cs" />
     <Compile Include="ThreadTests.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="ThreadTests.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
       <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
