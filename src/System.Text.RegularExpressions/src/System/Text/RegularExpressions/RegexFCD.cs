@@ -287,8 +287,7 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// Return rented buffers. Clear RegexFC buffer manually as only
-        /// the reference to the RegexCharClass needs to be cleared.
+        /// Return rented buffers.
         /// </summary>
         public void Dispose()
         {
