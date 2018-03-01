@@ -149,15 +149,26 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CompleteReaderThrowsIfReadInProgress()
+        public async Task CompleteReaderAfterFlushWithoutAdvancing()
+        {
+            await _pipe.Writer.FlushAsync();
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = result.Buffer;
+
+            _pipe.Reader.Complete();
+        }
+
+        [Fact]
+        public async Task AdvanceAfterCompleteThrows()
         {
             await _pipe.Writer.WriteAsync(new byte[1]);
             ReadResult result = await _pipe.Reader.ReadAsync();
             ReadOnlySequence<byte> buffer = result.Buffer;
 
-            Assert.Throws<InvalidOperationException>(() => _pipe.Reader.Complete());
+            _pipe.Reader.Complete();
 
-            _pipe.Reader.AdvanceTo(buffer.Start, buffer.Start);
+            var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(buffer.End));
+            Assert.Equal("Reading is not allowed after reader was completed.", exception.Message);
         }
 
         [Fact]
@@ -438,13 +449,15 @@ namespace System.IO.Pipelines.Tests
             cts.Token.Register(() => { _pipe.Writer.Complete(new OperationCanceledException(cts.Token)); });
 
             Task ignore = Task.Run(
-                async () => {
+                async () =>
+                {
                     await Task.Delay(1000);
                     cts.Cancel();
                 });
 
             await Assert.ThrowsAsync<OperationCanceledException>(
-                async () => {
+                async () =>
+                {
                     ReadResult result = await _pipe.Reader.ReadAsync();
                     ReadOnlySequence<byte> buffer = result.Buffer;
                 });
