@@ -74,6 +74,20 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return false;
         }
 
+        public static bool IsIntegratedSecuritySetup()
+        {
+            string integratedSecuritySetupFlag = Environment.GetEnvironmentVariable("TEST_INTEGRATEDSECURITY_SETUP");
+            if (!string.IsNullOrWhiteSpace(integratedSecuritySetupFlag))
+            {
+                int result;
+                if (int.TryParse(integratedSecuritySetupFlag.Trim(), out result))
+                {
+                    return result == 1;
+                }
+            }
+            return false;
+        }
+
         private static bool CheckException<TException>(Exception ex, string exceptionMessage, bool innerExceptionMustBeNull) where TException : Exception
         {
             return ((ex != null) && (ex is TException) &&
