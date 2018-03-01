@@ -107,7 +107,7 @@ namespace System.ServiceProcess.Tests
             Task writeCompleted;
             const int writeTimeout = 60000;
             lock (_writeLock)
-            {              
+            {
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
                     writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
