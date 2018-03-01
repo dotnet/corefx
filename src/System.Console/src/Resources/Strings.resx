@@ -196,4 +196,7 @@
   <data name="Argument_InvalidCharSequenceNoIndex" xml:space="preserve">
     <value>String contains invalid Unicode code points.</value>
   </data>
+  <data name="IO_TermInfoInvalidMagicNumber" xml:space="preserve">
+    <value>The terminfo database has an invalid magic number: '{0}'.</value>
+  </data>
 </root>
