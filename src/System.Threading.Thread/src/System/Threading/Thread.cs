@@ -272,6 +272,7 @@ namespace System.Threading
             throw new InvalidOperationException(SR.Thread_GetSetCompressedStack_NotSupported);
         }
 
+        public static int GetCurrentProcessorId() => RuntimeThread.GetCurrentProcessorId();
         public static AppDomain GetDomain() => AppDomain.CurrentDomain;
         public static int GetDomainID() => GetDomain().Id;
         public override int GetHashCode() => ManagedThreadId;
@@ -284,7 +285,6 @@ namespace System.Threading
         public static void Sleep(TimeSpan timeout) => Sleep(ToTimeoutMilliseconds(timeout));
         public static void SpinWait(int iterations) => RuntimeThread.SpinWait(iterations);
         public static bool Yield() => RuntimeThread.Yield();
-        public static int GetCurrentProcessorId() => RuntimeThread.GetCurrentProcessorId();
         public void Start() => _runtimeThread.Start();
         public void Start(object parameter) => _runtimeThread.Start(parameter);
 
