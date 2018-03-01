@@ -84,7 +84,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // We store our framework blobs in index 1
-            int platformBlobIndex = GetPlatformIndex(blobs);
+            int platformBlobIndex = TypeSerializableValue.GetPlatformIndex(blobs);
             for (int i = 0; i < blobs.Length; i++)
             {
                 // Check if the current blob is from the current running platform.
@@ -504,7 +504,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Check if runtime generated blob is the same as the stored one
-            int frameworkBlobNumber = GetPlatformIndex(blobs);
+            int frameworkBlobNumber = TypeSerializableValue.GetPlatformIndex(blobs);
             if (frameworkBlobNumber < blobs.Length)
             {
                 string runtimeBlob = BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full);
@@ -619,21 +619,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             File.WriteAllLines(testDataFilePath, updatedTestDataLines);
 
             return (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs);
-        }
-
-        private static int GetPlatformIndex(TypeSerializableValue[] blobs)
-        {
-            string platform = RuntimeInformation.FrameworkDescription;
-
-            for (int i = 0; i < blobs.Length; i++)
-            {
-                if (platform.Contains(blobs[i].Platform))
-                {
-                    return i;
-                }
-            }
-            //return PlatformDetection.IsFullFramework ? 1 : 0;
-            return -1;
         }
 
         private class DelegateBinder : SerializationBinder
