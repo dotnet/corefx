@@ -50,6 +50,11 @@
     <Compile Include="WindowAndCursorProps.cs" />
   </ItemGroup>
   <ItemGroup>
+    <SupplementalTestData Include="$(MSBuildThisFileDirectory)TestData\**\*.*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </SupplementalTestData>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\pkg\System.Console.pkgproj">
       <Project>{F9DF2357-81B4-4317-908E-512DA9395583}</Project>
       <Name>System.Console</Name>
@@ -60,6 +65,9 @@
       <Name>RemoteExecutorConsoleApp</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ncursesFormats\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
