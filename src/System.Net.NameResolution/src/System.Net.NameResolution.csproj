@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\NameResolutionPal.Windows.cs" />
-    <Compile Include="System\Net\NameResolutionPal.Windows.Win32.cs" Condition="'$(TargetGroup)' != 'uap'"/>
+    <Compile Include="System\Net\NameResolutionPal.Win32.cs" Condition="'$(TargetGroup)' != 'uap'"/>
     <Compile Include="System\Net\NameResolutionPal.Windows.Uap.cs" Condition="'$(TargetGroup)' == 'uap'"/>
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Windows.cs">
       <Link>Common\System\Net\ContextAwareResult.Windows.cs</Link>
