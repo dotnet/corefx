@@ -22,6 +22,7 @@ namespace System.Buffers
             public ArrayMemoryPoolBuffer(int size)
             {
                 _array = ArrayPool<T>.Shared.Rent(size);
+                _refCount = 1;
             }
 
             public sealed override int Length => _array.Length;
@@ -80,28 +81,30 @@ namespace System.Buffers
 
             public sealed override void Retain()
             {
-                if (IsDisposed)
-                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                Interlocked.Increment(ref _refCount);
+                while (true)
+                {
+                    int currentCount = Volatile.Read(ref _refCount);
+                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount) break;
+                }
             }
 
             public sealed override bool Release()
             {
-                if (IsDisposed)
-                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                int newRefCount = Interlocked.Decrement(ref _refCount);
-                if (newRefCount == 0)
+                while (true)
                 {
-                    Dispose();
+                    int currentCount = Volatile.Read(ref _refCount);
+                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    if (Interlocked.CompareExchange(ref _refCount, currentCount - 1, currentCount) == currentCount)
+                    {
+                        if (currentCount == 1)
+                        {
+                            Dispose();
+                            return false;
+                        }
+                        return true;
+                    }
                 }
-
-                // Other thread already disposed
-                if (newRefCount < 0)
-                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                return newRefCount != 0;
             }
         }
     }
