@@ -132,9 +132,9 @@ namespace System.Buffers
             }
             else if (typeof(T) == typeof(char))
             {
-                // At this point, ReadOnlyMemory is backed by a string object, so TryGetString shouldn't fail
-                bool result = MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length);
-                Debug.Assert(result);
+                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length))
+                    ThrowHelper.ThrowInvalidOperationException();
+
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
                 _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
             }
