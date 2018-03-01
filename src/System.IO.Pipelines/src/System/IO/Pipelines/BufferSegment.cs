@@ -74,7 +74,6 @@ namespace System.IO.Pipelines
         public void ResetMemory()
         {
             _ownedMemory.Release();
-            _ownedMemory.Dispose();
             _ownedMemory = null;
             AvailableMemory = default;
         }
