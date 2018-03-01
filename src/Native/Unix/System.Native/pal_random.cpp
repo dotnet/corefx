@@ -29,7 +29,14 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
     {
         if (rand_des == -1)
         {
-            int fd = open("/dev/urandom", O_RDONLY, O_CLOEXEC);
+            int fd;
+
+            do
+            {
+                fd = open("/dev/urandom", O_RDONLY, O_CLOEXEC);
+            }
+            while ((fd == -1) && (errno == EINTR));
+
             if (fd != -1)
             {
                 if (!__sync_bool_compare_and_swap(&rand_des, -1, fd))
