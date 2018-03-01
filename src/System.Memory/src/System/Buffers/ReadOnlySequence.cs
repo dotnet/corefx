@@ -132,9 +132,7 @@ namespace System.Buffers
             }
             else if (typeof(T) == typeof(char))
             {
-                // TODO: MemoryMarshal.TryGetString -- doesn't exist?
-                // https://github.com/dotnet/corefx/issues/27451
-                MemoryExtensions.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length);
+                MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length);
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
                 _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
             }
