@@ -24,10 +24,16 @@ namespace System.Memory.Tests
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 25); // segment 1 index 75
-            SequencePosition c2 = buffer.GetPosition(buffer.Start, 55); // segment 2 index 5
+            SequencePosition c1 = buffer.GetPosition(25); // segment 1 index 75
+            SequencePosition c2 = buffer.GetPosition(55); // segment 2 index 5
 
             ReadOnlySequence<byte> sliced = buffer.Slice(c1, c2);
+            Assert.Equal(30, sliced.Length);
+
+            c1 = buffer.GetPosition(25, buffer.Start); // segment 1 index 75
+            c2 = buffer.GetPosition(55, buffer.Start); // segment 2 index 5
+
+            sliced = buffer.Slice(c1, c2);
             Assert.Equal(30, sliced.Length);
         }
 
@@ -39,7 +45,12 @@ namespace System.Memory.Tests
 
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 50);
+            SequencePosition c1 = buffer.GetPosition(50);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(50, buffer.Start);
 
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
@@ -54,7 +65,12 @@ namespace System.Memory.Tests
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 100);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 200);
+            SequencePosition c1 = buffer.GetPosition(200);
+
+            Assert.Equal(100, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(200, buffer.Start);
 
             Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
@@ -70,12 +86,20 @@ namespace System.Memory.Tests
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 200);
+            SequencePosition c1 = buffer.GetPosition(200);
 
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment3, c1.GetObject());
 
             ReadOnlySequence<byte> seq = buffer.Slice(0, c1);
+            Assert.Equal(200, seq.Length);
+
+            c1 = buffer.GetPosition(200, buffer.Start);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment3, c1.GetObject());
+
+            seq = buffer.Slice(0, c1);
             Assert.Equal(200, seq.Length);
         }
 
@@ -89,7 +113,12 @@ namespace System.Memory.Tests
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 100);
+            SequencePosition c1 = buffer.GetPosition(100);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment4, c1.GetObject());
+
+            c1 = buffer.GetPosition(100, buffer.Start);
 
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment4, c1.GetObject());
@@ -105,7 +134,12 @@ namespace System.Memory.Tests
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 100);
+            SequencePosition c1 = buffer.GetPosition(100);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(100, buffer.Start);
 
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
@@ -120,22 +154,42 @@ namespace System.Memory.Tests
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 0);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment1, c1.GetObject());
+            {
+                SequencePosition c1 = buffer.GetPosition(0);
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment1, c1.GetObject());
 
-            ReadOnlyMemory<byte> data;
-            Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+                ReadOnlyMemory<byte> data;
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment4, c1.GetObject());
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment4, c1.GetObject());
 
-            Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(null, c1.GetObject());
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(null, c1.GetObject());
 
-            Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+                Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+            }
+            {
+                SequencePosition c1 = buffer.GetPosition(0, buffer.Start);
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment1, c1.GetObject());
+
+                ReadOnlyMemory<byte> data;
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment4, c1.GetObject());
+
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(null, c1.GetObject());
+
+                Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+            }
         }
 
         [Fact]
@@ -147,17 +201,32 @@ namespace System.Memory.Tests
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
-            SequencePosition c1 = buffer.GetPosition(buffer.Start, 0);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment1, c1.GetObject());
+            {
+                SequencePosition c1 = buffer.GetPosition(0);
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment1, c1.GetObject());
 
-            ReadOnlyMemory<byte> data;
-            Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+                ReadOnlyMemory<byte> data;
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(null, c1.GetObject());
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(null, c1.GetObject());
 
-            Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+                Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+            }
+            {
+                SequencePosition c1 = buffer.GetPosition(0, buffer.Start);
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(bufferSegment1, c1.GetObject());
+
+                ReadOnlyMemory<byte> data;
+                Assert.True(buffer.TryGet(ref c1, out data, advance: true));
+
+                Assert.Equal(0, c1.GetInteger());
+                Assert.Equal(null, c1.GetObject());
+
+                Assert.False(buffer.TryGet(ref c1, out data, advance: true));
+            }
         }
 
         [Fact]
