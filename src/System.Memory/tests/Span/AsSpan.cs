@@ -134,7 +134,7 @@ namespace System.SpanTests
             ArraySegment<int> segment = new ArraySegment<int>(a, 5, length);
             Span<int> s = segment.AsSpan(start);
             Assert.Equal(length - start, s.Length);
-            if (segment.Count != 0)
+            if (s.Length != 0)
             {
                 s[0] = 42;
                 Assert.Equal(42, a[segmentOffset + start]);

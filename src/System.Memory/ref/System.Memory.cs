@@ -27,7 +27,7 @@ namespace System
         public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this System.ArraySegment<T> arraySegment) { throw null; }
         public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this System.Span<T> span) { throw null; }
         public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
-        public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; } // this already exist, just rename the parameter
+        public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array) { throw null; }

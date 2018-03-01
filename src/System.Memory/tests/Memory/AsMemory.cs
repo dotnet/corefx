@@ -46,7 +46,7 @@ namespace System.MemoryTests
             ArraySegment<int> segment = new ArraySegment<int>(a, 5, length);
             Memory<int> m = segment.AsMemory(start);
             Assert.Equal(length - start, m.Length);
-            if (segment.Count != 0)
+            if (m.Length != 0)
             {
                 m.Span[0] = 42;
                 Assert.Equal(42, a[segmentOffset + start]);
