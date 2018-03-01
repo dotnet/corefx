@@ -42,9 +42,11 @@
     <Compile Include="PipeTest.Read.netcoreapp.cs" />
     <Compile Include="PipeTest.Write.netcoreapp.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' and '$(TargetsWindows)' == 'true'">
+    <Compile Include="NamedPipeTests\NamedPipeTest.CurrentUserOnly.netcoreapp.Windows.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="Interop.Windows.cs" />
-    <Compile Include="NamedPipeTests\NamedPipeTest.CurrentUserOnly.Windows.cs" />
     <Compile Include="NamedPipeTests\NamedPipeTest.RunAsClient.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">

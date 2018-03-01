@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using System.ComponentModel;
 using System.DirectoryServices.AccountManagement;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,13 +17,22 @@ namespace System.IO.Pipes.Tests
     // Class to be used as xUnit fixture to avoid creating the user, an relatively slow operation (couple of seconds), multiple times.
     public class TestAccountImpersonator : IDisposable
     {
-        private const string TestAccountName = "CorFxTst0uZa"; // Extra random suffix to avoid matching any other account by accident, but const to avoid leaking it.
+        private const string TestAccountName = "CorFxTst0uZa"; // Random suffix to avoid matching any other account by accident, but const to avoid leaking it.
         private SafeAccessTokenHandle _testAccountTokenHandle;
 
         public TestAccountImpersonator()
         {
-            string testAccountPassword = Guid.NewGuid().ToString() + "_^-As@!%*(1)4#2";  // Add special chars to ensure it satisfies password requirements.
-            DateTime accountExpirationDate = DateTime.UtcNow + TimeSpan.FromMinutes(5);
+            string testAccountPassword;
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                var randomBytes = new byte[33];
+                rng.GetBytes(randomBytes);
+
+                // Add special chars to ensure it satisfies password requirements.
+                testAccountPassword = Convert.ToBase64String(randomBytes) + "_-As@!%*(1)4#2";
+            }
+
+            DateTime accountExpirationDate = DateTime.UtcNow + TimeSpan.FromMinutes(2);
             using (var principalCtx = new PrincipalContext(ContextType.Machine))
             {
                 bool needToCreate = false;
