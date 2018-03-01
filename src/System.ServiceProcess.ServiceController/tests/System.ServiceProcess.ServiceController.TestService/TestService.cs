@@ -19,7 +19,7 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private bool _disposed;
-        private Task _waitClientConnect;
+        private object _writeLock = new object();
         private NamedPipeServerStream _serverStream;
         private readonly Exception _exception;
 
@@ -38,7 +38,12 @@ namespace System.ServiceProcess.Tests
             this._exception = throwException;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
-            _waitClientConnect = this._serverStream.WaitForConnectionAsync();
+            this._serverStream.BeginWaitForConnection( new AsyncCallback(SendConnectedByte), this);
+        }
+
+        public void SendConnectedByte(IAsyncResult result)
+        {
+            WriteStreamAsync(PipeMessageByteCode.Connected).Wait();
         }
 
         protected override void OnContinue()
@@ -100,25 +105,20 @@ namespace System.ServiceProcess.Tests
         public async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
             Task writeCompleted;
-            if (_waitClientConnect.IsCompleted)
-            {
-                const int writeTimeout = 60000;
+            const int writeTimeout = 60000;
+            lock (_writeLock)
+            {              
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
                     writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
-                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
                 }
                 else
                 {
-                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);
-                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
+                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);                    
                 }
             }
-            else
-            {
-                // We get here if the service is getting torn down before a client ever connected;
-                // some tests do this.
-            }
+
+            await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
         }
 
         protected override void Dispose(bool disposing)

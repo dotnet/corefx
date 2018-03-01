@@ -14,6 +14,7 @@ namespace System.ServiceProcess.Tests
         Pause = 2,
         Stop = 3,
         OnCustomCommand = 4,
-        ExceptionThrown = 5
+        ExceptionThrown = 5,
+        Connected = 6
     };
 }

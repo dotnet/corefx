@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 /// </summary>
 namespace System.ServiceProcess.Tests
 {
-    [ActiveIssue("https://github.com/dotnet/corefx/issues/27071")]
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceBaseTests : IDisposable
     {
@@ -79,6 +78,7 @@ namespace System.ServiceProcess.Tests
         public void TestOnStartThenStop()
         {
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -92,6 +92,7 @@ namespace System.ServiceProcess.Tests
         {
             var controller = new ServiceController(_testService.TestServiceName);
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             AssertExpectedProperties(controller);
 
             controller.Stop();
@@ -102,6 +103,7 @@ namespace System.ServiceProcess.Tests
             _testService.Client = null;
             _testService.Client.Connect();
 
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             Assert.Equal((int)PipeMessageByteCode.Start, _testService.GetByte());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
@@ -115,6 +117,7 @@ namespace System.ServiceProcess.Tests
         {
             _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             AssertExpectedProperties(controller);
 
             controller.Pause();
@@ -130,6 +133,7 @@ namespace System.ServiceProcess.Tests
         public void TestOnPauseAndContinueThenStop()
         {
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -150,6 +154,7 @@ namespace System.ServiceProcess.Tests
         public void TestOnExecuteCustomCommand()
         {
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -165,6 +170,7 @@ namespace System.ServiceProcess.Tests
         public void TestOnContinueBeforePause()
         {
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -222,6 +228,7 @@ namespace System.ServiceProcess.Tests
             string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();
             TestServiceProvider _testService = new TestServiceProvider(serviceName);
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
             _testService.DeleteTestServices();
         }

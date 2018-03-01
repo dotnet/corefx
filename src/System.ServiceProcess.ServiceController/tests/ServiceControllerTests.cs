@@ -11,7 +11,6 @@ using Xunit;
 
 namespace System.ServiceProcess.Tests
 {
-    [ActiveIssue("https://github.com/dotnet/corefx/issues/27071")]
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceControllerTests : IDisposable
     {
@@ -114,6 +113,7 @@ namespace System.ServiceProcess.Tests
             Assert.Equal(ServiceControllerStatus.Running, controller.Status);
 
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             for (int i = 0; i < 2; i++)
             {
                 controller.Pause();
