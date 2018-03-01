@@ -774,7 +774,7 @@ namespace System.Text.RegularExpressions.Tests
                 Assert.False(Regex.IsMatch("a", @"a{1000001,}")); // 1 over the cutoff for Boyer-Moore prefix
 
                 Assert.False(Regex.IsMatch("a", @"a{50000}")); // creates string for Boyer-Moore but not so large that tests fail and start paging
-            });
+            }).Dispose();
         }
 
         [Fact]
