@@ -15,16 +15,9 @@ namespace System.Net.Sockets.Tests
 {
     public partial class UnixDomainSocketTest
     {
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // new UnixDomainSocketEndPoint should throw on Windows
-        public void UnixDomainSocketEndPoint_Throws_OnWindows()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new UnixDomainSocketEndPoint("/path"));
-        }
-
+        [PlatformSpecific(~TestPlatforms.Windows)] // Windows doesn't currently support ConnectEx with domain sockets
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests ConnectAsyncUnixDomainSocketEndPoint success on Unix
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_ConnectAsyncUnixDomainSocketEndPoint_Success()
         {
             string path = null;
@@ -80,8 +73,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests ConnectAsyncUnixDomainSocketEndPoint seccess on Unix
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_ConnectAsyncUnixDomainSocketEndPoint_NotServer()
         {
             string path = GetRandomNonExistingFilePath();
@@ -103,7 +95,9 @@ namespace System.Net.Sockets.Tests
                         await complete.Task;
                     }
 
-                    Assert.Equal(SocketError.AddressNotAvailable, args.SocketError);
+                    Assert.Equal(
+                        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SocketError.InvalidArgument : SocketError.AddressNotAvailable,
+                        args.SocketError);
                 }
             }
             finally
@@ -114,8 +108,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests SendReceive success for UnixDomainSocketEndPoint on Unix
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public void Socket_SendReceive_Success()
         {
             string path = GetRandomNonExistingFilePath();
@@ -153,8 +146,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests SendReceiveAsync success for UnixDomainSocketEndPoint on Unix
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_SendReceiveAsync_Success()
         {
             string path = GetRandomNonExistingFilePath();
@@ -192,12 +184,11 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
+        [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(5000, 1, 1)]
         [InlineData(500, 18, 21)]
         [InlineData(500, 21, 18)]
         [InlineData(5, 128000, 64000)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests SendReceiveAsync success for UnixDomainSocketEndPoint on Unix
         public async Task Socket_SendReceiveAsync_PropagateToStream_Success(int iterations, int writeBufferSize, int readBufferSize)
         {             
             var writeBuffer = new byte[writeBufferSize * iterations];
@@ -221,8 +212,10 @@ namespace System.Net.Sockets.Tests
                     {
                         int bytesRead;
                         byte[] buffer = new byte[readBufferSize];
-                        while ((bytesRead = await client.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None)) > 0)
+                        while (readData.Length < writeBuffer.Length)
                         {
+                            bytesRead = await client.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
+                            Assert.InRange(bytesRead, 1, writeBuffer.Length - readData.Length);
                             readData.Write(buffer, 0, bytesRead);
                         }
                     });
@@ -251,10 +244,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
+        [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(false)]
         [InlineData(true)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests ConcurrentSendReceive success for UnixDomainSocketEndPoint on Unix
         public async Task ConcurrentSendReceive(bool forceNonBlocking)
         {
             using (Socket server = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
@@ -297,8 +289,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests ConcurrentSendReceive success for UnixDomainSocketEndPoint on Unix
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task ConcurrentSendReceiveAsync()
         {
             using (Socket server = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
@@ -336,8 +327,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests new UnixDomainSocketEndPoint throws the correct exception for invalid args
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public void UnixDomainSocketEndPoint_InvalidPaths_Throws()
         {
             Assert.Throws<ArgumentNullException>(() => new UnixDomainSocketEndPoint(null));
@@ -351,8 +341,7 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(invalidLengthString));
         }
 
-        [Theory]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(false)]
         [InlineData(true)]
         public void UnixDomainSocketEndPoint_RemoteEndPointEqualsBindAddress(bool abstractAddress)
@@ -412,7 +401,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.Linux)] // Don't support abstract socket addresses.
         public void UnixDomainSocketEndPoint_UsingAbstractSocketAddressOnUnsupported_Throws()
         {
@@ -432,6 +421,16 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ConditionalFact(nameof(PlatformDoesntSupportUnixDomainSockets))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void Socket_CreateUnixDomainSocket_Throws_OnWindows()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("path", () => new UnixDomainSocketEndPoint(null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("path", () => new UnixDomainSocketEndPoint(""));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("path", () => new UnixDomainSocketEndPoint(new string('s', 1000)));
+            Assert.Throws<PlatformNotSupportedException>(() => new UnixDomainSocketEndPoint("hello"));
+        }
+
         private static string GetRandomNonExistingFilePath()
         {
             string result;
@@ -443,5 +442,29 @@ namespace System.Net.Sockets.Tests
 
             return result;
         }
+
+        private static bool PlatformDoesntSupportUnixDomainSockets => s_platformSupportsUnixDomainSockets.Value;
+
+        private static bool PlatformSupportsUnixDomainSockets => s_platformSupportsUnixDomainSockets.Value;
+
+        private static readonly Lazy<bool> s_platformSupportsUnixDomainSockets = new Lazy<bool>(() =>
+        {
+            // All Unixes should support UDS.
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return true;
+            }
+
+            // Some Windows will.
+            try
+            {
+                new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified).Dispose();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        });
     }
 }
