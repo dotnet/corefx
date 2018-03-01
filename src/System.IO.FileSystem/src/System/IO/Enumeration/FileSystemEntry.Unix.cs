@@ -79,7 +79,7 @@ namespace System.IO.Enumeration
                         $"directory ({Directory.Length} chars) & name ({Directory.Length} chars) too long for buffer ({_pathBuffer.Length} chars)");
                     Path.TryJoin(Directory, FileName, _pathBuffer, out int charsWritten);
                     Debug.Assert(charsWritten > 0, "didn't write any chars to buffer");
-                    _fullPath = _pathBuffer.Slice(charsWritten);
+                    _fullPath = _pathBuffer.Slice(0, charsWritten);
                 }
                 return _fullPath;
             }
