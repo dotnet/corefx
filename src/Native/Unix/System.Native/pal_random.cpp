@@ -21,7 +21,6 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
     assert(buffer != NULL);
 
     int rand_des;
-    uint8_t* buf = (uint8_t*)alloca(bufferLength);
     long num = 0;
     static bool sMissingDevURandom;
     static bool sInitializedMRand;
@@ -42,7 +41,7 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
             int32_t offset = 0;
             do
             {
-                ssize_t n = read(rand_des, buf + offset , (size_t)(bufferLength - offset));
+                ssize_t n = read(rand_des, buffer + offset , (size_t)(bufferLength - offset));
                 if (n == -1)
                 {
                     if (errno == EINTR)
@@ -79,7 +78,7 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
             num = lrand48();
         }
 
-        *(buffer + i) ^= buf[i] ^ num;
+        *(buffer + i) ^= num;
         num >>= 8;
     }
 }
