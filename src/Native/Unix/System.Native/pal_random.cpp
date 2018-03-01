@@ -20,23 +20,31 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
 {
     assert(buffer != NULL);
 
-    int rand_des;
+    static volatile int rand_des = -1;
     long num = 0;
     static bool sMissingDevURandom;
     static bool sInitializedMRand;
 
     if (!sMissingDevURandom)
     {
-        if ((rand_des = open("/dev/urandom", O_RDONLY, 0)) == -1)
+        if (rand_des == -1)
         {
-            if (errno == ENOENT)
+            int fd = open("/dev/urandom", O_RDONLY, O_CLOEXEC);
+            if (fd != -1)
+            {
+                if (!__sync_bool_compare_and_swap(&rand_des, -1, fd))
+                {
+                    // Another thread has already set the rand_des
+                    close(fd);
+                }
+            }
+            else if (errno == ENOENT)
             {                
                 sMissingDevURandom = true;
             }
-
-            // Back off and try mrand48.
         }
-        else
+
+        if (rand_des != -1)
         {
             int32_t offset = 0;
             do
@@ -57,8 +65,6 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
             while (offset != bufferLength);
 
             assert(offset == bufferLength);
-
-            close(rand_des);
         }
     }
 
