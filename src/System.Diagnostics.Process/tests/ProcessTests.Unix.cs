@@ -474,9 +474,11 @@ namespace System.Diagnostics.Tests
             {
                 object waitState = null;
                 int processId = -1;
+                // Process takes a reference
                 using (var process = CreateShortProcess())
                 {
                     process.EnableRaisingEvents = true;
+                    // Exited event takes a reference
                     process.Exited += (o,e) => exitedEventSemaphore.Release();
                     process.Start();
 
@@ -489,6 +491,23 @@ namespace System.Diagnostics.Tests
                     Assert.True(GetWaitStateDictionary(childDictionary: true).Contains(processId));
                 }
                 exitedEventSemaphore.Wait();
+
+                // Child reaping holds a reference too
+                int referenceCount = -1;
+                for (int i = 0; i < 20; i++)
+                {
+                    referenceCount = GetWaitStateReferenceCount(waitState);
+                    if (referenceCount == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        // Process was reaped but ProcessWaitState not unrefed yet
+                        Thread.Sleep(50);
+                    }
+                }
+                Assert.Equal(0, referenceCount);
 
                 Assert.Equal(0, GetWaitStateReferenceCount(waitState));
                 Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
