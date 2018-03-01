@@ -33,7 +33,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        //[Fact]
+        //[Fact]        
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
@@ -47,18 +47,18 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 $"{Environment.NewLine}{numberOfFoundBlobs} found blobs with regex search" +
                 $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
         }
-
+ 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
-        public void ValidateAgainstBlobs(object obj, string[] blobs) 
+        public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs) 
             => ValidateAndRoundtrip(obj, blobs, false);
 
         [Theory]
         [MemberData(nameof(SerializableEqualityComparers_MemberData))]
-        public void ValidateEqualityComparersAgainstBlobs(object obj, string[] blobs)
+        public void ValidateEqualityComparersAgainstBlobs(object obj, TypeSerializableValue[] blobs)
             => ValidateAndRoundtrip(obj, blobs, true);
 
-        private static void ValidateAndRoundtrip(object obj, string[] blobs, bool isEqualityComparer)
+        private static void ValidateAndRoundtrip(object obj, TypeSerializableValue[] blobs, bool isEqualityComparer)
         {
             if (obj == null)
             {
@@ -77,7 +77,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // Therefore we remove the second blob which is the one from Desktop.
             if (!PlatformDetection.IsFullFramework && (obj is SqlException || obj is ReflectionTypeLoadException || obj is LicenseException))
             {
-                var tmpList = new List<string>(blobs);
+                var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
                 blobs = tmpList.ToArray();
             }
@@ -91,13 +91,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
                 if (isEqualityComparer)
                 {
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Simple));
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Full));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Simple));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Full));
                 }
                 else
                 {
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Simple), isSamePlatform);
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Full), isSamePlatform);
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Simple), isSamePlatform);
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Full), isSamePlatform);
                 }
             }
         }
@@ -486,7 +486,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
         }
 
-        private static void SanityCheckBlob(object obj, string[] blobs)
+        private static void SanityCheckBlob(object obj, TypeSerializableValue[] blobs)
         {
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
@@ -508,13 +508,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 string runtimeBlob = BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full);
 
-                string storedComparableBlob = CreateComparableBlobInfo(blobs[frameworkBlobNumber]);
+                string storedComparableBlob = CreateComparableBlobInfo(blobs[frameworkBlobNumber].BlobString);
                 string runtimeComparableBlob = CreateComparableBlobInfo(runtimeBlob);
 
                 Assert.True(storedComparableBlob == runtimeComparableBlob,
                     $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}{Environment.NewLine}" +
                     $"-------------------- Stored blob ---------------------{Environment.NewLine}" +
-                    $"Encoded: {blobs[frameworkBlobNumber]}{Environment.NewLine}" +
+                    $"Encoded: {blobs[frameworkBlobNumber].BlobString}{Environment.NewLine}" +
                     $"Decoded: {storedComparableBlob}{Environment.NewLine}{Environment.NewLine}" +
                     $"--------------- Runtime generated blob ---------------{Environment.NewLine}" +
                     $"Encoded: {runtimeBlob}{Environment.NewLine}" +
