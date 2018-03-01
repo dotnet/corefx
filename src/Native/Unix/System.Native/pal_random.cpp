@@ -21,47 +21,12 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
     assert(buffer != NULL);
 
     int rand_des;
-    char buf;
+    uint8_t* buf = (uint8_t*)alloca(bufferLength);
     long num = 0;
-
-    static bool sMissingDevRandom;
     static bool sMissingDevURandom;
     static bool sInitializedMRand;
 
-    int i = 0;
-
-    if (i < bufferLength && !sMissingDevRandom)
-    {
-        // request non-blocking access to avoid hangs if the /dev/random is exhausted
-        // or just simply broken
-        if ((rand_des = open("/dev/random", O_RDONLY | O_NONBLOCK)) == -1)
-        {
-            if (errno == ENOENT)
-            {
-                sMissingDevRandom = true;
-            }
-
-            // Back off and try /dev/urandom.
-        }
-        else
-        {
-            for( ; i < bufferLength; i++)
-            {
-                if (read(rand_des, &buf, 1) < 1)
-                {
-                    // the /dev/random pool has been exhausted.  Fall back
-                    // to /dev/urandom for the remainder of the buffer.
-                    break;
-                }
-
-                *(buffer + i) ^= buf;
-            }
-
-            close(rand_des);
-        }
-    }
- 
-    if (i < bufferLength && !sMissingDevURandom)
+    if (!sMissingDevURandom)
     {
         if ((rand_des = open("/dev/urandom", O_RDONLY, 0)) == -1)
         {
@@ -74,16 +39,25 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
         }
         else
         {
-            for( ; i < bufferLength; i++)
+            int32_t offset = 0;
+            do
             {
-                if (read(rand_des, &buf, 1) < 1)
+                ssize_t n = read(rand_des, buf + offset , (size_t)(bufferLength - offset));
+                if (n == -1)
                 {
-                    // Fall back to srand48 for the remainder of the buffer.
+                    if (errno == EINTR)
+                    {
+                        continue;
+                    }
+
                     break;
                 }
 
-                *(buffer + i) ^= buf;
+                offset += n;
             }
+            while (offset != bufferLength);
+
+            assert(offset == bufferLength);
 
             close(rand_des);
         }
@@ -96,16 +70,16 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
     }
 
     // always xor srand48 over the whole buffer to get some randomness
-    // in case /dev/random is not really random
+    // in case /dev/urandom is not really random
 
-    for(i = 0; i < bufferLength; i++)
+    for (int i = 0; i < bufferLength; i++)
     {
         if (i % 4 == 0)
         {
             num = lrand48();
         }
 
-        *(buffer + i) ^= num;
+        *(buffer + i) ^= buf[i] ^ num;
         num >>= 8;
     }
 }
