@@ -769,9 +769,11 @@ namespace System.Text.RegularExpressions.Tests
         {
             RemoteInvoke(() =>
             {
-                  // Should not throw out of memory
-                  Assert.False(Regex.IsMatch("a", @"a{2147483647,}"));
-                  Assert.False(Regex.IsMatch("a", @"a{999999}"));
+                // Should not throw out of memory
+                Assert.False(Regex.IsMatch("a", @"a{2147483647,}"));
+                Assert.False(Regex.IsMatch("a", @"a{1000001,}")); // 1 over the cutoff for Boyer-Moore prefix
+
+                Assert.False(Regex.IsMatch("a", @"a{50000}")); // creates string for Boyer-Moore but not so large that tests fail and start paging
             });
         }
 
