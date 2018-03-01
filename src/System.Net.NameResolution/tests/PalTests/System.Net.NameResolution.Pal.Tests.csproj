@@ -67,8 +67,8 @@
     <Compile Include="..\..\src\System\Net\NameResolutionPal.Windows.Uap.cs" Condition="'$(TargetGroup)' == 'uap'">
       <Link>ProductionCode\System\Net\NameResolutionPal.Windows.Uap.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\NameResolutionPal.Windows.Win32.cs" Condition="'$(TargetGroup)' == 'netcoreapp'">
-      <Link>ProductionCode\System\Net\NameResolutionPal.Windows.Win32.cs</Link>
+    <Compile Include="..\..\src\System\Net\NameResolutionPal.Win32.cs" Condition="'$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\NameResolutionPal.Win32.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
       <Link>Common\System\Net\InternalException.cs</Link>
