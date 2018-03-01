@@ -22,7 +22,9 @@ namespace System.Buffers
             else if (((uint)minimumBufferSize) > s_maxBufferSize)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumBufferSize);
 
-            return new ArrayMemoryPoolBuffer(minimumBufferSize);
+            var buffer = new ArrayMemoryPoolBuffer(minimumBufferSize);
+            buffer.Retain();
+            return buffer;
         }
 
         protected sealed override void Dispose(bool disposing) {}  // ArrayMemoryPool is a shared pool so Dispose() would be a nop even if there were native resources to dispose.

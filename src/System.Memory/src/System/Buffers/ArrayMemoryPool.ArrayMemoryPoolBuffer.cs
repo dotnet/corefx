@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using System.Threading;
 #if !netstandard
 using Internal.Runtime.CompilerServices;
 #else
@@ -27,7 +28,7 @@ namespace System.Buffers
 
             public sealed override bool IsDisposed => _array == null;
 
-            protected sealed override bool IsRetained => _refCount > 0;
+            protected sealed override bool IsRetained => Volatile.Read(ref _refCount) > 0;
 
             public sealed override Span<T> Span
             {
@@ -82,7 +83,7 @@ namespace System.Buffers
                 if (IsDisposed)
                     ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
 
-                _refCount++;
+                Interlocked.Increment(ref _refCount);
             }
 
             public sealed override bool Release()
@@ -90,9 +91,15 @@ namespace System.Buffers
                 if (IsDisposed)
                     ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
 
-                int newRefCount = --_refCount;
+                int newRefCount = Interlocked.Decrement(ref _refCount);
+                if (newRefCount == 0)
+                {
+                    Dispose();
+                }
+
+                // Other thread already disposed
                 if (newRefCount < 0)
-                    ThrowHelper.ThrowInvalidOperationException();
+                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
 
                 return newRefCount != 0;
             }
