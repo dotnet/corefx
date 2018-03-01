@@ -234,4 +234,7 @@
   <data name="ArgumentOutOfRange_BeepFrequency" xml:space="preserve">
     <value>The frequency must be between {0} and {1}.</value>
   </data>
+  <data name="IO_TermInfoInvalidMagicNumber" xml:space="preserve">
+    <value>The terminfo database has an invalid magic number: '{0}'.</value>
+  </data>
 </root>
