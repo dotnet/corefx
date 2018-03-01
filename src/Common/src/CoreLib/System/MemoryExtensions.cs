@@ -854,7 +854,7 @@ namespace System
         /// Creates a new memory over the portion of the target array beginning
         /// at 'start' index and ending at 'end' index (exclusive).
         /// </summary>
-        /// <param name="segment">The target ArraySegment.</param>
+        /// <param name="segment">The target array.</param>
         /// <param name="start">The index at which to begin the memory.</param>
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="segment"/> is covariant and array's type is not exactly T[].</exception>
@@ -873,7 +873,7 @@ namespace System
         /// Creates a new memory over the portion of the target array beginning
         /// at 'start' index and ending at 'end' index (exclusive).
         /// </summary>
-        /// <param name="segment">The target ArraySegment.</param>
+        /// <param name="segment">The target array.</param>
         /// <param name="start">The index at which to begin the memory.</param>
         /// <param name="length">The number of items in the memory.</param>
         /// <remarks>Returns default when <paramref name="segment"/> is null.</remarks>
