@@ -101,7 +101,7 @@ namespace System.Text.RegularExpressions
                             1_000_000;
                         #endif
 
-                        if (curNode._m > 0 && curNode._m < Cutoff)
+                        if (curNode.M > 0 && curNode.M < Cutoff)
                         {
                             string pref = string.Empty.PadRight(curNode.M, curNode.Ch);
                             return new RegexPrefix(pref, 0 != (curNode.Options & RegexOptions.IgnoreCase));
