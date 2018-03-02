@@ -11,22 +11,24 @@ namespace System.IO.Pipelines
     [DebuggerDisplay("CanceledState: {_canceledState}, IsCompleted: {IsCompleted}")]
     internal struct PipeAwaitable
     {
-        private static readonly Action<object> _awaitableIsCompleted = _ => { };
-        private static readonly Action<object> _awaitableIsNotCompleted = _ => { };
+        private static readonly Action<object> s_awaitableIsCompleted = _ => { };
+        private static readonly Action<object> s_awaitableIsNotCompleted = _ => { };
 
         private CanceledState _canceledState;
         private Action<object> _completion;
         private object _completionState;
         private CancellationToken _cancellationToken;
         private CancellationTokenRegistration _cancellationTokenRegistration;
-        private PipeScheduler _scheduler;
+        private SynchronizationContext _synchronizationContext;
+        private ExecutionContext _executionContext;
 
         public PipeAwaitable(bool completed)
         {
             _canceledState = CanceledState.NotCanceled;
-            _completion = completed ? _awaitableIsCompleted : _awaitableIsNotCompleted;
+            _completion = completed ? s_awaitableIsCompleted : s_awaitableIsNotCompleted;
             _completionState = null;
-            _scheduler = null;
+            _synchronizationContext = null;
+            _executionContext = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,37 +49,38 @@ namespace System.IO.Pipelines
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Complete(out Action<object> completion, out object completionState, out PipeScheduler scheduler)
+        public void Complete(out Action<object> completion, out object completionState, out SynchronizationContext synchronizationContext, out ExecutionContext executionContext)
         {
             Action<object> currentCompletion = _completion;
-            _completion = _awaitableIsCompleted;
-            object currentState = _completionState;
-            _completionState = null;
-            PipeScheduler currentScheduler = _scheduler;
-            _scheduler = null;
+            _completion = s_awaitableIsCompleted;
 
             completionState = null;
             completion = null;
-            scheduler = null;
+            synchronizationContext = null;
+            executionContext = null;
 
-            if (!ReferenceEquals(currentCompletion, _awaitableIsCompleted) &&
-                !ReferenceEquals(currentCompletion, _awaitableIsNotCompleted))
+            if (!ReferenceEquals(currentCompletion, s_awaitableIsCompleted) &&
+                !ReferenceEquals(currentCompletion, s_awaitableIsNotCompleted))
             {
+                // If we captured the execution context then we need to wrap our completion and state up
                 completion = currentCompletion;
-                completionState = currentState;
-                scheduler = currentScheduler;
+                completionState = _completionState;
+                executionContext = _executionContext;
+                // We only want to use the sync context scheduler if it's non null and is valid. We reuse the object
+                // to avoid allocations per async operation so it can be non-null and not have any valid state
+                synchronizationContext = _synchronizationContext;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
-            if (ReferenceEquals(_completion, _awaitableIsCompleted) &&
+            if (ReferenceEquals(_completion, s_awaitableIsCompleted) &&
                 _canceledState < CanceledState.CancellationPreRequested)
             {
-                _completion = _awaitableIsNotCompleted;
+                _completion = s_awaitableIsNotCompleted;
                 _completionState = null;
-                _scheduler = null;
+                _synchronizationContext?.Reset();
             }
 
             // Change the state from observed -> not cancelled.
@@ -88,8 +91,8 @@ namespace System.IO.Pipelines
             }
         }
 
-        public bool IsCompleted => ReferenceEquals(_completion, _awaitableIsCompleted);
-        internal bool HasContinuation => !ReferenceEquals(_completion, _awaitableIsNotCompleted);
+        public bool IsCompleted => ReferenceEquals(_completion, s_awaitableIsCompleted);
+        internal bool HasContinuation => !ReferenceEquals(_completion, s_awaitableIsNotCompleted);
 
         public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out Action<object> completion, out object completionState, out bool doubleCompletion)
         {
@@ -98,7 +101,7 @@ namespace System.IO.Pipelines
 
             doubleCompletion = false;
             Action<object> awaitableState = _completion;
-            if (ReferenceEquals(awaitableState, _awaitableIsNotCompleted))
+            if (ReferenceEquals(awaitableState, s_awaitableIsNotCompleted))
             {
                 _completion = continuation;
                 _completionState = state;
@@ -107,22 +110,32 @@ namespace System.IO.Pipelines
                 {
                     // Set the scheduler to the current synchronization context if there is one
                     // otherwise we delegate to what the pipe was configured with.
+
                     // REVIEW: Should the sync context override the current scheduler if it was explicitly specifed
                     // in the pipe options?
-                    if (SynchronizationContext.Current != null)
+
+                    // REVIEW: Should we post to the sync context if we're already completed (i.e. in OnCompleted)? Currently we're still delegating to the
+                    // scheduler here.
+                    SynchronizationContext sc = SynchronizationContext.Current;
+                    if (sc != null && sc.GetType() != typeof(SynchronizationContext))
                     {
-                        _scheduler = PipeScheduler.SynchronizationContext;
+                        _synchronizationContext = SynchronizationContext.Current;
                     }
+                }
+
+                if ((flags & ValueTaskSourceOnCompletedFlags.FlowExecutionContext) != 0)
+                {
+                    _executionContext = ExecutionContext.Capture();
                 }
             }
 
-            if (ReferenceEquals(awaitableState, _awaitableIsCompleted))
+            if (ReferenceEquals(awaitableState, s_awaitableIsCompleted))
             {
                 completion = continuation;
                 completionState = state;
             }
 
-            if (!ReferenceEquals(awaitableState, _awaitableIsNotCompleted))
+            if (!ReferenceEquals(awaitableState, s_awaitableIsNotCompleted))
             {
                 doubleCompletion = true;
                 completion = continuation;
@@ -130,9 +143,9 @@ namespace System.IO.Pipelines
             }
         }
 
-        public void Cancel(out Action<object> completion, out object completionState, out PipeScheduler scheduler)
+        public void Cancel(out Action<object> completion, out object completionState, out PipeScheduler scheduler, out ExecutionContext executionContext)
         {
-            Complete(out completion, out completionState, out scheduler);
+            Complete(out completion, out completionState, out scheduler, out executionContext);
             _canceledState = completion == null ?
                 CanceledState.CancellationPreRequested :
                 CanceledState.CancellationRequested;

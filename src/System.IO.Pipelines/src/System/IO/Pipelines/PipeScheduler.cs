@@ -11,13 +11,7 @@ namespace System.IO.Pipelines
     {
         private static readonly ThreadPoolScheduler s_threadPoolScheduler = new ThreadPoolScheduler();
         private static readonly InlineScheduler s_inlineScheduler = new InlineScheduler();
-        private static readonly SynchronizationContextPipeScheduler s_synchronizationContextPipeScheduler = new SynchronizationContextPipeScheduler();
-
-        /// <summary>
-        /// Used when we're capturing the current sync context
-        /// </summary>
-        internal static SynchronizationContextPipeScheduler SynchronizationContext => s_synchronizationContextPipeScheduler;
-
+        
         /// <summary>
         /// The <see cref="PipeScheduler"/> implementation that queues callbacks to thread pool
         /// </summary>

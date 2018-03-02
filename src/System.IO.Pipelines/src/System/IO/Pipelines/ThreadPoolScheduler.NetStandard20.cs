@@ -11,10 +11,10 @@ namespace System.IO.Pipelines
     {
         public override void Schedule<TState>(Action<TState> action, TState state)
         {
-            System.Threading.ThreadPool.QueueUserWorkItem(_actionObjectWaitCallback, new ActionObjectAsWaitCallback<TState>(action, state));
+            System.Threading.ThreadPool.QueueUserWorkItem(s_actionObjectWaitCallback, new ActionObjectAsWaitCallback<TState>(action, state));
         }
 
-        private readonly static WaitCallback _actionObjectWaitCallback = state => ((ActionObjectAsWaitCallback<TState>)state).Run();
+        private readonly static WaitCallback s_actionObjectWaitCallback = state => ((ActionObjectAsWaitCallback<TState>)state).Run();
 
         private sealed class ActionObjectAsWaitCallback<TState>
         {
