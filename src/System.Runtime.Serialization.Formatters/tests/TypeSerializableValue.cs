@@ -6,49 +6,42 @@ using System.Linq;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
-    public class TypeSerializableValue
+    public readonly struct TypeSerializableValue
     {
+        public readonly string Base64Blob;
+        public readonly TargetFrameworkMoniker Platform;
+
         public TypeSerializableValue(string base64Blob, TargetFrameworkMoniker platform)
         {
             Base64Blob = base64Blob;
             Platform = platform;
         }
 
-        public string Base64Blob { get; }
-
-        public TargetFrameworkMoniker Platform { get; }
-
         public static int GetPlatformIndex(TypeSerializableValue[] blobs)
         {
             var blobList = blobs.ToList();
-
+            int index;
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
-                if (!PlatformDetection.IsNetfx471OrNewer)
-                {
-                    // Check if a specialized blob for >=net471 is present and return if found.
-                    int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
-                    if (index >= 0)
-                        return index;
-                }
-
+                // Check if a specialized blob for >=net471 is present and return if found.
                 // If no newer blob for >=net471 is present use existing one. 
                 // If no netfx blob is present then -1 will be returned.
-                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
+                index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
+                return PlatformDetection.IsNetfx471OrNewer && (index >= 0) ? index : blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
             }
 
             // .NET Core
-            return PlatformDetection.IsNetCore ? blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21) : -1;
+            index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21);
+            return PlatformDetection.IsNetCore && (index >= 0) ? index : blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp));
         }
     }
 
     public enum TargetFrameworkMoniker
     {
-        netfx = 0,
-        netfx471 = 1,
-        netcoreapp = 2,
-        netcoreapp21 = 3,
+        netfx,
+        netfx471,
+        netcoreapp,
+        netcoreapp21,
     }
 }
-

@@ -33,7 +33,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        //[Fact]        
+        //[Fact]
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
@@ -47,7 +47,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 $"{Environment.NewLine}{numberOfFoundBlobs} found blobs with regex search" +
                 $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
         }
- 
+
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
         public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs) 
@@ -80,7 +80,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
 
-                int index = tmpList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
+                int index = tmpList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx || b.Platform == TargetFrameworkMoniker.netfx471);
                 if (index >= 0)
                     tmpList.RemoveAt(index);
 
