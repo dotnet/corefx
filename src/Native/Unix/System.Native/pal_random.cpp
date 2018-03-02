@@ -64,14 +64,13 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
                         continue;
                     }
 
+                    assert(false && "read from /dev/urandom has failed");
                     break;
                 }
 
                 offset += n;
             }
             while (offset != bufferLength);
-
-            assert(offset == bufferLength);
         }
     }
 
