@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using System.Security;
 
 namespace System.Data.SqlClient
 {
@@ -90,6 +91,10 @@ namespace System.Data.SqlClient
 
         private readonly LastIOTimer _lastSuccessfulIOTimer;
 
+        // secure password information to be stored
+        //  At maximum number of secure string that need to be stored is two; one for login password and the other for new change password
+        private SecureString[] _securePasswords = new SecureString[2] { null, null };
+        private int[] _securePasswordOffsetsInBuffer = new int[2];
 
         // This variable is used to track whether another thread has requested a cancel.  The
         // synchronization points are
@@ -2876,7 +2881,34 @@ namespace System.Data.SqlClient
         // Network/Packet Writing & Processing //
         /////////////////////////////////////////
 
+        internal void WriteSecureString(SecureString secureString)
+        {
+            Debug.Assert(_securePasswords[0] == null || _securePasswords[1] == null, "There are more than two secure passwords");
 
+            int index = _securePasswords[0] != null ? 1 : 0;
+
+            _securePasswords[index] = secureString;
+            _securePasswordOffsetsInBuffer[index] = _outBytesUsed;
+
+            // loop through and write the entire array
+            int lengthInBytes = secureString.Length * 2;
+
+            // It is guaranteed both secure password and secure change password should fit into the first packet
+            // Given current TDS format and implementation it is not possible that one of secure string is the last item and exactly fill up the output buffer
+            //  if this ever happens and it is correct situation, the packet needs to be written out after _outBytesUsed is update
+            Debug.Assert((_outBytesUsed + lengthInBytes) < _outBuff.Length, "Passwords cannot be splited into two different packet or the last item which fully fill up _outBuff!!!");
+
+            _outBytesUsed += lengthInBytes;
+        }
+
+        internal void ResetSecurePasswordsInformation()
+        {
+            for (int i = 0; i < _securePasswords.Length; ++i)
+            {
+                _securePasswords[i] = null;
+                _securePasswordOffsetsInBuffer[i] = 0;
+            }
+        }
 
         internal Task WaitForAccumulatedWrites()
         {
@@ -3340,14 +3372,14 @@ namespace System.Data.SqlClient
 
         internal abstract object CreateAndSetAttentionPacket();
 
-        internal abstract void SetPacketData(object packet, byte[] buffer, int bytesUsed);
+        internal abstract void SetPacketData(object packet, byte[] buffer, int bytesUsed, SecureString[] securePasswords, int[] securePasswordsOffsetsInBuffer);
 
         private Task WriteSni(bool canAccumulate)
         {
             // Prepare packet, and write to packet.
             object packet = GetResetWritePacket();
 
-            SetPacketData(packet, _outBuff, _outBytesUsed);
+            SetPacketData(packet, _outBuff, _outBytesUsed, _securePasswords, _securePasswordOffsetsInBuffer);
 
             uint sniError;
             Debug.Assert(Parser.Connection._parserLock.ThreadMayHaveLock(), "Thread is writing without taking the connection lock");

@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
@@ -168,7 +170,7 @@ namespace System.Data.SqlClient.SNI
         {
             SNIPacket attnPacket = new SNIPacket(Handle);
             _sniAsyncAttnPacket = attnPacket;
-            SetPacketData(attnPacket, SQL.AttentionHeader, TdsEnums.HEADER_LEN);
+            SetPacketData(attnPacket, SQL.AttentionHeader, TdsEnums.HEADER_LEN, null, null);
             return attnPacket;
         }
 
@@ -215,7 +217,32 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        internal override void SetPacketData(object packet, byte[] buffer, int bytesUsed) => SNIProxy.Singleton.PacketSetData((SNIPacket)packet, buffer, bytesUsed);
+        internal override void SetPacketData(object packet, byte[] buffer, int bytesUsed, SecureString[] securePasswords, int[] securePasswordOffsets)
+        {
+            if (securePasswords != null)
+            {
+                for (int i = 0; i < securePasswords.Length; i++)
+                {
+                    if (securePasswords[i] != null)
+                    {
+                        IntPtr str = IntPtr.Zero;
+                        try
+                        {
+                            str = Marshal.SecureStringToBSTR(securePasswords[i]);
+                            byte[] data = new byte[securePasswords[i].Length * 2];
+                            Marshal.Copy(str, data, 0, securePasswords[i].Length * 2);
+                            TdsParserStaticMethods.ObfuscatePassword(data);
+                            data.CopyTo(buffer, securePasswordOffsets[i]);
+                        }
+                        finally
+                        {
+                            Marshal.ZeroFreeBSTR(str);
+                        }
+                    }
+                }
+            }
+            SNIProxy.Singleton.PacketSetData((SNIPacket)packet, buffer, bytesUsed);
+        }
         
         internal override uint SniGetConnectionId(ref Guid clientConnectionId) => SNIProxy.Singleton.GetConnectionId(Handle, ref clientConnectionId);
 
