@@ -126,10 +126,18 @@ namespace System
                 const int MagicLegacyNumber = 0x11A; // magic number octal 0432 for legacy ncurses terminfo
                 const int Magic32BitNumber = 0x21E; // magic number octal 01036 for new ncruses terminfo
                 short magic = ReadInt16(data, 0);
-                _readAs32Bit =
-                    magic == MagicLegacyNumber ? false :
-                    magic == Magic32BitNumber ? true :
+                if (magic == MagicLegacyNumber)
+                {
+                    _readAs32Bit = false;
+                }
+                else if (magic == Magic32BitNumber)
+                {
+                    _readAs32Bit = true;
+                }
+                else
+                {
                     throw new InvalidOperationException(SR.Format(SR.IO_TermInfoInvalidMagicNumber, String.Concat("O" + Convert.ToString(magic, 8)))); // magic number was not recognized. Printing the magic number in octal.
+                }
                 _sizeOfInt = (_readAs32Bit) ? 4 : 2;
 
                 _nameSectionNumBytes = ReadInt16(data, 2);
