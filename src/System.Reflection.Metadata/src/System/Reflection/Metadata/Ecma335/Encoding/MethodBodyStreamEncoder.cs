@@ -136,7 +136,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxStack"/> is out of range [0, <see cref="ushort.MaxValue"/>].</exception>
         /// <exception cref="InvalidOperationException">
         /// A label targeted by a branch in the instruction stream has not been marked,
-        /// or the distance between a branch instruction and the target label is doesn't fit the size of the instruction operand.
+        /// or the distance between a branch instruction and the target label doesn't fit the size of the instruction operand.
         /// </exception>
         public int AddMethodBody(
             InstructionEncoder instructionEncoder,
@@ -159,7 +159,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxStack"/> is out of range [0, <see cref="ushort.MaxValue"/>].</exception>
         /// <exception cref="InvalidOperationException">
         /// A label targeted by a branch in the instruction stream has not been marked,
-        /// or the distance between a branch instruction and the target label is doesn't fit the size of the instruction operand.
+        /// or the distance between a branch instruction and the target label doesn't fit the size of the instruction operand.
         /// </exception>
         public int AddMethodBody(
             InstructionEncoder instructionEncoder, 

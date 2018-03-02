@@ -381,6 +381,51 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var codeBuilder = new BlobBuilder();
             var flowBuilder = new ControlFlowBuilder();
 
+            var il = new byte[]
+            {
+                0x1A,                         // ldc.i4.0
+                0xFE, 0x0F,                   // localloc
+                0x28, 0x01, 0x00, 0x00, 0x06, // call 0x06000001
+                0x2A                          // ret
+            };
+
+            var streamEncoder = new MethodBodyStreamEncoder(streamBuilder);
+            var methodBody = streamEncoder.AddMethodBody(
+                il.Length,
+                maxStack: 2,
+                localVariablesSignature: default,
+                attributes: MethodBodyAttributes.InitLocals,
+                hasDynamicStackAllocation: true);
+
+            Assert.Equal(0, methodBody.Offset);
+            Assert.Null(methodBody.ExceptionRegions.Builder);
+            Assert.False(methodBody.ExceptionRegions.HasSmallFormat);
+
+            new BlobWriter(methodBody.Instructions).WriteBytes(il);
+
+            var bodyBytes = streamBuilder.ToArray();
+
+            AssertEx.Equal(new byte[]
+            {
+                0x13, 0x30,                   // flags and header size 
+                0x02, 0x00,                   // max stack 
+                0x09, 0x00, 0x00, 0x00,       // code size
+                0x00, 0x00, 0x00, 0x00,       // local variable signature      
+
+                0x1A,                         // ldc.i4.0
+                0xFE, 0x0F,                   // localloc
+                0x28, 0x01, 0x00, 0x00, 0x06, // call 0x06000001
+                0x2A                          // ret
+            }, bodyBytes);
+        }
+
+        [Fact, ActiveIssue(26910)]
+        public unsafe void LocAlloc_WithInstructionEncoder()
+        {
+            var streamBuilder = new BlobBuilder();
+            var codeBuilder = new BlobBuilder();
+            var flowBuilder = new ControlFlowBuilder();
+
             var il = new InstructionEncoder(codeBuilder, flowBuilder);
 
             il.OpCode(ILOpCode.Ldc_i4_4);
@@ -408,7 +453,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x1A,                         // ldc.i4.0
                 0xFE, 0x0F,                   // localloc
                 0x28, 0x01, 0x00, 0x00, 0x06, // call 0x06000001
-                0x2A
+                0x2A                          // ret
             }, bodyBytes);
 
             fixed (byte* bodyPtr = &bodyBytes[0])
@@ -427,7 +472,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                     0x1A,                         // ldc.i4.0
                     0xFE, 0x0F,                   // localloc
                     0x28, 0x01, 0x00, 0x00, 0x06, // call 0x06000001
-                    0x2A
+                    0x2A                          // ret
                 }, ilBytes);
             }
         }
