@@ -42,8 +42,8 @@ namespace System.Diagnostics.Tests
         {
             Process currentProcess = Process.GetCurrentProcess();
 
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1"));
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessById(currentProcess.Id, "127.0.0.1"));
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1"));
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcessById(currentProcess.Id, "127.0.0.1"));
         }
 
         [Theory]
@@ -51,7 +51,7 @@ namespace System.Diagnostics.Tests
         public void GetProcessesByName_RemoteMachineNameUnix_ThrowsPlatformNotSupportedException(string machineName)
         {
             Process currentProcess = Process.GetCurrentProcess();
-            Assert.Throws<PlatformNotSupportedException>(() => Process.GetProcessesByName(currentProcess.ProcessName, machineName));
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcessesByName(currentProcess.ProcessName, machineName));
         }
 
         [Fact]
@@ -445,6 +445,6 @@ namespace System.Diagnostics.Tests
         [DllImport("libc")]
         private static extern int seteuid(uint euid);
 
-        private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
+        private static readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
     }
 }
