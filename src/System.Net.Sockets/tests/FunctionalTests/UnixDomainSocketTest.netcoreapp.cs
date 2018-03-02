@@ -16,7 +16,6 @@ namespace System.Net.Sockets.Tests
     public partial class UnixDomainSocketTest
     {
         [PlatformSpecific(~TestPlatforms.Windows)] // Windows doesn't currently support ConnectEx with domain sockets
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_ConnectAsyncUnixDomainSocketEndPoint_Success()
         {
@@ -72,7 +71,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_ConnectAsyncUnixDomainSocketEndPoint_NotServer()
         {
@@ -107,7 +105,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public void Socket_SendReceive_Success()
         {
@@ -145,7 +142,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task Socket_SendReceiveAsync_Success()
         {
@@ -183,7 +179,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(5000, 1, 1)]
         [InlineData(500, 18, 21)]
@@ -243,7 +238,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(false)]
         [InlineData(true)]
@@ -288,7 +282,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(PlatformSupportsUnixDomainSockets))]
         public async Task ConcurrentSendReceiveAsync()
         {
@@ -443,28 +436,33 @@ namespace System.Net.Sockets.Tests
             return result;
         }
 
-        private static bool PlatformDoesntSupportUnixDomainSockets => s_platformSupportsUnixDomainSockets.Value;
 
         private static bool PlatformSupportsUnixDomainSockets => s_platformSupportsUnixDomainSockets.Value;
 
+        private static bool PlatformDoesntSupportUnixDomainSockets => !s_platformSupportsUnixDomainSockets.Value;
+
         private static readonly Lazy<bool> s_platformSupportsUnixDomainSockets = new Lazy<bool>(() =>
         {
-            // All Unixes should support UDS.
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            // All Unixes should support UDS. Some Windows will.
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return true;
+                IntPtr s = socket((int)AddressFamily.Unix, (int)SocketType.Stream, (int)ProtocolType.Unspecified);
+                if (s == (IntPtr)(-1))
+                {
+                    return false;
+                }
+
+                closesocket(s);
             }
 
-            // Some Windows will.
-            try
-            {
-                new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified).Dispose();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return true;
         });
+
+        [DllImport("ws2_32.dll")]
+        internal static extern IntPtr socket(int af, int type, int protocol);
+
+        [DllImport("ws2_32.dll")]
+        internal static extern int closesocket(IntPtr socketHandle);
     }
 }

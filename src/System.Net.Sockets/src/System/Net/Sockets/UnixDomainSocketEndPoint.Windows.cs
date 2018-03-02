@@ -11,6 +11,9 @@ namespace System.Net.Sockets
         private static readonly int s_nativePathLength = 108; // sizeof(sun_path)
         private static readonly int s_nativeAddressSize = s_nativePathOffset + s_nativePathLength; // sizeof(sockaddr_un)
 
+        private SocketAddress CreateSocketAddressForSerialize() =>
+            new SocketAddress(AddressFamily.Unix, s_nativeAddressSize);
+
         // from afunix.h:
         //#define UNIX_PATH_MAX 108
         //typedef struct sockaddr_un

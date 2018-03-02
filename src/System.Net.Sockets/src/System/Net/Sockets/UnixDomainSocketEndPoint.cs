@@ -106,7 +106,7 @@ namespace System.Net.Sockets
 
         public override SocketAddress Serialize()
         {
-            var result = new SocketAddress(AddressFamily.Unix, s_nativeAddressSize);
+            SocketAddress result = CreateSocketAddressForSerialize();
 
             for (int index = 0; index < _encodedPath.Length; index++)
             {
