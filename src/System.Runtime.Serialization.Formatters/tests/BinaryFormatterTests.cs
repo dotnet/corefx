@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -80,6 +79,11 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
+
+                int index = tmpList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
+                if (index >= 0)
+                    tmpList.RemoveAt(index);
+
                 blobs = tmpList.ToArray();
             }
 
@@ -92,13 +96,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
                 if (isEqualityComparer)
                 {
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Simple));
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Full));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Simple));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Full));
                 }
                 else
                 {
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Simple), isSamePlatform);
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].BlobString, FormatterAssemblyStyle.Full), isSamePlatform);
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Simple), isSamePlatform);
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Full), isSamePlatform);
                 }
             }
         }
@@ -509,13 +513,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 string runtimeBlob = BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full);
 
-                string storedComparableBlob = CreateComparableBlobInfo(blobs[frameworkBlobNumber].BlobString);
+                string storedComparableBlob = CreateComparableBlobInfo(blobs[frameworkBlobNumber].Base64Blob);
                 string runtimeComparableBlob = CreateComparableBlobInfo(runtimeBlob);
 
                 Assert.True(storedComparableBlob == runtimeComparableBlob,
                     $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}{Environment.NewLine}" +
                     $"-------------------- Stored blob ---------------------{Environment.NewLine}" +
-                    $"Encoded: {blobs[frameworkBlobNumber].BlobString}{Environment.NewLine}" +
+                    $"Encoded: {blobs[frameworkBlobNumber].Base64Blob}{Environment.NewLine}" +
                     $"Decoded: {storedComparableBlob}{Environment.NewLine}{Environment.NewLine}" +
                     $"--------------- Runtime generated blob ---------------{Environment.NewLine}" +
                     $"Encoded: {runtimeBlob}{Environment.NewLine}" +
