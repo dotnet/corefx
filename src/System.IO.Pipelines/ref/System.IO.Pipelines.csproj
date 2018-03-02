@@ -16,8 +16,7 @@
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Memory\ref\System.Memory.csproj" />
-    <ProjectReference Include="..\..\System.Buffers\ref\System.Buffers.csproj" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
