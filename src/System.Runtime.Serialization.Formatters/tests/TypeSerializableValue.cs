@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 
 namespace System.Runtime.Serialization.Formatters.Tests
@@ -21,15 +22,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static int GetPlatformIndex(TypeSerializableValue[] blobs)
         {
-            var blobList = blobs.ToList();
-            int index;
+            List<TypeSerializableValue> blobList = blobs.ToList();
+
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
                 // Check if a specialized blob for >=netfx471 is present and return if found.
                 if (PlatformDetection.IsNetfx471OrNewer)
                 {
-                    index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
+                    int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
 
                     if (index >= 0)
                         return index;
@@ -44,15 +45,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
             if (PlatformDetection.IsNetCore)
             {
                 // Check if a specialized blob for >=netcoreapp2.1 is present and return if found.
-                index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21);
+                int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21);
 
                 if (index >= 0)
                     return index;
+
+                // If no newer blob for >=netcoreapp2.1 is present use existing one.
+                // If no netfx blob is present then -1 will be returned.
+                return blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp20));
             }
 
-            // If no newer blob for >=netcoreapp2.1 is present use existing one. 
-            // If no netfx blob is present then -1 will be returned.
-            return blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp20));
+            return -1;
         }
     }
 
