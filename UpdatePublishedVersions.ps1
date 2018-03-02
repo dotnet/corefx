@@ -65,6 +65,8 @@ function Update-GitHub-File(
 
     message "Getting the `"sha`" of the current contents of file '$owner/$repo/$path'"
 
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bxor [Net.SecurityProtocolType]::Tls12
+
     $currentFile = Invoke-WebRequest $fileUrl -UseBasicParsing -Headers $headers
     $currentSha = (ConvertFrom-Json $currentFile.Content).sha
 
