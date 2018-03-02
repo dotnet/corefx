@@ -41,17 +41,15 @@ namespace System.Data.SqlClient
             return bObfuscated;
         }
 
-        internal static Byte[] ObfuscatePassword(byte[] password)
+        internal static byte[] ObfuscatePassword(byte[] password)
         {
-            byte s;
             byte bLo;
             byte bHi;
 
             for (int i = 0; i < password.Length; i++)
             {
-                s = password[i];
-                bLo = (byte)(s & 0x0f);
-                bHi = (byte)(s & 0xf0);
+                bLo = (byte)(password[i] & 0x0f);
+                bHi = (byte)(password[i] & 0xf0);
                 password[i] = (Byte)(((bHi >> 4) | (bLo << 4)) ^ 0xa5);
             }
             return password;
