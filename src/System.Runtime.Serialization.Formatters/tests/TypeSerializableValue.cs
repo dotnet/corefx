@@ -24,16 +24,33 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
-                // Check if a specialized blob for >=net471 is present and return if found.
-                // If no newer blob for >=net471 is present use existing one. 
+                // Check if a specialized blob for >=netfx471 is present and return if found.
+                if (PlatformDetection.IsNetfx471OrNewer)
+                {
+                    index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
+
+                    if (index >= 0)
+                        return index;
+                }
+                    
+                // If no newer blob for >=netfx471 is present use existing one. 
                 // If no netfx blob is present then -1 will be returned.
-                index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
-                return PlatformDetection.IsNetfx471OrNewer && (index >= 0) ? index : blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
+                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
             }
 
             // .NET Core
-            index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21);
-            return PlatformDetection.IsNetCore && (index >= 0) ? index : blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp));
+            if (PlatformDetection.IsNetCore)
+            {
+                // Check if a specialized blob for >=netcoreapp2.1 is present and return if found.
+                index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netcoreapp21);
+
+                if (index >= 0)
+                    return index;
+            }
+
+            // If no newer blob for >=netcoreapp2.1 is present use existing one. 
+            // If no netfx blob is present then -1 will be returned.
+            return blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp));
         }
     }
 
