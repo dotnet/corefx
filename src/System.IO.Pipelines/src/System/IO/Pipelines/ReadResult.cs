@@ -17,7 +17,7 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Creates a new instance of <see cref="ReadResult"/> setting <see cref="IsCanceled"/> and <see cref="IsCompleted"/> flags
         /// </summary>
-        public ReadResult(ReadOnlySequence<byte> buffer, bool isCanceled, bool isCompleted)
+        public ReadResult(in ReadOnlySequence<byte> buffer, bool isCanceled, bool isCompleted)
         {
             _resultBuffer = buffer;
             _resultFlags = ResultFlags.None;

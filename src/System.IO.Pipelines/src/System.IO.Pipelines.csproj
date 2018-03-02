@@ -16,13 +16,11 @@
     <Compile Include="System\IO\Pipelines\BufferSegment.cs" />
     <Compile Include="System\IO\Pipelines\FlushResult.cs" />
     <Compile Include="System\IO\Pipelines\InlineScheduler.cs" />
-    <Compile Include="System\IO\Pipelines\IPipeAwaiter.cs" />
     <Compile Include="System\IO\Pipelines\IDuplexPipe.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeReader.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeWriter.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.cs" />
     <Compile Include="System\IO\Pipelines\PipeAwaitable.cs" />
-    <Compile Include="System\IO\Pipelines\PipeAwaiter.cs" />
     <Compile Include="System\IO\Pipelines\PipeCompletion.cs" />
     <Compile Include="System\IO\Pipelines\PipeCompletionCallback.cs" />
     <Compile Include="System\IO\Pipelines\PipeCompletionCallbacks.cs" />
@@ -54,6 +52,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" Condition="'$(TargetGroup)' == 'netstandard1.1'" />
+    <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.ThreadPool" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

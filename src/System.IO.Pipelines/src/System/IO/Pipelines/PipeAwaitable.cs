@@ -11,18 +11,22 @@ namespace System.IO.Pipelines
     [DebuggerDisplay("CanceledState: {_canceledState}, IsCompleted: {IsCompleted}")]
     internal struct PipeAwaitable
     {
-        private static readonly Action _awaitableIsCompleted = () => { };
-        private static readonly Action _awaitableIsNotCompleted = () => { };
+        private static readonly Action<object> _awaitableIsCompleted = _ => { };
+        private static readonly Action<object> _awaitableIsNotCompleted = _ => { };
 
         private CanceledState _canceledState;
-        private Action _state;
+        private Action<object> _completion;
+        private object _completionState;
         private CancellationToken _cancellationToken;
         private CancellationTokenRegistration _cancellationTokenRegistration;
+        private PipeScheduler _scheduler;
 
         public PipeAwaitable(bool completed)
         {
             _canceledState = CanceledState.NotCanceled;
-            _state = completed ? _awaitableIsCompleted : _awaitableIsNotCompleted;
+            _completion = completed ? _awaitableIsCompleted : _awaitableIsNotCompleted;
+            _completionState = null;
+            _scheduler = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -43,26 +47,37 @@ namespace System.IO.Pipelines
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Action Complete()
+        public void Complete(out Action<object> completion, out object completionState, out PipeScheduler scheduler)
         {
-            Action awaitableState = _state;
-            _state = _awaitableIsCompleted;
+            Action<object> currentCompletion = _completion;
+            _completion = _awaitableIsCompleted;
+            object currentState = _completionState;
+            _completionState = null;
+            PipeScheduler currentScheduler = _scheduler;
+            _scheduler = null;
 
-            if (!ReferenceEquals(awaitableState, _awaitableIsCompleted) &&
-                !ReferenceEquals(awaitableState, _awaitableIsNotCompleted))
+            completionState = null;
+            completion = null;
+            scheduler = null;
+
+            if (!ReferenceEquals(currentCompletion, _awaitableIsCompleted) &&
+                !ReferenceEquals(currentCompletion, _awaitableIsNotCompleted))
             {
-                return awaitableState;
+                completion = currentCompletion;
+                completionState = currentState;
+                scheduler = currentScheduler;
             }
-            return null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
-            if (ReferenceEquals(_state, _awaitableIsCompleted) &&
+            if (ReferenceEquals(_completion, _awaitableIsCompleted) &&
                 _canceledState < CanceledState.CancellationPreRequested)
             {
-                _state = _awaitableIsNotCompleted;
+                _completion = _awaitableIsNotCompleted;
+                _completionState = null;
+                _scheduler = null;
             }
 
             // Change the state from observed -> not cancelled.
@@ -73,39 +88,54 @@ namespace System.IO.Pipelines
             }
         }
 
-        public bool IsCompleted => ReferenceEquals(_state, _awaitableIsCompleted);
-        internal bool HasContinuation => !ReferenceEquals(_state, _awaitableIsNotCompleted);
+        public bool IsCompleted => ReferenceEquals(_completion, _awaitableIsCompleted);
+        internal bool HasContinuation => !ReferenceEquals(_completion, _awaitableIsNotCompleted);
 
-        public Action OnCompleted(Action continuation, out bool doubleCompletion)
+        public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out Action<object> completion, out object completionState, out bool doubleCompletion)
         {
+            completionState = null;
+            completion = null;
+
             doubleCompletion = false;
-            Action awaitableState = _state;
+            Action<object> awaitableState = _completion;
             if (ReferenceEquals(awaitableState, _awaitableIsNotCompleted))
             {
-                _state = continuation;
+                _completion = continuation;
+                _completionState = state;
+
+                if ((flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
+                {
+                    // Set the scheduler to the current synchronization context if there is one
+                    // otherwise we delegate to what the pipe was configured with.
+                    // REVIEW: Should the sync context override the current scheduler if it was explicitly specifed
+                    // in the pipe options?
+                    if (SynchronizationContext.Current != null)
+                    {
+                        _scheduler = PipeScheduler.SynchronizationContext;
+                    }
+                }
             }
 
             if (ReferenceEquals(awaitableState, _awaitableIsCompleted))
             {
-                return continuation;
+                completion = continuation;
+                completionState = state;
             }
 
             if (!ReferenceEquals(awaitableState, _awaitableIsNotCompleted))
             {
                 doubleCompletion = true;
-                return continuation;
+                completion = continuation;
+                completionState = state;
             }
-
-            return null;
         }
 
-        public Action Cancel()
+        public void Cancel(out Action<object> completion, out object completionState, out PipeScheduler scheduler)
         {
-            Action action = Complete();
-            _canceledState = action == null ?
+            Complete(out completion, out completionState, out scheduler);
+            _canceledState = completion == null ?
                 CanceledState.CancellationPreRequested :
                 CanceledState.CancellationRequested;
-            return action;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

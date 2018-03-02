@@ -19,12 +19,6 @@ namespace System.IO.Pipelines
         System.IO.Pipelines.PipeReader Input { get; }
         System.IO.Pipelines.PipeWriter Output { get; }
     }
-    public partial interface IPipeAwaiter<out T>
-    {
-        bool IsCompleted { get; }
-        T GetResult();
-        void OnCompleted(System.Action continuation);
-    }
     public sealed partial class Pipe
     {
         public Pipe() { }
@@ -32,16 +26,6 @@ namespace System.IO.Pipelines
         public System.IO.Pipelines.PipeReader Reader { get { throw null; } }
         public System.IO.Pipelines.PipeWriter Writer { get { throw null; } }
         public void Reset() { }
-    }
-    public partial struct PipeAwaiter<T> : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
-    {
-        private object _dummy;
-        public PipeAwaiter(System.IO.Pipelines.IPipeAwaiter<T> awaiter) { throw null; }
-        public bool IsCompleted { get { throw null; } }
-        public System.IO.Pipelines.PipeAwaiter<T> GetAwaiter() { throw null; }
-        public T GetResult() { throw null; }
-        public void OnCompleted(System.Action continuation) { }
-        public void UnsafeOnCompleted(System.Action continuation) { }
     }
     public partial class PipeOptions
     {

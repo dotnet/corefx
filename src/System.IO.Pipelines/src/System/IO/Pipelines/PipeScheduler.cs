@@ -11,6 +11,12 @@ namespace System.IO.Pipelines
     {
         private static readonly ThreadPoolScheduler s_threadPoolScheduler = new ThreadPoolScheduler();
         private static readonly InlineScheduler s_inlineScheduler = new InlineScheduler();
+        private static readonly SynchronizationContextPipeScheduler s_synchronizationContextPipeScheduler = new SynchronizationContextPipeScheduler();
+
+        /// <summary>
+        /// Used when we're capturing the current sync context
+        /// </summary>
+        internal static SynchronizationContextPipeScheduler SynchronizationContext => s_synchronizationContextPipeScheduler;
 
         /// <summary>
         /// The <see cref="PipeScheduler"/> implementation that queues callbacks to thread pool
@@ -23,13 +29,8 @@ namespace System.IO.Pipelines
         public static PipeScheduler Inline => s_inlineScheduler;
 
         /// <summary>
-        /// Requests <paramref name="action"/> to be run on scheduler
-        /// </summary>
-        public abstract void Schedule(Action action);
-
-        /// <summary>
         /// Requests <paramref name="action"/> to be run on scheduler with <paramref name="state"/> being passed in
         /// </summary>
-        public abstract void Schedule(Action<object> action, object state);
+        public abstract void Schedule<TState>(Action<TState> action, TState state);
     }
 }

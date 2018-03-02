@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO.Pipelines
 {
@@ -18,7 +19,7 @@ namespace System.IO.Pipelines
 
         private static readonly Action<object> s_signalReaderAwaitable = state => ((Pipe)state).ReaderCancellationRequested();
         private static readonly Action<object> s_signalWriterAwaitable = state => ((Pipe)state).WriterCancellationRequested();
-        private static readonly Action<object> s_invokeCompletionCallbacks = state => ((PipeCompletionCallbacks)state).Execute();
+        private static readonly Action<PipeCompletionCallbacks> s_invokeCompletionCallbacks = state => state.Execute();
 
         // This sync objects protects the following state:
         // 1. _commitHead & _commitHeadIndex
@@ -279,9 +280,11 @@ namespace System.IO.Pipelines
             // and if zero, just do nothing; don't need to validate tail etc
         }
 
-        internal PipeAwaiter<FlushResult> FlushAsync(CancellationToken cancellationToken)
+        internal ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken)
         {
-            Action awaitable;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler pipeScheduler;
             CancellationTokenRegistration cancellationTokenRegistration;
             lock (_sync)
             {
@@ -291,21 +294,23 @@ namespace System.IO.Pipelines
                     CommitUnsynchronized();
                 }
 
-                awaitable = _readerAwaitable.Complete();
+                _readerAwaitable.Complete(out completion, out completionState, out pipeScheduler);
 
                 cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
             }
 
             cancellationTokenRegistration.Dispose();
 
-            TrySchedule(_readerScheduler, awaitable);
+            TrySchedule(pipeScheduler ?? _readerScheduler, completion, completionState);
 
-            return new PipeAwaiter<FlushResult>(_writer);
+            return new ValueTask<FlushResult>(_writer);
         }
 
         internal void CompleteWriter(Exception exception)
         {
-            Action awaitable;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler scheduler;
             PipeCompletionCallbacks completionCallbacks;
             bool readerCompleted;
 
@@ -315,7 +320,7 @@ namespace System.IO.Pipelines
                 CommitUnsynchronized();
 
                 completionCallbacks = _writerCompletion.TryComplete(exception);
-                awaitable = _readerAwaitable.Complete();
+                _readerAwaitable.Complete(out completion, out completionState, out scheduler);
                 readerCompleted = _readerCompletion.IsCompleted;
             }
 
@@ -324,7 +329,7 @@ namespace System.IO.Pipelines
                 TrySchedule(_readerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
             }
 
-            TrySchedule(_readerScheduler, awaitable);
+            TrySchedule(scheduler ?? _readerScheduler, completion, completionState);
 
             if (readerCompleted)
             {
@@ -355,7 +360,9 @@ namespace System.IO.Pipelines
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
 
-            Action continuation = null;
+            Action<object> completion = null;
+            object completionState = null;
+            PipeScheduler scheduler;
             lock (_sync)
             {
                 var examinedEverything = false;
@@ -383,7 +390,7 @@ namespace System.IO.Pipelines
                     if (oldLength >= _resumeWriterThreshold &&
                         _length < _resumeWriterThreshold)
                     {
-                        continuation = _writerAwaitable.Complete();
+                        _writerAwaitable.Complete(out completion, out completionState, out scheduler);
                     }
 
                     // Check if we consumed entire last segment
@@ -431,13 +438,15 @@ namespace System.IO.Pipelines
                 _readingState.End();
             }
 
-            TrySchedule(_writerScheduler, continuation);
+            TrySchedule(scheduler ?? _writerScheduler, completion, completionState);
         }
 
         internal void CompleteReader(Exception exception)
         {
             PipeCompletionCallbacks completionCallbacks;
-            Action awaitable;
+            Action<object> completion;
+            PipeScheduler scheduler;
+            object completionState;
             bool writerCompleted;
 
             lock (_sync)
@@ -452,7 +461,7 @@ namespace System.IO.Pipelines
                 // on the reader side now.
 
                 completionCallbacks = _readerCompletion.TryComplete(exception);
-                awaitable = _writerAwaitable.Complete();
+                _writerAwaitable.Complete(out completion, out completionState, out scheduler);
                 writerCompleted = _writerCompletion.IsCompleted;
             }
 
@@ -461,7 +470,7 @@ namespace System.IO.Pipelines
                 TrySchedule(_writerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
             }
 
-            TrySchedule(_writerScheduler, awaitable);
+            TrySchedule(scheduler ?? _writerScheduler, completion, completionState);
 
             if (writerCompleted)
             {
@@ -490,22 +499,26 @@ namespace System.IO.Pipelines
 
         internal void CancelPendingRead()
         {
-            Action awaitable;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler scheduler;
             lock (_sync)
             {
-                awaitable = _readerAwaitable.Cancel();
+                _readerAwaitable.Cancel(out completion, out completionState, out scheduler);
             }
-            TrySchedule(_readerScheduler, awaitable);
+            TrySchedule(scheduler ?? _readerScheduler, completion, completionState);
         }
 
         internal void CancelPendingFlush()
         {
-            Action awaitable;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler scheduler;
             lock (_sync)
             {
-                awaitable = _writerAwaitable.Cancel();
+                _writerAwaitable.Cancel(out completion, out completionState, out scheduler);
             }
-            TrySchedule(_writerScheduler, awaitable);
+            TrySchedule(scheduler ?? _writerScheduler, completion, completionState);
         }
 
         internal void OnReaderCompleted(Action<Exception, object> callback, object state)
@@ -527,7 +540,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal PipeAwaiter<ReadResult> ReadAsync(CancellationToken token)
+        internal ValueTask<ReadResult> ReadAsync(CancellationToken token)
         {
             CancellationTokenRegistration cancellationTokenRegistration;
             if (_readerCompletion.IsCompleted)
@@ -539,7 +552,7 @@ namespace System.IO.Pipelines
                 cancellationTokenRegistration = _readerAwaitable.AttachToken(token, s_signalReaderAwaitable, this);
             }
             cancellationTokenRegistration.Dispose();
-            return new PipeAwaiter<ReadResult>(_reader);
+            return new ValueTask<ReadResult>(_reader);
         }
 
         internal bool TryRead(out ReadResult result)
@@ -566,15 +579,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        private static void TrySchedule(PipeScheduler scheduler, Action action)
-        {
-            if (action != null)
-            {
-                scheduler.Schedule(action);
-            }
-        }
-
-        private static void TrySchedule(PipeScheduler scheduler, Action<object> action, object state)
+        private static void TrySchedule<TState>(PipeScheduler scheduler, Action<TState> action, TState state)
         {
             if (action != null)
             {
@@ -610,21 +615,34 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal bool IsReadAsyncCompleted => _readerAwaitable.IsCompleted;
-
-        internal void OnReadAsyncCompleted(Action continuation)
+        internal ValueTaskSourceStatus GetReadAsyncStatus()
         {
-            Action awaitable;
+            if (_readerAwaitable.IsCompleted)
+            {
+                if (_writerCompletion.IsFaulted)
+                {
+                    return ValueTaskSourceStatus.Faulted;
+                }
+
+                return ValueTaskSourceStatus.Succeeded;
+            }
+            return ValueTaskSourceStatus.Pending;
+        }
+
+        internal void OnReadAsyncCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags)
+        {
+            Action<object> completion;
+            object completionState;
             bool doubleCompletion;
             lock (_sync)
             {
-                awaitable = _readerAwaitable.OnCompleted(continuation, out doubleCompletion);
+                _readerAwaitable.OnCompleted(continuation, state, flags, out completion, out completionState, out doubleCompletion);
             }
             if (doubleCompletion)
             {
                 Writer.Complete(ThrowHelper.CreateInvalidOperationException_NoConcurrentOperation());
             }
-            TrySchedule(_readerScheduler, awaitable);
+            TrySchedule(_readerScheduler, completion, completionState);
         }
 
         internal ReadResult GetReadAsyncResult()
@@ -674,7 +692,19 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal bool IsFlushAsyncCompleted => _writerAwaitable.IsCompleted;
+        internal ValueTaskSourceStatus GetFlushAsyncStatus()
+        {
+            if (_writerAwaitable.IsCompleted)
+            {
+                if (_readerCompletion.IsFaulted)
+                {
+                    return ValueTaskSourceStatus.Faulted;
+                }
+
+                return ValueTaskSourceStatus.Succeeded;
+            }
+            return ValueTaskSourceStatus.Pending;
+        }
 
         internal FlushResult GetFlushAsyncResult()
         {
@@ -700,39 +730,44 @@ namespace System.IO.Pipelines
             return result;
         }
 
-        internal void OnFlushAsyncCompleted(Action continuation)
+        internal void OnFlushAsyncCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags)
         {
-            Action awaitable;
+            Action<object> completion;
+            object completionState;
             bool doubleCompletion;
             lock (_sync)
             {
-                awaitable = _writerAwaitable.OnCompleted(continuation, out doubleCompletion);
+                _writerAwaitable.OnCompleted(continuation, state, flags, out completion, out completionState, out doubleCompletion);
             }
             if (doubleCompletion)
             {
                 Reader.Complete(ThrowHelper.CreateInvalidOperationException_NoConcurrentOperation());
             }
-            TrySchedule(_writerScheduler, awaitable);
+            TrySchedule(_writerScheduler, completion, completionState);
         }
 
         private void ReaderCancellationRequested()
         {
-            Action action;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler scheduler;
             lock (_sync)
             {
-                action = _readerAwaitable.Cancel();
+                _readerAwaitable.Cancel(out completion, out completionState, out scheduler);
             }
-            TrySchedule(_readerScheduler, action);
+            TrySchedule(scheduler ?? _readerScheduler, completion, completionState);
         }
 
         private void WriterCancellationRequested()
         {
-            Action action;
+            Action<object> completion;
+            object completionState;
+            PipeScheduler scheduler;
             lock (_sync)
             {
-                action = _writerAwaitable.Cancel();
+                _writerAwaitable.Cancel(out completion, out completionState, out scheduler);
             }
-            TrySchedule(_writerScheduler, action);
+            TrySchedule(scheduler ?? _writerScheduler, completion, completionState);
         }
 
         /// <summary>
