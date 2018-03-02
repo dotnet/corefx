@@ -143,7 +143,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                return _comparer;
+                return (_comparer is NonRandomizedStringEqualityComparer) ? (IEqualityComparer<TKey>)EqualityComparer<string>.Default : _comparer;
             }
         }
 
@@ -768,13 +768,69 @@ namespace System.Collections.Generic
         {
             if (capacity < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.capacity);
-            if (_entries != null && _entries.Length >= capacity)
-                return _entries.Length;
+            int currentCapacity = _entries == null ? 0 : _entries.Length;
+            if (currentCapacity >= capacity)
+                return currentCapacity;
             if (_buckets == null)
                 return Initialize(capacity);
             int newSize = HashHelpers.GetPrime(capacity);
             Resize(newSize, forceNewHashCodes: false);
             return newSize;
+        }
+
+        /// <summary>
+        /// Sets the capacity of this dictionary to what it would be if it had been originally initialized with all its entries
+        /// 
+        /// This method can be used to minimize the memory overhead 
+        /// once it is known that no new elements will be added. 
+        /// 
+        /// To allocate minimum size storage array, execute the following statements:
+        /// 
+        /// dictionary.Clear();
+        /// dictionary.TrimExcess();
+        /// </summary>
+        public void TrimExcess()
+        {
+            TrimExcess(Count);
+        }
+
+        /// <summary>
+        /// Sets the capacity of this dictionary to hold up 'capacity' entries without any further expansion of its backing storage
+        /// 
+        /// This method can be used to minimize the memory overhead 
+        /// once it is known that no new elements will be added. 
+        /// </summary>
+        public void TrimExcess(int capacity)
+        {
+            if (capacity < Count)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.capacity);
+            int newSize = HashHelpers.GetPrime(capacity);
+
+            Entry[] oldEntries = _entries;
+            int currentCapacity = oldEntries == null ? 0 : oldEntries.Length;
+            if (newSize >= currentCapacity)
+                return;
+
+            int oldCount = _count;
+            Initialize(newSize);
+            Entry[] entries = _entries;
+            int[] buckets = _buckets;
+            int count = 0;
+            for (int i = 0; i < oldCount; i++)
+            {
+                int hashCode = oldEntries[i].hashCode;
+                if (hashCode >= 0)
+                {
+                    ref Entry entry = ref entries[count];
+                    entry = oldEntries[i];
+                    int bucket = hashCode % newSize;
+                    entry.next = buckets[bucket];
+                    buckets[bucket] = count;
+                    count++;
+                }
+            }
+            _count = count;
+            _freeCount = 0;
         }
 
         bool ICollection.IsSynchronized

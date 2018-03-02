@@ -6,7 +6,7 @@ using System.Diagnostics.Tracing;
 
 namespace System.Buffers
 {
-    [EventSource(Name = "System.Buffers.ArrayPoolEventSource")]
+    [EventSource(Guid = "0866B2B8-5CEF-5DB9-2612-0C0FFD814A44", Name = "System.Buffers.ArrayPoolEventSource")]
     internal sealed class ArrayPoolEventSource : EventSource
     {
         internal readonly static ArrayPoolEventSource Log = new ArrayPoolEventSource();
@@ -22,6 +22,9 @@ namespace System.Buffers
             PoolExhausted
         }
 
+        // The ArrayPoolEventSource GUID is {0866b2b8-5cef-5db9-2612-0c0ffd814a44}
+        private ArrayPoolEventSource() : base(new Guid(0x0866b2b8, 0x5cef, 0x5db9, 0x26, 0x12, 0x0c, 0x0f, 0xfd, 0x81, 0x4a, 0x44), "System.Buffers.ArrayPoolEventSource") { }
+
         /// <summary>
         /// Event for when a buffer is rented.  This is invoked once for every successful call to Rent,
         /// regardless of whether a buffer is allocated or a buffer is taken from the pool.  In a
@@ -36,12 +39,16 @@ namespace System.Buffers
             EventData* payload = stackalloc EventData[4];
             payload[0].Size = sizeof(int);
             payload[0].DataPointer = ((IntPtr)(&bufferId));
+            payload[0].Reserved = 0;
             payload[1].Size = sizeof(int);
             payload[1].DataPointer = ((IntPtr)(&bufferSize));
+            payload[1].Reserved = 0;
             payload[2].Size = sizeof(int);
             payload[2].DataPointer = ((IntPtr)(&poolId));
+            payload[2].Reserved = 0;
             payload[3].Size = sizeof(int);
             payload[3].DataPointer = ((IntPtr)(&bucketId));
+            payload[3].Reserved = 0;
             WriteEventCore(1, 4, payload);
         }
 
@@ -56,14 +63,19 @@ namespace System.Buffers
             EventData* payload = stackalloc EventData[5];
             payload[0].Size = sizeof(int);
             payload[0].DataPointer = ((IntPtr)(&bufferId));
+            payload[0].Reserved = 0;
             payload[1].Size = sizeof(int);
             payload[1].DataPointer = ((IntPtr)(&bufferSize));
+            payload[1].Reserved = 0;
             payload[2].Size = sizeof(int);
             payload[2].DataPointer = ((IntPtr)(&poolId));
+            payload[2].Reserved = 0;
             payload[3].Size = sizeof(int);
             payload[3].DataPointer = ((IntPtr)(&bucketId));
+            payload[3].Reserved = 0;
             payload[4].Size = sizeof(BufferAllocatedReason);
             payload[4].DataPointer = ((IntPtr)(&reason));
+            payload[4].Reserved = 0;
             WriteEventCore(2, 5, payload);
         }
 

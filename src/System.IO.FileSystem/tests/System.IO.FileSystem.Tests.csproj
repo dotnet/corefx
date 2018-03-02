@@ -53,6 +53,18 @@
     <Compile Include="File\ReadWriteAllBytesAsync.cs" />
     <Compile Include="File\ReadWriteAllTextAsync.cs" />
     <Compile Include="FileStream\ReadWriteSpan.netcoreapp.cs" />
+    <Compile Include="Enumeration\ConstructionTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SkipAttributeTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\Win32MatcherTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\MatchCasingTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\TrimmedPaths.netcoreapp.cs" />
+    <Compile Include="Enumeration\ErrorHandlingTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\IncludePredicateTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\PatternTransformTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\RootTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\AttributeTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\MatchTypesTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
@@ -163,6 +175,9 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo.cs" />
     <!-- Helpers -->
+    <Compile Include="$(CommonTestPath)\System\Buffers\NativeOwnedMemory.cs">
+      <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
@@ -181,5 +196,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

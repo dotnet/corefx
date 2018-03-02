@@ -40,7 +40,9 @@ namespace System.SpanTests
         public static void NullArrayAsReadOnlySpan()
         {
             int[] a = null;
-            Assert.Throws<ArgumentNullException>(() => a.AsReadOnlySpan().DontBox());
+            ReadOnlySpan<int> span = a.AsReadOnlySpan();
+            span.Validate();
+            Assert.True(span == default);
         }
 
         [Fact]
@@ -100,7 +102,7 @@ namespace System.SpanTests
         public static void StringAsReadOnlySpanNullary()
         {
             string s = "Hello";
-            ReadOnlySpan<char> span = s.AsReadOnlySpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             char[] expected = s.ToCharArray();
             span.Validate(expected);
         }
@@ -109,7 +111,7 @@ namespace System.SpanTests
         public static void StringAsReadOnlySpanEmptyString()
         {
             string s = "";
-            ReadOnlySpan<char> span = s.AsReadOnlySpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             span.ValidateNonNullEmpty();
         }
 
@@ -117,9 +119,31 @@ namespace System.SpanTests
         public static void StringAsReadOnlySpanNullChecked()
         {
             string s = null;
-            Assert.Throws<ArgumentNullException>(() => s.AsReadOnlySpan().DontBox());
-            Assert.Throws<ArgumentNullException>(() => s.AsReadOnlySpan(0).DontBox());
-            Assert.Throws<ArgumentNullException>(() => s.AsReadOnlySpan(0, 0).DontBox());
+            ReadOnlySpan<char> span = s.AsSpan();
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0);
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0, 0);
+            span.Validate();
+            Assert.True(span == default);
+        }
+
+        [Fact]
+        public static void StringAsReadOnlySpanNullNonZeroStartAndLength()
+        {
+            string str = null;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1).DontBox());
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(0, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 0).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1, -1).DontBox());
         }
 
         [Fact]
@@ -148,16 +172,16 @@ namespace System.SpanTests
             {
                 start = 0;
                 length = text.Length;
-                span = text.AsReadOnlySpan();
+                span = text.AsSpan();
             }
             else if (length == -1)
             {
                 length = text.Length - start;
-                span = text.AsReadOnlySpan(start);
+                span = text.AsSpan(start);
             }
             else
             {
-                span = text.AsReadOnlySpan(start, length);
+                span = text.AsSpan(start, length);
             }
 
             Assert.Equal(length, span.Length);
@@ -174,14 +198,14 @@ namespace System.SpanTests
         [MemberData(nameof(TestHelpers.StringSlice2ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
         public static unsafe void AsReadOnlySpan_2Arg_OutOfRange(string text, int start)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsReadOnlySpan(start).DontBox());
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start).DontBox());
         }
 
         [Theory]
         [MemberData(nameof(TestHelpers.StringSlice3ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
         public static unsafe void AsReadOnlySpan_3Arg_OutOfRange(string text, int start, int length)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsReadOnlySpan(start, length).DontBox());
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start, length).DontBox());
         }
     }
 }

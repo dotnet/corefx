@@ -182,7 +182,7 @@ namespace System.Diagnostics.Tracing
             //
 
             //
-            // check if the object has been allready disposed
+            // check if the object has been already disposed
             //
             if (m_disposed) return;
 
@@ -258,12 +258,6 @@ namespace System.Diagnostics.Tracing
                     m_level = setLevel;
                     m_anyKeywordMask = anyKeyword;
                     m_allKeywordMask = allKeyword;
-
-                    // ES_SESSION_INFO is a marker for additional places we #ifdeffed out to remove
-                    // references to EnumerateTraceGuidsEx.  This symbol is actually not used because
-                    // today we use FEATURE_ACTIVITYSAMPLING to determine if this code is there or not.
-                    // However we put it in the #if so that we don't lose the fact that this feature
-                    // switch is at least partially independent of FEATURE_ACTIVITYSAMPLING
 
                     List<Tuple<SessionInfo, bool>> sessionsChanged = GetSessions();
                     foreach (var session in sessionsChanged)
@@ -567,7 +561,7 @@ namespace System.Diagnostics.Tracing
             if (filterData == null)
             {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN && PLATFORM_WINDOWS)
-                string regKey = @"\Microsoft\Windows\CurrentVersion\Winevt\Publishers\{" + m_providerName + "}";
+                string regKey = @"\Microsoft\Windows\CurrentVersion\Winevt\Publishers\{" + m_providerId + "}";
                 if (System.Runtime.InteropServices.Marshal.SizeOf(typeof(IntPtr)) == 8)
                     regKey = @"HKEY_LOCAL_MACHINE\Software" + @"\Wow6432Node" + regKey;
                 else
@@ -964,6 +958,8 @@ namespace System.Diagnostics.Tracing
                     List<int> refObjPosition = new List<int>(s_etwAPIMaxRefObjCount);
                     List<object> dataRefObj = new List<object>(s_etwAPIMaxRefObjCount);
                     EventData* userData = stackalloc EventData[2 * argCount];
+                    for (int i = 0; i < 2 * argCount; i++)
+                        userData[i] = default(EventData);
                     EventData* userDataPtr = (EventData*)userData;
                     byte* dataBuffer = stackalloc byte[s_basicTypeAllocationBufferSize * 2 * argCount]; // Assume 16 chars for non-string argument
                     byte* currentBuffer = dataBuffer;

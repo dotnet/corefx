@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace System.IO
 {
@@ -22,7 +23,7 @@ namespace System.IO
 
         internal const string ParentDirectoryPrefix = @"../";
 
-        internal static int GetRootLength(string path)
+        internal static int GetRootLength(ReadOnlySpan<char> path)
         {
             return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
         }
@@ -40,7 +41,8 @@ namespace System.IO
         /// </summary>
         internal static string NormalizeDirectorySeparators(string path)
         {
-            if (string.IsNullOrEmpty(path)) return path;
+            if (string.IsNullOrEmpty(path))
+                return path;
 
             // Make a pass to see if we need to normalize so we can potentially skip allocating
             bool normalized = true;
@@ -55,7 +57,8 @@ namespace System.IO
                 }
             }
 
-            if (normalized) return path;
+            if (normalized)
+                return path;
 
             StringBuilder builder = new StringBuilder(path.Length);
 
@@ -73,31 +76,13 @@ namespace System.IO
 
             return builder.ToString();
         }
-        
-        /// <summary>
-        /// Returns true if the character is a directory or volume separator.
-        /// </summary>
-        /// <param name="ch">The character to test.</param>
-        internal static bool IsDirectoryOrVolumeSeparator(char ch)
-        {
-            // The directory separator, volume separator, and the alternate directory
-            // separator should be the same on Unix, so we only need to check one.
-            Debug.Assert(DirectorySeparatorChar == AltDirectorySeparatorChar);
-            Debug.Assert(DirectorySeparatorChar == VolumeSeparatorChar);
-            return ch == DirectorySeparatorChar;
-        }
 
-        internal static bool IsPartiallyQualified(string path)
+        internal static bool IsPartiallyQualified(ReadOnlySpan<char> path)
         {
             // This is much simpler than Windows where paths can be rooted, but not fully qualified (such as Drive Relative)
             // As long as the path is rooted in Unix it doesn't use the current directory and therefore is fully qualified.
             return !Path.IsPathRooted(path);
         }
-
-        internal static string TrimEndingDirectorySeparator(string path) =>
-            path.Length > 1 && IsDirectorySeparator(path[path.Length - 1]) ? // exclude root "/"
-            path.Substring(0, path.Length - 1) :
-            path;
 
         /// <summary>
         /// Returns true if the path is effectively empty for the current OS.
@@ -107,6 +92,11 @@ namespace System.IO
         internal static bool IsEffectivelyEmpty(string path)
         {
             return string.IsNullOrEmpty(path);
+        }
+
+        internal static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
+        {
+            return path.IsEmpty;
         }
     }
 }

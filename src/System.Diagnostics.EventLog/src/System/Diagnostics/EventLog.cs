@@ -374,7 +374,7 @@ namespace System.Diagnostics
         public static void Delete(string logName, string machineName)
         {
             if (!SyntaxCheck.CheckMachineName(machineName))
-                throw new ArgumentException(SR.InvalidParameterFormat, nameof(machineName));
+                throw new ArgumentException(SR.Format(SR.InvalidParameterFormat, nameof(machineName)), nameof(machineName));
             if (logName == null || logName.Length == 0)
                 throw new ArgumentException(SR.NoLogName);
             if (!ValidLogName(logName, false))
@@ -656,7 +656,7 @@ namespace System.Diagnostics
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
 
-            string[] logNames = new string[0];
+            string[] logNames = null;
 
             RegistryKey eventkey = null;
             try
@@ -814,7 +814,7 @@ namespace System.Diagnostics
             }
 
             // If you pass in an empty array UnsafeTryFormatMessage will just pull out the message.
-            string formatString = UnsafeTryFormatMessage(hModule, messageNum, new string[0]);
+            string formatString = UnsafeTryFormatMessage(hModule, messageNum, Array.Empty<string>());
 
             if (formatString == null)
             {

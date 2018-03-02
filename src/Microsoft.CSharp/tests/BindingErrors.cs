@@ -8,9 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xunit;
 
 namespace Microsoft.CSharp.RuntimeBinder.Tests
@@ -424,6 +426,137 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         {
             dynamic d = new object();
             Assert.Throws<RuntimeBinderException>(() => DoStuff(d));
+        }
+
+        public class Outer
+        {
+            public class Inner
+            {
+                public void DoNothing()
+                {
+                }
+            }
+        }
+
+        [Fact]
+        public void TryInvokeOrAccessNestedClassAsMember()
+        {
+            dynamic dFirst = new Outer.Inner();
+            dFirst.DoNothing();
+            dynamic d = new Outer();
+            Assert.Throws<RuntimeBinderException>(() => d.Inner<int>());
+            Assert.Throws<RuntimeBinderException>(() => d.Inner());
+            Assert.Throws<RuntimeBinderException>(() => d.Inner = 2);
+            Assert.Throws<RuntimeBinderException>(
+                () =>
+                {
+                    int i = d.Inner<int>();
+                });
+        }
+
+        [Fact]
+        public void TryInvokeTypeParameterAsMember()
+        {
+            dynamic d = new List<int>();
+            Assert.Throws<RuntimeBinderException>(() => d.T);
+            Assert.Throws<RuntimeBinderException>(() => d.T());
+            Assert.Throws<RuntimeBinderException>(() => d.T<int>());
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                int i = d.T;
+            });
+        }
+
+        public class BaseForOuterWithMethod
+        {
+            public int Inner() => 42;
+        }
+
+        public class DerivedOuterHidingMethod : BaseForOuterWithMethod
+        {
+            public new class Inner
+            {
+                public void DoNothing()
+                {
+                }
+            }
+        }
+
+        [Fact]
+        public void AccessMethodHiddenByNested()
+        {
+            dynamic dFirst = new DerivedOuterHidingMethod.Inner();
+            dFirst.DoNothing();
+            dynamic d = new DerivedOuterHidingMethod();
+            Assert.Equal(42, d.Inner());
+        }
+
+        public class BaseForOuterWithNested
+        {
+            public class Inner
+            {
+                public void DoNothing()
+                {
+                }
+            }
+        }
+
+        public class DerivedOuterHidingNested : BaseForOuterWithNested
+        {
+            public new int Inner() => 42;
+        }
+
+        [Fact]
+        public void AccessMethodHidingNested()
+        {
+            dynamic dFirst = new BaseForOuterWithNested.Inner();
+            dFirst.DoNothing();
+            dynamic d = new DerivedOuterHidingNested();
+            Assert.Equal(42, d.Inner());
+		}
+
+        [Fact]
+        public void CannotCallOperatorDirectly()
+        {
+            CultureInfo prev = CultureInfo.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            dynamic d = "";
+            RuntimeBinderException e = Assert.Throws<RuntimeBinderException>(() => d.op_Equality("", ""));
+            Assert.Equal("'string.operator ==(string, string)': cannot explicitly call operator or accessor", e.Message);
+            Thread.CurrentThread.CurrentCulture = prev;
+        }
+
+        [Fact]
+        public void CannotCallAccessorDirectly()
+        {
+            CultureInfo prev = CultureInfo.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            dynamic d = "";
+            RuntimeBinderException e = Assert.Throws<RuntimeBinderException>(() => d.get_Length());
+            Assert.Equal("'string.Length.get': cannot explicitly call operator or accessor", e.Message);
+            Thread.CurrentThread.CurrentCulture = prev;
+        }
+
+        [Fact]
+        public void AllowIndexerAccess()
+        {
+            // Indexers' accessors can be accessed directly. This is against the C# rules, which only allow
+            // direct access of indexer accessors when they are not the default member as C# has no other
+            // way to express such access, but being stricter would be a breaking change.
+            List<int> list = new List<int> { 1, 2, 3 };
+            dynamic d = list;
+            d.set_Item(2, 4);
+            dynamic e = d.get_Item(2);
+            Assert.Equal(4, e);
+            Assert.Equal(4, list[2]);
+        }
+
+        [Fact]
+        public void AllowStringIndexerAccess()
+        {
+            dynamic d = "abcd";
+            char c = d.get_Chars(2);
+            Assert.Equal('c', c);
         }
     }
 }

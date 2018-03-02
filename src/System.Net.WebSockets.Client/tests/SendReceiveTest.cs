@@ -305,7 +305,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(23765)]
+        [ActiveIssue(23765, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_VaryingLengthBuffers_Success(Uri server)
@@ -381,25 +381,23 @@ namespace System.Net.WebSockets.Client.Tests
         {
             var options = new LoopbackServer.Options { WebSocketEndpoint = true };
 
-            Func<ClientWebSocket, Socket, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
+            Func<ClientWebSocket, LoopbackServer, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
             {
                 AutoResetEvent pendingReceiveAsyncPosted =  new AutoResetEvent(false);
 
                 // Start listening for incoming connections on the server side.
-                Task<List<string>> acceptTask = LoopbackServer.AcceptSocketAsync(server, async (socket, stream, reader, writer) =>
+                Task acceptTask = server.AcceptConnectionAsync(async connection =>
                 {
                     // Complete the WebSocket upgrade. After this is done, the client-side ConnectAsync should complete.
-                    Assert.True(await LoopbackServer.WebSocketHandshakeAsync(socket, reader, writer));
+                    Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(connection));
 
                     // Wait for client-side ConnectAsync to complete and for a pending ReceiveAsync to be posted.
                     pendingReceiveAsyncPosted.WaitOne(TimeOutMilliseconds);
 
                     // Close the underlying connection prematurely (without sending a WebSocket Close frame).
-                    socket.Shutdown(SocketShutdown.Both);
-                    socket.Close();
-
-                    return null;
-                }, options);
+                    connection.Socket.Shutdown(SocketShutdown.Both);
+                    connection.Socket.Close();
+                });
 
                 // Initiate a connection attempt.
                 var cts = new CancellationTokenSource(TimeOutMilliseconds);
@@ -414,59 +412,27 @@ namespace System.Net.WebSockets.Client.Tests
                 // Wait for the server to close the underlying connection.
                 acceptTask.Wait(cts.Token);
 
-                // Validate I/O errors and socket state.
-                if (PlatformDetection.IsFullFramework)
+                WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
+
+                Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
+
+                if (PlatformDetection.IsUap)
                 {
-                    _output.WriteLine("[Windows] ManagedWebSocket-based implementation.");
-
-                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
-                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
-
-                    WebSocketException newReceiveException =
-                        await Assert.ThrowsAsync<WebSocketException>(() => ReceiveAsync(clientSocket, recvSegment, cts.Token));
-                    Assert.Equal(WebSocketError.Success, newReceiveException.WebSocketErrorCode);
-                    Assert.Equal(
-                        ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
-                        newReceiveException.Message);
-
-                    Assert.Equal(WebSocketState.Aborted, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
-                }
-                else if (PlatformDetection.IsUap)
-                {
-                    _output.WriteLine("WinRTWebSocket-based implementation.");
-
                     const uint WININET_E_CONNECTION_ABORTED = 0x80072EFE;
 
-                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
-                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
                     Assert.NotNull(pendingReceiveException.InnerException);
                     Assert.Equal(WININET_E_CONNECTION_ABORTED, (uint)pendingReceiveException.InnerException.HResult);
-
-                    WebSocketException newReceiveException =
-                        await Assert.ThrowsAsync<WebSocketException>(() => ReceiveAsync(clientSocket, recvSegment, cts.Token));
-                    Assert.Equal(WebSocketError.Success, newReceiveException.WebSocketErrorCode);
-                    Assert.Equal(
-                        ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
-                        newReceiveException.Message);
-
-                    Assert.Equal(WebSocketState.Aborted, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
                 }
-                else
-                {
-                    _output.WriteLine("[Non-Windows] ManagedWebSocket-based implementation.");
 
-                    WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
-                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, pendingReceiveException.WebSocketErrorCode);
-
-                    WebSocketException newReceiveException =
+                WebSocketException newReceiveException =
                         await Assert.ThrowsAsync<WebSocketException>(() => ReceiveAsync(clientSocket, recvSegment, cts.Token));
-                    Assert.Equal(WebSocketError.ConnectionClosedPrematurely, newReceiveException.WebSocketErrorCode);
+                
+                Assert.Equal(
+                    ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
+                    newReceiveException.Message);
 
-                    Assert.Equal(WebSocketState.Open, clientSocket.State);
-                    Assert.Null(clientSocket.CloseStatus);
-                }
+                Assert.Equal(WebSocketState.Aborted, clientSocket.State);
+                Assert.Null(clientSocket.CloseStatus);
             };
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>

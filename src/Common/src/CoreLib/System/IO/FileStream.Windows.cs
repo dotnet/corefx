@@ -268,7 +268,15 @@ namespace System.IO
                     // want us to do this.
                     if (_writePos > 0)
                     {
-                        FlushWriteBuffer(!disposing);
+                        try
+                        {
+                            FlushWriteBuffer(!disposing);
+                        }
+                        catch (Exception e) when (IsIoRelatedException(e) && !disposing)
+                        {
+                            // On finalization, ignore failures from trying to flush the write buffer,
+                            // e.g. if this stream is wrapping a pipe and the pipe is now broken.
+                        }
                     }
                 }
             }
@@ -848,9 +856,7 @@ namespace System.IO
             Debug.Assert(_useAsyncIO, "ReadNativeAsync doesn't work on synchronous file streams!");
 
             // Create and store async stream class library specific data in the async result
-            FileStreamCompletionSource completionSource = destination.TryGetArray(out ArraySegment<byte> memoryArray) ?
-                new FileStreamCompletionSource(this, numBufferedBytesRead, memoryArray.Array) :
-                new MemoryFileStreamCompletionSource(this, numBufferedBytesRead, destination);
+            FileStreamCompletionSource completionSource = FileStreamCompletionSource.Create(this, numBufferedBytesRead, destination);
             NativeOverlapped* intOverlapped = completionSource.Overlapped;
 
             // Calculate position in the file we should be at after the read is done
@@ -955,7 +961,7 @@ namespace System.IO
             return completionSource.Task;
         }
 
-        private Task WriteAsyncInternal(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        private ValueTask WriteAsyncInternal(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             Debug.Assert(_useAsyncIO);
             Debug.Assert((_readPos == 0 && _readLength == 0 && _writePos >= 0) || (_writePos == 0 && _readPos <= _readLength), "We're either reading or writing, but not both.");
@@ -999,7 +1005,7 @@ namespace System.IO
                     // completely, we want to do the asynchronous flush/write as part of this operation 
                     // rather than waiting until the next write that fills the buffer.
                     if (source.Length != remainingBuffer)
-                        return Task.CompletedTask;
+                        return default;
 
                     Debug.Assert(_writePos == _bufferLength);
                 }
@@ -1045,7 +1051,7 @@ namespace System.IO
                     flushTask.IsFaulted ||
                     flushTask.IsCanceled)
                 {
-                    return flushTask;
+                    return new ValueTask(flushTask);
                 }
             }
 
@@ -1055,10 +1061,10 @@ namespace System.IO
             // Finally, issue the write asynchronously, and return a Task that logically
             // represents the write operation, including any flushing done.
             Task writeTask = WriteAsyncInternalCore(source, cancellationToken);
-            return
+            return new ValueTask(
                 (flushTask == null || flushTask.Status == TaskStatus.RanToCompletion) ? writeTask :
                 (writeTask.Status == TaskStatus.RanToCompletion) ? flushTask :
-                Task.WhenAll(flushTask, writeTask);
+                Task.WhenAll(flushTask, writeTask));
         }
 
         private unsafe Task WriteAsyncInternalCore(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
@@ -1069,9 +1075,7 @@ namespace System.IO
             Debug.Assert(_useAsyncIO, "WriteInternalCoreAsync doesn't work on synchronous file streams!");
 
             // Create and store async stream class library specific data in the async result
-            FileStreamCompletionSource completionSource = MemoryMarshal.TryGetArray(source, out ArraySegment<byte> array) ?
-                new FileStreamCompletionSource(this, 0, array.Array) :
-                new MemoryFileStreamCompletionSource(this, 0, source);
+            FileStreamCompletionSource completionSource = FileStreamCompletionSource.Create(this, 0, source);
             NativeOverlapped* intOverlapped = completionSource.Overlapped;
 
             if (CanSeek)
@@ -1315,7 +1319,7 @@ namespace System.IO
                 int bufferedBytes = _readLength - _readPos;
                 if (bufferedBytes > 0)
                 {
-                    await destination.WriteAsync(GetBuffer(), _readPos, bufferedBytes, cancellationToken).ConfigureAwait(false);
+                    await destination.WriteAsync(new ReadOnlyMemory<byte>(GetBuffer(), _readPos, bufferedBytes), cancellationToken).ConfigureAwait(false);
                     _readPos = _readLength = 0;
                 }
             }
@@ -1341,7 +1345,6 @@ namespace System.IO
             // Further, typically the CopyToAsync buffer size will be larger than that used by the FileStream, such that
             // we'd likely be unable to use it anyway.  Instead, we rent the buffer from a pool.
             byte[] copyBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-            bufferSize = 0; // repurpose bufferSize to be the high water mark for the buffer, to avoid an extra field in the state machine
 
             // Allocate an Overlapped we can use repeatedly for all operations
             var awaitableOverlapped = new PreAllocatedOverlapped(AsyncCopyToAwaitable.s_callback, readAwaitable, copyBuffer);
@@ -1448,13 +1451,6 @@ namespace System.IO
                         {
                             readAwaitable._position += numBytesRead;
                         }
-
-                        // (and keep track of the maximum number of bytes in the buffer we used, to avoid excessive and unnecessary
-                        // clearing of the buffer before we return it to the pool)
-                        if (numBytesRead > bufferSize)
-                        {
-                            bufferSize = numBytesRead;
-                        }
                     }
                     finally
                     {
@@ -1475,7 +1471,7 @@ namespace System.IO
                     }
 
                     // Write out the read data.
-                    await destination.WriteAsync(copyBuffer, 0, (int)readAwaitable._numBytes, cancellationToken).ConfigureAwait(false);
+                    await destination.WriteAsync(new ReadOnlyMemory<byte>(copyBuffer, 0, (int)readAwaitable._numBytes), cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -1484,8 +1480,7 @@ namespace System.IO
                 cancellationReg.Dispose();
                 awaitableOverlapped.Dispose();
 
-                Array.Clear(copyBuffer, 0, bufferSize);
-                ArrayPool<byte>.Shared.Return(copyBuffer, clearArray: false);
+                ArrayPool<byte>.Shared.Return(copyBuffer);
 
                 // Make sure the stream's current position reflects where we ended up
                 if (!_fileHandle.IsClosed && CanSeek)

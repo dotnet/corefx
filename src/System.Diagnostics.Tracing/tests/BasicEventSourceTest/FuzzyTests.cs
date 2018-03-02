@@ -13,7 +13,7 @@ using Microsoft.Diagnostics.Tracing;
 using System.Diagnostics.Tracing;
 #endif
 using Xunit;
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+#if USE_ETW
 using Microsoft.Diagnostics.Tracing.Session;
 #endif
 
@@ -2747,11 +2747,13 @@ namespace BasicEventSourceTests
                     Assert.Equal("FWKFKXHDFY", evt.EventName);
                 }));
 
-                // Run tests for ETW
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
-                using (var listener = new EtwListener())
+#if USE_ETW
+                if(TestUtilities.IsProcessElevated)
                 {
-                    EventTestHarness.RunTests(tests, listener, logger);
+                    using (var listener = new EtwListener())
+                    {
+                        EventTestHarness.RunTests(tests, listener, logger);
+                    }
                 }
 #endif // USE_ETW
                 using (var listener = new EventListenerListener())

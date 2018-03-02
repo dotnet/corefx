@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -150,8 +149,7 @@ namespace System
         {
             get
             {
-                // The path will likely be under 32 characters, e.g. C:\Windows\system32
-                Span<char> buffer = stackalloc char[32];
+                Span<char> buffer = stackalloc char[260];
                 int requiredSize = Interop.Kernel32.GetSystemDirectoryW(buffer);
 
                 if (requiredSize > buffer.Length)

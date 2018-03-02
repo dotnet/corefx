@@ -9,6 +9,7 @@
     <DefineConstants Condition="'$(IsPartialFacadeAssembly)' != 'true'">$(DefineConstants);netstandard;FEATURE_PORTABLE_SPAN</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.1'">$(DefineConstants);netstandard11</DefineConstants>
+    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -21,15 +22,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\MemoryExtensions.cs" />
-    <Compile Include="System\SpanHelpers.BinarySearch.cs" />
-    <Compile Include="System\SpanHelpers.T.cs" />
-    <Compile Include="System\SpanHelpers.byte.cs" />
+    <Compile Include="System\SequencePosition.cs" />
     <Compile Include="System\ThrowHelper.cs" />
     <Compile Include="System\Buffers\ArrayMemoryPool.cs" />
     <Compile Include="System\Buffers\ArrayMemoryPool.ArrayMemoryPoolBuffer.cs" />
+    <Compile Include="System\Buffers\BuffersExtensions.cs" />
+    <Compile Include="System\Buffers\IBufferWriter.cs" />
     <Compile Include="System\Buffers\MemoryPool.cs" />
     <Compile Include="System\Buffers\OperationStatus.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequence.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />
     <Compile Include="System\Buffers\Binary\Reader.cs" />
     <Compile Include="System\Buffers\Binary\ReaderBigEndian.cs" />
     <Compile Include="System\Buffers\Binary\ReaderLittleEndian.cs" />
@@ -38,6 +41,7 @@
     <Compile Include="System\Buffers\Binary\WriterLittleEndian.cs" />
     <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
     <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
+    <Compile Include="System\Runtime\InteropServices\SequenceMarshal.cs" />
   </ItemGroup>
   <!-- Utf8 Formatter/Parser -->
   <ItemGroup>
@@ -105,22 +109,30 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="$(CommonPath)\CoreLib\System\Memory.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\MemoryDebugView.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\MemoryExtensions.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\ReadOnlyMemory.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\ReadOnlySpan.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Span.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\SpanDebugView.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\SpanHelpers.BinarySearch.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\SpanHelpers.Byte.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\SpanHelpers.T.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\IRetainable.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\MemoryHandle.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\OwnedMemory.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Runtime\InteropServices\MemoryMarshal.cs" />
-    <Compile Include="System\ReadOnlySpan.cs" />
-    <Compile Include="System\Span.cs" />
-    <Compile Include="System\SpanDebugView.cs" />
+    <Compile Include="System\ReadOnlySpan.Portable.cs" />
+    <Compile Include="System\Span.Portable.cs" />
     <Compile Include="System\MemoryExtensions.Portable.cs" />
     <Compile Include="System\SpanHelpers.cs" />
     <Compile Include="System\Pinnable.cs" />
-    <Compile Include="System\SpanHelpers.Clear.cs" />
     <Compile Include="System\Runtime\InteropServices\MemoryMarshal.Portable.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Common or Common-branched source files -->
+    <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
+      <Link>Common\System\Collections\HashHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
@@ -136,9 +148,6 @@
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Numerics.Vectors" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
-    <Compile Include="System\MemoryExtensions.Fast.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />

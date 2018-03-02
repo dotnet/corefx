@@ -27,64 +27,99 @@ namespace System.IO
             (char)31
         };
 
-        // Expands the given path to a fully qualified path. 
+        // Expands the given path to a fully qualified path.
         public static string GetFullPath(string path)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            // Embedded null characters are the only invalid character case we want to check up front.
+            // If the path would normalize to string empty, we'll consider it empty
+            if (PathInternal.IsEffectivelyEmpty(path))
+                throw new ArgumentException(SR.Arg_PathEmpty, nameof(path));
+
+            // Embedded null characters are the only invalid character case we trully care about.
             // This is because the nulls will signal the end of the string to Win32 and therefore have
-            // unpredictable results. Other invalid characters we give a chance to be normalized out.
+            // unpredictable results.
             if (path.IndexOf('\0') != -1)
                 throw new ArgumentException(SR.Argument_InvalidPathChars, nameof(path));
 
             if (PathInternal.IsExtended(path))
             {
-                // We can't really know what is valid for all cases of extended paths.
-                //
-                //  - object names can include other characters as well (':', '/', etc.)
-                //  - even file objects have different rules (pipe names can contain most characters)
-                //
-                // As such we will do no further analysis of extended paths to avoid blocking known and unknown
-                // scenarios as well as minimizing compat breaks should we block now and need to unblock later.
+                // \\?\ paths are considered normalized by definition. Windows doesn't normalize \\?\
+                // paths and neither should we. Even if we wanted to GetFullPathName does not work
+                // properly with device paths. If one wants to pass a \\?\ path through normalization
+                // one can chop off the prefix, pass it to GetFullPath and add it again.
                 return path;
             }
 
-            bool isDevice = PathInternal.IsDevice(path);
-            if (!isDevice)
+            return PathHelper.Normalize(path);
+        }
+
+        public static string GetFullPath(string path, string basePath)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            if (basePath == null)
+                throw new ArgumentNullException(nameof(basePath));
+
+            if (!IsPathFullyQualified(basePath))
+                throw new ArgumentException(SR.Arg_BasePathNotFullyQualified, nameof(basePath));
+
+            if (basePath.Contains('\0') || path.Contains('\0'))
+                throw new ArgumentException(SR.Argument_InvalidPathChars);
+
+            if (IsPathFullyQualified(path))
+                return GetFullPath(path);
+
+            int length = path.Length;
+            string combinedPath = null;
+
+            if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])))
             {
-                // Toss out paths with colons that aren't a valid drive specifier.
-                // Cannot start with a colon and can only be of the form "C:".
-                // (Note that we used to explicitly check "http:" and "file:"- these are caught by this check now.)
-                int startIndex = PathInternal.PathStartSkip(path);
+                // Path is current drive rooted i.e. starts with \:
+                // "\Foo" and "C:\Bar" => "C:\Foo"
+                // "\Foo" and "\\?\C:\Bar" => "\\?\C:\Foo"
+                combinedPath = Join(GetPathRoot(basePath.AsSpan()), path);
+            }
+            else if (length >= 2 && PathInternal.IsValidDriveChar(path[0]) && path[1] == PathInternal.VolumeSeparatorChar)
+            {
+                // Drive relative paths
+                Debug.Assert(length == 2 || !PathInternal.IsDirectorySeparator(path[2]));
 
-                // Move past the colon
-                startIndex += 2;
-
-                if ((path.Length > 0 && path[0] == PathInternal.VolumeSeparatorChar)
-                    || (path.Length >= startIndex && path[startIndex - 1] == PathInternal.VolumeSeparatorChar && !PathInternal.IsValidDriveChar(path[startIndex - 2]))
-                    || (path.Length > startIndex && path.IndexOf(PathInternal.VolumeSeparatorChar, startIndex) != -1))
+                if (StringSpanHelpers.Equals(GetVolumeName(path), GetVolumeName(basePath)))
                 {
-                    throw new NotSupportedException(SR.Format(SR.Argument_PathFormatNotSupported_Path, path));
+                    // Matching root
+                    // "C:Foo" and "C:\Bar" => "C:\Bar\Foo"
+                    // "C:Foo" and "\\?\C:\Bar" => "\\?\C:\Bar\Foo"
+                    combinedPath = Join(basePath, path.AsSpan().Slice(2));
+                }
+                else
+                {
+                    // No matching root, root to specified drive
+                    // "D:Foo" and "C:\Bar" => "D:Foo"
+                    // "D:Foo" and "\\?\C:\Bar" => "\\?\D:\Foo"
+                    combinedPath = !PathInternal.IsDevice(basePath)
+                        ? path.Insert(2, @"\")
+                        : length == 2
+                            ? JoinInternal(basePath.AsSpan().Slice(0, 4), path, @"\")
+                            : JoinInternal(basePath.AsSpan().Slice(0, 4), path.AsSpan().Slice(0, 2), @"\", path.AsSpan().Slice(2));
                 }
             }
-
-            // Technically this doesn't matter but we used to throw for this case
-            if (PathInternal.IsEffectivelyEmpty(path))
-                throw new ArgumentException(SR.Arg_PathEmpty, nameof(path));
-
-            // We don't want to check invalid characters for device format- see comments for extended above
-            string fullPath = PathHelper.Normalize(path, checkInvalidCharacters: !isDevice, expandShortPaths: true);
-
-            if (!isDevice)
+            else
             {
-                // Emulate FileIOPermissions checks, retained for compatibility (normal invalid characters have already been checked)
-                if (PathInternal.HasWildCardCharacters(fullPath))
-                    throw new ArgumentException(SR.Argument_InvalidPathChars, nameof(path));
+                // "Simple" relative path
+                // "Foo" and "C:\Bar" => "C:\Bar\Foo"
+                // "Foo" and "\\?\C:\Bar" => "\\?\C:\Bar\Foo"
+                combinedPath = JoinInternal(basePath, path);
             }
 
-            return fullPath;
+            // Device paths are normalized by definition, so passing something of this format
+            // to GetFullPath() won't do anything by design. Additionally, GetFullPathName() in
+            // Windows doesn't root them properly. As such we need to manually remove segments.
+            return PathInternal.IsDevice(combinedPath)
+                ? RemoveRelativeSegments(combinedPath, PathInternal.GetRootLength(combinedPath))
+                : GetFullPath(combinedPath);
         }
 
         public static string GetTempPath()
@@ -113,14 +148,14 @@ namespace System.IO
         // if it starts with a backslash ("\") or a valid drive letter and a colon (":").
         public static bool IsPathRooted(string path)
         {
-            if (path != null)
-            {
-                int length = path.Length;
-                if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])) ||
-                    (length >= 2 && PathInternal.IsValidDriveChar(path[0]) && path[1] == PathInternal.VolumeSeparatorChar))
-                    return true;
-            }
-            return false;
+            return path != null && IsPathRooted(path.AsSpan());
+        }
+
+        public static bool IsPathRooted(ReadOnlySpan<char> path)
+        {
+            int length = path.Length;
+            return (length >= 1 && PathInternal.IsDirectorySeparator(path[0]))
+                || (length >= 2 && PathInternal.IsValidDriveChar(path[0]) && path[1] == PathInternal.VolumeSeparatorChar);
         }
 
         // Returns the root portion of the given path. The resulting string
@@ -134,18 +169,82 @@ namespace System.IO
         // only contains whitespace characters an ArgumentException gets thrown.
         public static string GetPathRoot(string path)
         {
-            if (path == null) return null;
             if (PathInternal.IsEffectivelyEmpty(path))
-                throw new ArgumentException(SR.Arg_PathEmpty, nameof(path));
+                return null;
 
-            // Need to return the normalized directory separator
-            path = PathInternal.NormalizeDirectorySeparators(path);
+            ReadOnlySpan<char> result = GetPathRoot(path.AsSpan());
+            if (path.Length == result.Length)
+                return PathInternal.NormalizeDirectorySeparators(path);
+
+            return PathInternal.NormalizeDirectorySeparators(new string(result));
+        }
+
+        /// <remarks>
+        /// Unlike the string overload, this method will not normalize directory separators.
+        /// </remarks>
+        public static ReadOnlySpan<char> GetPathRoot(ReadOnlySpan<char> path)
+        {
+            if (PathInternal.IsEffectivelyEmpty(path))
+                return ReadOnlySpan<char>.Empty;
 
             int pathRoot = PathInternal.GetRootLength(path);
-            return pathRoot <= 0 ? string.Empty : path.Substring(0, pathRoot);
+            return pathRoot <= 0 ? ReadOnlySpan<char>.Empty : path.Slice(0, pathRoot);
         }
 
         /// <summary>Gets whether the system is case-sensitive.</summary>
         internal static bool IsCaseSensitive { get { return false; } }
+
+        /// <summary>
+        /// Returns the volume name for dos, UNC and device paths.
+        /// </summary>
+        internal static ReadOnlySpan<char> GetVolumeName(ReadOnlySpan<char> path)
+        {
+            // 3 cases: UNC ("\\server\share"), Device ("\\?\C:\"), or Dos ("C:\")
+            ReadOnlySpan<char> root = GetPathRoot(path);
+            if (root.Length == 0)
+                return root;
+
+            int offset = GetUncRootLength(path);
+            if (offset >= 0)
+            {
+                // Cut from "\\?\UNC\Server\Share" to "Server\Share"
+                // Cut from  "\\Server\Share" to "Server\Share"
+                return TrimEndingDirectorySeparator(root.Slice(offset));
+            }
+            else if (PathInternal.IsDevice(path))
+            {
+                return TrimEndingDirectorySeparator(root.Slice(4)); // Cut from "\\?\C:\" to "C:"
+            }
+
+            return TrimEndingDirectorySeparator(root); // e.g. "C:"
+        }
+
+        /// <summary>
+        /// Trims the ending directory separator if present.
+        /// </summary>
+        /// <param name="path"></param>
+        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            PathInternal.EndsInDirectorySeparator(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Returns offset as -1 if the path is not in Unc format, otherwise returns the root length.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        internal static int GetUncRootLength(ReadOnlySpan<char> path)
+        {
+            bool isDevice = PathInternal.IsDevice(path);
+
+            if (!isDevice && StringSpanHelpers.Equals(path.Slice(0, 2), @"\\") )
+                return 2;
+            else if (isDevice && path.Length >= 8
+                && (StringSpanHelpers.Equals(path.Slice(0, 8), PathInternal.UncExtendedPathPrefix)
+                || StringSpanHelpers.Equals(path.Slice(5, 4), @"UNC\")))
+                return 8;
+
+            return -1;
+        }
     }
 }

@@ -31,6 +31,7 @@ namespace System.Net.Http.Headers
         public string Name => _headerName;
         public HttpHeaderParser Parser => _knownHeader?.Parser;
         public HttpHeaderType HeaderType => _knownHeader == null ? HttpHeaderType.Custom : _knownHeader.HeaderType;
+        public KnownHeader KnownHeader => _knownHeader;
 
         public bool Equals(HeaderDescriptor other) =>
             _knownHeader == null ?
@@ -81,7 +82,7 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            descriptor = new HeaderDescriptor(ByteArrayHelpers.GetStringFromByteSpan(headerName));
+            descriptor = new HeaderDescriptor(HttpRuleParser.GetTokenString(headerName));
             return true;
         }
 
@@ -112,7 +113,7 @@ namespace System.Net.Http.Headers
                 }
             }
 
-            return ByteArrayHelpers.GetStringFromByteSpan(headerValue);
+            return HttpRuleParser.DefaultHttpEncoding.GetString(headerValue);
         }
     }
 }

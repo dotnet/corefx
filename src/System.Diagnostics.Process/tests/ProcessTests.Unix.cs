@@ -304,8 +304,146 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
+        public void TestStartWithNonExistingUserThrows()
+        {
+            Process p = CreateProcessPortable(RemotelyInvokable.Dummy);
+            p.StartInfo.UserName = "DoesNotExist";
+            Assert.Throws<Win32Exception>(() => p.Start());
+        }
+
+        /// <summary>
+        /// Tests when running as a normal user and starting a new process as the same user
+        /// works as expected.
+        /// </summary>
+        [Fact]
+        public void TestStartWithNormalUser()
+        {
+            TestStartWithUserName(GetCurrentRealUserName());
+        }
+
+        /// <summary>
+        /// Tests when running as root and starting a new process as a normal user,
+        /// the new process doesn't have elevated privileges.
+        /// </summary>
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void TestStartWithRootUser()
+        {
+            RunTestAsSudo(TestStartWithUserName, GetCurrentRealUserName());
+        }
+
+        public static int TestStartWithUserName(string realUserName)
+        {
+            Assert.NotNull(realUserName);
+            Assert.NotEqual("root", realUserName);
+
+            using (ProcessTests testObject = new ProcessTests())
+            {
+                using (Process p = testObject.CreateProcessPortable(GetCurrentEffectiveUserId))
+                {
+                    p.StartInfo.UserName = realUserName;
+                    Assert.True(p.Start());
+
+                    p.WaitForExit();
+
+                    // since the process was started with the current real user, even if this test
+                    // was run with 'sudo', the child process will be run as the normal real user.
+                    // Assert that the effective user of the child process was never 'root'
+                    // and was the real user of this process.
+                    Assert.NotEqual(0, p.ExitCode);
+                }
+
+                return 0;
+            }
+        }
+
+        public static int GetCurrentEffectiveUserId()
+        {
+            return (int)geteuid();
+        }
+
+        private static string GetCurrentRealUserName()
+        {
+            string realUserName = geteuid() == 0 ?
+                Environment.GetEnvironmentVariable("SUDO_USER") :
+                Environment.UserName;
+
+            Assert.NotNull(realUserName);
+            Assert.NotEqual("root", realUserName);
+
+            return realUserName;
+        }
+
+        /// <summary>
+        /// Tests when running as root and starting a new process as a normal user,
+        /// the new process can't elevate back to root.
+        /// </summary>
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void TestStartWithRootUserCannotElevate()
+        {
+            RunTestAsSudo(TestStartWithUserNameCannotElevate, GetCurrentRealUserName());
+        }
+
+        public static int TestStartWithUserNameCannotElevate(string realUserName)
+        {
+            Assert.NotNull(realUserName);
+            Assert.NotEqual("root", realUserName);
+
+            using (ProcessTests testObject = new ProcessTests())
+            {
+                using (Process p = testObject.CreateProcessPortable(SetEffectiveUserIdToRoot))
+                {
+                    p.StartInfo.UserName = realUserName;
+                    Assert.True(p.Start());
+
+                    p.WaitForExit();
+
+                    // seteuid(0) should not have succeeded, thus the exit code should be non-zero
+                    Assert.NotEqual(0, p.ExitCode);
+                }
+
+                return 0;
+            }
+        }
+
+        public static int SetEffectiveUserIdToRoot()
+        {
+            return seteuid(0);
+        }
+
+        private void RunTestAsSudo(Func<string, int> testMethod, string arg)
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions()
+            {
+                Start = false,
+                RunAsSudo = true
+            };
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteInvoke(testMethod, arg, options))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
+            AddProcessForDispose(p);
+
+            p.Start();
+            p.WaitForExit();
+
+            Assert.Equal(0, p.ExitCode);
+        }
+
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
+
+        [DllImport("libc")]
+        private static extern uint geteuid();
+
+        [DllImport("libc")]
+        private static extern int seteuid(uint euid);
 
         private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
     }

@@ -7,6 +7,7 @@ using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace System.IO.Pipes
 {
@@ -72,7 +73,7 @@ namespace System.IO.Pipes
             {
                 throw new ArgumentException(SR.Argument_EmptyServerName);
             }
-            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous)) != 0)
+            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_OptionsInvalid);
             }
@@ -83,6 +84,10 @@ namespace System.IO.Pipes
             if (inheritability < HandleInheritability.None || inheritability > HandleInheritability.Inheritable)
             {
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
+            }
+            if ((options & PipeOptions.CurrentUserOnly) != 0)
+            {
+                IsCurrentUserOnly = true;
             }
 
             _normalizedPipePath = GetPipePath(serverName, pipeName);

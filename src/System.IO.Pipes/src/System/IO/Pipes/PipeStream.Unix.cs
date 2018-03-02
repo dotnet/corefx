@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -472,6 +473,14 @@ namespace System.IO.Pipes
                     s.Shutdown(SocketShutdown.Receive);
                     break;
             }
+        }
+
+        internal static Exception CreateExceptionForLastError(string pipeName = null)
+        {
+            Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
+            return error.Error == Interop.Error.ENOTSUP ?
+                new PlatformNotSupportedException(SR.Format(SR.PlatformNotSupported_OperatingSystemError, nameof(Interop.Error.ENOTSUP))) :
+                Interop.GetExceptionForIoErrno(error, pipeName);
         }
     }
 }

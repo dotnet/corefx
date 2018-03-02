@@ -8,7 +8,7 @@ using Microsoft.Diagnostics.Tracing;
 #else
 using System.Diagnostics.Tracing;
 #endif
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue https://github.com/dotnet/corefx/issues/4864 
+#if USE_ETW
 using Microsoft.Diagnostics.Tracing.Session;
 #endif
 using Xunit;
@@ -25,6 +25,12 @@ namespace BasicEventSourceTests
 {
     public class TestEventCounter
     {
+#if USE_ETW
+        // Specifies whether the process is elevated or not.
+        private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
+        private static bool IsProcessElevated => s_isElevated.Value;
+#endif // USE_ETW
+
         private sealed class MyEventSource : EventSource
         {
             private EventCounter _requestCounter;
@@ -52,6 +58,7 @@ namespace BasicEventSourceTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, reason: "https://github.com/dotnet/corefx/issues/23661")]
 #endif
         [ActiveIssue("https://github.com/dotnet/corefx/issues/22791", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/25029")]
         public void Test_Write_Metric_EventListener()
         {
             using (var listener = new EventListenerListener())
@@ -61,7 +68,8 @@ namespace BasicEventSourceTests
         }
 
 #if USE_ETW
-        [Fact]
+        [ConditionalFact(nameof(IsProcessElevated))]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/27106")]
         public void Test_Write_Metric_ETW()
         {
 

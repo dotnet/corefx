@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// This is the only concrete implementation of RegexRunnerFactory, 
+// but we cannot combine them due to RegexRunnerFactory having shipped public. 
+
 using System.Reflection.Emit;
 
 namespace System.Text.RegularExpressions
@@ -12,7 +15,7 @@ namespace System.Text.RegularExpressions
         private readonly DynamicMethod _findFirstCharMethod;
         private readonly DynamicMethod _initTrackCountMethod;
 
-        internal CompiledRegexRunnerFactory(DynamicMethod go, DynamicMethod firstChar, DynamicMethod trackCount)
+        public CompiledRegexRunnerFactory(DynamicMethod go, DynamicMethod firstChar, DynamicMethod trackCount)
         {
             _goMethod = go;
             _findFirstCharMethod = firstChar;

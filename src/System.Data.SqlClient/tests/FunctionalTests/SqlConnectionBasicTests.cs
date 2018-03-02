@@ -81,6 +81,32 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        public void ClosedConnectionSchemaRetrieval()
+        {
+            using (SqlConnection connection = new SqlConnection(string.Empty))
+            {
+                Assert.Throws<InvalidOperationException>(() => connection.GetSchema());
+            }
+        }
+
+        [Theory]
+        [InlineData("RandomStringForTargetServer", false, true)]
+        [InlineData("RandomStringForTargetServer", true, false)]
+        [InlineData(null, false, false)]
+        [InlineData("", false, false)]
+        public void RetrieveWorkstationId(string workstation, bool withDispose, bool shouldMatchSetWorkstationId)
+        {
+            string connectionString = $"Workstation Id={workstation}";
+            SqlConnection conn = new SqlConnection(connectionString);
+            if(withDispose)
+            {
+                conn.Dispose();
+            }
+            string expected = shouldMatchSetWorkstationId ? workstation : Environment.MachineName;
+            Assert.Equal(expected, conn.WorkstationId);
+        }
+
+        [Fact]
         public void ConnectionTimeoutTestWithThread()
         {
             int timeoutSec = 5;
@@ -107,6 +133,21 @@ namespace System.Data.SqlClient.Tests
             int threshold = (timeoutSec + 1) * 1000;
 
             Console.WriteLine($"ConnectionTimeoutTestWithThread: Elapsed Time {theMax} and threshold {threshold}");
+        }
+
+        [OuterLoop("Can take up to 4 seconds")]
+        [Fact]
+        public void ExceptionsWithMinPoolSizeCanBeHandled()
+        {
+            string connectionString = $"Data Source={Guid.NewGuid().ToString()};uid=random;pwd=asd;Connect Timeout=2; Min Pool Size=3";
+            for (int i = 0; i < 2; i++)
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    Exception exception = Record.Exception(() => connection.Open());
+                    Assert.True(exception is InvalidOperationException || exception is SqlException, $"Unexpected exception: {exception}");
+                }
+            }
         }
 
         public class ConnectionWorker

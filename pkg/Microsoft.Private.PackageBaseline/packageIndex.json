@@ -5,6 +5,12 @@
         "net45": "4.0.0.0"
       }
     },
+    "CoreFx.Private.TestUtilities": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "1.0.0.0": "4.5.0"
+      }
+    },
     "CustomMarshalers": {
       "InboxOn": {
         "net45": "4.0.0.0"
@@ -98,9 +104,13 @@
       }
     },
     "Microsoft.Diagnostics.Tracing.EventSource.Redist": {
+      "StableVersions": [
+        "2.0.0"
+      ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "2.0.0.0": "2.0.0"
+        "2.0.0.0": "2.0.0",
+        "2.0.1.0": "2.0.1"
       }
     },
     "Microsoft.JScript": {
@@ -2120,6 +2130,12 @@
         "4.0.3.0": "4.5.0"
       }
     },
+    "System.IO.Pipelines": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
+      }
+    },
     "System.IO.Pipes": {
       "StableVersions": [
         "4.0.0",
@@ -2144,7 +2160,9 @@
         "4.4.0"
       ],
       "BaselineVersion": "4.4.0",
-      "InboxOn": {},
+      "InboxOn": {
+        "uap10.0.16300": "4.0.3.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.1.0": "4.3.0",
         "4.0.2.0": "4.4.0",
@@ -2894,6 +2912,7 @@
       }
     },
     "System.Net.WebSockets.WebSocketProtocol": {
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.0"
       }
@@ -3705,10 +3724,8 @@
         "4.0.2.0": "4.3.0"
       }
     },
-    "System.Runtime.Intrinsics": {
-      "InboxOn": {
-        "netcoreapp2.1": "4.0.0.0"
-      },
+    "System.Runtime.Intrinsics.Experimental": {
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.0"
       }
@@ -4085,7 +4102,13 @@
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
-        "uap10.0.16300": "4.3.1.0"
+        "monoandroid10": "Any",
+        "monotouch10": "Any",
+        "uap10.0.16300": "4.3.1.0",
+        "xamarinios10": "Any",
+        "xamarinmac20": "Any",
+        "xamarintvos10": "Any",
+        "xamarinwatchos10": "Any"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.2.0",
@@ -4872,7 +4895,7 @@
       "InboxOn": {
         "netcoreapp2.0": "4.1.1.0",
         "netcoreapp2.1": "4.1.2.0",
-        "uap10.0.16300": "4.1.2.0",
+        "uap10.0.16300": "4.1.2.0"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",

@@ -17,7 +17,7 @@ namespace System
             throw new ArgumentOutOfRangeException(nameof(comparisonType));
 
         public static bool Equals(this ReadOnlySpan<char> left, string right) =>
-            Equals(left, right.AsReadOnlySpan());
+            Equals(left, right.AsSpan());
 
         public static bool Equals(this ReadOnlySpan<char> left, ReadOnlySpan<char> right)
         {
@@ -33,7 +33,7 @@ namespace System
                     return false;
                 }
             }
-            
+
             return true;
         }
 
@@ -55,23 +55,6 @@ namespace System
             }
 
             return true;
-        }
-
-        public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> source)
-        {
-            int startIndex = 0, endIndex = source.Length - 1;
-
-            while (startIndex <= endIndex && char.IsWhiteSpace(source[startIndex]))
-            {
-                startIndex++;
-            }
-
-            while (endIndex >= startIndex && char.IsWhiteSpace(source[endIndex]))
-            {
-                endIndex--;
-            }
-
-            return source.Slice(startIndex, endIndex - startIndex + 1);
         }
 
         public static int IndexOf(this ReadOnlySpan<char> source, char value) =>
@@ -105,9 +88,12 @@ namespace System
 
         public static ReadOnlySpan<char> Remove(this ReadOnlySpan<char> source, int startIndex, int count)
         {
-            if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex), SR.ArgumentOutOfRange_StartIndex);
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NegativeCount);
-            if (count > source.Length - startIndex) throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_IndexCount);
+            if (startIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(startIndex), SR.ArgumentOutOfRange_StartIndex);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NegativeCount);
+            if (count > source.Length - startIndex)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_IndexCount);
 
             if (count == 0)
             {
@@ -124,6 +110,30 @@ namespace System
             source.Slice(0, startIndex).CopyTo(result);
             source.Slice(startIndex + count).CopyTo(result.Slice(startIndex));
             return result;
+        }
+
+        // Returns the index of the last occurrence of a specified character in the current instance.
+        public static int LastIndexOf(this ReadOnlySpan<char> source, char value)
+        {
+            if (source.Length == 0)
+                return -1;
+
+            for (int i = source.Length - 1; i >= 0; i--)
+            {
+                if (source[i] == value)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public static void CheckStringComparison(StringComparison comparisonType)
+        {
+            // Single comparison to check if comparisonType is within [CurrentCulture .. OrdinalIgnoreCase]
+            if ((uint)(comparisonType - StringComparison.CurrentCulture) > (StringComparison.OrdinalIgnoreCase - StringComparison.CurrentCulture))
+            {
+                throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
+            }
         }
     }
 }

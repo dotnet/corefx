@@ -413,10 +413,7 @@ namespace System.Data.ProviderBase
 
             _objectList = new List<DbConnectionInternal>(MaxPoolSize);
 
-            if (ADP.IsPlatformNT5)
-            {
-                _transactedConnectionPool = new TransactedConnectionPool(this);
-            }
+            _transactedConnectionPool = new TransactedConnectionPool(this); // initialize irrespective of platform
 
             _poolCreateRequest = new WaitCallback(PoolCreateRequest); // used by CleanupCallback
             _state = State.Running;
@@ -664,10 +661,12 @@ namespace System.Data.ProviderBase
             ReclaimEmancipatedObjects();
         }
 
-        private Timer CreateCleanupTimer()
-        {
-            return (new Timer(new TimerCallback(this.CleanupCallback), null, _cleanupWait, _cleanupWait));
-        }
+        private Timer CreateCleanupTimer() =>
+            ADP.UnsafeCreateTimer(
+                new TimerCallback(CleanupCallback),
+                null,
+                _cleanupWait,
+                _cleanupWait);
 
         private DbConnectionInternal CreateObject(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
         {
@@ -728,6 +727,7 @@ namespace System.Data.ProviderBase
 
                 // timer allocation has to be done out of CER block
                 Timer t = new Timer(new TimerCallback(this.ErrorCallback), null, Timeout.Infinite, Timeout.Infinite);
+
                 bool timerIsNotDisposed;
                 try { }
                 finally
@@ -1373,9 +1373,19 @@ namespace System.Data.ProviderBase
                                 {
                                     while (NeedToReplenish)
                                     {
-                                        // Don't specify any user options because there is no outer connection associated with the new connection
-                                        newObj = CreateObject(owningObject: null, userOptions: null, oldConnection: null);
-
+                                        try
+                                        {
+                                            // Don't specify any user options because there is no outer connection associated with the new connection
+                                            newObj = CreateObject(owningObject: null, userOptions: null, oldConnection: null);
+                                        }
+                                        catch
+                                        {
+                                            // Catch all the exceptions occuring during CreateObject so that they 
+                                            // don't emerge as unhandled on the thread pool and don't crash applications
+                                            // The error is handled in CreateObject and surfaced to the caller of the Connection Pool
+                                            // using the ErrorEvent. Hence it is OK to swallow all exceptions here.
+                                            break;
+                                        }
                                         // We do not need to check error flag here, since we know if
                                         // CreateObject returned null, we are in error case.
                                         if (null != newObj)

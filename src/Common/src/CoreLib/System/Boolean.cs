@@ -100,10 +100,8 @@ namespace System
         {
             string s = m_value ? TrueLiteral : FalseLiteral;
 
-            if (s.Length <= destination.Length)
+            if (s.AsSpan().TryCopyTo(destination))
             {
-                bool copied = s.AsReadOnlySpan().TryCopyTo(destination);
-                Debug.Assert(copied);
                 charsWritten = s.Length;
                 return true;
             }
@@ -183,7 +181,7 @@ namespace System
         public static Boolean Parse(String value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
-            return Parse(value.AsReadOnlySpan());
+            return Parse(value.AsSpan());
         }
 
         public static bool Parse(ReadOnlySpan<char> value) =>
@@ -199,19 +197,19 @@ namespace System
                 return false;
             }
 
-            return TryParse(value.AsReadOnlySpan(), out result);
+            return TryParse(value.AsSpan(), out result);
         }
 
         public static bool TryParse(ReadOnlySpan<char> value, out bool result)
         {
-            ReadOnlySpan<char> trueSpan = TrueLiteral.AsReadOnlySpan();
+            ReadOnlySpan<char> trueSpan = TrueLiteral.AsSpan();
             if (StringSpanHelpers.Equals(trueSpan, value, StringComparison.OrdinalIgnoreCase))
             {
                 result = true;
                 return true;
             }
 
-            ReadOnlySpan<char> falseSpan = FalseLiteral.AsReadOnlySpan();
+            ReadOnlySpan<char> falseSpan = FalseLiteral.AsSpan();
             if (StringSpanHelpers.Equals(falseSpan, value, StringComparison.OrdinalIgnoreCase))
             {
                 result = false;

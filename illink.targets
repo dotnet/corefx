@@ -72,7 +72,8 @@
       <!-- reflection heuristics to apply -->
       <ILLinkArgs>$(ILLinkArgs) -h LdtokenTypeMethods,InstanceConstructors</ILLinkArgs>
       <!-- add a linker step to clear initlocals flag on all assemblies before the output step -->
-      <ILLinkArgs Condition="'$(ILLinkClearInitLocals)' == 'true'">$(ILLinkArgs) -s ILLink.CustomSteps.ClearInitLocalsStep,ILLink.CustomSteps:OutputStep</ILLinkArgs>
+      <!-- version of ILLink.CustomSteps is passed as a workaround for msbuild issue #3016 -->
+      <ILLinkArgs Condition="'$(ILLinkClearInitLocals)' == 'true'">$(ILLinkArgs) -s ILLink.CustomSteps.ClearInitLocalsStep,ILLink.CustomSteps,Version=0.0.0.0:OutputStep</ILLinkArgs>
     </PropertyGroup>
 
     <MakeDir Directories="$(ILLinkTrimInputPath)" />
@@ -88,7 +89,15 @@
           Condition="'$(ILLinkRewritePDBs)' == 'true' AND Exists('$(ILLinkTrimAssemblySymbols)')"
     />
 
-    <ILLink AssemblyPaths="$(ILLinkTrimInputAssembly);@(ReferencePath)"
+    <ItemGroup>
+      <_DependencyDirectoriesTemp Include="@(ReferencePath->'%(RootDir)%(Directory)')" />
+      <!-- Remove duplicate directories by batching over them -->
+      <!-- Add project references first to give precedence to project-specific files -->
+      <_DependencyDirectories Condition="'%(_DependencyDirectoriesTemp.ReferenceSourceTarget)'=='ProjectReference'" Include="%(_DependencyDirectoriesTemp.Identity)" />
+      <_DependencyDirectories Condition="'%(_DependencyDirectoriesTemp.ReferenceSourceTarget)'!='ProjectReference'" Include="%(_DependencyDirectoriesTemp.Identity)" />
+    </ItemGroup>
+
+    <ILLink AssemblyPaths="$(ILLinkTrimInputAssembly);@(_DependencyDirectories)"
             RootAssemblyNames=""
             OutputDirectory="$(ILLinkTrimOutputPath)"
             ExtraArgs="$(ILLinkArgs)" />
