@@ -19,7 +19,7 @@ namespace System.Buffers
                 int index = sequence.First.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return sequence.GetPosition(index, sequence.Start);
+                    return sequence.GetPosition(index);
                 }
 
                 return null;
