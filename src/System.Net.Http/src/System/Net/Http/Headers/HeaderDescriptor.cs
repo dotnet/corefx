@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System.Net.Http.Headers
 {
@@ -106,7 +107,7 @@ namespace System.Net.Http.Headers
                 string[] knownValues = _knownHeader.KnownValues;
                 for (int i = 0; i < knownValues.Length; i++)
                 {
-                    if (ByteArrayHelpers.EqualsOrdinalAsciiIgnoreCase(knownValues[i], headerValue))
+                    if (knownValues[i].AsSpan().Equals(MemoryMarshal.Cast<byte, char>(headerValue), StringComparison.OrdinalIgnoreCase))
                     {
                         return knownValues[i];
                     }

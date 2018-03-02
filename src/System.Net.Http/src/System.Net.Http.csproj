@@ -30,7 +30,6 @@
   <!-- Common -->
   <ItemGroup>
     <Compile Include="System\Net\Http\ByteArrayContent.cs" />
-    <Compile Include="System\Net\Http\ByteArrayHelpers.cs" />
     <Compile Include="System\Net\Http\ClientCertificateOption.cs" />
     <Compile Include="System\Net\Http\DelegatingHandler.cs" />
     <Compile Include="System\Net\Http\FormUrlEncodedContent.cs" />
