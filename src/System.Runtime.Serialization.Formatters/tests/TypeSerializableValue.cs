@@ -25,17 +25,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
-                if (PlatformDetection.IsNetfx471OrNewer)
+                if (!PlatformDetection.IsNetfx471OrNewer)
                 {
                     // Check if a specialized blob for >=net471 is present and return if found.
-                    int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
+                    int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
                     if (index >= 0)
                         return index;
                 }
 
                 // If no newer blob for >=net471 is present use existing one. 
                 // If no netfx blob is present then -1 will be returned.
-                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
+                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx471);
             }
 
             // .NET Core
