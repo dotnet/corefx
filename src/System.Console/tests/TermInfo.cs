@@ -59,7 +59,7 @@ public class TermInfo
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.AnyUnix)] // Tests TermInfo
+    [PlatformSpecific(PlatformID.AnyUnix)] // Tests TermInfo
     public void VerifyTermInfoSupportsNewAndLegacyNcurses()
     {
         MethodInfo readDbMethod = typeof(Console).GetTypeInfo().Assembly.GetType(TerminfoDatabaseType).GetTypeInfo().GetDeclaredMethods(ReadDatabaseMethod).Where(m => m.GetParameters().Count() == 2).Single();
