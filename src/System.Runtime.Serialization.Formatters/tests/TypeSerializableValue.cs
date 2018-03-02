@@ -9,6 +9,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
     public readonly struct TypeSerializableValue
     {
         public readonly string Base64Blob;
+
+        // This is the minimum version, when the blob changed.
         public readonly TargetFrameworkMoniker Platform;
 
         public TypeSerializableValue(string base64Blob, TargetFrameworkMoniker platform)
@@ -35,7 +37,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     
                 // If no newer blob for >=netfx471 is present use existing one. 
                 // If no netfx blob is present then -1 will be returned.
-                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx);
+                return blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx461);
             }
 
             // .NET Core
@@ -50,15 +52,16 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             // If no newer blob for >=netcoreapp2.1 is present use existing one. 
             // If no netfx blob is present then -1 will be returned.
-            return blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp));
+            return blobList.FindIndex((b => b.Platform == TargetFrameworkMoniker.netcoreapp20));
         }
     }
 
+    // The values represent platforms where there was change in the serialization for one or more types.
     public enum TargetFrameworkMoniker
     {
-        netfx,
+        netfx461,
         netfx471,
-        netcoreapp,
+        netcoreapp20,
         netcoreapp21,
     }
 }
