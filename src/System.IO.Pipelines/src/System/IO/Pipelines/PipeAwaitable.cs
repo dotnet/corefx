@@ -69,7 +69,6 @@ namespace System.IO.Pipelines
             if (!ReferenceEquals(currentCompletion, s_awaitableIsCompleted) &&
                 !ReferenceEquals(currentCompletion, s_awaitableIsNotCompleted))
             {
-                // If we captured the execution context then we need to wrap our completion and state up
                 completion = currentCompletion;
                 completionState = _completionState;
                 executionContext = _executionContext;
