@@ -44,42 +44,11 @@ namespace System.IO.Pipelines.Tests
             }
         }
 
-        public class ThreadSynchronizationContext : SynchronizationContext
-        {
-            private readonly BlockingCollection<Action> _work = new BlockingCollection<Action>();
-
-            public ThreadSynchronizationContext()
-            {
-                Thread = new Thread(Work) { IsBackground = true };
-                Thread.Start();
-            }
-
-            public Thread Thread { get; }
-
-            public void Dispose()
-            {
-                _work.CompleteAdding();
-            }
-
-            public override void Post(SendOrPostCallback action, object state)
-            {
-                _work.Add(() => action(state));
-            }
-
-            private void Work(object state)
-            {
-                foreach (Action callback in _work.GetConsumingEnumerable())
-                {
-                    callback();
-                }
-            }
-        }
-
         [Fact]
         public async Task DefaultReaderSchedulerRunsOnSynchronizationContext()
         {
             var previous = SynchronizationContext.Current;
-            var sc = new ThreadSynchronizationContext();
+            var sc = new CustomSynchronizationContext();
             try
             {
                 SynchronizationContext.SetSynchronizationContext(sc);
@@ -90,7 +59,7 @@ namespace System.IO.Pipelines.Tests
                 {
                     ReadResult result = await pipe.Reader.ReadAsync();
 
-                    Assert.Equal(sc.Thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+                    Assert.Same(SynchronizationContext.Current, sc);
 
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
@@ -183,7 +152,7 @@ namespace System.IO.Pipelines.Tests
         public async Task DefaultWriterSchedulerRunsOnSynchronizationContext()
         {
             var previous = SynchronizationContext.Current;
-            var sc = new ThreadSynchronizationContext();
+            var sc = new CustomSynchronizationContext();
             try
             {
                 SynchronizationContext.SetSynchronizationContext(sc);
@@ -208,7 +177,7 @@ namespace System.IO.Pipelines.Tests
 
                         pipe.Writer.Complete();
 
-                        Assert.Equal(sc.Thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+                        Assert.Same(SynchronizationContext.Current, sc);
                     };
 
                     Task writing = doWrite();
@@ -342,6 +311,25 @@ namespace System.IO.Pipelines.Tests
             await reading;
 
             Assert.True(callbackRan);
+        }
+
+        private sealed class CustomSynchronizationContext : SynchronizationContext
+        {
+            public override void Post(SendOrPostCallback d, object state)
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SetSynchronizationContext(this);
+                    try
+                    {
+                        d(state);
+                    }
+                    finally
+                    {
+                        SetSynchronizationContext(null);
+                    }
+                }, null);
+            }
         }
     }
 }

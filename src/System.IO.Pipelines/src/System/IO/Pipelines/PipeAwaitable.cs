@@ -115,10 +115,7 @@ namespace System.IO.Pipelines
                 {
                     // Set the scheduler to the current synchronization context if there is one
                     // otherwise we delegate to what the pipe was configured with.
-
-                    // REVIEW: Should the sync context override the current scheduler if it was explicitly specifed
-                    // in the pipe options?
-
+                    
                     // REVIEW: Should we post to the sync context if we're already completed (i.e. in OnCompleted)? Currently we're still delegating to the
                     // scheduler here.
                     SynchronizationContext sc = SynchronizationContext.Current;

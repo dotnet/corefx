@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -479,6 +480,109 @@ namespace System.IO.Pipelines.Tests
             _pipe.Reader.AdvanceTo(reader.Start, reader.Start);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ReadAsyncOnCompletedCapturesTheExecutionContext(bool useSynchronizationContext)
+        {
+            var pipe = new Pipe(new PipeOptions(useSynchronizationContext: useSynchronizationContext));
+
+            SynchronizationContext previous = SynchronizationContext.Current;
+            var sc = new CustomSynchronizationContext();
+
+            if (useSynchronizationContext)
+            {
+                SynchronizationContext.SetSynchronizationContext(sc);
+            }
+
+            try
+            {
+                AsyncLocal<int> val = new AsyncLocal<int>();
+                var tcs = new TaskCompletionSource<int>();
+                val.Value = 10;
+
+                pipe.Reader.ReadAsync().GetAwaiter().OnCompleted(() =>
+                {
+                    if (useSynchronizationContext)
+                    {
+                        Assert.Same(sc, SynchronizationContext.Current);
+                    }
+
+                    tcs.TrySetResult(val.Value);
+                });
+
+                val.Value = 20;
+
+                pipe.Writer.WriteEmpty(100);
+                await pipe.Writer.FlushAsync();
+
+                int value = await tcs.Task;
+                Assert.Equal(10, value);
+            }
+            finally
+            {
+                if (useSynchronizationContext)
+                {
+                    SynchronizationContext.SetSynchronizationContext(previous);
+                }
+
+                pipe.Reader.Complete();
+                pipe.Writer.Complete();
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task FlushAsyncOnCompletedCapturesTheExecutionContext(bool useSynchronizationContext)
+        {
+            var pipe = new Pipe(new PipeOptions(useSynchronizationContext: useSynchronizationContext, pauseWriterThreshold: 20, resumeWriterThreshold: 10));
+
+            SynchronizationContext previous = SynchronizationContext.Current;
+            var sc = new CustomSynchronizationContext();
+
+            if (useSynchronizationContext)
+            {
+                SynchronizationContext.SetSynchronizationContext(sc);
+            }
+
+            try
+            {
+                AsyncLocal<int> val = new AsyncLocal<int>();
+                var tcs = new TaskCompletionSource<int>();
+                val.Value = 10;
+
+                pipe.Writer.WriteEmpty(20);
+                pipe.Writer.FlushAsync().GetAwaiter().OnCompleted(() =>
+                {
+                    if (useSynchronizationContext)
+                    {
+                        Assert.Same(sc, SynchronizationContext.Current);
+                    }
+
+                    tcs.TrySetResult(val.Value);
+                });
+
+                val.Value = 20;
+
+                var result = await pipe.Reader.ReadAsync();
+                pipe.Reader.AdvanceTo(result.Buffer.End);
+
+                int value = await tcs.Task;
+                Assert.Equal(10, value);
+            }
+            finally
+            {
+                if (useSynchronizationContext)
+                {
+                    SynchronizationContext.SetSynchronizationContext(previous);
+                }
+
+                pipe.Reader.Complete();
+                pipe.Writer.Complete();
+            }
+        }
+
         [Fact]
         public async Task ReadingCanBeCanceled()
         {
@@ -661,6 +765,25 @@ namespace System.IO.Pipelines.Tests
         public void GetMemoryZeroReturnsNonEmpty()
         {
             Assert.True(_pipe.Writer.GetMemory(0).Length > 0);
+        }
+
+        private sealed class CustomSynchronizationContext : SynchronizationContext
+        {
+            public override void Post(SendOrPostCallback d, object state)
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SetSynchronizationContext(this);
+                    try
+                    {
+                        d(state);
+                    }
+                    finally
+                    {
+                        SetSynchronizationContext(null);
+                    }
+                }, null);
+            }
         }
     }
 }
