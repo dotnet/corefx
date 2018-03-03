@@ -11,7 +11,25 @@ namespace System.IO.Pipelines
     {
         public override void Schedule<TState>(Action<TState> action, TState state)
         {
-            Task.Factory.StartNew(action, state, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            System.Threading.ThreadPool.QueueUserWorkItem(s =>
+            {
+                ((ActionObjectAsWaitCallback<TState>)s).Run();
+            }, 
+            new ActionObjectAsWaitCallback<TState>(action, state));
+        }
+
+        private sealed class ActionObjectAsWaitCallback<TState>
+        {
+            private Action<TState> _action;
+            private TState _state;
+
+            public ActionObjectAsWaitCallback(Action<TState> action, TState state)
+            {
+                _action = action;
+                _state = state;
+            }
+
+            public void Run() => _action(_state);
         }
     }
 }
