@@ -1162,12 +1162,12 @@ namespace System.Text.RegularExpressions
 
         public bool Equals(CachedCodeEntryKey other)
         {
-            return this == other;
+            return _pattern.Equals(other._pattern) && _options == other._options && _cultureKey.Equals(other._cultureKey);
         }
 
         public static bool operator ==(CachedCodeEntryKey left, CachedCodeEntryKey right)
         {
-            return left._options == right._options && left._cultureKey == right._cultureKey && left._pattern == right._pattern;
+            return left.Equals(right);
         }
 
         public static bool operator !=(CachedCodeEntryKey left, CachedCodeEntryKey right)
