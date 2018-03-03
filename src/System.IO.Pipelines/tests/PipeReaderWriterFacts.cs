@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -139,7 +140,7 @@ namespace System.IO.Pipelines.Tests
 
             // Create position that would cross into write head
             ReadOnlySequence<byte> buffer = readResult.Buffer;
-            SequencePosition position = buffer.GetPosition(buffer.Start, buffer.Length);
+            SequencePosition position = buffer.GetPosition(buffer.Length);
 
             // Return everything
             _pipe.Reader.AdvanceTo(position);
@@ -149,15 +150,62 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CompleteReaderThrowsIfReadInProgress()
+        public async Task CompleteReaderAfterFlushWithoutAdvancingDoesNotThrow()
+        {
+            await _pipe.Writer.FlushAsync();
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = result.Buffer;
+
+            _pipe.Reader.Complete();
+        }
+
+        [Fact]
+        public async Task ResetAfterCompleteReaderAndWriterWithoutAdvancingClearsEverything()
+        {
+            _pipe.Writer.WriteEmpty(4094);
+            _pipe.Writer.WriteEmpty(4094);
+            await _pipe.Writer.FlushAsync();
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = result.Buffer;
+
+            SequenceMarshal.TryGetReadOnlySequenceSegment(
+                buffer,
+                out ReadOnlySequenceSegment<byte> start,
+                out int startIndex,
+                out ReadOnlySequenceSegment<byte> end,
+                out int endIndex);
+
+            var startSegment = (BufferSegment)start;
+            var endSegment = (BufferSegment)end;
+            Assert.NotNull(startSegment.OwnedMemory);
+            Assert.NotNull(endSegment.OwnedMemory);
+
+            _pipe.Reader.Complete();
+
+            // Nothing cleaned up
+            Assert.NotNull(startSegment.OwnedMemory);
+            Assert.NotNull(endSegment.OwnedMemory);
+
+            _pipe.Writer.Complete();
+
+            // Should be cleaned up now
+            Assert.Null(startSegment.OwnedMemory);
+            Assert.Null(endSegment.OwnedMemory);
+
+            _pipe.Reset();
+        }
+
+        [Fact]
+        public async Task AdvanceAfterCompleteThrows()
         {
             await _pipe.Writer.WriteAsync(new byte[1]);
             ReadResult result = await _pipe.Reader.ReadAsync();
             ReadOnlySequence<byte> buffer = result.Buffer;
 
-            Assert.Throws<InvalidOperationException>(() => _pipe.Reader.Complete());
+            _pipe.Reader.Complete();
 
-            _pipe.Reader.AdvanceTo(buffer.Start, buffer.Start);
+            var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(buffer.End));
+            Assert.Equal("Reading is not allowed after reader was completed.", exception.Message);
         }
 
         [Fact]
@@ -233,7 +281,7 @@ namespace System.IO.Pipelines.Tests
             //     block 1       ->    block2
             // [padding..hello]  ->  [  world   ]
             PipeWriter writeBuffer = _pipe.Writer;
-            var blockSize = _pipe.Writer.GetMemory(0).Length;
+            var blockSize = _pipe.Writer.GetMemory().Length;
 
             byte[] paddingBytes = Enumerable.Repeat((byte)'a', blockSize - 5).ToArray();
             byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
@@ -438,13 +486,15 @@ namespace System.IO.Pipelines.Tests
             cts.Token.Register(() => { _pipe.Writer.Complete(new OperationCanceledException(cts.Token)); });
 
             Task ignore = Task.Run(
-                async () => {
+                async () =>
+                {
                     await Task.Delay(1000);
                     cts.Cancel();
                 });
 
             await Assert.ThrowsAsync<OperationCanceledException>(
-                async () => {
+                async () =>
+                {
                     ReadResult result = await _pipe.Reader.ReadAsync();
                     ReadOnlySequence<byte> buffer = result.Buffer;
                 });
@@ -462,7 +512,7 @@ namespace System.IO.Pipelines.Tests
 
             Assert.Equal("Hello World", Encoding.ASCII.GetString(result.Buffer.ToArray()));
 
-            _pipe.Reader.AdvanceTo(result.Buffer.GetPosition(result.Buffer.Start, 6));
+            _pipe.Reader.AdvanceTo(result.Buffer.GetPosition(6));
 
             result = await _pipe.Reader.ReadAsync();
 

@@ -16,6 +16,7 @@ namespace System.Net.Http.Functional.Tests
 {
     public static class TestHelper
     {
+        public static int PassingTestTimeoutMilliseconds => 60 * 1000;
         public static bool JsonMessageContainsKeyValue(string message, string key, string value)
         {
             // TODO (#5525): Align with the rest of tests w.r.t response parsing once the test server is finalized.
@@ -88,7 +89,16 @@ namespace System.Net.Http.Functional.Tests
             return TaskTimeoutExtensions.WhenAllOrAnyFailed(tasks);
         }
 
+        public static Task WhenAllCompletedOrAnyFailedWithTimeout(int timeoutInMilliseconds, params Task[] tasks)
+        {
+            return TaskTimeoutExtensions.WhenAllOrAnyFailed(tasks, timeoutInMilliseconds);
+        }
+
+#if netcoreapp
+       public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#else
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
+#endif
 
         public static IPAddress GetIPv6LinkLocalAddress() =>
             NetworkInterface

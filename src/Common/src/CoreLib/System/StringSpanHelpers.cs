@@ -17,7 +17,7 @@ namespace System
             throw new ArgumentOutOfRangeException(nameof(comparisonType));
 
         public static bool Equals(this ReadOnlySpan<char> left, string right) =>
-            Equals(left, right.AsReadOnlySpan());
+            Equals(left, right.AsSpan());
 
         public static bool Equals(this ReadOnlySpan<char> left, ReadOnlySpan<char> right)
         {
@@ -55,23 +55,6 @@ namespace System
             }
 
             return true;
-        }
-
-        public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> source)
-        {
-            int startIndex = 0, endIndex = source.Length - 1;
-
-            while (startIndex <= endIndex && char.IsWhiteSpace(source[startIndex]))
-            {
-                startIndex++;
-            }
-
-            while (endIndex >= startIndex && char.IsWhiteSpace(source[endIndex]))
-            {
-                endIndex--;
-            }
-
-            return source.Slice(startIndex, endIndex - startIndex + 1);
         }
 
         public static int IndexOf(this ReadOnlySpan<char> source, char value) =>

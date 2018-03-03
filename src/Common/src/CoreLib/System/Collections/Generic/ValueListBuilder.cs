@@ -23,6 +23,15 @@ namespace System.Collections.Generic
 
         public int Length => _pos;
 
+        public ref T this[int index]
+        {
+            get
+            {
+                Debug.Assert(index < _pos);
+                return ref _span[index];
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(T item)
         {
@@ -34,7 +43,7 @@ namespace System.Collections.Generic
             _pos = pos + 1;
         }
 
-        public ReadOnlySpan<T> AsReadOnlySpan()
+        public ReadOnlySpan<T> AsSpan()
         {
             return _span.Slice(0, _pos);
         }

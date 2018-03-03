@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace System.ServiceProcess.Tests
 {
+    [ActiveIssue("https://github.com/dotnet/corefx/issues/27071")]
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceBaseTests : IDisposable
     {
@@ -43,11 +44,11 @@ namespace System.ServiceProcess.Tests
             Assert.True(testServiceController.CanShutdown);
         }
 
-        //[Fact]
+        // [Fact]
         // To cleanup lingering Test Services uncomment the Fact attribute and run the following command
-        //   msbuild /t:rebuildandtest /p:XunitMethodName=System.ServiceProcess.Tests.ServiceBaseTests.Cleanup
+        //   msbuild /t:rebuildandtest /p:XunitMethodName=System.ServiceProcess.Tests.ServiceBaseTests.Cleanup /p:OuterLoop=true
         // Remember to comment out the Fact again before running tests otherwise it will cleanup tests running in parallel
-        // and casue them to fail.
+        // and cause them to fail.
         public void Cleanup()
         {
             string currentService = "";
@@ -213,6 +214,16 @@ namespace System.ServiceProcess.Tests
                     sb.Stop();
                 }
             }
+        }
+        
+        [ConditionalFact(nameof(IsProcessElevated))]
+        public void PropagateExceptionFromOnStart()
+        {
+            string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();
+            TestServiceProvider _testService = new TestServiceProvider(serviceName);
+            _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
+            _testService.DeleteTestServices();
         }
 
         public void Dispose()

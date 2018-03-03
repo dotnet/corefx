@@ -111,30 +111,29 @@ namespace System.IO.Pipelines
             _length = 0;
         }
 
-        internal Memory<byte> GetMemory(int minimumSize)
+        internal Memory<byte> GetMemory(int sizeHint)
         {
             if (_writerCompletion.IsCompleted)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
             }
 
-            if (minimumSize < 0)
+            if (sizeHint < 0)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
             lock (_sync)
             {
-                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(minimumSize);
+                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(sizeHint);
 
                 int bytesLeftInBuffer = segment.WritableBytes;
 
                 // If inadequate bytes left or if the segment is readonly
-                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < minimumSize || segment.ReadOnly)
+                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint || segment.ReadOnly)
                 {
                     BufferSegment nextSegment = CreateSegmentUnsynchronized();
-
-                    nextSegment.SetMemory(_pool.Rent(Math.Max(_minimumSegmentSize, minimumSize)));
+                    nextSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
                     segment.SetNext(nextSegment);
 
@@ -145,7 +144,7 @@ namespace System.IO.Pipelines
             return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
         }
 
-        private BufferSegment AllocateWriteHeadUnsynchronized(int count)
+        private BufferSegment AllocateWriteHeadUnsynchronized(int sizeHint)
         {
             BufferSegment segment = null;
 
@@ -154,7 +153,7 @@ namespace System.IO.Pipelines
                 // Try to return the tail so the calling code can append to it
                 int remaining = _commitHead.WritableBytes;
 
-                if (count <= remaining && remaining > 0)
+                if (sizeHint <= remaining && remaining > 0)
                 {
                     // Free tail space of the right amount, use that
                     segment = _commitHead;
@@ -165,7 +164,7 @@ namespace System.IO.Pipelines
             {
                 // No free tail space, allocate a new segment
                 segment = CreateSegmentUnsynchronized();
-                segment.SetMemory(_pool.Rent(Math.Max(_minimumSegmentSize, count)));
+                segment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
             }
 
             if (_commitHead == null)
@@ -184,6 +183,15 @@ namespace System.IO.Pipelines
             _writingHead = segment;
 
             return segment;
+        }
+
+        private int GetSegmentSize(int sizeHint)
+        {
+            // First we need to handle case where hint is smaller than minimum segment size
+            var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, sizeHint);
+            // After that adjust it to fit into pools max buffer size
+            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+            return adjustedToMaximumSize;
         }
 
         private BufferSegment CreateSegmentUnsynchronized()
@@ -324,12 +332,25 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal void AdvanceReader(SequencePosition consumed)
+        internal void AdvanceReader(in SequencePosition consumed)
         {
             AdvanceReader(consumed, consumed);
         }
 
-        internal void AdvanceReader(SequencePosition consumed, SequencePosition examined)
+        internal void AdvanceReader(in SequencePosition consumed, in SequencePosition examined)
+        {
+            // If the reader is completed
+            if (_readerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
+            }
+
+            // TODO: Use new SequenceMarshal.TryGetReadOnlySequenceSegment to get the correct data
+            // directly casting only works because the type value in ReadOnlySequenceSegment is 0
+            AdvanceReader((BufferSegment)consumed.GetObject(), consumed.GetInteger(), (BufferSegment)examined.GetObject(), examined.GetInteger());
+        }
+
+        internal void AdvanceReader(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
         {
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
@@ -338,12 +359,12 @@ namespace System.IO.Pipelines
             lock (_sync)
             {
                 var examinedEverything = false;
-                if (examined.Segment == _commitHead)
+                if (examinedSegment == _commitHead)
                 {
-                    examinedEverything = _commitHead != null ? examined.Index == _commitHeadIndex - _commitHead.Start : examined.Index == 0;
+                    examinedEverything = _commitHead != null ? examinedIndex == _commitHeadIndex - _commitHead.Start : examinedIndex == 0;
                 }
 
-                if (consumed.Segment != null)
+                if (consumedSegment != null)
                 {
                     if (_readHead == null)
                     {
@@ -351,13 +372,11 @@ namespace System.IO.Pipelines
                         return;
                     }
 
-                    var consumedSegment = (BufferSegment)consumed.Segment;
-
                     returnStart = _readHead;
                     returnEnd = consumedSegment;
 
                     // Check if we crossed _maximumSizeLow and complete backpressure
-                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumed.Index).Length;
+                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumedIndex).Length;
                     long oldLength = _length;
                     _length -= consumedBytes;
 
@@ -370,7 +389,7 @@ namespace System.IO.Pipelines
                     // Check if we consumed entire last segment
                     // if we are going to return commit head we need to check that there is no writing operation that
                     // might be using tailspace
-                    if (consumed.Index == returnEnd.Length && _writingHead != returnEnd)
+                    if (consumedIndex == returnEnd.Length && _writingHead != returnEnd)
                     {
                         BufferSegment nextBlock = returnEnd.NextSegment;
                         if (_commitHead == returnEnd)
@@ -386,7 +405,7 @@ namespace System.IO.Pipelines
                     else
                     {
                         _readHead = consumedSegment;
-                        _readHeadIndex = consumed.Index;
+                        _readHeadIndex = consumedIndex;
                     }
                 }
 
@@ -423,10 +442,14 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
+                // If we're reading, treat clean up that state before continuting
                 if (_readingState.IsActive)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_CompleteReaderActiveReader();
+                    _readingState.End();
                 }
+
+                // REVIEW: We should consider cleaning up all of the allocated memory
+                // on the reader side now.
 
                 completionCallbacks = _readerCompletion.TryComplete(exception);
                 awaitable = _writerAwaitable.Complete();
