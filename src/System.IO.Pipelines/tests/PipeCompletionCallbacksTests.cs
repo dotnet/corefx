@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Pipelines.Tests
@@ -26,12 +28,7 @@ namespace System.IO.Pipelines.Tests
 
             public Exception LastException { get; set; }
 
-            public override void Schedule(Action action)
-            {
-                Schedule(o => ((Action)o)(), action);
-            }
-
-            public override void Schedule(Action<object> action, object state)
+            public override void Schedule<TState>(Action<TState> action, TState state)
             {
                 CallCount++;
                 try
@@ -213,7 +210,7 @@ namespace System.IO.Pipelines.Tests
                 }, null);
 
             PipeWriter buffer = pipe.Writer.WriteEmpty(10);
-            PipeAwaiter<FlushResult> awaiter = buffer.FlushAsync();
+            ValueTaskAwaiter<FlushResult> awaiter = buffer.FlushAsync().GetAwaiter();
 
             Assert.False(awaiter.IsCompleted);
             awaiter.OnCompleted(() => { continuationRan = true; });
@@ -420,9 +417,9 @@ namespace System.IO.Pipelines.Tests
                     Assert.False(continuationRan);
                 }, null);
 
-            PipeAwaiter<ReadResult> awaiter = pipe.Reader.ReadAsync();
+            ValueTask<ReadResult> awaiter = pipe.Reader.ReadAsync();
             Assert.False(awaiter.IsCompleted);
-            awaiter.OnCompleted(() => { continuationRan = true; });
+            awaiter.GetAwaiter().OnCompleted(() => { continuationRan = true; });
             pipe.Writer.Complete();
 
             Assert.True(callbackRan);

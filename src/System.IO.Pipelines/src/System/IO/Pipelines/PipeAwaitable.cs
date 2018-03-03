@@ -32,6 +32,12 @@ namespace System.IO.Pipelines
             _executionContext = null;
         }
 
+        public bool IsCompleted => ReferenceEquals(_completion, s_awaitableIsCompleted);
+
+        public bool HasContinuation => !ReferenceEquals(_completion, s_awaitableIsNotCompleted);
+
+        public bool IsCancelled => _canceledState >= CanceledState.CancellationPreRequested;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration AttachToken(CancellationToken cancellationToken, Action<object> callback, object state)
         {
@@ -93,9 +99,6 @@ namespace System.IO.Pipelines
             }
         }
 
-        public bool IsCompleted => ReferenceEquals(_completion, s_awaitableIsCompleted);
-        internal bool HasContinuation => !ReferenceEquals(_completion, s_awaitableIsNotCompleted);
-
         public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out Action<object> completion, out object completionState, out bool doubleCompletion)
         {
             completionState = null;
@@ -125,6 +128,7 @@ namespace System.IO.Pipelines
                     }
                 }
 
+                // Capture the execution context
                 if ((flags & ValueTaskSourceOnCompletedFlags.FlowExecutionContext) != 0)
                 {
                     _executionContext = ExecutionContext.Capture();
@@ -135,6 +139,7 @@ namespace System.IO.Pipelines
             {
                 completion = continuation;
                 completionState = state;
+                return;
             }
 
             if (!ReferenceEquals(awaitableState, s_awaitableIsNotCompleted))

@@ -54,8 +54,7 @@ namespace System.IO.Pipelines
         protected PipeScheduler() { }
         public static System.IO.Pipelines.PipeScheduler Inline { get { throw null; } }
         public static System.IO.Pipelines.PipeScheduler ThreadPool { get { throw null; } }
-        public abstract void Schedule(System.Action action);
-        public abstract void Schedule(System.Action<object> action, object state);
+        public abstract void Schedule<TState>(System.Action<TState> action, TState state);
     }
     public abstract partial class PipeWriter : System.Buffers.IBufferWriter<byte>
     {

@@ -30,12 +30,7 @@ namespace System.IO.Pipelines.Tests
                 _work.CompleteAdding();
             }
 
-            public override void Schedule(Action action)
-            {
-                Schedule(o => ((Action)o)(), action);
-            }
-
-            public override void Schedule(Action<object> action, object state)
+            public override void Schedule<TState>(Action<TState> action, TState state)
             {
                 _work.Add(() => action(state));
             }
@@ -93,7 +88,7 @@ namespace System.IO.Pipelines.Tests
                     ));
 
                 PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
-                PipeAwaiter<FlushResult> flushAsync = writableBuffer.FlushAsync();
+                ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
 
                 Assert.False(flushAsync.IsCompleted);
 
@@ -138,7 +133,7 @@ namespace System.IO.Pipelines.Tests
                             writerScheduler: scheduler));
 
                     PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
-                    PipeAwaiter<FlushResult> flushAsync = writableBuffer.FlushAsync();
+                    ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
 
                     Assert.False(flushAsync.IsCompleted);
 

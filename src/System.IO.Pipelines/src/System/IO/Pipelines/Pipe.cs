@@ -641,6 +641,11 @@ namespace System.IO.Pipelines
                     return ValueTaskSourceStatus.Faulted;
                 }
 
+                if (_readerAwaitable.IsCancelled)
+                {
+                    return ValueTaskSourceStatus.Canceled;
+                }
+
                 return ValueTaskSourceStatus.Succeeded;
             }
             return ValueTaskSourceStatus.Pending;
@@ -716,6 +721,11 @@ namespace System.IO.Pipelines
                 if (_readerCompletion.IsFaulted)
                 {
                     return ValueTaskSourceStatus.Faulted;
+                }
+
+                if (_writerAwaitable.IsCancelled)
+                {
+                    return ValueTaskSourceStatus.Canceled;
                 }
 
                 return ValueTaskSourceStatus.Succeeded;
