@@ -44,12 +44,79 @@ namespace System.IO.Pipelines.Tests
             }
         }
 
+        public class ThreadSynchronizationContext : SynchronizationContext
+        {
+            private readonly BlockingCollection<Action> _work = new BlockingCollection<Action>();
+
+            public ThreadSynchronizationContext()
+            {
+                Thread = new Thread(Work) { IsBackground = true };
+                Thread.Start();
+            }
+
+            public Thread Thread { get; }
+
+            public void Dispose()
+            {
+                _work.CompleteAdding();
+            }
+
+            public override void Post(SendOrPostCallback action, object state)
+            {
+                _work.Add(() => action(state));
+            }
+
+            private void Work(object state)
+            {
+                foreach (Action callback in _work.GetConsumingEnumerable())
+                {
+                    callback();
+                }
+            }
+        }
+
+        [Fact]
+        public async Task DefaultReaderSchedulerRunsOnSynchronizationContext()
+        {
+            var previous = SynchronizationContext.Current;
+            var sc = new ThreadSynchronizationContext();
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(sc);
+
+                var pipe = new Pipe();
+
+                Func<Task> doRead = async () =>
+                {
+                    ReadResult result = await pipe.Reader.ReadAsync();
+
+                    Assert.Equal(sc.Thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+
+                    pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
+
+                    pipe.Reader.Complete();
+                };
+
+                Task reading = doRead();
+
+                PipeWriter buffer = pipe.Writer;
+                buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
+                await buffer.FlushAsync();
+
+                pipe.Writer.Complete();
+
+                await reading;
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
+
         [Fact]
         public async Task DefaultReaderSchedulerRunsOnThreadPool()
         {
             var pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
-
-            var id = 0;
 
             Func<Task> doRead = async () =>
             {
@@ -63,8 +130,6 @@ namespace System.IO.Pipelines.Tests
             };
 
             Task reading = doRead();
-
-            id = Thread.CurrentThread.ManagedThreadId;
 
             PipeWriter buffer = pipe.Writer;
             buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
@@ -93,8 +158,6 @@ namespace System.IO.Pipelines.Tests
 
                 Assert.False(flushAsync.IsCompleted);
 
-                var id = 0;
-
                 Func<Task> doWrite = async () =>
                 {
                     await flushAsync;
@@ -108,13 +171,60 @@ namespace System.IO.Pipelines.Tests
 
                 ReadResult result = await pipe.Reader.ReadAsync();
 
-                id = Thread.CurrentThread.ManagedThreadId;
-
                 pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
                 pipe.Reader.Complete();
 
                 await writing;
+            }
+        }
+
+        [Fact]
+        public async Task DefaultWriterSchedulerRunsOnSynchronizationContext()
+        {
+            var previous = SynchronizationContext.Current;
+            var sc = new ThreadSynchronizationContext();
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(sc);
+
+                using (var pool = new TestMemoryPool())
+                {
+                    var pipe = new Pipe(
+                        new PipeOptions(
+                            pool,
+                            resumeWriterThreshold: 32,
+                            pauseWriterThreshold: 64
+                        ));
+
+                    PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
+                    ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
+
+                    Assert.False(flushAsync.IsCompleted);
+
+                    Func<Task> doWrite = async () =>
+                    {
+                        await flushAsync;
+
+                        pipe.Writer.Complete();
+
+                        Assert.Equal(sc.Thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+                    };
+
+                    Task writing = doWrite();
+
+                    ReadResult result = await pipe.Reader.ReadAsync();
+
+                    pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
+
+                    pipe.Reader.Complete();
+
+                    await writing;
+                }
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
             }
         }
 

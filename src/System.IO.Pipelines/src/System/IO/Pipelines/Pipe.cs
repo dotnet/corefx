@@ -615,7 +615,7 @@ namespace System.IO.Pipelines
             // Ultimately, we need to call either
             // 1. The sync context with a delegate
             // 2. The scheduler with a delegate
-            // That delegate and state will either be the action passed in direction
+            // That delegate and state will either be the action passed in directly
             // or it will be that specified delegate wrapped in ExecutionContext.Run
 
             if (synchronizationContext == null)
@@ -660,7 +660,6 @@ namespace System.IO.Pipelines
             Debug.Assert(completionData.ExecutionContext != null);
             ExecutionContext.Run(completionData.ExecutionContext, s_executionContextRawCallback, state);
         }
-
 
         private void CompletePipe()
         {
