@@ -23,7 +23,7 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Asynchronously reads a sequence of bytes from the current <see cref="PipeReader"/>.
         /// </summary>
-        /// <returns>A <see cref="PipeAwaiter{T}"/> representing the asynchronous read operation.</returns>
+        /// <returns>A <see cref="ValueTask{T}"/> representing the asynchronous read operation.</returns>
         public abstract ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default);
 
         /// <summary>

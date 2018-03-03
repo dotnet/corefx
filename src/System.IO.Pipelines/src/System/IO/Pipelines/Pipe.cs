@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Sources;
 
 namespace System.IO.Pipelines
 {
@@ -304,7 +305,7 @@ namespace System.IO.Pipelines
 
             TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
 
-            return new ValueTask<FlushResult>(_writer);
+            return new ValueTask<FlushResult>(_writer, token: 0);
         }
 
         internal void CompleteWriter(Exception exception)
@@ -560,7 +561,7 @@ namespace System.IO.Pipelines
             }
             cancellationTokenRegistration.Dispose();
 
-            return new ValueTask<ReadResult>(_reader);
+            return new ValueTask<ReadResult>(_reader, token: 0);
         }
 
         internal bool TryRead(out ReadResult result)
@@ -595,7 +596,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        private static void TrySchedule<TState>(PipeScheduler scheduler, SynchronizationContext synchronizationContext, ExecutionContext executionContext, Action<object> action, object state)
+        private static void TrySchedule(PipeScheduler scheduler, SynchronizationContext synchronizationContext, ExecutionContext executionContext, Action<object> action, object state)
         {
             if (action != null)
             {
@@ -772,7 +773,7 @@ namespace System.IO.Pipelines
             {
                 _readerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
             }
-            TrySchedule(synchronizationContext ?? _readerScheduler, completion, completionState);
+            TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
         }
 
         private void WriterCancellationRequested()
@@ -785,7 +786,7 @@ namespace System.IO.Pipelines
             {
                 _writerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
             }
-            TrySchedule(scheduler ?? _writerScheduler, completion, completionState);
+            TrySchedule(_writerScheduler, synchronizationContext, executionContext, completion, completionState);
         }
 
         /// <summary>

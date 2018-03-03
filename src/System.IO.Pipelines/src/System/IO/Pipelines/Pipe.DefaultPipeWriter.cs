@@ -36,7 +36,7 @@ namespace System.IO.Pipelines
 
             public override Span<byte> GetSpan(int sizeHint = 0) => _pipe.GetMemory(sizeHint).Span;
 
-            public ValueTaskSourceStatus GetStatus(short token) => _pipe.GetFlushAsyncGetStatus();
+            public ValueTaskSourceStatus GetStatus(short token) => _pipe.GetFlushAsyncStatus();
 
             public FlushResult GetResult(short token) => _pipe.GetFlushAsyncResult();
 

@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks.Sources;
 
 namespace System.IO.Pipelines
 {
@@ -80,7 +81,8 @@ namespace System.IO.Pipelines
             {
                 _completion = s_awaitableIsNotCompleted;
                 _completionState = null;
-                _synchronizationContext?.Reset();
+                _synchronizationContext = null;
+                _executionContext = null;
             }
 
             // Change the state from observed -> not cancelled.
@@ -143,9 +145,9 @@ namespace System.IO.Pipelines
             }
         }
 
-        public void Cancel(out Action<object> completion, out object completionState, out PipeScheduler scheduler, out ExecutionContext executionContext)
+        public void Cancel(out Action<object> completion, out object completionState, out SynchronizationContext synchronizationContext, out ExecutionContext executionContext)
         {
-            Complete(out completion, out completionState, out scheduler, out executionContext);
+            Complete(out completion, out completionState, out synchronizationContext, out executionContext);
             _canceledState = completion == null ?
                 CanceledState.CancellationPreRequested :
                 CanceledState.CancellationRequested;
