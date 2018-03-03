@@ -111,7 +111,7 @@ namespace System.Text.RegularExpressions
         internal bool _refsInitialized = false;
 
         // the cache of code and factories that are currently loaded:
-        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>();
+        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
         internal static CachedCodeEntry s_livecode_first = null;
         internal static CachedCodeEntry s_livecode_last = null;
         internal static int s_cacheSize = 15;
@@ -193,7 +193,7 @@ namespace System.Text.RegularExpressions
 
             // Try to look up this regex in the cache.
             var key = new CachedCodeEntryKey(options, cultureKey, pattern);
-            CachedCodeEntry cached = LookupCachedAndUpdate(key);
+            CachedCodeEntry cached = GetCachedCode(key, false);
 
             this.pattern = pattern;
             roptions = options;
@@ -215,7 +215,7 @@ namespace System.Text.RegularExpressions
 
                 tree = null;
                 if (addToCache)
-                    cached = CacheCode(key);
+                    cached = GetCachedCode(key, true);
             }
             else
             {
@@ -1034,25 +1034,53 @@ namespace System.Text.RegularExpressions
         }
 
         /*
-         * Find code cache based on options+pattern
+         * Get current cached code and add it if not found
          */
-        private static CachedCodeEntry LookupCachedAndUpdate(CachedCodeEntryKey key)
+        private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
             lock (s_livecode)
             {
-                s_livecode.TryGetValue(key, out var entry);
-                if (entry != null )
+                // first look for it in the cache and move it to the head
+                var entry = LookupCachedAndPromote(key);
+                // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
+                if (entry == null && isToAdd && s_cacheSize != 0)
                 {
-                    CachePromoteLinkedListEntry(entry);
-                    return entry;
+                    entry = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
+                    s_livecode.Add(key, entry);
+                    // put in linked list:
+                    if (s_livecode_first != null)
+                    {
+                        s_livecode_first._next = entry;
+                        entry._previous = s_livecode_first;
+                    }
+                    s_livecode_first = entry;
+                    if (s_livecode_last == null)
+                    {
+                        s_livecode_last = entry;
+                    }
+                    else
+                    {
+                        if (s_livecode.Count > s_cacheSize)
+                        {
+                            var last = s_livecode_last;
+                            s_livecode.Remove(last._key);
+
+                            last._next._previous = null;
+                            s_livecode_last = last._next;
+                            last._next = null;
+                        }
+                    }
                 }
+                return entry;
             }
-            return null;
         }
 
-        private static void CachePromoteLinkedListEntry(CachedCodeEntry entry)
+        private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
-            if (s_livecode_first != entry)
+            if (s_livecode_first?._key == key) // most used regex should be at the top already
+                return s_livecode_first;
+            s_livecode.TryGetValue(key, out var entry);
+            if (entry != null)
             {
                 if (entry._previous != null)
                 {
@@ -1070,56 +1098,7 @@ namespace System.Text.RegularExpressions
                 entry._next = null;
                 s_livecode_first = entry;
             }
-        }
-
-        /*
-         * Add current code to the cache
-         */
-        private CachedCodeEntry CacheCode(CachedCodeEntryKey key)
-        {
-            CachedCodeEntry newcached = null;
-
-            lock (s_livecode)
-            {
-                // first look for it in the cache and move it to the head
-                s_livecode.TryGetValue(key, out var entry);
-                if (entry != null)
-                {
-                    CachePromoteLinkedListEntry(entry);
-                    return entry;
-                }
-                // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
-                else if (s_cacheSize != 0)
-                {
-                    newcached = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
-                    s_livecode.Add(key, newcached);
-                    // put in linked list:
-                    if (s_livecode_first != null)
-                    {
-                        s_livecode_first._next = newcached;
-                        newcached._previous = s_livecode_first;
-                    }
-                    s_livecode_first = newcached;
-                    if (s_livecode_last == null)
-                    {
-                        s_livecode_last = newcached;
-                    }
-                    else
-                    {
-                        if (s_livecode.Count > s_cacheSize)
-                        {
-                            var last = s_livecode_last;
-                            s_livecode.Remove(last._key);
-
-                            last._next._previous = null;
-                            s_livecode_last = last._next;
-                            last._next = null;
-                        }
-                    }
-                }
-            }
-
-            return newcached;
+            return entry;
         }
 
         protected bool UseOptionC()

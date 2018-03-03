@@ -5,12 +5,6 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class Regex_Cache_Tests : RemoteExecutorTestBase
     {
-        [Fact]
-        public void CacheSize_Get()
-        {
-            Assert.Equal(15, Regex.CacheSize);
-        }
-
         [Theory]
         [InlineData(0)]
         [InlineData(12)]
@@ -18,10 +12,15 @@ namespace System.Text.RegularExpressions.Tests
         {
             int originalCacheSize = Regex.CacheSize;
 
-            Regex.CacheSize = newCacheSize;
-            Assert.Equal(newCacheSize, Regex.CacheSize);
-
-            Regex.CacheSize = originalCacheSize;
+            try
+            {
+                Regex.CacheSize = newCacheSize;
+                Assert.Equal(newCacheSize, Regex.CacheSize);
+            }
+            finally
+            {
+                Regex.CacheSize = originalCacheSize;
+            }
         }
 
         [Fact]
@@ -35,11 +34,16 @@ namespace System.Text.RegularExpressions.Tests
         {
             int originalCacheSize = Regex.CacheSize;
 
-            Regex.CacheSize = 1;
-            Regex.IsMatch("1", "1");
-            Regex.IsMatch("2", "2"); // previous removed from cache
-
-            Regex.CacheSize = originalCacheSize;
+            try
+            { 
+                Regex.CacheSize = 1;
+                Regex.IsMatch("1", "1");
+                Regex.IsMatch("2", "2"); // previous removed from cache
+            }
+            finally
+            {
+                Regex.CacheSize = originalCacheSize;
+            }
         }
 
         [Fact]
@@ -47,13 +51,18 @@ namespace System.Text.RegularExpressions.Tests
         {
             int originalCacheSize = Regex.CacheSize;
 
-            Regex.CacheSize = 2;
-            Regex.IsMatch("1", "1");
-            Regex.IsMatch("2", "2");
-            Regex.CacheSize = 1;
-            Regex.CacheSize = 0; // clear
-
-            Regex.CacheSize = originalCacheSize;
+            try
+            { 
+                Regex.CacheSize = 2;
+                Regex.IsMatch("1", "1");
+                Regex.IsMatch("2", "2");
+                Regex.CacheSize = 1;
+                Regex.CacheSize = 0; // clear
+            }
+            finally
+            {
+                Regex.CacheSize = originalCacheSize;
+            }
         }
 
         [Fact]
@@ -61,14 +70,19 @@ namespace System.Text.RegularExpressions.Tests
         {
             int originalCacheSize = Regex.CacheSize;
 
-            Regex.CacheSize = 3;
-            Regex.IsMatch("1", "1");
-            Regex.IsMatch("2", "2"); 
-            Regex.IsMatch("3", "3");
-            Regex.IsMatch("1", "1"); // should be put first
-            Regex.CacheSize = 1;  // only 1 stays
-
-            Regex.CacheSize = originalCacheSize;
+            try
+            { 
+                Regex.CacheSize = 3;
+                Regex.IsMatch("1", "1");
+                Regex.IsMatch("2", "2"); 
+                Regex.IsMatch("3", "3");
+                Regex.IsMatch("1", "1"); // should be put first
+                Regex.CacheSize = 1;  // only 1 stays
+            }
+            finally
+            {
+                Regex.CacheSize = originalCacheSize;
+            }
         }
 
     }
