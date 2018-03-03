@@ -143,7 +143,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.Udt,typeof(TestUdt),"sql_TestUdt")
+                new SqlMetaData("col1", SqlDbType.Udt, typeof(TestUdt), "sql_TestUdt")
             };
 
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -156,7 +156,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50)
             };
 
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -168,7 +168,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50)
             };
 
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -181,7 +181,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50)
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50)
             };
 
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -194,7 +194,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -216,7 +216,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -235,7 +235,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -255,7 +255,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
            {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
            };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -268,7 +268,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -285,7 +285,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -297,7 +297,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,50),
+                new SqlMetaData("col1", SqlDbType.NVarChar, 50),
                 new SqlMetaData("col2", SqlDbType.Int)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
@@ -310,7 +310,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.Char,100)
+                new SqlMetaData("col1", SqlDbType.Char, 100)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
             record.SetValue(0, 'c');
@@ -323,7 +323,7 @@ namespace System.Data.SqlClient.Tests
         {
             SqlMetaData[] metaData = new SqlMetaData[]
             {
-                new SqlMetaData("col1", SqlDbType.NVarChar,1)
+                new SqlMetaData("col1", SqlDbType.NVarChar, 1)
             };
             SqlDataRecord record = new SqlDataRecord(metaData);
             record.SetValue(0, "a");
