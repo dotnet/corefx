@@ -1419,6 +1419,7 @@ namespace System.Text.RegularExpressions
                 Mvfldloc(s_textposF, _textposV);
                 Mvfldloc(s_textF, _textV);
 
+                // Forwardchars() {
                 if (!_code.RightToLeft)
                 {
                     Ldthisfld(s_textendF);
@@ -1431,18 +1432,23 @@ namespace System.Text.RegularExpressions
                 }
                 Sub();
                 Stloc(cV);
+                // }
 
+                // check i > 0 else return false
                 Ldloc(cV);
                 Ldc(0);
                 BleFar(l4);
 
+                // loop begin
                 MarkLabel(l1);
 
+                // i--
                 Ldloc(cV);
                 Ldc(1);
                 Sub();
                 Stloc(cV);
 
+                // Forwardcharnext() {
                 if (_code.RightToLeft)
                     Leftcharnext();
                 else
@@ -1450,20 +1456,22 @@ namespace System.Text.RegularExpressions
 
                 if (_fcPrefix.GetValueOrDefault().CaseInsensitive)
                     CallToLower();
+                // }
 
                 if (!RegexCharClass.IsSingleton(_fcPrefix.GetValueOrDefault().Prefix))
                 {
                     Ldstr(_fcPrefix.GetValueOrDefault().Prefix);
                     Call(s_charInSetM);
 
-                    BrtrueFar(l2);
+                    BrtrueFar(l2); // Backwardnext(); return true;
                 }
                 else
                 {
                     Ldc(RegexCharClass.SingletonChar(_fcPrefix.GetValueOrDefault().Prefix));
-                    Beq(l2);
+                    Beq(l2); // Backwardnext(); return true;
                 }
 
+                // if i > 0 continue loop
                 MarkLabel(l5);
 
                 Ldloc(cV);
@@ -1473,52 +1481,20 @@ namespace System.Text.RegularExpressions
                 else
                     Bgt(l1);
 
+                // return false, setting runtextpos
                 Ldc(0);
                 BrFar(l3);
 
+                // Backwardnext() {
                 MarkLabel(l2);
-
-                /*          // CURRENTLY DISABLED
-                            // If for some reason we have a prefix we didn't use, use it now.
-                
-                            if (_bmPrefix != null) {
-                                if (!_code._rightToLeft) {
-                                    Ldthisfld(_textendF);
-                                    Ldloc(_textposV);
-                                }
-                                else {
-                                    Ldloc(_textposV);
-                                    Ldthisfld(_textbegF);
-                                }
-                                Sub();
-                                Ldc(_bmPrefix._pattern.Length - 1);
-                                BltFar(l5);
-                                
-                                for (int i = 1; i < _bmPrefix._pattern.Length; i++) {
-                                    Ldloc(_textV);
-                                    Ldloc(_textposV);
-                                    if (!_code._rightToLeft) {
-                                        Ldc(i - 1);
-                                        Add();
-                                    }
-                                    else {
-                                        Ldc(i);
-                                        Sub();
-                                    }
-                                    Callvirt(_getcharM);
-                                    if (!_code._rightToLeft)
-                                        Ldc(_bmPrefix._pattern[i]);
-                                    else
-                                        Ldc(_bmPrefix._pattern[_bmPrefix._pattern.Length - 1 - i]);
-                                    BneFar(l5);
-                                }
-                            }
-                */
 
                 Ldloc(_textposV);
                 Ldc(1);
                 Sub(_code.RightToLeft);
                 Stloc(_textposV);
+                // }
+
+                // return true, setting runtextpos
                 Ldc(1);
 
                 MarkLabel(l3);
@@ -1526,6 +1502,7 @@ namespace System.Text.RegularExpressions
                 Mvlocfld(_textposV, s_textposF);
                 Ret();
 
+                // return false
                 MarkLabel(l4);
                 Ldc(0);
                 Ret();
