@@ -47,7 +47,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task DefaultReaderSchedulerRunsOnSynchronizationContext()
         {
-            var previous = SynchronizationContext.Current;
+            SynchronizationContext previous = SynchronizationContext.Current;
             var sc = new CustomSynchronizationContext();
             try
             {
@@ -151,7 +151,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task DefaultWriterSchedulerRunsOnSynchronizationContext()
         {
-            var previous = SynchronizationContext.Current;
+            SynchronizationContext previous = SynchronizationContext.Current;
             var sc = new CustomSynchronizationContext();
             try
             {
