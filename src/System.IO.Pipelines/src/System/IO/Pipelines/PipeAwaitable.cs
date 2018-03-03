@@ -73,8 +73,6 @@ namespace System.IO.Pipelines
                 completion = currentCompletion;
                 completionState = _completionState;
                 executionContext = _executionContext;
-                // We only want to use the sync context scheduler if it's non null and is valid. We reuse the object
-                // to avoid allocations per async operation so it can be non-null and not have any valid state
                 synchronizationContext = _synchronizationContext;
             }
         }

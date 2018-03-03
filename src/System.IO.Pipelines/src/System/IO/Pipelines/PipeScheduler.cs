@@ -11,7 +11,7 @@ namespace System.IO.Pipelines
     {
         private static readonly ThreadPoolScheduler s_threadPoolScheduler = new ThreadPoolScheduler();
         private static readonly InlineScheduler s_inlineScheduler = new InlineScheduler();
-        
+
         /// <summary>
         /// The <see cref="PipeScheduler"/> implementation that queues callbacks to thread pool
         /// </summary>
