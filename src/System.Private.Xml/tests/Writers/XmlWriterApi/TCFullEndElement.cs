@@ -4270,7 +4270,18 @@ namespace System.Xml.Tests
                     if (param == 1)
                         w.WriteValue(value[sourceStr]);
                     else
-                        w.WriteAttributeString("a", value[sourceStr].ToString());
+                    {
+                        try
+                        {
+                            origCulture = CultureInfo.CurrentCulture;
+                            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;  // So that the number format doesn't depend on the current culture
+                            w.WriteAttributeString("a", value[sourceStr].ToString());
+                        }
+                        finally
+                        {
+                            CultureInfo.CurrentCulture = origCulture;
+                        }
+                    }
                     w.WriteEndElement();
                 }
                 try
