@@ -22,14 +22,16 @@ namespace System.IO.Pipelines
         private CancellationTokenRegistration _cancellationTokenRegistration;
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
+        private bool _useSynchronizationContext;
 
-        public PipeAwaitable(bool completed)
+        public PipeAwaitable(bool completed, bool useSynchronizationContext)
         {
             _canceledState = CanceledState.NotCanceled;
             _completion = completed ? s_awaitableIsCompleted : s_awaitableIsNotCompleted;
             _completionState = null;
             _synchronizationContext = null;
             _executionContext = null;
+            _useSynchronizationContext = useSynchronizationContext;
         }
 
         public bool IsCompleted => ReferenceEquals(_completion, s_awaitableIsCompleted);
@@ -111,7 +113,7 @@ namespace System.IO.Pipelines
                 _completion = continuation;
                 _completionState = state;
 
-                if ((flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
+                if (_useSynchronizationContext && (flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
                 {
                     // Set the scheduler to the current synchronization context if there is one
                     // otherwise we delegate to what the pipe was configured with.

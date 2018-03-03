@@ -12,7 +12,7 @@ namespace System.IO.Pipelines.Tests
         public BackpressureTests()
         {
             _pool = new TestMemoryPool();
-            _pipe = new Pipe(new PipeOptions(_pool, resumeWriterThreshold: 32, pauseWriterThreshold: 64, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            _pipe = new Pipe(new PipeOptions(_pool, resumeWriterThreshold: 32, pauseWriterThreshold: 64, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
         }
 
         public void Dispose()

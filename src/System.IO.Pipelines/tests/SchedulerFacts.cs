@@ -47,7 +47,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task DefaultReaderSchedulerRunsOnThreadPool()
         {
-            var pipe = new Pipe();
+            var pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
 
             var id = 0;
 
@@ -84,7 +84,8 @@ namespace System.IO.Pipelines.Tests
                     new PipeOptions(
                         pool,
                         resumeWriterThreshold: 32,
-                        pauseWriterThreshold: 64
+                        pauseWriterThreshold: 64,
+                        useSynchronizationContext: false
                     ));
 
                 PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
@@ -130,7 +131,8 @@ namespace System.IO.Pipelines.Tests
                             resumeWriterThreshold: 32,
                             pauseWriterThreshold: 64,
                             readerScheduler: PipeScheduler.Inline,
-                            writerScheduler: scheduler));
+                            writerScheduler: scheduler,
+                            useSynchronizationContext: false));
 
                     PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
                     ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
@@ -170,7 +172,7 @@ namespace System.IO.Pipelines.Tests
             {
                 using (var scheduler = new ThreadScheduler())
                 {
-                    var pipe = new Pipe(new PipeOptions(pool, scheduler, writerScheduler: PipeScheduler.Inline));
+                    var pipe = new Pipe(new PipeOptions(pool, scheduler, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
                     Func<Task> doRead = async () =>
                     {
@@ -201,7 +203,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task ThreadPoolScheduler_SchedulesOnThreadPool()
         {
-            var pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.ThreadPool, writerScheduler: PipeScheduler.Inline));
+            var pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.ThreadPool, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
             async Task DoRead()
             {

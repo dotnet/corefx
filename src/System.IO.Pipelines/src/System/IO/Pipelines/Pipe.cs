@@ -22,6 +22,13 @@ namespace System.IO.Pipelines
         private static readonly Action<object> s_signalWriterAwaitable = state => ((Pipe)state).WriterCancellationRequested();
         private static readonly Action<PipeCompletionCallbacks> s_invokeCompletionCallbacks = state => state.Execute();
 
+        // These callbacks all point to the same methods but are different delegate types
+        private static readonly ContextCallback s_executionContextCallback = ExecuteWithExecutionContext;
+        private static readonly ContextCallback s_executionContextRawCallback = ExecuteWithoutExecutionContext;
+        private static readonly SendOrPostCallback s_syncContextExecutionContextCallback = ExecuteWithExecutionContext;
+        private static readonly SendOrPostCallback s_syncContextExecuteWithoutExecutionContextCallback = ExecuteWithoutExecutionContext;
+        private static readonly Action<object> s_scheduleWithExecutionContextCallback = ExecuteWithExecutionContext;
+
         // This sync objects protects the following state:
         // 1. _commitHead & _commitHeadIndex
         // 2. _length
@@ -98,8 +105,9 @@ namespace System.IO.Pipelines
             _resumeWriterThreshold = options.ResumeWriterThreshold;
             _readerScheduler = options.ReaderScheduler;
             _writerScheduler = options.WriterScheduler;
-            _readerAwaitable = new PipeAwaitable(completed: false);
-            _writerAwaitable = new PipeAwaitable(completed: true);
+            var useSynchronizationContext = options.UseSynchronizationContext;
+            _readerAwaitable = new PipeAwaitable(completed: false, useSynchronizationContext);
+            _writerAwaitable = new PipeAwaitable(completed: true, useSynchronizationContext);
             _reader = new DefaultPipeReader(this);
             _writer = new DefaultPipeWriter(this);
         }
@@ -596,13 +604,63 @@ namespace System.IO.Pipelines
             }
         }
 
-        private static void TrySchedule(PipeScheduler scheduler, SynchronizationContext synchronizationContext, ExecutionContext executionContext, Action<object> action, object state)
+        private static void TrySchedule(PipeScheduler scheduler, SynchronizationContext synchronizationContext, ExecutionContext executionContext, Action<object> completion, object completionState)
         {
-            if (action != null)
+            // Nothing to do
+            if (completion == null)
             {
-                scheduler.Schedule(action, state);
+                return;
+            }
+
+            // Ultimately, we need to call either
+            // 1. The sync context with a delegate
+            // 2. The scheduler with a delegate
+            // That delegate and state will either be the action passed in direction
+            // or it will be that specified delegate wrapped in ExecutionContext.Run
+
+            if (synchronizationContext == null)
+            {
+                // We don't have a SynchronizationContext so execute on the specified scheduler
+                if (executionContext == null)
+                {
+                    // We can run directly, this should be the default fast path
+                    scheduler.Schedule(completion, completionState);
+                    return;
+                }
+
+                // We also have to run on the specified execution context so run the scheduler and execute the
+                // delegate on the execution context
+                scheduler.Schedule(s_scheduleWithExecutionContextCallback, new CompletionData(completion, completionState, executionContext));
+            }
+            else
+            {
+                var completionData = new CompletionData(completion, completionState, executionContext);
+                if (executionContext == null)
+                {
+                    // We need to box the struct here since there's no generic overload for state
+                    synchronizationContext.Post(s_syncContextExecuteWithoutExecutionContextCallback, completionData);
+                }
+                else
+                {
+                    // We need to execute the callback with the execution context
+                    synchronizationContext.Post(s_syncContextExecutionContextCallback, completionData);
+                }
             }
         }
+
+        private static void ExecuteWithoutExecutionContext(object state)
+        {
+            CompletionData completionData = (CompletionData)state;
+            completionData.Completion(completionData.CompletionState);
+        }
+
+        private static void ExecuteWithExecutionContext(object state)
+        {
+            CompletionData completionData = (CompletionData)state;
+            Debug.Assert(completionData.ExecutionContext != null);
+            ExecutionContext.Run(completionData.ExecutionContext, s_executionContextRawCallback, state);
+        }
+
 
         private void CompletePipe()
         {
@@ -823,6 +881,20 @@ namespace System.IO.Pipelines
 
                 _disposed = false;
                 ResetState();
+            }
+        }
+
+        private readonly struct CompletionData
+        {
+            public Action<object> Completion { get; }
+            public object CompletionState { get; }
+            public ExecutionContext ExecutionContext { get; }
+
+            public CompletionData(Action<object> completion, object completionState, ExecutionContext executionContext)
+            {
+                Completion = completion;
+                CompletionState = completionState;
+                ExecutionContext = executionContext;
             }
         }
     }
