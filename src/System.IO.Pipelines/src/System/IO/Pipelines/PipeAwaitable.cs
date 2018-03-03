@@ -38,8 +38,6 @@ namespace System.IO.Pipelines
 
         public bool HasContinuation => !ReferenceEquals(_completion, s_awaitableIsNotCompleted);
 
-        public bool IsCancelled => _canceledState >= CanceledState.CancellationPreRequested;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration AttachToken(CancellationToken cancellationToken, Action<object> callback, object state)
         {
