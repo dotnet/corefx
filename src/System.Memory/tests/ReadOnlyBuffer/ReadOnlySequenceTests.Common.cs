@@ -114,11 +114,11 @@ namespace System.Memory.Tests
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 200);
 
             Assert.Equal(500, buffer.Length);
-            var length = 500;
+            int length = 500;
 
-            for (var s = 0; s < 3; s++)
+            for (int s = 0; s < 3; s++)
             {
-                for (var i = 100; i > 0; i--)
+                for (int i = 100; i > 0; i--)
                 {
                     Assert.Equal(i, buffer.First.Length);
                     buffer = buffer.Slice(1);
@@ -129,7 +129,7 @@ namespace System.Memory.Tests
 
             Assert.Equal(200, buffer.Length);
 
-            for (var i = 200; i > 0; i--)
+            for (int i = 200; i > 0; i--)
             {
                 Assert.Equal(i, buffer.First.Length);
                 buffer = buffer.Slice(1);
