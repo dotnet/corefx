@@ -47,9 +47,9 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /*
-         * Get current cached code and add it if not found
-         */
+        /// <summary>
+        ///  Find cache based on options+pattern+culture and optionally add new cache if not found
+        /// </summary>
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
             lock (s_livecode)
@@ -148,7 +148,7 @@ namespace System.Text.RegularExpressions
 
 			public static bool operator !=(CachedCodeEntryKey left, CachedCodeEntryKey right)
 			{
-				return !(left == right);
+				return !left.Equals(right);
 			}
 
 			public override int GetHashCode()
