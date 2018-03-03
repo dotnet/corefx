@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace System.Text.RegularExpressions
 {
@@ -52,12 +53,14 @@ namespace System.Text.RegularExpressions
         /// </summary>
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
+            if (s_cacheSize == 0)
+                return null;
             lock (s_livecode)
             {
                 // first look for it in the cache and move it to the head
                 var entry = LookupCachedAndPromote(key);
                 // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
-                if (entry == null && isToAdd && s_cacheSize != 0)
+                if (entry == null && isToAdd && s_cacheSize != 0)  // check cache size again in case it changed
                 {
                     entry = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
                     s_livecode.Add(key, entry);
