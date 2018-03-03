@@ -11,9 +11,9 @@ namespace System.IO.Pipelines
     {
         public override void Schedule<TState>(Action<TState> action, TState state)
         {
-            System.Threading.ThreadPool.QueueUserWorkItem(state =>
+            System.Threading.ThreadPool.QueueUserWorkItem(s =>
             {
-                ((ActionObjectAsWaitCallback<TState>)state).Run();
+                ((ActionObjectAsWaitCallback<TState>)s).Run();
             }, 
             new ActionObjectAsWaitCallback<TState>(action, state));
         }
