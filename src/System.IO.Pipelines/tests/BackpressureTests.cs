@@ -34,7 +34,7 @@ namespace System.IO.Pipelines.Tests
             Assert.False(flushAsync.IsCompleted);
 
             ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
-            SequencePosition consumed = result.Buffer.GetPosition(result.Buffer.Start, 31);
+            SequencePosition consumed = result.Buffer.GetPosition(31);
             Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(consumed, result.Buffer.End));
 
             _pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
@@ -49,7 +49,7 @@ namespace System.IO.Pipelines.Tests
             Assert.False(flushAsync.IsCompleted);
 
             ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
-            SequencePosition consumed = result.Buffer.GetPosition(result.Buffer.Start, 33);
+            SequencePosition consumed = result.Buffer.GetPosition(33);
             _pipe.Reader.AdvanceTo(consumed, consumed);
 
             Assert.True(flushAsync.IsCompleted);
@@ -66,7 +66,7 @@ namespace System.IO.Pipelines.Tests
             Assert.False(flushAsync.IsCompleted);
 
             ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
-            SequencePosition consumed = result.Buffer.GetPosition(result.Buffer.Start, 32);
+            SequencePosition consumed = result.Buffer.GetPosition(32);
             _pipe.Reader.AdvanceTo(consumed, consumed);
 
             Assert.False(flushAsync.IsCompleted);
@@ -81,7 +81,7 @@ namespace System.IO.Pipelines.Tests
             Assert.False(flushAsync.IsCompleted);
 
             ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
-            SequencePosition consumed = result.Buffer.GetPosition(result.Buffer.Start, 33);
+            SequencePosition consumed = result.Buffer.GetPosition(33);
             _pipe.Reader.AdvanceTo(consumed, consumed);
 
             Assert.True(flushAsync.IsCompleted);
@@ -107,6 +107,36 @@ namespace System.IO.Pipelines.Tests
             Assert.True(flushAsync.IsCompleted);
             FlushResult flushResult = flushAsync.GetResult();
             Assert.True(flushResult.IsCompleted);
+
+            writableBuffer = _pipe.Writer.WriteEmpty(64);
+            flushAsync = writableBuffer.FlushAsync();
+            flushResult = flushAsync.GetResult();
+
+            Assert.True(flushResult.IsCompleted);
+            Assert.True(flushAsync.IsCompleted);
+        }
+
+        [Fact]
+        public async Task FlushAsyncReturnsCompletedIfReaderCompletesWithoutAdvance()
+        {
+            PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(64);
+            PipeAwaiter<FlushResult> flushAsync = writableBuffer.FlushAsync();
+
+            Assert.False(flushAsync.IsCompleted);
+
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.Complete();
+
+            Assert.True(flushAsync.IsCompleted);
+            FlushResult flushResult = flushAsync.GetResult();
+            Assert.True(flushResult.IsCompleted);
+
+            writableBuffer = _pipe.Writer.WriteEmpty(64);
+            flushAsync = writableBuffer.FlushAsync();
+            flushResult = flushAsync.GetResult();
+
+            Assert.True(flushResult.IsCompleted);
+            Assert.True(flushAsync.IsCompleted);
         }
 
         [Fact]

@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.ServiceModel.Syndication;
-using System.Xml;
-using System.IO;
-using Xunit;
 using System.Linq;
+using System.Xml;
+using Xunit;
 
 namespace System.ServiceModel.Syndication.Tests
 {
@@ -25,7 +21,11 @@ namespace System.ServiceModel.Syndication.Tests
             using (XmlReader reader = XmlReader.Create(@"RssSpecCustomParser.xml"))
             {
                 var formatter = new Rss20FeedFormatter();
-                formatter.DateTimeParser = (value, localName, ns) => dto;
+                formatter.DateTimeParser = (XmlDateTimeData xmlDateTimeData, out DateTimeOffset dateTimeOffset) =>
+                {
+                    dateTimeOffset = dto;
+                    return true;
+                };
                 formatter.ReadFrom(reader);
                 feed = formatter.Feed;
             }
@@ -45,7 +45,11 @@ namespace System.ServiceModel.Syndication.Tests
             {
                 var formatter = new Rss20FeedFormatter
                 {
-                    UriParser = (value, kind, localName, ns) => new Uri($"http://value-{value}-kind-{kind}-localName-{localName}-ns-{ns}-end")
+                    UriParser = (XmlUriData xmlUriData, out Uri uri) =>
+                    {
+                        uri = new Uri($"http://value-{xmlUriData.UriString}-kind-{xmlUriData.UriKind}-localName-{xmlUriData.ElementQualifiedName.Name}-ns-{xmlUriData.ElementQualifiedName.Namespace}-end");
+                        return true;
+                    }
                 };
                 formatter.ReadFrom(reader);
                 feed = formatter.Feed;
@@ -76,7 +80,11 @@ namespace System.ServiceModel.Syndication.Tests
             {
                 var formatter = new Atom10FeedFormatter
                 {
-                    DateTimeParser = (value, localName, ns) => dto
+                    DateTimeParser = (XmlDateTimeData xmlDateTimeData, out DateTimeOffset dateTimeOffset) =>
+                    {
+                        dateTimeOffset = dto;
+                        return true;
+                    }
                 };
                 formatter.ReadFrom(reader);
                 feed = formatter.Feed;
@@ -101,7 +109,11 @@ namespace System.ServiceModel.Syndication.Tests
             {
                 var formatter = new Atom10FeedFormatter
                 {
-                    UriParser = (value, kind, localName, ns) => new Uri($"http://value-{value}-kind-{kind}-localName-{localName}-ns-{ns}-end")
+                    UriParser = (XmlUriData xmlUriData, out Uri uri) =>
+                    {
+                        uri = new Uri($"http://value-{xmlUriData.UriString}-kind-{xmlUriData.UriKind}-localName-{xmlUriData.ElementQualifiedName.Name}-ns-{xmlUriData.ElementQualifiedName.Namespace}-end");
+                        return true;
+                    }
                 };
                 formatter.ReadFrom(reader);
                 feed = formatter.Feed;
@@ -118,5 +130,132 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(new Uri("http://value-EntryLinkHref-kind-relativeorabsolute-localName-link-ns-http//www.w3.org/2005/Atom-end"), feed.Items.First().Links.First().Uri);
             Assert.Equal(new Uri("http://value-EntryContentSrc-kind-relativeorabsolute-localName-content-ns-http://www.w3.org/2005/Atom-end"), ((UrlSyndicationContent)feed.Items.First().Content).Url);
         }
+        
+        [Fact]
+        public static void SyndicationFeed_RSS_Optional_Elements()
+        {
+            using (XmlReader reader = XmlReader.Create(@"rssSpecExample.xml"))
+            {
+                SyndicationFeed feed = SyndicationFeed.Load(reader);
+
+                Assert.NotNull(feed.Documentation);
+                Assert.Equal("http://contoso.com/rss", feed.Documentation.GetAbsoluteUri().ToString());
+
+                Assert.NotNull(feed.TimeToLive);
+                Assert.Equal(TimeSpan.FromMinutes(60), feed.TimeToLive.Value);
+
+                Assert.NotNull(feed.SkipHours);
+                Assert.Equal(3, feed.SkipHours.Count);
+
+                Assert.NotNull(feed.SkipDays);
+                Assert.Equal(7, feed.SkipDays.Count);
+
+                Assert.NotNull(feed.TextInput);
+                Assert.Equal("Search Online", feed.TextInput.Description);
+                Assert.Equal("Search", feed.TextInput.Title);
+                Assert.Equal("input Name", feed.TextInput.Name);
+                Assert.Equal("http://www.contoso.no/search?", feed.TextInput.Link.Uri.ToString());
+            }
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Load_Write_RSS_With_Optional_Elements()
+        {
+            List<AllowableDifference> allowableDifferences = GetRssFeedPositiveTestAllowableDifferences();
+            ReadWriteSyndicationFeed(
+                file: "rssOptionalElements.xml",
+                feedFormatter: (feedObject) => new Rss20FeedFormatter(feedObject),
+                allowableDifferences: allowableDifferences
+            );
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Load_Write_RSS_Use_Optional_Element_Properties()
+        {
+            List<AllowableDifference> allowableDifferences = GetRssFeedPositiveTestAllowableDifferences();
+            ReadWriteSyndicationFeed(
+                file: "rssOptionalElements.xml",
+                feedFormatter: (feedObject) => new Rss20FeedFormatter(feedObject),
+                allowableDifferences: allowableDifferences,
+                verifySyndicationFeedRead: (feed) =>
+                {
+                    Assert.NotNull(feed);
+                    Assert.NotNull(feed.Documentation);
+                    Assert.True(feed.Documentation.GetAbsoluteUri().ToString() == "http://contoso.com/rss");
+
+                    Assert.NotNull(feed.TimeToLive);
+                    Assert.Equal(TimeSpan.FromMinutes(60), feed.TimeToLive.Value);
+
+                    Assert.NotNull(feed.SkipHours);
+                    Assert.Equal(3, feed.SkipHours.Count);
+
+                    Assert.NotNull(feed.SkipDays);
+                    Assert.Equal(2, feed.SkipDays.Count);
+
+                    Assert.NotNull(feed.TextInput);
+                    Assert.Equal("Search Online", feed.TextInput.Description);
+                    Assert.Equal("Search", feed.TextInput.Title);
+                    Assert.Equal("input Name", feed.TextInput.Name);
+                    Assert.Equal("http://www.contoso.no/search?", feed.TextInput.Link.Uri.ToString());
+                });
+        }
+
+        public static TheoryData<TimeSpan> InvalidTimeToLiveValues
+        {
+            get
+            {
+                TheoryData<TimeSpan> data = new TheoryData<TimeSpan>();
+
+                data.Add(new TimeSpan(days: 0, hours: 0, minutes: 1, seconds: 1, milliseconds: 0));
+                data.Add(new TimeSpan(days: 0, hours: 0, minutes: 1, seconds: 0, milliseconds: 1));
+                data.Add(new TimeSpan(hours: 0, minutes: -1, seconds: 0));
+
+                return data;
+            }
+        }
+
+        public static TheoryData<TimeSpan> ValidTimeToLiveValues
+        {
+            get
+            {
+                TheoryData<TimeSpan> data = new TheoryData<TimeSpan>();
+
+                data.Add(new TimeSpan(hours: 0, minutes: 0, seconds: 0));
+                data.Add(new TimeSpan(hours: 0, minutes: 1, seconds: 0));
+                data.Add(new TimeSpan(hours: 0, minutes: 1000, seconds: 0));
+
+                return data;
+            }
+        }
+
+        [Theory, MemberData(nameof(InvalidTimeToLiveValues))]
+        public static void SyndicationFeed_TimeToLive_Validation_Throws(TimeSpan invalidTimeToLive)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var feed = new SyndicationFeed("Contoso News", "<div>Most recent news from Contoso</div>",
+                    new Uri("http://www.Contoso.com/news"));
+                feed.TimeToLive = invalidTimeToLive;
+            });
+        }
+
+        [Theory, MemberData(nameof(ValidTimeToLiveValues))]
+        public static void SyndicationFeed_TimeToLive_Success(TimeSpan validTimeToLive)
+        {
+            var feed = new SyndicationFeed("Contoso News", "<div>Most recent news from Contoso</div>",
+                new Uri("http://www.Contoso.com/news"));
+            feed.TimeToLive = validTimeToLive;
+            Assert.Equal(validTimeToLive, feed.TimeToLive.Value);
+        }
+
+        [Fact]
+        public static void SyndicationFeed_TimeToLive_Null_Success()
+        {
+            var feed = new SyndicationFeed("Contoso News", "<div>Most recent news from Contoso</div>",
+                new Uri("http://www.Contoso.com/news"));
+            feed.TimeToLive = null;
+            Assert.False(feed.TimeToLive.HasValue);
+        }
+
     }
 }
