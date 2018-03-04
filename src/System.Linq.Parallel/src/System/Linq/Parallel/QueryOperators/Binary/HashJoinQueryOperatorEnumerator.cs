@@ -207,6 +207,51 @@ namespace System.Linq.Parallel
     {
         public abstract HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken);
 
+        protected void BuildBaseHashLookup<TBaseBuilder, TBaseElement, TBaseOrderKey>(
+            QueryOperatorEnumerator<Pair<TBaseElement, THashKey>, TBaseOrderKey> dataSource,
+            TBaseBuilder baseHashBuilder,
+            CancellationToken cancellationToken) where TBaseBuilder : IBaseHashBuilder<TBaseElement, TBaseOrderKey>
+        {
+            Debug.Assert(dataSource != null);
+
+#if DEBUG
+            int hashLookupCount = 0;
+            int hashKeyCollisions = 0;
+#endif
+
+            Pair<TBaseElement, THashKey> currentPair = default(Pair<TBaseElement, THashKey>);
+            TBaseOrderKey orderKey = default(TBaseOrderKey);
+            int i = 0;
+            while (dataSource.MoveNext(ref currentPair, ref orderKey))
+            {
+                if ((i++ & CancellationState.POLL_INTERVAL) == 0)
+                    CancellationState.ThrowIfCanceled(cancellationToken);
+
+                TBaseElement element = currentPair.First;
+                THashKey hashKey = currentPair.Second;
+
+                // We ignore null keys.
+                if (hashKey != null)
+                {
+#if DEBUG
+                    hashLookupCount++;
+#endif
+
+                    if (baseHashBuilder.Add(hashKey, element, orderKey))
+                    {
+#if DEBUG
+                        hashKeyCollisions++;
+#endif
+                    }
+                }
+            }
+
+#if DEBUG
+            TraceHelpers.TraceInfo("HashLookupBuilder::BuildBaseHashLookup - built hash table [count = {0}, collisions = {1}]",
+                hashLookupCount, hashKeyCollisions);
+#endif
+        }
+
         // Standard implementation of the disposable pattern.
         public void Dispose()
         {
@@ -215,6 +260,19 @@ namespace System.Linq.Parallel
 
         protected virtual void Dispose(bool disposing)
         {
+        }
+
+        /// <summary>
+        /// Used in BuildBaseHashLookup to translate from data in dataSource to data to be used
+        /// by the HashJoin operator.
+        /// </summary>
+        /// <typeparam name="TBaseElement"></typeparam>
+        /// <typeparam name="TBaseOrderKey"></typeparam>
+        protected interface IBaseHashBuilder<TBaseElement, TBaseOrderKey>
+        {
+            // adds the value to the base HashLookup.
+            // returns true if the addition is a hash collision
+            bool Add(THashKey hashKey, TBaseElement element, TBaseOrderKey orderKey);
         }
     }
 
@@ -253,59 +311,11 @@ namespace System.Linq.Parallel
 
         public override HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken)
         {
-            Debug.Assert(_dataSource != null);
+            HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> lookup =
+                new HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>>(_keyComparer);
+            JoinBaseHashBuilder baseHashBuilder = new JoinBaseHashBuilder(lookup);
 
-#if DEBUG
-            int hashLookupCount = 0;
-            int hashKeyCollisions = 0;
-#endif
-
-            var lookup = new HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>>(_keyComparer);
-
-            Pair<TElement, THashKey> currentPair = default(Pair<TElement, THashKey>);
-            TOrderKey orderKey = default(TOrderKey);
-            int i = 0;
-            while (_dataSource.MoveNext(ref currentPair, ref orderKey))
-            {
-                if ((i++ & CancellationState.POLL_INTERVAL) == 0)
-                    CancellationState.ThrowIfCanceled(cancellationToken);
-
-                TElement element = currentPair.First;
-                THashKey hashKey = currentPair.Second;
-
-                // We ignore null keys.
-                if (hashKey != null)
-                {
-#if DEBUG
-                    hashLookupCount++;
-#endif
-
-                    // See if we've already stored an element under the current key. If not, we
-                    // add a HashLookupValueList to hold the elements mapping to the same key.
-                    HashLookupValueList<TElement, TOrderKey> currentValue = default(HashLookupValueList<TElement, TOrderKey>);
-                    if (!lookup.TryGetValue(hashKey, ref currentValue))
-                    {
-                        currentValue = new HashLookupValueList<TElement, TOrderKey>(element, orderKey);
-                        lookup.Add(hashKey, currentValue);
-                    }
-                    else
-                    {
-                        if (currentValue.Add(element, orderKey))
-                        {
-                            // We need to re-store this element because the pair is a value type.
-                            lookup[hashKey] = currentValue;
-                        }
-#if DEBUG
-                        hashKeyCollisions++;
-#endif
-                    }
-                }
-            }
-
-#if DEBUG
-            TraceHelpers.TraceInfo("ParallelJoinQueryOperator::BuildHashLookup - built hash table [count = {0}, collisions = {1}]",
-                hashLookupCount, hashKeyCollisions);
-#endif
+            BuildBaseHashLookup(_dataSource, baseHashBuilder, cancellationToken);
 
             return new JoinHashLookup(lookup);
         }
@@ -315,6 +325,41 @@ namespace System.Linq.Parallel
             Debug.Assert(_dataSource != null);
 
             _dataSource.Dispose();
+        }
+
+        /// <summary>
+        /// Adds TElement,TOrderKey values to a HashLookup of HashLookupValueLists.
+        /// </summary>
+        private struct JoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
+        {
+            private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
+
+            public JoinBaseHashBuilder(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
+
+                _base = baseLookup;
+            }
+
+            public bool Add(THashKey hashKey, TElement element, TOrderKey orderKey)
+            {
+                HashLookupValueList<TElement, TOrderKey> currentValue = default(HashLookupValueList<TElement, TOrderKey>);
+                if (!_base.TryGetValue(hashKey, ref currentValue))
+                {
+                    currentValue = new HashLookupValueList<TElement, TOrderKey>(element, orderKey);
+                    _base.Add(hashKey, currentValue);
+                    return false;
+                }
+                else
+                {
+                    if (currentValue.Add(element, orderKey))
+                    {
+                        // We need to re-store this element because the pair is a value type.
+                        _base[hashKey] = currentValue;
+                    }
+                    return true;
+                }
+            }
         }
 
         /// <summary>
@@ -361,59 +406,46 @@ namespace System.Linq.Parallel
 
         public override HashJoinHashLookup<THashKey, IEnumerable<TElement>, int> BuildHashLookup(CancellationToken cancellationToken)
         {
-            Debug.Assert(_dataSource != null);
+            HashLookup<THashKey, ListChunk<TElement>> lookup = new HashLookup<THashKey, ListChunk<TElement>>(_keyComparer);
+            GroupJoinBaseHashBuilder baseHashBuilder = new GroupJoinBaseHashBuilder(lookup);
 
-#if DEBUG
-            int hashLookupCount = 0;
-            int hashKeyCollisions = 0;
-#endif
-
-            var lookup = new HashLookup<THashKey, ListChunk<TElement>>(_keyComparer);
-
-            Pair<TElement, THashKey> currentPair = default(Pair<TElement, THashKey>);
-            TOrderKey orderKeyUnused = default(TOrderKey);
-            int i = 0;
-            while (_dataSource.MoveNext(ref currentPair, ref orderKeyUnused))
-            {
-                if ((i++ & CancellationState.POLL_INTERVAL) == 0)
-                    CancellationState.ThrowIfCanceled(cancellationToken);
-
-                TElement element = currentPair.First;
-                THashKey hashKey = currentPair.Second;
-
-                // We ignore null keys.
-                if (hashKey != null)
-                {
-#if DEBUG
-                    hashLookupCount++;
-#endif
-
-                    // See if we've already stored an element under the current key. If not, we
-                    // add a HashLookupValueList to hold the elements mapping to the same key.
-                    ListChunk<TElement> currentValue = default(ListChunk<TElement>);
-                    if (!lookup.TryGetValue(hashKey, ref currentValue))
-                    {
-                        const int INITIAL_CHUNK_SIZE = 2;
-                        currentValue = new ListChunk<TElement>(INITIAL_CHUNK_SIZE);
-                        lookup.Add(hashKey, currentValue);
-                    }
-#if DEBUG
-                    else
-                    {
-                        hashKeyCollisions++;
-                    }
-#endif
-                    currentValue.Add(element);
-                }
-            }
-
-#if DEBUG
-            TraceHelpers.TraceInfo("ParallelJoinQueryOperator::BuildHashLookup - built hash table [count = {0}, collisions = {1}]",
-                hashLookupCount, hashKeyCollisions);
-#endif
+            BuildBaseHashLookup(_dataSource, baseHashBuilder, cancellationToken);
 
             return new GroupJoinHashLookup(lookup);
 
+        }
+
+        /// <summary>
+        /// Adds TElement values to a HashLookup of ListChunks. TOrderKey is ignored.
+        /// </summary>
+        private struct GroupJoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
+        {
+            private readonly HashLookup<THashKey, ListChunk<TElement>> _base;
+
+            public GroupJoinBaseHashBuilder(HashLookup<THashKey, ListChunk<TElement>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
+
+                _base = baseLookup;
+            }
+
+            public bool Add(THashKey hashKey, TElement element, TOrderKey orderKey)
+            {
+                bool hasCollision = true;
+
+                ListChunk<TElement> currentValue = default(ListChunk<TElement>);
+                if (!_base.TryGetValue(hashKey, ref currentValue))
+                {
+                    const int INITIAL_CHUNK_SIZE = 2;
+                    currentValue = new ListChunk<TElement>(INITIAL_CHUNK_SIZE);
+                    _base.Add(hashKey, currentValue);
+                    hasCollision = false;
+                }
+
+                currentValue.Add(element);
+
+                return hasCollision;
+            }
         }
 
         /// <summary>
@@ -498,7 +530,7 @@ namespace System.Linq.Parallel
             Debug.Assert(nextIndex >= 0, "nextIndex must be non-negative");
             Debug.Assert(rest == null || nextIndex < rest.Count, "nextIndex not a valid index in chunk rest");
 
-            _head = default;
+            _head = default(Pair<TElement, TOrderKey>);
             _tail = rest;
             _currentIndex = nextIndex;
         }
