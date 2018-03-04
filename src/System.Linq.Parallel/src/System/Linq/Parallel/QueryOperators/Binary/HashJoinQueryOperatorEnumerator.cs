@@ -341,6 +341,123 @@ namespace System.Linq.Parallel
     }
 
     /// <summary>
+    /// Class to build a HashJoinHashLookup of right elements for use in GroupJoin operations.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    /// <typeparam name="THashKey"></typeparam>
+    internal class GroupJoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<IEnumerable<TElement>, int, THashKey>
+    {
+        private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
+        private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
+
+        internal GroupJoinHashLookupBuilder(QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource, IEqualityComparer<THashKey> keyComparer)
+        {
+            Debug.Assert(dataSource != null);
+
+            _dataSource = dataSource;
+            _keyComparer = keyComparer;
+        }
+
+        public override HashJoinHashLookup<THashKey, IEnumerable<TElement>, int> BuildHashLookup(CancellationToken cancellationToken)
+        {
+            Debug.Assert(_dataSource != null);
+
+#if DEBUG
+            int hashLookupCount = 0;
+            int hashKeyCollisions = 0;
+#endif
+
+            var lookup = new HashLookup<THashKey, ListChunk<TElement>>(_keyComparer);
+
+            Pair<TElement, THashKey> currentPair = default(Pair<TElement, THashKey>);
+            TOrderKey orderKeyUnused = default(TOrderKey);
+            int i = 0;
+            while (_dataSource.MoveNext(ref currentPair, ref orderKeyUnused))
+            {
+                if ((i++ & CancellationState.POLL_INTERVAL) == 0)
+                    CancellationState.ThrowIfCanceled(cancellationToken);
+
+                TElement element = currentPair.First;
+                THashKey hashKey = currentPair.Second;
+
+                // We ignore null keys.
+                if (hashKey != null)
+                {
+#if DEBUG
+                    hashLookupCount++;
+#endif
+
+                    // See if we've already stored an element under the current key. If not, we
+                    // add a HashLookupValueList to hold the elements mapping to the same key.
+                    ListChunk<TElement> currentValue = default(ListChunk<TElement>);
+                    if (!lookup.TryGetValue(hashKey, ref currentValue))
+                    {
+                        const int INITIAL_CHUNK_SIZE = 2;
+                        currentValue = new ListChunk<TElement>(INITIAL_CHUNK_SIZE);
+                        lookup.Add(hashKey, currentValue);
+                    }
+#if DEBUG
+                    else
+                    {
+                        hashKeyCollisions++;
+                    }
+#endif
+                    currentValue.Add(element);
+                }
+            }
+
+#if DEBUG
+            TraceHelpers.TraceInfo("ParallelJoinQueryOperator::BuildHashLookup - built hash table [count = {0}, collisions = {1}]",
+                hashLookupCount, hashKeyCollisions);
+#endif
+
+            return new GroupJoinHashLookup(lookup);
+
+        }
+
+        /// <summary>
+        /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
+        /// 
+        /// Since GroupJoin operations always match, if no matching elements exist, an empty enumerable is returned.
+        /// </summary>
+        private class GroupJoinHashLookup : HashJoinHashLookup<THashKey, IEnumerable<TElement>, int>
+        {
+            const int OrderKey = unchecked((int)0xdeadbeef);
+
+            private readonly HashLookup<THashKey, ListChunk<TElement>> _base;
+
+            internal GroupJoinHashLookup(HashLookup<THashKey, ListChunk<TElement>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
+
+                _base = baseLookup;
+            }
+
+            public override bool TryGetValue(THashKey key, ref HashLookupValueList<IEnumerable<TElement>, int> value)
+            {
+
+                IEnumerable<TElement> valueList = GetValueList(key);
+                value = new HashLookupValueList<IEnumerable<TElement>, int>(valueList, OrderKey);
+                return true;
+            }
+
+            private IEnumerable<TElement> GetValueList(THashKey key)
+            {
+                ListChunk<TElement> baseValues = default(ListChunk<TElement>);
+                if (_base.TryGetValue(key, ref baseValues))
+                {
+                    return baseValues;
+                }
+                else
+                {
+                    return ParallelEnumerable.Empty<TElement>();
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// A list to handle one or more right elements of a join operation.
     /// 
     /// It optimizes for 1 to 1 joins by only allocating heap space lazily
