@@ -383,7 +383,7 @@ namespace System.Linq.Parallel
 
             BuildBaseHashLookup(_dataSource, baseHashBuilder, cancellationToken);
 
-            return new GroupJoinHashLookup(lookup);
+            return new GroupJoinHashLookup<THashKey, TElement, ListChunk<TElement>>(lookup);
 
         }
 
@@ -419,44 +419,122 @@ namespace System.Linq.Parallel
                 return hasCollision;
             }
         }
+    }
+
+    /// <summary>
+    /// Class to build a HashJoinHashLookup of ordered right elements for use in GroupJoin operations.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    /// <typeparam name="THashKey"></typeparam>
+    internal class OrderedGroupJoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<IEnumerable<TElement>, int, THashKey>
+    {
+        private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
+        private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
+        private readonly IComparer<TOrderKey> _orderKeyComparer;
+
+        internal OrderedGroupJoinHashLookupBuilder(
+            QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource,
+            IEqualityComparer<THashKey> keyComparer,
+            IComparer<TOrderKey> orderKeyComparer)
+        {
+            Debug.Assert(dataSource != null);
+
+            _dataSource = dataSource;
+            _keyComparer = keyComparer;
+            _orderKeyComparer = orderKeyComparer;
+        }
+
+        public override HashJoinHashLookup<THashKey, IEnumerable<TElement>, int> BuildHashLookup(CancellationToken cancellationToken)
+        {
+            HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>> lookup = 
+                new HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>>(_keyComparer);
+            OrderedGroupJoinBaseHashBuilder baseHashBuilder = new OrderedGroupJoinBaseHashBuilder(lookup, _orderKeyComparer);
+
+            BuildBaseHashLookup(_dataSource, baseHashBuilder, cancellationToken);
+
+            for (int i = 0; i < lookup.Count; i++)
+            {
+                lookup[i].Value.DoneAdding();
+            }
+
+            return new GroupJoinHashLookup<THashKey, TElement, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>>(lookup);
+
+        }
 
         /// <summary>
-        /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
-        /// 
-        /// Since GroupJoin operations always match, if no matching elements exist, an empty enumerable is returned.
+        /// Adds TElement values to a HashLookup of ListChunks. TOrderKey is ignored.
         /// </summary>
-        private class GroupJoinHashLookup : HashJoinHashLookup<THashKey, IEnumerable<TElement>, int>
+        private struct OrderedGroupJoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
         {
-            const int OrderKey = unchecked((int)0xdeadbeef);
+            private readonly HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>> _base;
+            private readonly IComparer<TOrderKey> _orderKeyComparer;
 
-            private readonly HashLookup<THashKey, ListChunk<TElement>> _base;
-
-            internal GroupJoinHashLookup(HashLookup<THashKey, ListChunk<TElement>> baseLookup)
+            public OrderedGroupJoinBaseHashBuilder(
+                HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>> baseLookup,
+                IComparer<TOrderKey> orderKeyComparer)
             {
                 Debug.Assert(baseLookup != null);
 
                 _base = baseLookup;
+                _orderKeyComparer = orderKeyComparer;
             }
 
-            public override bool TryGetValue(THashKey key, ref HashLookupValueList<IEnumerable<TElement>, int> value)
+            public bool Add(THashKey hashKey, TElement element, TOrderKey orderKey)
             {
+                bool hasCollision = true;
 
-                IEnumerable<TElement> valueList = GetValueList(key);
-                value = new HashLookupValueList<IEnumerable<TElement>, int>(valueList, OrderKey);
-                return true;
+                OrderedGroupByGrouping<THashKey, TOrderKey, TElement> currentValue = default(OrderedGroupByGrouping<THashKey, TOrderKey, TElement>);
+                if (!_base.TryGetValue(hashKey, ref currentValue))
+                {
+                    currentValue = new OrderedGroupByGrouping<THashKey, TOrderKey, TElement>(hashKey, _orderKeyComparer);
+                    _base.Add(hashKey, currentValue);
+                    hasCollision = false;
+                }
+
+                currentValue.Add(element, orderKey);
+
+                return hasCollision;
             }
+        }
+    }
 
-            private IEnumerable<TElement> GetValueList(THashKey key)
+    /// <summary>
+    /// A wrapper for the HashLookup returned by GroupJoinHashLookupBuilder and OrderedGroupJoinHashLookupBuilder.
+    /// 
+    /// Since GroupJoin operations always match, if no matching elements exist, an empty enumerable is returned.
+    /// </summary>
+    internal class GroupJoinHashLookup<THashKey, TElement, TBaseElement> : HashJoinHashLookup<THashKey, IEnumerable<TElement>, int> where TBaseElement : IEnumerable<TElement>
+    {
+        const int OrderKey = unchecked((int)0xdeadbeef);
+
+        private readonly HashLookup<THashKey, TBaseElement> _base;
+
+        internal GroupJoinHashLookup(HashLookup<THashKey, TBaseElement> baseLookup)
+        {
+            Debug.Assert(baseLookup != null);
+
+            _base = baseLookup;
+        }
+
+        public override bool TryGetValue(THashKey key, ref HashLookupValueList<IEnumerable<TElement>, int> value)
+        {
+
+            IEnumerable<TElement> valueList = GetValueList(key);
+            value = new HashLookupValueList<IEnumerable<TElement>, int>(valueList, OrderKey);
+            return true;
+        }
+
+        private IEnumerable<TElement> GetValueList(THashKey key)
+        {
+            TBaseElement baseValues = default(TBaseElement);
+            if (_base.TryGetValue(key, ref baseValues))
             {
-                ListChunk<TElement> baseValues = default(ListChunk<TElement>);
-                if (_base.TryGetValue(key, ref baseValues))
-                {
-                    return baseValues;
-                }
-                else
-                {
-                    return ParallelEnumerable.Empty<TElement>();
-                }
+                return baseValues;
+            }
+            else
+            {
+                return ParallelEnumerable.Empty<TElement>();
             }
         }
     }
