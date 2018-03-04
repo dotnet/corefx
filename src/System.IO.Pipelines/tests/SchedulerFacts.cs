@@ -69,19 +69,70 @@ namespace System.IO.Pipelines.Tests
 
                 PipeWriter buffer = pipe.Writer;
                 buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
-                await buffer.FlushAsync();
+
+                // Don't run code on our sync context (we just want to make sure the callbacks)
+                // are scheduled on the sync context
+                await buffer.FlushAsync().ConfigureAwait(false);
 
                 Assert.Equal(1, sc.Callbacks.Count);
                 sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
 
                 pipe.Writer.Complete();
 
-                await reading;
+                // Don't run code on our sync context
+                await reading.ConfigureAwait(false);
             }
             finally
             {
                 SynchronizationContext.SetSynchronizationContext(previous);
             }
+        }
+
+        [Fact]
+        public async Task DefaultReaderSchedulerIgnoresSyncContextIfConfigureAwaitFalse()
+        {
+            // Get off the xunit sync context
+
+            var previous = SynchronizationContext.Current;
+            try
+            {
+                var sc = new CustomSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(sc);
+
+                var pipe = new Pipe();
+
+                Func<Task> doRead = async () =>
+                {
+                    ReadResult result = await pipe.Reader.ReadAsync().ConfigureAwait(false);
+
+                    Assert.True(Thread.CurrentThread.IsThreadPoolThread);
+
+                    pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
+
+                    pipe.Reader.Complete();
+                };
+
+                Task reading = doRead();
+
+                PipeWriter buffer = pipe.Writer;
+                buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
+
+                // We don't want to run any code on our fake sync context
+                await buffer.FlushAsync().ConfigureAwait(false);
+
+                // Nothing posted to the sync context
+                Assert.Equal(0, sc.Callbacks.Count);
+
+                pipe.Writer.Complete();
+
+                // We don't want to run any code on our fake sync context
+                await reading.ConfigureAwait(false);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+
         }
 
         [Fact]
@@ -184,7 +235,8 @@ namespace System.IO.Pipelines.Tests
 
                     Task writing = doWrite();
 
-                    ReadResult result = await pipe.Reader.ReadAsync();
+                    // Don't run on our bogus sync context
+                    ReadResult result = await pipe.Reader.ReadAsync().ConfigureAwait(false);
 
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
@@ -193,7 +245,61 @@ namespace System.IO.Pipelines.Tests
 
                     pipe.Reader.Complete();
 
-                    await writing;
+                    // Don't run on our bogus sync context
+                    await writing.ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+            }
+        }
+
+        [Fact]
+        public async Task DefaultWriterSchedulerIgnoresSynchronizationContext()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            var sc = new CustomSynchronizationContext();
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(sc);
+
+                using (var pool = new TestMemoryPool())
+                {
+                    var pipe = new Pipe(
+                        new PipeOptions(
+                            pool,
+                            resumeWriterThreshold: 32,
+                            pauseWriterThreshold: 64
+                        ));
+
+                    PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
+                    ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
+
+                    Assert.False(flushAsync.IsCompleted);
+
+                    Func<Task> doWrite = async () =>
+                    {
+                        await flushAsync.ConfigureAwait(false);
+
+                        pipe.Writer.Complete();
+
+                        Assert.NotSame(SynchronizationContext.Current, sc);
+                    };
+
+                    Task writing = doWrite();
+
+                    // Don't run on our bogus sync context
+                    ReadResult result = await pipe.Reader.ReadAsync().ConfigureAwait(false);
+
+                    pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
+
+                    Assert.Equal(0, sc.Callbacks.Count);
+
+                    pipe.Reader.Complete();
+
+                    // Don't run on our bogus sync context
+                    await writing.ConfigureAwait(false);
                 }
             }
             finally
@@ -291,11 +397,8 @@ namespace System.IO.Pipelines.Tests
 
             async Task DoRead()
             {
-                int oid = Thread.CurrentThread.ManagedThreadId;
-
                 ReadResult result = await pipe.Reader.ReadAsync();
 
-                Assert.NotEqual(oid, Thread.CurrentThread.ManagedThreadId);
                 Assert.True(Thread.CurrentThread.IsThreadPoolThread);
                 pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
                 pipe.Reader.Complete();
