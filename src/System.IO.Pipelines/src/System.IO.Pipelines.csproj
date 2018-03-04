@@ -41,7 +41,7 @@
     <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netstandard1.3.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
-    <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netstandard2.0.cs" />
+    <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netstandard.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Buffers" />
