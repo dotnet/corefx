@@ -307,7 +307,7 @@ namespace System.Linq.Parallel
                 hashLookupCount, hashKeyCollisions);
 #endif
 
-            return new JoinHashLookup<THashKey, TElement, TOrderKey>(lookup);
+            return new JoinHashLookup(lookup);
         }
 
         protected override void Dispose(bool disposing)
@@ -316,30 +316,27 @@ namespace System.Linq.Parallel
 
             _dataSource.Dispose();
         }
-    }
 
-    /// <summary>
-    /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
-    /// 
-    /// Since Join operations do not require a default, this just passes the call on to the base lookup.
-    /// </summary>
-    /// <typeparam name="THashKey"></typeparam>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
-    internal class JoinHashLookup<THashKey, TElement, TOrderKey> : HashJoinHashLookup<THashKey, TElement, TOrderKey>
-    {
-        private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
-
-        internal JoinHashLookup(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+        /// <summary>
+        /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
+        /// 
+        /// Since Join operations do not require a default, this just passes the call on to the base lookup.
+        /// </summary>
+        private class JoinHashLookup : HashJoinHashLookup<THashKey, TElement, TOrderKey>
         {
-            Debug.Assert(baseLookup != null);
+            private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
 
-            _base = baseLookup;
-        }
+            internal JoinHashLookup(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
 
-        public override bool TryGetValue(THashKey key, ref HashLookupValueList<TElement, TOrderKey> value)
-        {
-            return _base.TryGetValue(key, ref value);
+                _base = baseLookup;
+            }
+
+            public override bool TryGetValue(THashKey key, ref HashLookupValueList<TElement, TOrderKey> value)
+            {
+                return _base.TryGetValue(key, ref value);
+            }
         }
     }
 
