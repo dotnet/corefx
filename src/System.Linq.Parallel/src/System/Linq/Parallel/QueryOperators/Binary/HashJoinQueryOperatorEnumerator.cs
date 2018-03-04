@@ -246,17 +246,28 @@ namespace System.Linq.Parallel
         }
     }
 
-    internal struct HashLookupValueList<TRightInput, TRightKey>
+    /// <summary>
+    /// A list to handle one or more right elements of a join operation.
+    /// 
+    /// It optimizes for 1 to 1 joins by only allocating heap space lazily
+    /// once a second value is added.
+    /// 
+    /// This is built in the HashLookupBuilder classes and consumed by the
+    /// HashJoinQueryOperatorEnumerator.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    internal struct HashLookupValueList<TElement, TOrderKey>
     {
-        private readonly Pair<TRightInput, TRightKey> _head;
-        private ListChunk<Pair<TRightInput, TRightKey>> _tail;
+        private readonly Pair<TElement, TOrderKey> _head;
+        private ListChunk<Pair<TElement, TOrderKey>> _tail;
         private int _currentIndex;
 
         private const int Head = -1;
         private const int INITIAL_CHUNK_SIZE = 2;
 
         // constructor used to build a new list.
-        public HashLookupValueList(TRightInput firstValue, TRightKey firstOrderKey)
+        public HashLookupValueList(TElement firstValue, TOrderKey firstOrderKey)
         {
             _head = CreatePair(firstValue, firstOrderKey);
             _tail = null;
@@ -264,7 +275,7 @@ namespace System.Linq.Parallel
         }
 
         // constructor used for enumeration.
-        private HashLookupValueList(ListChunk<Pair<TRightInput, TRightKey>> rest, int nextIndex)
+        private HashLookupValueList(ListChunk<Pair<TElement, TOrderKey>> rest, int nextIndex)
         {
             Debug.Assert(nextIndex >= 0, "nextIndex must be non-negative");
             Debug.Assert(rest == null || nextIndex < rest.Count, "nextIndex not a valid index in chunk rest");
@@ -285,7 +296,7 @@ namespace System.Linq.Parallel
         /// then the changes need to be reflected (to a HashLookup, for example)
         /// as necessary
         /// </remarks>
-        internal bool Add(TRightInput value, TRightKey orderKey)
+        internal bool Add(TElement value, TOrderKey orderKey)
         {
             Debug.Assert(_currentIndex == Head, "expected a non-empty, non-enumerated list");
 
@@ -293,7 +304,7 @@ namespace System.Linq.Parallel
 
             if (requiresMemoryChange)
             {
-                _tail = new ListChunk<Pair<TRightInput, TRightKey>>(INITIAL_CHUNK_SIZE);
+                _tail = new ListChunk<Pair<TElement, TOrderKey>>(INITIAL_CHUNK_SIZE);
             }
             _tail.Add(CreatePair(value, orderKey));
 
@@ -307,7 +318,7 @@ namespace System.Linq.Parallel
         /// <param name="currentKey"></param>
         /// <param name="remainingValues"></param>
         /// <returns>if true, a next element existed.</returns>
-        public bool MoveNext(ref TRightInput currentElement, ref TRightKey currentKey, ref HashLookupValueList<TRightInput, TRightKey> remainingValues)
+        public bool MoveNext(ref TElement currentElement, ref TOrderKey currentKey, ref HashLookupValueList<TElement, TOrderKey> remainingValues)
         {
             if (_currentIndex == Head)
             {
@@ -319,7 +330,7 @@ namespace System.Linq.Parallel
 
             if (_tail != null)
             {
-                Pair<TRightInput, TRightKey> current = _tail._chunk[_currentIndex];
+                Pair<TElement, TOrderKey> current = _tail._chunk[_currentIndex];
                 currentElement = current.First;
                 currentKey = current.Second;
 
@@ -345,25 +356,25 @@ namespace System.Linq.Parallel
         }
 
         //TODO reevaluate if this is necessary after refactoring complete
-        internal IEnumerable<TRightInput> AsEnumerable()
+        internal IEnumerable<TElement> AsEnumerable()
         {
-            HashLookupValueList<TRightInput, TRightKey> remainder = this;
-            TRightInput element = default;
-            TRightKey keyUnused = default;
+            HashLookupValueList<TElement, TOrderKey> remainder = this;
+            TElement element = default;
+            TOrderKey keyUnused = default;
             while (remainder.MoveNext(ref element, ref keyUnused, ref remainder))
             {
                 yield return element;
             }
         }
 
-        private static HashLookupValueList<TRightInput, TRightKey> CreateRemainingList(ListChunk<Pair<TRightInput, TRightKey>> nextChunk, int nextIndex)
+        private static HashLookupValueList<TElement, TOrderKey> CreateRemainingList(ListChunk<Pair<TElement, TOrderKey>> nextChunk, int nextIndex)
         {
-            return new HashLookupValueList<TRightInput, TRightKey>(nextChunk, nextIndex);
+            return new HashLookupValueList<TElement, TOrderKey>(nextChunk, nextIndex);
         }
 
-        private static Pair<TRightInput, TRightKey> CreatePair(TRightInput value, TRightKey orderKey)
+        private static Pair<TElement, TOrderKey> CreatePair(TElement value, TOrderKey orderKey)
         {
-            return new Pair<TRightInput, TRightKey>(value, orderKey);
+            return new Pair<TElement, TOrderKey>(value, orderKey);
         }
     }
 }
