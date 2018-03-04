@@ -56,23 +56,17 @@ namespace System.IO.Pipelines
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Complete(out Action<object> completion, out object completionState, out SynchronizationContext synchronizationContext, out ExecutionContext executionContext)
+        public void Complete(out Pipe.CompletionData completionData)
         {
             Action<object> currentCompletion = _completion;
             _completion = s_awaitableIsCompleted;
 
-            completionState = null;
-            completion = null;
-            synchronizationContext = null;
-            executionContext = null;
+            completionData = default;
 
             if (!ReferenceEquals(currentCompletion, s_awaitableIsCompleted) &&
                 !ReferenceEquals(currentCompletion, s_awaitableIsNotCompleted))
             {
-                completion = currentCompletion;
-                completionState = _completionState;
-                executionContext = _executionContext;
-                synchronizationContext = _synchronizationContext;
+                completionData = new Pipe.CompletionData(currentCompletion, _completionState, _executionContext, _synchronizationContext);
             }
         }
 
@@ -96,10 +90,9 @@ namespace System.IO.Pipelines
             }
         }
 
-        public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out Action<object> completion, out object completionState, out bool doubleCompletion)
+        public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out Pipe.CompletionData completionData, out bool doubleCompletion)
         {
-            completionState = null;
-            completion = null;
+            completionData = default;
 
             doubleCompletion = false;
             Action<object> awaitableState = _completion;
@@ -108,13 +101,9 @@ namespace System.IO.Pipelines
                 _completion = continuation;
                 _completionState = state;
 
+                // Capture the SynchronizationContext if there's any and we're allowing capture (from pipe options)
                 if (_useSynchronizationContext && (flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
                 {
-                    // Set the scheduler to the current synchronization context if there is one
-                    // otherwise we delegate to what the pipe was configured with.
-                    
-                    // REVIEW: Should we post to the sync context if we're already completed (i.e. in OnCompleted)? Currently we're still delegating to the
-                    // scheduler here.
                     SynchronizationContext sc = SynchronizationContext.Current;
                     if (sc != null && sc.GetType() != typeof(SynchronizationContext))
                     {
@@ -131,23 +120,21 @@ namespace System.IO.Pipelines
 
             if (ReferenceEquals(awaitableState, s_awaitableIsCompleted))
             {
-                completion = continuation;
-                completionState = state;
+                completionData = new Pipe.CompletionData(continuation, state, _executionContext, _synchronizationContext);
                 return;
             }
 
             if (!ReferenceEquals(awaitableState, s_awaitableIsNotCompleted))
             {
                 doubleCompletion = true;
-                completion = continuation;
-                completionState = state;
+                completionData = new Pipe.CompletionData(continuation, state, _executionContext, _synchronizationContext);
             }
         }
 
-        public void Cancel(out Action<object> completion, out object completionState, out SynchronizationContext synchronizationContext, out ExecutionContext executionContext)
+        public void Cancel(out Pipe.CompletionData completionData)
         {
-            Complete(out completion, out completionState, out synchronizationContext, out executionContext);
-            _canceledState = completion == null ?
+            Complete(out completionData);
+            _canceledState = completionData.Completion == null ?
                 CanceledState.CancellationPreRequested :
                 CanceledState.CancellationRequested;
         }

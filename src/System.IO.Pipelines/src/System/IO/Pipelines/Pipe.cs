@@ -291,10 +291,7 @@ namespace System.IO.Pipelines
 
         internal ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken)
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             CancellationTokenRegistration cancellationTokenRegistration;
             lock (_sync)
             {
@@ -304,24 +301,21 @@ namespace System.IO.Pipelines
                     CommitUnsynchronized();
                 }
 
-                _readerAwaitable.Complete(out completion, out completionState, out synchronizationContext, out executionContext);
+                _readerAwaitable.Complete(out completionData);
 
                 cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
             }
 
             cancellationTokenRegistration.Dispose();
 
-            TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_readerScheduler, completionData);
 
             return new ValueTask<FlushResult>(_writer, token: 0);
         }
 
         internal void CompleteWriter(Exception exception)
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             PipeCompletionCallbacks completionCallbacks;
             bool readerCompleted;
 
@@ -331,7 +325,7 @@ namespace System.IO.Pipelines
                 CommitUnsynchronized();
 
                 completionCallbacks = _writerCompletion.TryComplete(exception);
-                _readerAwaitable.Complete(out completion, out completionState, out synchronizationContext, out executionContext);
+                _readerAwaitable.Complete(out completionData);
                 readerCompleted = _readerCompletion.IsCompleted;
             }
 
@@ -340,7 +334,7 @@ namespace System.IO.Pipelines
                 TrySchedule(_readerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
             }
 
-            TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_readerScheduler, completionData);
 
             if (readerCompleted)
             {
@@ -371,10 +365,7 @@ namespace System.IO.Pipelines
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
 
-            Action<object> completion = null;
-            object completionState = null;
-            SynchronizationContext synchronizationContext = null;
-            ExecutionContext executionContext = null;
+            CompletionData completionData = default;
 
             lock (_sync)
             {
@@ -403,7 +394,7 @@ namespace System.IO.Pipelines
                     if (oldLength >= _resumeWriterThreshold &&
                         _length < _resumeWriterThreshold)
                     {
-                        _writerAwaitable.Complete(out completion, out completionState, out synchronizationContext, out executionContext);
+                        _writerAwaitable.Complete(out completionData);
                     }
 
                     // Check if we consumed entire last segment
@@ -451,16 +442,13 @@ namespace System.IO.Pipelines
                 _readingState.End();
             }
 
-            TrySchedule(_writerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_writerScheduler, completionData);
         }
 
         internal void CompleteReader(Exception exception)
         {
             PipeCompletionCallbacks completionCallbacks;
-            Action<object> completion;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
-            object completionState;
+            CompletionData completionData;
             bool writerCompleted;
 
             lock (_sync)
@@ -475,7 +463,7 @@ namespace System.IO.Pipelines
                 // on the reader side now.
 
                 completionCallbacks = _readerCompletion.TryComplete(exception);
-                _writerAwaitable.Complete(out completion, out completionState, out synchronizationContext, out executionContext);
+                _writerAwaitable.Complete(out completionData);
                 writerCompleted = _writerCompletion.IsCompleted;
             }
 
@@ -484,7 +472,7 @@ namespace System.IO.Pipelines
                 TrySchedule(_writerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
             }
 
-            TrySchedule(_writerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_writerScheduler, completionData);
 
             if (writerCompleted)
             {
@@ -513,28 +501,22 @@ namespace System.IO.Pipelines
 
         internal void CancelPendingRead()
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             lock (_sync)
             {
-                _readerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
+                _readerAwaitable.Cancel(out completionData);
             }
-            TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_readerScheduler, completionData);
         }
 
         internal void CancelPendingFlush()
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             lock (_sync)
             {
-                _writerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
+                _writerAwaitable.Cancel(out completionData);
             }
-            TrySchedule(_writerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_writerScheduler, completionData);
         }
 
         internal void OnReaderCompleted(Action<Exception, object> callback, object state)
@@ -604,10 +586,10 @@ namespace System.IO.Pipelines
             }
         }
 
-        private static void TrySchedule(PipeScheduler scheduler, SynchronizationContext synchronizationContext, ExecutionContext executionContext, Action<object> completion, object completionState)
+        private static void TrySchedule(PipeScheduler scheduler, in CompletionData completionData)
         {
             // Nothing to do
-            if (completion == null)
+            if (completionData.Completion == null)
             {
                 return;
             }
@@ -618,32 +600,31 @@ namespace System.IO.Pipelines
             // That delegate and state will either be the action passed in directly
             // or it will be that specified delegate wrapped in ExecutionContext.Run
 
-            if (synchronizationContext == null)
+            if (completionData.SynchronizationContext == null)
             {
                 // We don't have a SynchronizationContext so execute on the specified scheduler
-                if (executionContext == null)
+                if (completionData.ExecutionContext == null)
                 {
                     // We can run directly, this should be the default fast path
-                    scheduler.Schedule(completion, completionState);
+                    scheduler.Schedule(completionData.Completion, completionData.CompletionState);
                     return;
                 }
 
                 // We also have to run on the specified execution context so run the scheduler and execute the
                 // delegate on the execution context
-                scheduler.Schedule(s_scheduleWithExecutionContextCallback, new CompletionData(completion, completionState, executionContext));
+                scheduler.Schedule(s_scheduleWithExecutionContextCallback, completionData);
             }
             else
             {
-                var completionData = new CompletionData(completion, completionState, executionContext);
-                if (executionContext == null)
+                if (completionData.ExecutionContext == null)
                 {
                     // We need to box the struct here since there's no generic overload for state
-                    synchronizationContext.Post(s_syncContextExecuteWithoutExecutionContextCallback, completionData);
+                    completionData.SynchronizationContext.Post(s_syncContextExecuteWithoutExecutionContextCallback, completionData);
                 }
                 else
                 {
                     // We need to execute the callback with the execution context
-                    synchronizationContext.Post(s_syncContextExecutionContextCallback, completionData);
+                    completionData.SynchronizationContext.Post(s_syncContextExecutionContextCallback, completionData);
                 }
             }
         }
@@ -705,18 +686,17 @@ namespace System.IO.Pipelines
 
         internal void OnReadAsyncCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags)
         {
-            Action<object> completion;
-            object completionState;
+            CompletionData completionData;
             bool doubleCompletion;
             lock (_sync)
             {
-                _readerAwaitable.OnCompleted(continuation, state, flags, out completion, out completionState, out doubleCompletion);
+                _readerAwaitable.OnCompleted(continuation, state, flags, out completionData, out doubleCompletion);
             }
             if (doubleCompletion)
             {
                 Writer.Complete(ThrowHelper.CreateInvalidOperationException_NoConcurrentOperation());
             }
-            TrySchedule(_readerScheduler, completion, completionState);
+            TrySchedule(_readerScheduler, completionData);
         }
 
         internal ReadResult GetReadAsyncResult()
@@ -806,44 +786,37 @@ namespace System.IO.Pipelines
 
         internal void OnFlushAsyncCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags)
         {
-            Action<object> completion;
-            object completionState;
+            CompletionData completionData;
             bool doubleCompletion;
             lock (_sync)
             {
-                _writerAwaitable.OnCompleted(continuation, state, flags, out completion, out completionState, out doubleCompletion);
+                _writerAwaitable.OnCompleted(continuation, state, flags, out completionData, out doubleCompletion);
             }
             if (doubleCompletion)
             {
                 Reader.Complete(ThrowHelper.CreateInvalidOperationException_NoConcurrentOperation());
             }
-            TrySchedule(_writerScheduler, completion, completionState);
+            TrySchedule(_writerScheduler, completionData);
         }
 
         private void ReaderCancellationRequested()
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             lock (_sync)
             {
-                _readerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
+                _readerAwaitable.Cancel(out completionData);
             }
-            TrySchedule(_readerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_readerScheduler, completionData);
         }
 
         private void WriterCancellationRequested()
         {
-            Action<object> completion;
-            object completionState;
-            SynchronizationContext synchronizationContext;
-            ExecutionContext executionContext;
+            CompletionData completionData;
             lock (_sync)
             {
-                _writerAwaitable.Cancel(out completion, out completionState, out synchronizationContext, out executionContext);
+                _writerAwaitable.Cancel(out completionData);
             }
-            TrySchedule(_writerScheduler, synchronizationContext, executionContext, completion, completionState);
+            TrySchedule(_writerScheduler, completionData);
         }
 
         /// <summary>
@@ -873,17 +846,19 @@ namespace System.IO.Pipelines
             }
         }
 
-        private readonly struct CompletionData
+        internal readonly struct CompletionData
         {
             public Action<object> Completion { get; }
             public object CompletionState { get; }
             public ExecutionContext ExecutionContext { get; }
+            public SynchronizationContext SynchronizationContext { get; }
 
-            public CompletionData(Action<object> completion, object completionState, ExecutionContext executionContext)
+            public CompletionData(Action<object> completion, object completionState, ExecutionContext executionContext, SynchronizationContext synchronizationContext)
             {
                 Completion = completion;
                 CompletionState = completionState;
                 ExecutionContext = executionContext;
+                SynchronizationContext = synchronizationContext;
             }
         }
     }
