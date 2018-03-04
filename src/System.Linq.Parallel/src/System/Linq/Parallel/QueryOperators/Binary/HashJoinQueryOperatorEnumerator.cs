@@ -47,7 +47,7 @@ namespace System.Linq.Parallel
         {
             internal TLeftInput _currentLeft; // The current matching left element.
             internal TLeftKey _currentLeftKey; // The current index of the matching left element.
-            internal HashLookup<THashKey, HashLookupValueList<TRightInput, TRightKey>> _rightHashLookup; // The hash lookup.
+            internal HashJoinHashLookup<THashKey, TRightInput, TRightKey> _rightHashLookup; // The hash lookup.
             internal HashLookupValueList<TRightInput, TRightKey> _currentRightMatches; // Remaining right matches (if any).
             internal int _outputLoopCount;
         }
@@ -198,14 +198,14 @@ namespace System.Linq.Parallel
     }
 
     /// <summary>
-    /// Class to build a HashLookup of right elements for use in HashJoin operations.
+    /// Class to build a HashJoinHashLookup of right elements for use in HashJoin operations.
     /// </summary>
     /// <typeparam name="TElement"></typeparam>
     /// <typeparam name="TOrderKey"></typeparam>
     /// <typeparam name="THashKey"></typeparam>
     internal abstract class HashLookupBuilder<TElement, TOrderKey, THashKey>
     {
-        public abstract HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken);
+        public abstract HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken);
 
         // Standard implementation of the disposable pattern.
         public void Dispose()
@@ -219,7 +219,21 @@ namespace System.Linq.Parallel
     }
 
     /// <summary>
-    /// Class to build a HashLookup of right elements for use in Join operations.
+    /// A wrapper for the HashLookup returned by HashLookupBuilder.
+    /// 
+    /// This will allow for providing a default if there is no value in the base lookup.
+    /// </summary>
+    /// <typeparam name="THashKey"></typeparam>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    internal abstract class HashJoinHashLookup<THashKey, TElement, TOrderKey>
+    {
+        // get the current value if it exists.
+        public abstract bool TryGetValue(THashKey key, ref HashLookupValueList<TElement, TOrderKey> value);
+    }
+
+    /// <summary>
+    /// Class to build a HashJoinHashLookup of right elements for use in Join operations.
     /// </summary>
     /// <typeparam name="TElement"></typeparam>
     /// <typeparam name="TOrderKey"></typeparam>
@@ -237,7 +251,7 @@ namespace System.Linq.Parallel
             _keyComparer = keyComparer;
         }
 
-        public override HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken)
+        public override HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken)
         {
             Debug.Assert(_dataSource != null);
 
@@ -293,7 +307,7 @@ namespace System.Linq.Parallel
                 hashLookupCount, hashKeyCollisions);
 #endif
 
-            return lookup;
+            return new JoinHashLookup<THashKey, TElement, TOrderKey>(lookup);
         }
 
         protected override void Dispose(bool disposing)
@@ -301,6 +315,31 @@ namespace System.Linq.Parallel
             Debug.Assert(_dataSource != null);
 
             _dataSource.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
+    /// 
+    /// Since Join operations do not require a default, this just passes the call on to the base lookup.
+    /// </summary>
+    /// <typeparam name="THashKey"></typeparam>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    internal class JoinHashLookup<THashKey, TElement, TOrderKey> : HashJoinHashLookup<THashKey, TElement, TOrderKey>
+    {
+        private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
+
+        internal JoinHashLookup(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+        {
+            Debug.Assert(baseLookup != null);
+
+            _base = baseLookup;
+        }
+
+        public override bool TryGetValue(THashKey key, ref HashLookupValueList<TElement, TOrderKey> value)
+        {
+            return _base.TryGetValue(key, ref value);
         }
     }
 
