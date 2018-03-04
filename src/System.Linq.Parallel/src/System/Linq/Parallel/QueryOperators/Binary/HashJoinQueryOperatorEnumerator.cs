@@ -353,11 +353,18 @@ namespace System.Linq.Parallel
     /// <typeparam name="TOrderKey"></typeparam>
     internal struct HashLookupValueList<TElement, TOrderKey>
     {
+        internal TElement Head
+        {
+            get
+            {
+                return _head.First;
+            }
+        }
         private readonly Pair<TElement, TOrderKey> _head;
         private ListChunk<Pair<TElement, TOrderKey>> _tail;
         private int _currentIndex;
 
-        private const int Head = -1;
+        private const int AtHead = -1;
         private const int INITIAL_CHUNK_SIZE = 2;
 
         // constructor used to build a new list.
@@ -365,7 +372,7 @@ namespace System.Linq.Parallel
         {
             _head = CreatePair(firstValue, firstOrderKey);
             _tail = null;
-            _currentIndex = Head;
+            _currentIndex = AtHead;
         }
 
         // constructor used for enumeration.
@@ -392,7 +399,7 @@ namespace System.Linq.Parallel
         /// </remarks>
         internal bool Add(TElement value, TOrderKey orderKey)
         {
-            Debug.Assert(_currentIndex == Head, "expected a non-empty, non-enumerated list");
+            Debug.Assert(_currentIndex == AtHead, "expected a non-empty, non-enumerated list");
 
             bool requiresMemoryChange = (_tail == null);
 
@@ -414,7 +421,7 @@ namespace System.Linq.Parallel
         /// <returns>if true, a next element existed.</returns>
         public bool MoveNext(ref TElement currentElement, ref TOrderKey currentKey, ref HashLookupValueList<TElement, TOrderKey> remainingValues)
         {
-            if (_currentIndex == Head)
+            if (_currentIndex == AtHead)
             {
                 currentElement = _head.First;
                 currentKey = _head.Second;
@@ -446,7 +453,7 @@ namespace System.Linq.Parallel
         //TODO reevaluate if this is necessary after refactoring complete
         internal bool HasNext()
         {
-            return _currentIndex == Head || _tail != null;
+            return _currentIndex == AtHead || _tail != null;
         }
 
         //TODO reevaluate if this is necessary after refactoring complete
