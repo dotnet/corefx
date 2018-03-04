@@ -37,10 +37,9 @@ namespace System.Linq.Parallel
         : QueryOperatorEnumerator<TOutput, TLeftKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> _leftSource; // Left (outer) data source. For probing.
-        private readonly QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> _rightSource; // Right (inner) data source. For building.
+        private readonly HashLookupBuilder<TRightInput, TRightKey, THashKey> _rightLookupBuilder; // Right (inner) data source. For building.
         private readonly Func<TLeftInput, TRightInput, TOutput> _singleResultSelector; // Single result selector.
         private readonly Func<TLeftInput, IEnumerable<TRightInput>, TOutput> _groupResultSelector; // Group result selector.
-        private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
         private readonly CancellationToken _cancellationToken;
         private Mutables _mutables;
 
@@ -64,16 +63,26 @@ namespace System.Linq.Parallel
             Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
             IEqualityComparer<THashKey> keyComparer,
             CancellationToken cancellationToken)
+            : this(leftSource, new HashLookupBuilder<TRightInput, TRightKey, THashKey>(rightSource, keyComparer),
+                  singleResultSelector, groupResultSelector, cancellationToken)
+        {
+        }
+
+        internal HashJoinQueryOperatorEnumerator(
+            QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> leftSource,
+            HashLookupBuilder<TRightInput, TRightKey, THashKey> rightLookupBuilder,
+            Func<TLeftInput, TRightInput, TOutput> singleResultSelector,
+            Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
+            CancellationToken cancellationToken)
         {
             Debug.Assert(leftSource != null);
-            Debug.Assert(rightSource != null);
+            Debug.Assert(rightLookupBuilder != null);
             Debug.Assert(singleResultSelector != null || groupResultSelector != null);
 
             _leftSource = leftSource;
-            _rightSource = rightSource;
+            _rightLookupBuilder = rightLookupBuilder;
             _singleResultSelector = singleResultSelector;
             _groupResultSelector = groupResultSelector;
-            _keyComparer = keyComparer;
             _cancellationToken = cancellationToken;
         }
 
@@ -93,7 +102,7 @@ namespace System.Linq.Parallel
         {
             Debug.Assert(_singleResultSelector != null || _groupResultSelector != null, "expected a compiled result selector");
             Debug.Assert(_leftSource != null);
-            Debug.Assert(_rightSource != null);
+            Debug.Assert(_rightLookupBuilder != null);
 
             // BUILD phase: If we haven't built the hash-table yet, create that first.
             Mutables mutables = _mutables;
@@ -102,7 +111,7 @@ namespace System.Linq.Parallel
                 mutables = _mutables = new Mutables();
                 Debug.Assert(mutables._currentRightMatches.HasNext() == false, "empty list expected");
 
-                mutables._rightHashLookup = BuildHashLookup();
+                mutables._rightHashLookup = _rightLookupBuilder.BuildHashLookup(_cancellationToken);
             }
 
             // PROBE phase: So long as the source has a next element, return the match.
@@ -180,9 +189,31 @@ namespace System.Linq.Parallel
             return true;
         }
 
-        //TODO this will be moved to a separate class to customize for GroupJoin ordered and unordered
-        private HashLookup<THashKey, HashLookupValueList<TRightInput, TRightKey>> BuildHashLookup()
+        protected override void Dispose(bool disposing)
         {
+            Debug.Assert(_leftSource != null && _rightLookupBuilder != null);
+            _leftSource.Dispose();
+            _rightLookupBuilder.Dispose();
+        }
+    }
+
+    internal class HashLookupBuilder<TRightInput, TRightKey, THashKey>
+    {
+        private readonly QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> _rightSource; // Right (inner) data source. For building.
+        private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
+
+        internal HashLookupBuilder(QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> rightSource, IEqualityComparer<THashKey> keyComparer)
+        {
+            Debug.Assert(rightSource != null);
+
+            _rightSource = rightSource;
+            _keyComparer = keyComparer;
+        }
+
+        public HashLookup<THashKey, HashLookupValueList<TRightInput, TRightKey>> BuildHashLookup(CancellationToken cancellationToken)
+        {
+            Debug.Assert(_rightSource != null);
+
 #if DEBUG
             int hashLookupCount = 0;
             int hashKeyCollisions = 0;
@@ -196,7 +227,7 @@ namespace System.Linq.Parallel
             while (_rightSource.MoveNext(ref rightPair, ref rightKey))
             {
                 if ((i++ & CancellationState.POLL_INTERVAL) == 0)
-                    CancellationState.ThrowIfCanceled(_cancellationToken);
+                    CancellationState.ThrowIfCanceled(cancellationToken);
 
                 TRightInput rightElement = rightPair.First;
                 THashKey rightHashKey = rightPair.Second;
@@ -238,10 +269,16 @@ namespace System.Linq.Parallel
             return lookup;
         }
 
-        protected override void Dispose(bool disposing)
+        // Standard implementation of the disposable pattern.
+        public void Dispose()
         {
-            Debug.Assert(_leftSource != null && _rightSource != null);
-            _leftSource.Dispose();
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            Debug.Assert(_rightSource != null);
+
             _rightSource.Dispose();
         }
     }
@@ -267,7 +304,7 @@ namespace System.Linq.Parallel
         private const int INITIAL_CHUNK_SIZE = 2;
 
         // constructor used to build a new list.
-        public HashLookupValueList(TElement firstValue, TOrderKey firstOrderKey)
+        internal HashLookupValueList(TElement firstValue, TOrderKey firstOrderKey)
         {
             _head = CreatePair(firstValue, firstOrderKey);
             _tail = null;
