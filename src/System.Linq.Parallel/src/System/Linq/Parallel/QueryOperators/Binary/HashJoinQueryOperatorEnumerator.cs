@@ -197,62 +197,68 @@ namespace System.Linq.Parallel
         }
     }
 
-    internal class HashLookupBuilder<TRightInput, TRightKey, THashKey>
+    /// <summary>
+    /// Class to build a HashLookup of right elements for use in HashJoin operations.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    /// <typeparam name="THashKey"></typeparam>
+    internal class HashLookupBuilder<TElement, TOrderKey, THashKey>
     {
-        private readonly QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> _rightSource; // Right (inner) data source. For building.
+        private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
         private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
 
-        internal HashLookupBuilder(QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> rightSource, IEqualityComparer<THashKey> keyComparer)
+        internal HashLookupBuilder(QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource, IEqualityComparer<THashKey> keyComparer)
         {
-            Debug.Assert(rightSource != null);
+            Debug.Assert(dataSource != null);
 
-            _rightSource = rightSource;
+            _dataSource = dataSource;
             _keyComparer = keyComparer;
         }
 
-        public HashLookup<THashKey, HashLookupValueList<TRightInput, TRightKey>> BuildHashLookup(CancellationToken cancellationToken)
+        public HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken)
         {
-            Debug.Assert(_rightSource != null);
+            Debug.Assert(_dataSource != null);
 
 #if DEBUG
             int hashLookupCount = 0;
             int hashKeyCollisions = 0;
 #endif
 
-            var lookup = new HashLookup<THashKey, HashLookupValueList<TRightInput, TRightKey>>(_keyComparer);
+            var lookup = new HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>>(_keyComparer);
 
-            Pair<TRightInput, THashKey> rightPair = default(Pair<TRightInput, THashKey>);
-            TRightKey rightKey = default(TRightKey);
+            Pair<TElement, THashKey> currentPair = default(Pair<TElement, THashKey>);
+            TOrderKey orderKey = default(TOrderKey);
             int i = 0;
-            while (_rightSource.MoveNext(ref rightPair, ref rightKey))
+            while (_dataSource.MoveNext(ref currentPair, ref orderKey))
             {
                 if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                     CancellationState.ThrowIfCanceled(cancellationToken);
 
-                TRightInput rightElement = rightPair.First;
-                THashKey rightHashKey = rightPair.Second;
+                TElement element = currentPair.First;
+                THashKey hashKey = currentPair.Second;
 
                 // We ignore null keys.
-                if (rightHashKey != null)
+                if (hashKey != null)
                 {
 #if DEBUG
                     hashLookupCount++;
 #endif
 
                     // See if we've already stored an element under the current key. If not, we
-                    // add a RightValueList to hold the elements mapping to the same key.
-                    HashLookupValueList<TRightInput, TRightKey> currentValue = default(HashLookupValueList<TRightInput, TRightKey>);
-                    if (!lookup.TryGetValue(rightHashKey, ref currentValue))
+                    // add a HashLookupValueList to hold the elements mapping to the same key.
+                    HashLookupValueList<TElement, TOrderKey> currentValue = default(HashLookupValueList<TElement, TOrderKey>);
+                    if (!lookup.TryGetValue(hashKey, ref currentValue))
                     {
-                        currentValue = new HashLookupValueList<TRightInput, TRightKey>(rightElement, rightKey);
-                        lookup.Add(rightHashKey, currentValue);
+                        currentValue = new HashLookupValueList<TElement, TOrderKey>(element, orderKey);
+                        lookup.Add(hashKey, currentValue);
                     }
                     else
                     {
-                        if (currentValue.Add(rightElement, rightKey))
+                        if (currentValue.Add(element, orderKey))
                         {
                             // We need to re-store this element because the pair is a value type.
-                            lookup[rightHashKey] = currentValue;
+                            lookup[hashKey] = currentValue;
                         }
 #if DEBUG
                         hashKeyCollisions++;
@@ -277,9 +283,9 @@ namespace System.Linq.Parallel
 
         protected virtual void Dispose(bool disposing)
         {
-            Debug.Assert(_rightSource != null);
+            Debug.Assert(_dataSource != null);
 
-            _rightSource.Dispose();
+            _dataSource.Dispose();
         }
     }
 
