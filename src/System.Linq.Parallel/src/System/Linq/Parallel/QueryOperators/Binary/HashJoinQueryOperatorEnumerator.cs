@@ -38,8 +38,7 @@ namespace System.Linq.Parallel
     {
         private readonly QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> _leftSource; // Left (outer) data source. For probing.
         private readonly HashLookupBuilder<TRightInput, TRightKey, THashKey> _rightLookupBuilder; // Right (inner) data source. For building.
-        private readonly Func<TLeftInput, TRightInput, TOutput> _singleResultSelector; // Single result selector.
-        private readonly Func<TLeftInput, IEnumerable<TRightInput>, TOutput> _groupResultSelector; // Group result selector.
+        private readonly Func<TLeftInput, TRightInput, TOutput> _resultSelector; // Result selector.
         private readonly CancellationToken _cancellationToken;
         private Mutables _mutables;
 
@@ -58,31 +57,17 @@ namespace System.Linq.Parallel
 
         internal HashJoinQueryOperatorEnumerator(
             QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> leftSource,
-            QueryOperatorEnumerator<Pair<TRightInput, THashKey>, TRightKey> rightSource,
-            Func<TLeftInput, TRightInput, TOutput> singleResultSelector,
-            Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
-            IEqualityComparer<THashKey> keyComparer,
-            CancellationToken cancellationToken)
-            : this(leftSource, new JoinHashLookupBuilder<TRightInput, TRightKey, THashKey>(rightSource, keyComparer),
-                  singleResultSelector, groupResultSelector, cancellationToken)
-        {
-        }
-
-        internal HashJoinQueryOperatorEnumerator(
-            QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> leftSource,
             HashLookupBuilder<TRightInput, TRightKey, THashKey> rightLookupBuilder,
-            Func<TLeftInput, TRightInput, TOutput> singleResultSelector,
-            Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
+            Func<TLeftInput, TRightInput, TOutput> resultSelector,
             CancellationToken cancellationToken)
         {
             Debug.Assert(leftSource != null);
             Debug.Assert(rightLookupBuilder != null);
-            Debug.Assert(singleResultSelector != null || groupResultSelector != null);
+            Debug.Assert(resultSelector != null);
 
             _leftSource = leftSource;
             _rightLookupBuilder = rightLookupBuilder;
-            _singleResultSelector = singleResultSelector;
-            _groupResultSelector = groupResultSelector;
+            _resultSelector = resultSelector;
             _cancellationToken = cancellationToken;
         }
 
@@ -100,7 +85,7 @@ namespace System.Linq.Parallel
 
         internal override bool MoveNext(ref TOutput currentElement, ref TLeftKey currentKey)
         {
-            Debug.Assert(_singleResultSelector != null || _groupResultSelector != null, "expected a compiled result selector");
+            Debug.Assert(_resultSelector != null, "expected a compiled result selector");
             Debug.Assert(_leftSource != null);
             Debug.Assert(_rightLookupBuilder != null);
 
@@ -144,35 +129,22 @@ namespace System.Linq.Parallel
                             // We found a new match. For inner joins, we remember the list in case
                             // there are multiple value under this same key -- the next iteration will pick
                             // them up. For outer joins, we will use the list momentarily.
-                            if (_singleResultSelector != null)
+                            bool hadNext = matchValue.MoveNext(ref rightElement, ref rightKeyUnused, ref mutables._currentRightMatches);
+                            Debug.Assert(hadNext, "we were expecting MoveNext to return true (since the list should be non-empty)");
+
+                            // Yield the value.
+                            currentElement = _resultSelector(leftElement, rightElement);
+                            currentKey = leftKey;
+
+                            // If there is a list of matches, remember the left values for next time.
+                            if (mutables._currentRightMatches.HasNext())
                             {
-                                bool hadNext = matchValue.MoveNext(ref rightElement, ref rightKeyUnused, ref mutables._currentRightMatches);
-                                Debug.Assert(hadNext, "we were expecting MoveNext to return true (since the list should be non-empty)");
-
-                                // Yield the value.
-                                currentElement = _singleResultSelector(leftElement, rightElement);
-                                currentKey = leftKey;
-
-                                // If there is a list of matches, remember the left values for next time.
-                                if (mutables._currentRightMatches.HasNext())
-                                {
-                                    mutables._currentLeft = leftElement;
-                                    mutables._currentLeftKey = leftKey;
-                                }
-
-                                return true;
+                                mutables._currentLeft = leftElement;
+                                mutables._currentLeftKey = leftKey;
                             }
-                        }
-                    }
 
-                    // For outer joins, we always yield a result.
-                    if (_groupResultSelector != null)
-                    {
-                        // Generate the current value. If no match was found,
-                        // matchValue will produce an empty enumerable.
-                        currentElement = _groupResultSelector(leftElement, matchValue.AsEnumerable());
-                        currentKey = leftKey;
-                        return true;
+                            return true;
+                        }
                     }
                 }
 
@@ -181,9 +153,9 @@ namespace System.Linq.Parallel
             }
 
             // Produce the next element.
-            Debug.Assert(_singleResultSelector != null);
+            Debug.Assert(_resultSelector != null);
 
-            currentElement = _singleResultSelector(mutables._currentLeft, rightElement);
+            currentElement = _resultSelector(mutables._currentLeft, rightElement);
             currentKey = mutables._currentLeftKey;
 
             return true;

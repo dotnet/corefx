@@ -125,7 +125,7 @@ namespace System.Linq.Parallel
                 GroupJoinHashLookupBuilder<TRightInput, TRightKey, TKey> rightLookupBuilder = new GroupJoinHashLookupBuilder<TRightInput, TRightKey, TKey>(
                     rightHashStream[i], _keyComparer);
                 outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, IEnumerable<TRightInput>, int, TKey, TOutput>(
-                    leftHashStream[i], rightLookupBuilder, _resultSelector, null, cancellationToken);
+                    leftHashStream[i], rightLookupBuilder, _resultSelector, cancellationToken);
             }
 
             outputRecipient.Receive(outputStream);

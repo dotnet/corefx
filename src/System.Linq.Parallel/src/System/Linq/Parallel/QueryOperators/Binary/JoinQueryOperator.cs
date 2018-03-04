@@ -129,7 +129,7 @@ namespace System.Linq.Parallel
                 JoinHashLookupBuilder<TRightInput, TRightKey, TKey> rightLookupBuilder = new JoinHashLookupBuilder<TRightInput, TRightKey, TKey>(
                     rightHashStream[i], _keyComparer);
                 outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, TKey, TOutput>(
-                    leftHashStream[i], rightLookupBuilder, _resultSelector, null, cancellationToken);
+                    leftHashStream[i], rightLookupBuilder, _resultSelector, cancellationToken);
             }
 
             outputRecipient.Receive(outputStream);
