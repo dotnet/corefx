@@ -68,7 +68,7 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void ToStringFroMemoryFromOwnedMemory()
+        public static void ToStringFromMemoryFromOwnedMemory()
         {
             int[] a = { 91, 92, -93, 94 };
             OwnedMemory<int> intOwner = new CustomMemoryForTest<int>(a);
