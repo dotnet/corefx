@@ -117,7 +117,6 @@ namespace System.Management
             int hour = DateTime.MinValue.Hour;
             int minute = DateTime.MinValue.Minute;
             int second = DateTime.MinValue.Second;
-            int millisec = 0;
             string dmtf = dmtfDate;
 
             // If the string passed is empty or null then throw
@@ -197,7 +196,7 @@ namespace System.Management
 
 
             // Construct a new System.DateTime object
-            var datetime = new DateTime(year, month, day, hour, minute, second, millisec);
+            var datetime = new DateTime(year, month, day, hour, minute, second, 0, DateTimeKind.Utc);
             // Then add the ticks calculated from the microseconds
             datetime = datetime.AddTicks(ticks);
             // Then subtruct offset in minutes
