@@ -63,7 +63,7 @@ namespace System.Linq.Parallel
             Func<TLeftInput, IEnumerable<TRightInput>, TOutput> groupResultSelector,
             IEqualityComparer<THashKey> keyComparer,
             CancellationToken cancellationToken)
-            : this(leftSource, new HashLookupBuilder<TRightInput, TRightKey, THashKey>(rightSource, keyComparer),
+            : this(leftSource, new JoinHashLookupBuilder<TRightInput, TRightKey, THashKey>(rightSource, keyComparer),
                   singleResultSelector, groupResultSelector, cancellationToken)
         {
         }
@@ -203,12 +203,33 @@ namespace System.Linq.Parallel
     /// <typeparam name="TElement"></typeparam>
     /// <typeparam name="TOrderKey"></typeparam>
     /// <typeparam name="THashKey"></typeparam>
-    internal class HashLookupBuilder<TElement, TOrderKey, THashKey>
+    internal abstract class HashLookupBuilder<TElement, TOrderKey, THashKey>
+    {
+        public abstract HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken);
+
+        // Standard implementation of the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Class to build a HashLookup of right elements for use in Join operations.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    /// <typeparam name="THashKey"></typeparam>
+    internal class JoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<TElement, TOrderKey, THashKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
         private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
 
-        internal HashLookupBuilder(QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource, IEqualityComparer<THashKey> keyComparer)
+        internal JoinHashLookupBuilder(QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource, IEqualityComparer<THashKey> keyComparer)
         {
             Debug.Assert(dataSource != null);
 
@@ -216,7 +237,7 @@ namespace System.Linq.Parallel
             _keyComparer = keyComparer;
         }
 
-        public HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken)
+        public override HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> BuildHashLookup(CancellationToken cancellationToken)
         {
             Debug.Assert(_dataSource != null);
 
@@ -275,13 +296,7 @@ namespace System.Linq.Parallel
             return lookup;
         }
 
-        // Standard implementation of the disposable pattern.
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             Debug.Assert(_dataSource != null);
 
