@@ -788,16 +788,17 @@ static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, struct I
     struct ifaddrs* addrs;
     if (getifaddrs(&addrs) == 0)
     {
-        while (addrs != 0)
+        struct ifaddrs* addrs_head = addrs;
+        while (addrs != NULL)
         {
-            if ((addrs->ifa_addr->sa_family == AF_INET) && ((struct sockaddr_in*)addrs->ifa_addr)->sin_addr.s_addr == pktinfo->ipi_addr.s_addr)
+            if (addrs->ifa_addr->sa_family == AF_INET && ((struct sockaddr_in*)addrs->ifa_addr)->sin_addr.s_addr == pktinfo->ipi_addr.s_addr)
             {
                 packetInfo->InterfaceIndex = (int32_t)if_nametoindex(addrs->ifa_name);
                 break;
             }
             addrs = addrs->ifa_next;
         }
-        freeifaddrs(addrs);
+        freeifaddrs(addrs_head);
     }
 #endif
 
