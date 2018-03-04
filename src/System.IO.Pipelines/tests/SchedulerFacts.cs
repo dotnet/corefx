@@ -404,10 +404,6 @@ namespace System.IO.Pipelines.Tests
         public async Task ThreadPoolScheduler_SchedulesOnThreadPool()
         {
             var pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.ThreadPool, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            while (!Diagnostics.Debugger.IsAttached)
-            {
-
-            }
 
             async Task DoRead()
             {
