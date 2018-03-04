@@ -65,6 +65,7 @@ namespace System.IO.Pipelines.Tests
                     pipe.Reader.Complete();
                 };
 
+                // This needs to run on the current SynchronizationContext
                 Task reading = doRead();
 
                 PipeWriter buffer = pipe.Writer;
@@ -112,6 +113,7 @@ namespace System.IO.Pipelines.Tests
                     pipe.Reader.Complete();
                 };
 
+                // This needs to run on the current SynchronizationContext
                 Task reading = doRead();
 
                 PipeWriter buffer = pipe.Writer;
@@ -142,6 +144,8 @@ namespace System.IO.Pipelines.Tests
 
             Func<Task> doRead = async () =>
             {
+                Assert.False(Thread.CurrentThread.IsThreadPoolThread, "We started on the thread pool");
+
                 ReadResult result = await pipe.Reader.ReadAsync();
 
                 Assert.True(Thread.CurrentThread.IsThreadPoolThread);
@@ -151,7 +155,7 @@ namespace System.IO.Pipelines.Tests
                 pipe.Reader.Complete();
             };
 
-            Task reading = doRead();
+            Task reading = ExecuteOnNonThreadPoolThread(doRead);
 
             PipeWriter buffer = pipe.Writer;
             buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
@@ -175,13 +179,15 @@ namespace System.IO.Pipelines.Tests
                         useSynchronizationContext: false
                     ));
 
-                PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
-                ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
-
-                Assert.False(flushAsync.IsCompleted);
-
                 Func<Task> doWrite = async () =>
                 {
+                    Assert.False(Thread.CurrentThread.IsThreadPoolThread, "We started on the thread pool");
+
+                    PipeWriter writableBuffer = pipe.Writer.WriteEmpty(64);
+                    ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
+
+                    Assert.False(flushAsync.IsCompleted);
+
                     await flushAsync;
 
                     pipe.Writer.Complete();
@@ -189,7 +195,7 @@ namespace System.IO.Pipelines.Tests
                     Assert.True(Thread.CurrentThread.IsThreadPoolThread);
                 };
 
-                Task writing = doWrite();
+                Task writing = ExecuteOnNonThreadPoolThread(doWrite);
 
                 ReadResult result = await pipe.Reader.ReadAsync();
 
@@ -333,6 +339,8 @@ namespace System.IO.Pipelines.Tests
                     {
                         int oid = Thread.CurrentThread.ManagedThreadId;
 
+                        Assert.False(Thread.CurrentThread.IsThreadPoolThread, "We started on the thread pool");
+
                         await flushAsync;
 
                         Assert.NotEqual(oid, Thread.CurrentThread.ManagedThreadId);
@@ -342,7 +350,7 @@ namespace System.IO.Pipelines.Tests
                         Assert.Equal(Thread.CurrentThread.ManagedThreadId, scheduler.Thread.ManagedThreadId);
                     };
 
-                    Task writing = doWrite();
+                    Task writing = ExecuteOnNonThreadPoolThread(doWrite);
 
                     ReadResult result = await pipe.Reader.ReadAsync();
 
@@ -368,6 +376,8 @@ namespace System.IO.Pipelines.Tests
                     {
                         int oid = Thread.CurrentThread.ManagedThreadId;
 
+                        Assert.False(Thread.CurrentThread.IsThreadPoolThread, "We started on the thread pool");
+
                         ReadResult result = await pipe.Reader.ReadAsync();
 
                         Assert.NotEqual(oid, Thread.CurrentThread.ManagedThreadId);
@@ -379,7 +389,7 @@ namespace System.IO.Pipelines.Tests
                         pipe.Reader.Complete();
                     };
 
-                    Task reading = doRead();
+                    Task reading = ExecuteOnNonThreadPoolThread(doRead);
 
                     PipeWriter buffer = pipe.Writer;
                     buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
@@ -394,31 +404,62 @@ namespace System.IO.Pipelines.Tests
         public async Task ThreadPoolScheduler_SchedulesOnThreadPool()
         {
             var pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.ThreadPool, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
+            while (!Diagnostics.Debugger.IsAttached)
+            {
+
+            }
 
             async Task DoRead()
             {
-                ReadResult result = await pipe.Reader.ReadAsync();
+                int oid = Thread.CurrentThread.ManagedThreadId;
 
+                // Make sure we aren't on a thread pool thread
+                Assert.False(Thread.CurrentThread.IsThreadPoolThread, "We started on the thread pool");
+
+                ValueTask<ReadResult> task = pipe.Reader.ReadAsync();
+
+                Assert.False(task.IsCompleted, "Task completed synchronously");
+
+                ReadResult result = await task;
+
+                Assert.NotEqual(oid, Thread.CurrentThread.ManagedThreadId);
                 Assert.True(Thread.CurrentThread.IsThreadPoolThread);
                 pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
                 pipe.Reader.Complete();
             }
 
             bool callbackRan = false;
-            Task reading = DoRead();
+
+            // Wait start the thread and wait for it to finish
+            Task reading = ExecuteOnNonThreadPoolThread(DoRead);
 
             PipeWriter buffer = pipe.Writer;
             pipe.Writer.OnReaderCompleted((state, exception) =>
-                {
-                    callbackRan = true;
-                    Assert.True(Thread.CurrentThread.IsThreadPoolThread);
-                }, null);
+            {
+                callbackRan = true;
+                Assert.True(Thread.CurrentThread.IsThreadPoolThread);
+            },
+            null);
+
             buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
             await buffer.FlushAsync();
 
             await reading;
 
             Assert.True(callbackRan);
+        }
+
+        private Task ExecuteOnNonThreadPoolThread(Func<Task> func)
+        {
+            // Starts the execution of a task on a non thread pool thread
+            Task task = null;
+            var thread = new Thread(() =>
+            {
+                task = func();
+            });
+            thread.Start();
+            thread.Join();
+            return task;
         }
 
         private sealed class CustomSynchronizationContext : SynchronizationContext
