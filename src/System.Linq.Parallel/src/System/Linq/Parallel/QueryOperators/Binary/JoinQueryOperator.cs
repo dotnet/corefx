@@ -126,8 +126,10 @@ namespace System.Linq.Parallel
 
             for (int i = 0; i < partitionCount; i++)
             {
+                JoinHashLookupBuilder<TRightInput, TRightKey, TKey> rightLookupBuilder = new JoinHashLookupBuilder<TRightInput, TRightKey, TKey>(
+                    rightHashStream[i], _keyComparer);
                 outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, TKey, TOutput>(
-                    leftHashStream[i], rightHashStream[i], _resultSelector, null, _keyComparer, cancellationToken);
+                    leftHashStream[i], rightLookupBuilder, _resultSelector, null, cancellationToken);
             }
 
             outputRecipient.Receive(outputStream);
