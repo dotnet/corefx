@@ -13,23 +13,10 @@ namespace System.IO.Pipelines
         {
             System.Threading.ThreadPool.QueueUserWorkItem(s =>
             {
-                ((ActionObjectAsWaitCallback<TState>)s).Run();
-            }, 
-            new ActionObjectAsWaitCallback<TState>(action, state));
-        }
-
-        private sealed class ActionObjectAsWaitCallback<TState>
-        {
-            private Action<TState> _action;
-            private TState _state;
-
-            public ActionObjectAsWaitCallback(Action<TState> action, TState state)
-            {
-                _action = action;
-                _state = state;
-            }
-
-            public void Run() => _action(_state);
+                var tuple = (Tuple<Action<TState>, TState>)s;
+                tuple.Item1(tuple.Item2);
+            },
+            Tuple.Create(action, state));
         }
     }
 }
