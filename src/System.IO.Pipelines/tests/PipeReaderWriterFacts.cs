@@ -503,11 +503,6 @@ namespace System.IO.Pipelines.Tests
 
                 pipe.Reader.ReadAsync().GetAwaiter().OnCompleted(() =>
                 {
-                    if (useSynchronizationContext)
-                    {
-                        Assert.Same(sc, SynchronizationContext.Current);
-                    }
-
                     tcs.TrySetResult(val.Value);
                 });
 
@@ -515,6 +510,12 @@ namespace System.IO.Pipelines.Tests
 
                 pipe.Writer.WriteEmpty(100);
                 await pipe.Writer.FlushAsync();
+
+                if (useSynchronizationContext)
+                {
+                    Assert.Equal(1, sc.Callbacks.Count);
+                    sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
+                }
 
                 int value = await tcs.Task;
                 Assert.Equal(10, value);
@@ -534,7 +535,7 @@ namespace System.IO.Pipelines.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task FlushAsyncOnCompletedCapturesTheExecutionContext(bool useSynchronizationContext)
+        public async Task FlushAsyncOnCompletedCapturesTheExecutionContextAndSyncContext(bool useSynchronizationContext)
         {
             var pipe = new Pipe(new PipeOptions(useSynchronizationContext: useSynchronizationContext, pauseWriterThreshold: 20, resumeWriterThreshold: 10));
 
@@ -555,18 +556,19 @@ namespace System.IO.Pipelines.Tests
                 pipe.Writer.WriteEmpty(20);
                 pipe.Writer.FlushAsync().GetAwaiter().OnCompleted(() =>
                 {
-                    if (useSynchronizationContext)
-                    {
-                        Assert.Same(sc, SynchronizationContext.Current);
-                    }
-
                     tcs.TrySetResult(val.Value);
                 });
 
                 val.Value = 20;
 
-                var result = await pipe.Reader.ReadAsync();
+                ReadResult result = await pipe.Reader.ReadAsync();
                 pipe.Reader.AdvanceTo(result.Buffer.End);
+
+                if (useSynchronizationContext)
+                {
+                    Assert.Equal(1, sc.Callbacks.Count);
+                    sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
+                }
 
                 int value = await tcs.Task;
                 Assert.Equal(10, value);
@@ -769,20 +771,11 @@ namespace System.IO.Pipelines.Tests
 
         private sealed class CustomSynchronizationContext : SynchronizationContext
         {
+            public List<Tuple<SendOrPostCallback, object>> Callbacks = new List<Tuple<SendOrPostCallback, object>>();
+
             public override void Post(SendOrPostCallback d, object state)
             {
-                ThreadPool.QueueUserWorkItem(delegate
-                {
-                    SetSynchronizationContext(this);
-                    try
-                    {
-                        d(state);
-                    }
-                    finally
-                    {
-                        SetSynchronizationContext(null);
-                    }
-                }, null);
+                Callbacks.Add(Tuple.Create(d, state));
             }
         }
     }

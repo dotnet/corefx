@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,8 +60,6 @@ namespace System.IO.Pipelines.Tests
                 {
                     ReadResult result = await pipe.Reader.ReadAsync();
 
-                    Assert.Same(SynchronizationContext.Current, sc);
-
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
                     pipe.Reader.Complete();
@@ -71,6 +70,9 @@ namespace System.IO.Pipelines.Tests
                 PipeWriter buffer = pipe.Writer;
                 buffer.Write(Encoding.UTF8.GetBytes("Hello World"));
                 await buffer.FlushAsync();
+
+                Assert.Equal(1, sc.Callbacks.Count);
+                sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
 
                 pipe.Writer.Complete();
 
@@ -185,6 +187,9 @@ namespace System.IO.Pipelines.Tests
                     ReadResult result = await pipe.Reader.ReadAsync();
 
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
+
+                    Assert.Equal(1, sc.Callbacks.Count);
+                    sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
 
                     pipe.Reader.Complete();
 
@@ -315,20 +320,11 @@ namespace System.IO.Pipelines.Tests
 
         private sealed class CustomSynchronizationContext : SynchronizationContext
         {
+            public List<Tuple<SendOrPostCallback, object>> Callbacks = new List<Tuple<SendOrPostCallback, object>>();
+
             public override void Post(SendOrPostCallback d, object state)
             {
-                ThreadPool.QueueUserWorkItem(delegate
-                {
-                    SetSynchronizationContext(this);
-                    try
-                    {
-                        d(state);
-                    }
-                    finally
-                    {
-                        SetSynchronizationContext(null);
-                    }
-                }, null);
+                Callbacks.Add(Tuple.Create(d, state));
             }
         }
     }
