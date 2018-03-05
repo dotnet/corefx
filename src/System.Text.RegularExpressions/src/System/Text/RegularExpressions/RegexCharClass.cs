@@ -714,6 +714,12 @@ namespace System.Text.RegularExpressions
             return set[SETSTART];
         }
 
+        public static (char, char) DoubletonChars(string set)
+        {
+            Debug.Assert(IsDoubleton(set), "Tried to get the singleton char out of a non singleton character class");
+            return (set[SETSTART], set[SETSTART + 2]);
+        }
+
         public static bool IsMergeable(string charClass)
         {
             return (!IsNegated(charClass) && !IsSubtraction(charClass));
@@ -731,6 +737,19 @@ namespace System.Text.RegularExpressions
         {
             if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
                 (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// <c>true</c> if the set contains a single character only
+        /// </summary>
+        public static bool IsDoubleton(string set)
+        {
+            if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 4 && !IsSubtraction(set) &&
+                ((set[SETSTART] + 1 == set[SETSTART + 1]) &&   // if the class only has one member eg., "T", it is stored as "TU"
+                (set[SETSTART + 2] == LastChar || set[SETSTART + 2] + 1 == set[SETSTART + 3])))
                 return true;
             else
                 return false;
