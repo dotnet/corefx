@@ -175,24 +175,21 @@ namespace System.Data.SqlClient.SNI
 
         public override uint ReceiveAsync(ref SNIPacket packet, bool isMars = false)
         {
-            lock (this)
-            {
-                packet = new SNIPacket(null);
-                packet.Allocate(_bufferSize);
+            packet = new SNIPacket(null);
+            packet.Allocate(_bufferSize);
 
-                try
-                {
-                    packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
-                    return TdsEnums.SNI_SUCCESS_IO_PENDING;
-                }
-                catch (ObjectDisposedException ode)
-                {
-                    return ReportErrorAndReleasePacket(packet, ode);
-                }
-                catch (IOException ioe)
-                {
-                    return ReportErrorAndReleasePacket(packet, ioe);
-                }
+            try
+            {
+                packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
+                return TdsEnums.SNI_SUCCESS_IO_PENDING;
+            }
+            catch (ObjectDisposedException ode)
+            {
+                return ReportErrorAndReleasePacket(packet, ode);
+            }
+            catch (IOException ioe)
+            {
+                return ReportErrorAndReleasePacket(packet, ioe);
             }
         }
 
@@ -219,10 +216,7 @@ namespace System.Data.SqlClient.SNI
         public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
-            lock (this)
-            {
-                packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV);
-            }
+            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV);
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 
