@@ -4,13 +4,11 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -27,9 +25,7 @@ namespace System.Data.SqlClient.SNI
         private readonly object _callbackObject;
         private readonly Socket _socket;
         private NetworkStream _tcpStream;
-        private readonly TaskScheduler _writeScheduler;
-        private readonly TaskFactory _writeTaskFactory;
-
+        
         private Stream _stream;
         private SslStream _sslStream;
         private SslOverTdsStream _sslOverTdsStream;
@@ -104,8 +100,6 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callbackObject">Callback object</param>
         public SNITCPHandle(string serverName, int port, long timerExpire, object callbackObject, bool parallel)
         {
-            _writeScheduler = new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler;
-            _writeTaskFactory = new TaskFactory(_writeScheduler);
             _callbackObject = callbackObject;
             _targetServer = serverName;
 
