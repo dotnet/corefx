@@ -48,13 +48,20 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(padding));
             }
 
+            int modulusSizeInBytes = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
+
+            if (!encrypt && data.Length > modulusSizeInBytes)
+            {
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_Padding_DecDataTooBig, modulusSizeInBytes));
+            }
+
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
             {
                 if (encrypt && data.Length == 0)
                 {
-                    int bufSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
-                    byte[] rented = ArrayPool<byte>.Shared.Rent(bufSize);
-                    Span<byte> paddedMessage = new Span<byte>(rented, 0, bufSize);
+                    byte[] rented = ArrayPool<byte>.Shared.Rent(modulusSizeInBytes);
+                    Span<byte> paddedMessage = new Span<byte>(rented, 0, modulusSizeInBytes);
 
                     try
                     {
@@ -122,13 +129,20 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(padding));
             }
 
+            int modulusSizeInBytes = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
+
+            if (!encrypt && data.Length > modulusSizeInBytes)
+            {
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_Padding_DecDataTooBig, modulusSizeInBytes));
+            }
+
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
             {
                 if (encrypt && data.Length == 0)
                 {
-                    int bufSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
-                    byte[] rented = ArrayPool<byte>.Shared.Rent(bufSize);
-                    Span<byte> paddedMessage = new Span<byte>(rented, 0, bufSize);
+                    byte[] rented = ArrayPool<byte>.Shared.Rent(modulusSizeInBytes);
+                    Span<byte> paddedMessage = new Span<byte>(rented, 0, modulusSizeInBytes);
 
                     try
                     {
