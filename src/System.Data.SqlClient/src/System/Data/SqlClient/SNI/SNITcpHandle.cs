@@ -541,28 +541,25 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         public override uint ReceiveAsync(ref SNIPacket packet, bool isMars = false)
         {
-            lock (this)
-            {
-                packet = new SNIPacket(null);
-                packet.Allocate(_bufferSize);
+            packet = new SNIPacket(null);
+            packet.Allocate(_bufferSize);
 
-                try
-                {
-                    packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
-                    return TdsEnums.SNI_SUCCESS_IO_PENDING;
-                }
-                catch (ObjectDisposedException ode)
-                {
-                    return ReportErrorAndReleasePacket(packet, ode);
-                }
-                catch (SocketException se)
-                {
-                    return ReportErrorAndReleasePacket(packet, se);
-                }
-                catch (IOException ioe)
-                {
-                    return ReportErrorAndReleasePacket(packet, ioe);
-                }
+            try
+            {
+                packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
+                return TdsEnums.SNI_SUCCESS_IO_PENDING;
+            }
+            catch (ObjectDisposedException ode)
+            {
+                return ReportErrorAndReleasePacket(packet, ode);
+            }
+            catch (SocketException se)
+            {
+                return ReportErrorAndReleasePacket(packet, se);
+            }
+            catch (IOException ioe)
+            {
+                return ReportErrorAndReleasePacket(packet, ioe);
             }
         }
 
