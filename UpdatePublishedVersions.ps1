@@ -16,7 +16,7 @@ param(
     # A pattern matching all packages in the set that the versions repository should be set to.
     [Parameter(Mandatory=$true)][string]$nupkgPath)
 
-. "$PSScriptRoot\Tools\dotnetcli\dotnet.exe" Tools\msbuild.exe build.proj /t:UpdatePublishedVersions `
+. "$PSScriptRoot\Tools\dotnetcli\dotnet.exe" Tools\msbuild.dll build.proj /t:UpdatePublishedVersions `
     /p:GitHubUser="$gitHubUser" `
     /p:GitHubEmail="$gitHubEmail" `
     /p:GitHubAuthToken="$gitHubAuthToken" `
