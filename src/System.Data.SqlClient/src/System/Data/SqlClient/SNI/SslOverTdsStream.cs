@@ -49,10 +49,8 @@ namespace System.Data.SqlClient.SNI
         /// <param name="offset">Offset</param>
         /// <param name="count">Byte count</param>
         /// <returns>Bytes read</returns>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            return ReadInternal(buffer, offset, count, CancellationToken.None, false).GetAwaiter().GetResult();
-        }
+        public override int Read(byte[] buffer, int offset, int count) =>
+            ReadInternal(buffer, offset, count, CancellationToken.None, false).GetAwaiter().GetResult();
 
         /// <summary>
         /// Write Buffer
