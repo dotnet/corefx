@@ -109,10 +109,13 @@ namespace System.ServiceProcess.Tests
         {
             string serviceName = _testService.TestServiceName;
             var controller = new ServiceController(serviceName);
+
             controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
             Assert.Equal(ServiceControllerStatus.Running, controller.Status);
+
             _testService.Client.Connect(connectionTimeout);
             Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
+
             for (int i = 0; i < 2; i++)
             {
                 controller.Pause();

@@ -77,10 +77,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -90,10 +87,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
-            var controller = new ServiceController(_testService.TestServiceName);
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -115,10 +109,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -132,10 +123,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -153,10 +141,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand()
         {
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.ExecuteCommand(128);
             Assert.Equal(128, _testService.GetByte());
@@ -169,10 +154,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            var controller = ConnectToServer();
 
             controller.Continue();
             controller.WaitForStatus(ServiceControllerStatus.Running);
@@ -231,6 +213,16 @@ namespace System.ServiceProcess.Tests
             Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
             _testService.DeleteTestServices();
+        }
+
+        private ServiceController ConnectToServer()
+        {
+            _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
+
+            var controller = new ServiceController(_testService.TestServiceName);
+            AssertExpectedProperties(controller);
+            return controller;
         }
 
         public void Dispose()
