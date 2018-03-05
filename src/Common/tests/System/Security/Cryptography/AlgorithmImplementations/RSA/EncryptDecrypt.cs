@@ -476,8 +476,13 @@ namespace System.Security.Cryptography.Rsa.Tests
                 byte[] encrypted = Encrypt(rsa, data, RSAEncryptionPadding.Pkcs1);
                 Array.Resize(ref encrypted, encrypted.Length + 1);
 
-                Assert.ThrowsAny<CryptographicException>(
-                    () => Decrypt(rsa, encrypted, RSAEncryptionPadding.Pkcs1));
+                // Baseline/exempt a NetFx difference for RSACng
+                if (!PlatformDetection.IsFullFramework ||
+                    rsa.GetType().Assembly.GetName().Name != "System.Core")
+                {
+                    Assert.ThrowsAny<CryptographicException>(
+                        () => Decrypt(rsa, encrypted, RSAEncryptionPadding.Pkcs1));
+                }
 
                 Array.Resize(ref encrypted, encrypted.Length - 2);
 
