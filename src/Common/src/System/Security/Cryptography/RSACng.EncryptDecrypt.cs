@@ -19,6 +19,8 @@ namespace System.Security.Cryptography
 #endif
     public sealed partial class RSACng : RSA
     {
+        private const int Pkcs1PaddingOverhead = 11;
+
         /// <summary>Encrypts data using the public key.</summary>
         public override unsafe byte[] Encrypt(byte[] data, RSAEncryptionPadding padding) =>
             EncryptOrDecrypt(data, padding, encrypt: true);
@@ -54,6 +56,14 @@ namespace System.Security.Cryptography
             {
                 throw new CryptographicException(
                     SR.Format(SR.Cryptography_Padding_DecDataTooBig, modulusSizeInBytes));
+            }
+
+            if (encrypt &&
+                padding.Mode == RSAEncryptionPaddingMode.Pkcs1 &&
+                data.Length > modulusSizeInBytes - Pkcs1PaddingOverhead)
+            {
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_Encryption_MessageTooLong, modulusSizeInBytes - Pkcs1PaddingOverhead));
             }
 
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
@@ -135,6 +145,14 @@ namespace System.Security.Cryptography
             {
                 throw new CryptographicException(
                     SR.Format(SR.Cryptography_Padding_DecDataTooBig, modulusSizeInBytes));
+            }
+
+            if (encrypt &&
+                padding.Mode == RSAEncryptionPaddingMode.Pkcs1 &&
+                data.Length > modulusSizeInBytes - Pkcs1PaddingOverhead)
+            {
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_Encryption_MessageTooLong, modulusSizeInBytes - Pkcs1PaddingOverhead));
             }
 
             using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
