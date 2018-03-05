@@ -146,7 +146,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var handler = new SocketsHttpHandler())
             {
-                Assert.Equal(TimeSpan.FromSeconds(5), GetMaxResponseDrainTime(handler));
+                Assert.Equal(TimeSpan.FromSeconds(2), GetMaxResponseDrainTime(handler));
 
                 SetMaxResponseDrainTime(handler, TimeSpan.Zero);
                 Assert.Equal(TimeSpan.Zero, GetMaxResponseDrainTime(handler));
@@ -161,13 +161,13 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var handler = new SocketsHttpHandler())
             {
-                Assert.Equal(TimeSpan.FromSeconds(5), GetMaxResponseDrainTime(handler));
+                Assert.Equal(TimeSpan.FromSeconds(2), GetMaxResponseDrainTime(handler));
 
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => SetMaxResponseDrainTime(handler, TimeSpan.FromSeconds(-1)));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => SetMaxResponseDrainTime(handler, TimeSpan.MaxValue));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => SetMaxResponseDrainTime(handler, TimeSpan.FromSeconds(int.MaxValue)));
 
-                Assert.Equal(TimeSpan.FromSeconds(5), GetMaxResponseDrainTime(handler));
+                Assert.Equal(TimeSpan.FromSeconds(2), GetMaxResponseDrainTime(handler));
             }
         }
 
