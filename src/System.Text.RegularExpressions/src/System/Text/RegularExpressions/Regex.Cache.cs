@@ -148,10 +148,10 @@ namespace System.Text.RegularExpressions
 #endif
             public int _capsize;
             public ExclusiveReference _runnerref;
-            public SharedReference _replref;
+            public SharedReference<RegexReplacement> _replref;
 
             public CachedCodeEntry(CachedCodeEntryKey key, Hashtable capnames, string[] capslist, RegexCode code, 
-                Hashtable caps, int capsize, ExclusiveReference runner, SharedReference repl)
+                Hashtable caps, int capsize, ExclusiveReference runner, SharedReference<RegexReplacement> repl)
             {
                 _key = key;
                 _capnames = capnames;
