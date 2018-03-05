@@ -529,7 +529,7 @@ namespace System.Data.SqlClient.SNI
             SNIAsyncCallback cb = callback ?? _sendCallback;
             lock(this)
             {
-                packet.WriteToStreamAsync(_stream, cb);
+                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV);
             }
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }

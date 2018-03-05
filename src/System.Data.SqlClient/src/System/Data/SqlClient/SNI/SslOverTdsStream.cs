@@ -50,7 +50,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="count">Byte count</param>
         /// <returns>Bytes read</returns>
         public override int Read(byte[] buffer, int offset, int count) =>
-            ReadInternal(buffer, offset, count, CancellationToken.None, false).GetAwaiter().GetResult();
+            ReadInternal(buffer, offset, count, CancellationToken.None, async: false).GetAwaiter().GetResult();
 
         /// <summary>
         /// Write Buffer
@@ -59,7 +59,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="offset"></param>
         /// <param name="count"></param>
         public override void Write(byte[] buffer, int offset, int count)
-            => WriteInternal(buffer, offset, count, CancellationToken.None, false).Wait();
+            => WriteInternal(buffer, offset, count, CancellationToken.None, async: false).Wait();
 
         /// <summary>
         /// Write Buffer Asynchronosly
@@ -70,7 +70,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="token"></param>
         /// <returns></returns>
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
-            => WriteInternal(buffer, offset, count, token, true);
+            => WriteInternal(buffer, offset, count, token, async: true);
 
         /// <summary>
         /// Read Buffer Asynchronosly
@@ -81,17 +81,11 @@ namespace System.Data.SqlClient.SNI
         /// <param name="token"></param>
         /// <returns></returns>
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken token)
-            => ReadInternal(buffer, offset, count, token, true);
+            => ReadInternal(buffer, offset, count, token, async: true);
 
         /// <summary>
         /// Read Internal is called synchronosly when async is false
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <param name="token"></param>
-        /// <param name="async"></param>
-        /// <returns></returns>
         private async Task<int> ReadInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
         {
             int readBytes = 0;
@@ -104,14 +98,9 @@ namespace System.Data.SqlClient.SNI
                     // Account for split packets
                     while (readBytes < TdsEnums.HEADER_LEN)
                     {
-                        if (async)
-                        {
-                            readBytes += await _stream.ReadAsync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes, token).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            readBytes += _stream.Read(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes);
-                        }
+                        readBytes += async ?
+                            await _stream.ReadAsync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes, token).ConfigureAwait(false) :
+                            _stream.Read(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes);
                     }
 
                     _packetBytes = (packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET] << 8) | packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET + 1];
@@ -124,14 +113,9 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            if (async)
-            {
-                readBytes = await _stream.ReadAsync(packetData, 0, count, token).ConfigureAwait(false);
-            }
-            else
-            {
-                readBytes = _stream.Read(packetData, 0, count);
-            }
+            readBytes = async ?
+                await _stream.ReadAsync(packetData, 0, count, token).ConfigureAwait(false) :
+                _stream.Read(packetData, 0, count);
 
             if (_encapsulate)
             {
@@ -145,12 +129,6 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// The internal write method calls Sync APIs when Async flag is false
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <param name="token"></param>
-        /// <param name="async"></param>
-        /// <returns></returns>
         private async Task WriteInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
         {
             int currentCount = 0;
@@ -279,7 +257,6 @@ namespace System.Data.SqlClient.SNI
         {
             throw new NotSupportedException();
         }
-
 
         /// <summary>
         /// Check if stream can be read from
