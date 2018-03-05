@@ -38,14 +38,9 @@ namespace System.ServiceProcess.Tests
             this._exception = throwException;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
-            this._serverStream.BeginWaitForConnection( new AsyncCallback(SendConnectedByte), this);
+            this._serverStream.WaitForConnectionAsync().ContinueWith((t) => WriteStreamAsync(PipeMessageByteCode.Connected).Wait());
         }
-
-        public void SendConnectedByte(IAsyncResult result)
-        {
-            WriteStreamAsync(PipeMessageByteCode.Connected).Wait();
-        }
-
+        
         protected override void OnContinue()
         {
             base.OnContinue();
