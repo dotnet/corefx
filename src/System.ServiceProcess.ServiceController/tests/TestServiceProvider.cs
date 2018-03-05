@@ -63,7 +63,7 @@ namespace System.ServiceProcess.Tests
             TestServiceDisplayName = "Test Service " + TestServiceName;
 
             _dependentServices = new TestServiceProvider(TestServiceName + ".Dependent");
-
+            
             // Create the service
             CreateTestServices();
         }
@@ -84,7 +84,7 @@ namespace System.ServiceProcess.Tests
             Task readTask;
             byte[] received = new byte[] { 0 };
             readTask = Client.ReadAsync(received, 0, 1);
-            await readTask.TimeoutAfter(readTimeout);
+            await readTask.TimeoutAfter(readTimeout).ConfigureAwait(false);
             return received[0];
         }
 

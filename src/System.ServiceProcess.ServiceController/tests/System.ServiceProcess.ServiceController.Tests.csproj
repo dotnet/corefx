@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{F7D9984B-02EB-4573-84EF-00FFFBFB872C}</ProjectGuid>
     <XunitShowProgress>true</XunitShowProgress>
-    <XunitMaxThreads>3</XunitMaxThreads> 
+    <XunitMaxThreads>1</XunitMaxThreads> 
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
