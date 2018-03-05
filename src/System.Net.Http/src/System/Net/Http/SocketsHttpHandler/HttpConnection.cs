@@ -463,7 +463,7 @@ namespace System.Net.Http
                 // Parse the response headers.
                 while (true)
                 {
-                    ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync().ConfigureAwait(false);
+                    ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).ConfigureAwait(false);
                     if (LineIsEmpty(line))
                     {
                         break;
@@ -1066,7 +1066,7 @@ namespace System.Net.Http
             return true;
         }
 
-        private async ValueTask<ArraySegment<byte>> ReadNextResponseHeaderLineAsync()
+        private async ValueTask<ArraySegment<byte>> ReadNextResponseHeaderLineAsync(bool foldedHeadersAllowed = false)
         {
             int previouslyScannedBytes = 0;
             while (true)
@@ -1086,7 +1086,7 @@ namespace System.Net.Http
                     // of folded headers, which per RFC2616 are headers split across multiple
                     // lines, where the continuation line begins with a space or horizontal tab.
                     // The feature was deprecated in RFC 7230 3.2.4, but some servers still use it.
-                    if (length > 0)
+                    if (foldedHeadersAllowed && length > 0)
                     {
                         // If the newline is the last character we've buffered, we need at least
                         // one more character in order to see whether it's space/tab, in which
