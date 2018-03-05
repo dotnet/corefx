@@ -14,9 +14,9 @@ namespace System.Tests
         [InlineData(new byte[] { 5, 6, 7, 8 }, "BQYHCA==")]
         public void ToBase64String_Span_ProducesExpectedOutput(byte[] input, string expected)
         {
-            Assert.Equal(expected, Convert.ToBase64String(input.AsReadOnlySpan()));
-            Assert.Equal(expected, Convert.ToBase64String(input.AsReadOnlySpan(), Base64FormattingOptions.None));
-            Assert.Equal(expected, Convert.ToBase64String(input.AsReadOnlySpan(), Base64FormattingOptions.InsertLineBreaks));
+            Assert.Equal(expected, Convert.ToBase64String(input));
+            Assert.Equal(expected, Convert.ToBase64String(input, Base64FormattingOptions.None));
+            Assert.Equal(expected, Convert.ToBase64String(input, Base64FormattingOptions.InsertLineBreaks));
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace System.Tests
         [InlineData((Base64FormattingOptions)(2))]
         public void ToBase64String_Span_InvalidOptions_Throws(Base64FormattingOptions invalidOption)
         {
-            AssertExtensions.Throws<ArgumentException>("options", () => Convert.ToBase64String(new byte[0].AsReadOnlySpan(), invalidOption));
+            AssertExtensions.Throws<ArgumentException>("options", () => Convert.ToBase64String(new byte[0], invalidOption));
         }
 
         [Theory]
@@ -60,7 +60,7 @@ namespace System.Tests
 
             // Just right
             dest = new char[expected.Length];
-            Assert.True(Convert.TryToBase64Chars(input.AsReadOnlySpan(), dest, out int charsWritten));
+            Assert.True(Convert.TryToBase64Chars(input, dest, out int charsWritten));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal<char>(expected.ToCharArray(), dest.ToArray());
 
@@ -68,13 +68,13 @@ namespace System.Tests
             if (expected.Length > 0)
             {
                 dest = new char[expected.Length - 1];
-                Assert.False(Convert.TryToBase64Chars(input.AsReadOnlySpan(), dest, out charsWritten));
+                Assert.False(Convert.TryToBase64Chars(input, dest, out charsWritten));
                 Assert.Equal(0, charsWritten);
             }
 
             // Longer than needed
             dest = new char[expected.Length + 1];
-            Assert.True(Convert.TryToBase64Chars(input.AsReadOnlySpan(), dest, out charsWritten));
+            Assert.True(Convert.TryToBase64Chars(input, dest, out charsWritten));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal<char>(expected.ToCharArray(), dest.Slice(0, expected.Length).ToArray());
             Assert.Equal(0, dest[dest.Length - 1]);
@@ -86,7 +86,7 @@ namespace System.Tests
         public void TryToBase64Chars_InvalidOptions_Throws(Base64FormattingOptions invalidOption)
         {
             AssertExtensions.Throws<ArgumentException>("options",
-                () => Convert.TryToBase64Chars(new byte[0].AsReadOnlySpan(), new char[0].AsSpan(), out int charsWritten, invalidOption));
+                () => Convert.TryToBase64Chars(new byte[0], new char[0].AsSpan(), out int charsWritten, invalidOption));
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace System.Tests
 
             // Just the right length
             dest = new byte[expected.Length];
-            Assert.True(Convert.TryFromBase64Chars(charArrayInput.AsReadOnlySpan(), dest, out int bytesWritten));
+            Assert.True(Convert.TryFromBase64Chars(charArrayInput, dest, out int bytesWritten));
             Assert.Equal(expected.Length, bytesWritten);
             Assert.Equal<byte>(expected, dest.ToArray());
 
@@ -146,13 +146,13 @@ namespace System.Tests
             if (expected.Length > 0)
             {
                 dest = new byte[expected.Length - 1];
-                Assert.False(Convert.TryFromBase64Chars(charArrayInput.AsReadOnlySpan(), dest, out bytesWritten));
+                Assert.False(Convert.TryFromBase64Chars(charArrayInput, dest, out bytesWritten));
                 Assert.Equal(0, bytesWritten);
             }
 
             // Longer than needed
             dest = new byte[expected.Length + 1];
-            Assert.True(Convert.TryFromBase64Chars(charArrayInput.AsReadOnlySpan(), dest, out bytesWritten));
+            Assert.True(Convert.TryFromBase64Chars(charArrayInput, dest, out bytesWritten));
             Assert.Equal(expected.Length, bytesWritten);
             Assert.Equal<byte>(expected, dest.Slice(0, dest.Length - 1).ToArray());
             Assert.Equal(0, dest[dest.Length - 1]);
