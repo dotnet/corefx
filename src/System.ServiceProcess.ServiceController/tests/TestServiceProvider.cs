@@ -63,7 +63,7 @@ namespace System.ServiceProcess.Tests
             TestServiceDisplayName = "Test Service " + TestServiceName;
 
             _dependentServices = new TestServiceProvider(TestServiceName + ".Dependent");
-            
+
             // Create the service
             CreateTestServices();
         }

@@ -40,7 +40,7 @@ namespace System.ServiceProcess.Tests
             this._serverStream = new NamedPipeServerStream(serviceName);
             this._serverStream.WaitForConnectionAsync().ContinueWith((t) => WriteStreamAsync(PipeMessageByteCode.Connected).Wait());
         }
-        
+
         protected override void OnContinue()
         {
             base.OnContinue();
