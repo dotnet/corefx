@@ -925,7 +925,8 @@ namespace System.Diagnostics.Tests
         [ActiveIssue(26720, TargetFrameworkMonikers.Uap)]
         public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
         {
-            Assert.Throws<InvalidOperationException>(() => Process.GetProcesses(Guid.NewGuid().ToString()));
+            Type exceptionType = PlatformDetection.IsWindows ? typeof(InvalidOperationException) : typeof(PlatformNotSupportedException);
+            var exception = Assert.Throws(exceptionType, () => Process.GetProcesses(Guid.NewGuid().ToString()));
         }
 
         [Fact]

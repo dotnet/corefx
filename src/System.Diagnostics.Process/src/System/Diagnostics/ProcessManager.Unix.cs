@@ -74,7 +74,7 @@ namespace System.Diagnostics
         {
             if (IsRemoteMachine(machineName))
             {
-                throw new InvalidOperationException(SR.CouldntConnectToRemoteMachine);
+                throw new PlatformNotSupportedException(SR.RemoteMachinesNotSupported);
             }
         }
         public static IntPtr GetMainWindowHandle(int processId)
