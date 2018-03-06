@@ -9,16 +9,9 @@ namespace System.IO.Pipelines
 {
     internal sealed class ThreadPoolScheduler : PipeScheduler
     {
-        public override void Schedule(Action action)
-        {
-            System.Threading.ThreadPool.QueueUserWorkItem(s_actionCallback, action, preferLocal: false);
-        }
-
-        public override void Schedule(Action<object> action, object state)
+        public override void Schedule<TState>(Action<TState> action, TState state)
         {
             System.Threading.ThreadPool.QueueUserWorkItem(action, state, preferLocal: false);
         }
-
-        private static readonly Action<Action> s_actionCallback = state => state();
     }
 }

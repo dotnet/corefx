@@ -76,6 +76,7 @@
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.char.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.TryGet.cs" />
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +150,7 @@
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
+    <Compile Include="Memory\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsMemory.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="ReadOnlyMemory\Span.cs" />
     <Compile Include="ReadOnlyMemory\Strings.cs" />
     <Compile Include="ReadOnlyMemory\ToArray.cs" />
+    <Compile Include="ReadOnlyMemory\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binary\BinaryReaderUnitTests.cs" />
