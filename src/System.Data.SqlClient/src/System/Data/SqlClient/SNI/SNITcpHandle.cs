@@ -549,17 +549,9 @@ namespace System.Data.SqlClient.SNI
                 packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
                 return TdsEnums.SNI_SUCCESS_IO_PENDING;
             }
-            catch (ObjectDisposedException ode)
+            catch (Exception e) when (e is ObjectDisposedException || e is SocketException || e is IOException)
             {
-                return ReportErrorAndReleasePacket(packet, ode);
-            }
-            catch (SocketException se)
-            {
-                return ReportErrorAndReleasePacket(packet, se);
-            }
-            catch (IOException ioe)
-            {
-                return ReportErrorAndReleasePacket(packet, ioe);
+                return ReportErrorAndReleasePacket(packet, e);
             }
         }
 
