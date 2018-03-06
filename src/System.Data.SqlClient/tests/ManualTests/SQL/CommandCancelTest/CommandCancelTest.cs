@@ -149,7 +149,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 cmd.CommandText = "WAITFOR DELAY '00:00:30';select * from Customers";
 
                 string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-                DataTestUtility.ExpectFailure<SqlException>(() => cmd.ExecuteReader(), errorMessage);
+                DataTestUtility.ExpectFailure<SqlException>(() => cmd.ExecuteReader(), new string[] { errorMessage });
 
                 VerifyConnection(cmd);
             }
@@ -208,19 +208,28 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Barrier threadsReady = stateTuple.Item3;
 
             string errorMessage = SystemDataResourceManager.Instance.SQL_OperationCancelled;
-            DataTestUtility.ExpectFailure<SqlException>(() =>
+            string errorMessageSevereFailure = SystemDataResourceManager.Instance.SQL_SevereError;
+
+            try
             {
-                threadsReady.SignalAndWait();
-                using (SqlDataReader r = command.ExecuteReader())
+                DataTestUtility.ExpectFailure<SqlException>(() =>
                 {
-                    do
+                    threadsReady.SignalAndWait();
+                    using (SqlDataReader r = command.ExecuteReader())
                     {
-                        while (r.Read())
+                        do
                         {
-                        }
-                    } while (r.NextResult());
-                }
-            }, errorMessage);
+                            while (r.Read())
+                            {
+                            }
+                        } while (r.NextResult());
+                    }
+                }, new string[] { errorMessage, errorMessageSevereFailure });
+            }
+            catch
+            {
+                Assert.True(false, $"An unchecked exception was thrown in {nameof(ExecuteCommandCancelExpected)}");
+            }
         }
 
         private static void CancelSharedCommand(object state)
