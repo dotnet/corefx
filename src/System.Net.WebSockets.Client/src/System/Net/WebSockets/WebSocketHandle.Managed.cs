@@ -87,27 +87,36 @@ namespace System.Net.WebSockets
                 Socket connectedSocket = await ConnectSocketAsync(uri.Host, uri.Port, cancellationToken).ConfigureAwait(false);
                 Stream stream = new NetworkStream(connectedSocket, ownsSocket:true);
 
-                // Upgrade to SSL if needed
-                if (uri.Scheme == UriScheme.Wss)
+                string subprotocol;
+                try
                 {
-                    var sslStream = new SslStream(stream);
-                    await sslStream.AuthenticateAsClientAsync(
-                        uri.Host,
-                        options.ClientCertificates,
-                        SecurityProtocol.AllowedSecurityProtocols,
-                        checkCertificateRevocation: false).ConfigureAwait(false);
-                    stream = sslStream;
+                    // Upgrade to SSL if needed
+                    if (uri.Scheme == UriScheme.Wss)
+                    {
+                        var sslStream = new SslStream(stream);
+                        await sslStream.AuthenticateAsClientAsync(
+                            uri.Host,
+                            options.ClientCertificates,
+                            SecurityProtocol.AllowedSecurityProtocols,
+                            checkCertificateRevocation: false).ConfigureAwait(false);
+                        stream = sslStream;
+                    }
+
+                    // Create the security key and expected response, then build all of the request headers
+                    KeyValuePair<string, string> secKeyAndSecWebSocketAccept = CreateSecKeyAndSecWebSocketAccept();
+                    byte[] requestHeader = BuildRequestHeader(uri, options, secKeyAndSecWebSocketAccept.Key);
+
+                    // Write out the header to the connection
+                    await stream.WriteAsync(requestHeader, 0, requestHeader.Length, cancellationToken).ConfigureAwait(false);
+
+                    // Parse the response and store our state for the remainder of the connection
+                    subprotocol = await ParseAndValidateConnectResponseAsync(stream, options, secKeyAndSecWebSocketAccept.Value, cancellationToken).ConfigureAwait(false);
                 }
-
-                // Create the security key and expected response, then build all of the request headers
-                KeyValuePair<string, string> secKeyAndSecWebSocketAccept = CreateSecKeyAndSecWebSocketAccept();
-                byte[] requestHeader = BuildRequestHeader(uri, options, secKeyAndSecWebSocketAccept.Key);
-
-                // Write out the header to the connection
-                await stream.WriteAsync(requestHeader, 0, requestHeader.Length, cancellationToken).ConfigureAwait(false);
-
-                // Parse the response and store our state for the remainder of the connection
-                string subprotocol = await ParseAndValidateConnectResponseAsync(stream, options, secKeyAndSecWebSocketAccept.Value, cancellationToken).ConfigureAwait(false);
+                catch
+                {
+                    stream.Dispose();
+                    throw;
+                }
 
                 _webSocket = ManagedWebSocket.CreateFromConnectedStream(
                     stream, false, subprotocol, options.KeepAliveInterval, options.ReceiveBufferSize, options.Buffer);
