@@ -92,10 +92,14 @@ namespace System.Net.Http
                 }
             }
 
+            Task<HttpResponseMessage> responseTask = null;
             try
             {
-                Task<HttpResponseMessage> responseTask = base.SendAsync(request, cancellationToken);
+                responseTask = base.SendAsync(request, cancellationToken);
+
                 await responseTask.ConfigureAwait(false);
+
+                return responseTask.Result;
             }
             catch (TaskCanceledException)
             {
@@ -120,12 +124,12 @@ namespace System.Net.Http
                 {
                     s_diagnosticListener.StopActivity(activity, new
                     {
-                        Response = responseTask.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
+                        Response = responseTask?.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
                         //If request is failed or cancelled, there is no reponse, therefore no information about request;
                         //pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
                         //and not retain all requests in Start 
                         Request = request,
-                        RequestTaskStatus = responseTask.Status
+                        RequestTaskStatus = responseTask?.Status ?? TaskStatus.Faulted
                     });
                 }
                 // Try to write System.Net.Http.Response event (deprecated)
@@ -135,15 +139,14 @@ namespace System.Net.Http
                     s_diagnosticListener.Write(DiagnosticsHandlerLoggingStrings.ResponseWriteNameDeprecated,
                         new
                         {
-                            Response = responseTask.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
+                            Response = responseTask?.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
                             LoggingRequestId = loggingRequestId,
                             TimeStamp = timestamp,
-                            RequestTaskStatus = responseTask.Status
+                            RequestTaskStatus = responseTask?.Status ?? TaskStatus.Faulted
                         }
                     );
                 }
             }
-            return responseTask.Result;
         }
 
         #region private
