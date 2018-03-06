@@ -37,8 +37,8 @@ namespace System.Text.RegularExpressions.Tests
             try
             { 
                 Regex.CacheSize = 1;
-                Regex.IsMatch("1", "1");
-                Regex.IsMatch("2", "2"); // previous removed from cache
+                Assert.True(Regex.IsMatch("1", "1"));
+                Assert.True(Regex.IsMatch("2", "2")); // previous removed from cache
             }
             finally
             {
@@ -54,8 +54,8 @@ namespace System.Text.RegularExpressions.Tests
             try
             { 
                 Regex.CacheSize = 2;
-                Regex.IsMatch("1", "1");
-                Regex.IsMatch("2", "2");
+                Assert.True(Regex.IsMatch("1", "1"));
+                Assert.True(Regex.IsMatch("2", "2"));
                 Regex.CacheSize = 1;
                 Regex.CacheSize = 0; // clear
             }
@@ -73,10 +73,10 @@ namespace System.Text.RegularExpressions.Tests
             try
             { 
                 Regex.CacheSize = 3;
-                Regex.IsMatch("1", "1");
-                Regex.IsMatch("2", "2"); 
-                Regex.IsMatch("3", "3");
-                Regex.IsMatch("1", "1"); // should be put first
+                Assert.True(Regex.IsMatch("1", "1"));
+                Assert.True(Regex.IsMatch("2", "2")); 
+                Assert.True(Regex.IsMatch("3", "3"));
+                Assert.True(Regex.IsMatch("1", "1")); // should be put first
                 Regex.CacheSize = 1;  // only 1 stays
             }
             finally
