@@ -38,7 +38,7 @@ namespace System.ServiceProcess.Tests
             this._exception = throwException;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
-            this._serverStream.WaitForConnectionAsync().ContinueWith((t) => WriteStreamAsync(PipeMessageByteCode.Connected).Wait());
+            this._serverStream.WaitForConnectionAsync().ContinueWith((t) => WriteStreamAsync(PipeMessageByteCode.Connected));
         }
 
         protected override void OnContinue()
@@ -100,7 +100,7 @@ namespace System.ServiceProcess.Tests
         public async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
             Task writeCompleted;
-            const int writeTimeout = 60000;
+            const int WriteTimeout = 60000;
             lock (_writeLock)
             {
                 if (code == PipeMessageByteCode.OnCustomCommand)
@@ -113,7 +113,7 @@ namespace System.ServiceProcess.Tests
                 }
             }
 
-            await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
+            await writeCompleted.TimeoutAfter(WriteTimeout).ConfigureAwait(false);
         }
 
         protected override void Dispose(bool disposing)

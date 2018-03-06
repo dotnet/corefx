@@ -77,7 +77,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -87,7 +87,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -109,7 +109,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -123,7 +123,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -141,7 +141,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.ExecuteCommand(128);
             Assert.Equal(128, _testService.GetByte());
@@ -154,7 +154,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
-            var controller = ConnectToServer();
+            ServiceController controller = ConnectToServer();
 
             controller.Continue();
             controller.WaitForStatus(ServiceControllerStatus.Running);
@@ -220,7 +220,7 @@ namespace System.ServiceProcess.Tests
             _testService.Client.Connect(connectionTimeout);
             Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
 
-            var controller = new ServiceController(_testService.TestServiceName);
+            ServiceController controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
             return controller;
         }
