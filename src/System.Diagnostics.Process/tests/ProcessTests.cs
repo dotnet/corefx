@@ -925,7 +925,7 @@ namespace System.Diagnostics.Tests
         public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
         {
             Type exceptionType = PlatformDetection.IsWindows ? typeof(InvalidOperationException) : typeof(PlatformNotSupportedException);
-            var exception = Assert.Throws(exceptionType, () => Process.GetProcesses(Guid.NewGuid().ToString()));
+            Assert.Throws(exceptionType, () => Process.GetProcesses(Guid.NewGuid().ToString()));
         }
 
         [Fact]
