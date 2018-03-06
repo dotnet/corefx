@@ -129,12 +129,17 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 Thread rThread2 = new Thread(CancelSharedCommand);
                 Barrier threadsReady = new Barrier(2);
                 object state = new Tuple<bool, SqlCommand, Barrier>(async, command, threadsReady);
+                Task t1 = new Task(ExecuteCommandCancelExpected, state);
+                Task t2 = new Task(CancelSharedCommand, state);
+                t1.Start();
+                t2.Start();
 
-                rThread1.Start(state);
-                rThread2.Start(state);
-                rThread1.Join();
-                rThread2.Join();
-
+                t1.Wait(15 * 10000);
+                if (t1.IsFaulted)
+                {
+                    throw t1.Exception;
+                }
+                
                 CommandCancelTest.VerifyConnection(command);
             }
         }
@@ -210,26 +215,20 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             string errorMessage = SystemDataResourceManager.Instance.SQL_OperationCancelled;
             string errorMessageSevereFailure = SystemDataResourceManager.Instance.SQL_SevereError;
 
-            try
+            DataTestUtility.ExpectFailure<SqlException>(() =>
             {
-                DataTestUtility.ExpectFailure<SqlException>(() =>
+                threadsReady.SignalAndWait();
+                using (SqlDataReader r = command.ExecuteReader())
                 {
-                    threadsReady.SignalAndWait();
-                    using (SqlDataReader r = command.ExecuteReader())
+                    do
                     {
-                        do
+                        while (r.Read())
                         {
-                            while (r.Read())
-                            {
-                            }
-                        } while (r.NextResult());
-                    }
-                }, new string[] { errorMessage, errorMessageSevereFailure });
-            }
-            catch
-            {
-                Assert.True(false, $"An unchecked exception was thrown in {nameof(ExecuteCommandCancelExpected)}");
-            }
+                        }
+                    } while (r.NextResult());
+                }
+            }, new string[] { errorMessage, errorMessageSevereFailure });
+            
         }
 
         private static void CancelSharedCommand(object state)
