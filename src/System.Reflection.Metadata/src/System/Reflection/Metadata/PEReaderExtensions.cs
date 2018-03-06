@@ -85,7 +85,7 @@ namespace System.Reflection.Metadata
             }
 
             var metadata = peReader.GetMetadata();
-            return new MetadataReader(metadata.Pointer, metadata.Length, options, utf8Decoder);
+            return new MetadataReader(metadata.Pointer, metadata.Length, options, utf8Decoder, memoryOwner: peReader);
         }
     }
 }
