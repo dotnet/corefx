@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -352,25 +353,12 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal void AdvanceReader(in SequencePosition consumed)
+        internal void AdvanceTo(in SequencePosition consumed)
         {
-            AdvanceReader(consumed, consumed);
+            AdvanceTo(consumed, consumed);
         }
 
-        internal void AdvanceReader(in SequencePosition consumed, in SequencePosition examined)
-        {
-            // If the reader is completed
-            if (_readerCompletion.IsCompleted)
-            {
-                ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
-            }
-
-            // TODO: Use new SequenceMarshal.TryGetReadOnlySequenceSegment to get the correct data
-            // directly casting only works because the type value in ReadOnlySequenceSegment is 0
-            AdvanceReader((BufferSegment)consumed.GetObject(), consumed.GetInteger(), (BufferSegment)examined.GetObject(), examined.GetInteger());
-        }
-
-        internal void AdvanceReader(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
+        internal void AdvanceTo(in SequencePosition consumed, in SequencePosition examined)
         {
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
@@ -379,6 +367,24 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
+                // If the reader is completed
+                if (_readerCompletion.IsCompleted)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
+                }
+
+                var fullBuffer = new ReadOnlySequence<byte>(_readHead, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
+                var examinedToConsumed = fullBuffer.Slice(examined, consumed);
+                if (!SequenceMarshal.TryGetReadOnlySequenceSegment(
+                    examinedToConsumed,
+                    out ReadOnlySequenceSegment<byte> examinedSegment,
+                    out int examinedIndex,
+                    out ReadOnlySequenceSegment<byte> consumedSegment,
+                    out int consumedIndex))
+                {
+                    ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
+                }
+
                 var examinedEverything = false;
                 if (examinedSegment == _commitHead)
                 {
