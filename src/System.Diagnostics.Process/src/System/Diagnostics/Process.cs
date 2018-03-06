@@ -782,10 +782,20 @@ namespace System.Diagnostics
         ///     This is called from the threadpool when a process exits.
         /// </devdoc>
         /// <internalonly/>
-        private void CompletionCallback(object context, bool wasSignaled)
+        private void CompletionCallback(object waitHandleContext, bool wasSignaled)
         {
-            StopWatchingForExit();
-            RaiseOnExited();
+            Debug.Assert(waitHandleContext != null, "Process.CompletionCallback called with no waitHandleContext");
+            lock (this)
+            {
+                // Check the exited event that we get from the threadpool
+                // matches the event we are waiting for.
+                if (waitHandleContext != _waitHandle)
+                {
+                    return;
+                }
+                StopWatchingForExit();
+                RaiseOnExited();
+            }
         }
 
         /// <internalonly/>

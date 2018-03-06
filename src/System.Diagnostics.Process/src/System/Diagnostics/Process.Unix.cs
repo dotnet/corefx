@@ -110,7 +110,7 @@ namespace System.Diagnostics
                         {
                             _waitHandle = new ProcessWaitHandle(GetWaitState());
                             _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
-                                new WaitOrTimerCallback(CompletionCallback), null, -1, true);
+                                new WaitOrTimerCallback(CompletionCallback), _waitHandle, -1, true);
                         }
                         catch
                         {
