@@ -209,7 +209,6 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-
         /// <summary>
         /// Set stream length. 
         /// </summary>
