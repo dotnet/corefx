@@ -76,8 +76,7 @@ namespace System.Text.RegularExpressions
                 throw new ArgumentNullException(nameof(replacement));
 
             // a little code to grab a cached parsed replacement object
-            RegexReplacement repl = (RegexReplacement)_replref.Get();
-
+            RegexReplacement repl = _replref.Get();
             if (repl == null || !repl.Pattern.Equals(replacement))
             {
                 repl = RegexParser.ParseReplacement(replacement, caps, capsize, capnames, roptions);

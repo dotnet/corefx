@@ -127,8 +127,7 @@ namespace System.Text.RegularExpressions
             if (_regex == null)
                 throw new NotSupportedException(SR.NoResultOnFailed);
 
-            repl = (RegexReplacement)_regex._replref.Get();
-
+            repl = _regex._replref.Get();
             if (repl == null || !repl.Pattern.Equals(replacement))
             {
                 repl = RegexParser.ParseReplacement(replacement, _regex.caps, _regex.capsize, _regex.capnames, _regex.roptions);
