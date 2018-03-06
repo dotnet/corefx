@@ -14,7 +14,7 @@ namespace System.IO.Pipelines
     {
         private const int DefaultMinimumSegmentSize = 2048;
 
-        private const int DefaultResumeWriterThreshold = DefaultMinimumSegmentSize * (Pipe.SegmentPoolSize - 1);
+        private const int DefaultResumeWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize / 2;
 
         private const int DefaultPauseWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize;
 

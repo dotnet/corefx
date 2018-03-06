@@ -810,7 +810,7 @@ namespace System.IO.Pipelines.Tests
 
         private bool IsTaskWithResult<T>(ValueTask<T> task)
         {
-            return task.GetType().GetField("_result", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(task) != null;
+            return task == new ValueTask<T>(task.Result);
         }
 
         private sealed class CustomSynchronizationContext : SynchronizationContext

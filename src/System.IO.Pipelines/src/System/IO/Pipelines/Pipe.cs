@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -353,12 +352,25 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal void AdvanceTo(in SequencePosition consumed)
+        internal void AdvanceReader(in SequencePosition consumed)
         {
-            AdvanceTo(consumed, consumed);
+            AdvanceReader(consumed, consumed);
         }
 
-        internal void AdvanceTo(in SequencePosition consumed, in SequencePosition examined)
+        internal void AdvanceReader(in SequencePosition consumed, in SequencePosition examined)
+        {
+            // If the reader is completed
+            if (_readerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
+            }
+
+            // TODO: Use new SequenceMarshal.TryGetReadOnlySequenceSegment to get the correct data
+            // directly casting only works because the type value in ReadOnlySequenceSegment is 0
+            AdvanceReader((BufferSegment)consumed.GetObject(), consumed.GetInteger(), (BufferSegment)examined.GetObject(), examined.GetInteger());
+        }
+
+        internal void AdvanceReader(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
         {
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
@@ -367,81 +379,55 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
-                // If the reader is completed
-                if (_readerCompletion.IsCompleted)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
-                }
-
                 var examinedEverything = false;
-                if (_readHead != null && _commitHead != null)
+                if (examinedSegment == _commitHead)
                 {
-                    var fullBuffer = new ReadOnlySequence<byte>(_readHead, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
-                    var examinedToConsumed = fullBuffer.Slice(consumed, examined);
-                    if (!SequenceMarshal.TryGetReadOnlySequenceSegment(
-                        examinedToConsumed,
-                        out ReadOnlySequenceSegment<byte> consumedSequenceSegment,
-                        out int consumedIndex,
-                        out ReadOnlySequenceSegment<byte> examinedSegment,
-                        out int examinedIndex))
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
-                    }
-
-                    var consumedSegment = (BufferSegment)consumedSequenceSegment;
-                    if (examinedSegment == _commitHead)
-                    {
-                        examinedEverything = _commitHead != null ? examinedIndex == _commitHeadIndex - _commitHead.Start : examinedIndex == 0;
-                    }
-
-                    if (consumedSegment != null)
-                    {
-                        if (_readHead == null)
-                        {
-                            ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
-                            return;
-                        }
-
-                        returnStart = _readHead;
-                        returnEnd = consumedSegment;
-
-                        // Check if we crossed _maximumSizeLow and complete backpressure
-                        long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumedIndex).Length;
-                        long oldLength = _length;
-                        _length -= consumedBytes;
-
-                        if (oldLength >= _resumeWriterThreshold &&
-                            _length < _resumeWriterThreshold)
-                        {
-                            _writerAwaitable.Complete(out completionData);
-                        }
-
-                        // Check if we consumed entire last segment
-                        // if we are going to return commit head we need to check that there is no writing operation that
-                        // might be using tailspace
-                        if (consumedIndex == returnEnd.Length && _writingHead != returnEnd)
-                        {
-                            BufferSegment nextBlock = returnEnd.NextSegment;
-                            if (_commitHead == returnEnd)
-                            {
-                                _commitHead = nextBlock;
-                                _commitHeadIndex = 0;
-                            }
-
-                            _readHead = nextBlock;
-                            _readHeadIndex = 0;
-                            returnEnd = nextBlock;
-                        }
-                        else
-                        {
-                            _readHead = consumedSegment;
-                            _readHeadIndex = consumedIndex;
-                        }
-                    }
+                    examinedEverything = _commitHead != null ? examinedIndex == _commitHeadIndex - _commitHead.Start : examinedIndex == 0;
                 }
-                else if (consumed != default || examined != default)
+
+                if (consumedSegment != null)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_NoReadToComplete();
+                    if (_readHead == null)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
+                        return;
+                    }
+
+                    returnStart = _readHead;
+                    returnEnd = consumedSegment;
+
+                    // Check if we crossed _maximumSizeLow and complete backpressure
+                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumedIndex).Length;
+                    long oldLength = _length;
+                    _length -= consumedBytes;
+
+                    if (oldLength >= _resumeWriterThreshold &&
+                        _length < _resumeWriterThreshold)
+                    {
+                        _writerAwaitable.Complete(out completionData);
+                    }
+
+                    // Check if we consumed entire last segment
+                    // if we are going to return commit head we need to check that there is no writing operation that
+                    // might be using tailspace
+                    if (consumedIndex == returnEnd.Length && _writingHead != returnEnd)
+                    {
+                        BufferSegment nextBlock = returnEnd.NextSegment;
+                        if (_commitHead == returnEnd)
+                        {
+                            _commitHead = nextBlock;
+                            _commitHeadIndex = 0;
+                        }
+
+                        _readHead = nextBlock;
+                        _readHeadIndex = 0;
+                        returnEnd = nextBlock;
+                    }
+                    else
+                    {
+                        _readHead = consumedSegment;
+                        _readHeadIndex = consumedIndex;
+                    }
                 }
 
                 // We reset the awaitable to not completed if we've examined everything the producer produced so far
