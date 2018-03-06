@@ -212,13 +212,13 @@ namespace System.SpanTests
                 // Test is written this way to allow detecting overrunning bounds.
 
                 string[] expected = (string[])baseline.Clone();
-                for (int j = 0; j < i; j++)
+                for (int j = 1; j <= i; j++)
                 {
-                    expected[j + 1] = null;
+                    expected[j] = null;
                 }
 
                 string[] actual = (string[])baseline.Clone();
-                new Span<string>(actual).Slice(1, i).Clear();
+                actual.AsSpan(1, i).Clear();
 
                 Assert.Equal(expected, actual);
             }
