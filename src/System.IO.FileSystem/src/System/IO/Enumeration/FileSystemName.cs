@@ -44,7 +44,7 @@ namespace System.IO.Enumeration
                 {
                     case '.':
                         modified = true;
-                        if (i > 1 && i == length - 1 && expression[i - 1] == '*')
+                        if (i >= 1 && i == length - 1 && expression[i - 1] == '*')
                         {
                             sb[sb.Length - 1] = '<'; // DOS_STAR (ends in *.)
                         }
@@ -123,7 +123,8 @@ namespace System.IO.Enumeration
                         return false;
 
                     // See if we end with the expression
-                    return name.EndsWithOrdinal(expressionEnd, ignoreCase);
+
+                    return name.EndsWith(expressionEnd, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                 }
             }
 

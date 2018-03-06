@@ -76,6 +76,139 @@ namespace System.Net.Http.Functional.Tests
     public sealed class SocketsHttpHandler_HttpClientHandler_ResponseDrain_Test : HttpClientHandler_ResponseDrain_Test
     {
         protected override bool UseSocketsHttpHandler => true;
+
+        [Fact]
+        public void MaxResponseDrainSize_Roundtrips()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(1024 * 1024, handler.MaxResponseDrainSize);
+
+                handler.MaxResponseDrainSize = 0;
+                Assert.Equal(0, handler.MaxResponseDrainSize);
+
+                handler.MaxResponseDrainSize = int.MaxValue;
+                Assert.Equal(int.MaxValue, handler.MaxResponseDrainSize);
+            }
+        }
+
+        [Fact]
+        public void MaxResponseDrainSize_InvalidArgument_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(1024 * 1024, handler.MaxResponseDrainSize);
+
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.MaxResponseDrainSize = -1);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.MaxResponseDrainSize = int.MinValue);
+
+                Assert.Equal(1024 * 1024, handler.MaxResponseDrainSize);
+            }
+        }
+
+        [Fact]
+        public void MaxResponseDrainSize_SetAfterUse_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            using (var client = new HttpClient(handler))
+            {
+                handler.MaxResponseDrainSize = 1;
+                client.GetAsync("http://" + Guid.NewGuid().ToString("N")); // ignoring failure
+                Assert.Equal(1, handler.MaxResponseDrainSize);
+                Assert.Throws<InvalidOperationException>(() => handler.MaxResponseDrainSize = 1);
+            }
+        }
+
+        [OuterLoop]
+        [Theory]
+        [InlineData(1024 * 1024 * 2, 9_500, 1024 * 1024 * 3, ContentMode.ContentLength)]
+        [InlineData(1024 * 1024 * 2, 9_500, 1024 * 1024 * 3, ContentMode.SingleChunk)]
+        [InlineData(1024 * 1024 * 2, 9_500, 1024 * 1024 * 13, ContentMode.BytePerChunk)]
+        public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_DrainsRequestsUnderMaxDrainSizeAndReusesConnection(int totalSize, int readSize, int maxDrainSize, ContentMode mode)
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    var handler = new SocketsHttpHandler();
+                    handler.MaxResponseDrainSize = maxDrainSize;
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
+                    handler.MaxConnectionsPerServer = 1;
+
+                    using (var client = new HttpClient(handler))
+                    {
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponseHeaders(response1, totalSize, mode);
+
+                        // Read part but not all of response
+                        Stream responseStream = await response1.Content.ReadAsStreamAsync();
+                        await ReadToByteCount(responseStream, readSize);
+
+                        response1.Dispose();
+
+                        // Issue another request.  We'll confirm that it comes on the same connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponseHeaders(response2, totalSize, mode);
+                        Assert.Equal(totalSize, (await response2.Content.ReadAsStringAsync()).Length);
+                    }
+                },
+                async server =>
+                {
+                    string content = new string('a', totalSize);
+                    string response = GetResponseForContentMode(content, mode);
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                        await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
+                    });
+                });
+        }
+
+        [OuterLoop]
+        [Theory]
+        [InlineData(100_000, 0,  ContentMode.ContentLength)]
+        [InlineData(100_000, 0, ContentMode.SingleChunk)]
+        [InlineData(100_000, 0, ContentMode.BytePerChunk)]
+        public async Task GetAsyncWithMaxConnections_DisposeLargerThanMaxDrainSize_KillsConnection(int totalSize, int maxDrainSize, ContentMode mode)
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    var handler = new SocketsHttpHandler();
+                    handler.MaxResponseDrainSize = maxDrainSize;
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
+                    handler.MaxConnectionsPerServer = 1;
+
+                    using (var client = new HttpClient(handler))
+                    {
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponseHeaders(response1, totalSize, mode);
+                        response1.Dispose();
+
+                        // Issue another request.  We'll confirm that it comes on a new connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponseHeaders(response2, totalSize, mode);
+                        Assert.Equal(totalSize, (await response2.Content.ReadAsStringAsync()).Length);
+                    }
+                },
+                async server =>
+                {
+                    string content = new string('a', totalSize);
+                    string response = GetResponseForContentMode(content, mode);
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.ReadRequestHeaderAsync();
+                        try
+                        {
+                            await connection.Writer.WriteAsync(response);
+                        }
+                        catch (Exception) { }     // Eat errors from client disconnect.
+
+                        await server.AcceptConnectionSendCustomResponseAndCloseAsync(response);
+                    });
+                });
+        }
     }
 
     public sealed class SocketsHttpHandler_PostScenarioTest : PostScenarioTest

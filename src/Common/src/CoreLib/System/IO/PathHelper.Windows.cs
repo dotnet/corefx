@@ -35,7 +35,7 @@ namespace System.IO
             // TryExpandShortName does this input identity check.
             string result = builder.AsSpan().Contains('~')
                 ? TryExpandShortFileName(ref builder, originalPath: path)
-                : builder.AsSpan().Equals(path.AsReadOnlySpan()) ? path : builder.ToString();
+                : builder.AsSpan().EqualsOrdinal(path.AsSpan()) ? path : builder.ToString();
 
             // Clear the buffer
             builder.Dispose();
@@ -203,6 +203,9 @@ namespace System.IO
                 }
             }
 
+            // Need to trim out the trailing separator in the input builder
+            inputBuilder.Length = inputBuilder.Length - 1;
+
             // If we were able to expand the path, use it, otherwise use the original full path result
             ref ValueStringBuilder builderToUse = ref (success ? ref outputBuilder : ref inputBuilder);
 
@@ -217,7 +220,7 @@ namespace System.IO
             // Strip out any added characters at the front of the string
             ReadOnlySpan<char> output = builderToUse.AsSpan().Slice(rootDifference);
 
-            string returnValue = output.Equals(originalPath.AsReadOnlySpan())
+            string returnValue = output.EqualsOrdinal(originalPath.AsSpan())
                 ? originalPath : new string(output);
 
             inputBuilder.Dispose();

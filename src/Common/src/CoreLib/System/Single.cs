@@ -16,6 +16,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
+using Internal.Runtime.CompilerServices;
+
 namespace System
 {
     [Serializable]
@@ -213,16 +215,18 @@ namespace System
             return IsNaN(obj) && IsNaN(m_value);
         }
 
-        public unsafe override int GetHashCode()
+        public override int GetHashCode()
         {
-            float f = m_value;
-            if (f == 0)
+            var bits = Unsafe.As<float, int>(ref m_value);
+
+            // Optimized check for IsNan() || IsZero()
+            if (((bits - 1) & 0x7FFFFFFF) >= 0x7F800000)
             {
-                // Ensure that 0 and -0 have the same hash code
-                return 0;
+                // Ensure that all NaNs and both zeros have the same hash code
+                bits &= 0x7F800000;
             }
-            int v = *(int*)(&f);
-            return v;
+
+            return bits;
         }
 
         public override String ToString()
@@ -331,15 +335,15 @@ namespace System
             if (!success)
             {
                 ReadOnlySpan<char> sTrim = s.Trim();
-                if (StringSpanHelpers.Equals(sTrim, info.PositiveInfinitySymbol))
+                if (sTrim.EqualsOrdinal(info.PositiveInfinitySymbol))
                 {
                     result = PositiveInfinity;
                 }
-                else if (StringSpanHelpers.Equals(sTrim, info.NegativeInfinitySymbol))
+                else if (sTrim.EqualsOrdinal(info.NegativeInfinitySymbol))
                 {
                     result = NegativeInfinity;
                 }
-                else if (StringSpanHelpers.Equals(sTrim, info.NaNSymbol))
+                else if (sTrim.EqualsOrdinal(info.NaNSymbol))
                 {
                     result = NaN;
                 }

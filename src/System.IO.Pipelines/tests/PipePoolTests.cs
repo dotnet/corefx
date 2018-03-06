@@ -13,6 +13,7 @@ namespace System.IO.Pipelines.Tests
         private class DisposeTrackingBufferPool : TestMemoryPool
         {
             public int ReturnedBlocks { get; set; }
+            public int DisposedBlocks { get; set; }
             public int CurrentlyRentedBlocks { get; set; }
 
             public override OwnedMemory<byte> Rent(int size)
@@ -26,9 +27,11 @@ namespace System.IO.Pipelines.Tests
 
             private class DisposeTrackingOwnedMemory : OwnedMemory<byte>
             {
-                private readonly byte[] _array;
+                private byte[] _array;
 
                 private readonly DisposeTrackingBufferPool _bufferPool;
+
+                private int _refCount = 1;
 
                 public DisposeTrackingOwnedMemory(byte[] array, DisposeTrackingBufferPool bufferPool)
                 {
@@ -49,9 +52,9 @@ namespace System.IO.Pipelines.Tests
                     }
                 }
 
-                public override bool IsDisposed { get; }
+                public override bool IsDisposed => _array == null;
 
-                protected override bool IsRetained => true;
+                protected override bool IsRetained => _refCount > 0;
 
                 public override MemoryHandle Pin(int byteOffset = 0)
                 {
@@ -68,18 +71,26 @@ namespace System.IO.Pipelines.Tests
 
                 protected override void Dispose(bool disposing)
                 {
-                    throw new NotImplementedException();
+                    if (IsRetained)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    _bufferPool.DisposedBlocks++;
+
+                    _array = null;
                 }
 
                 public override bool Release()
                 {
                     _bufferPool.ReturnedBlocks++;
                     _bufferPool.CurrentlyRentedBlocks--;
+                    _refCount--;
                     return IsRetained;
                 }
 
                 public override void Retain()
                 {
+                    _refCount++;
                 }
             }
         }
@@ -91,7 +102,7 @@ namespace System.IO.Pipelines.Tests
 
             var writeSize = 512;
 
-            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             while (pool.CurrentlyRentedBlocks != 3)
             {
                 PipeWriter writableBuffer = pipe.Writer.WriteEmpty(writeSize);
@@ -102,6 +113,8 @@ namespace System.IO.Pipelines.Tests
             pipe.Reader.AdvanceTo(readResult.Buffer.End);
 
             Assert.Equal(0, pool.CurrentlyRentedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
+            Assert.Equal(3, pool.ReturnedBlocks);
         }
 
         [Fact]
@@ -111,7 +124,7 @@ namespace System.IO.Pipelines.Tests
 
             var writeSize = 512;
 
-            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
             // Write two blocks
             Memory<byte> buffer = pipe.Writer.GetMemory(writeSize);
@@ -128,6 +141,10 @@ namespace System.IO.Pipelines.Tests
 
             // Try writing more
             await pipe.Writer.WriteAsync(new byte[writeSize]);
+
+            Assert.Equal(1, pool.CurrentlyRentedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
+            Assert.Equal(2, pool.ReturnedBlocks);
         }
 
         [Fact]
@@ -135,16 +152,18 @@ namespace System.IO.Pipelines.Tests
         {
             var pool = new DisposeTrackingBufferPool();
 
-            var readerWriter = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            var readerWriter = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             await readerWriter.Writer.WriteAsync(new byte[] { 1 });
 
             readerWriter.Writer.Complete();
             readerWriter.Reader.Complete();
             Assert.Equal(1, pool.ReturnedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
 
             readerWriter.Writer.Complete();
             readerWriter.Reader.Complete();
             Assert.Equal(1, pool.ReturnedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
         }
 
         [Fact]
@@ -153,7 +172,7 @@ namespace System.IO.Pipelines.Tests
             var pool = new DisposeTrackingBufferPool();
             var writeSize = 512;
 
-            var pipe = new Pipe(new PipeOptions(pool, minimumSegmentSize: 2020, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            var pipe = new Pipe(new PipeOptions(pool, minimumSegmentSize: 2020, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
             Memory<byte> buffer = pipe.Writer.GetMemory(writeSize);
             int allocatedSize = buffer.Length;
@@ -173,25 +192,29 @@ namespace System.IO.Pipelines.Tests
         public void ReturnsWriteHeadOnComplete()
         {
             var pool = new DisposeTrackingBufferPool();
-            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
-            var memory = pipe.Writer.GetMemory(512);
+            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
+            pipe.Writer.GetMemory(512);
 
             pipe.Reader.Complete();
             pipe.Writer.Complete();
             Assert.Equal(0, pool.CurrentlyRentedBlocks);
+            Assert.Equal(1, pool.ReturnedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
         }
 
         [Fact]
         public void ReturnsWriteHeadWhenRequestingLargerBlock()
         {
             var pool = new DisposeTrackingBufferPool();
-            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
-            var memory = pipe.Writer.GetMemory(512);
+            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
+            pipe.Writer.GetMemory(512);
             pipe.Writer.GetMemory(4096);
 
             pipe.Reader.Complete();
             pipe.Writer.Complete();
             Assert.Equal(0, pool.CurrentlyRentedBlocks);
+            Assert.Equal(2, pool.ReturnedBlocks);
+            Assert.Equal(0, pool.DisposedBlocks);
         }
 
         [Fact]
@@ -201,7 +224,7 @@ namespace System.IO.Pipelines.Tests
 
             var writeSize = 512;
 
-            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline));
+            var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             await pipe.Writer.WriteAsync(new byte[writeSize]);
 
             pipe.Writer.GetMemory(writeSize);

@@ -1224,6 +1224,10 @@ namespace System.IO
         public static bool IsPathFullyQualified(string path) { throw null; }
         public static bool IsPathFullyQualified(ReadOnlySpan<char> path) { throw null; }
         public static string GetRelativePath(string relativeTo, string path) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten) { throw null; }
     }
 
     public partial class BinaryReader : System.IDisposable
@@ -1381,7 +1385,7 @@ namespace System.IO
         public override void Write(byte[] buffer, int offset, int count) { }
         public override void Write(System.ReadOnlySpan<byte> source) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
         public virtual void WriteTo(System.IO.Stream stream) { }
     }

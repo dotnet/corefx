@@ -5,6 +5,12 @@
         "net45": "4.0.0.0"
       }
     },
+    "CoreFx.Private.TestUtilities": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "1.0.0.0": "4.5.0"
+      }
+    },
     "CustomMarshalers": {
       "InboxOn": {
         "net45": "4.0.0.0"
@@ -273,6 +279,12 @@
         "4.0.1.0": "4.3.0",
         "4.0.2.0": "4.4.0",
         "4.0.3.0": "4.5.0"
+      }
+    },
+    "Microsoft.Win32.SystemEvents": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
       }
     },
     "Microsoft.Windows.Compatibility": {
@@ -3718,10 +3730,8 @@
         "4.0.2.0": "4.3.0"
       }
     },
-    "System.Runtime.Intrinsics": {
-      "InboxOn": {
-        "netcoreapp2.1": "4.0.0.0"
-      },
+    "System.Runtime.Intrinsics.Experimental": {
+      "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.0"
       }

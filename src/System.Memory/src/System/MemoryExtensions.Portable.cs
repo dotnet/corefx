@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -12,6 +13,149 @@ namespace System
     /// </summary>
     public static partial class MemoryExtensions
     {
+        /// <summary>
+        /// Creates a new span over the portion of the target array.
+        /// </summary>
+        public static Span<T> AsSpan<T>(this T[] array, int start) => Span<T>.Create(array, start);
+
+        /// <summary>
+        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => (IndexOf(span, value, comparisonType) >= 0);
+
+        /// <summary>
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
+        /// when compared using the specified <paramref name="comparisonType"/> option.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.SequenceEqual<char>(value);
+            }
+
+            return span.ToString().Equals(value.ToString(), comparisonType);
+        }
+
+        /// <summary>
+        /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
+        /// and returns an integer that indicates their relative position in the sort order.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType) 
+            => string.Compare(span.ToString(), value.ToString(), comparisonType);
+        
+        /// <summary>
+        /// Reports the zero-based index of the first occurrence of the specified <paramref name="value"/> in the current <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.IndexOf<char>(value);
+            }
+
+            return span.ToString().IndexOf(value.ToString(), comparisonType);
+        }
+        
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+#if !netstandard11
+            string resultString = sourceString.ToLower(culture);
+#else
+            string resultString = culture.TextInfo.ToLower(sourceString);
+#endif
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsSpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToLower(source, destination, CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+#if !netstandard11
+            string resultString = sourceString.ToUpper(culture);
+#else
+            string resultString = culture.TextInfo.ToUpper(sourceString);
+#endif
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsSpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToUpper(source, destination, CultureInfo.InvariantCulture);
+
         /// <summary>
         /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
@@ -207,30 +351,6 @@ namespace System
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new ReadOnlyMemory<char>(text, start, length);
-        }
-
-        /// <summary>Attempts to get the underlying <see cref="string"/> from a <see cref="ReadOnlyMemory{T}"/>.</summary>
-        /// <param name="readOnlyMemory">The memory that may be wrapping a <see cref="string"/> object.</param>
-        /// <param name="text">The string.</param>
-        /// <param name="start">The starting location in <paramref name="text"/>.</param>
-        /// <param name="length">The number of items in <paramref name="text"/>.</param>
-        /// <returns></returns>
-        public static bool TryGetString(this ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length)
-        {
-            if (readOnlyMemory.GetObjectStartLength(out int offset, out int count) is string s)
-            {
-                text = s;
-                start = offset;
-                length = count;
-                return true;
-            }
-            else
-            {
-                text = null;
-                start = 0;
-                length = 0;
-                return false;
-            }
         }
 
         internal static readonly IntPtr StringAdjustment = MeasureStringAdjustment();

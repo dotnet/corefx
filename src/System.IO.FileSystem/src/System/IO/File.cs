@@ -713,23 +713,21 @@ namespace System.IO
             Debug.Assert(encoding != null);
 
             char[] buffer = null;
-            StringBuilder sb = null;
             StreamReader sr = AsyncStreamReader(path, encoding);
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                sb = StringBuilderCache.Acquire();
                 buffer = ArrayPool<char>.Shared.Rent(sr.CurrentEncoding.GetMaxCharCount(DefaultBufferSize));
+                StringBuilder sb = new StringBuilder();
                 for (;;)
                 {
-                    int read = await sr.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    int read = await sr.ReadAsync(new Memory<char>(buffer), cancellationToken).ConfigureAwait(false);
                     if (read == 0)
                     {
                         return sb.ToString();
                     }
 
                     sb.Append(buffer, 0, read);
-                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
             finally
@@ -738,11 +736,6 @@ namespace System.IO
                 if (buffer != null)
                 {
                     ArrayPool<char>.Shared.Return(buffer);
-                }
-
-                if (sb != null)
-                {
-                    StringBuilderCache.Release(sb);
                 }
             }
         }
@@ -823,7 +816,7 @@ namespace System.IO
                 byte[] bytes = new byte[count];
                 do
                 {
-                    int n = await fs.ReadAsync(bytes, index, count - index, cancellationToken).ConfigureAwait(false);
+                    int n = await fs.ReadAsync(new Memory<byte>(bytes, index, count - index), cancellationToken).ConfigureAwait(false);
                     if (n == 0)
                     {
                         throw Error.GetEndOfFile();
@@ -857,7 +850,7 @@ namespace System.IO
 
             using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                await fs.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+                await fs.WriteAsync(new ReadOnlyMemory<byte>(bytes), cancellationToken).ConfigureAwait(false);
                 await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -950,8 +943,7 @@ namespace System.IO
                 {
                     int batchSize = Math.Min(DefaultBufferSize, count - index);
                     contents.CopyTo(index, buffer, 0, batchSize);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await sw.WriteAsync(buffer, 0, batchSize).ConfigureAwait(false);
+                    await sw.WriteAsync(new ReadOnlyMemory<char>(buffer, 0, batchSize), cancellationToken).ConfigureAwait(false);
                     index += batchSize;
                 }
 
