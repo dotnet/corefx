@@ -58,7 +58,7 @@ namespace System.Text.RegularExpressions
             {
                 // first look for it in the cache and move it to the head
                 var entry = LookupCachedAndPromote(key);
-                // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
+                // it wasn't in the cache, so we'll add a new one
                 if (entry == null && isToAdd && s_cacheSize != 0)  // check cache size again in case it changed
                 {
                     entry = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
@@ -98,16 +98,15 @@ namespace System.Text.RegularExpressions
             s_livecode.TryGetValue(key, out var entry);
             if (entry != null)
             {
-                if (entry._previous != null)
-                {
-                    entry._previous._next = entry._next;
-                    entry._next._previous = entry._previous;  // not first so should exist _next
-                }
-
                 if (s_livecode_last == entry)
                 {
                     s_livecode_last = entry._next;
                 }
+				else // in middle
+                {
+                    entry._previous._next = entry._next;
+                }
+				entry._next._previous = entry._previous;  // not first so should exist _next
 
                 s_livecode_first._next = entry;
                 entry._previous = s_livecode_first;
