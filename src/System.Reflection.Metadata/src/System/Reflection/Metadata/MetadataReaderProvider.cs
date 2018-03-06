@@ -234,7 +234,7 @@ namespace System.Reflection.Metadata
         /// Gets a <see cref="MetadataReader"/> from a <see cref="MetadataReaderProvider"/>.
         /// </summary>
         /// <remarks>
-        /// The caller must keep the <see cref="MetadataReaderProvider"/> alive and undisposed throughout the lifetime of the metadata reader.
+        /// The caller must keep the <see cref="MetadataReaderProvider"/> undisposed throughout the lifetime of the metadata reader.
         /// 
         /// If this method is called multiple times each call with arguments equal to the arguments passed to the previous successful call 
         /// returns the same instance of <see cref="MetadataReader"/> as the previous call.
