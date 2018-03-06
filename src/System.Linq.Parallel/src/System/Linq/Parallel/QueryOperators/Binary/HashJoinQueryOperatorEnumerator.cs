@@ -33,12 +33,13 @@ namespace System.Linq.Parallel
     /// <typeparam name="TRightInput"></typeparam>
     /// <typeparam name="THashKey"></typeparam>
     /// <typeparam name="TOutput"></typeparam>
-    internal class HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, THashKey, TOutput>
-        : QueryOperatorEnumerator<TOutput, TLeftKey>
+    internal class HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, THashKey, TOutput, TOutputKey>
+        : QueryOperatorEnumerator<TOutput, TOutputKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> _leftSource; // Left (outer) data source. For probing.
         private readonly HashLookupBuilder<TRightInput, TRightKey, THashKey> _rightLookupBuilder; // Right (inner) data source. For building.
         private readonly Func<TLeftInput, TRightInput, TOutput> _resultSelector; // Result selector.
+        private readonly HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey> _outputKeyBuilder;
         private readonly CancellationToken _cancellationToken;
         private Mutables _mutables;
 
@@ -59,15 +60,18 @@ namespace System.Linq.Parallel
             QueryOperatorEnumerator<Pair<TLeftInput, THashKey>, TLeftKey> leftSource,
             HashLookupBuilder<TRightInput, TRightKey, THashKey> rightLookupBuilder,
             Func<TLeftInput, TRightInput, TOutput> resultSelector,
+            HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey> outputKeyBuilder,
             CancellationToken cancellationToken)
         {
             Debug.Assert(leftSource != null);
             Debug.Assert(rightLookupBuilder != null);
             Debug.Assert(resultSelector != null);
+            Debug.Assert(outputKeyBuilder != null);
 
             _leftSource = leftSource;
             _rightLookupBuilder = rightLookupBuilder;
             _resultSelector = resultSelector;
+            _outputKeyBuilder = outputKeyBuilder;
             _cancellationToken = cancellationToken;
         }
 
@@ -83,7 +87,7 @@ namespace System.Linq.Parallel
         // as we do for inner joins.
         //
 
-        internal override bool MoveNext(ref TOutput currentElement, ref TLeftKey currentKey)
+        internal override bool MoveNext(ref TOutput currentElement, ref TOutputKey currentKey)
         {
             Debug.Assert(_resultSelector != null, "expected a compiled result selector");
             Debug.Assert(_leftSource != null);
@@ -101,8 +105,8 @@ namespace System.Linq.Parallel
 
             // PROBE phase: So long as the source has a next element, return the match.
             TRightInput rightElement = default(TRightInput);
-            TRightKey rightKeyUnused = default(TRightKey);
-            if (!mutables._currentRightMatches.MoveNext(ref rightElement, ref rightKeyUnused, ref mutables._currentRightMatches))
+            TRightKey rightKey = default(TRightKey);
+            if (!mutables._currentRightMatches.MoveNext(ref rightElement, ref rightKey, ref mutables._currentRightMatches))
             {
                 Debug.Assert(mutables._currentRightMatches.HasNext() == false, "empty list expected");
 
@@ -126,15 +130,14 @@ namespace System.Linq.Parallel
                         {
                             Debug.Assert(matchValue.HasNext(), "non-empty list expected");
 
-                            // We found a new match. For inner joins, we remember the list in case
-                            // there are multiple value under this same key -- the next iteration will pick
-                            // them up. For outer joins, we will use the list momentarily.
-                            bool hadNext = matchValue.MoveNext(ref rightElement, ref rightKeyUnused, ref mutables._currentRightMatches);
+                            // We found a new match. We remember the list in case there are multiple
+                            // values under this same key -- the next iteration will pick them up.
+                            bool hadNext = matchValue.MoveNext(ref rightElement, ref rightKey, ref mutables._currentRightMatches);
                             Debug.Assert(hadNext, "we were expecting MoveNext to return true (since the list should be non-empty)");
 
                             // Yield the value.
                             currentElement = _resultSelector(leftElement, rightElement);
-                            currentKey = leftKey;
+                            currentKey = _outputKeyBuilder.Combine(leftKey, rightKey);
 
                             // If there is a list of matches, remember the left values for next time.
                             if (mutables._currentRightMatches.HasNext())
@@ -156,7 +159,7 @@ namespace System.Linq.Parallel
             Debug.Assert(_resultSelector != null);
 
             currentElement = _resultSelector(mutables._currentLeft, rightElement);
-            currentKey = mutables._currentLeftKey;
+            currentKey = _outputKeyBuilder.Combine(mutables._currentLeftKey, rightKey);
 
             return true;
         }
@@ -166,6 +169,33 @@ namespace System.Linq.Parallel
             Debug.Assert(_leftSource != null && _rightLookupBuilder != null);
             _leftSource.Dispose();
             _rightLookupBuilder.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// A class to create output order keys from the left and right keys.
+    /// </summary>
+    /// <typeparam name="TLeftKey"></typeparam>
+    /// <typeparam name="TRightKey"></typeparam>
+    /// <typeparam name="TOutputKey"></typeparam>
+    internal abstract class HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey>
+    {
+        public abstract TOutputKey Combine(TLeftKey leftKey, TRightKey right);
+    }
+
+    /// <summary>
+    /// A key builder that simply returns the left key, ignoring the right key.
+    /// 
+    /// Used when the right source is unordered.
+    /// </summary>
+    /// <typeparam name="TLeftKey"></typeparam>
+    /// <typeparam name="TRightKey"></typeparam>
+    /// <typeparam name="TOutputKey"></typeparam>
+    internal class LeftKeyOutputKeyBuilder<TLeftKey, TRightKey> : HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TLeftKey>
+    {
+        public override TLeftKey Combine(TLeftKey leftKey, TRightKey right)
+        {
+            return leftKey;
         }
     }
 
@@ -445,9 +475,11 @@ namespace System.Linq.Parallel
             _orderKeyComparer = orderKeyComparer;
         }
 
+        //TODO return the least right key in the group as the order key for the group?
+        //     (empty lists should be less than non-empty ones?)
         public override HashJoinHashLookup<THashKey, IEnumerable<TElement>, int> BuildHashLookup(CancellationToken cancellationToken)
         {
-            HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>> lookup = 
+            HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>> lookup =
                 new HashLookup<THashKey, OrderedGroupByGrouping<THashKey, TOrderKey, TElement>>(_keyComparer);
             OrderedGroupJoinBaseHashBuilder baseHashBuilder = new OrderedGroupJoinBaseHashBuilder(lookup, _orderKeyComparer);
 

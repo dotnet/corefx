@@ -101,35 +101,40 @@ namespace System.Linq.Parallel
             PartitionedStream<Pair<TLeftInput, TKey>, TLeftKey> leftHashStream, PartitionedStream<TRightInput, TRightKey> rightPartitionedStream,
             IPartitionedStreamRecipient<TOutput> outputRecipient, CancellationToken cancellationToken)
         {
-            if (RightChild.OutputOrdered)
+            if (RightChild.OutputOrdered && LeftChild.OutputOrdered)
             {
-                WrapPartitionedStreamHelper<TLeftKey, TRightKey>(leftHashStream,
+                LeftKeyOutputKeyBuilder<TLeftKey, TRightKey> outputKeyBuilder = new LeftKeyOutputKeyBuilder<TLeftKey, TRightKey>();
+
+                WrapPartitionedStreamHelper<TLeftKey, TRightKey, TLeftKey>(leftHashStream,
                     ExchangeUtilities.HashRepartitionOrdered(rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken),
-                    outputRecipient, cancellationToken);
+                    outputKeyBuilder, leftHashStream.KeyComparer, outputRecipient, cancellationToken);
             }
             else
             {
-                WrapPartitionedStreamHelper<TLeftKey, int>(leftHashStream,
+                LeftKeyOutputKeyBuilder<TLeftKey, int> outputKeyBuilder = new LeftKeyOutputKeyBuilder<TLeftKey, int>();
+
+                WrapPartitionedStreamHelper<TLeftKey, int, TLeftKey>(leftHashStream,
                     ExchangeUtilities.HashRepartition(rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken),
-                    outputRecipient, cancellationToken);
+                    outputKeyBuilder, leftHashStream.KeyComparer, outputRecipient, cancellationToken);
             }
         }
 
-        private void WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
+        private void WrapPartitionedStreamHelper<TLeftKey, TRightKey, TOutputKey>(
             PartitionedStream<Pair<TLeftInput, TKey>, TLeftKey> leftHashStream, PartitionedStream<Pair<TRightInput, TKey>, TRightKey> rightHashStream,
+            HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey> outputKeyBuilder, IComparer<TOutputKey> outputKeyComparer,
             IPartitionedStreamRecipient<TOutput> outputRecipient, CancellationToken cancellationToken)
         {
             int partitionCount = leftHashStream.PartitionCount;
 
-            PartitionedStream<TOutput, TLeftKey> outputStream = new PartitionedStream<TOutput, TLeftKey>(
-                partitionCount, leftHashStream.KeyComparer, OrdinalIndexState);
+            PartitionedStream<TOutput, TOutputKey> outputStream =
+                new PartitionedStream<TOutput, TOutputKey>(partitionCount, outputKeyComparer, OrdinalIndexState);
 
             for (int i = 0; i < partitionCount; i++)
             {
-                JoinHashLookupBuilder<TRightInput, TRightKey, TKey> rightLookupBuilder = new JoinHashLookupBuilder<TRightInput, TRightKey, TKey>(
-                    rightHashStream[i], _keyComparer);
-                outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, TKey, TOutput>(
-                    leftHashStream[i], rightLookupBuilder, _resultSelector, cancellationToken);
+                JoinHashLookupBuilder<TRightInput, TRightKey, TKey> rightLookupBuilder =
+                    new JoinHashLookupBuilder<TRightInput, TRightKey, TKey>(rightHashStream[i], _keyComparer);
+                outputStream[i] = new HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, TKey, TOutput, TOutputKey>(
+                    leftHashStream[i], rightLookupBuilder, _resultSelector, outputKeyBuilder, cancellationToken);
             }
 
             outputRecipient.Receive(outputStream);
