@@ -22,6 +22,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
+  <!-- Setting PackageDestination is required for validation to succeed since we are harvesting an aot netcore50 asset which we don't want to apply
+  for UAP RS3 so instead we use the netstandard implementation -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <PackageDestination Include="lib/netstandard2.0">
+      <TargetFramework>netstandard2.0</TargetFramework>
+    </PackageDestination>
+    <PackageDestination Include="runtimes/aot/lib/uap10.0.16299">
+      <TargetFramework>uap10.0.16299</TargetFramework>
+    </PackageDestination>
+  </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetGroup)' != 'netstandard'">
     <Compile Include="System\Reflection\DispatchProxy.cs" />
     <Compile Include="System\Reflection\DispatchProxyGenerator.cs" />
