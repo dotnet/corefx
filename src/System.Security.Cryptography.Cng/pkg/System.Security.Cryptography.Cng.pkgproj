@@ -4,13 +4,13 @@
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Security.Cryptography.Cng.csproj">
       <!-- Removing AllXamarianFrameworks from validation because of https://github.com/dotnet/corefx/issues/25924 -->
-      <SupportedFramework>net461;netcoreapp2.1;$(UAPvNextTFM)</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp2.1;uap10.0.16299</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Security.Cryptography.Cng.csproj" />
     <File Include="$(PlaceHolderFile)">
-      <TargetPath>runtimes/win/lib/$(UAPvNextTFM)</TargetPath>
+      <TargetPath>runtimes/win/lib/uap10.0.16299</TargetPath>
     </File>
-    <InboxOnTargetFramework Include="$(UAPvNextTFM)" />
+    <InboxOnTargetFramework Include="uap10.0.16299" />
     <!-- All elements from previous packages that will be included in the newly built package -->
     <HarvestIncludePaths Include="ref/net46;lib/net46;runtimes/win/lib/net46" />
     <HarvestIncludePaths Include="ref/netstandard1.3" />
