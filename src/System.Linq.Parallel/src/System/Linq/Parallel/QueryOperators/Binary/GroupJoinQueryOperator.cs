@@ -99,28 +99,29 @@ namespace System.Linq.Parallel
             PartitionedStream<Pair<TLeftInput,TKey>, TLeftKey> leftHashStream, PartitionedStream<TRightInput, TRightKey> rightPartitionedStream,
             IPartitionedStreamRecipient<TOutput> outputRecipient, int partitionCount, CancellationToken cancellationToken)
         {
-            HashLookupBuilder<IEnumerable<TRightInput>, int, TKey>[] rightLookupBuilders =
-                new HashLookupBuilder<IEnumerable<TRightInput>, int, TKey>[partitionCount];
-
             if (RightChild.OutputOrdered)
             {
                 PartitionedStream<Pair<TRightInput, TKey>, TRightKey> rePartitionedRightStream = ExchangeUtilities.HashRepartitionOrdered(
                     rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken);
 
+                HashLookupBuilder<IEnumerable<TRightInput>, Pair<bool, TRightKey>, TKey>[] rightLookupBuilders =
+                    new HashLookupBuilder<IEnumerable<TRightInput>, Pair<bool, TRightKey>, TKey>[partitionCount];
                 for (int i = 0; i < partitionCount; i++)
                 {
                     rightLookupBuilders[i] = new OrderedGroupJoinHashLookupBuilder<TRightInput, TRightKey, TKey>(
                         rePartitionedRightStream[i], _keyComparer, rePartitionedRightStream.KeyComparer);
                 }
 
-                WrapPartitionedStreamHelper<TLeftKey, int>(leftHashStream, rightLookupBuilders,
-                    outputRecipient, partitionCount, cancellationToken);
+                WrapPartitionedStreamHelper<TLeftKey, Pair<bool, TRightKey>>(leftHashStream, rightLookupBuilders,
+                    CreateComparer(rightPartitionedStream.KeyComparer), outputRecipient, partitionCount, cancellationToken);
             }
             else
             {
                 PartitionedStream<Pair<TRightInput, TKey>, int> rePartitionedRightStream = ExchangeUtilities.HashRepartition(
                     rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken);
 
+                HashLookupBuilder<IEnumerable<TRightInput>, int, TKey>[] rightLookupBuilders =
+                    new HashLookupBuilder<IEnumerable<TRightInput>, int, TKey>[partitionCount];
                 for (int i = 0; i < partitionCount; i++)
                 {
                     rightLookupBuilders[i] = new GroupJoinHashLookupBuilder<TRightInput, int, TKey>(
@@ -128,14 +129,15 @@ namespace System.Linq.Parallel
                 }
 
                 WrapPartitionedStreamHelper<TLeftKey, int>(leftHashStream, rightLookupBuilders,
-                    outputRecipient, partitionCount, cancellationToken);
+                    null, outputRecipient, partitionCount, cancellationToken);
             }
         }
 
         private void WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
             PartitionedStream<Pair<TLeftInput, TKey>, TLeftKey> leftHashStream,
             HashLookupBuilder<IEnumerable<TRightInput>, TRightKey, TKey>[] rightLookupBuilders,
-            IPartitionedStreamRecipient<TOutput> outputRecipient, int partitionCount, CancellationToken cancellationToken)
+            IComparer<TRightKey> rightKeyComparer, IPartitionedStreamRecipient<TOutput> outputRecipient,
+            int partitionCount, CancellationToken cancellationToken)
         {
             if (RightChild.OutputOrdered && LeftChild.OutputOrdered)
             {
@@ -151,6 +153,16 @@ namespace System.Linq.Parallel
                 WrapPartitionedStreamHelper<TLeftKey, TRightKey, TLeftKey>(leftHashStream, rightLookupBuilders,
                     outputKeyBuilder, leftHashStream.KeyComparer, outputRecipient, partitionCount, cancellationToken);
             }
+        }
+
+        private IComparer<Pair<bool, TRightKey>> CreateComparer<TRightKey>(IComparer<TRightKey> comparer)
+        {
+            return CreateComparer(Comparer<bool>.Default, comparer);
+        }
+
+        private IComparer<Pair<TLeftKey, TRightKey>> CreateComparer<TLeftKey, TRightKey>(IComparer<TLeftKey> leftKeyComparer, IComparer<TRightKey> rightKeyComparer)
+        {
+            return new PairComparer<TLeftKey, TRightKey>(leftKeyComparer, rightKeyComparer);
         }
 
         private void WrapPartitionedStreamHelper<TLeftKey, TRightKey, TOutputKey>(
