@@ -15,7 +15,7 @@ namespace System.IO.Pipelines.Tests
     {
         [Fact]
         public async Task AdvanceShouldResetStateIfReadCanceled()
-        {
+        {while (!System.Diagnostics.Debugger.IsAttached)  { System.Threading.Thread.Sleep(100);}
             Pipe.Reader.CancelPendingRead();
 
             ReadResult result = await Pipe.Reader.ReadAsync();

@@ -119,7 +119,6 @@ namespace System.IO.Pipelines.Tests
 
             _pipe.Reader.CancelPendingRead();
             result = await _pipe.Reader.ReadAsync();
-
             Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(buffer.End));
             _pipe.Reader.AdvanceTo(result.Buffer.End);
         }
