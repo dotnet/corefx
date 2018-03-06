@@ -91,6 +91,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
+        // Always called within s_livecode lock
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
             if (s_livecode_first?._key == key) // most used regex should be at the top already
@@ -102,11 +103,11 @@ namespace System.Text.RegularExpressions
                 {
                     s_livecode_last = entry._next;
                 }
-				else // in middle
+                else // in middle
                 {
                     entry._previous._next = entry._next;
                 }
-				entry._next._previous = entry._previous;  // not first so should exist _next
+                entry._next._previous = entry._previous;  // not first so should exist _next
 
                 s_livecode_first._next = entry;
                 entry._previous = s_livecode_first;
@@ -119,52 +120,52 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Used as a key for CacheCodeEntry
         /// </summary>
-		internal readonly struct CachedCodeEntryKey : IEquatable<CachedCodeEntryKey>
-		{
-			private readonly RegexOptions _options;
-			private readonly string _cultureKey;
-			private readonly string _pattern;
+        internal readonly struct CachedCodeEntryKey : IEquatable<CachedCodeEntryKey>
+        {
+            private readonly RegexOptions _options;
+            private readonly string _cultureKey;
+            private readonly string _pattern;
 
-			internal CachedCodeEntryKey(RegexOptions options, string cultureKey, string pattern)
-			{
-				_options = options;
-				_cultureKey = cultureKey;
-				_pattern = pattern;
-			}
+            internal CachedCodeEntryKey(RegexOptions options, string cultureKey, string pattern)
+            {
+                _options = options;
+                _cultureKey = cultureKey;
+                _pattern = pattern;
+            }
 
-			public override bool Equals(object obj)
-			{
-				return obj is CachedCodeEntryKey && Equals((CachedCodeEntryKey)obj);
-			}
+            public override bool Equals(object obj)
+            {
+                return obj is CachedCodeEntryKey && Equals((CachedCodeEntryKey)obj);
+            }
 
-			public bool Equals(CachedCodeEntryKey other)
-			{
-				return _pattern.Equals(other._pattern) && _options == other._options && _cultureKey.Equals(other._cultureKey);
-			}
+            public bool Equals(CachedCodeEntryKey other)
+            {
+                return _pattern.Equals(other._pattern) && _options == other._options && _cultureKey.Equals(other._cultureKey);
+            }
 
-			public static bool operator ==(CachedCodeEntryKey left, CachedCodeEntryKey right)
-			{
-				return left.Equals(right);
-			}
+            public static bool operator ==(CachedCodeEntryKey left, CachedCodeEntryKey right)
+            {
+                return left.Equals(right);
+            }
 
-			public static bool operator !=(CachedCodeEntryKey left, CachedCodeEntryKey right)
-			{
-				return !left.Equals(right);
-			}
+            public static bool operator !=(CachedCodeEntryKey left, CachedCodeEntryKey right)
+            {
+                return !left.Equals(right);
+            }
 
-			public override int GetHashCode()
-			{
-				return ((int)_options) ^ _cultureKey.GetHashCode() ^ _pattern.GetHashCode();
-			}
-		}
+            public override int GetHashCode()
+            {
+                return ((int)_options) ^ _cultureKey.GetHashCode() ^ _pattern.GetHashCode();
+            }
+        }
 
         /// <summary>
         /// Used to cache byte codes
         /// </summary>
         internal sealed class CachedCodeEntry
         {
-			public CachedCodeEntry _next = null;
-			public CachedCodeEntry _previous = null;
+            public CachedCodeEntry _next = null;
+            public CachedCodeEntry _previous = null;
             public CachedCodeEntryKey _key;
             public RegexCode _code;
             public Hashtable _caps;
