@@ -17,7 +17,6 @@ namespace System.Text.RegularExpressions
         internal static CachedCodeEntry s_livecode_last = null;
         internal static int s_cacheSize = 15;
 
-        [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "Reviewed for thread-safety")]
         public static int CacheSize
         {
             get
