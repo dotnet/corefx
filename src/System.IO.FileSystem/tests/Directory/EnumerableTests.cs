@@ -33,10 +33,11 @@ namespace System.IO.Tests
         }
         
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void EnumerateDirectories_NonBreakingSpace()
         {
-            string curDir = Directory.GetCurrentDirectory();
-            DirectoryInfo di = new DirectoryInfo(curDir + @"\\Temp");
+            string TestDirectory = GetTestFilePath();
+            DirectoryInfo di = new DirectoryInfo(TestDirectory);
             di.Create();
             di.CreateSubdirectory("\u00A0");
 
@@ -54,8 +55,13 @@ namespace System.IO.Tests
                 count++;
             }
 
-            di.Delete(true);
             Assert.Equal(2, count);
+
+            try
+            {
+                Directory.Delete(TestDirectory, recursive: true);
+            }
+            catch { } // avoid exceptions escaping Dispose
         }
 
         class ThreadSafeRepro
