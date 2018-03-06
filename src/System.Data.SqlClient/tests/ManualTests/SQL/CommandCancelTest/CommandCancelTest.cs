@@ -125,8 +125,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 var command = con.CreateCommand();
                 command.CommandText = "select * from orders; waitfor delay '00:00:08'; select * from customers";
 
-                Thread rThread1 = new Thread(ExecuteCommandCancelExpected);
-                Thread rThread2 = new Thread(CancelSharedCommand);
                 Barrier threadsReady = new Barrier(2);
                 object state = new Tuple<bool, SqlCommand, Barrier>(async, command, threadsReady);
                 Task t1 = new Task(ExecuteCommandCancelExpected, state);
@@ -134,7 +132,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 t1.Start();
                 t2.Start();
 
-                t1.Wait(15 * 10000);
+                t1.Wait(15 * 1000);
                 if (t1.IsFaulted)
                 {
                     throw t1.Exception;
