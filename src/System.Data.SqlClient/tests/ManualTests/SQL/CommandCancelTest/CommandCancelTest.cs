@@ -127,15 +127,17 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                 Barrier threadsReady = new Barrier(2);
                 object state = new Tuple<bool, SqlCommand, Barrier>(async, command, threadsReady);
-                Task t1 = new Task(ExecuteCommandCancelExpected, state);
-                Task t2 = new Task(CancelSharedCommand, state);
-                t1.Start();
-                t2.Start();
 
-                t1.Wait(15 * 1000);
-                if (t1.IsFaulted)
+                Task[] tasks = new Task[2];
+                tasks[0] = new Task(ExecuteCommandCancelExpected, state);
+                tasks[1] = new Task(CancelSharedCommand, state);
+                tasks[0].Start();
+                tasks[1].Start();
+
+                Task.WaitAll(tasks, 15 * 1000);
+                if (tasks[0].IsFaulted)
                 {
-                    throw t1.Exception;
+                    throw tasks[0].Exception;
                 }
                 
                 CommandCancelTest.VerifyConnection(command);
