@@ -31,6 +31,32 @@ namespace System.IO.Tests
             {
             }
         }
+        
+        [Fact]
+        public void EnumerateDirectories_NonBreakingSpace()
+        {
+            string curDir = Directory.GetCurrentDirectory();
+            DirectoryInfo di = new DirectoryInfo(curDir + @"\\Temp");
+            di.Create();
+            di.CreateSubdirectory("\u00A0");
+
+            var diQueue = new Queue<DirectoryInfo>();
+            diQueue.Enqueue(di);
+            int count = 0;
+
+            while (diQueue.Count != 0)
+            {
+                foreach (var directory in diQueue.Dequeue().EnumerateDirectories())
+                {
+                    diQueue.Enqueue(directory);
+                }
+
+                count++;
+            }
+
+            di.Delete(true);
+            Assert.Equal(2, count);
+        }
 
         class ThreadSafeRepro
         {
