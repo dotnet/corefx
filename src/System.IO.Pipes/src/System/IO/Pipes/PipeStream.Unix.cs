@@ -47,13 +47,13 @@ namespace System.IO.Pipes
             }
 
             // Since pipes are stored as files in the system we support either an absolute path to a file name
-            // or a file name. The support of absolute path was added to allow a work around the limited
+            // or a file name. The support of absolute path was added to allow working around the limited
             // length available for the pipe name when concatenated with the temp path, while being
             // cross-platform with Windows (which has only '\' as an invalid char).
             if (Path.IsPathRooted(pipeName))
             {
                 if (pipeName.IndexOfAny(s_invalidPathNameChars) >= 0 || pipeName[pipeName.Length - 1] == Path.DirectorySeparatorChar)
-                    throw new PlatformNotSupportedException(SR.PlatformNotSupproted_InvalidPipeNameChars);
+                    throw new PlatformNotSupportedException(SR.PlatformNotSupported_InvalidPipeNameChars);
                 
                 // Caller is in full control of file location.
                 return pipeName;
@@ -61,7 +61,7 @@ namespace System.IO.Pipes
 
             if (pipeName.IndexOfAny(s_invalidFileNameChars) >= 0)
             {
-                throw new PlatformNotSupportedException(SR.PlatformNotSupproted_InvalidPipeNameChars);
+                throw new PlatformNotSupportedException(SR.PlatformNotSupported_InvalidPipeNameChars);
             }
 
             // The pipe is created directly under Path.GetTempPath() with "CoreFXPipe_" prefix.
