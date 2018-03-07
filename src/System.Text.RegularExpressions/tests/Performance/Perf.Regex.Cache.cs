@@ -49,6 +49,7 @@ namespace System.Text.RegularExpressions.Tests
             var cacheSizeOld = Regex.CacheSize;
             try
             {
+                Regex.CacheSize = 0; // clean up cache
                 Regex.CacheSize = cacheSize;
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
