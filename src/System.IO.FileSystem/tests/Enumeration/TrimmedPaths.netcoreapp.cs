@@ -201,10 +201,10 @@ namespace System.IO.Tests.Enumeration
             FileInfo[] files = directory.GetFiles();
             Assert.Equal(2, files.Length);
 
-            FileInfo destination = new FileInfo(Path.Join(directory.FullName, GetTestFilePath()));
+            FileInfo destination = new FileInfo(Path.Join(directory.FullName, GetTestFileName()));
             destination.Create().Dispose();
 
-            foreach (FileInfo fi in directory.GetFiles())
+            foreach (FileInfo fi in files)
             {
                 fi.Replace(destination.FullName, null);
                 using (StreamReader reader = destination.OpenText())

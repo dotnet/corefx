@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace System.IO
 
         /// <summary>
         /// Copies an existing file to a new file.
-        /// If <paramref name="overwrite"/> is false, and exception will be
+        /// If <paramref name="overwrite"/> is false, an exception will be
         /// raised if the destination exists. Otherwise it will be overwritten.
         /// </summary>
         public static void Copy(string sourceFileName, string destFileName, bool overwrite)
@@ -93,7 +92,7 @@ namespace System.IO
         // If the file does not exist, Delete succeeds without throwing
         // an exception.
         // 
-        // On NT, Delete will fail for a file that is open for normal I/O
+        // On Windows, Delete will fail for a file that is open for normal I/O
         // or a file that is memory mapped.
         public static void Delete(string path)
         {
@@ -103,7 +102,7 @@ namespace System.IO
             FileSystem.DeleteFile(Path.GetFullPath(path));
         }
 
-        // Tests if a file exists. The result is true if the file
+        // Tests whether a file exists. The result is true if the file
         // given by the specified path exists; otherwise, the result is
         // false.  Note that if path describes a directory,
         // Exists will return true.
@@ -117,6 +116,7 @@ namespace System.IO
                     return false;
 
                 path = Path.GetFullPath(path);
+
                 // After normalizing, check whether path ends in directory separator.
                 // Otherwise, FillAttributeInfo removes it and we may return a false positive.
                 // GetFullPath should never return null
@@ -129,8 +129,6 @@ namespace System.IO
                 return FileSystem.FileExists(path);
             }
             catch (ArgumentException) { }
-            catch (NotSupportedException) { } // Security can throw this on ":"
-            catch (SecurityException) { }
             catch (IOException) { }
             catch (UnauthorizedAccessException) { }
 
