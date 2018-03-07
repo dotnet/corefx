@@ -44,17 +44,17 @@ namespace System.IO.Tests
             di.CreateSubdirectory(expectedDirectoryNames[1] + Path.DirectorySeparatorChar + expectedDirectoryNames[2]);
             
             var actualDirectoryNames = new List<string>();
-            AddDirectoryNameToList(di, actualDirectoryNames);
+            AddDirectoryNameToList(di);
 
             Assert.Equal(expectedDirectoryNames, actualDirectoryNames);
-        }
 
-        public void AddDirectoryNameToList(DirectoryInfo di, List<string> directoryNames)
-        {
-            directoryNames.Add(Path.GetFileName(di.FullName));
-            foreach (var directory in di.EnumerateDirectories())
+            void AddDirectoryNameToList(DirectoryInfo directoryInfo)
             {
-                AddDirectoryNameToList(directory, directoryNames);
+                actualDirectoryNames.Add(Path.GetFileName(directoryInfo.FullName));
+                foreach (var directory in directoryInfo.EnumerateDirectories())
+                {
+                    AddDirectoryNameToList(directory);
+                }
             }
         }
 
