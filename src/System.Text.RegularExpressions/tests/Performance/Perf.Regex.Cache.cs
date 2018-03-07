@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xunit.Performance;
+using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
 {
@@ -6,7 +7,6 @@ namespace System.Text.RegularExpressions.Tests
     {
         private const int N = 40_000;
         private const int UniqueRegsNum = (int)(N * 0.04);
-        private const int CacheSize = (int)(N * 0.02);
         private static volatile bool s_IsMatch;
         private readonly string[] _regexes; // shuffled
 
@@ -41,12 +41,15 @@ namespace System.Text.RegularExpressions.Tests
 
         [Benchmark(InnerIterationCount = N)]
         [MeasureGCAllocations]
-        public void IsMatch()
+        [InlineData(15)]
+        [InlineData(N*0.02)]
+        [InlineData(N*0.2)]
+        public void IsMatch(int cacheSize)
         {
             var cacheSizeOld = Regex.CacheSize;
             try
             {
-                Regex.CacheSize = CacheSize;
+                Regex.CacheSize = cacheSize;
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
                     {
