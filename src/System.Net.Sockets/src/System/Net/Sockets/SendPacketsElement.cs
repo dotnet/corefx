@@ -2,27 +2,38 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
+
 namespace System.Net.Sockets
 {
     // Class that wraps the semantics of a Winsock TRANSMIT_PACKETS_ELEMENTS struct.
     public class SendPacketsElement
     {
-        internal string _filePath;
-        internal byte[] _buffer;
-        internal int _offset;
-        internal int _count;
+        //internal string _filePath;
+        //internal FileStream _fileStream;
+        //internal byte[] _buffer;
+        //internal long _offset;
+        //internal long _count;
         internal SendPacketsElementFlags _flags;
 
         // Constructors for file elements.
         public SendPacketsElement(string filepath) :
-            this(filepath, 0, 0, false)
+            this(filepath, 0L, 0L, false)
         { }
 
         public SendPacketsElement(string filepath, int offset, int count) :
+            this(filepath, (long)offset, count, false)
+        { }
+
+        public SendPacketsElement(string filepath, int offset, int count, bool endOfPacket) :
+            this(filepath, (long)offset, count, endOfPacket)
+        { }
+
+        public SendPacketsElement(string filepath, long offset, long count) :
             this(filepath, offset, count, false)
         { }
 
-        public SendPacketsElement(string filepath, int offset, int count, bool endOfPacket)
+        public SendPacketsElement(string filepath, long offset, long count, bool endOfPacket)
         {
             // We will validate if the file exists on send.
             if (filepath == null)
@@ -39,7 +50,36 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Initialize(filepath, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
+            Initialize(filepath, null, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
+        }
+
+        // Constructors for fileStream elements.
+        public SendPacketsElement(FileStream fileStream) :
+            this(fileStream, 0L, 0L, false)
+        { }
+
+        public SendPacketsElement(FileStream fileStream, long offset, long count) :
+            this(fileStream, offset, count, false)
+        { }
+
+        public SendPacketsElement(FileStream fileStream, long offset, long count, bool endOfPacket)
+        {
+            // We will validate if the fileStream exists on send.
+            if (fileStream == null)
+            {
+                throw new ArgumentNullException(nameof(fileStream));
+            }
+            // The native API will validate the file length on send.
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            Initialize(null, fileStream, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
         }
 
         // Constructors for buffer elements.
@@ -57,25 +97,26 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
-            if (offset < 0 || offset > buffer.Length)
+            if ((uint)offset > (uint)buffer.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
-            if (count < 0 || count > (buffer.Length - offset))
+            if ((uint)count > (uint)(buffer.Length - offset))
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Initialize(null, buffer, offset, count, SendPacketsElementFlags.Memory, endOfPacket);
+            Initialize(null, null, buffer, offset, count, SendPacketsElementFlags.Memory, endOfPacket);
         }
 
-        private void Initialize(string filePath, byte[] buffer, int offset, int count,
+        private void Initialize(string filePath, FileStream fileStream, byte[] buffer, long offset, long count,
             SendPacketsElementFlags flags, bool endOfPacket)
         {
-            _filePath = filePath;
-            _buffer = buffer;
-            _offset = offset;
-            _count = count;
+            FilePath = filePath;
+            FileStream = fileStream;
+            Buffer = buffer;
+            LongOffset = offset;
+            LongCount = count;
             _flags = flags;
             if (endOfPacket)
             {
@@ -83,29 +124,20 @@ namespace System.Net.Sockets
             }
         }
 
-        public string FilePath
-        {
-            get { return _filePath; }
-        }
+        public string FilePath { get; private set; }
 
-        public byte[] Buffer
-        {
-            get { return _buffer; }
-        }
+        public FileStream FileStream { get; private set; }
 
-        public int Count
-        {
-            get { return _count; }
-        }
+        public byte[] Buffer { get; private set; }
 
-        public int Offset
-        {
-            get { return _offset; }
-        }
+        public int Count => checked((int)LongCount);
 
-        public bool EndOfPacket
-        {
-            get { return (_flags & SendPacketsElementFlags.EndOfPacket) != 0; }
-        }
+        public int Offset => checked((int)LongOffset);
+
+        public long LongCount { get; private set; }
+
+        public long LongOffset { get; private set; }
+
+        public bool EndOfPacket => (_flags & SendPacketsElementFlags.EndOfPacket) != 0;
     }
 }
