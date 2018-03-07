@@ -1646,6 +1646,49 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void SerializeWithDefaultValueSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        value.DoubleField = Double.PositiveInfinity;
+        value.SingleField = Single.PositiveInfinity;
+        value.FloatProp = float.PositiveInfinity;
+        value.DoubleProp = double.PositiveInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void SerializeWithDefaultValueSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        value.DoubleField = Double.NegativeInfinity;
+        value.SingleField = Single.NegativeInfinity;
+        value.FloatProp = float.NegativeInfinity;
+        value.DoubleProp = double.NegativeInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+        @"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    private static bool SerializeWithDefaultValue<T>(T value, string baseline)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(T));
+        using (MemoryStream ms = new MemoryStream())
+        {
+            serializer.Serialize(ms, value);
+            ms.Position = 0;
+            string output = new StreamReader(ms).ReadToEnd();
+            Utils.CompareResult result = Utils.Compare(baseline, output);
+            return result.Equal;
+        }
+    }
+
+    [Fact]
     public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
     {
         var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
