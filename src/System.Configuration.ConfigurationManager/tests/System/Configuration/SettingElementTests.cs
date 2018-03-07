@@ -1,59 +1,58 @@
-﻿namespace System.Configuration
+﻿using Xunit;
+
+namespace System.Configuration.Tests
 {
-
-    using Xunit;
-
     public class SettingElementTests
     {
-
         [Fact]
         public void TestForInequality()
         {
-            SettingElement ElementOne = new SettingElement("NotEqualOne", SettingsSerializeAs.String);
-            SettingElement ElementTwo = new SettingElement("NotEqualTwo", SettingsSerializeAs.String);
+            var ElementOne = new SettingElement("NotEqualOne", SettingsSerializeAs.String);
+            var ElementTwo = new SettingElement("NotEqualTwo", SettingsSerializeAs.String);
             Assert.False(ElementOne.Equals(ElementTwo));
         }
 
         [Fact]
         public void TestForEquality()
         {
-            SettingElement ElementOne = new SettingElement("TheExactSameName", SettingsSerializeAs.String);
-            SettingElement ElementTwo = new SettingElement("TheExactSameName", SettingsSerializeAs.String);
+            var ElementOne = new SettingElement("TheExactSameName", SettingsSerializeAs.String);
+            var ElementTwo = new SettingElement("TheExactSameName", SettingsSerializeAs.String);
             Assert.True(ElementOne.Equals(ElementTwo));
         }
 
         [Fact]
-        public void AssureDefaultSettingSerializationIsString()
+        public void DefaultSettingSerializationIsString()
         {
-            SettingElement Element = new SettingElement();
-            Assert.Equal(Element.SerializeAs, SettingsSerializeAs.String);
+            var Element = new SettingElement();
+            Assert.Equal(SettingsSerializeAs.String, Element.SerializeAs);
         }
 
         [Fact]
-        public void AssureDefaultNameIsEmptyString()
+        public void DefaultNameIsEmptyString()
         {
-            SettingElement Element = new SettingElement();
-            Assert.Equal(Element.Name, string.Empty);
+            var Element = new SettingElement();
+            Assert.Equal(string.Empty, Element.Name);
         }
 
         [Fact]
-        public void AssureDefaultValueIsNull()
+        public void DefaultValueIsNull()
         {
-            SettingElement Element = new SettingElement();
-            Assert.Equal(Element.Value.CurrentConfiguration, null);
+            var Element = new SettingElement();
+            Assert.Equal(null, Element.Value.CurrentConfiguration);
         }
     
         [Fact]
         public void DefaultSettingElementExceptionForGetHashCode()
         {
-            SettingElement Element = new SettingElement();
+            var Element = new SettingElement();
             Assert.Throws<NullReferenceException>(() => Element.GetHashCode());
+            //likely a bug
         }
 
         [Fact]
         public void NonDefaultValueHasNonNullHashCode()
         {
-            SettingElement Element = new SettingElement("Test", SettingsSerializeAs.Xml)
+            var Element = new SettingElement("Test", SettingsSerializeAs.Xml)
             {
                 Value = new SettingValueElement
                 {
@@ -64,6 +63,5 @@
             };
             Assert.NotNull(Element.GetHashCode());
         }
-
     }
 }
