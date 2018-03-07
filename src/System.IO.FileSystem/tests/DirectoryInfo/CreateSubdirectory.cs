@@ -227,7 +227,7 @@ namespace System.IO.Tests
             string randomName = GetTestFileName();
             DirectoryInfo di = Directory.CreateDirectory(Path.Combine(TestDirectory, randomName));
 
-            Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(@".." + Path.DirectorySeparatorChar  + randomName + @"abc" + Path.DirectorySeparatorChar + GetTestFileName()));
+            Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(Path.Combine("..", randomName + "abc", GetTestFileName())));
         }
 
         #endregion
