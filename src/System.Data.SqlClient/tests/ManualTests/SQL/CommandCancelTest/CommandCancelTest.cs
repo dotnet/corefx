@@ -135,10 +135,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 tasks[1].Start();
 
                 Task.WaitAll(tasks, 15 * 1000);
-                if (tasks[0].IsFaulted)
-                {
-                    throw tasks[0].Exception;
-                }
                 
                 CommandCancelTest.VerifyConnection(command);
             }
