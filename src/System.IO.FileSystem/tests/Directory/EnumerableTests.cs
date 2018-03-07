@@ -36,26 +36,11 @@ namespace System.IO.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void EnumerateDirectories_NonBreakingSpace()
         {
-            var expectedDirectoryNames = new List<string> { GetTestFileName(), "\u00A0", GetTestFileName() };
+            DirectoryInfo rootDirectory = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo subDirectory1 = rootDirectory.CreateSubdirectory("\u00A0");
+            DirectoryInfo subDirectory2 = subDirectory1.CreateSubdirectory(GetTestFileName());
 
-            DirectoryInfo di = new DirectoryInfo(Path.Combine(TestDirectory, expectedDirectoryNames[0]));
-            di.Create();
-            di.CreateSubdirectory(expectedDirectoryNames[1]);
-            di.CreateSubdirectory(expectedDirectoryNames[1] + Path.DirectorySeparatorChar + expectedDirectoryNames[2]);
-            
-            var actualDirectoryNames = new List<string>();
-            AddDirectoryNameToList(di);
-
-            Assert.Equal(expectedDirectoryNames, actualDirectoryNames);
-
-            void AddDirectoryNameToList(DirectoryInfo directoryInfo)
-            {
-                actualDirectoryNames.Add(Path.GetFileName(directoryInfo.FullName));
-                foreach (var directory in directoryInfo.EnumerateDirectories())
-                {
-                    AddDirectoryNameToList(directory);
-                }
-            }
+            Assert.Equal(new string[] { subDirectory1.FullName, subDirectory2.FullName }, Directory.EnumerateDirectories(rootDirectory.FullName, string.Empty, SearchOption.AllDirectories));
         }
 
         class ThreadSafeRepro
