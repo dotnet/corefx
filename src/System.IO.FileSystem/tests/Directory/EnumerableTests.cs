@@ -41,7 +41,7 @@ namespace System.IO.Tests
             DirectoryInfo di = new DirectoryInfo(Path.Combine(TestDirectory, expectedDirectoryNames[0]));
             di.Create();
             di.CreateSubdirectory(expectedDirectoryNames[1]);
-            di.CreateSubdirectory(expectedDirectoryNames[1] + @"\"+ expectedDirectoryNames[2]);
+            di.CreateSubdirectory(expectedDirectoryNames[1] + Path.DirectorySeparatorChar + expectedDirectoryNames[2]);
             
             var actualDirectoryNames = new List<string>();
             AddDirectoryNameToList(di, actualDirectoryNames);
