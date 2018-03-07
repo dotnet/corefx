@@ -160,7 +160,7 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void WindowsSimpleWhiteSpaceThrowException(string component)
+        public void WindowsSimpleWhiteSpaceThrowsException(string component)
         {
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
@@ -212,11 +212,10 @@ namespace System.IO.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void ParentDirectoryNameAsPrefix()
+        public void ParentDirectoryNameAsPrefixShouldThrow()
         {
             string randomName = GetTestFileName();
-            var di = new DirectoryInfo(Path.Combine(TestDirectory, randomName));
-            di.Create();
+            DirectoryInfo di = Directory.CreateDirectory(Path.Combine(TestDirectory, randomName));
 
             Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(@"..\" + randomName + @"abc\" + GetTestFileName()));
         }

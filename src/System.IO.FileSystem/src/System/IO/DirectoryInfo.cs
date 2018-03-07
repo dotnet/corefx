@@ -63,7 +63,7 @@ namespace System.IO
 
             string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            if (0 != string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) 
+            if (string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0
                 || fullPath.Length < FullPath.Length 
                 || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length])))
             {
