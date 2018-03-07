@@ -487,7 +487,6 @@ namespace System.Text.RegularExpressions
         internal bool UseOptionInvariant() => (roptions & RegexOptions.CultureInvariant) != 0;
 
 #if DEBUG
-
         /// <summary>
         /// True if the regex has debugging enabled
         /// </summary>

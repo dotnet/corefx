@@ -96,8 +96,7 @@ namespace System.Text.RegularExpressions
         {
             if (s_livecode_first?._key == key) // most used regex should be at the top already
                 return s_livecode_first;
-            s_livecode.TryGetValue(key, out var entry);
-            if (entry != null)
+            if (s_livecode.TryGetValue(key, out var entry))
             {
                 if (s_livecode_last == entry)
                 {
@@ -107,7 +106,7 @@ namespace System.Text.RegularExpressions
                 {
                     entry._previous._next = entry._next;
                 }
-                entry._next._previous = entry._previous;  // not first so should exist _next
+                entry._next._previous = entry._previous;  // not first so _next should exist
 
                 s_livecode_first._next = entry;
                 entry._previous = s_livecode_first;
@@ -126,7 +125,7 @@ namespace System.Text.RegularExpressions
             private readonly string _cultureKey;
             private readonly string _pattern;
 
-            internal CachedCodeEntryKey(RegexOptions options, string cultureKey, string pattern)
+            public CachedCodeEntryKey(RegexOptions options, string cultureKey, string pattern)
             {
                 _options = options;
                 _cultureKey = cultureKey;
