@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class HttpProtocolTests : HttpClientTestBase
+    public abstract class HttpProtocolTests : HttpClientTestBase
     {
         protected virtual Stream GetStream(Stream s) => s;
         protected virtual Stream GetStream_ClientDisconnectOk(Stream s) => s;
@@ -66,13 +66,13 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_RequestVersion0X_ThrowsOr11(int minorVersion)
         {
             Type exceptionType = null;
-            if (UseSocketsHttpHandler)
-            {
-                exceptionType = typeof(NotSupportedException);
-            }
-            else if (PlatformDetection.IsFullFramework)
+            if (PlatformDetection.IsFullFramework)
             {
                 exceptionType = typeof(ArgumentException);
+            }
+            else if (UseSocketsHttpHandler)
+            {
+                exceptionType = typeof(NotSupportedException);
             }
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -327,6 +327,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
+        [ActiveIssue(25880)]
         [InlineData("HTTP/1.1 200 OK", 200, "OK")]
         [InlineData("HTTP/1.1 200 Sure why not?", 200, "Sure why not?")]
         [InlineData("HTTP/1.1 200 OK\x0080", 200, "OK?")]
@@ -598,7 +599,7 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
-    public class HttpProtocolTests_Dribble : HttpProtocolTests
+    public abstract class HttpProtocolTests_Dribble : HttpProtocolTests
     {
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
         protected override Stream GetStream_ClientDisconnectOk(Stream s) => new DribbleStream(s, true);

@@ -79,6 +79,7 @@ namespace System.Net.WebSockets.Client.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => cws.Options.KeepAliveInterval = TimeSpan.MinValue);
         }
 
+        [ActiveIssue(27846)]
         [OuterLoop("Connects to remote service")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Lacks RemoteCertificateValidationCallback to enable loopback testing")]
         [ConditionalFact(nameof(WebSocketsSupported), nameof(ClientCertificatesSupported))]
