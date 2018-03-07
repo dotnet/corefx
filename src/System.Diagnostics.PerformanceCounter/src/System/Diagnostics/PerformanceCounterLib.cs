@@ -1175,25 +1175,6 @@ namespace System.Diagnostics
             return categoryType;
         }
 
-        public static bool IsPublished(string category)
-        {
-            PerformanceCounterLib library = GetPerformanceCounterLib(".", new CultureInfo(EnglishLCID));
-            if (library.CategoryTable[category] != null)
-                return true;
-            if (CultureInfo.CurrentCulture.Parent.LCID != EnglishLCID)
-            {
-                CultureInfo culture = CultureInfo.CurrentCulture;
-                while (culture != CultureInfo.InvariantCulture)
-                {
-                    library = GetPerformanceCounterLib(".", culture);
-                    if (library.CategoryTable[category] != null)
-                        return true;
-                    culture = culture.Parent;
-                }
-            }
-            return false;
-        }
-
         internal static void RegisterCategory(string categoryName, PerformanceCounterCategoryType categoryType, string categoryHelp, CounterCreationDataCollection creationData)
         {
             try
@@ -1206,22 +1187,8 @@ namespace System.Diagnostics
                     CreateIniFile(categoryName, categoryHelp, creationData, languageIds);
                     CreateSymbolFile(creationData);
                     RegisterFiles(IniFilePath, false);
-                }
-                /*
-                  Wait some seconds for publication, sometimes registry modification is not immediatly visibile to all.
-                  (https://msdn.microsoft.com/en-us/library/cs38wsc4%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396)
-                  Similar pattern of GetStringTable()  "int waitRetries = 14;   //((2^13)-1)*10ms == approximately 1.4mins"
-                 */
-                bool isPublished = false;
-                DateTime now = DateTime.UtcNow;
-                while ((DateTime.UtcNow.Subtract(now).TotalSeconds < 10))
-                {
-                    CloseAllLibraries();
-                    if (isPublished = IsPublished(categoryName))
-                        break;
-                }
-                if (!isPublished)
-                    throw new InvalidOperationException(SR.CantCreateCategoryRegistration);
+                }                
+                CloseAllLibraries();
             }
             finally
             {
