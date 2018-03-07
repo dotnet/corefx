@@ -19,8 +19,8 @@ namespace System.Data.SqlClient
 
         internal SqlConnectionPoolKey(string connectionString, SqlCredential credential) : base(connectionString)
         {
-            CalculateHashCode();
             _credential = credential;
+            CalculateHashCode();
         }
 
         private SqlConnectionPoolKey(SqlConnectionPoolKey key) : base(key)

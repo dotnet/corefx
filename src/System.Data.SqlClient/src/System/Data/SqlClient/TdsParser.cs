@@ -6326,7 +6326,7 @@ namespace System.Data.SqlClient
 
                 WriteString(rec.attachDBFilename, _physicalStateObj);
 
-                if (rec.useSSPI == false)
+                if (!rec.useSSPI)
                 {
                     if (rec.newSecurePassword != null)
                     {

@@ -459,7 +459,7 @@ namespace System.Data.SqlClient
     {
         public SqlConnection() { }
         public SqlConnection(string connectionString) { }
-        public SqlConnection(string connectionString, SqlCredential credential) { }
+        public SqlConnection(string connectionString, System.Data.SqlClient.SqlCredential credential) { }
         public System.Guid ClientConnectionId { get { throw null; } }
         object ICloneable.Clone() { throw null; }
         public override string ConnectionString { get { throw null; } set { } }
@@ -472,7 +472,7 @@ namespace System.Data.SqlClient
         public override System.Data.ConnectionState State { get { throw null; } }
         public bool StatisticsEnabled { get { throw null; } set { } }
         public string WorkstationId { get { throw null; } }
-        public SqlCredential Credential { get { throw null; } set { } }
+        public System.Data.SqlClient.SqlCredential Credential { get { throw null; } set { } }
         public event System.Data.SqlClient.SqlInfoMessageEventHandler InfoMessage { add { } remove { } }
         protected override System.Data.Common.DbTransaction BeginDbTransaction(System.Data.IsolationLevel isolationLevel) { throw null; }
         public new System.Data.SqlClient.SqlTransaction BeginTransaction() { throw null; }

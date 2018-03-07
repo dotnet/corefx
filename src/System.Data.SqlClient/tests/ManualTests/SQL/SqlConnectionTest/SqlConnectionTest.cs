@@ -22,22 +22,30 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         {
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
             var passStr = "pass";
-            CreateTestUser(user, passStr);
 
-            var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
-            csb.Remove("User ID");
-            csb.Remove("Password");
-            csb.IntegratedSecurity = false;
-
-            var password = new SecureString();
-            passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
-            password.MakeReadOnly();
-
-            using (var conn = new SqlConnection(csb.ConnectionString, new SqlCredential(user, password)))
-            using (var cmd = new SqlCommand("SELECT 1;", conn))
+            try
             {
-                conn.Open();
-                Assert.Equal(1, cmd.ExecuteScalar());
+                createTestUser(user, passStr);
+
+                var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+                csb.Remove("User ID");
+                csb.Remove("Password");
+                csb.IntegratedSecurity = false;
+
+                var password = new SecureString();
+                passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
+                password.MakeReadOnly();
+
+                using (var conn = new SqlConnection(csb.ConnectionString, new SqlCredential(user, password)))
+                using (var cmd = new SqlCommand("SELECT 1;", conn))
+                {
+                    conn.Open();
+                    Assert.Equal(1, cmd.ExecuteScalar());
+                }
+            }
+            finally
+            {
+                dropTestUser(user);
             }
         }
 
@@ -47,22 +55,30 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
             var pass = "pass";
             var newPass = "newPass";
-            CreateTestUser(user, pass);
 
-            var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
-            csb.UserID = user;
-            csb.Password = pass;
-            csb.IntegratedSecurity = false;
-
-            // Change password and try opening connection.
-            SqlConnection.ChangePassword(csb.ConnectionString, newPass);
-            csb.Password = newPass;
-
-            using (var conn = new SqlConnection(csb.ConnectionString))
-            using (var cmd = new SqlCommand("SELECT 1;", conn))
+            try
             {
-                conn.Open();
-                Assert.Equal(1, cmd.ExecuteScalar());
+                createTestUser(user, pass);
+
+                var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+                csb.UserID = user;
+                csb.Password = pass;
+                csb.IntegratedSecurity = false;
+
+                // Change password and try opening connection.
+                SqlConnection.ChangePassword(csb.ConnectionString, newPass);
+                csb.Password = newPass;
+
+                using (var conn = new SqlConnection(csb.ConnectionString))
+                using (var cmd = new SqlCommand("SELECT 1;", conn))
+                {
+                    conn.Open();
+                    Assert.Equal(1, cmd.ExecuteScalar());
+                }
+            }
+            finally
+            {
+                dropTestUser(user);
             }
         }
 
@@ -72,33 +88,41 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
             var passStr = "pass";
             var newPassStr = "newPass";
-            CreateTestUser(user, passStr);
 
-            var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
-            csb.Remove("User ID");
-            csb.Remove("Password");
-            csb.IntegratedSecurity = false;
-
-            var password = new SecureString();
-            passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
-            password.MakeReadOnly();
-
-            var newPassword = new SecureString();
-            newPassStr.ToCharArray().ToList().ForEach(x => newPassword.AppendChar(x));
-            newPassword.MakeReadOnly();
-
-            // Change password and try opening connection.
-            SqlConnection.ChangePassword(csb.ConnectionString, new SqlCredential(user, password), newPassword);
-
-            using (var conn = new SqlConnection(csb.ConnectionString, new SqlCredential(user, newPassword)))
-            using (var cmd = new SqlCommand("SELECT 1;", conn))
+            try
             {
-                conn.Open();
-                Assert.Equal(1, cmd.ExecuteScalar());
+                createTestUser(user, passStr);
+
+                var csb = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+                csb.Remove("User ID");
+                csb.Remove("Password");
+                csb.IntegratedSecurity = false;
+
+                var password = new SecureString();
+                passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
+                password.MakeReadOnly();
+
+                var newPassword = new SecureString();
+                newPassStr.ToCharArray().ToList().ForEach(x => newPassword.AppendChar(x));
+                newPassword.MakeReadOnly();
+
+                // Change password and try opening connection.
+                SqlConnection.ChangePassword(csb.ConnectionString, new SqlCredential(user, password), newPassword);
+
+                using (var conn = new SqlConnection(csb.ConnectionString, new SqlCredential(user, newPassword)))
+                using (var cmd = new SqlCommand("SELECT 1;", conn))
+                {
+                    conn.Open();
+                    Assert.Equal(1, cmd.ExecuteScalar());
+                }
+            }
+            finally
+            {
+                dropTestUser(user);
             }
         }
 
-        private static void CreateTestUser(string username, string password)
+        private static void createTestUser(string username, string password)
         {
             // Creates a test user with read permissions.
             string createUserCmd = $"CREATE LOGIN {username} WITH PASSWORD = '{password}';"
@@ -106,6 +130,24 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             using (var conn = new SqlConnection(DataTestUtility.TcpConnStr))
             using (var cmd = new SqlCommand(createUserCmd, conn))
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private static void dropTestUser(string username)
+        {
+            // Removes a created test user.
+            string dropUserCmd = $"DROP SCHEMA IF EXISTS {username};" 
+                                    + $"DROP USER IF EXISTS {username};"
+                                    + $"DROP LOGIN {username}";
+
+            // Pool must be cleared to prevent DROP LOGIN failure.
+            SqlConnection.ClearAllPools();
+
+            using (var conn = new SqlConnection(DataTestUtility.TcpConnStr))
+            using (var cmd = new SqlCommand(dropUserCmd, conn))
             {
                 conn.Open();
                 cmd.ExecuteNonQuery();
