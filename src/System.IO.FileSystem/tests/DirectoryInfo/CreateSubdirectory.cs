@@ -160,6 +160,7 @@ namespace System.IO.Tests
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsSimpleWhiteSpaceThrowsException(string component)
         {
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
@@ -167,13 +168,22 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]  // Simple whitespace is trimmed in path
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // Simple whitespace is trimmed in path
         public void WindowsSimpleWhiteSpace(string component)
         {
             DirectoryInfo result = new DirectoryInfo(TestDirectory).CreateSubdirectory(component);
 
             Assert.True(Directory.Exists(result.FullName));
             Assert.Equal(TestDirectory, IOServices.RemoveTrailingSlash(result.FullName));
+        }
+
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace as path allowed
+        public void UnixWhiteSpaceAsPath_Allowed(string path)
+        {
+            new DirectoryInfo(TestDirectory).CreateSubdirectory(path);
+            Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
         }
 
         [Theory,
