@@ -12,8 +12,7 @@
     <LibBinDir>$(UAPPackageRuntimePath)</LibBinDir>
     <LibBinDir Condition="$(PackageTargetRuntime.EndsWith('-aot'))">$(UAPAOTPackageRuntimePath)</LibBinDir>
 
-    <!-- <IsFrameworkPackage>true</IsFrameworkPackage> -->
-    <SkipValidatePackage>true</SkipValidatePackage>
+    <IsFrameworkPackage>true</IsFrameworkPackage>
 
     <!-- Private packages need symbols -->
     <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
