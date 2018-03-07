@@ -209,18 +209,18 @@ namespace System.IO.Tests
         {
             { @"C:\git\corefx", @"C:\git\corefx", @"C:\git\corefx" },
             { @"C:\git\corefx.\.\.\.\.\.", @"C:\git\corefx", @"C:\git\corefx" },
-            { @"C:\git\corefx" + new string(Path.DirectorySeparatorChar, 3) + ".", @"C:\git\corefx", @"C:\git\corefx" },
-            { @"C:\git\corefx\..\" + Path.GetFileName(@"C:\git\corefx") + @"\.\..\" + Path.GetFileName(@"C:\git\corefx"), @"C:\git\corefx", @"C:\git\corefx" },
+            { @"C:\git\corefx\\\.", @"C:\git\corefx", @"C:\git\corefx" },
+            { @"C:\git\corefx\..\corefx\.\..\corefx", @"C:\git\corefx", @"C:\git\corefx" },
             { @"C:\somedir\..", @"C:\git\corefx", @"C:\" },
             { @"C:\", @"C:\git\corefx", @"C:\" },
             { @"..\..\..\..", @"C:\git\corefx", @"C:\" },
-            { @"C:\" + new string(Path.DirectorySeparatorChar, 3), @"C:\git\corefx", @"C:\" },
+            { @"C:\\\", @"C:\git\corefx", @"C:\" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_CommonUnRootedWindowsData => new TheoryData<string, string, string>
         {
             { "", @"C:\git\corefx", @"C:\git\corefx" },
-            { "..", @"C:\git\corefx", Path.GetDirectoryName(@"C:\git\corefx") },
+            { "..", @"C:\git\corefx", @"C:\git" },
 
             // Current drive rooted
             { @"\tmp\bar", @"C:\git\corefx", @"C:\tmp\bar" },
@@ -243,7 +243,7 @@ namespace System.IO.Tests
             { @"Z:tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
             { @"Z:tmp", @"C:\git\corefx", @"Z:\tmp" },
             { @"Z:", @"C:\git\corefx", @"Z:\" },
-            { @"Z", @"C:\git\corefx", @"C:\git\corefx" + Path.DirectorySeparatorChar + @"Z" }
+            { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" }
         };
 
 
@@ -253,10 +253,9 @@ namespace System.IO.Tests
             { @"foo", @"server1", @"server1\foo" },
             { @"\foo", @"server2", @"server2\foo" },
             { @"foo", @"server3\", @"server3\foo" },
-            { @"foo", @"server3\\", @"server3\foo" },
             { @"..\foo", @"server4", @"server4\..\foo" },
             { @".\foo", @"server5\share", @"server5\share\foo" },
-            // { @"..\foo", @"server6\share", @"server6\share\foo" },
+            { @"..\foo", @"server6\share", @"server6\share\foo" },
             { @"\foo", @"a\b\\", @"a\b\foo" },            
             { @"foo", @"LOCALHOST\share8\test.txt.~SS", @"LOCALHOST\share8\test.txt.~SS\foo" },
             { @"foo", @"LOCALHOST\share9", @"LOCALHOST\share9\foo" },
@@ -283,9 +282,14 @@ namespace System.IO.Tests
             { @"...\foo", @"C:\", @"C:\...\foo" },
 
             { @"foo", @"C:\\", @"C:\foo" },
+            { @"foo.", @"C:\\", @"C:\foo." },
+            { @"foo \git", @"C:\\", @"C:\foo \git" },
+            { @"foo. \git", @"C:\\", @"C:\foo. \git" },
+            { @" foo \git", @"C:\\", @"C:\ foo \git" },
+            { @"foo ", @"C:\\", @"C:\foo " },
             { @"|\foo", @"C:\", @"C:\|\foo" },
             { @".\foo", @"C:\", @"C:\foo" },
-            { @"..\foo", @"C:\", @"foo" },
+            { @"..\foo", @"C:\", @"C:\foo" },
 
             { @"\Foo1\.\foo", @"C:\", @"C:\Foo1\foo" },
             { @"\Foo2\..\foo", @"C:\", @"C:\foo" },
@@ -302,43 +306,47 @@ namespace System.IO.Tests
             // Path argument is a device path.
             // Device Paths with \\?\ wont get normalized i.e. relative segments wont get removed.
             { @"\\?\C:\git\corefx.\.\.\.\.\.", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx.\.\.\.\.\." },
-            { @"\\?\C:\git\corefx\\\" + ".", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\\\." },
-            { @"\\?\C:\git\corefx\..\" + Path.GetFileName(@"\\?\C:\git\corefx") + @"\.\..\" + Path.GetFileName(@"\\?\C:\git\corefx"), @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\..\corefx\.\..\corefx" },
+            { @"\\?\C:\git\corefx\\\.", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\\\." },
+            { @"\\?\C:\git\corefx\..\corefx\.\..\corefx", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\..\corefx\.\..\corefx" },
             { @"\\?\\somedir\..", @"\\?\C:\git\corefx", @"\\?\\somedir\.." },
             { @"\\?\", @"\\?\C:\git\corefx", @"\\?\" },
             { @"\\?\..\..\..\..", @"\\?\C:\git\corefx", @"\\?\..\..\..\.." },
-            { @"\\?\" + new string(Path.DirectorySeparatorChar, 3), @"\\?\C:\git\corefx", @"\\?\\\\" },
+            { @"\\?\\\\" , @"\\?\C:\git\corefx", @"\\?\\\\" },
+            { @"\\?\C:\Foo." , @"\\?\C:\git\corefx", @"\\?\C:\Foo." },
+            { @"\\?\C:\Foo " , @"\\?\C:\git\corefx", @"\\?\C:\Foo " },
 
             { @"\\.\C:\git\corefx.\.\.\.\.\.", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
-            { @"\\.\C:\git\corefx\\\" + ".", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
-            { @"\\.\C:\git\corefx\..\" + Path.GetFileName(@"\\.\C:\git\corefx") + @"\.\..\" + Path.GetFileName(@"\\.\C:\git\corefx"), @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
+            { @"\\.\C:\git\corefx\\\.", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
+            { @"\\.\C:\git\corefx\..\corefx\.\..\corefx", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
             { @"\\.\\somedir\..", @"\\.\C:\git\corefx", @"\\.\" },
             { @"\\.\", @"\\.\C:\git\corefx", @"\\.\" },
             { @"\\.\..\..\..\..", @"\\.\C:\git\corefx", @"\\.\" },
-            { @"\\.\" + new string(Path.DirectorySeparatorChar, 3), @"\\.\C:\git\corefx", @"\\.\" },
+            { @"\\.\", @"\\.\C:\git\corefx", @"\\.\" },
+            { @"\\.\C:\Foo." , @"\\?\C:\git\corefx", @"\\.\C:\Foo" },
+            { @"\\.\C:\Foo " , @"\\?\C:\git\corefx", @"\\.\C:\Foo" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_BasePath_BasicExpansions_TestData_Unix => new TheoryData<string, string, string>
         {
             { @"/home/git", @"/home/git", @"/home/git" },
             { "", @"/home/git", @"/home/git" },
-            { "..", @"/home/git", Path.GetDirectoryName(@"/home/git") },
-            { Path.Combine(@"/home/git", ".", ".", ".", ".", "."), @"/home/git", @"/home/git" },
-            { @"/home/git" + new string(Path.DirectorySeparatorChar, 3) + ".", @"/home/git", @"/home/git" },
-            { Path.Combine(@"/home/git", "..", Path.GetFileName(@"/home/git"), ".", "..", Path.GetFileName(@"/home/git")), @"/home/git", @"/home/git" },
-            { Path.Combine(Path.GetPathRoot(@"/home/git"), "somedir", ".."), @"/home/git", Path.GetPathRoot(@"/home/git") },
-            { Path.Combine(Path.GetPathRoot(@"/home/git"), "."), @"/home/git", Path.GetPathRoot(@"/home/git") },
-            { Path.Combine(Path.GetPathRoot(@"/home/git"), "..", "..", "..", ".."), @"/home/git", Path.GetPathRoot(@"/home/git") },
-            { Path.GetPathRoot(@"/home/git") + new string(Path.DirectorySeparatorChar, 3), @"/home/git", Path.GetPathRoot(@"/home/git") },
-            { "tmp", @"/home/git", @"/home/git" + "/tmp" },
-            { "tmp/bar/..", @"/home/git", @"/home/git" + "/tmp" },
+            { "..", @"/home/git", @"/home" },
+            { @"/home/git/././././././", @"/home/git", @"/home/git/" },
+            { @"/home/git///.", @"/home/git", @"/home/git" },
+            { @"/home/git/../git/./../git", @"/home/git", @"/home/git" },
+            { @"/home/git/somedir/..", @"/home/git", @"/home/git" },
+            { @"/home/git/./", @"/home/git", @"/home/git/" },
+            { @"/home/../../../../..", @"/home/git", @"/" },
+            { @"/home///", @"/home/git", @"/home/" },
+            { "tmp", @"/home/git", @"/home/git/tmp" },
+            { "tmp/bar/..", @"/home/git", @"/home/git/tmp" },
             { "tmp/..", @"/home/git", @"/home/git" },
-            { "tmp/./bar/../", @"/home/git", @"/home/git" + "/tmp/" },
-            { "tmp/bar/../../", @"/home/git", @"/home/git" + "/" },
-            { "tmp/bar/../next/../", @"/home/git", @"/home/git" + "/tmp/" },
-            { "tmp/bar/next", @"/home/git", @"/home/git" + "/tmp/bar/next" },
+            { "tmp/./bar/../", @"/home/git", @"/home/git/tmp/" },
+            { "tmp/bar/../../", @"/home/git", @"/home/git/" },
+            { "tmp/bar/../next/../", @"/home/git", @"/home/git/tmp/" },
+            { "tmp/bar/next", @"/home/git", @"/home/git/tmp/bar/next" },
 
-            // Current drive rooted
+            // Rooted
             { @"/tmp/bar", @"/home/git", @"/tmp/bar" },
             { @"/bar", @"/home/git", @"/bar" },
             { @"/tmp/..", @"/home/git", @"/" },
@@ -361,7 +369,6 @@ namespace System.IO.Tests
             { @"", @"foo\bar", "basePath"},
             { @"tmp", @"foo\bar", "basePath"},
             { @"\home", @"foo\bar", "basePath"},
-            { "/gi\0t", @"C:\foo\bar", null }
         };
 
         protected static void GetTempPath_SetEnvVar(string envVar, string expected, string newTempPath)

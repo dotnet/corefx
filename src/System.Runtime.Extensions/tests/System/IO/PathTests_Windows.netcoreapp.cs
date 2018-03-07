@@ -68,5 +68,11 @@ namespace System.IO.Tests
             Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
             Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));
         }
+
+        [Fact]
+        public void GetFullPath_ThrowsOnEmbeddedNulls()
+        {
+            Assert.Throws<ArgumentException>(null, () => Path.GetFullPath("/gi\0t", @"C:\foo\bar"));
+        }
     }
 }
