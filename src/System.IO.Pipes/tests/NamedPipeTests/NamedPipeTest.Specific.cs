@@ -508,7 +508,8 @@ namespace System.IO.Pipes.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void NamedPipeServer_Connects_With_UnixDomainSocketEndPointClient()
         {
-            string pipeName = Path.Combine("/tmp", "CoreFxTests_" + Path.GetRandomFileName());
+            string absoluteHomePath = Path.GetFullPath(Environment.GetEnvironmentVariable("HOME"));
+            string pipeName = Path.Combine(absoluteHomePath, "pipe-tests-corefx-" + Path.GetRandomFileName());
             var endPoint = new UnixDomainSocketEndPoint(pipeName);
             
             using (var pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
@@ -525,8 +526,10 @@ namespace System.IO.Pipes.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public async Task NamedPipeClient_Connects_With_UnixDomainSocketEndPointServer()
         {
-            string pipeName = Path.Combine("/tmp", "CoreFxTests_" + Path.GetRandomFileName());
+            string absoluteHomePath = Path.GetFullPath(Environment.GetEnvironmentVariable("HOME"));
+            string pipeName = Path.Combine(absoluteHomePath, "pipe-tests-corefx-" + Path.GetRandomFileName());
             var endPoint = new UnixDomainSocketEndPoint(pipeName);
+
             using (var socketServer = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
             using (var pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None))
             {
