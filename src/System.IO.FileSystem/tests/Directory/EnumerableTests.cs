@@ -31,37 +31,31 @@ namespace System.IO.Tests
             {
             }
         }
-        
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void EnumerateDirectories_NonBreakingSpace()
         {
-            string TestDirectory = GetTestFilePath();
-            DirectoryInfo di = new DirectoryInfo(TestDirectory);
+            var expectedDirectoryNames = new List<string> { GetTestFileName(), "\u00A0", GetTestFileName() };
+
+            DirectoryInfo di = new DirectoryInfo(Path.Combine(TestDirectory, expectedDirectoryNames[0]));
             di.Create();
-            di.CreateSubdirectory("\u00A0");
+            di.CreateSubdirectory(expectedDirectoryNames[1]);
+            di.CreateSubdirectory(expectedDirectoryNames[1] + @"\"+ expectedDirectoryNames[2]);
+            
+            var actualDirectoryNames = new List<string>();
+            AddDirectoryNameToList(di, actualDirectoryNames);
 
-            var diQueue = new Queue<DirectoryInfo>();
-            diQueue.Enqueue(di);
-            int count = 0;
+            Assert.Equal(expectedDirectoryNames, actualDirectoryNames);
+        }
 
-            while (diQueue.Count != 0)
+        public void AddDirectoryNameToList(DirectoryInfo di, List<string> directoryNames)
+        {
+            directoryNames.Add(Path.GetFileName(di.FullName));
+            foreach (var directory in di.EnumerateDirectories())
             {
-                foreach (var directory in diQueue.Dequeue().EnumerateDirectories())
-                {
-                    diQueue.Enqueue(directory);
-                }
-
-                count++;
+                AddDirectoryNameToList(directory, directoryNames);
             }
-
-            Assert.Equal(2, count);
-
-            try
-            {
-                Directory.Delete(TestDirectory, recursive: true);
-            }
-            catch { } // avoid exceptions escaping Dispose
         }
 
         class ThreadSafeRepro
