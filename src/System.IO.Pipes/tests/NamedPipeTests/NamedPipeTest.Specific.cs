@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
@@ -502,50 +501,6 @@ namespace System.IO.Pipes.Tests
                 server.ReadMode = PipeTransmissionMode.Byte;
                 client.ReadMode = PipeTransmissionMode.Byte;
             }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void NamedPipeServer_Connects_With_UnixDomainSocketEndPointClient()
-        {
-            string absoluteHomePath = Path.GetFullPath(Environment.GetEnvironmentVariable("HOME"));
-            string pipeName = Path.Combine(absoluteHomePath, "pipe-tests-corefx-" + Path.GetRandomFileName());
-            var endPoint = new UnixDomainSocketEndPoint(pipeName);
-            
-            using (var pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
-            using (var sockectClient = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
-            {
-                sockectClient.Connect(endPoint);
-                Assert.True(File.Exists(pipeName));
-            }
-
-            Assert.False(File.Exists(pipeName));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public async Task NamedPipeClient_Connects_With_UnixDomainSocketEndPointServer()
-        {
-            string absoluteHomePath = Path.GetFullPath(Environment.GetEnvironmentVariable("HOME"));
-            string pipeName = Path.Combine(absoluteHomePath, "pipe-tests-corefx-" + Path.GetRandomFileName());
-            var endPoint = new UnixDomainSocketEndPoint(pipeName);
-
-            using (var socketServer = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
-            using (var pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None))
-            {
-                socketServer.Bind(endPoint);
-                socketServer.Listen(1);
-
-                var pipeConnectTask = pipeClient.ConnectAsync(15_000);
-                using (Socket accepted = socketServer.Accept())
-                {
-                    await pipeConnectTask;
-                    Assert.True(File.Exists(pipeName));
-                }
-            }
-
-            Assert.True(File.Exists(pipeName));
-            try { File.Delete(pipeName); } catch { }
         }
 
         [Fact]
