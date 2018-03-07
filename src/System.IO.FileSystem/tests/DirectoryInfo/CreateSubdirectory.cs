@@ -159,22 +159,21 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Simple whitespace is trimmed in path
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSimpleWhiteSpaceThrowException(string component)
+        {
+            Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
+        }
+
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]  // Simple whitespace is trimmed in path
         public void WindowsSimpleWhiteSpace(string component)
         {
             DirectoryInfo result = new DirectoryInfo(TestDirectory).CreateSubdirectory(component);
 
             Assert.True(Directory.Exists(result.FullName));
             Assert.Equal(TestDirectory, IOServices.RemoveTrailingSlash(result.FullName));
-        }
-
-        [Theory,
-            MemberData(nameof(WhiteSpace))]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace as path allowed
-        public void UnixWhiteSpaceAsPath_Allowed(string path)
-        {
-            new DirectoryInfo(TestDirectory).CreateSubdirectory(path);
-            Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
         }
 
         [Theory,
@@ -209,6 +208,17 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<ArgumentException>(() => testDir.CreateSubdirectory("//"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void ParentDirectoryNameAsPrefix()
+        {
+            string randomName = GetTestFileName();
+            var di = new DirectoryInfo(Path.Combine(TestDirectory, randomName));
+            di.Create();
+
+            Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(@"..\" + randomName + @"abc\" + GetTestFileName()));
         }
 
         #endregion
