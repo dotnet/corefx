@@ -639,13 +639,11 @@ namespace System.Xml.Tests
             {
                 XmlReader r = XmlReader.Create(s, new XmlReaderSettings(), includeUri);
                 _output.WriteLine("Reader uri: " + r.BaseURI);
-                XmlSchema som = null;
                 using (r)
                 {
-                    som = XmlSchema.Read(r, new ValidationEventHandler(ValidationCallback));
+                    return XmlSchema.Read(r, new ValidationEventHandler(ValidationCallback));
                 }
             }
-            return som;
         }
     }
 }
