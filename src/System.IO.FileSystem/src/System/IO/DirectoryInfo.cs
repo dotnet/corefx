@@ -63,9 +63,9 @@ namespace System.IO
 
             string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            if (string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0
-                || fullPath.Length < FullPath.Length 
-                || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length])))
+            if (fullPath.Length < FullPath.Length 
+                || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length]))
+                || string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0)
             {
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
             }
