@@ -196,14 +196,13 @@ namespace System.Net.Sockets
         public SendPacketsElement(string filepath) { }
         public SendPacketsElement(string filepath, int offset, int count) { }
         public SendPacketsElement(string filepath, int offset, int count, bool endOfPacket) { }
-        public SendPacketsElement(string filepath, long offset, long count) { }
-        public SendPacketsElement(string filepath, long offset, long count, bool endOfPacket) { }
+        public SendPacketsElement(string filepath, long offset, int count) { }
+        public SendPacketsElement(string filepath, long offset, int count, bool endOfPacket) { }
         public SendPacketsElement(FileStream fileStream) { }
-        public SendPacketsElement(FileStream fileStream, long offset, long count) { }
-        public SendPacketsElement(FileStream fileStream, long offset, long count, bool endOfPacket) { }
+        public SendPacketsElement(FileStream fileStream, long offset, int count) { }
+        public SendPacketsElement(FileStream fileStream, long offset, int count, bool endOfPacket) { }
         public byte[] Buffer { get { throw null; } }
         public int Count { get { throw null; } }
-        public long LongCount { get { throw null; } }
         public long LongOffset { get { throw null; } }
         public bool EndOfPacket { get { throw null; } }
         public string FilePath { get { throw null; } }

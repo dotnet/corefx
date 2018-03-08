@@ -388,7 +388,7 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 5, 10000), SocketError.InvalidArgument, 0);
-            SendPackets(type, new SendPacketsElement(TestFileName, 5L, (long)int.MaxValue + 10000), SocketError.InvalidArgument, 0);
+            SendPackets(type, new SendPacketsElement(TestFileName, 5L, 10000), SocketError.InvalidArgument, 0);
         }
 
         #endregion Files
@@ -471,7 +471,7 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
-                SendPackets(type, new SendPacketsElement(stream, 5L, (long)int.MaxValue + 10000),
+                SendPackets(type, new SendPacketsElement(stream, 5, 10000),
                     SocketError.InvalidArgument, 0);
             }
         }

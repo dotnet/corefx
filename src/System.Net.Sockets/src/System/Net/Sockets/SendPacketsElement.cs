@@ -9,11 +9,9 @@ namespace System.Net.Sockets
     // Class that wraps the semantics of a Winsock TRANSMIT_PACKETS_ELEMENTS struct.
     public class SendPacketsElement
     {
-        internal SendPacketsElementFlags _flags;
-
         // Constructors for file elements.
         public SendPacketsElement(string filepath) :
-            this(filepath, 0L, 0L, false)
+            this(filepath, 0L, 0, false)
         { }
 
         public SendPacketsElement(string filepath, int offset, int count) :
@@ -24,11 +22,11 @@ namespace System.Net.Sockets
             this(filepath, (long)offset, count, endOfPacket)
         { }
 
-        public SendPacketsElement(string filepath, long offset, long count) :
+        public SendPacketsElement(string filepath, long offset, int count) :
             this(filepath, offset, count, false)
         { }
 
-        public SendPacketsElement(string filepath, long offset, long count, bool endOfPacket)
+        public SendPacketsElement(string filepath, long offset, int count, bool endOfPacket)
         {
             // We will validate if the file exists on send.
             if (filepath == null)
@@ -45,19 +43,19 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Initialize(filepath, null, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
+            Initialize(filepath, null, null, offset, count, endOfPacket);
         }
 
         // Constructors for fileStream elements.
         public SendPacketsElement(FileStream fileStream) :
-            this(fileStream, 0L, 0L, false)
+            this(fileStream, 0L, 0, false)
         { }
 
-        public SendPacketsElement(FileStream fileStream, long offset, long count) :
+        public SendPacketsElement(FileStream fileStream, long offset, int count) :
             this(fileStream, offset, count, false)
         { }
 
-        public SendPacketsElement(FileStream fileStream, long offset, long count, bool endOfPacket)
+        public SendPacketsElement(FileStream fileStream, long offset, int count, bool endOfPacket)
         {
             // We will validate if the fileStream exists on send.
             if (fileStream == null)
@@ -74,7 +72,7 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Initialize(null, fileStream, null, offset, count, SendPacketsElementFlags.File, endOfPacket);
+            Initialize(null, fileStream, null, offset, count, endOfPacket);
         }
 
         // Constructors for buffer elements.
@@ -101,22 +99,17 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            Initialize(null, null, buffer, offset, count, SendPacketsElementFlags.Memory, endOfPacket);
+            Initialize(null, null, buffer, offset, count, endOfPacket);
         }
 
-        private void Initialize(string filePath, FileStream fileStream, byte[] buffer, long offset, long count,
-            SendPacketsElementFlags flags, bool endOfPacket)
+        private void Initialize(string filePath, FileStream fileStream, byte[] buffer, long offset, int count, bool endOfPacket)
         {
             FilePath = filePath;
             FileStream = fileStream;
             Buffer = buffer;
             LongOffset = offset;
-            LongCount = count;
-            _flags = flags;
-            if (endOfPacket)
-            {
-                _flags |= SendPacketsElementFlags.EndOfPacket;
-            }
+            Count = count;
+            EndOfPacket = endOfPacket;
         }
 
         public string FilePath { get; private set; }
@@ -125,14 +118,12 @@ namespace System.Net.Sockets
 
         public byte[] Buffer { get; private set; }
 
-        public int Count => checked((int)LongCount);
+        public int Count { get; private set; }
 
         public int Offset => checked((int)LongOffset);
 
-        public long LongCount { get; private set; }
-
         public long LongOffset { get; private set; }
 
-        public bool EndOfPacket => (_flags & SendPacketsElementFlags.EndOfPacket) != 0;
+        public bool EndOfPacket { get; private set; }
     }
 }

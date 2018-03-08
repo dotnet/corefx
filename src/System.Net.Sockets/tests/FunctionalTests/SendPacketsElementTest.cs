@@ -49,7 +49,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Null(element.FilePath);
             Assert.Null(element.FileStream);
@@ -64,7 +63,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(10, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(10, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Null(element.FilePath);
             Assert.Null(element.FileStream);
@@ -115,7 +113,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(2, element.Offset);
             Assert.Equal(8, element.Count);
             Assert.Equal(2, element.LongOffset);
-            Assert.Equal(8, element.LongCount);
             Assert.True(element.EndOfPacket);
             Assert.Null(element.FilePath);
             Assert.Null(element.FileStream);
@@ -130,7 +127,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(6, element.Offset);
             Assert.Equal(4, element.Count);
             Assert.Equal(6, element.LongOffset);
-            Assert.Equal(4, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Null(element.FilePath);
             Assert.Null(element.FileStream);
@@ -146,7 +142,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Null(element.FilePath);
             Assert.Null(element.FileStream);
@@ -173,11 +168,11 @@ namespace System.Net.Sockets.Tests
             });
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SendPacketsElement((string)null, 0L, 0L);
+                new SendPacketsElement((string)null, 0L, 0);
             });
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SendPacketsElement((string)null, 0L, 0L, true);
+                new SendPacketsElement((string)null, 0L, 0, true);
             });
         }
 
@@ -191,7 +186,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal(string.Empty, element.FilePath);
         }
@@ -206,7 +200,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("   \t ", element.FilePath);
         }
@@ -221,7 +214,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
         }
@@ -236,18 +228,16 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
 
             // An exception will happen on send if this file doesn't exist
-            element = new SendPacketsElement("SomeFileName", 0L, 0L); // Send whole file
+            element = new SendPacketsElement("SomeFileName", 0L, 0); // Send whole file
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.LongOffset);
-            Assert.Equal(0, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
         }
@@ -305,33 +295,27 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(2, element.Offset);
             Assert.Equal(8, element.Count);
             Assert.Equal(2, element.LongOffset);
-            Assert.Equal(8, element.LongCount);
             Assert.True(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
 
-            element = new SendPacketsElement("SomeFileName", 2L, 8L, true);
+            element = new SendPacketsElement("SomeFileName", 2L, 8, true);
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(2, element.Offset);
             Assert.Equal(8, element.Count);
             Assert.Equal(2, element.LongOffset);
-            Assert.Equal(8, element.LongCount);
             Assert.True(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
 
-            element = new SendPacketsElement("SomeFileName", (long)int.MaxValue + 2, (long)int.MaxValue + 8, true);
+            element = new SendPacketsElement("SomeFileName", (long)int.MaxValue + 2, 8, true);
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Throws<OverflowException>(() =>
             {
                 var ofset = element.Offset;
             });
-            Assert.Throws<OverflowException>(() =>
-            {
-                var count = element.Count;
-            });
+            Assert.Equal(8, element.Count);
             Assert.Equal((long)int.MaxValue + 2, element.LongOffset);
-            Assert.Equal((long)int.MaxValue + 8, element.LongCount);
             Assert.True(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
         }
@@ -345,33 +329,27 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(6, element.Offset);
             Assert.Equal(4, element.Count);
             Assert.Equal(6, element.LongOffset);
-            Assert.Equal(4, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
 
-            element = new SendPacketsElement("SomeFileName", 6L, 4L, false);
+            element = new SendPacketsElement("SomeFileName", 6L, 4, false);
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(6, element.Offset);
             Assert.Equal(4, element.Count);
             Assert.Equal(6, element.LongOffset);
-            Assert.Equal(4, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
 
-            element = new SendPacketsElement("SomeFileName", (long)int.MaxValue + 6, (long)int.MaxValue + 4, false);
+            element = new SendPacketsElement("SomeFileName", (long)int.MaxValue + 6, 4, false);
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Throws<OverflowException>(() =>
             {
                 var ofset = element.Offset;
             });
-            Assert.Throws<OverflowException>(() =>
-            {
-                var count = element.Count;
-            });
+            Assert.Equal(4, element.Count);
             Assert.Equal((long)int.MaxValue + 6, element.LongOffset);
-            Assert.Equal((long)int.MaxValue + 4, element.LongCount);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
         }
@@ -409,7 +387,6 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(0, element.Offset);
                 Assert.Equal(0, element.Count);
                 Assert.Equal(0, element.LongOffset);
-                Assert.Equal(0, element.LongCount);
                 Assert.False(element.EndOfPacket);
             }
         }
@@ -426,17 +403,15 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(0, element.Offset);
                 Assert.Equal(0, element.Count);
                 Assert.Equal(0, element.LongOffset);
-                Assert.Equal(0, element.LongCount);
                 Assert.False(element.EndOfPacket);
 
-                element = new SendPacketsElement(stream, 0L, 0L); // Send whole file
+                element = new SendPacketsElement(stream, 0L, 0); // Send whole file
                 Assert.Null(element.FilePath);
                 Assert.Equal(element.FileStream, stream);
                 Assert.Null(element.Buffer);
                 Assert.Equal(0, element.Offset);
                 Assert.Equal(0, element.Count);
                 Assert.Equal(0, element.LongOffset);
-                Assert.Equal(0, element.LongCount);
                 Assert.False(element.EndOfPacket);
             }
         }
@@ -503,20 +478,18 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(2, element.Offset);
                 Assert.Equal(8, element.Count);
                 Assert.Equal(2, element.LongOffset);
-                Assert.Equal(8, element.LongCount);
                 Assert.True(element.EndOfPacket);
 
-                element = new SendPacketsElement(stream, 2L, 8L, true);
+                element = new SendPacketsElement(stream, 2L, 8, true);
                 Assert.Null(element.FilePath);
                 Assert.Equal(element.FileStream, stream);
                 Assert.Null(element.Buffer);
                 Assert.Equal(2, element.Offset);
                 Assert.Equal(8, element.Count);
                 Assert.Equal(2, element.LongOffset);
-                Assert.Equal(8, element.LongCount);
                 Assert.True(element.EndOfPacket);
 
-                element = new SendPacketsElement(stream, (long)int.MaxValue + 2, (long)int.MaxValue + 8, true);
+                element = new SendPacketsElement(stream, (long)int.MaxValue + 2, 8, true);
                 Assert.Null(element.FilePath);
                 Assert.Equal(element.FileStream, stream);
                 Assert.Null(element.Buffer);
@@ -524,12 +497,8 @@ namespace System.Net.Sockets.Tests
                 {
                     var ofset = element.Offset;
                 });
-                Assert.Throws<OverflowException>(() =>
-                {
-                    var count = element.Count;
-                });
+                Assert.Equal(8, element.Count);
                 Assert.Equal((long)int.MaxValue + 2, element.LongOffset);
-                Assert.Equal((long)int.MaxValue + 8, element.LongCount);
                 Assert.True(element.EndOfPacket);
             }
         }
@@ -546,20 +515,18 @@ namespace System.Net.Sockets.Tests
                 Assert.Equal(6, element.Offset);
                 Assert.Equal(4, element.Count);
                 Assert.Equal(6, element.LongOffset);
-                Assert.Equal(4, element.LongCount);
                 Assert.False(element.EndOfPacket);
 
-                element = new SendPacketsElement(stream, 6L, 4L, false);
+                element = new SendPacketsElement(stream, 6L, 4, false);
                 Assert.Null(element.FilePath);
                 Assert.Equal(element.FileStream, stream);
                 Assert.Null(element.Buffer);
                 Assert.Equal(6, element.Offset);
                 Assert.Equal(4, element.Count);
                 Assert.Equal(6, element.LongOffset);
-                Assert.Equal(4, element.LongCount);
                 Assert.False(element.EndOfPacket);
 
-                element = new SendPacketsElement(stream, (long)int.MaxValue + 6, (long)int.MaxValue + 4, false);
+                element = new SendPacketsElement(stream, (long)int.MaxValue + 6, 4, false);
                 Assert.Null(element.FilePath);
                 Assert.Equal(element.FileStream, stream);
                 Assert.Null(element.Buffer);
@@ -567,12 +534,8 @@ namespace System.Net.Sockets.Tests
                 {
                     var ofset = element.Offset;
                 });
-                Assert.Throws<OverflowException>(() =>
-                {
-                    var count = element.Count;
-                });
+                Assert.Equal(4, element.Count);
                 Assert.Equal((long)int.MaxValue + 6, element.LongOffset);
-                Assert.Equal((long)int.MaxValue + 4, element.LongCount);
                 Assert.False(element.EndOfPacket);
             }
         }

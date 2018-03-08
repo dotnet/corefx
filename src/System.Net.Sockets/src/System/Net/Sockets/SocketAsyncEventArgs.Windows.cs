@@ -618,7 +618,7 @@ namespace System.Net.Sockets
                     {
                         sendPacketsElementsFileStreamCount++;
                     }
-                    else if (spe.Buffer != null && spe.LongCount > 0)
+                    else if (spe.Buffer != null && spe.Count > 0)
                     {
                         sendPacketsElementsBufferCount++;
                     }
@@ -977,12 +977,15 @@ namespace System.Net.Sockets
             {
                 if (spe != null)
                 {
-                    if (spe.Buffer != null && spe.LongCount > 0)
+                    if (spe.Buffer != null && spe.Count > 0)
                     {
                         // This element is a buffer.
                         sendPacketsDescriptor[descriptorIndex].buffer = Marshal.UnsafeAddrOfPinnedArrayElement(spe.Buffer, spe.Offset);
-                        sendPacketsDescriptor[descriptorIndex].length = checked((uint)spe.LongCount);
-                        sendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.Memory | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         descriptorIndex++;
                     }
                     else if (spe.FilePath != null)
@@ -990,8 +993,11 @@ namespace System.Net.Sockets
                         // This element is a file.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = _sendPacketsFileStreams[fileIndex].SafeFileHandle.DangerousGetHandle();
                         sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
-                        sendPacketsDescriptor[descriptorIndex].length = checked((uint)spe.LongCount);
-                        sendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         fileIndex++;
                         descriptorIndex++;
                     }
@@ -1000,8 +1006,11 @@ namespace System.Net.Sockets
                         // This element is a file.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
                         sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
-                        sendPacketsDescriptor[descriptorIndex].length = checked((uint)spe.LongCount);
-                        sendPacketsDescriptor[descriptorIndex].flags = (Interop.Winsock.TransmitPacketsElementFlags)spe._flags;
+                        sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
+                        sendPacketsDescriptor[descriptorIndex].flags =
+                            Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
+                                ? Interop.Winsock.TransmitPacketsElementFlags.EndOfPacket
+                                : 0);
                         descriptorIndex++;
                     }
                 }
