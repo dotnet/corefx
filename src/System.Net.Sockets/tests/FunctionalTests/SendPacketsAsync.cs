@@ -404,6 +404,7 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+                SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
             }
         }
 
@@ -416,6 +417,7 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+                SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
             }
         }
 
@@ -426,8 +428,10 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
-                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, new SendPacketsElement(stream, 0, 20), 20);
                 SendPackets(type, new SendPacketsElement(stream, 10, 20), 20);
+                SendPackets(type, new SendPacketsElement(stream, s_testFileSize - 20, 20), 20);
             }
         }
 
@@ -440,12 +444,14 @@ namespace System.Net.Sockets.Tests
             {
                 var elements = new[]
                 {
+                    new SendPacketsElement(stream, 0, 20),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(stream, 0, 10),
                     new SendPacketsElement(stream, 10, 20),
                     new SendPacketsElement(stream, 30, 10),
-                    new SendPacketsElement(stream, 0, 10),
                 };
-                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
-                SendPackets(type, elements, SocketError.Success, 40);
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, elements, SocketError.Success, 70);
             }
         }
 
