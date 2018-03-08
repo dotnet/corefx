@@ -363,10 +363,6 @@ namespace System
         /// Serves as the default hash function.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashCode.Combine(
-            _object,
-            _index,
-            _length
-        );
+        public override int GetHashCode() => HashCode.Combine(_object, _index, _length);
     }
 }
