@@ -1576,7 +1576,7 @@ namespace System.Net.Sockets
         public static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, Action<long, SocketError> callback) =>
             SendFileAsync(handle, fileStream, 0, (int)fileStream.Length, callback);
 
-        private static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, int offset, int count, Action<long, SocketError> callback)
+        private static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, long offset, long count, Action<long, SocketError> callback)
         {
             long bytesSent;
             SocketError socketError = handle.AsyncContext.SendFileAsync(fileStream.SafeFileHandle, offset, count, out bytesSent, callback);
@@ -1591,7 +1591,7 @@ namespace System.Net.Sockets
             Socket socket, TransmitFileOptions options, SendPacketsElement[] elements, FileStream[] files, Action<long, SocketError> callback)
         {
             SocketError error = SocketError.Success;
-            long bytesTransferred = 0;
+            long[] bytesTransferred = {0};
             try
             {
                 Debug.Assert(elements.Length == files.Length);
@@ -1600,22 +1600,22 @@ namespace System.Net.Sockets
                     SendPacketsElement e = elements[i];
                     if (e != null)
                     {
-                        if (e.FilePath == null)
+                        if (e.Buffer != null)
                         {
-                            bytesTransferred += await socket.SendAsync(new ArraySegment<byte>(e.Buffer, e.Offset, e.Count), SocketFlags.None).ConfigureAwait(false);
+                            bytesTransferred[0] += await socket.SendAsync(new ArraySegment<byte>(e.Buffer, e.Offset, e.Count), SocketFlags.None).ConfigureAwait(false);
                         }
                         else
                         {
-                            FileStream fs = files[i];
-                            if (e.Offset > fs.Length - e.Count)
+                            FileStream fs = files[i] ?? e.FileStream;
+                            if (e.LongCount > fs.Length - e.LongOffset)
                             {
                                 throw new ArgumentOutOfRangeException();
                             }
 
                             var tcs = new TaskCompletionSource<SocketError>();
-                            error = SendFileAsync(socket.SafeHandle, fs, e.Offset, e.Count > 0 ? e.Count : checked((int)(fs.Length - e.Offset)), (transferred, se) =>
+                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.LongCount > 0 ? e.LongCount : fs.Length - e.LongOffset, (transferred, se) =>
                             {
-                                bytesTransferred += transferred;
+                                bytesTransferred[0] += transferred;
                                 tcs.TrySetResult(se);
                             });
                             if (error == SocketError.IOPending)
@@ -1654,7 +1654,7 @@ namespace System.Net.Sockets
             }
             finally
             {
-                callback(bytesTransferred, error);
+                callback(bytesTransferred[0], error);
             }
         }
 
