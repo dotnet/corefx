@@ -103,11 +103,13 @@ namespace System.Linq.Parallel
         {
             if (RightChild.OutputOrdered && LeftChild.OutputOrdered)
             {
-                LeftKeyOutputKeyBuilder<TLeftKey, TRightKey> outputKeyBuilder = new LeftKeyOutputKeyBuilder<TLeftKey, TRightKey>();
+                PairOutputKeyBuilder<TLeftKey, TRightKey> outputKeyBuilder = new PairOutputKeyBuilder<TLeftKey, TRightKey>();
+                IComparer<Pair<TLeftKey, TRightKey>> outputKeyComparer =
+                    new PairComparer<TLeftKey, TRightKey>(leftHashStream.KeyComparer, rightPartitionedStream.KeyComparer);
 
-                WrapPartitionedStreamHelper<TLeftKey, TRightKey, TLeftKey>(leftHashStream,
+                WrapPartitionedStreamHelper<TLeftKey, TRightKey, Pair<TLeftKey, TRightKey>>(leftHashStream,
                     ExchangeUtilities.HashRepartitionOrdered(rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken),
-                    outputKeyBuilder, leftHashStream.KeyComparer, outputRecipient, cancellationToken);
+                    outputKeyBuilder, outputKeyComparer, outputRecipient, cancellationToken);
             }
             else
             {

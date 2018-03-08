@@ -154,7 +154,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(JoinMultipleData), new[] { 0, 1, 2, KeyFactor * 2 })]
         public static void Join_Multiple(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
@@ -171,7 +170,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [OuterLoop]
         [MemberData(nameof(JoinMultipleData), new[] { 512, 1024 })]
         public static void Join_Multiple_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
@@ -216,7 +214,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(JoinMultipleData), new[] { 0, 1, 2, KeyFactor * 2 })]
         public static void Join_CustomComparator(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
@@ -248,7 +245,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [OuterLoop]
         [MemberData(nameof(JoinMultipleData), new[] { 512, 1024 })]
         public static void Join_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)

@@ -541,7 +541,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join(Labeled<Operation> source, Labeled<Operation> operation)
@@ -563,7 +562,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
