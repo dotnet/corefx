@@ -273,7 +273,7 @@ namespace System.Net.Sockets.Tests
         {
             AssertExtensions.Throws<ArgumentException>("path", null, () =>
             {
-                SendPackets(type, new SendPacketsElement(String.Empty), 0);
+                SendPackets(type, new SendPacketsElement(string.Empty), 0);
             });
         }
 
@@ -342,6 +342,7 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_FileZeroCount_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 0, 0), s_testFileSize);  // Whole File
+            SendPackets(type, new SendPacketsElement(TestFileName, 0L, 0), s_testFileSize);  // Whole File
         }
 
         [Theory]
@@ -350,6 +351,7 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_FilePart_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 10, 20), 20);
+            SendPackets(type, new SendPacketsElement(TestFileName, 10L, 20), 20);
         }
 
         [Theory]
@@ -357,13 +359,16 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileMultiPart_Success(SocketImplementationType type)
         {
-            SendPacketsElement[] elements = new SendPacketsElement[]
+            var elements = new[]
             {
                 new SendPacketsElement(TestFileName, 10, 20),
                 new SendPacketsElement(TestFileName, 30, 10),
                 new SendPacketsElement(TestFileName, 0, 10),
+                new SendPacketsElement(TestFileName, 10L, 20),
+                new SendPacketsElement(TestFileName, 30L, 10),
+                new SendPacketsElement(TestFileName, 0L, 10),
             };
-            SendPackets(type, elements, SocketError.Success, 40);
+            SendPackets(type, elements, SocketError.Success, 80);
         }
 
         [Theory]
@@ -373,6 +378,7 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 11000, 1), SocketError.InvalidArgument, 0);
+            SendPackets(type, new SendPacketsElement(TestFileName, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
         }
 
         [Theory]
@@ -382,9 +388,94 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 5, 10000), SocketError.InvalidArgument, 0);
+            SendPackets(type, new SendPacketsElement(TestFileName, 5L, (long)int.MaxValue + 10000), SocketError.InvalidArgument, 0);
+            Assert.Throws<OverflowException>(() => SendPackets(type,
+                new SendPacketsElement(TestFileName, 5L, (long)uint.MaxValue + 10000), SocketError.InvalidArgument, 0));
         }
 
         #endregion Files
+
+        #region FileStreams
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStream_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamZeroCount_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                SendPackets(type, new SendPacketsElement(stream, 10, 20), 20);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamMultiPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                var elements = new[]
+                {
+                    new SendPacketsElement(stream, 10, 20),
+                    new SendPacketsElement(stream, 30, 10),
+                    new SendPacketsElement(stream, 0, 10),
+                };
+                SendPackets(type, elements, SocketError.Success, 40);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamLargeOffset_Throws(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                // Length is validated on Send
+                SendPackets(type, new SendPacketsElement(stream, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamLargeCount_Throws(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                // Length is validated on Send
+                SendPackets(type, new SendPacketsElement(stream, 5L, (long)int.MaxValue + 10000),
+                    SocketError.InvalidArgument, 0);
+                Assert.Throws<OverflowException>(() => SendPackets(type,
+                    new SendPacketsElement(stream, 5L, (long)uint.MaxValue + 10000), SocketError.InvalidArgument,
+                    0));
+            }
+        }
+
+        #endregion FileStreams
 
         #region Helpers
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, TransmitFileOptions flags, int bytesExpected)
