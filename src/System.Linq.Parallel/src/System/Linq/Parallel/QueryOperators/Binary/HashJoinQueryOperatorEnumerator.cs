@@ -180,7 +180,7 @@ namespace System.Linq.Parallel
     /// <typeparam name="TOutputKey"></typeparam>
     internal abstract class HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey>
     {
-        public abstract TOutputKey Combine(TLeftKey leftKey, TRightKey right);
+        public abstract TOutputKey Combine(TLeftKey leftKey, TRightKey rightKey);
     }
 
     /// <summary>
@@ -190,12 +190,26 @@ namespace System.Linq.Parallel
     /// </summary>
     /// <typeparam name="TLeftKey"></typeparam>
     /// <typeparam name="TRightKey"></typeparam>
-    /// <typeparam name="TOutputKey"></typeparam>
     internal class LeftKeyOutputKeyBuilder<TLeftKey, TRightKey> : HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TLeftKey>
     {
-        public override TLeftKey Combine(TLeftKey leftKey, TRightKey right)
+        public override TLeftKey Combine(TLeftKey leftKey, TRightKey rightKey)
         {
             return leftKey;
+        }
+    }
+
+    /// <summary>
+    /// A key builder that simply returns a left key, right key pair.
+    /// 
+    /// Used when the right source is ordered.
+    /// </summary>
+    /// <typeparam name="TLeftKey"></typeparam>
+    /// <typeparam name="TRightKey"></typeparam>
+    internal class PairOutputKeyBuilder<TLeftKey, TRightKey> : HashJoinOutputKeyBuilder<TLeftKey, TRightKey, Pair<TLeftKey, TRightKey>>
+    {
+        public override Pair<TLeftKey, TRightKey> Combine(TLeftKey leftKey, TRightKey rightKey)
+        {
+            return new Pair<TLeftKey, TRightKey>(leftKey, rightKey);
         }
     }
 
