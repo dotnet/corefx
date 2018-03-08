@@ -1343,7 +1343,7 @@ namespace System.Numerics
 					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash.Add((Byte)(object)this[g]);
+                        hash.Add(this[g]);
                     }
                     return hash.ToHashCode();
                 }
@@ -1352,41 +1352,41 @@ namespace System.Numerics
 					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash.Add((SByte)(object)this[g]);
+                        hash.Add(this[g]);
                     }
                     return hash.ToHashCode();
                 }
                 else if (typeof(T) == typeof(UInt16))
                 {
-                    return HashCode.Combine((UInt16)(object)this[0], (UInt16)(object)this[1], (UInt16)(object)this[2], (UInt16)(object)this[3], (UInt16)(object)this[4], (UInt16)(object)this[5], (UInt16)(object)this[6], (UInt16)(object)this[7]);
+                    return HashCode.Combine(this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7]);
                 }
                 else if (typeof(T) == typeof(Int16))
                 {
-                    return HashCode.Combine((Int16)(object)this[0], (Int16)(object)this[1], (Int16)(object)this[2], (Int16)(object)this[3], (Int16)(object)this[4], (Int16)(object)this[5], (Int16)(object)this[6], (Int16)(object)this[7]);
+                    return HashCode.Combine(this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7]);
                 }
                 else if (typeof(T) == typeof(UInt32))
                 {
-                    return HashCode.Combine((UInt32)(object)this[0], (UInt32)(object)this[1], (UInt32)(object)this[2], (UInt32)(object)this[3]);
+                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
                 }
                 else if (typeof(T) == typeof(Int32))
                 {
-                    return HashCode.Combine((Int32)(object)this[0], (Int32)(object)this[1], (Int32)(object)this[2], (Int32)(object)this[3]);
+                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
                 }
                 else if (typeof(T) == typeof(UInt64))
                 {
-                    return HashCode.Combine((UInt64)(object)this[0], (UInt64)(object)this[1]);
+                    return HashCode.Combine(this[0], this[1]);
                 }
                 else if (typeof(T) == typeof(Int64))
                 {
-                    return HashCode.Combine((Int64)(object)this[0], (Int64)(object)this[1]);
+                    return HashCode.Combine(this[0], this[1]);
                 }
                 else if (typeof(T) == typeof(Single))
                 {
-                    return HashCode.Combine((Single)(object)this[0], (Single)(object)this[1], (Single)(object)this[2], (Single)(object)this[3]);
+                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
                 }
                 else if (typeof(T) == typeof(Double))
                 {
-                    return HashCode.Combine((Double)(object)this[0], (Double)(object)this[1]);
+                    return HashCode.Combine(this[0], this[1]);
                 }
                 else
                 {
@@ -2718,7 +2718,7 @@ namespace System.Numerics
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator ~(Vector<T> value)
         {
-            return allOnes ^ value;
+            return s_allOnes ^ value;
         }
         #endregion Bitwise Operators
 

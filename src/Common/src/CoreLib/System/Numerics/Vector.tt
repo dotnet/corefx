@@ -524,7 +524,7 @@ namespace System.Numerics
 					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash.Add((<#=type.Name#>)(object)this[g]);
+                        hash.Add(this[g]);
                     }
                     return hash.ToHashCode();
 <#					} 
