@@ -402,6 +402,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
             }
         }
@@ -413,6 +414,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
             }
         }
@@ -424,6 +426,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 10, 20), 20);
             }
         }
@@ -441,6 +444,7 @@ namespace System.Net.Sockets.Tests
                     new SendPacketsElement(stream, 30, 10),
                     new SendPacketsElement(stream, 0, 10),
                 };
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, elements, SocketError.Success, 40);
             }
         }
@@ -452,6 +456,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
                 SendPackets(type, new SendPacketsElement(stream, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
             }
@@ -464,6 +469,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
                 SendPackets(type, new SendPacketsElement(stream, 5L, (long)int.MaxValue + 10000),
                     SocketError.InvalidArgument, 0);

@@ -33,6 +33,7 @@ namespace System.Net.Sockets.Tests
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
             {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
                 SendPackets(type, new SendPacketsElement(stream, 5L, (long)uint.MaxValue + 10000),
                     SocketError.InvalidArgument, 0);
