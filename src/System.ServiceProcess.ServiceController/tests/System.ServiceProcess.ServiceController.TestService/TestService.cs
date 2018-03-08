@@ -11,9 +11,9 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private bool _disposed;
+        private Task _waitClientConnect;
         private NamedPipeServerStream _serverStream;
         private readonly Exception _exception;
-        private Task _waitClientConnect;
 
         public TestService(string serviceName, Exception throwException = null)
         {
