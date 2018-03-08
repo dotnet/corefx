@@ -29,6 +29,8 @@
     <Compile Include="ReceiveMessageFrom.cs" />
     <Compile Include="ReceiveMessageFromAsync.cs" />
     <Compile Include="SelectTest.cs" />
+    <Compile Include="SendPacketsAsync.Unix.cs" />
+    <Compile Include="SendPacketsAsync.Windows.cs" />
     <Compile Include="SendPacketsAsync.cs" />
     <Compile Include="SendPacketsElementTest.cs" />
     <Compile Include="SendFile.cs" />
