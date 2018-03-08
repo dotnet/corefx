@@ -299,14 +299,12 @@ namespace System.Security.Cryptography
 
             if (blocksToProcess > 1 && _transform.CanTransformMultipleBlocks)
             {
-                byte[] tempInputBuffer = null;
+                int numWholeBlocksInBytes = blocksToProcess * _inputBlockSize;
+                byte[] tempInputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocksInBytes);
                 byte[] tempOutputBuffer = null;
 
                 try
                 {
-                    int numWholeBlocksInBytes = blocksToProcess * _inputBlockSize;
-                    tempInputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocksInBytes);
-
                     amountRead = useAsync ?
                         await _stream.ReadAsync(new Memory<byte>(tempInputBuffer, _inputBufferIndex, numWholeBlocksInBytes - _inputBufferIndex), cancellationToken) :
                         _stream.Read(tempInputBuffer, _inputBufferIndex, numWholeBlocksInBytes - _inputBufferIndex);
@@ -341,6 +339,7 @@ namespace System.Security.Cryptography
                         numOutputBytes = _transform.TransformBlock(tempInputBuffer, 0, numWholeReadBlocksInBytes, tempOutputBuffer, 0);
                         Buffer.BlockCopy(tempOutputBuffer, 0, buffer, currentOutputIndex, numOutputBytes);
 
+                        // Clear what was written while we know how much that was
                         CryptographicOperations.ZeroMemory(new Span<byte>(tempOutputBuffer, 0, numOutputBytes));
                         ArrayPool<byte>.Shared.Return(tempOutputBuffer);
                         tempOutputBuffer = null;
@@ -351,6 +350,8 @@ namespace System.Security.Cryptography
                 }
                 finally
                 {
+                    // If we rented and then an exception happened we don't know how much was written to,
+                    // clear the whole thing and return it.
                     if (tempOutputBuffer != null)
                     {
                         CryptographicOperations.ZeroMemory(tempOutputBuffer);
@@ -358,12 +359,9 @@ namespace System.Security.Cryptography
                         tempOutputBuffer = null;
                     }
 
-                    if (tempInputBuffer != null)
-                    {
-                        CryptographicOperations.ZeroMemory(tempInputBuffer);
-                        ArrayPool<byte>.Shared.Return(tempInputBuffer);
-                        tempInputBuffer = null;
-                    }
+                    CryptographicOperations.ZeroMemory(new Span<byte>(tempInputBuffer, 0, numWholeBlocksInBytes));
+                    ArrayPool<byte>.Shared.Return(tempInputBuffer);
+                    tempInputBuffer = null;
                 }
             }
 
