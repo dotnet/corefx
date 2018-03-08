@@ -162,7 +162,7 @@ namespace System.Net.Sockets.Tests
                         server.Send(new byte[] { 42 }, SocketFlags.None);
                         server.Send(new byte[] { 43 }, SocketFlags.OutOfBand);
 
-                         // OOB data recieved, but read pointer not at mark
+                        // OOB data recieved, but read pointer not at mark
                         Assert.True(SpinWait.SpinUntil(() =>
                         {
                             Assert.Equal(4, client.IOControl(IOControlCode.OobDataRead, null, siocatmarkResult));
