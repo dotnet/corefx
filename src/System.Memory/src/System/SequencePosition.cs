@@ -57,9 +57,6 @@ namespace System
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashCode.Combine(Segment, Index);
-
-        /// <inheritdoc />
-        public override string ToString() => this == default ? "(default)" : Segment == null ? Index.ToString(): $"{Segment}[{Index}]";
+        public override int GetHashCode() => HashCode.Combine(_object, _integer);
     }
 }
