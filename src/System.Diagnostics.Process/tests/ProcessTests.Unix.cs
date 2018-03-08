@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Security;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -415,12 +416,12 @@ namespace System.Diagnostics.Tests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
-        public void TestChildProcessCleanup()
+        public async Task TestChildProcessCleanup()
         {
             using (Process process = CreateShortProcess())
             {
                 process.Start();
-                bool processReaped = TryWaitProcessReaped(process.Id, timeout: 1000);
+                bool processReaped = await TryWaitProcessReapedAsync(process.Id, timeout: 30000);
                 Assert.True(processReaped);
             }
         }
@@ -435,7 +436,7 @@ namespace System.Diagnostics.Tests
         [InlineData(true, false)]
         [InlineData(true, true)]
         [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
-        public void TestChildProcessCleanupAfterDispose(bool shortProcess, bool enableEvents)
+        public async Task TestChildProcessCleanupAfterDispose(bool shortProcess, bool enableEvents)
         {
             // We test using a long and short process. The long process will terminate after Dispose,
             // The short process will terminate at the same time, possibly revealing race conditions.
@@ -451,7 +452,7 @@ namespace System.Diagnostics.Tests
                     process.EnableRaisingEvents = true;
                 }
             }
-            bool processReaped = TryWaitProcessReaped(processId, timeout: 1000);
+            bool processReaped = await TryWaitProcessReapedAsync(processId, timeout: 30000);
             Assert.True(processReaped);
         }
 
@@ -462,7 +463,7 @@ namespace System.Diagnostics.Tests
             return process;
         }
 
-        private static bool TryWaitProcessReaped(int pid, int timeout)
+        private static async Task<bool> TryWaitProcessReapedAsync(int pid, int timeout)
         {
             const int sleepTime = 50;
             // When the process is reaped, the '/proc/<pid>' directory to disappears.
@@ -472,7 +473,7 @@ namespace System.Diagnostics.Tests
                 procPidExists = Directory.Exists("/proc/" + pid);
                 if (procPidExists)
                 {
-                    Thread.Sleep(sleepTime);
+                    await Task.Delay(sleepTime);
                 }
                 else
                 {
@@ -487,7 +488,7 @@ namespace System.Diagnostics.Tests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Test validates Unix implementation
-        public void TestProcessWaitStateReferenceCount()
+        public async Task TestProcessWaitStateReferenceCount()
         {
             using (var exitedEventSemaphore = new SemaphoreSlim(0, 1))
             {
@@ -513,7 +514,8 @@ namespace System.Diagnostics.Tests
 
                 // Child reaping holds a reference too
                 int referenceCount = -1;
-                for (int i = 0; i < 20; i++)
+                const int sleepTime = 50;
+                for (int i = 0; i < (30000 / sleepTime); i++)
                 {
                     referenceCount = GetWaitStateReferenceCount(waitState);
                     if (referenceCount == 0)
@@ -523,7 +525,7 @@ namespace System.Diagnostics.Tests
                     else
                     {
                         // Process was reaped but ProcessWaitState not unrefed yet
-                        Thread.Sleep(50);
+                        await Task.Delay(sleepTime);
                     }
                 }
                 Assert.Equal(0, referenceCount);
