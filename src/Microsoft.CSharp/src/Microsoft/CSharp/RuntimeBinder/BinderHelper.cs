@@ -246,6 +246,14 @@ namespace Microsoft.CSharp.RuntimeBinder
             DynamicMetaObject argument,
             CSharpArgumentInfo info)
         {
+            if (IsTypeOfStaticCall(parameterIndex, callPayload))
+            {
+                // target type of a static call is used in the binding, 
+                // however it cannot possibly change dynamically
+                // so we do not need to guard on it
+                return BindingRestrictions.Empty;
+            }
+
             // Here we deduce what predicates the DLR can apply to future calls in order to
             // determine whether to use the previously-computed-and-cached delegate, or
             // whether we need to bind the site again. Ideally we would like the 
@@ -253,26 +261,21 @@ namespace Microsoft.CSharp.RuntimeBinder
             // solely on the type of the argument, that is preferable to re-using analysis
             // based on object identity with a previously-analyzed argument.
 
-            // The times when we need to restrict re-use to a particular instance, rather 
-            // than its type, are:
-            // 
-            // * if the argument is a null reference then we have no type information.
-            //
-            // * if we are making a static call then the first argument is
-            //   going to be a Type object. In this scenario we should always check 
-            //   for a specific Type object rather than restricting to the Type type.
-            //
-            // * if the argument was dynamic at compile time and it is a dynamic proxy
-            //   object that the runtime manages, such as COM RCWs and transparent
-            //   proxies.
-            //
-            // ** there is also a case for constant values (such as literals) to use
-            //    something like value restrictions, and that is accomplished in Bind().
+                // The times when we need to restrict re-use to a particular instance, rather 
+                // than its type, are:
+                // 
+                // * if the argument is a null reference then we have no type information.
+                //
+                // * if the argument was dynamic at compile time and it is a dynamic proxy
+                //   object that the runtime manages, such as COM RCWs and transparent
+                //   proxies.
+                //
+                // ** there is also a case for constant values (such as literals) to use
+                //    something like value restrictions, and that is accomplished in Bind().
 
-            bool useValueRestriction =
-                argument.Value == null ||
-                IsTypeOfStaticCall(parameterIndex, callPayload) ||
-                IsDynamicallyTypedRuntimeProxy(argument, info);
+                bool useValueRestriction =
+                    argument.Value == null ||
+                    IsDynamicallyTypedRuntimeProxy(argument, info);
 
             return useValueRestriction ?
                     BindingRestrictions.GetInstanceRestriction(argument.Expression, argument.Value) :
