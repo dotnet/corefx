@@ -93,8 +93,7 @@ namespace System.ServiceProcess.Tests
             _testService.Client = null;
             _testService.Client.Connect();
 
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            Assert.Equal((int)PipeMessageByteCode.Start, _testService.GetByte());
+            Assert.Equal((int)(PipeMessageByteCode.Connected | PipeMessageByteCode.Start), _testService.GetByte() | _testService.GetByte());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();

@@ -11,7 +11,6 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private bool _disposed;
-        private object _writeLock = new object();
         private NamedPipeServerStream _serverStream;
         private readonly Exception _exception;
         private Task _waitClientConnect;
@@ -97,16 +96,13 @@ namespace System.ServiceProcess.Tests
             {
                 Task writeCompleted;
                 const int WriteTimeout = 60000;
-                lock (_writeLock)
+                if (code == PipeMessageByteCode.OnCustomCommand)
                 {
-                    if (code == PipeMessageByteCode.OnCustomCommand)
-                    {
-                        writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
-                    }
-                    else
-                    {
-                        writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);
-                    }
+                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
+                }
+                else
+                {
+                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);
                 }
                 await writeCompleted.TimeoutAfter(WriteTimeout).ConfigureAwait(false);
             }
