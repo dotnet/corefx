@@ -450,6 +450,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_ReceiveInvalidSetCookieHeader_ValidCookiesAdded()
         {
+            if (IsNetfxHandler)
+            {
+                // NetfxHandler incorrectly only processes one valid cookie 
+                return;
+            }
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
