@@ -20,13 +20,9 @@ namespace System
         public static System.ReadOnlyMemory<char> AsMemory(this string text) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start, int length) { throw null; }
-        public static System.ReadOnlyMemory<T> AsReadOnlyMemory<T>(this System.Memory<T> memory) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start, int length) { throw null; }
-        public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this System.ArraySegment<T> arraySegment) { throw null; }
-        public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this System.Span<T> span) { throw null; }
-        public static System.ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
@@ -94,7 +90,6 @@ namespace System
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span) { throw null; }
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span, char trimChar) { throw null; }
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> trimChars) { throw null; }
-        public static bool TryGetString(this System.ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length) { throw null; }
     }
     public readonly partial struct Memory<T>
     {
@@ -118,8 +113,8 @@ namespace System
         public System.Memory<T> Slice(int start) { throw null; }
         public System.Memory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
-        public bool TryGetArray(out System.ArraySegment<T> arraySegment) { throw null; }
     }
     public readonly partial struct ReadOnlyMemory<T>
     {
@@ -142,6 +137,7 @@ namespace System
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
     }
     public readonly ref partial struct ReadOnlySpan<T>
@@ -318,7 +314,8 @@ namespace System.Buffers
         public long Length { get { throw null; } }
         public System.SequencePosition Start { get { throw null; } }
         public System.Buffers.ReadOnlySequence<T>.Enumerator GetEnumerator() { throw null; }
-        public System.SequencePosition GetPosition(System.SequencePosition origin, long offset) { throw null; }
+        public System.SequencePosition GetPosition(long offset) { throw null; }
+        public System.SequencePosition GetPosition(long offset, System.SequencePosition origin) { throw null; }
         public System.Buffers.ReadOnlySequence<T> Slice(int start, int length) { throw null; }
         public System.Buffers.ReadOnlySequence<T> Slice(int start, System.SequencePosition end) { throw null; }
         public System.Buffers.ReadOnlySequence<T> Slice(long start) { throw null; }
@@ -530,6 +527,7 @@ namespace System.Runtime.InteropServices
             where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
         public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory, out int index, out int length)
             where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
+        public static bool TryGetString(System.ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length) { throw null; }
     }
 
     public static partial class SequenceMarshal

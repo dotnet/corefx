@@ -132,9 +132,9 @@ namespace System.Buffers
             }
             else if (typeof(T) == typeof(char))
             {
-                // TODO: MemoryMarshal.TryGetString -- doesn't exist?
-                // https://github.com/dotnet/corefx/issues/27451
-                MemoryExtensions.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length);
+                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length))
+                    ThrowHelper.ThrowInvalidOperationException();
+
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
                 _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
             }
@@ -311,9 +311,14 @@ namespace System.Buffers
         public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
+        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the start of the sequence.
+        /// </summary>
+        public SequencePosition GetPosition(long offset) => GetPosition(offset, _sequenceStart);
+
+        /// <summary>
         /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the <paramref name="origin"/>
         /// </summary>
-        public SequencePosition GetPosition(SequencePosition origin, long offset)
+        public SequencePosition GetPosition(long offset, SequencePosition origin)
         {
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);

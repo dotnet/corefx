@@ -72,6 +72,9 @@ namespace System.IO
             if (IsPathFullyQualified(path))
                 return GetFullPath(path);
 
+            if (PathInternal.IsEffectivelyEmpty(path))
+                return basePath;
+
             int length = path.Length;
             string combinedPath = null;
 
@@ -80,14 +83,14 @@ namespace System.IO
                 // Path is current drive rooted i.e. starts with \:
                 // "\Foo" and "C:\Bar" => "C:\Foo"
                 // "\Foo" and "\\?\C:\Bar" => "\\?\C:\Foo"
-                combinedPath = Join(GetPathRoot(basePath.AsSpan()), path);
+                combinedPath = Join(GetPathRoot(basePath.AsSpan()), path.AsSpan().Slice(1)); // Cut the separator to ensure we don't end up with two separators when joining with the root.
             }
             else if (length >= 2 && PathInternal.IsValidDriveChar(path[0]) && path[1] == PathInternal.VolumeSeparatorChar)
             {
                 // Drive relative paths
                 Debug.Assert(length == 2 || !PathInternal.IsDirectorySeparator(path[2]));
 
-                if (StringSpanHelpers.Equals(GetVolumeName(path), GetVolumeName(basePath)))
+                if (GetVolumeName(path).EqualsOrdinal(GetVolumeName(basePath)))
                 {
                     // Matching root
                     // "C:Foo" and "C:\Bar" => "C:\Bar\Foo"
@@ -118,7 +121,8 @@ namespace System.IO
             // to GetFullPath() won't do anything by design. Additionally, GetFullPathName() in
             // Windows doesn't root them properly. As such we need to manually remove segments.
             return PathInternal.IsDevice(combinedPath)
-                ? RemoveRelativeSegments(combinedPath, PathInternal.GetRootLength(combinedPath))
+                // Paths at this point are in the form of \\?\C:\.\tmp we skip to the last character of the root when calling RemoveRelativeSegments to remove relative paths in such cases.
+                ? RemoveRelativeSegments(combinedPath, PathInternal.GetRootLength(combinedPath) - 1)
                 : GetFullPath(combinedPath);
         }
 
@@ -237,11 +241,11 @@ namespace System.IO
         {
             bool isDevice = PathInternal.IsDevice(path);
 
-            if (!isDevice && StringSpanHelpers.Equals(path.Slice(0, 2), @"\\") )
+            if (!isDevice && path.Slice(0, 2).EqualsOrdinal(@"\\") )
                 return 2;
             else if (isDevice && path.Length >= 8
-                && (StringSpanHelpers.Equals(path.Slice(0, 8), PathInternal.UncExtendedPathPrefix)
-                || StringSpanHelpers.Equals(path.Slice(5, 4), @"UNC\")))
+                && (path.Slice(0, 8).EqualsOrdinal(PathInternal.UncExtendedPathPrefix)
+                || path.Slice(5, 4).EqualsOrdinal(@"UNC\")))
                 return 8;
 
             return -1;

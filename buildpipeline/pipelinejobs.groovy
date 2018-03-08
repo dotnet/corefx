@@ -24,11 +24,11 @@ def configurations = [
     ['TGroup':"netcoreapp", 'Pipeline':linPipeline, 'Name':'Linux' ,'ForPR':"Release-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':centos6Pipeline, 'Name':'CentOS.6' ,'ForPR':"", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':alpine36Pipeline, 'Name':'Alpine.3.6' ,'ForPR':"Debug-x64", 'Arch':['x64']],
-    ['TGroup':"netcoreapp", 'Pipeline':osxPipeline, 'Name':'OSX', 'ForPR':"Debug-x64", 'Arch':['x64']],
+ //   ['TGroup':"netcoreapp", 'Pipeline':osxPipeline, 'Name':'OSX', 'ForPR':"Debug-x64", 'Arch':['x64']],
     ['TGroup':"netcoreapp", 'Pipeline':winPipeline, 'Name':'Windows' , 'ForPR':"Debug-x64|Release-x86"],
     ['TGroup':"netfx",      'Pipeline':winPipeline, 'Name':'NETFX', 'ForPR':"Release-x86"],
-//  ['TGroup':"uap",        'Pipeline':winPipeline, 'Name':'UWP CoreCLR', 'ForPR':"Debug-x64"],
-//  ['TGroup':"uapaot",     'Pipeline':winPipeline, 'Name':'UWP NETNative', 'ForPR':"Release-x86"],
+    ['TGroup':"uap",        'Pipeline':winPipeline, 'Name':'UWP CoreCLR', 'ForPR':"Debug-x64"],
+    ['TGroup':"uapaot",     'Pipeline':winPipeline, 'Name':'UWP NETNative', 'ForPR':"Release-x86"],
     ['TGroup':"all",        'Pipeline':winPipeline, 'Name':'Packaging All Configurations', 'ForPR':"Debug-x64"],
 ]
 

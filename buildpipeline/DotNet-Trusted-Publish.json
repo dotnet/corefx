@@ -19,7 +19,7 @@
         "zipSources": "true",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
-        "esrpSigning": "true"
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -530,6 +530,10 @@
     },
     "PB_BuildOutputManifestArguments": {
       "value": "/p:ManifestBuildId=$(OfficialBuildId) /p:ManifestBranch=$(SourceBranch) /p:ManifestCommit=$(SourceVersion)"
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "retentionRules": [

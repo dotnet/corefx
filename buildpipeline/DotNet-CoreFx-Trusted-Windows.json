@@ -81,7 +81,7 @@
         "zipSources": "false",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
-        "esrpSigning": "true"
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -411,6 +411,14 @@
       "value": null,
       "isSecret": true
     },
+    "HelixApiAccessKey": {
+      "value": null,
+      "isSecret": true
+    },
+    "OutputCloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)",
       "allowOverride": true
@@ -524,6 +532,10 @@
     },
     "PB_AssetRootUrl": {
       "value": ""
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "demands": [

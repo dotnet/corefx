@@ -42,16 +42,34 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)] // On Unix domain socket should have different location in this case.
-        public static void CreateServerNotCurrentUserOnly_ClientCurrentUserOnly_ThrowsTimeout_OnUnix()
+        public static void CreateServer_ConnectClient_UsingUnixAbsolutePath()
         {
-            string name = GetUniquePipeName();
-            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte))
+            string name = Path.Combine("/tmp", GetUniquePipeName());
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             {
                 using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
-                { 
-                    Assert.Throws<TimeoutException>(() => client.Connect(1));
+                {
+                    client.Connect();
                 }
+            }
+        }
+
+        [Theory]
+        [InlineData(PipeOptions.None, PipeOptions.CurrentUserOnly)]
+        [InlineData(PipeOptions.CurrentUserOnly, PipeOptions.None)]
+        public static void Connection_UnderSameUser_SingleSide_CurrentUserOnly_Works(PipeOptions serverPipeOptions, PipeOptions clientPipeOptions)
+        {
+            string name = GetUniquePipeName();
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, serverPipeOptions))
+            using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, clientPipeOptions))
+            {
+                Task[] tasks = new[]
+                {
+                    Task.Run(() => server.WaitForConnection()),
+                    Task.Run(() => client.Connect())
+                };
+
+                Assert.True(Task.WaitAll(tasks, 20_000));
             }
         }
 
