@@ -1576,7 +1576,7 @@ namespace System.Net.Sockets
         public static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, Action<long, SocketError> callback) =>
             SendFileAsync(handle, fileStream, 0, (int)fileStream.Length, callback);
 
-        private static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, long offset, long count, Action<long, SocketError> callback)
+        private static SocketError SendFileAsync(SafeCloseSocket handle, FileStream fileStream, long offset, int count, Action<long, SocketError> callback)
         {
             long bytesSent;
             SocketError socketError = handle.AsyncContext.SendFileAsync(fileStream.SafeFileHandle, offset, count, out bytesSent, callback);
@@ -1607,13 +1607,13 @@ namespace System.Net.Sockets
                         else
                         {
                             FileStream fs = files[i] ?? e.FileStream;
-                            if (e.LongCount > fs.Length - e.LongOffset)
+                            if (e.Count > fs.Length - e.LongOffset)
                             {
                                 throw new ArgumentOutOfRangeException();
                             }
 
                             var tcs = new TaskCompletionSource<SocketError>();
-                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.LongCount > 0 ? e.LongCount : fs.Length - e.LongOffset, (transferred, se) =>
+                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.Count > 0 ? e.Count : (int)(fs.Length - e.LongOffset), (transferred, se) =>
                             {
                                 bytesTransferred[0] += transferred;
                                 tcs.TrySetResult(se);
