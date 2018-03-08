@@ -9,11 +9,6 @@ namespace System.Net.Sockets
     // Class that wraps the semantics of a Winsock TRANSMIT_PACKETS_ELEMENTS struct.
     public class SendPacketsElement
     {
-        //internal string _filePath;
-        //internal FileStream _fileStream;
-        //internal byte[] _buffer;
-        //internal long _offset;
-        //internal long _count;
         internal SendPacketsElementFlags _flags;
 
         // Constructors for file elements.
