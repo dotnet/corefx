@@ -1607,13 +1607,13 @@ namespace System.Net.Sockets
                         else
                         {
                             FileStream fs = files[i] ?? e.FileStream;
-                            if (e.Count > fs.Length - e.Offset)
+                            if (e.Count > fs.Length - e.LongOffset)
                             {
                                 throw new ArgumentOutOfRangeException();
                             }
 
                             var tcs = new TaskCompletionSource<SocketError>();
-                            error = SendFileAsync(socket.SafeHandle, fs, e.Offset, e.Count > 0 ? e.Count : (int)(fs.Length - e.Offset), (transferred, se) =>
+                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.Count > 0 ? e.Count : (int)(fs.Length - e.LongOffset), (transferred, se) =>
                             {
                                 bytesTransferred[0] += transferred;
                                 tcs.TrySetResult(se);
