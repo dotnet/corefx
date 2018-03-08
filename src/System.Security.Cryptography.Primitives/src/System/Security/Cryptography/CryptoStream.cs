@@ -272,12 +272,17 @@ namespace System.Security.Cryptography
                     bytesToDeliver -= _outputBufferIndex;
                     currentOutputIndex += _outputBufferIndex;
                     _outputBufferIndex = 0;
+                    CryptographicOperations.ZeroMemory(_outputBuffer);
                 }
                 else
                 {
                     Buffer.BlockCopy(_outputBuffer, 0, buffer, offset, count);
                     Buffer.BlockCopy(_outputBuffer, count, _outputBuffer, 0, _outputBufferIndex - count);
                     _outputBufferIndex -= count;
+
+                    int toClear = _outputBuffer.Length - _outputBufferIndex;
+                    CryptographicOperations.ZeroMemory(new Span<byte>(_outputBuffer, _outputBufferIndex, toClear));
+
                     return (count);
                 }
             }
@@ -321,6 +326,7 @@ namespace System.Security.Cryptography
                     {
                         // Copy any held data into tempInputBuffer now that we know we're proceeding
                         Buffer.BlockCopy(_inputBuffer, 0, tempInputBuffer, 0, _inputBufferIndex);
+                        CryptographicOperations.ZeroMemory(new Span<byte>(_inputBuffer, 0, _inputBufferIndex));
                         amountRead += _inputBufferIndex;
                         _inputBufferIndex = 0;
                         
@@ -378,11 +384,14 @@ namespace System.Security.Cryptography
                     if (amountRead == 0) goto ProcessFinalBlock;
                     _inputBufferIndex += amountRead;
                 }
+
                 numOutputBytes = _transform.TransformBlock(_inputBuffer, 0, _inputBlockSize, _outputBuffer, 0);
                 _inputBufferIndex = 0;
+
                 if (bytesToDeliver >= numOutputBytes)
                 {
                     Buffer.BlockCopy(_outputBuffer, 0, buffer, currentOutputIndex, numOutputBytes);
+                    CryptographicOperations.ZeroMemory(new Span<byte>(_outputBuffer, 0, numOutputBytes));
                     currentOutputIndex += numOutputBytes;
                     bytesToDeliver -= numOutputBytes;
                 }
@@ -391,6 +400,8 @@ namespace System.Security.Cryptography
                     Buffer.BlockCopy(_outputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
                     _outputBufferIndex = numOutputBytes - bytesToDeliver;
                     Buffer.BlockCopy(_outputBuffer, bytesToDeliver, _outputBuffer, 0, _outputBufferIndex);
+                    int toClear = _outputBuffer.Length - _outputBufferIndex;
+                    CryptographicOperations.ZeroMemory(new Span<byte>(_outputBuffer, _outputBufferIndex, toClear));
                     return count;
                 }
             }
@@ -411,6 +422,8 @@ namespace System.Security.Cryptography
                 Buffer.BlockCopy(_outputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
                 _outputBufferIndex -= bytesToDeliver;
                 Buffer.BlockCopy(_outputBuffer, bytesToDeliver, _outputBuffer, 0, _outputBufferIndex);
+                int toClear = _outputBuffer.Length - _outputBufferIndex;
+                CryptographicOperations.ZeroMemory(new Span<byte>(_outputBuffer, _outputBufferIndex, toClear));
                 return (count);
             }
             else
@@ -418,6 +431,7 @@ namespace System.Security.Cryptography
                 Buffer.BlockCopy(_outputBuffer, 0, buffer, currentOutputIndex, _outputBufferIndex);
                 bytesToDeliver -= _outputBufferIndex;
                 _outputBufferIndex = 0;
+                CryptographicOperations.ZeroMemory(_outputBuffer);
                 return (count - bytesToDeliver);
             }
         }
