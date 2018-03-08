@@ -18,8 +18,8 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_Unix_FileLargeCount_Throws(SocketImplementationType type)
         {
             // Length is validated on Send
-            Assert.Throws<OverflowException>(() => SendPackets(type,
-                new SendPacketsElement(TestFileName, 5L, (long)uint.MaxValue + 10000), SocketError.InvalidArgument, 0));
+            SendPackets(type, new SendPacketsElement(TestFileName, 5L, (long)uint.MaxValue + 10000),
+                SocketError.InvalidArgument, 0);
         }
 
         #endregion Files
