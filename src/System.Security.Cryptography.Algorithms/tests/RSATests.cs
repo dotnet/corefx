@@ -197,8 +197,6 @@ namespace System.Security.Cryptography.Algorithms.Tests
         public void RSAEncryptionPadding_Equality()
         {
             var paddingType = typeof(RSAEncryptionPadding);
-            var ctorTypes = new Type[] { typeof(RSAEncryptionPaddingMode), typeof(HashAlgorithmName) };
-            ConstructorInfo paddingCtor = paddingType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, ctorTypes, null);
 
             var padding0 = RSAEncryptionPadding.Pkcs1;
             var padding1 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.MD5);

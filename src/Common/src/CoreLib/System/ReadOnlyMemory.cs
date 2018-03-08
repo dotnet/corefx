@@ -311,11 +311,7 @@ namespace System
 
         /// <summary>Returns the hash code for this <see cref="ReadOnlyMemory{T}"/></summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override int GetHashCode() => HashCode.Combine(
-            _object,
-            _index,
-            _length
-        );
+        public override int GetHashCode() => HashCode.Combine(_object, _index, _length);
 
         /// <summary>Gets the state of the memory as individual fields.</summary>
         /// <param name="start">The offset.</param>

@@ -67,12 +67,12 @@ namespace System.Numerics
         /// Returns a vector containing all zeroes.
         /// </summary>
         public static Vector<T> Zero
-        { 
+        {
             [Intrinsic]
             get
             {
                 return s_zero;
-            } 
+            }
         }
         private static readonly Vector<T> s_zero = new Vector<T>();
 
@@ -83,7 +83,7 @@ namespace System.Numerics
         {
             [Intrinsic]
             get
-            { 
+            {
                 return s_one;
             }
         }
