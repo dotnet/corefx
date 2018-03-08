@@ -75,7 +75,7 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                SendPacketsElement element = new SendPacketsElement(new byte[10], -1, 11);
+                new SendPacketsElement(new byte[10], -1, 11);
             });
         }
 
@@ -185,7 +185,7 @@ namespace System.Net.Sockets.Tests
         public void FileCtorEmpty_Success()
         {
             // An exception will happen on send if this file doesn't exist
-            SendPacketsElement element = new SendPacketsElement(String.Empty);
+            SendPacketsElement element = new SendPacketsElement(string.Empty);
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(0, element.Offset);
@@ -231,6 +231,17 @@ namespace System.Net.Sockets.Tests
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement("SomeFileName", 0, 0); // Send whole file
+            Assert.Null(element.FileStream);
+            Assert.Null(element.Buffer);
+            Assert.Equal(0, element.Offset);
+            Assert.Equal(0, element.Count);
+            Assert.Equal(0, element.LongOffset);
+            Assert.Equal(0, element.LongCount);
+            Assert.False(element.EndOfPacket);
+            Assert.Equal("SomeFileName", element.FilePath);
+
+            // An exception will happen on send if this file doesn't exist
+            element = new SendPacketsElement("SomeFileName", 0L, 0L); // Send whole file
             Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(0, element.Offset);
@@ -367,107 +378,205 @@ namespace System.Net.Sockets.Tests
 
         #endregion File
 
-        //#region FileStream
+        #region FileStream
 
-        //[Fact]
-        //public void FileStreamCtorNull_Throws()
-        //{
-        //    Assert.Throws<ArgumentNullException>(() =>
-        //    {
-        //        SendPacketsElement element = new SendPacketsElement((FileStream)null);
-        //    });
-        //}
+        [Fact]
+        public void FileStreamCtorNull_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new SendPacketsElement((FileStream)null);
+            });
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new SendPacketsElement((FileStream)null, 0, 0);
+            });
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new SendPacketsElement((FileStream)null, 0, 0, true);
+            });
+        }
 
-        //[Fact]
-        //public void FileStreamCtorEmpty_Success()
-        //{
-        //    // An exception will happen on send if this file doesn't exist
-        //    SendPacketsElement element = new SendPacketsElement(String.Empty);
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(0, element.Offset);
-        //    Assert.Equal(0, element.Count);
-        //    Assert.False(element.EndOfPacket);
-        //    Assert.Equal(String.Empty, element.FilePath);
-        //}
+        [Fact]
+        public void FileStreamCtorNormal_Success()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                SendPacketsElement element = new SendPacketsElement(stream);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(0, element.Offset);
+                Assert.Equal(0, element.Count);
+                Assert.Equal(0, element.LongOffset);
+                Assert.Equal(0, element.LongCount);
+                Assert.False(element.EndOfPacket);
+            }
+        }
 
-        //[Fact]
-        //public void FileCtorWhiteSpace_Success()
-        //{
-        //    // An exception will happen on send if this file doesn't exist
-        //    SendPacketsElement element = new SendPacketsElement("   \t ");
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(0, element.Offset);
-        //    Assert.Equal(0, element.Count);
-        //    Assert.False(element.EndOfPacket);
-        //    Assert.Equal("   \t ", element.FilePath);
-        //}
+        [Fact]
+        public void FileStreamCtorZeroCountLength_Success()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                SendPacketsElement element = new SendPacketsElement(stream, 0, 0); // Send whole file
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(0, element.Offset);
+                Assert.Equal(0, element.Count);
+                Assert.Equal(0, element.LongOffset);
+                Assert.Equal(0, element.LongCount);
+                Assert.False(element.EndOfPacket);
 
-        //[Fact]
-        //public void FileCtorNormal_Success()
-        //{
-        //    // An exception will happen on send if this file doesn't exist
-        //    SendPacketsElement element = new SendPacketsElement("SomeFileName"); // Send whole file
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(0, element.Offset);
-        //    Assert.Equal(0, element.Count);
-        //    Assert.False(element.EndOfPacket);
-        //    Assert.Equal("SomeFileName", element.FilePath);
-        //}
+                element = new SendPacketsElement(stream, 0L, 0L); // Send whole file
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(0, element.Offset);
+                Assert.Equal(0, element.Count);
+                Assert.Equal(0, element.LongOffset);
+                Assert.Equal(0, element.LongCount);
+                Assert.False(element.EndOfPacket);
+            }
+        }
 
-        //[Fact]
-        //public void FileCtorZeroCountLength_Success()
-        //{
-        //    // An exception will happen on send if this file doesn't exist
-        //    SendPacketsElement element = new SendPacketsElement("SomeFileName", 0, 0); // Send whole file
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(0, element.Offset);
-        //    Assert.Equal(0, element.Count);
-        //    Assert.False(element.EndOfPacket);
-        //    Assert.Equal("SomeFileName", element.FilePath);
-        //}
+        [Fact]
+        public void FileStreamCtorNegOffset_ArgumentOutOfRangeException()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, -1, 11);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, -1, 11, true);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, -1L, 11);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, -1L, 11, true);
+                });
+            }
+        }
 
-        //[Fact]
-        //public void FileCtorNegOffset_ArgumentOutOfRangeException()
-        //{
-        //    Assert.Throws<ArgumentOutOfRangeException>(() =>
-        //    {
-        //        SendPacketsElement element = new SendPacketsElement("SomeFileName", -1, 11);
-        //    });
-        //}
+        [Fact]
+        public void FileStreamCtorNegCount_ArgumentOutOfRangeException()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, 0, -1);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, 0, -1, true);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, 0L, -1);
+                });
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    new SendPacketsElement(stream, 0L, -1, true);
+                });
+            }
+        }
 
-        //[Fact]
-        //public void FileCtorNegCount_ArgumentOutOfRangeException()
-        //{
-        //    Assert.Throws<ArgumentOutOfRangeException>(() =>
-        //    {
-        //        SendPacketsElement element = new SendPacketsElement("SomeFileName", 0, -1);
-        //    });
-        //}
+        // File lengths are validated on send
 
-        //// File lengths are validated on send
+        [Fact]
+        public void FileStreamCtorEndOfBufferTrue_Success()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                var element = new SendPacketsElement(stream, 2, 8, true);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(2, element.Offset);
+                Assert.Equal(8, element.Count);
+                Assert.Equal(2, element.LongOffset);
+                Assert.Equal(8, element.LongCount);
+                Assert.True(element.EndOfPacket);
 
-        //[Fact]
-        //public void FileCtorEndOfBufferTrue_Success()
-        //{
-        //    SendPacketsElement element = new SendPacketsElement("SomeFileName", 2, 8, true);
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(2, element.Offset);
-        //    Assert.Equal(8, element.Count);
-        //    Assert.True(element.EndOfPacket);
-        //    Assert.Equal("SomeFileName", element.FilePath);
-        //}
+                element = new SendPacketsElement(stream, 2L, 8L, true);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(2, element.Offset);
+                Assert.Equal(8, element.Count);
+                Assert.Equal(2, element.LongOffset);
+                Assert.Equal(8, element.LongCount);
+                Assert.True(element.EndOfPacket);
 
-        //[Fact]
-        //public void FileCtorEndOfBufferFalse_Success()
-        //{
-        //    SendPacketsElement element = new SendPacketsElement("SomeFileName", 6, 4, false);
-        //    Assert.Null(element.Buffer);
-        //    Assert.Equal(6, element.Offset);
-        //    Assert.Equal(4, element.Count);
-        //    Assert.False(element.EndOfPacket);
-        //    Assert.Equal("SomeFileName", element.FilePath);
-        //}
+                element = new SendPacketsElement(stream, (long)int.MaxValue + 2, (long)int.MaxValue + 8, true);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Throws<OverflowException>(() =>
+                {
+                    var ofset = element.Offset;
+                });
+                Assert.Throws<OverflowException>(() =>
+                {
+                    var count = element.Count;
+                });
+                Assert.Equal((long)int.MaxValue + 2, element.LongOffset);
+                Assert.Equal((long)int.MaxValue + 8, element.LongCount);
+                Assert.True(element.EndOfPacket);
+            }
+        }
 
-        //#endregion File
+        [Fact]
+        public void FileStreamCtorEndOfBufferFalse_Success()
+        {
+            using(var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose))
+            {
+                SendPacketsElement element = new SendPacketsElement(stream, 6, 4, false);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(6, element.Offset);
+                Assert.Equal(4, element.Count);
+                Assert.Equal(6, element.LongOffset);
+                Assert.Equal(4, element.LongCount);
+                Assert.False(element.EndOfPacket);
+
+                element = new SendPacketsElement(stream, 6L, 4L, false);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Equal(6, element.Offset);
+                Assert.Equal(4, element.Count);
+                Assert.Equal(6, element.LongOffset);
+                Assert.Equal(4, element.LongCount);
+                Assert.False(element.EndOfPacket);
+
+                element = new SendPacketsElement(stream, (long)int.MaxValue + 6, (long)int.MaxValue + 4, false);
+                Assert.Null(element.FilePath);
+                Assert.Equal(element.FileStream, stream);
+                Assert.Null(element.Buffer);
+                Assert.Throws<OverflowException>(() =>
+                {
+                    var ofset = element.Offset;
+                });
+                Assert.Throws<OverflowException>(() =>
+                {
+                    var count = element.Count;
+                });
+                Assert.Equal((long)int.MaxValue + 6, element.LongOffset);
+                Assert.Equal((long)int.MaxValue + 4, element.LongCount);
+                Assert.False(element.EndOfPacket);
+            }
+        }
+
+        #endregion FileStream
     }
 }

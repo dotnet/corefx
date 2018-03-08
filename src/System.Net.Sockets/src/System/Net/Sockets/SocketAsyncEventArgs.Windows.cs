@@ -636,7 +636,7 @@ namespace System.Net.Sockets
                 {
                     foreach (SendPacketsElement spe in sendPacketsElementsCopy)
                     {
-                        if (spe != null && spe.FilePath != null)
+                        if (spe?.FilePath != null)
                         {
                             // Create a FileStream to open the file.
                             _sendPacketsFileStreams[index] =
@@ -650,7 +650,7 @@ namespace System.Net.Sockets
                 catch
                 {
                     // Got an exception opening a file - close any open streams, then throw.
-                    for (int i = index; i >= 0; i--)
+                    for (int i = index - 1; i >= 0; i--)
                         _sendPacketsFileStreams[i].Dispose();
                     _sendPacketsFileStreams = null;
                     throw;
@@ -961,7 +961,7 @@ namespace System.Net.Sockets
             int index = 1;
             foreach (SendPacketsElement spe in sendPacketsElementsCopy)
             {
-                if (spe != null && spe.Buffer != null && spe.Count > 0)
+                if (spe?.Buffer != null && spe.Count > 0)
                 {
                     Debug.Assert(!_multipleBufferGCHandles[index].IsAllocated);
                     _multipleBufferGCHandles[index] = GCHandle.Alloc(spe.Buffer, GCHandleType.Pinned);
