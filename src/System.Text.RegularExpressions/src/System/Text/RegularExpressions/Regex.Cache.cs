@@ -175,10 +175,10 @@ namespace System.Text.RegularExpressions
 #endif
             public readonly int Capsize;
             public readonly ExclusiveReference Runnerref;
-            public readonly SharedReference ReplRef;
+            public readonly WeakReference<RegexReplacement> ReplRef;
 
             public CachedCodeEntry(CachedCodeEntryKey key, Hashtable capnames, string[] capslist, RegexCode code, 
-                Hashtable caps, int capsize, ExclusiveReference runner, SharedReference repl)
+                Hashtable caps, int capsize, ExclusiveReference runner, WeakReference<RegexReplacement> replref)
             {
                 Key = key;
                 Capnames = capnames;
@@ -189,7 +189,7 @@ namespace System.Text.RegularExpressions
                 Capsize = capsize;
 
                 Runnerref = runner;
-                ReplRef = repl;
+                ReplRef = replref;
             }
 
 #if FEATURE_COMPILED

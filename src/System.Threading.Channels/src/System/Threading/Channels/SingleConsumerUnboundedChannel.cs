@@ -59,8 +59,8 @@ namespace System.Threading.Channels
             internal UnboundedChannelReader(SingleConsumerUnboundedChannel<T> parent)
             {
                 _parent = parent;
-                _readerSingleton = new AsyncOperation<T>(parent._runContinuationsAsynchronously) { UnsafeState = ResettableValueTaskSource.States.Released };
-                _waiterSingleton = new AsyncOperation<bool>(parent._runContinuationsAsynchronously) { UnsafeState = ResettableValueTaskSource.States.Released };
+                _readerSingleton = new AsyncOperation<T>(parent._runContinuationsAsynchronously, pooled: true);
+                _waiterSingleton = new AsyncOperation<bool>(parent._runContinuationsAsynchronously, pooled: true);
             }
 
             public override Task Completion => _parent._completion.Task;
@@ -160,7 +160,7 @@ namespace System.Threading.Channels
                     {
                         return parent._doneWriting != ChannelUtilities.s_doneWritingSentinel ?
                             new ValueTask<bool>(Task.FromException<bool>(parent._doneWriting)) :
-                            new ValueTask<bool>(false);
+                            default;
                     }
 
                     // Try to use the singleton waiter.  If it's currently being used, then the channel
@@ -252,7 +252,7 @@ namespace System.Threading.Channels
                 if (blockedReader != null)
                 {
                     error = ChannelUtilities.CreateInvalidCompletionException(error);
-                    blockedReader.Fail(error);
+                    blockedReader.TrySetException(error);
                 }
 
                 // Complete a waiting reader if necessary.  (We really shouldn't have both a blockedReader
@@ -261,11 +261,11 @@ namespace System.Threading.Channels
                 {
                     if (error != null)
                     {
-                        waitingReader.Fail(error);
+                        waitingReader.TrySetException(error);
                     }
                     else
                     {
-                        waitingReader.Success(item: false);
+                        waitingReader.TrySetResult(item: false);
                     }
                 }
 
@@ -314,8 +314,9 @@ namespace System.Threading.Channels
 
                     // If we have a waiting reader, notify it that an item was written and exit.
                     if (waitingReader != null)
-                    {                // If we get here, we grabbed a waiting reader.
-                        waitingReader.Success(item: true);
+                    {
+                        // If we get here, we grabbed a waiting reader.
+                        waitingReader.TrySetResult(item: true);
                         return true;
                     }
 
@@ -324,7 +325,7 @@ namespace System.Threading.Channels
                     // have been completed due to cancellation by the time we get here.  In that case,
                     // we'll loop around to try again so as not to lose the item being written.
                     Debug.Assert(blockedReader != null);
-                    if (blockedReader.Success(item))
+                    if (blockedReader.TrySetResult(item))
                     {
                         return true;
                     }
@@ -338,7 +339,7 @@ namespace System.Threading.Channels
                     cancellationToken.IsCancellationRequested ? new ValueTask<bool>(Task.FromCanceled<bool>(cancellationToken)) :
                     doneWriting == null ? new ValueTask<bool>(true) :
                     doneWriting != ChannelUtilities.s_doneWritingSentinel ? new ValueTask<bool>(Task.FromException<bool>(doneWriting)) :
-                    new ValueTask<bool>(false);
+                    default;
             }
 
             public override ValueTask WriteAsync(T item, CancellationToken cancellationToken) =>
