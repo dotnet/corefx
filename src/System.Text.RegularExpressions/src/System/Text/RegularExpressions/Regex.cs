@@ -138,18 +138,18 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                caps = cached._caps;
-                capnames = cached._capnames;
-                capslist = cached._capslist;
-                capsize = cached._capsize;
-                _code = cached._code;
+                caps = cached.Caps;
+                capnames = cached.Capnames;
+                capslist = cached.Capslist;
+                capsize = cached.Capsize;
+                _code = cached.Code;
 #if FEATURE_COMPILED
-                factory = cached._factory;
+                factory = cached.Factory;
 #endif
 
                 // Cache runner and replacement
-                _runnerref = cached._runnerref;
-                _replref = cached._replref;
+                _runnerref = cached.Runnerref;
+                _replref = cached.ReplRef;
                 _refsInitialized = true;
             }
 
