@@ -54,6 +54,14 @@ namespace System.Configuration.Tests
         }
 
         [Fact]
+        public void DefaultConstructorEqualHashCodes()
+        {
+            var ElementOne = new SettingElement();
+            var ElementTwo = new SettingElement();
+            Assert.Equal(ElementOne.GetHashCode(), ElementTwo.GetHashCode());
+        }
+
+        [Fact]
         public void NonDefaultValueHasNonNullHashCode()
         {
             var Element = new SettingElement("Test", SettingsSerializeAs.Xml)
