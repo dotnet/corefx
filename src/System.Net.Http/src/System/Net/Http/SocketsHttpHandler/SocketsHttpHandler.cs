@@ -152,6 +152,37 @@ namespace System.Net.Http
             }
         }
 
+        public int MaxResponseDrainSize
+        {
+            get => _settings._maxResponseDrainSize;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedNonNegativeNum);
+                }
+
+                CheckDisposedOrStarted();
+                _settings._maxResponseDrainSize = value;
+            }
+        }
+
+        internal TimeSpan MaxResponseDrainTime // TODO #27685: Expose publicly.
+        {
+            get => _settings._maxResponseDrainTime;
+            set
+            {
+                if ((value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan) ||
+                    (value.TotalMilliseconds > int.MaxValue))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._maxResponseDrainTime = value;
+            }
+        }
+
         public int MaxResponseHeadersLength
         {
             get => _settings._maxResponseHeadersLength;
@@ -261,18 +292,15 @@ namespace System.Net.Http
 
             HttpConnectionPoolManager poolManager = new HttpConnectionPoolManager(settings);
 
-            HttpMessageHandler handler = new HttpConnectionHandler(poolManager);
+            HttpMessageHandler handler;
 
-            if (settings._useProxy && (settings._proxy != null || HttpProxyConnectionHandler.DefaultProxyConfigured))
+            if (settings._credentials == null)
             {
-                handler = new HttpProxyConnectionHandler(poolManager, settings._proxy, settings._defaultProxyCredentials, handler);
+                handler = new HttpConnectionHandler(poolManager);
             }
-
-            HttpMessageHandler unauthenticatedHandler = handler;
-
-            if (settings._credentials != null)
+            else
             {
-                handler = new AuthenticationHandler(settings._preAuthenticate, settings._credentials, handler);
+                handler = new HttpAuthenticatedConnectionHandler(poolManager);
             }
 
             if (settings._allowAutoRedirect)
@@ -280,7 +308,11 @@ namespace System.Net.Http
                 // Just as with WinHttpHandler and CurlHandler, for security reasons, we do not support authentication on redirects
                 // if the credential is anything other than a CredentialCache.
                 // We allow credentials in a CredentialCache since they are specifically tied to URIs.
-                HttpMessageHandler redirectHandler = (settings._credentials is CredentialCache ? handler : unauthenticatedHandler);
+                HttpMessageHandler redirectHandler = 
+                    (settings._credentials == null || settings._credentials is CredentialCache) ? 
+                    handler : 
+                    new HttpConnectionHandler(poolManager);        // will not authenticate
+
                 handler = new RedirectHandler(settings._maxAutomaticRedirections, handler, redirectHandler);
             }
 

@@ -26,7 +26,7 @@ namespace System.Text.Encodings.Tests
             byte[] textBytes = e.GetBytes(TextString);
 
             char[] chars = new char[TextString.Length];
-            Assert.Equal(chars.Length, e.GetDecoder().GetChars(textBytes.AsReadOnlySpan(), chars.AsSpan(), flush: true));
+            Assert.Equal(chars.Length, e.GetDecoder().GetChars(textBytes, chars.AsSpan(), flush: true));
             Assert.Equal(TextString, new string(chars));
         }
 
@@ -40,7 +40,7 @@ namespace System.Text.Encodings.Tests
             char[] chars;
 
             chars = new char[TextString.Length];
-            decoder.Convert(textBytes.AsSpan(), chars.AsSpan().Slice(0, 2), true, out int bytesUsed, out int charsUsed, out bool completed);
+            decoder.Convert(textBytes.AsSpan(), chars.AsSpan(0, 2), true, out int bytesUsed, out int charsUsed, out bool completed);
             Assert.Equal("he", new string(chars, 0, 2));
             Assert.Equal(2, bytesUsed);
             Assert.Equal(2, charsUsed);

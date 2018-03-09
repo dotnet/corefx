@@ -18,6 +18,7 @@ namespace System.Net.Http
     internal sealed class HttpConnectionPool : IDisposable
     {
         private readonly HttpConnectionPoolManager _poolManager;
+        private readonly HttpConnectionKind _kind;
         private readonly string _host;
         private readonly int _port;
         private readonly Uri _proxyUri;
@@ -28,7 +29,7 @@ namespace System.Net.Http
         private readonly int _maxConnections;
 
         /// <summary>For non-proxy connection pools, this is the host name in bytes; for proxies, null.</summary>
-        private readonly byte[] _idnHostAsciiBytes;
+        private readonly byte[] _hostHeaderValueBytes;
         /// <summary>Options specialized and cached for this pool and its <see cref="_key"/>.</summary>
         private readonly SslClientAuthenticationOptions _sslOptions;
 
@@ -43,57 +44,110 @@ namespace System.Net.Http
         private bool _usedSinceLastCleanup = true;
         /// <summary>Whether the pool has been disposed.</summary>
         private bool _disposed;
-        
+
+        private const int DefaultHttpPort = 80;
+        private const int DefaultHttpsPort = 443;
+
         /// <summary>Initializes the pool.</summary>
         /// <param name="maxConnections">The maximum number of connections allowed to be associated with the pool at any given time.</param>
         /// 
-        public HttpConnectionPool(HttpConnectionPoolManager poolManager, string host, int port, string sslHostName, Uri proxyUri, int maxConnections)
+        public HttpConnectionPool(HttpConnectionPoolManager poolManager, HttpConnectionKind kind, string host, int port, string sslHostName, Uri proxyUri, int maxConnections)
         {
-            Debug.Assert(proxyUri == null ?
-                    host != null && port != 0 :         // direct http or https connection
-                    (sslHostName == null ?
-                        host == null && port == 0 :     // proxy connection 
-                        host != null && port != 0));    // SSL proxy tunnel
-
             _poolManager = poolManager;
+            _kind = kind;
             _host = host;
             _port = port;
             _proxyUri = proxyUri;
             _maxConnections = maxConnections;
 
-            if (sslHostName != null)
+            switch (kind)
             {
-                // Precalculate cached SSL options to use for all connections.
-                _sslOptions = _poolManager.Settings._sslOptions?.ShallowClone() ?? new SslClientAuthenticationOptions();
-                _sslOptions.ApplicationProtocols = null; // explicitly ignore any ApplicationProtocols set
-                _sslOptions.TargetHost = sslHostName; // always use the key's name rather than whatever was specified
+                case HttpConnectionKind.Http:
+                    Debug.Assert(host != null);
+                    Debug.Assert(port != 0);
+                    Debug.Assert(sslHostName == null);
+                    Debug.Assert(proxyUri == null);
+                    break;
+
+                case HttpConnectionKind.Https:
+                    Debug.Assert(host != null);
+                    Debug.Assert(port != 0);
+                    Debug.Assert(sslHostName != null);
+                    Debug.Assert(proxyUri == null);
+
+                    _sslOptions = ConstructSslOptions(poolManager, sslHostName);
+                    break;
+
+                case HttpConnectionKind.Proxy:
+                    Debug.Assert(host == null);
+                    Debug.Assert(port == 0);
+                    Debug.Assert(sslHostName == null);
+                    Debug.Assert(proxyUri != null);
+                    break;
+
+                case HttpConnectionKind.SslProxyTunnel:
+                    Debug.Assert(host != null);
+                    Debug.Assert(port != 0);
+                    Debug.Assert(sslHostName != null);
+                    Debug.Assert(proxyUri != null);
+
+                    _sslOptions = ConstructSslOptions(poolManager, sslHostName);
+                    break;
+
+                case HttpConnectionKind.ProxyConnect:
+                    Debug.Assert(host != null);
+                    Debug.Assert(port != 0);
+                    Debug.Assert(sslHostName == null);
+                    Debug.Assert(proxyUri != null);
+                    Debug.Assert(proxyUri.IdnHost == host && proxyUri.Port == port);
+                    break;
+
+                default:
+                    Debug.Fail("Unkown HttpConnectionKind in HttpConnectionPool.ctor");
+                    break;
             }
 
             if (_host != null)
             {
-                // Precalculate ASCII bytes for header name
+                // Precalculate ASCII bytes for Host header
                 // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
-                // CONSIDER: Cache more than just host name -- port, header name, etc
+                string hostHeader =
+                    (_port != (_sslOptions == null ? DefaultHttpPort : DefaultHttpsPort)) ?
+                    $"{_host}:{_port}" :
+                    _host;
 
                 // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
-                _idnHostAsciiBytes = Encoding.ASCII.GetBytes(_host);
-                Debug.Assert(Encoding.ASCII.GetString(_idnHostAsciiBytes) == _host);
+                _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
+                Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
             }
+        }
+
+        private static SslClientAuthenticationOptions ConstructSslOptions(HttpConnectionPoolManager poolManager, string sslHostName)
+        {
+            Debug.Assert(sslHostName != null);
+
+            SslClientAuthenticationOptions sslOptions = poolManager.Settings._sslOptions?.ShallowClone() ?? new SslClientAuthenticationOptions();
+            sslOptions.ApplicationProtocols = null; // explicitly ignore any ApplicationProtocols set
+            sslOptions.TargetHost = sslHostName; // always use the key's name rather than whatever was specified
+
+            return sslOptions;
         }
 
         public HttpConnectionSettings Settings => _poolManager.Settings;
         public bool IsSecure => _sslOptions != null;
-        public bool UsingProxy => (_proxyUri != null && !IsSecure);     // Tunnel doesn't count, only direct proxy usage
-        public byte[] IdnHostAsciiBytes => _idnHostAsciiBytes;
+        public bool UsingProxy => _kind == HttpConnectionKind.Proxy;        // Tunnel doesn't count, only direct proxy usage
+        public Uri ProxyUri => _proxyUri;
+        public ICredentials ProxyCredentials => _poolManager.ProxyCredentials;
+        public byte[] HostHeaderValueBytes => _hostHeaderValueBytes;
 
         /// <summary>Object used to synchronize access to state in the pool.</summary>
         private object SyncObj => _idleConnections;
 
-        private ValueTask<HttpConnection> GetConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private ValueTask<(HttpConnection, HttpResponseMessage)> GetConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return new ValueTask<HttpConnection>(Task.FromCanceled<HttpConnection>(cancellationToken));
+                return new ValueTask<(HttpConnection, HttpResponseMessage)>(Task.FromCanceled<(HttpConnection, HttpResponseMessage)>(cancellationToken));
             }
 
             TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
@@ -115,7 +169,7 @@ namespace System.Net.Http
                     {
                         // We found a valid collection.  Return it.
                         if (NetEventSource.IsEnabled) conn.Trace("Found usable connection in pool.");
-                        return new ValueTask<HttpConnection>(conn);
+                        return new ValueTask<(HttpConnection, HttpResponseMessage)>((conn, null));
                     }
 
                     // We got a connection, but it was already closed by the server or the
@@ -166,7 +220,7 @@ namespace System.Net.Http
                             }
                         }, waiter);
                     }
-                    return new ValueTask<HttpConnection>(waiter.Task);
+                    return new ValueTask<(HttpConnection, HttpResponseMessage)>(waiter.Task);
                 }
 
                 // Note that we don't check for _disposed.  We may end up disposing the
@@ -180,31 +234,59 @@ namespace System.Net.Http
             }
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendWithRetryAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
         {
             while (true)
             { 
                 // Loop on connection failures and retry if possible.
 
-                HttpConnection connection = await GetConnectionAsync(request, cancellationToken).ConfigureAwait(false);
-
-                if (connection.IsNewConnection)
+                (HttpConnection connection, HttpResponseMessage response) = await GetConnectionAsync(request, cancellationToken).ConfigureAwait(false);
+                if (response != null)
                 {
-                    return await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                    // Proxy tunnel failure; return proxy response
+                    return response;
                 }
 
+                bool isNewConnection = connection.IsNewConnection;
+
+                connection.Acquire();
                 try
                 {
-                    return await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                    return await connection.SendAsync(request, doRequestAuth, cancellationToken).ConfigureAwait(false);
                 }
-                catch (HttpRequestException e) when (e.InnerException is IOException && connection.CanRetry)
+                catch (HttpRequestException e) when (!isNewConnection && e.InnerException is IOException && connection.CanRetry)
                 {
                     // Eat exception and try again.
+                }
+                finally
+                {
+                    connection.Release();
                 }
             }
         }
 
-        private async ValueTask<HttpConnection> CreateConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public Task<HttpResponseMessage> SendWithProxyAuthAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
+        {
+            if ((_kind == HttpConnectionKind.Proxy || _kind == HttpConnectionKind.ProxyConnect) &&
+                _poolManager.ProxyCredentials != null)
+            {
+                return AuthenticationHelper.SendWithProxyAuthAsync(request, _proxyUri, _poolManager.ProxyCredentials, doRequestAuth, this, cancellationToken);
+            }
+
+            return SendWithRetryAsync(request, doRequestAuth, cancellationToken);
+        }
+
+        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
+        {
+            if (doRequestAuth && Settings._credentials != null)
+            {
+                return AuthenticationHelper.SendWithRequestAuthAsync(request, Settings._credentials, Settings._preAuthenticate, this, cancellationToken);
+            }
+
+            return SendWithProxyAuthAsync(request, doRequestAuth, cancellationToken);
+        }
+
+        private async ValueTask<(HttpConnection, HttpResponseMessage)> CreateConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // If a non-infinite connect timeout has been set, create and use a new CancellationToken that'll be canceled
             // when either the original token is canceled or a connect timeout occurs.
@@ -218,12 +300,30 @@ namespace System.Net.Http
 
             try
             {
-                Stream stream = await
-                    (_proxyUri == null ?
-                        ConnectHelper.ConnectAsync(_host, _port, cancellationToken) :
-                        (_sslOptions == null ?
-                            ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken) :
-                            EstablishProxyTunnel(cancellationToken))).ConfigureAwait(false);
+                Stream stream = null;
+                switch (_kind)
+                {
+                    case HttpConnectionKind.Http:
+                    case HttpConnectionKind.Https:
+                    case HttpConnectionKind.ProxyConnect:
+                        stream = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
+                        break;
+
+                    case HttpConnectionKind.Proxy:
+                        stream = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
+                        break;
+
+                    case HttpConnectionKind.SslProxyTunnel:
+                        HttpResponseMessage response;
+                        (stream, response) = await EstablishProxyTunnel(cancellationToken).ConfigureAwait(false);
+                        if (response != null)
+                        {
+                            // Return non-success response from proxy.
+                            response.RequestMessage = request;
+                            return (null, response);
+                        }
+                        break;
+                }
 
                 TransportContext transportContext = null;
                 if (_sslOptions != null)
@@ -233,9 +333,10 @@ namespace System.Net.Http
                     transportContext = sslStream.TransportContext;
                 }
 
-                return _maxConnections == int.MaxValue ?
+                HttpConnection connection = _maxConnections == int.MaxValue ?
                     new HttpConnection(this, stream, transportContext) :
                     new HttpConnectionWithFinalizer(this, stream, transportContext); // finalizer needed to signal the pool when a connection is dropped
+                return (connection, null);
             }
             finally
             {
@@ -243,25 +344,21 @@ namespace System.Net.Http
             }
         }
 
-        // TODO (#23136):
-        // CONNECT is not yet supported, so this code will not succeed currently.
-
-        private async ValueTask<Stream> EstablishProxyTunnel(CancellationToken cancellationToken)
+        // Returns the established stream or an HttpResponseMessage from the proxy indicating failure.
+        private async ValueTask<(Stream, HttpResponseMessage)> EstablishProxyTunnel(CancellationToken cancellationToken)
         {
             // Send a CONNECT request to the proxy server to establish a tunnel.
             HttpRequestMessage tunnelRequest = new HttpRequestMessage(HttpMethod.Connect, _proxyUri);
             tunnelRequest.Headers.Host = $"{_host}:{_port}";    // This specifies destination host/port to connect to
 
-            // TODO: For now, we don't support proxy authentication in this scenario.
-            // This will get fixed when we refactor proxy auth handling.
+            HttpResponseMessage tunnelResponse = await _poolManager.SendProxyConnectAsync(tunnelRequest, _proxyUri, cancellationToken);
 
-            HttpResponseMessage tunnelResponse = await _poolManager.SendAsync(tunnelRequest, null, cancellationToken).ConfigureAwait(false);
             if (tunnelResponse.StatusCode != HttpStatusCode.OK)
             {
-                throw new HttpRequestException(SR.Format(SR.net_http_proxy_tunnel_failed, _proxyUri, tunnelResponse.StatusCode));
+                return (null, tunnelResponse);
             }
 
-            return await tunnelResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            return (await tunnelResponse.Content.ReadAsStreamAsync().ConfigureAwait(false), null);
         }
 
         /// <summary>Enqueues a waiter to the waiters list.</summary>
@@ -346,11 +443,16 @@ namespace System.Net.Http
         }
 
         /// <summary>Waits for and returns the created connection, decrementing the associated connection count if it fails.</summary>
-        private async ValueTask<HttpConnection> WaitForCreatedConnectionAsync(ValueTask<HttpConnection> creationTask)
+        private async ValueTask<(HttpConnection, HttpResponseMessage)> WaitForCreatedConnectionAsync(ValueTask<(HttpConnection, HttpResponseMessage)> creationTask)
         {
             try
             {
-                return await creationTask.ConfigureAwait(false);
+                (HttpConnection connection, HttpResponseMessage response) = await creationTask.ConfigureAwait(false);
+                if (connection == null)
+                {
+                    DecrementConnectionCount();
+                }
+                return (connection, response);
             }
             catch
             {
@@ -415,7 +517,7 @@ namespace System.Net.Http
 
                     // Having a waiter means there must not be any idle connections, so we need to create
                     // one, and we do so using the logic associated with the waiter.
-                    ValueTask<HttpConnection> connectionTask = waiter.CreateConnectionAsync();
+                    ValueTask<(HttpConnection, HttpResponseMessage)> connectionTask = waiter.CreateConnectionAsync();
                     if (connectionTask.IsCompletedSuccessfully)
                     {
                         // We synchronously and successfully created a connection (this is rare).
@@ -433,7 +535,13 @@ namespace System.Net.Http
                             try
                             {
                                 // Get the resulting connection.
-                                HttpConnection result = innerConnectionTask.GetAwaiter().GetResult();
+                                (HttpConnection result, HttpResponseMessage response) = innerConnectionTask.GetAwaiter().GetResult();
+
+                                if (response != null)
+                                {
+                                    // Proxy tunnel connect failed, so decrement the connection count.
+                                    innerWaiter._pool.DecrementConnectionCount();
+                                }
 
                                 // Store the resulting connection into the waiter. As in the synchronous case,
                                 // since we already have a count that's inflated due to the connection being
@@ -475,7 +583,7 @@ namespace System.Net.Http
                     waiter._cancellationTokenRegistration.Dispose();
 
                     if (NetEventSource.IsEnabled) connection.Trace("Transferring connection returned to pool.");
-                    waiter.SetResult(connection);
+                    waiter.SetResult((connection, null));
 
                     return;
                 }
@@ -699,7 +807,7 @@ namespace System.Net.Http
         /// into the waiter as a result, and if no connection is available from the pool,
         /// this waiter's logic is used to create the connection.
         /// </summary>
-        private class ConnectionWaiter : TaskCompletionSource<HttpConnection>
+        private class ConnectionWaiter : TaskCompletionSource<(HttpConnection, HttpResponseMessage)>
         {
             /// <summary>The pool with which this waiter is associated.</summary>
             internal readonly HttpConnectionPool _pool;
@@ -725,7 +833,7 @@ namespace System.Net.Http
             }
 
             /// <summary>Creates a connection.</summary>
-            public ValueTask<HttpConnection> CreateConnectionAsync()
+            public ValueTask<(HttpConnection, HttpResponseMessage)> CreateConnectionAsync()
             {
                 try
                 {
@@ -733,7 +841,7 @@ namespace System.Net.Http
                 }
                 catch (Exception e)
                 {
-                    return new ValueTask<HttpConnection>(Threading.Tasks.Task.FromException<HttpConnection>(e));
+                    return new ValueTask<(HttpConnection, HttpResponseMessage)>(Threading.Tasks.Task.FromException<(HttpConnection, HttpResponseMessage)>(e));
                 }
             }
         }

@@ -46,7 +46,6 @@ namespace System.Net.Http
         private readonly Stream _stream;
         private readonly TransportContext _transportContext;
         private readonly bool _usingProxy;
-        private readonly byte[] _idnHostAsciiBytes;
         private readonly WeakReference<HttpConnection> _weakThisRef;
 
         private HttpRequestMessage _currentRequest;
@@ -54,18 +53,19 @@ namespace System.Net.Http
         private int _writeOffset;
         private int _allowedReadLineBytes;
 
-        private Task<int> _readAheadTask;
+        private ValueTask<int>? _readAheadTask;
         private byte[] _readBuffer;
         private int _readOffset;
         private int _readLength;
 
+        private bool _inUse;
         private bool _canRetry;
         private bool _connectionClose; // Connection: close was seen on last response
         private int _disposed; // 1 yes, 0 no
 
         public HttpConnection(
             HttpConnectionPool pool,
-            Stream stream, 
+            Stream stream,
             TransportContext transportContext)
         {
             Debug.Assert(pool != null);
@@ -75,7 +75,6 @@ namespace System.Net.Http
             _stream = stream;
             _transportContext = transportContext;
             _usingProxy = pool.UsingProxy;
-            _idnHostAsciiBytes = pool.IdnHostAsciiBytes;
 
             _writeBuffer = new byte[InitialWriteBufferSize];
             _readBuffer = new byte[InitialReadBufferSize];
@@ -125,7 +124,7 @@ namespace System.Net.Http
             get
             {
                 Debug.Assert(_readAheadTask != null, $"{nameof(_readAheadTask)} should have been initialized");
-                return _readAheadTask.IsCompleted;
+                return _readAheadTask.GetValueOrDefault().IsCompleted;
             }
         }
 
@@ -150,6 +149,8 @@ namespace System.Net.Http
         }
 
         public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
+
+        public TransportContext TransportContext => _transportContext;
 
         private int ReadBufferSize => _readBuffer.Length;
 
@@ -211,14 +212,21 @@ namespace System.Net.Http
         {
             await WriteBytesAsync(KnownHeaders.Host.AsciiBytesWithColonSpace).ConfigureAwait(false);
 
-            await (_idnHostAsciiBytes != null ?
-                WriteBytesAsync(_idnHostAsciiBytes) :
-                WriteAsciiStringAsync(uri.IdnHost)).ConfigureAwait(false);
-
-            if (!uri.IsDefaultPort)
+            if (_pool.HostHeaderValueBytes != null)
             {
-                await WriteByteAsync((byte)':').ConfigureAwait(false);
-                await WriteDecimalInt32Async(uri.Port).ConfigureAwait(false);
+                Debug.Assert(!_pool.UsingProxy);
+                await WriteBytesAsync(_pool.HostHeaderValueBytes).ConfigureAwait(false);
+            }
+            else
+            {
+                Debug.Assert(_pool.UsingProxy);
+                await WriteAsciiStringAsync(uri.IdnHost).ConfigureAwait(false);
+
+                if (!uri.IsDefaultPort)
+                {
+                    await WriteByteAsync((byte)':').ConfigureAwait(false);
+                    await WriteDecimalInt32Async(uri.Port).ConfigureAwait(false);
+                }
             }
 
             await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
@@ -250,11 +258,14 @@ namespace System.Net.Http
             return WriteAsciiStringAsync(value.ToString("X", CultureInfo.InvariantCulture));
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             TaskCompletionSource<bool> allowExpect100ToContinue = null;
             Debug.Assert(_currentRequest == null, $"Expected null {nameof(_currentRequest)}.");
+            Debug.Assert(RemainingBuffer.Length == 0, "Unexpected data in read buffer");
+
             _currentRequest = request;
+            bool isConnectMethod = (request.Method == HttpMethod.Connect);
 
             Debug.Assert(!_canRetry);
             _canRetry = true;
@@ -268,15 +279,27 @@ namespace System.Net.Http
                 await WriteStringAsync(request.Method.Method).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ').ConfigureAwait(false);
 
-                if (_usingProxy)
+                if (isConnectMethod)
                 {
-                    // Proxied requests contain full URL
-                    Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
-                    await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
-                    await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                    // RFC 7231 #section-4.3.6.
+                    // Write only CONNECT foo.com:345 HTTP/1.1
+                    if (!request.HasHeaders || request.Headers.Host == null)
+                    {
+                        throw new HttpRequestException(SR.net_http_request_no_host);
+                    }
+                    await WriteAsciiStringAsync(request.Headers.Host).ConfigureAwait(false);
                 }
-
-                await WriteStringAsync(request.RequestUri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.UriEscaped)).ConfigureAwait(false);
+                else
+                {
+                    if (_usingProxy)
+                    {
+                        // Proxied requests contain full URL
+                        Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
+                        await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
+                        await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                    }
+                    await WriteStringAsync(request.RequestUri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.UriEscaped)).ConfigureAwait(false);
+                }
 
                 // Fall back to 1.1 for all versions other than 1.0
                 Debug.Assert(request.Version.Major >= 0 && request.Version.Minor >= 0); // guaranteed by Version class
@@ -304,7 +327,7 @@ namespace System.Net.Http
                 {
                     // Write out Content-Length: 0 header to indicate no body,
                     // unless this is a method that never has a body.
-                    if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head)
+                    if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head && !isConnectMethod)
                     {
                         await WriteBytesAsync(s_contentLength0NewlineAsciiBytes).ConfigureAwait(false);
                     }
@@ -371,12 +394,12 @@ namespace System.Net.Http
                 // connection again, as that would mean the connection was either closed or had
                 // erroneous data sent on it by the server in response to no request from us.
                 // We need to consume that read prior to issuing another read request.
-                Task<int> t = _readAheadTask;
+                ValueTask<int>? t = _readAheadTask;
                 if (t != null)
                 {
                     _readAheadTask = null;
 
-                    int bytesRead = await t.ConfigureAwait(false);
+                    int bytesRead = await t.GetValueOrDefault().ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
 
                     if (bytesRead == 0)
@@ -388,14 +411,14 @@ namespace System.Net.Http
                     _readLength = bytesRead;
                 }
 
-                // The request is no longer retryable; either we received data from the _readAheadTask, 
+                // The request is no longer retryable; either we received data from the _readAheadTask,
                 // or there was no _readAheadTask because this is the first request on the connection.
                 // (We may have already set this as well if we sent request content.)
                 _canRetry = false;
 
                 // Parse the response status line.
                 var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionResponseContent() };
-                ParseStatusLine(await ReadNextLineAsync().ConfigureAwait(false), response);
+                ParseStatusLine(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false), response);
 
                 // If we sent an Expect: 100-continue header, handle the response accordingly.
                 if (allowExpect100ToContinue != null)
@@ -423,12 +446,12 @@ namespace System.Net.Http
                         if (response.StatusCode == HttpStatusCode.Continue)
                         {
                             // We got our continue header.  Read the subsequent empty line and parse the additional status line.
-                            if (!LineIsEmpty(await ReadNextLineAsync().ConfigureAwait(false)))
+                            if (!LineIsEmpty(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false)))
                             {
                                 ThrowInvalidHttpResponse();
                             }
 
-                            ParseStatusLine(await ReadNextLineAsync().ConfigureAwait(false), response);
+                            ParseStatusLine(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false), response);
                         }
                     }
                 }
@@ -445,7 +468,7 @@ namespace System.Net.Http
                 // Parse the response headers.
                 while (true)
                 {
-                    ArraySegment<byte> line = await ReadNextLineAsync().ConfigureAwait(false);
+                    ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).ConfigureAwait(false);
                     if (LineIsEmpty(line))
                     {
                         break;
@@ -471,7 +494,17 @@ namespace System.Net.Http
                 if (request.Method == HttpMethod.Head || response.StatusCode == HttpStatusCode.NoContent || response.StatusCode == HttpStatusCode.NotModified)
                 {
                     responseStream = EmptyReadStream.Instance;
-                    ReturnConnectionToPool();
+                    CompleteResponse();
+                }
+                else if (isConnectMethod && response.StatusCode == HttpStatusCode.OK)
+                {
+                    // Successful response to CONNECT does not have body.
+                    // What ever comes next should be opaque.
+                    responseStream = new RawConnectionStream(this);
+                    // Don't put connection back to the pool if we upgraded to tunnel.
+                    // We cannot use it for normal HTTP requests any more.
+                    _connectionClose = true;
+
                 }
                 else if (response.Content.Headers.ContentLength != null)
                 {
@@ -479,7 +512,7 @@ namespace System.Net.Http
                     if (contentLength <= 0)
                     {
                         responseStream = EmptyReadStream.Instance;
-                        ReturnConnectionToPool();
+                        CompleteResponse();
                     }
                     else
                     {
@@ -549,6 +582,26 @@ namespace System.Net.Http
                     throw;
                 }
             }
+        }
+
+        public Task<HttpResponseMessage> SendWithNtProxyAuthAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (_pool.UsingProxy && _pool.ProxyCredentials != null)
+            {
+                return AuthenticationHelper.SendWithNtProxyAuthAsync(request, _pool.ProxyUri, _pool.ProxyCredentials, this, cancellationToken);
+            }
+
+            return SendAsyncCore(request, cancellationToken);
+        }
+
+        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
+        {
+            if (doRequestAuth && _pool.Settings._credentials != null)
+            {
+                return AuthenticationHelper.SendWithNtConnectionAuthAsync(request, _pool.Settings._credentials, this, cancellationToken);
+            }
+
+            return SendWithNtProxyAuthAsync(request, cancellationToken);
         }
 
         private HttpContentWriteStream CreateRequestContentStream(HttpRequestMessage request)
@@ -815,7 +868,7 @@ namespace System.Net.Http
             }
         }
 
-        private Task WriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
+        private ValueTask WriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
         {
             if (_writeOffset == 0)
             {
@@ -837,7 +890,7 @@ namespace System.Net.Http
 
             // There's data in the write buffer and the data we're writing doesn't fit after it.
             // Do two writes, one to flush the buffer and then another to write the supplied content.
-            return FlushThenWriteWithoutBufferingAsync(source);
+            return new ValueTask(FlushThenWriteWithoutBufferingAsync(source));
         }
 
         private async Task FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
@@ -977,18 +1030,18 @@ namespace System.Net.Http
             }
         }
 
-        private Task FlushAsync()
+        private ValueTask FlushAsync()
         {
             if (_writeOffset > 0)
             {
-                Task t = WriteToStreamAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, _writeOffset));
+                ValueTask t = WriteToStreamAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, _writeOffset));
                 _writeOffset = 0;
                 return t;
             }
-            return Task.CompletedTask;
+            return default;
         }
 
-        private Task WriteToStreamAsync(ReadOnlyMemory<byte> source)
+        private ValueTask WriteToStreamAsync(ReadOnlyMemory<byte> source)
         {
             if (NetEventSource.IsEnabled) Trace($"Writing {source.Length} bytes.");
             return _stream.WriteAsync(source);
@@ -1012,16 +1065,13 @@ namespace System.Net.Http
             int bytesConsumed = length + 1;
             _readOffset += bytesConsumed;
             _allowedReadLineBytes -= bytesConsumed;
-            if (_allowedReadLineBytes < 0)
-            {
-                ThrowInvalidHttpResponse();
-            }
+            ThrowIfExceededAllowedReadLineBytes();
 
             line = buffer.Slice(0, length > 0 && buffer[length - 1] == '\r' ? length - 1 : length);
             return true;
         }
 
-        private async ValueTask<ArraySegment<byte>> ReadNextLineAsync()
+        private async ValueTask<ArraySegment<byte>> ReadNextResponseHeaderLineAsync(bool foldedHeadersAllowed = false)
         {
             int previouslyScannedBytes = 0;
             while (true)
@@ -1032,31 +1082,91 @@ namespace System.Net.Http
                 {
                     int startIndex = _readOffset;
                     int length = lfIndex - startIndex;
-                    if (length > 0 && _readBuffer[startIndex + length - 1] == '\r')
+                    if (lfIndex > 0 && _readBuffer[lfIndex - 1] == '\r')
                     {
                         length--;
                     }
 
+                    // If this isn't the ending header, we need to account for the possibility
+                    // of folded headers, which per RFC2616 are headers split across multiple
+                    // lines, where the continuation line begins with a space or horizontal tab.
+                    // The feature was deprecated in RFC 7230 3.2.4, but some servers still use it.
+                    if (foldedHeadersAllowed && length > 0)
+                    {
+                        // If the newline is the last character we've buffered, we need at least
+                        // one more character in order to see whether it's space/tab, in which
+                        // case it's a folded header.
+                        if (lfIndex + 1 == _readLength)
+                        {
+                            // The LF is at the end of the buffer, so we need to read more
+                            // to determine whether there's a continuation.  We'll read
+                            // and then loop back around again, but to avoid needing to
+                            // rescan the whole header, reposition to one character before
+                            // the newline so that we'll find it quickly.
+                            int backPos = _readBuffer[lfIndex - 1] == '\r' ? lfIndex - 2 : lfIndex - 1;
+                            Debug.Assert(backPos >= 0);
+                            previouslyScannedBytes = backPos - _readOffset;
+                            _allowedReadLineBytes -= backPos - scanOffset;
+                            ThrowIfExceededAllowedReadLineBytes();
+                            await FillAsync().ConfigureAwait(false);
+                            continue;
+                        }
+
+                        // We have at least one more character we can look at.
+                        Debug.Assert(lfIndex + 1 < _readLength);
+                        char nextChar = (char)_readBuffer[lfIndex + 1];
+                        if (nextChar == ' ' || nextChar == '\t')
+                        {
+                            // The next header is a continuation.
+
+                            // Folded headers are only allowed within header field values, not within header field names,
+                            // so if we haven't seen a colon, this is invalid.
+                            if (Array.IndexOf(_readBuffer, (byte)':', _readOffset, lfIndex - _readOffset) == -1)
+                            {
+                                ThrowInvalidHttpResponse();
+                            }
+
+                            // When we return the line, we need the interim newlines filtered out. According
+                            // to RFC 7230 3.2.4, a valid approach to dealing with them is to "replace each
+                            // received obs-fold with one or more SP octets prior to interpreting the field
+                            // value or forwarding the message downstream", so that's what we do.
+                            _readBuffer[lfIndex] = (byte)' ';
+                            if (_readBuffer[lfIndex - 1] == '\r')
+                            {
+                                _readBuffer[lfIndex - 1] = (byte)' ';
+                            }
+
+                            // Update how much we've read, and simply go back to search for the next newline.
+                            previouslyScannedBytes = (lfIndex + 1 - _readOffset);
+                            _allowedReadLineBytes -= (lfIndex + 1 - scanOffset);
+                            ThrowIfExceededAllowedReadLineBytes();
+                            continue;
+                        }
+
+                        // Not at the end of a header with a continuation.
+                    }
+
                     // Advance read position past the LF
                     _allowedReadLineBytes -= lfIndex + 1 - scanOffset;
-                    if (_allowedReadLineBytes < 0)
-                    {
-                        ThrowInvalidHttpResponse();
-                    }
+                    ThrowIfExceededAllowedReadLineBytes();
                     _readOffset = lfIndex + 1;
 
                     return new ArraySegment<byte>(_readBuffer, startIndex, length);
                 }
 
-                // Couldn't find LF.  Read more.
-                // Note this may cause _readOffset to change.
+                // Couldn't find LF.  Read more. Note this may cause _readOffset to change.
                 previouslyScannedBytes = _readLength - _readOffset;
                 _allowedReadLineBytes -= _readLength - scanOffset;
-                if (_allowedReadLineBytes < 0)
-                {
-                    ThrowInvalidHttpResponse();
-                }
+                ThrowIfExceededAllowedReadLineBytes();
                 await FillAsync().ConfigureAwait(false);
+            }
+        }
+
+        private void ThrowIfExceededAllowedReadLineBytes()
+        {
+            if (_allowedReadLineBytes < 0)
+            {
+                ThrowInvalidHttpResponse();
             }
         }
 
@@ -1148,7 +1258,7 @@ namespace System.Net.Http
             Debug.Assert(count <= _readLength - _readOffset);
 
             if (NetEventSource.IsEnabled) Trace($"Copying {count} bytes to stream.");
-            await destination.WriteAsync(_readBuffer, _readOffset, count, cancellationToken).ConfigureAwait(false);
+            await destination.WriteAsync(new ReadOnlyMemory<byte>(_readBuffer, _readOffset, count), cancellationToken).ConfigureAwait(false);
             _readOffset += count;
         }
 
@@ -1210,33 +1320,107 @@ namespace System.Net.Http
             }
         }
 
-        private void ReturnConnectionToPool()
+        public void Acquire()
         {
-            Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
+            Debug.Assert(_currentRequest == null);
+            Debug.Assert(!_inUse);
+
+            _inUse = true;
+        }
+
+        public void Release()
+        {
+            Debug.Assert(_inUse);
+
+            _inUse = false;
+
+            // If the last request already completed (because the response had no content), return the connection to the pool now.
+            // Otherwise, it will be returned when the response has been consumed and CompleteResponse below is called.
+            if (_currentRequest == null)
+            {
+                ReturnConnectionToPool();
+            }
+        }
+
+        private void CompleteResponse()
+        {
             Debug.Assert(_currentRequest != null, "Expected the connection to be associated with a request.");
             Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
 
-            if (NetEventSource.IsEnabled && _connectionClose)
-            {
-                Trace("Server requested connection be closed.");
-            }
+            // Disassociate the connection from a request.
+            _currentRequest = null;
 
             // If we have extraneous data in the read buffer, don't reuse the connection;
             // otherwise we'd interpret this as part of the next response.
-            if (_readOffset != _readLength)
+            if (RemainingBuffer.Length != 0)
             {
+                if (NetEventSource.IsEnabled)
+                {
+                    Trace("Unexpected data on connection after response read.");
+                }
+
+                ConsumeFromRemainingBuffer(RemainingBuffer.Length);
                 _connectionClose = true;
             }
 
-            // If server told us it's closing the connection, don't put this back in the pool.
-            // And if we incurred an error while transferring request content, also skip the pool.
-            if (!_connectionClose)
+            // If the connection is no longer in use (i.e. for NT authentication), then we can return it to the pool now.
+            // Otherwise, it will be returned when the connection is no longer in use (i.e. Release above is called).
+            if (!_inUse)
+            {
+                ReturnConnectionToPool();
+            }
+        }
+
+        public async Task DrainResponseAsync(HttpResponseMessage response)
+        {
+            Debug.Assert(_inUse);
+
+            if (_connectionClose)
+            {
+                throw new HttpRequestException(SR.net_http_authconnectionfailure);
+            }
+
+            HttpContentReadStream responseStream = (HttpContentReadStream)await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+            if (responseStream.NeedsDrain)
+            {
+                Debug.Assert(response.RequestMessage == _currentRequest);
+
+                if (!await responseStream.DrainAsync(_pool.Settings._maxResponseDrainSize).ConfigureAwait(false) ||
+                    _connectionClose)       // Draining may have set this
+                {
+                    throw new HttpRequestException(SR.net_http_authconnectionfailure);
+                }
+            }
+
+            Debug.Assert(_currentRequest == null);
+
+            response.Dispose();
+        }
+
+        private void ReturnConnectionToPool()
+        {
+            Debug.Assert(_currentRequest == null, "Connection should no longer be associated with a request.");
+            Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
+            Debug.Assert(RemainingBuffer.Length == 0, "Unexpected data in connection read buffer.");
+
+            // If we decided not to reuse the connection (either because the server sent Connection: close,
+            // or there was some other problem while processing the request that makes the connection unusable),
+            // don't put the connection back in the pool.
+            if (_connectionClose)
+            {
+                if (NetEventSource.IsEnabled)
+                {
+                    Trace("Connection will not be reused.");
+                }
+
+                // We're not putting the connection back in the pool. Dispose it.
+                Dispose();
+            }
+            else
             {
                 try
                 {
-                    // Disassociate the connection from a request.
-                    _currentRequest = null;
-
                     // When putting a connection back into the pool, we initiate a pre-emptive
                     // read on the stream.  When the connection is subsequently taken out of the
                     // pool, this can be used in place of the first read on the stream that would
@@ -1244,21 +1428,20 @@ namespace System.Net.Http
                     // at any point to understand if the connection has been closed or if errant data
                     // has been sent on the connection by the server, either of which would mean we
                     // should close the connection and not use it for subsequent requests.
-                    _readAheadTask = _stream.ReadAsync(_readBuffer, 0, _readBuffer.Length);
-
-                    // Put connection back in the pool.
-                    _pool.ReturnConnection(this);
-                    return;
+                    _readAheadTask = _stream.ReadAsync(new Memory<byte>(_readBuffer));
                 }
                 catch (Exception error)
                 {
                     // If reading throws, eat the error and don't pool the connection.
                     if (NetEventSource.IsEnabled) Trace($"Error performing read ahead when returning connection to pool: {error}");
-                }
-            }
 
-            // We're not putting the connection back in the pool. Dispose it.
-            Dispose();
+                    Dispose();
+                    return;
+                }
+
+                // Put connection back in the pool.
+                _pool.ReturnConnection(this);
+            }
         }
 
         private static bool EqualsOrdinal(string left, Span<byte> right)

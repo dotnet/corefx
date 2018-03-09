@@ -30,7 +30,7 @@ namespace System.IO.Pipes.Tests
         [Fact]
         public static void CreateServer_ConnectClient()
         {
-            var name = GetUniquePipeName();
+            string name = GetUniquePipeName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             {
                 using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
@@ -42,11 +42,43 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        public static void CreateServer_ConnectClient_UsingUnixAbsolutePath()
+        {
+            string name = Path.Combine("/tmp", GetUniquePipeName());
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
+            {
+                using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.CurrentUserOnly))
+                {
+                    client.Connect();
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(PipeOptions.None, PipeOptions.CurrentUserOnly)]
+        [InlineData(PipeOptions.CurrentUserOnly, PipeOptions.None)]
+        public static void Connection_UnderSameUser_SingleSide_CurrentUserOnly_Works(PipeOptions serverPipeOptions, PipeOptions clientPipeOptions)
+        {
+            string name = GetUniquePipeName();
+            using (var server = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, serverPipeOptions))
+            using (var client = new NamedPipeClientStream(".", name, PipeDirection.InOut, clientPipeOptions))
+            {
+                Task[] tasks = new[]
+                {
+                    Task.Run(() => server.WaitForConnection()),
+                    Task.Run(() => client.Connect())
+                };
+
+                Assert.True(Task.WaitAll(tasks, 20_000));
+            }
+        }
+
+        [Fact]
         public static void CreateMultipleServers_ConnectMultipleClients()
         {
-            var name1 = GetUniquePipeName();
-            var name2 = GetUniquePipeName();
-            var name3 = GetUniquePipeName();
+            string name1 = GetUniquePipeName();
+            string name2 = GetUniquePipeName();
+            string name3 = GetUniquePipeName();
             using (var server1 = new NamedPipeServerStream(name1, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             using (var server2 = new NamedPipeServerStream(name2, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))
             using (var server3 = new NamedPipeServerStream(name3, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly))

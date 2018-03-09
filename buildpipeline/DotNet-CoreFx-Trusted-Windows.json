@@ -80,7 +80,8 @@
         "signType": "real",
         "zipSources": "false",
         "version": "",
-        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -206,7 +207,7 @@
         "msbuildLocation": "",
         "platform": "",
         "configuration": "",
-        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
@@ -410,8 +411,20 @@
       "value": null,
       "isSecret": true
     },
+    "HelixApiAccessKey": {
+      "value": null,
+      "isSecret": true
+    },
+    "OutputCloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "ProductBuildId": {
+      "value": null,
       "allowOverride": true
     },
     "PB_BuildArguments": {
@@ -523,6 +536,10 @@
     },
     "PB_AssetRootUrl": {
       "value": ""
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "demands": [

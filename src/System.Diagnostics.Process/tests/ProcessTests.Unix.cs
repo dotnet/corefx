@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Security;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -98,6 +101,25 @@ namespace System.Diagnostics.Tests
                 }
 
                 Directory.SetCurrentDirectory(curDir);
+            }
+        }
+
+        [Fact]
+        [OuterLoop]
+        public void ProcessStart_UseShellExecute_OnUnix_OpenMissingFile_DoesNotThrow()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && 
+                s_allowedProgramsToRun.FirstOrDefault(program => IsProgramInstalled(program)) == null)
+            {
+                return;
+            }
+            string fileToOpen = Path.Combine(Environment.CurrentDirectory, "_no_such_file.TXT");
+            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
+            {
+                Assert.NotNull(px);
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
             }
         }
 
@@ -388,6 +410,152 @@ namespace System.Diagnostics.Tests
             RunTestAsSudo(TestStartWithUserNameCannotElevate, GetCurrentRealUserName());
         }
 
+        /// <summary>
+        /// Tests whether child processes are reaped (cleaning up OS resources)
+        /// when they terminate.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
+        public async Task TestChildProcessCleanup()
+        {
+            using (Process process = CreateShortProcess())
+            {
+                process.Start();
+                bool processReaped = await TryWaitProcessReapedAsync(process.Id, timeoutMs: 30000);
+                Assert.True(processReaped);
+            }
+        }
+
+        /// <summary>
+        /// Tests whether child processes are reaped (cleaning up OS resources)
+        /// when they terminate after the Process was Disposed.
+        /// </summary>
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        [PlatformSpecific(TestPlatforms.Linux)] // Test uses Linux specific '/proc' filesystem
+        public async Task TestChildProcessCleanupAfterDispose(bool shortProcess, bool enableEvents)
+        {
+            // We test using a long and short process. The long process will terminate after Dispose,
+            // The short process will terminate at the same time, possibly revealing race conditions.
+            int processId = -1;
+            using (Process process = shortProcess ? CreateShortProcess() : CreateSleepProcess(durationMs: 500))
+            {
+                process.Start();
+                processId = process.Id;
+                if (enableEvents)
+                {
+                    // Dispose will disable the Exited event.
+                    // We enable it to check this doesn't cause issues for process reaping.
+                    process.EnableRaisingEvents = true;
+                }
+            }
+            bool processReaped = await TryWaitProcessReapedAsync(processId, timeoutMs: 30000);
+            Assert.True(processReaped);
+        }
+
+        private static Process CreateShortProcess()
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "uname";
+            return process;
+        }
+
+        private static async Task<bool> TryWaitProcessReapedAsync(int pid, int timeoutMs)
+        {
+            const int SleepTimeMs = 50;
+            // When the process is reaped, the '/proc/<pid>' directory to disappears.
+            bool procPidExists = true;
+            for (int attempt = 0; attempt < (timeoutMs / SleepTimeMs); attempt++)
+            {
+                procPidExists = Directory.Exists("/proc/" + pid);
+                if (procPidExists)
+                {
+                    await Task.Delay(SleepTimeMs);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return !procPidExists;
+        }
+
+        /// <summary>
+        /// Tests the ProcessWaitState reference count drops to zero.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Test validates Unix implementation
+        public async Task TestProcessWaitStateReferenceCount()
+        {
+            using (var exitedEventSemaphore = new SemaphoreSlim(0, 1))
+            {
+                object waitState = null;
+                int processId = -1;
+                // Process takes a reference
+                using (var process = CreateShortProcess())
+                {
+                    process.EnableRaisingEvents = true;
+                    // Exited event takes a reference
+                    process.Exited += (o,e) => exitedEventSemaphore.Release();
+                    process.Start();
+
+                    processId = process.Id;
+                    waitState = GetProcessWaitState(process);
+
+                    process.WaitForExit();
+
+                    Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
+                    Assert.True(GetWaitStateDictionary(childDictionary: true).Contains(processId));
+                }
+                exitedEventSemaphore.Wait();
+
+                // Child reaping holds a reference too
+                int referenceCount = -1;
+                const int SleepTimeMs = 50;
+                for (int i = 0; i < (30000 / SleepTimeMs); i++)
+                {
+                    referenceCount = GetWaitStateReferenceCount(waitState);
+                    if (referenceCount == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        // Process was reaped but ProcessWaitState not unrefed yet
+                        await Task.Delay(SleepTimeMs);
+                    }
+                }
+                Assert.Equal(0, referenceCount);
+
+                Assert.Equal(0, GetWaitStateReferenceCount(waitState));
+                Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
+                Assert.False(GetWaitStateDictionary(childDictionary: true).Contains(processId));
+            }
+        }
+
+        private static IDictionary GetWaitStateDictionary(bool childDictionary)
+        {
+            Assembly assembly = typeof(Process).Assembly;
+            Type waitStateType = assembly.GetType("System.Diagnostics.ProcessWaitState");
+            FieldInfo dictionaryField = waitStateType.GetField(childDictionary ? "s_childProcessWaitStates" : "s_processWaitStates", BindingFlags.NonPublic | BindingFlags.Static);
+            return (IDictionary)dictionaryField.GetValue(null);
+        }
+
+        private static object GetProcessWaitState(Process p)
+        {
+            MethodInfo getWaitState = typeof(Process).GetMethod("GetWaitState", BindingFlags.NonPublic | BindingFlags.Instance);
+            return getWaitState.Invoke(p, null);
+        }
+
+        private static int GetWaitStateReferenceCount(object waitState)
+        {
+            FieldInfo referenCountField = waitState.GetType().GetField("_outstandingRefCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (int)referenCountField.GetValue(waitState);
+        }
+
         public static int TestStartWithUserNameCannotElevate(string realUserName)
         {
             Assert.NotNull(realUserName);
@@ -422,7 +590,12 @@ namespace System.Diagnostics.Tests
                 Start = false,
                 RunAsSudo = true
             };
-            Process p = RemoteInvoke(testMethod, arg, options).Process;
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteInvoke(testMethod, arg, options))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
             AddProcessForDispose(p);
 
             p.Start();
@@ -440,6 +613,6 @@ namespace System.Diagnostics.Tests
         [DllImport("libc")]
         private static extern int seteuid(uint euid);
 
-        private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
+        private static readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
     }
 }

@@ -26,10 +26,13 @@ namespace System.IO.Pipes
         /// <summary>Characters that can't be used in a pipe's name.</summary>
         private static readonly char[] s_invalidFileNameChars = Path.GetInvalidFileNameChars();
 
+        /// <summary>Characters that can't be used in an absolute path pipe's name.</summary>
+        private static readonly char[] s_invalidPathNameChars = Path.GetInvalidPathChars();
+
         /// <summary>Prefix to prepend to all pipe names.</summary>
         private static readonly string s_pipePrefix = Path.Combine(Path.GetTempPath(), "CoreFxPipe_");
 
-        internal static string GetPipePath(string serverName, string pipeName, bool isCurrentUserOnly)
+        internal static string GetPipePath(string serverName, string pipeName)
         {
             if (serverName != "." && serverName != Interop.Sys.GetHostName())
             {
@@ -43,34 +46,33 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(pipeName), SR.ArgumentOutOfRange_AnonymousReserved);
             }
 
-            if (pipeName.IndexOfAny(s_invalidFileNameChars) >= 0)
+            // Since pipes are stored as files in the system we support either an absolute path to a file name
+            // or a file name. The support of absolute path was added to allow working around the limited
+            // length available for the pipe name when concatenated with the temp path, while being
+            // cross-platform with Windows (which has only '\' as an invalid char).
+            if (Path.IsPathRooted(pipeName))
             {
-                // Since pipes are stored as files in the file system, we don't support
-                // pipe names that are actually paths or that otherwise have invalid
-                // filename characters in them.
-                throw new PlatformNotSupportedException(SR.PlatformNotSupproted_InvalidNameChars);
+                if (pipeName.IndexOfAny(s_invalidPathNameChars) >= 0 || pipeName[pipeName.Length - 1] == Path.DirectorySeparatorChar)
+                    throw new PlatformNotSupportedException(SR.PlatformNotSupported_InvalidPipeNameChars);
+                
+                // Caller is in full control of file location.
+                return pipeName;
             }
 
-            // Return the pipe path.  The pipe is created directly under %TMPDIR%.  We previously
-            // didn't put it into a subdirectory because it only existed on disk for the duration
+            if (pipeName.IndexOfAny(s_invalidFileNameChars) >= 0)
+            {
+                throw new PlatformNotSupportedException(SR.PlatformNotSupported_InvalidPipeNameChars);
+            }
+
+            // The pipe is created directly under Path.GetTempPath() with "CoreFXPipe_" prefix.
+            //
+            // We previously didn't put it into a subdirectory because it only existed on disk for the duration
             // between when the server started listening in WaitForConnection and when the client
             // connected, after which the pipe was deleted.  We now create the pipe when the
             // server stream is created, which leaves it on disk longer, but we can't change the
             // naming scheme used as that breaks the ability for code running on an older
             // runtime to connect to code running on the newer runtime.  That means we're stuck
             // with a tmp file for the lifetime of the server stream.
-            if (isCurrentUserOnly)
-            {
-                string directory = Path.Combine(Path.GetTempPath(), ".NET" + Interop.Sys.GetEUid());
-                Directory.CreateDirectory(directory);
-                if (Interop.Sys.ChMod(directory, (int)Interop.Sys.Permissions.S_IRWXU) == -1)
-                {
-                    throw CreateExceptionForLastError();
-                }
-
-                return Path.Combine(directory, s_pipePrefix + pipeName);
-            }
-
             return s_pipePrefix + pipeName;
         }
 
@@ -218,7 +220,7 @@ namespace System.IO.Pipes
                 }
 
                 // Issue the asynchronous read.
-                return await (destination.TryGetArray(out ArraySegment<byte> buffer) ?
+                return await (MemoryMarshal.TryGetArray(destination, out ArraySegment<byte> buffer) ?
                     socket.ReceiveAsync(buffer, SocketFlags.None) :
                     socket.ReceiveAsync(destination.ToArray(), SocketFlags.None)).ConfigureAwait(false);
             }

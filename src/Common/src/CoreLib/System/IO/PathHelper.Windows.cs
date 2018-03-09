@@ -35,7 +35,7 @@ namespace System.IO
             // TryExpandShortName does this input identity check.
             string result = builder.AsSpan().Contains('~')
                 ? TryExpandShortFileName(ref builder, originalPath: path)
-                : builder.AsSpan().Equals(path.AsReadOnlySpan()) ? path : builder.ToString();
+                : builder.AsSpan().EqualsOrdinal(path.AsSpan()) ? path : builder.ToString();
 
             // Clear the buffer
             builder.Dispose();
@@ -84,7 +84,7 @@ namespace System.IO
                 buffer.Append(PathInternal.UncExtendedPathPrefix);
 
                 // Copy Server\Share\... over to the buffer
-                buffer.Append(content.AsSpan().Slice(PathInternal.UncPrefixLength));
+                buffer.Append(content.AsSpan(PathInternal.UncPrefixLength));
 
                 // Return the prefix difference
                 return PathInternal.UncExtendedPrefixLength - PathInternal.UncPrefixLength;
@@ -198,10 +198,13 @@ namespace System.IO
                     if (foundIndex < inputLength - 1)
                     {
                         // It was a partial find, put the non-existent part of the path back
-                        outputBuilder.Append(inputBuilder.AsSpan().Slice(foundIndex, inputBuilder.Length - foundIndex));
+                        outputBuilder.Append(inputBuilder.AsSpan(foundIndex, inputBuilder.Length - foundIndex));
                     }
                 }
             }
+
+            // Need to trim out the trailing separator in the input builder
+            inputBuilder.Length = inputBuilder.Length - 1;
 
             // If we were able to expand the path, use it, otherwise use the original full path result
             ref ValueStringBuilder builderToUse = ref (success ? ref outputBuilder : ref inputBuilder);
@@ -215,9 +218,9 @@ namespace System.IO
                 builderToUse[PathInternal.UncExtendedPrefixLength - PathInternal.UncPrefixLength] = '\\';
 
             // Strip out any added characters at the front of the string
-            ReadOnlySpan<char> output = builderToUse.AsSpan().Slice(rootDifference);
+            ReadOnlySpan<char> output = builderToUse.AsSpan(rootDifference);
 
-            string returnValue = output.Equals(originalPath.AsReadOnlySpan())
+            string returnValue = output.EqualsOrdinal(originalPath.AsSpan())
                 ? originalPath : new string(output);
 
             inputBuilder.Dispose();
