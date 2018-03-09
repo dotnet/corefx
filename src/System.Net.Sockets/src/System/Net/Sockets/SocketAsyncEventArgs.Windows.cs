@@ -1003,9 +1003,14 @@ namespace System.Net.Sockets
                     }
                     else if (spe.FileStream != null)
                     {
-                        // This element is a file.
+                        // This element is a file stream.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
                         sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
+
+                        // Workaround from reading stream from current position
+                        if (spe.LongOffset == 0)
+                            spe.FileStream.Seek(0, SeekOrigin.Begin);
+
                         sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
                         sendPacketsDescriptor[descriptorIndex].flags =
                             Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
