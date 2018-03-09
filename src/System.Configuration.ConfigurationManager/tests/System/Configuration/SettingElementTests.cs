@@ -46,11 +46,11 @@ namespace System.Configuration.Tests
         }
     
         [Fact]
-        public void DefaultSettingElementExceptionForGetHashCode()
+        public void DefaultConstructorEquality()
         {
-            var Element = new SettingElement();
-            Assert.Throws<NullReferenceException>(() => Element.GetHashCode());
-            //likely a bug
+            var ElementOne = new SettingElement();
+            var ElementTwo = new SettingElement();
+            Assert.True(ElementOne.Equals(ElementTwo));
         }
 
         [Fact]
