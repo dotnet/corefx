@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 using Xunit;
@@ -404,7 +405,12 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
                 SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
             }
         }
 
@@ -417,7 +423,30 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamSizeCount_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
+
+                SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize / 2, stream.Position);
             }
         }
 
@@ -430,8 +459,16 @@ namespace System.Net.Sockets.Tests
             {
                 stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
                 SendPackets(type, new SendPacketsElement(stream, 10, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
                 SendPackets(type, new SendPacketsElement(stream, s_testFileSize - 20, 20), 20);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
             }
         }
 
@@ -452,6 +489,12 @@ namespace System.Net.Sockets.Tests
                 };
                 stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
                 SendPackets(type, elements, SocketError.Success, 70);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, elements, SocketError.Success, 70);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Assert.Equal(s_testFileSize - 10, stream.Position);
             }
         }
 
@@ -485,6 +528,7 @@ namespace System.Net.Sockets.Tests
         #endregion FileStreams
 
         #region Helpers
+
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, TransmitFileOptions flags, int bytesExpected)
         {
             Assert.True(Capability.IPv6Support());
@@ -529,12 +573,12 @@ namespace System.Net.Sockets.Tests
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, SocketError.Success, bytesExpected);
+            SendPackets(type, new[] {element}, SocketError.Success, bytesExpected);
         }
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResut, int bytesExpected)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, expectedResut, bytesExpected);
+            SendPackets(type, new[] {element}, expectedResut, bytesExpected);
         }
 
         private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResut, int bytesExpected)
