@@ -271,8 +271,9 @@ namespace System.Security.Cryptography
                     Buffer.BlockCopy(_outputBuffer, 0, buffer, offset, _outputBufferIndex);
                     bytesToDeliver -= _outputBufferIndex;
                     currentOutputIndex += _outputBufferIndex;
+                    int toClear = _outputBuffer.Length - _outputBufferIndex;
+                    CryptographicOperations.ZeroMemory(new Span<byte>(_outputBuffer, _outputBufferIndex, toClear));
                     _outputBufferIndex = 0;
-                    CryptographicOperations.ZeroMemory(_outputBuffer);
                 }
                 else
                 {
