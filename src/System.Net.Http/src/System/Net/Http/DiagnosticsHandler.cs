@@ -97,9 +97,7 @@ namespace System.Net.Http
             {
                 responseTask = base.SendAsync(request, cancellationToken);
 
-                await responseTask.ConfigureAwait(false);
-
-                return responseTask.Result;
+                return await responseTask.ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
