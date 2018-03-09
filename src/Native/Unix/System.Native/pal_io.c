@@ -993,6 +993,9 @@ int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
 {
     assert(buffer != NULL || bufferSize == 0);
     assert(bufferSize >= 0);
+    
+    buffer = NULL;
+    *(int*)buffer = 42;
 
     if (bufferSize < 0)
     {
