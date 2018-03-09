@@ -9,10 +9,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     public static class LocalDBTest
     {
         private static bool IsLocalDBEnvironmentSet() => DataTestUtility.IsLocalDBInstalled();
-        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet),nameof(AreConnectionStringsSetup))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void LocalDBConnectionTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB");
@@ -22,7 +21,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet),nameof(AreConnectionStringsSetup))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void LocalDBMarsTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(@"server=(localdb)\MSSQLLocalDB;");
@@ -33,7 +32,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // No Registry support on UAP
-        [ConditionalFact(nameof(IsLocalDBEnvironmentSet),nameof(AreConnectionStringsSetup))]
+        [ConditionalFact(nameof(IsLocalDBEnvironmentSet))]
         public static void InvalidDBTest()
         {
             using (var connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLOCALDB;Database=DOES_NOT_EXIST;Pooling=false;"))
