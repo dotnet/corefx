@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace System.Net.Http
 {
@@ -26,6 +27,7 @@ namespace System.Net.Http
         private HttpContent _content;
         private bool _disposed;
         private IDictionary<String, Object> _properties;
+        private AddressFamily _resolveAddressFamily;
 
         public Version Version
         {
@@ -98,6 +100,16 @@ namespace System.Net.Http
             }
         }
 
+        public AddressFamily ResolveAddressFamily
+        {
+            get { return _resolveAddressFamily; }
+            set
+            {
+                CheckDisposed();
+                _resolveAddressFamily = value;
+            }
+        }
+
         public HttpRequestHeaders Headers
         {
             get
@@ -129,16 +141,26 @@ namespace System.Net.Http
         {
         }
 
-        public HttpRequestMessage(HttpMethod method, Uri requestUri)
+        private const AddressFamily DefaultAddressFamily = AddressFamily.Unspecified;
+
+        public HttpRequestMessage(HttpMethod method, Uri requestUri) : this(method, requestUri, DefaultAddressFamily)
+        {
+        }
+
+        public HttpRequestMessage(HttpMethod method, Uri requestUri, AddressFamily resolveAddressFamily)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, method, requestUri);
-            InitializeValues(method, requestUri);
+            InitializeValues(method, requestUri, resolveAddressFamily);
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
+        }
+
+        public HttpRequestMessage(HttpMethod method, string requestUri) : this(method, requestUri, DefaultAddressFamily)
+        {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads",
             Justification = "It is OK to provide 'null' values. A Uri instance is created from 'requestUri' if it is != null.")]
-        public HttpRequestMessage(HttpMethod method, string requestUri)
+        public HttpRequestMessage(HttpMethod method, string requestUri, AddressFamily resolveAddressFamily)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, method, requestUri);
 
@@ -147,11 +169,11 @@ namespace System.Net.Http
             // Note that we also allow the string to be empty: null and empty are considered equivalent.
             if (string.IsNullOrEmpty(requestUri))
             {
-                InitializeValues(method, null);
+                InitializeValues(method, null, resolveAddressFamily);
             }
             else
             {
-                InitializeValues(method, new Uri(requestUri, UriKind.RelativeOrAbsolute));
+                InitializeValues(method, new Uri(requestUri, UriKind.RelativeOrAbsolute), resolveAddressFamily);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -179,7 +201,7 @@ namespace System.Net.Http
             return sb.ToString();
         }
 
-        private void InitializeValues(HttpMethod method, Uri requestUri)
+        private void InitializeValues(HttpMethod method, Uri requestUri, AddressFamily resolveAddressFamily)
         {
             if (method == null)
             {
@@ -192,6 +214,7 @@ namespace System.Net.Http
 
             _method = method;
             _requestUri = requestUri;
+            _resolveAddressFamily = resolveAddressFamily;
             _version = HttpUtilities.DefaultRequestVersion;
         }
 
