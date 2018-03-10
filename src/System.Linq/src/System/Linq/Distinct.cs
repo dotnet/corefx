@@ -50,7 +50,7 @@ namespace System.Linq
                         if (!_enumerator.MoveNext())
                         {
                             Dispose();
-                            return false;
+                            break;
                         }
 
                         TSource element = _enumerator.Current;
@@ -70,10 +70,10 @@ namespace System.Linq
                             }
                         }
 
+                        Dispose();
                         break;
                 }
 
-                Dispose();
                 return false;
             }
 
