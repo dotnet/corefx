@@ -284,6 +284,7 @@ namespace System.IO.Tests
             InlineData(":bar:$DATA"),
             InlineData("::$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStream(string streamName)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
@@ -298,6 +299,7 @@ namespace System.IO.Tests
             InlineData(":bar"),
             InlineData(":bar:$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStream_OnExisting(string streamName)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
