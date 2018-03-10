@@ -173,4 +173,99 @@ namespace System.Linq.Parallel
             get { return false; }
         }
     }
+
+    /// <summary>
+    /// Class to build a HashJoinHashLookup of right elements for use in Join operations.
+    /// </summary>
+    /// <typeparam name="TElement"></typeparam>
+    /// <typeparam name="TOrderKey"></typeparam>
+    /// <typeparam name="THashKey"></typeparam>
+    internal class JoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<TElement, TOrderKey, THashKey>
+    {
+        private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
+        private readonly IEqualityComparer<THashKey> _keyComparer; // An optional key comparison object.
+
+        internal JoinHashLookupBuilder(QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> dataSource, IEqualityComparer<THashKey> keyComparer)
+        {
+            Debug.Assert(dataSource != null);
+
+            _dataSource = dataSource;
+            _keyComparer = keyComparer;
+        }
+
+        public override HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken)
+        {
+            HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> lookup =
+                new HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>>(_keyComparer);
+            JoinBaseHashBuilder baseHashBuilder = new JoinBaseHashBuilder(lookup);
+
+            BuildBaseHashLookup(_dataSource, baseHashBuilder, cancellationToken);
+
+            return new JoinHashLookup(lookup);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            Debug.Assert(_dataSource != null);
+
+            _dataSource.Dispose();
+        }
+
+        /// <summary>
+        /// Adds TElement,TOrderKey values to a HashLookup of HashLookupValueLists.
+        /// </summary>
+        private struct JoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
+        {
+            private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
+
+            public JoinBaseHashBuilder(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
+
+                _base = baseLookup;
+            }
+
+            public bool Add(THashKey hashKey, TElement element, TOrderKey orderKey)
+            {
+                HashLookupValueList<TElement, TOrderKey> currentValue = default(HashLookupValueList<TElement, TOrderKey>);
+                if (!_base.TryGetValue(hashKey, ref currentValue))
+                {
+                    currentValue = new HashLookupValueList<TElement, TOrderKey>(element, orderKey);
+                    _base.Add(hashKey, currentValue);
+                    return false;
+                }
+                else
+                {
+                    if (currentValue.Add(element, orderKey))
+                    {
+                        // We need to re-store this element because the pair is a value type.
+                        _base[hashKey] = currentValue;
+                    }
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
+        /// 
+        /// Since Join operations do not require a default, this just passes the call on to the base lookup.
+        /// </summary>
+        private class JoinHashLookup : HashJoinHashLookup<THashKey, TElement, TOrderKey>
+        {
+            private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;
+
+            internal JoinHashLookup(HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> baseLookup)
+            {
+                Debug.Assert(baseLookup != null);
+
+                _base = baseLookup;
+            }
+
+            public override bool TryGetValue(THashKey key, ref HashLookupValueList<TElement, TOrderKey> value)
+            {
+                return _base.TryGetValue(key, ref value);
+            }
+        }
+    }
 }
