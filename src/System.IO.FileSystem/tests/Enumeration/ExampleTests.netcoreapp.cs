@@ -26,6 +26,8 @@ namespace System.IO.Tests.Enumeration
                 {
                     ShouldIncludePredicate = (ref FileSystemEntry entry) => !entry.IsDirectory
                 };
+
+            FSAssert.EqualWhenOrdered(new string[] { "one", "two" }, fileNames);
         }
     }
 }
