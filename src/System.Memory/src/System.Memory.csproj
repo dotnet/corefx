@@ -103,9 +103,6 @@
     <Compile Include="System\Number\Number.FormatAndParse.cs" />
     <Compile Include="System\Number\Number.NumberBuffer.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Common\src\System\MutableDecimal.cs" />
-  </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="$(CommonPath)\CoreLib\System\Memory.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\MemoryDebugView.cs" />
@@ -136,6 +133,9 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
+      <Link>Common\System\MutableDecimal.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Reference Include="System.Buffers" />
@@ -155,6 +155,20 @@
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.Numerics.Vectors\src\System.Numerics.Vectors.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(CommonPath)\CoreLib\System\MemoryExtensions.Fast.cs">
+      <Link>System\MemoryExtensions.Fast.cs</Link>
+    </None>
+    <None Include="$(CommonPath)\CoreLib\System\Runtime\InteropServices\MemoryMarshal.Fast.cs">
+      <Link>System\Runtime\InteropServices\MemoryMarshal.Fast.cs</Link>
+    </None>
+    <None Include="$(CommonPath)\CoreLib\System\ReadOnlySpan.Fast.cs">
+      <Link>System\ReadOnlySpan.Fast.cs</Link>
+    </None>
+    <None Include="$(CommonPath)\CoreLib\System\Span.Fast.cs">
+      <Link>System\Span.Fast.cs</Link>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
