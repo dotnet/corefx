@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -388,5 +389,14 @@ namespace System.Net.Http
 
             return null;
         }
+
+        public delegate Task<EndPoint> ResolveEndpointAsyncDelegate(string host, int port, AddressFamily addressFamily, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// With this property user can have more control when resolving IP address. For example one could prefer to resolve IPv6 addresses over IPv4
+        /// or completely override system default DNS resolving logic.
+        /// If set to null (default) client behaves same as before (backward compatible).
+        /// </summary>
+        public static ResolveEndpointAsyncDelegate ResolveEndpointAsync { get; set; } = null;
     }
 }

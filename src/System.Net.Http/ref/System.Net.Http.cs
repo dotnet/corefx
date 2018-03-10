@@ -176,6 +176,8 @@ namespace System.Net.Http
         public HttpRequestMessage() { }
         public HttpRequestMessage(System.Net.Http.HttpMethod method, string requestUri) { }
         public HttpRequestMessage(System.Net.Http.HttpMethod method, System.Uri requestUri) { }
+        public HttpRequestMessage(HttpMethod method, Uri requestUri, System.Net.Sockets.AddressFamily resolveAddressFamily) { }
+        public HttpRequestMessage(HttpMethod method, string requestUri, System.Net.Sockets.AddressFamily resolveAddressFamily) { }
         public System.Net.Http.HttpContent Content { get { throw null; } set { } }
         public System.Net.Http.Headers.HttpRequestHeaders Headers { get { throw null; } }
         public System.Net.Http.HttpMethod Method { get { throw null; } set { } }
@@ -185,6 +187,7 @@ namespace System.Net.Http
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public override string ToString() { throw null; }
+        public System.Net.Sockets.AddressFamily ResolveAddressFamily { get { throw null; } set { } }
     }
     public partial class HttpResponseMessage : System.IDisposable
     {

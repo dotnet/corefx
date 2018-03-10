@@ -32,7 +32,7 @@ namespace System.Net.Http
             }
         }
 
-        public static async ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken)
+        public static async ValueTask<Stream> ConnectAsync(string host, int port, AddressFamily addressFamily, CancellationToken cancellationToken)
         {
             try
             {
@@ -42,9 +42,18 @@ namespace System.Net.Http
                 using (var saea = new BuilderAndCancellationTokenSocketAsyncEventArgs(cancellationToken))
                 {
                     // Configure which server to which to connect.
-                    saea.RemoteEndPoint = IPAddress.TryParse(host, out IPAddress address) ?
+                    if (SocketsHttpHandler.ResolveEndpointAsync == null)
+                    {
+                        saea.RemoteEndPoint = IPAddress.TryParse(host, out IPAddress address) ?
                         (EndPoint)new IPEndPoint(address, port) :
                         new DnsEndPoint(host, port);
+                    }
+                    else
+                    {
+                        //give user control how to resolve endpoint address
+                        var resolveEndpointTask = SocketsHttpHandler.ResolveEndpointAsync(host, port, addressFamily, cancellationToken);
+                        saea.RemoteEndPoint = resolveEndpointTask.IsCompleted ? resolveEndpointTask.Result : await resolveEndpointTask.ConfigureAwait(false);
+                    }
 
                     // Hook up a callback that'll complete the Task when the operation completes.
                     saea.Completed += (s, e) =>
