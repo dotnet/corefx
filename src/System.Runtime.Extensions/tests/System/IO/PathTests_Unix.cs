@@ -46,7 +46,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void GetTempPath_SetEnvVar_Unix(string expected, string newTempPath)
+        public void GetTempPath_SetEnvVar_Unix()
         {
             RemoteInvoke(() =>
             {
