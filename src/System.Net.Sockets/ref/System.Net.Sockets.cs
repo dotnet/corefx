@@ -6,8 +6,6 @@
 // ------------------------------------------------------------------------------
 
 
-using System.IO;
-
 namespace System.Net.Sockets
 {
     public enum IOControlCode : long

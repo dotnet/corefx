@@ -1591,7 +1591,7 @@ namespace System.Net.Sockets
             Socket socket, TransmitFileOptions options, SendPacketsElement[] elements, FileStream[] files, Action<long, SocketError> callback)
         {
             SocketError error = SocketError.Success;
-            long[] bytesTransferred = {0};
+            long bytesTransferred = 0;
             try
             {
                 Debug.Assert(elements.Length == files.Length);
@@ -1602,7 +1602,7 @@ namespace System.Net.Sockets
                     {
                         if (e.Buffer != null)
                         {
-                            bytesTransferred[0] += await socket.SendAsync(new ArraySegment<byte>(e.Buffer, e.Offset, e.Count), SocketFlags.None).ConfigureAwait(false);
+                            bytesTransferred += await socket.SendAsync(new ArraySegment<byte>(e.Buffer, e.Offset, e.Count), SocketFlags.None).ConfigureAwait(false);
                         }
                         else
                         {
@@ -1615,7 +1615,7 @@ namespace System.Net.Sockets
                             var tcs = new TaskCompletionSource<SocketError>();
                             error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.Count > 0 ? e.Count : (int)(fs.Length - e.LongOffset), (transferred, se) =>
                             {
-                                bytesTransferred[0] += transferred;
+                                bytesTransferred += transferred;
                                 tcs.TrySetResult(se);
                             });
                             if (error == SocketError.IOPending)
@@ -1654,7 +1654,7 @@ namespace System.Net.Sockets
             }
             finally
             {
-                callback(bytesTransferred[0], error);
+                callback(bytesTransferred, error);
             }
         }
 

@@ -362,7 +362,7 @@ namespace System.Net.Sockets
                     }
                     else if (spe.FileStream != null)
                     {
-                        NetEventSource.NotLoggedFileStream(spe.FileStream, _currentSocket, _completedOperation);
+                        NetEventSource.NotLoggedFile(spe.FileStream.Name, _currentSocket, _completedOperation);
                     }
                 }
             }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.Tracing;
-using System.IO;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -71,15 +70,6 @@ namespace System.Net
             if (IsEnabled)
             {
                 Log.NotLoggedFile(filePath, GetHashCode(socket), completedOperation);
-            }
-        }
-
-        [NonEvent]
-        public static void NotLoggedFileStream(FileStream fileStream, Socket socket, SocketAsyncOperation completedOperation)
-        {
-            if (IsEnabled)
-            {
-                Log.NotLoggedFile(fileStream.Name, GetHashCode(socket), completedOperation);
             }
         }
 
