@@ -501,6 +501,30 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamAsyncMultiPart_Success(SocketImplementationType type)
+        {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
+            {
+                var elements = new[]
+                {
+                    new SendPacketsElement(stream, 0, 20),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(stream, 0, 10),
+                    new SendPacketsElement(stream, 10, 20),
+                    new SendPacketsElement(stream, 30, 10),
+                };
+                stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
+                SendPackets(type, elements, SocketError.Success, 70);
+                Assert.Equal(s_testFileSize - 10, stream.Position);
+
+                SendPackets(type, elements, SocketError.Success, 70);
+                Assert.Equal(s_testFileSize - 10, stream.Position);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamLargeOffset_Throws(SocketImplementationType type)
         {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))

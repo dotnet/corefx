@@ -1020,8 +1020,8 @@ namespace System.Net.Sockets
                         sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
                         sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
 
-                        // Workaround from reading stream from current position
-                        if (spe.LongOffset == 0)
+                        // Workaround from synchronous reading stream from current position if packet offset equals 0
+                        if (spe.LongOffset == 0 && !spe.FileStream.IsAsync)
                             spe.FileStream.Seek(0, SeekOrigin.Begin);
 
                         sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;

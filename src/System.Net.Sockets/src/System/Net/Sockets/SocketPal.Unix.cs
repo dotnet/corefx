@@ -1613,11 +1613,13 @@ namespace System.Net.Sockets
                             }
 
                             var tcs = new TaskCompletionSource<SocketError>();
-                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset, e.Count > 0 ? e.Count : (int)(fs.Length - e.LongOffset), (transferred, se) =>
-                            {
-                                bytesTransferred += transferred;
-                                tcs.TrySetResult(se);
-                            });
+                            error = SendFileAsync(socket.SafeHandle, fs, e.LongOffset,
+                                e.Count > 0 ? e.Count : checked((int)(fs.Length - e.LongOffset)),
+                                (transferred, se) =>
+                                {
+                                    bytesTransferred += transferred;
+                                    tcs.TrySetResult(se);
+                                });
                             if (error == SocketError.IOPending)
                             {
                                 error = await tcs.Task.ConfigureAwait(false);
