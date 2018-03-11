@@ -13,6 +13,31 @@ namespace System.Runtime.CompilerServices.Tests
     public class CallSiteCachingTests
     {
         [Fact]
+        public void InlineCache()
+        {
+            var callSite = CallSite<Func<CallSite, object, object>>.Create(Binder.GetMember(CSharpBinderFlags.None, "A", typeof(CallSiteCachingTests), new CSharpArgumentInfo[1]
+            {
+                CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)
+            }));
+
+            var initialTarget = callSite.Target;
+            Assert.Equal((object)initialTarget, callSite.Update);
+
+            object newExpando = CallSiteCachingTests.GetNewExpando(123);
+            callSite.Target(callSite, newExpando);
+
+            var newTarget = callSite.Target;
+
+            for (int i = 0; i < 10; i++)
+            {
+                callSite.Target(callSite, newExpando);
+
+                // rule should not be changing
+                Assert.Equal((object)newTarget, callSite.Target);
+            }
+        }
+
+        [Fact]
         public void L1Cache()
         {
             var callSite = CallSite<Func<CallSite, object, object>>.Create(Binder.GetMember(CSharpBinderFlags.None, "A", typeof(CallSiteCachingTests), new CSharpArgumentInfo[1]
