@@ -19,6 +19,9 @@ param(
     # a semi-colon delimited list of GitHub users to notify on the PR
     [string]$GitHubPullRequestNotifications='')
 
+# Enable TLS 1.2 for communication with GitHub.
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+
 $LatestVersion = Invoke-WebRequest $VersionFileUrl -UseBasicParsing
 $LatestVersion = $LatestVersion.ToString().Trim()
 
