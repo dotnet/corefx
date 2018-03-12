@@ -798,6 +798,37 @@ namespace System.Net.WebSockets
             // Store the close status and description onto the instance.
             _closeStatus = closeStatus;
             _closeStatusDescription = closeStatusDescription;
+
+            if (!_isServer && _sentCloseFrame)
+            {
+                await WaitForServerToCloseConnectionAsync().ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>Issues a read on the stream to wait for EOF.</summary>
+        private async Task WaitForServerToCloseConnectionAsync()
+        {
+            // Per RFC 6455 7.1.1, try to let the server close the connection.  We give it up to a second.
+            // We simply issue a read and don't care what we get back; we could validate that we don't get
+            // additional data, but at this point we're about to close the connection and we're just stalling
+            // to try to get the server to close first.
+            ValueTask<int> finalReadTask = _stream.ReadAsync(_receiveBuffer, default);
+            if (!finalReadTask.IsCompletedSuccessfully)
+            {
+                const int WaitForCloseTimeoutMs = 1_000; // arbitrary amount of time to give the server (same as netfx)
+                using (var finalCts = new CancellationTokenSource(WaitForCloseTimeoutMs))
+                using (finalCts.Token.Register(s => ((ManagedWebSocket)s).Abort(), this))
+                {
+                    try
+                    {
+                        await finalReadTask.ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // Eat any resulting exceptions.  We were going to close the connection, anyway.
+                    }
+                }
+            }
         }
 
         /// <summary>Processes a received ping or pong message.</summary>
@@ -1095,6 +1126,11 @@ namespace System.Net.WebSockets
                 {
                     _state = WebSocketState.CloseSent;
                 }
+            }
+
+            if (!_isServer && _receivedCloseFrame)
+            {
+                await WaitForServerToCloseConnectionAsync().ConfigureAwait(false);
             }
         }
 
