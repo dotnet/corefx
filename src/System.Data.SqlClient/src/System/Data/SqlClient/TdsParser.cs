@@ -193,8 +193,6 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal bool IsYukonOrNewer => _isYukon;
-
         internal bool IsKatmaiOrNewer
         {
             get
