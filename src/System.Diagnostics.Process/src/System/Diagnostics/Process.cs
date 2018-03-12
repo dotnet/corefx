@@ -117,9 +117,10 @@ namespace System.Diagnostics
             _processInfo = processInfo;
             _machineName = machineName;
             _isRemoteMachine = isRemoteMachine;
+            _processId = processId;
+            _haveProcessId = true;
             _outputStreamReadMode = StreamReadMode.Undefined;
             _errorStreamReadMode = StreamReadMode.Undefined;
-            SetProcessId(processId);
         }
 
         public SafeProcessHandle SafeHandle

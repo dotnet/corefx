@@ -85,10 +85,7 @@ namespace System.Diagnostics
             // Make sure that we configure the wait state holder for this process object, which we can only do once we have a process ID.
             Debug.Assert(_haveProcessId, $"{nameof(ConfigureAfterProcessIdSet)} should only be called once a process ID is set");
             // Initialize WaitStateHolder for non-child processes
-            if (_waitStateHolder == null)
-            {
-                _waitStateHolder = new ProcessWaitState.Holder(_processId);
-            }
+            GetWaitState();
         }
 
         /// <devdoc>
@@ -624,13 +621,12 @@ namespace System.Diagnostics
         /// <summary>Gets the wait state for this Process object.</summary>
         private ProcessWaitState GetWaitState()
         {
-            ProcessWaitState waitState = _waitStateHolder?._state;
-            if (waitState == null)
+            if (_waitStateHolder == null)
             {
-                // This will throw
                 EnsureState(State.HaveId);
+                _waitStateHolder = new ProcessWaitState.Holder(_processId);
             }
-            return waitState;
+            return _waitStateHolder._state;
         }
 
         private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)
