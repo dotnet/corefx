@@ -1577,7 +1577,7 @@ namespace System.Collections.Concurrent
                 if (key == null) ThrowKeyNullException();
 
                 if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
-                if (!(value is TValue)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
+                if (!(value is TValue) && value != null) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
 
                 ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value;
             }

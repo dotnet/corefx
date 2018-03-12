@@ -309,6 +309,19 @@ namespace System.Collections.Tests
             Assert.Equal(count + 1, dictionary.Count);
             Assert.Equal(newValue, dictionary[existingKey]);
         }
+		
+		 [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void IDictionary_NonGeneric_ItemSet_NullValue(int count)
+        {
+            if (!IsReadOnly)
+            {
+                IDictionary dictionary = NonGenericIDictionaryFactory(count);
+                object key = GetNewKey(dictionary);
+                dictionary[key] = null;
+                Assert.Null(dictionary[key]);
+            }
+        }
 
         #endregion
 
