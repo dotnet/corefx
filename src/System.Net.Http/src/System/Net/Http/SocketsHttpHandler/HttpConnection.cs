@@ -53,7 +53,7 @@ namespace System.Net.Http
         private int _writeOffset;
         private int _allowedReadLineBytes;
 
-        private ValueTask<int>? _readAheadTask;
+        private Task<int> _readAheadTask;
         private byte[] _readBuffer;
         private int _readOffset;
         private int _readLength;
@@ -118,16 +118,19 @@ namespace System.Net.Http
 
                     // Eat any exceptions from the read-ahead task.  We don't need to log, as we expect
                     // failures from this task due to closing the connection while a read is in progress.
-                    if (_readAheadTask != null)
+                    Task<int> t = _readAheadTask;
+                    if (t != null)
                     {
-                        ValueTask<int> t = _readAheadTask.GetValueOrDefault();
-                        if (t.IsCompleted && !t.IsCompletedSuccessfully)
+                        if (t.IsCompleted)
                         {
-                            Exception ignored = t.AsTask().Exception; // accessing Exception prop is sufficient to suppress unobserved exception events
+                            if (t.IsFaulted)
+                            {
+                                Exception ignored = t.Exception; // accessing Exception prop is sufficient to suppress unobserved exception events
+                            }
                         }
                         else
                         {
-                            t.AsTask().ContinueWith(p =>
+                            t.ContinueWith(p =>
                             {
                                 Exception ignored = p.Exception;
                             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
@@ -142,7 +145,7 @@ namespace System.Net.Http
             get
             {
                 Debug.Assert(_readAheadTask != null, $"{nameof(_readAheadTask)} should have been initialized");
-                return _readAheadTask.GetValueOrDefault().IsCompleted;
+                return _readAheadTask.IsCompleted;
             }
         }
 
@@ -412,12 +415,12 @@ namespace System.Net.Http
                 // connection again, as that would mean the connection was either closed or had
                 // erroneous data sent on it by the server in response to no request from us.
                 // We need to consume that read prior to issuing another read request.
-                ValueTask<int>? t = _readAheadTask;
+                Task<int> t = _readAheadTask;
                 if (t != null)
                 {
                     _readAheadTask = null;
 
-                    int bytesRead = await t.GetValueOrDefault().ConfigureAwait(false);
+                    int bytesRead = await t.ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
 
                     if (bytesRead == 0)
@@ -1446,7 +1449,7 @@ namespace System.Net.Http
                     // at any point to understand if the connection has been closed or if errant data
                     // has been sent on the connection by the server, either of which would mean we
                     // should close the connection and not use it for subsequent requests.
-                    _readAheadTask = _stream.ReadAsync(new Memory<byte>(_readBuffer));
+                    _readAheadTask = ReadAheadAsync();
                 }
                 catch (Exception error)
                 {
@@ -1460,6 +1463,33 @@ namespace System.Net.Http
                 // Put connection back in the pool.
                 _pool.ReturnConnection(this);
             }
+        }
+
+        /// <summary>Issue a read on the connection, closing the connection if the read returns 0 bytes for EOF.</summary>
+        private async Task<int> ReadAheadAsync()
+        {
+            // From RFC 7230:
+            //   "To avoid the TCP reset problem, servers typically close a connection
+            //    in stages. First, the server performs a half-close by closing only
+            //    the write side of the read/write connection. The server then
+            //    continues to read from the connection until it receives a
+            //    corresponding close by the client, or until the server is reasonably
+            //    certain that its own TCP stack has received the client's
+            //    acknowledgement of the packet(s) containing the server's last
+            //    response. Finally, the server fully closes the connection."
+            // To be a well-behaved client, we want to close a pooled connection
+            // as soon as we detect the server has closed its write side.
+
+            int bytesRead = await _stream.ReadAsync(new Memory<byte>(_readBuffer)).ConfigureAwait(false);
+            if (bytesRead == 0)
+            {
+                // Proactively close the connection once we get an EOF from the server.
+                // Note that if the read completes synchronously as part of this call,
+                // we'll end up disposing the connection before the read ahead task is stored
+                // into _readAheadTask, but since this task is completing successfully, that's ok.
+                Dispose();
+            }
+            return bytesRead;
         }
 
         private static bool EqualsOrdinal(string left, Span<byte> right)
