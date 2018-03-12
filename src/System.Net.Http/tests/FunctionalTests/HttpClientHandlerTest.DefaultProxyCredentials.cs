@@ -64,20 +64,21 @@ namespace System.Net.Http.Functional.Tests
                     Task<HttpResponseMessage> responseTask = client.GetAsync("http://notatrealserver.com/");
                     await proxyServer.AcceptConnectionAsync(async connection =>
                     {
-                        List<string> headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                        //List<string> headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                        List<string> headers = await connection.ReadRequestHeaderAsync();
                         // Curl sends Basic auth without asking, other handlers wait for 407.
                         if (!IsCurlHandler)
                         {
                             await connection.SendResponseAsync(HttpStatusCode.ProxyAuthenticationRequired, "Proxy-Authenticate: Basic\r\n");
-                            headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                            headers = await connection.ReadRequestHeaderAsync();
                         }
                         // Verify that we got explicitProxyCreds.
                         Assert.Equal(expectCreds, LoopbackServer.GetRequestHeaderValue(headers, "Proxy-Authorization"));
 
                         Task serverTask = connection.SendResponseAsync(HttpStatusCode.OK);
 
-                        await TestHelper.WhenAllCompletedOrAnyFailed(serverTask, responseTask).ConfigureAwait(false);
-                        HttpResponseMessage response = await responseTask.ConfigureAwait(false);
+                        await TestHelper.WhenAllCompletedOrAnyFailed(serverTask, responseTask);
+                        HttpResponseMessage response = responseTask.Result;
 
                         Assert.Equal(response.StatusCode, HttpStatusCode.OK);
                     });
