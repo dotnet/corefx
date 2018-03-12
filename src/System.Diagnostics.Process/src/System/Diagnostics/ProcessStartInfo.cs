@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text;
@@ -22,7 +23,7 @@ namespace System.Diagnostics
         private string _directory;
         private string _userName;
         private string _verb;
-        private readonly IReadOnlyCollection<string> _argumentList = Array.Empty<string>();
+        private Collection<string> _argumentList = new Collection<string>();
         private ProcessWindowStyle _windowStyle;
 
         internal DictionaryWrapper _environmentVariables;
@@ -54,18 +55,6 @@ namespace System.Diagnostics
         }
 
         /// <devdoc>
-        ///     Specifies the name of the application that is to be started, as well as a set
-        ///     of command line arguments to pass to the application.
-        /// </devdoc>
-        public ProcessStartInfo(string fileName, IReadOnlyCollection<string> argumentList)
-        {
-            _fileName = fileName;
-
-            if (argumentList != null)
-                _argumentList = argumentList;
-        }
-
-        /// <devdoc>
         ///     Specifies the set of command line arguments to use when starting the application.
         /// </devdoc>
         public string Arguments
@@ -74,7 +63,7 @@ namespace System.Diagnostics
             set => _arguments = value;
         }
 
-        public IReadOnlyCollection<string> ArgumentList
+        public Collection<string> ArgumentList
         {
             get => _argumentList;
         }

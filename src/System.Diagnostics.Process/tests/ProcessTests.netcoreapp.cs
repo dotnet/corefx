@@ -44,11 +44,10 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void StartProcessWithArgumentList()
         {
-            List<string> argList = new List<string>();
-            argList.Add("arg1");
-            argList.Add("arg2");
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
 
-            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
             Process testProcess = CreateProcess();
             testProcess.StartInfo = psi;
 
@@ -69,11 +68,10 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void StartProcessWithSameArgumentList()
         {
-            List<string> argList = new List<string>();
-            argList.Add("arg1");
-            argList.Add("arg2");
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
 
-            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
             Process testProcess = CreateProcess();
             Process secondTestProcess = CreateProcess();
             testProcess.StartInfo = psi;
@@ -102,12 +100,10 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void BothArgumentAndArgumentListSet()
         {
-            List<string> argList = new List<string>();
-            argList.Add("arg1");
-            argList.Add("arg2");
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), "arg3");
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
 
-            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), argList);
-            psi.Arguments = "arg3";
             Process testProcess = CreateProcess();
             testProcess.StartInfo = psi;
             Assert.Throws<InvalidOperationException>(() => testProcess.Start());
