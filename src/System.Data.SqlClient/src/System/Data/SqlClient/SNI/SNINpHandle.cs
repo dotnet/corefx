@@ -150,8 +150,7 @@ namespace System.Data.SqlClient.SNI
                 packet = null;
                 try
                 {
-                    packet = new SNIPacket(null);
-                    packet.Allocate(_bufferSize);
+                    packet = new SNIPacket(_bufferSize);
                     packet.ReadFromStream(_stream);
 
                     if (packet.Length == 0)
@@ -175,9 +174,8 @@ namespace System.Data.SqlClient.SNI
 
         public override uint ReceiveAsync(ref SNIPacket packet, bool isMars = false)
         {
-            packet = new SNIPacket(null);
-            packet.Allocate(_bufferSize);
-
+            packet = new SNIPacket(_bufferSize);
+            
             try
             {
                 packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);

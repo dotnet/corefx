@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,13 +21,15 @@ namespace System.Data.SqlClient.SNI
         private string _description;
         private SNIAsyncCallback _completionCallback;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="handle">Owning SNI handle</param>
-        public SNIPacket(SNIHandle handle)
+        private ArrayPool<byte>  _arrayPool = ArrayPool<byte>.Shared;
+        private bool _isBufferFromArrayPool = false;
+        private bool _disposeAfterWriteAsync = false;
+
+        public SNIPacket() { }
+
+        public SNIPacket(int capacity)
         {
-            _offset = 0;
+            Allocate(capacity);
         }
 
         /// <summary>
@@ -45,47 +48,40 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Data left to process
-        /// </summary>
-        public int DataLeft
+        public bool DisposeAfterWriteAsync
         {
             get
             {
-                return _length - _offset;
+                return _disposeAfterWriteAsync;
+            }
+
+            set
+            {
+                _disposeAfterWriteAsync = value;
             }
         }
+
+        /// <summary>
+        /// Length of data left to process
+        /// </summary>
+        public int DataLeft => (_length - _offset);
 
         /// <summary>
         /// Length of data
         /// </summary>
-        public int Length
-        {
-            get
-            {
-                return _length;
-            }
-        }
+        public int Length => _length;
 
         /// <summary>
         /// Packet validity
         /// </summary>
-        public bool IsInvalid
-        {
-            get
-            {
-                return _data == null;
-            }
-        }
+        public bool IsInvalid => (_data == null);
 
         /// <summary>
         /// Packet data
         /// </summary>
         public void Dispose()
         {
-            _data = null;
-            _length = 0;
-            _capacity = 0;
+            Release();
         }
 
         /// <summary>
@@ -109,11 +105,27 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Allocate space for data
         /// </summary>
-        /// <param name="capacity">Bytes to allocate</param>
+        /// <param name="bufferSize">Length of byte array to be allocated</param>
         public void Allocate(int capacity)
         {
+            if (_data != null && _data.Length < capacity)
+            {
+                if (_isBufferFromArrayPool)
+                {
+                    _arrayPool.Return(_data);
+                }
+                _data = null;
+            }
+
+            if (_data == null)
+            {
+                _data = _arrayPool.Rent(capacity);
+                _isBufferFromArrayPool = true;
+            }
+
             _capacity = capacity;
-            _data = new Byte[capacity];
+            _length = 0;
+            _offset = 0;
         }
 
         /// <summary>
@@ -122,10 +134,11 @@ namespace System.Data.SqlClient.SNI
         /// <returns>Cloned packet</returns>
         public SNIPacket Clone()
         {
-            SNIPacket packet = new SNIPacket(null);
-            packet._data = new byte[_length];
-            Buffer.BlockCopy(_data, 0, packet._data, 0, _length);
+            SNIPacket packet = new SNIPacket(_capacity);
+            Buffer.BlockCopy(_data, 0, packet._data, 0, _capacity);
             packet._length = _length;
+            packet._description = _description;
+            packet._completionCallback = _completionCallback;
 
             return packet;
         }
@@ -133,7 +146,7 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Get packet data
         /// </summary>
-        /// <param name="inBuff">Buffer</param>
+        /// <param name="buffer">Buffer</param>
         /// <param name="dataSize">Data in packet</param>
         public void GetData(byte[] buffer, ref int dataSize)
         {
@@ -150,8 +163,9 @@ namespace System.Data.SqlClient.SNI
         {
             _data = data;
             _length = length;
-            _capacity = length;
+            _capacity = data.Length;
             _offset = 0;
+            _isBufferFromArrayPool = false;
         }
 
         /// <summary>
@@ -208,7 +222,7 @@ namespace System.Data.SqlClient.SNI
             }
 
             Buffer.BlockCopy(_data, _offset, buffer, dataOffset, size);
-            _offset = _offset + size;
+            _offset += size;
             return size;
         }
 
@@ -217,9 +231,16 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         public void Release()
         {
-            _length = 0;
-            _capacity = 0;
-            _data = null;
+            if (_data != null)
+            {
+                if(_isBufferFromArrayPool)
+                {
+                    _arrayPool.Return(_data);
+                }
+                _data = null;
+                _capacity = 0;
+            }
+            Reset();
         }
 
         /// <summary>
@@ -228,7 +249,9 @@ namespace System.Data.SqlClient.SNI
         public void Reset()
         {
             _length = 0;
-            _data = new byte[_capacity];
+            _offset = 0;
+            _description = null;
+            _completionCallback = null;
         }
 
         /// <summary>
@@ -270,10 +293,15 @@ namespace System.Data.SqlClient.SNI
 
                 if (error)
                 {
-                    this.Release();
+                    Release();
                 }
 
                 callback(this, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
+
+                if (_disposeAfterWriteAsync)
+                {
+                    Dispose();
+                }
             },
             CancellationToken.None,
             options,
@@ -315,6 +343,11 @@ namespace System.Data.SqlClient.SNI
                 status = TdsEnums.SNI_ERROR;
             }
             callback(this, status);
+
+            if (_disposeAfterWriteAsync)
+            {
+                Dispose();
+            }
         }
 
         /// <summary>
@@ -352,7 +385,7 @@ namespace System.Data.SqlClient.SNI
         {
             if (packet != null)
             {
-                return object.ReferenceEquals(packet, this);
+                return ReferenceEquals(packet, this);
             }
 
             return false;

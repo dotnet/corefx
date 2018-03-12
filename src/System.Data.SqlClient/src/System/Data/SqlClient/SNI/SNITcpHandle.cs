@@ -381,7 +381,6 @@ namespace System.Data.SqlClient.SNI
             _sslStream = null;
             _sslOverTdsStream.Dispose();
             _sslOverTdsStream = null;
-
             _stream = _tcpStream;
         }
 
@@ -469,8 +468,7 @@ namespace System.Data.SqlClient.SNI
                         return TdsEnums.SNI_WAIT_TIMEOUT;
                     }
 
-                    packet = new SNIPacket(null);
-                    packet.Allocate(_bufferSize);
+                    packet = new SNIPacket(_bufferSize);
                     packet.ReadFromStream(_stream);
 
                     if (packet.Length == 0)
@@ -527,7 +525,7 @@ namespace System.Data.SqlClient.SNI
         public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
-            lock(this)
+            lock (this)
             {
                 packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV);
             }
@@ -541,8 +539,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         public override uint ReceiveAsync(ref SNIPacket packet, bool isMars = false)
         {
-            packet = new SNIPacket(null);
-            packet.Allocate(_bufferSize);
+            packet = new SNIPacket(_bufferSize);
 
             try
             {
@@ -619,6 +616,6 @@ namespace System.Data.SqlClient.SNI
         {
             _socket.Shutdown(SocketShutdown.Both);
         }
-#endif		
+#endif
     }
 }
