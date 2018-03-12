@@ -59,8 +59,7 @@ namespace System.IO.Pipes.Tests
                     client.Connect();
             }
 
-            // Hard-coded value expected by the remote invoker in case of successful run.
-            return 42;
+            return SuccessExitCode;
         }
     }
 }
