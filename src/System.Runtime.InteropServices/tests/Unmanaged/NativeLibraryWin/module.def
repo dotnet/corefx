@@ -1,0 +1,13 @@
+LIBRARY NativeLibraryWin
+
+EXPORTS
+    WinapiWithBaseOnly
+    WinapiWithBaseAndAnsiAndUnicode
+    WinapiWithBaseAndAnsiAndUnicodeA
+    WinapiWithBaseAndAnsiAndUnicodeW
+    WinapiWithAnsiAndUnicodeA
+    WinapiWithAnsiAndUnicodeW
+    WinapiWithBaseAndUnicode
+    WinapiWithBaseAndUnicodeW
+    ExportedByNameAndOrdinal @100
+    ExportedByOrdinalOnly @200 NONAME

@@ -719,6 +719,15 @@ namespace System.Runtime.InteropServices
         public MarshalDirectiveException(string message) { }
         public MarshalDirectiveException(string message, System.Exception inner) { }
     }
+    public sealed partial class NativeLibrary
+    {
+        private NativeLibrary() { }
+        public IntPtr Handle { get { throw null; } }
+        public bool TryGetDelegate<TDelegate>(string name, out TDelegate result) where TDelegate : class { throw null; }
+        public bool TryGetDelegate<TDelegate>(string name, bool exactSpelling, out TDelegate result) where TDelegate : class { throw null; }
+        public bool TryGetSymbolAddress(string symbolName, out IntPtr result) { throw null; }
+        public static bool TryLoad(string name, System.Reflection.Assembly caller, System.Runtime.InteropServices.DllImportSearchPath paths, out NativeLibrary result) { throw null; }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
     public sealed partial class OptionalAttribute : System.Attribute
     {
