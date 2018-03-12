@@ -64,7 +64,6 @@ namespace System.Net.Http.Functional.Tests
                     Task<HttpResponseMessage> responseTask = client.GetAsync("http://notatrealserver.com/");
                     await proxyServer.AcceptConnectionAsync(async connection =>
                     {
-                        //List<string> headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
                         List<string> headers = await connection.ReadRequestHeaderAsync();
                         // Curl sends Basic auth without asking, other handlers wait for 407.
                         if (!IsCurlHandler)
