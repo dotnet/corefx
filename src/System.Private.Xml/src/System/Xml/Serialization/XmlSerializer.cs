@@ -588,7 +588,7 @@ namespace System.Xml.Serialization
                     }
                     return DeserializePrimitive(xmlReader, events);
                 }
-                else if (ShouldUseReflectionBasedSerialization(_mapping))
+                else if (ShouldUseReflectionBasedSerialization(_mapping) || _isReflectionBasedSerializer)
                 {
                     return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                 }
