@@ -10,11 +10,15 @@ using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 #endif
 
-#if BIT64
-using nuint = System.UInt64;
+#if netstandard
+using nuint=System.NUInt;
 #else
-using nuint = System.UInt32;
-#endif
+#if BIT64
+using nuint=System.UInt64;
+#else
+using nuint=System.UInt32;
+#endif // BIT64
+#endif // netstandard
 
 namespace System
 {

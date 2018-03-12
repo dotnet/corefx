@@ -13,11 +13,15 @@ using Internal.Runtime.CompilerServices;
 using System.Numerics;
 #endif
 
-#if BIT64
-using nuint = System.UInt64;
+#if netstandard
+using nuint=System.NUInt;
 #else
-using nuint = System.UInt32;
-#endif
+#if BIT64
+using nuint=System.UInt64;
+#else
+using nuint=System.UInt32;
+#endif // BIT64
+#endif // netstandard
 
 namespace System
 {
@@ -900,8 +904,6 @@ namespace System
         // where the length can exceed 2Gb once scaled by sizeof(T).
         public static unsafe bool SequenceEqualBytes(ref byte first, ref byte second, nuint length)
         {
-            Debug.Assert(length >= 0);
-
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
