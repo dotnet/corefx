@@ -14,14 +14,14 @@ using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    public static class SqlConnectionTest
+    public static class SqlCredentialTest
     {
 
         [CheckConnStrSetupFact]
         public static void CreateSqlConnectionWithCredential()
         {
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
-            var passStr = "pass";
+            var passStr = "Pax561O$T5K#jD";
 
             try
             {
@@ -53,8 +53,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void SqlConnectionChangePasswordPlaintext()
         {
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
-            var pass = "pass";
-            var newPass = "newPass";
+            var pass = "!21Ja3Ims7LI&n";
+            var newPass = "fmVCNf@24Dg*8j";
 
             try
             {
@@ -86,8 +86,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void SqlConnectionChangePasswordSecureString()
         {
             var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
-            var passStr = "pass";
-            var newPassStr = "newPass";
+            var passStr = "tcM0qB^izt%3u7";
+            var newPassStr = "JSG2e(Vp0WCXE&";
 
             try
             {

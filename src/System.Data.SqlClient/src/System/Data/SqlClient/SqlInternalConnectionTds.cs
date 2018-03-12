@@ -492,8 +492,6 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal override bool IsYukonOrNewer => _parser.IsYukonOrNewer;
-
         internal override bool IsKatmaiOrNewer
         {
             get

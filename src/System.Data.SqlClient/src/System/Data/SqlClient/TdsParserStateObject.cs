@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Security;
+using System.Runtime.InteropServices;
 
 namespace System.Data.SqlClient
 {
@@ -2656,6 +2657,32 @@ namespace System.Data.SqlClient
             }
         }
 
+        private void SetBufferSecureStrings()
+        {
+            if (_securePasswords != null)
+            {
+                for (int i = 0; i < _securePasswords.Length; i++)
+                {
+                    if (_securePasswords[i] != null)
+                    {
+                        IntPtr str = IntPtr.Zero;
+                        try
+                        {
+                            str = Marshal.SecureStringToBSTR(_securePasswords[i]);
+                            byte[] data = new byte[_securePasswords[i].Length * 2];
+                            Marshal.Copy(str, data, 0, _securePasswords[i].Length * 2);
+                            TdsParserStaticMethods.ObfuscatePassword(data);
+                            data.CopyTo(_outBuff, _securePasswordOffsetsInBuffer[i]);
+                        }
+                        finally
+                        {
+                            Marshal.ZeroFreeBSTR(str);
+                        }
+                    }
+                }
+            }
+        }
+
         public void ReadAsyncCallback<T>(T packet, UInt32 error)
         {
             ReadAsyncCallback(IntPtr.Zero, packet, error);
@@ -3372,14 +3399,15 @@ namespace System.Data.SqlClient
 
         internal abstract object CreateAndSetAttentionPacket();
 
-        internal abstract void SetPacketData(object packet, byte[] buffer, int bytesUsed, SecureString[] securePasswords, int[] securePasswordsOffsetsInBuffer);
+        internal abstract void SetPacketData(object packet, byte[] buffer, int bytesUsed);
 
         private Task WriteSni(bool canAccumulate)
         {
             // Prepare packet, and write to packet.
             object packet = GetResetWritePacket();
 
-            SetPacketData(packet, _outBuff, _outBytesUsed, _securePasswords, _securePasswordOffsetsInBuffer);
+            SetBufferSecureStrings();
+            SetPacketData(packet, _outBuff, _outBytesUsed);
 
             uint sniError;
             Debug.Assert(Parser.Connection._parserLock.ThreadMayHaveLock(), "Thread is writing without taking the connection lock");

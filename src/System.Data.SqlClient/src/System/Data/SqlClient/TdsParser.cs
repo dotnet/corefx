@@ -6299,10 +6299,12 @@ namespace System.Data.SqlClient
                 {
                     WriteString(userName, _physicalStateObj);
 
-                    if (rec.credential != null) {
+                    if (rec.credential != null)
+                    {
                         _physicalStateObj.WriteSecureString(rec.credential.Password);
                     }
-                    else {
+                    else
+                    {
                         _physicalStateObj.WriteByteArray(encryptedPassword, encryptedPasswordLengthInBytes, 0);
                     }
                 }

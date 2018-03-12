@@ -225,7 +225,6 @@ namespace System.Data.SqlClient
                 if (_credential != null)
                 {
                     SqlConnectionString connectionOptions = new SqlConnectionString(value);
-
                     CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(connectionOptions);
                 }
                 ConnectionString_Set(new SqlConnectionPoolKey(value, _credential));
@@ -1432,12 +1431,15 @@ namespace System.Data.SqlClient
             // note: This is the only case where we directly construct the internal connection, passing in the new password.
             // Normally we would simply create a regular connection and open it, but there is no other way to pass the
             // new password down to the constructor. This would have an unwanted impact on the connection pool.
-            using (SqlInternalConnectionTds con = new SqlInternalConnectionTds(null, connectionOptions, credential, null, newPassword, newSecurePassword, false))
+            SqlInternalConnectionTds con = null;
+            try
             {
-                if (!con.IsYukonOrNewer)
-                {
-                    throw SQL.ChangePasswordRequiresYukon();
-                }
+                con = new SqlInternalConnectionTds(null, connectionOptions, credential, null, newPassword, newSecurePassword, false);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Dispose();
             }
             SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential);
 

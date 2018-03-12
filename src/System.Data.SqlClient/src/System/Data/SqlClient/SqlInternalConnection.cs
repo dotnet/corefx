@@ -142,11 +142,6 @@ namespace System.Data.SqlClient
             get;
         }
 
-        abstract internal bool IsYukonOrNewer
-        {
-            get;
-        }
-
         abstract internal bool IsKatmaiOrNewer
         {
             get;
