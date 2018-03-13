@@ -97,6 +97,7 @@ namespace System.Net.WebSockets
                 // Try to use a shared handler rather than creating a new one just for this request, if
                 // the options are compatible.
                 if (options.Credentials == null &&
+                    !options.UseDefaultCredentials &&
                     options.Proxy == null &&
                     options.Cookies == null &&
                     options.RemoteCertificateValidationCallback == null &&
@@ -106,7 +107,12 @@ namespace System.Net.WebSockets
                     handler = s_defaultHandler;
                     if (handler == null)
                     {
-                        handler = new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.Zero };
+                        handler = new SocketsHttpHandler()
+                        {
+                            PooledConnectionLifetime = TimeSpan.Zero,
+                            UseProxy = false,
+                            UseCookies = false,
+                        };
                         if (Interlocked.CompareExchange(ref s_defaultHandler, handler, null) != null)
                         {
                             handler.Dispose();
@@ -116,17 +122,34 @@ namespace System.Net.WebSockets
                 }
                 else
                 {
-                    handler = new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.Zero };
-                    handler.Credentials = options.Credentials;
-                    handler.Proxy = options.Proxy;
+                    handler = new SocketsHttpHandler();
+                    handler.PooledConnectionLifetime = TimeSpan.Zero;
                     handler.CookieContainer = options.Cookies;
+                    handler.UseCookies = options.Cookies != null;
                     handler.SslOptions.RemoteCertificateValidationCallback = options.RemoteCertificateValidationCallback;
+
+                    if (options.UseDefaultCredentials)
+                    {
+                        handler.Credentials = CredentialCache.DefaultCredentials;
+                    }
+                    else
+                    {
+                        handler.Credentials = options.Credentials;
+                    }
+
+                    if (options.Proxy == null)
+                    {
+                        handler.UseProxy = false;
+                    }
+                    else if (options.Proxy != ClientWebSocket.DefaultWebProxy.Instance)
+                    {
+                        handler.Proxy = options.Proxy;
+                    }
+
                     if (options._clientCertificates?.Count > 0) // use field to avoid lazily initializing the collection
                     {
-                        if (handler.SslOptions.ClientCertificates == null)
-                        {
-                            handler.SslOptions.ClientCertificates = new X509Certificate2Collection();
-                        }
+                        Debug.Assert(handler.SslOptions.ClientCertificates == null);
+                        handler.SslOptions.ClientCertificates = new X509Certificate2Collection();
                         handler.SslOptions.ClientCertificates.AddRange(options.ClientCertificates);
                     }
                 }
