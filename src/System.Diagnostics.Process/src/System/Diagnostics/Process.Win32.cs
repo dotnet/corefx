@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -30,8 +28,6 @@ namespace System.Diagnostics
 
         private unsafe bool StartWithShellExecuteEx(ProcessStartInfo startInfo)
         {
-            string arguments;
-
             if (!string.IsNullOrEmpty(startInfo.UserName) || startInfo.Password != null)
                 throw new InvalidOperationException(SR.CantStartAsUser);
 
@@ -50,9 +46,10 @@ namespace System.Diagnostics
             if (startInfo._environmentVariables != null)
                 throw new InvalidOperationException(SR.CantUseEnvVars);
 
+            string arguments;
             if (startInfo != null && startInfo.ArgumentList.Count > 0)
             {
-                arguments = PasteArguments.Paste(startInfo.ArgumentList, false);
+                arguments = PasteArguments.Paste(startInfo.ArgumentList, pasteFirstArgumentUsingArgV0Rules: false);
             }
             else
             {

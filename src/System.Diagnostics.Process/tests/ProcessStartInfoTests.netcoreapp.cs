@@ -31,11 +31,44 @@ namespace System.Diagnostics.Tests
             Assert.Equal("arg2", psi.ArgumentList[1]);
         }
 
-        [Fact]
-        public void InitializeWithArgumentList_Null()
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
+        [MemberData(nameof(UseShellExecute))]
+        [OuterLoop("Launches notepad")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WaitForInputIdle, ProcessName, and MainWindowTitle are not supported on UAP")]
+        public void StartInfo_NotepadWithContent_withArgumentList(bool useShellExecute)
         {
-           // ProcessStartInfo psi = new ProcessStartInfo("filename", (IReadOnlyCollection<string>)null);
-           // Assert.Equal(0, psi.ArgumentList.Count);
+            string tempFile = GetTestFilePath() + ".txt";
+            File.WriteAllText(tempFile, $"StartInfo_NotepadWithContent({useShellExecute})");
+
+            ProcessStartInfo info = new ProcessStartInfo
+            {
+                UseShellExecute = useShellExecute,
+                FileName = @"notepad.exe",
+                Arguments = null,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            info.ArgumentList.Add(tempFile);
+
+            using (var process = Process.Start(info))
+            {
+                Assert.True(process != null, $"Could not start {info.FileName} {info.Arguments} UseShellExecute={info.UseShellExecute}");
+
+                try
+                {
+                    process.WaitForInputIdle(); // Give the file a chance to load
+                    Assert.Equal("notepad", process.ProcessName);
+
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
+                }
+                finally
+                {
+                    if (process != null && !process.HasExited)
+                        process.Kill();
+                }
+            }
         }
     }
 }

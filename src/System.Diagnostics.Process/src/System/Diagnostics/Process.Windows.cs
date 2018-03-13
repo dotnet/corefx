@@ -439,16 +439,16 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartWithCreateProcess(ProcessStartInfo startInfo)
         {
-            string arguments;
             // See knowledge base article Q190351 for an explanation of the following code.  Noteworthy tricky points:
             //    * The handles are duplicated as non-inheritable before they are passed to CreateProcess so
             //      that the child process can not close them
             //    * CreateProcess allows you to redirect all or none of the standard IO handles, so we use
             //      GetStdHandle for the handles that are not being redirected
 
-            if (startInfo != null && startInfo.ArgumentList.Count > 0)
+            string arguments;
+            if (startInfo.ArgumentList.Count > 0)
             {
-                arguments = PasteArguments.Paste(startInfo.ArgumentList, false);
+                arguments = PasteArguments.Paste(startInfo.ArgumentList, pasteFirstArgumentUsingArgV0Rules: false);
             }
             else
             {

@@ -42,6 +42,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StartProcessWithArgumentList()
         {
             ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
@@ -66,6 +67,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void StartProcessWithSameArgumentList()
         {
             ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
