@@ -422,12 +422,16 @@ namespace System
         //   implementation has to change in the future we don't want to worry
         //   about people who might have incorrectly used this type.
 
+        // These aren't applied for HASHCODE_INTERNAL as EditorBrowsable is not available
+        // everywhere.
+#if !HASHCODE_INTERNAL
         [Obsolete("HashCode is a mutable struct and should not be compared with other HashCodes. Use ToHashCode to retrieve the computed hash code.", error: true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode() => throw new NotSupportedException(SR.HashCode_HashCodeNotSupported);
 
         [Obsolete("HashCode is a mutable struct and should not be compared with other HashCodes.", error: true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public override bool Equals(object obj) => throw new NotSupportedException(SR.HashCode_EqualityNotSupported);
 #pragma warning restore 0809
     }
