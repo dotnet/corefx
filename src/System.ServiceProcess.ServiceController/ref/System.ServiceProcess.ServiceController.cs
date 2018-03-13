@@ -5,8 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-using System.ComponentModel;
-
 namespace System.ServiceProcess
 {
     public enum PowerBroadcastStatus
@@ -108,7 +106,7 @@ namespace System.ServiceProcess
         Manual = 3,
         System = 1,
     }
-    public partial class ServiceProcessDescriptionAttribute : DescriptionAttribute
+    public partial class ServiceProcessDescriptionAttribute : System.ComponentModel.DescriptionAttribute
     {
         public ServiceProcessDescriptionAttribute(string name) { }
         public override string Description { get { throw null; } }
