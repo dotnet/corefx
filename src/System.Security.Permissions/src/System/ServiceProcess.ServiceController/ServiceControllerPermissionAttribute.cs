@@ -8,21 +8,20 @@ using System.Security.Permissions;
 using System.Globalization;
 
 namespace System.ServiceProcess
-{    
+{
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false )]
     [Serializable]
     public class ServiceControllerPermissionAttribute : CodeAccessSecurityAttribute
     {
         private string machineName;
         private string serviceName;
-        private ServiceControllerPermissionAccess permissionAccess;
 
         public ServiceControllerPermissionAttribute(SecurityAction action): base(action)
         {
             this.machineName = ".";
             this.serviceName = "*";
-            this.permissionAccess = ServiceControllerPermissionAccess.Browse;
-        }        
+            this.PermissionAccess = ServiceControllerPermissionAccess.Browse;
+        }
 
         public string MachineName
         {
@@ -30,29 +29,18 @@ namespace System.ServiceProcess
             {
                 return this.machineName;
             }
-            
+
             set
             {
                 if (!SyntaxCheck.CheckMachineName(value))
                     throw new ArgumentException(string.Format(SR.BadMachineName, value));
-                    
-                this.machineName = value;                    
+
+                this.machineName = value;
             }
         }
-        
-        public ServiceControllerPermissionAccess PermissionAccess
-        {
-            get
-            {
-                return this.permissionAccess;
-            }
-            
-            set
-            {
-                this.permissionAccess = value;
-            }
-        }   
-        
+
+        public ServiceControllerPermissionAccess PermissionAccess { get; set; }
+
         public string ServiceName
         {
             get
@@ -60,24 +48,20 @@ namespace System.ServiceProcess
                 return this.serviceName;
             }
             
-            set {                                                                                                                                                                  
+            set {
                 if (value == null)
                     throw new ArgumentNullException("value");
 
                 if (!ServiceBase.ValidServiceName(value))
-                   throw new ArgumentException(string.Format(SR.ServiceName, value, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));                                                
-                                    
-                this.serviceName = value;                                    
-            }
-        }                         
-              
-        public override IPermission CreatePermission()
-        {      
-            if (Unrestricted) 
-                return new ServiceControllerPermission(PermissionState.Unrestricted);
-            
-            return new ServiceControllerPermission(this.PermissionAccess, this.MachineName, this.ServiceName);
-        }
-    }    
-}
+                   throw new ArgumentException(string.Format(SR.ServiceName, value, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
+                this.serviceName = value;
+            }
+        }
+
+        public override IPermission CreatePermission()
+        {
+            return Unrestricted ? new ServiceControllerPermission(PermissionState.Unrestricted) : new ServiceControllerPermission(this.PermissionAccess, this.MachineName, this.ServiceName);
+        }
+    }
+}

@@ -29,11 +29,8 @@ namespace System.ServiceProcess
                 List[index] = value;
             }
         }
-        
-        public int Add(ServiceControllerPermissionEntry value)
-        {   
-            return List.Add(value);
-        }
+
+        public int Add(ServiceControllerPermissionEntry value) => List.Add(value);
 
         public void AddRange(ServiceControllerPermissionEntry[] value)
         {
@@ -51,7 +48,7 @@ namespace System.ServiceProcess
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             int currentCount = value.Count;
             for (int i = 0; i < currentCount; i = ((i) + (1)))
@@ -59,21 +56,15 @@ namespace System.ServiceProcess
                 this.Add(value[i]);
             }
         }
-    
-        public bool Contains(ServiceControllerPermissionEntry value)
-        {
-            return List.Contains(value);
-        }
-    
+
+        public bool Contains(ServiceControllerPermissionEntry value) => List.Contains(value);
+
         public void CopyTo(ServiceControllerPermissionEntry[] array, int index)
         {
             List.CopyTo(array, index);
         }
-    
-        public int IndexOf(ServiceControllerPermissionEntry value)
-        {
-            return List.IndexOf(value);
-        }
+
+        public int IndexOf(ServiceControllerPermissionEntry value) => List.IndexOf(value);
         
         public void Insert(int index, ServiceControllerPermissionEntry value)
         {

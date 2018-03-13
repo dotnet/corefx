@@ -30,7 +30,7 @@ namespace System.ServiceProcess {
         public ServiceControllerPermission(ServiceControllerPermissionEntry[] permissionAccessEntries)
         {
             if (permissionAccessEntries == null)
-                throw new ArgumentNullException("permissionAccessEntries");
+                throw new ArgumentNullException(nameof(permissionAccessEntries));
 
             SetNames();
             for (int index = 0; index < permissionAccessEntries.Length; ++index)
@@ -42,26 +42,17 @@ namespace System.ServiceProcess {
             get
             {
                 if (this.innerCollection == null)
-                    this.innerCollection = new ServiceControllerPermissionEntryCollection(this, base.GetPermissionEntries()); 
+                    this.innerCollection = new ServiceControllerPermissionEntryCollection(this, base.GetPermissionEntries());
 
                 return this.innerCollection;
             }
         }
 
-        internal void AddPermissionAccess(ServiceControllerPermissionEntry entry)
-        {
-            base.AddPermissionAccess(entry.GetBaseEntry());
-        }
+        internal void AddPermissionAccess(ServiceControllerPermissionEntry entry) => base.AddPermissionAccess(entry.GetBaseEntry());
 
-        internal new void Clear()
-        {
-            base.Clear();
-        }
+        internal new void Clear() => base.Clear();
 
-        internal void RemovePermissionAccess(ServiceControllerPermissionEntry entry)
-        {
-            base.RemovePermissionAccess(entry.GetBaseEntry());
-        }
+        internal void RemovePermissionAccess(ServiceControllerPermissionEntry entry) => base.RemovePermissionAccess(entry.GetBaseEntry());
 
         private void SetNames()
         {

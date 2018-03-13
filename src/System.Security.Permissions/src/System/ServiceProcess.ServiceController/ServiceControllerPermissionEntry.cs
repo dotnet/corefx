@@ -11,15 +11,12 @@ namespace System.ServiceProcess
     [Serializable] 
     public class ServiceControllerPermissionEntry
     {
-        private string machineName;
-        private string serviceName;
-        private ServiceControllerPermissionAccess permissionAccess;
-
-        public ServiceControllerPermissionEntry()
+        public ServiceControllerPermissionEntry() : this(ServiceControllerPermissionAccess.Browse, ".", "*")
         {
-            this.machineName = ".";
-            this.serviceName = "*";
-            this.permissionAccess = ServiceControllerPermissionAccess.Browse;
+        }
+
+        internal ServiceControllerPermissionEntry(ResourcePermissionBaseEntry baseEntry) : this((ServiceControllerPermissionAccess)baseEntry.PermissionAccess, baseEntry.PermissionAccessPath[0], baseEntry.PermissionAccessPath[1])
+        {
         }
 
         public ServiceControllerPermissionEntry(ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName)
@@ -33,46 +30,17 @@ namespace System.ServiceProcess
             if (!SyntaxCheck.CheckMachineName(machineName))
                 throw new ArgumentException(string.Format(SR.BadMachineName, machineName));
 
-            this.permissionAccess = permissionAccess;
-            this.machineName = machineName;
-            this.serviceName = serviceName;
+            this.PermissionAccess = permissionAccess;
+            this.MachineName = machineName;
+            this.ServiceName = serviceName;
         }  
-        
-        internal ServiceControllerPermissionEntry(ResourcePermissionBaseEntry baseEntry)
-        {
-            this.permissionAccess = (ServiceControllerPermissionAccess)baseEntry.PermissionAccess;
-            this.machineName = baseEntry.PermissionAccessPath[0]; 
-            this.serviceName = baseEntry.PermissionAccessPath[1];  
-        }
 
-        public string MachineName
-        {
-            get
-            {
-                return this.machineName;
-            }
-        }
+        public string MachineName { get; }
         
-        public ServiceControllerPermissionAccess PermissionAccess
-        {
-            get
-            {
-                return this.permissionAccess;
-            }
-        }   
+        public ServiceControllerPermissionAccess PermissionAccess { get; }
         
-        public string ServiceName
-        {
-            get
-            {
-                return this.serviceName;
-            }
-        }
+        public string ServiceName { get; }
         
-        internal ResourcePermissionBaseEntry GetBaseEntry()
-        {
-            ResourcePermissionBaseEntry baseEntry = new ResourcePermissionBaseEntry((int)this.PermissionAccess, new string[] {this.MachineName, this.ServiceName});
-            return baseEntry;
-        }
+        internal ResourcePermissionBaseEntry GetBaseEntry => new ResourcePermissionBaseEntry((int)this.PermissionAccess, new string[] {this.MachineName, this.ServiceName});
     }
 }
