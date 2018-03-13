@@ -79,12 +79,16 @@ namespace System.Net.WebSockets.Client.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => cws.Options.KeepAliveInterval = TimeSpan.MinValue);
         }
 
-        [ActiveIssue(27846)]
         [OuterLoop("Connects to remote service")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Lacks RemoteCertificateValidationCallback to enable loopback testing")]
         [ConditionalFact(nameof(WebSocketsSupported), nameof(ClientCertificatesSupported))]
         public async Task ClientCertificates_ValidCertificate_ServerReceivesCertificateAndConnectAsyncSucceeds()
         {
+            if (PlatformDetection.IsWindows7)
+            {
+                return; // [ActiveIssue(27846)]
+            }
+
             using (X509Certificate2 clientCert = Test.Common.Configuration.Certificates.GetClientCertificate())
             {
                 await LoopbackServer.CreateClientAndServerAsync(async uri =>

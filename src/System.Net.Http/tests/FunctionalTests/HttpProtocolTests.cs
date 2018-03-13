@@ -327,7 +327,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [ActiveIssue(25880)]
         [InlineData("HTTP/1.1 200 OK", 200, "OK")]
         [InlineData("HTTP/1.1 200 Sure why not?", 200, "Sure why not?")]
         [InlineData("HTTP/1.1 200 OK\x0080", 200, "OK?")]
@@ -342,6 +341,11 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 600 still valid", 600, "still valid")]
         public async Task GetAsync_ExpectedStatusCodeAndReason_Success(string statusLine, int expectedStatusCode, string expectedReason)
         {
+            if (IsWinHttpHandler)
+            {
+                return; // [ActiveIssue(25880)]
+            }
+
             await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
         }
 

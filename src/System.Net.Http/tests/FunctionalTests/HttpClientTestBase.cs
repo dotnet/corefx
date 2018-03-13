@@ -37,8 +37,8 @@ namespace System.Net.Http.Functional.Tests
             ConstructorInfo ctor = typeof(HttpClientHandler).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(bool) }, null);
             Debug.Assert(ctor != null, "Couldn't find test constructor on HttpClientHandler");
 
-            HttpClientHandler handler = (HttpClientHandler)ctor.Invoke(new object[] { false });
-            Debug.Assert(false == IsSocketsHttpHandler(handler), "Unexpected handler.");
+            HttpClientHandler handler = (HttpClientHandler)ctor.Invoke(new object[] { useSocketsHttpHandler });
+            Debug.Assert(useSocketsHttpHandler == IsSocketsHttpHandler(handler), "Unexpected handler.");
 
             return handler;
         }
