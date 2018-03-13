@@ -641,11 +641,10 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(303)]
         public async Task AllowAutoRedirect_True_PostToGetDoesNotSendTE(int statusCode)
         {
-            if (IsCurlHandler)
+            if (IsCurlHandler && statusCode == 300)
             {
-                // ISSUE #27301:
-                // CurlHandler incorrectly sends Transfer-Encoding when the method changes from POST to GET.
-                // Also, note CurlHandler doesn't change POST to GET for 300 response, either (see above test)
+                // ISSUE #26434:
+                // CurlHandler doesn't change POST to GET for 300 response (see above test).
                 return;
             }
 
@@ -873,7 +872,17 @@ namespace System.Net.Http.Functional.Tests
                 }
                 else
                 {
-                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    if (UseSocketsHttpHandler)
+                    {
+                        using (HttpResponseMessage response = await t)
+                        {
+                            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+                        }
+                    }
+                    else
+                    {
+                        await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    }
                 }
             }
         }
@@ -2661,7 +2670,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
-        [ActiveIssue(23770, TestPlatforms.AnyUnix)]
+        [ActiveIssue(23037, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
@@ -2719,6 +2728,23 @@ namespace System.Net.Http.Functional.Tests
                         "Response version " + response.Version);
                 }
             }
+        }
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
+        [Fact]
+        public async Task SendAsync_RequestVersion20_HttpNotHttps_NoUpgradeRequest()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    (await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri) { Version = new Version(2, 0) })).Dispose();
+                }
+            }, async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync();
+                Assert.All(headers, header => Assert.DoesNotContain("Upgrade", header, StringComparison.OrdinalIgnoreCase));
+            });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]

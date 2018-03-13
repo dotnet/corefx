@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class Win32MatcherTests
+    public class FileSystemNameTests
     {
         [Theory,
             MemberData(nameof(SimpleMatchData)),
@@ -142,6 +142,13 @@ namespace System.IO.Tests
         public void TranslateExpression(string expression, string expected)
         {
             Assert.Equal(expected, FileSystemName.TranslateWin32Expression(expression));
+        }
+
+        [Fact]
+        public void TranslateVeryLongExpression()
+        {
+            string longString = new string('a', 10_000_000);
+            Assert.Equal(longString, FileSystemName.TranslateWin32Expression(longString));
         }
     }
 }
