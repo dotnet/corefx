@@ -13,7 +13,7 @@ using static System.SpanSortHelpersCommon;
 
 namespace System
 {
-    internal static partial class SpanSortHelpersKeys
+    internal static partial class SpanSortHelpersKeys_DirectComparer
     {
         // https://github.com/dotnet/coreclr/blob/master/src/classlibnative/bcltype/arrayhelpers.cpp
 

@@ -12,7 +12,7 @@ using static System.SpanSortHelpersCommon;
 
 namespace System
 {
-    internal static partial class SpanSortHelpersKeysValues
+    internal static partial class SpanSortHelpersKeysValues_DirectComparer
     {
         // https://github.com/dotnet/coreclr/blob/master/src/classlibnative/bcltype/arrayhelpers.cpp
 
@@ -20,6 +20,12 @@ namespace System
         internal static bool TrySortSpecialized<TKey, TValue>(
             ref TKey keys, ref TValue values, int length)
         {
+            // TODO: Change to do specific value tests below, since otherwise not fast... maybe
+            if (typeof(TKey) != typeof(TValue))
+            {
+                return false;
+            }
+            else
             // Types unfolding adopted from https://github.com/dotnet/coreclr/blob/master/src/classlibnative/bcltype/arrayhelpers.cpp#L268
             if (typeof(TKey) == typeof(sbyte))
             {

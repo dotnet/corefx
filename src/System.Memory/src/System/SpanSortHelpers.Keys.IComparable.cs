@@ -194,8 +194,8 @@ namespace System
                 }
 
                 //if (keys[lo + child - 1] == null || keys[lo + child - 1].CompareTo(d) < 0)
-                if (Unsafe.Add(ref keysAtLoMinus1, child) == null || 
-                    !(d.CompareTo(Unsafe.Add(ref keysAtLoMinus1, child)) < 0))
+                if (Unsafe.Add(ref keysAtLoMinus1, child) == null ||
+                    Unsafe.Add(ref keysAtLoMinus1, child).CompareTo(d) < 0)
                     break;
 
                 // keys[lo + i - 1] = keys[lo + child - 1]

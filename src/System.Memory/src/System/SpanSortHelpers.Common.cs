@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 #if !netstandard
@@ -48,7 +46,7 @@ namespace System
 
         // This started out with just LessThan.
         // However, due to bogus comparers, comparables etc.
-        // we need preserve semantics completely to get same result.
+        // we need to preserve semantics completely to get same result.
         internal interface IDirectComparer<in T>
         {
             bool GreaterThan(T x, T y);
@@ -158,53 +156,6 @@ namespace System
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThanEqual(string x, string y) => x.CompareTo(y) <= 0;
         }
-
-        // Helper to allow sharing code
-        // Does not work well for reference types
-        internal struct ComparerDirectComparer<T, TComparer> : IDirectComparer<T>
-            where TComparer : IComparer<T>
-        {
-            readonly TComparer _comparer;
-
-            public ComparerDirectComparer(TComparer comparer)
-            {
-                _comparer = comparer;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool GreaterThan(T x, T y) => _comparer.Compare(x, y) > 0;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool LessThan(T x, T y) => _comparer.Compare(x, y) < 0;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool LessThanEqual(T x, T y) => _comparer.Compare(x, y) <= 0;
-        }
-        // Helper to allow sharing code
-        // Does not work well for reference types
-        internal struct ComparableDirectComparer<T> : IDirectComparer<T>
-            where T : IComparable<T>
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool GreaterThan(T x, T y) => x.CompareTo(y) > 0;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool LessThan(T x, T y) => x.CompareTo(y) < 0;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool LessThanEqual(T x, T y) => x.CompareTo(y) <= 0;
-        }
-
-        // Helper to allow sharing code (TODO: This probably has issues for reference types...)
-        internal struct ComparisonComparer<T> : IComparer<T>
-        {
-            readonly Comparison<T> m_comparison;
-
-            public ComparisonComparer(Comparison<T> comparison)
-            {
-                m_comparison = comparison;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Compare(T x, T y) => m_comparison(x, y);
-        }
-
 
         internal interface IIsNaN<T>
         {
