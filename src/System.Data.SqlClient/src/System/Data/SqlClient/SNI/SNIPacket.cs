@@ -105,7 +105,7 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Allocate space for data
         /// </summary>
-        /// <param name="bufferSize">Length of byte array to be allocated</param>
+        /// <param name="capacity">Length of byte array to be allocated</param>
         public void Allocate(int capacity)
         {
             if (_data != null && _data.Length < capacity)
