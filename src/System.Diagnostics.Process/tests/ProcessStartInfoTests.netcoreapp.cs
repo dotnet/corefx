@@ -27,6 +27,8 @@ namespace System.Diagnostics.Tests
             psi.ArgumentList.Add("arg2");
 
             Assert.Equal(2, psi.ArgumentList.Count);
+            Assert.Equal("arg1", psi.ArgumentList[0]);
+            Assert.Equal("arg2", psi.ArgumentList[1]);
         }
 
         [Fact]
