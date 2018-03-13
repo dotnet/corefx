@@ -76,6 +76,11 @@ namespace System.Drawing.Drawing2D
 
         public object Clone()
         {
+            return CoreClone();
+        }
+
+        internal virtual object CoreClone()
+        {
             IntPtr clonedCap;
             int status = SafeNativeMethods.Gdip.GdipCloneCustomLineCap(new HandleRef(this, nativeCap), out clonedCap);
 
