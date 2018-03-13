@@ -224,6 +224,34 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        public static TheoryData<string[]> StartOSXProcessWithArgumentList => new TheoryData<string[]>
+        {
+            { new string[] { "-a", "Safari" } },
+            { new string[] { "-a", "\"Google Chrome\"" } }
+        };
+
+        [Theory,
+            MemberData(nameof(StartOSXProcessWithArgumentList))]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        [OuterLoop("Opens browser")]
+        public void ProcessStart_UseShellExecuteTrue_OpenUrl_SuccessfullyReadsArgument(string[] argumentList)
+        {
+            var startInfo = new ProcessStartInfo { UseShellExecute = true, FileName = "https://github.com/dotnet/corefx"};
+
+            foreach (string item in argumentList)
+            {
+                startInfo.ArgumentList.Add(item);
+            }
+
+            using (var px = Process.Start(startInfo))
+            {
+                Assert.NotNull(px);
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
+            }
+        }
+
         [Fact]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestPriorityClassUnix()
