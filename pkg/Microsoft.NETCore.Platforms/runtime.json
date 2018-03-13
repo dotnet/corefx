@@ -170,6 +170,13 @@
             "#import": [ "osx.10.12", "osx.10.11-x64" ]
         },
         
+        "osx.10.13": {
+            "#import": [ "osx.10.12" ]
+        },
+        "osx.10.13-x64": {
+            "#import": [ "osx.10.13", "osx.10.12-x64" ]
+        },
+
         "linux": {
             "#import": [ "unix" ]
         },
@@ -195,21 +202,35 @@
             "#import": [ "rhel.7" ]
         },
         "rhel.7.0-x64": {
-            "#import": [ "rhel.7", "rhel.7-x64" ]
+            "#import": [ "rhel.7.0", "rhel.7-x64" ]
         },
 
         "rhel.7.1": {
             "#import": [ "rhel.7.0" ]
         },
         "rhel.7.1-x64": {
-            "#import": [ "rhel.7.0", "rhel.7.0-x64" ]
+            "#import": [ "rhel.7.1", "rhel.7.0-x64" ]
         },
 
         "rhel.7.2": {
             "#import": [ "rhel.7.1" ]
         },
         "rhel.7.2-x64": {
-            "#import": [ "rhel.7.1", "rhel.7.1-x64" ]
+            "#import": [ "rhel.7.2", "rhel.7.1-x64" ]
+        },
+
+        "rhel.7.3": {
+            "#import": [ "rhel.7.2" ]
+        },
+        "rhel.7.3-x64": {
+            "#import": [ "rhel.7.3", "rhel.7.2-x64" ]
+        },
+
+        "rhel.7.4": {
+            "#import": [ "rhel.7.3" ]
+        },
+        "rhel.7.4-x64": {
+            "#import": [ "rhel.7.4", "rhel.7.3-x64" ]
         },
 
         "ol": {
@@ -230,21 +251,35 @@
             "#import": [ "ol.7", "rhel.7.0" ]
         },
         "ol.7.0-x64": {
-            "#import": [ "ol.7", "ol.7-x64", "rhel.7.0-x64" ]
+            "#import": [ "ol.7.0", "ol.7-x64", "rhel.7.0-x64" ]
         },
 
         "ol.7.1": {
             "#import": [ "ol.7.0", "rhel.7.1" ]
         },
         "ol.7.1-x64": {
-            "#import": [ "ol.7.0", "ol.7.0-x64", "rhel.7.1-x64" ]
+            "#import": [ "ol.7.1", "ol.7.0-x64", "rhel.7.1-x64" ]
         },
 
         "ol.7.2": {
             "#import": [ "ol.7.1", "rhel.7.2" ]
         },
         "ol.7.2-x64": {
-            "#import": [ "ol.7.1", "ol.7.1-x64", "rhel.7.2-x64" ]
+            "#import": [ "ol.7.2", "ol.7.1-x64", "rhel.7.2-x64" ]
+        },
+
+        "ol.7.3": {
+            "#import": [ "ol.7.2", "rhel.7.3" ]
+        },
+        "ol.7.3-x64": {
+            "#import": [ "ol.7.3", "ol.7.2-x64", "rhel.7.3-x64" ]
+        },
+
+        "ol.7.4": {
+            "#import": [ "ol.7.3", "rhel.7.4" ]
+        },
+        "ol.7.4-x64": {
+            "#import": [ "ol.7.4", "ol.7.3-x64", "rhel.7.4-x64" ]
         },
 
         "centos": {
@@ -273,6 +308,13 @@
         },
         "debian.8-x64": {
             "#import": [ "debian.8", "debian-x64" ]
+        },
+
+        "debian.9": {
+            "#import": [ "debian" ]
+        },
+        "debian.9-x64": {
+            "#import": [ "debian.9", "debian-x64" ]
         },
 
         "ubuntu": {
@@ -325,6 +367,27 @@
             "#import": [ "ubuntu.16.10", "ubuntu-x64" ]
         },
 
+        "ubuntu.17.04": {
+            "#import": [ "ubuntu" ]
+        },
+        "ubuntu.17.04-x64": {
+            "#import": [ "ubuntu.17.04", "ubuntu-x64" ]
+        },
+
+        "ubuntu.17.10": {
+            "#import": [ "ubuntu" ]
+        },
+        "ubuntu.17.10-x64": {
+            "#import": [ "ubuntu.17.10", "ubuntu-x64" ]
+        },
+
+        "ubuntu.18.04": {
+            "#import": [ "ubuntu" ]
+        },
+        "ubuntu.18.04-x64": {
+            "#import": [ "ubuntu.18.04", "ubuntu-x64" ]
+        },
+
         "linuxmint.17": {
             "#import": [ "ubuntu.14.04" ]
         },
@@ -360,6 +423,34 @@
             "#import": [ "linuxmint.18", "ubuntu.16.04-x64" ]
         },
 
+        "linuxmint.18.1": {
+            "#import": [ "linuxmint.18" ]
+        },
+        "linuxmint.18.1-x64": {
+            "#import": [ "linuxmint.18.1", "linuxmint.18-x64" ]
+        },
+
+        "linuxmint.18.2": {
+            "#import": [ "linuxmint.18.1" ]
+        },
+        "linuxmint.18.2-x64": {
+            "#import": [ "linuxmint.18.2", "linuxmint.18.1-x64" ]
+        },
+
+        "linuxmint.18.3": {
+            "#import": [ "linuxmint.18.2" ]
+        },
+        "linuxmint.18.3-x64": {
+            "#import": [ "linuxmint.18.3", "linuxmint.18.2-x64" ]
+        },
+
+        "linuxmint.19": {
+            "#import": [ "ubuntu.18.04" ]
+        },
+        "linuxmint.19-x64": {
+            "#import": [ "linuxmint.19", "ubuntu.18.04-x64" ]
+        },
+
         "fedora": {
             "#import": [ "linux" ]
         },
@@ -381,6 +472,34 @@
             "#import": [ "fedora.24", "fedora-x64" ]
         },
 
+        "fedora.25": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.25-x64": {
+            "#import": [ "fedora.25, "fedora-x64" ]
+        },
+
+        "fedora.26": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.26-x64": {
+            "#import": [ "fedora.26, "fedora-x64" ]
+        },
+
+        "fedora.27": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.27x64": {
+            "#import": [ "fedora.27", "fedora-x64" ]
+        },
+
+        "fedora.28": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.28-x64": {
+            "#import": [ "fedora.28", "fedora-x64" ]
+        },
+
         "opensuse": {
             "#import": [ "linux" ]
         },
@@ -400,6 +519,20 @@
         },
         "opensuse.42.1-x64": {
             "#import": [ "opensuse.42.1", "opensuse-x64" ]
+        },
+
+        "opensuse.42.2": {
+            "#import": [ "opensuse" ]
+        },
+        "opensuse.42.2-x64": {
+            "#import": [ "opensuse.42.2", "opensuse-x64" ]
+        },
+
+        "opensuse.42.3": {
+            "#import": [ "opensuse" ]
+        },
+        "opensuse.42.3-x64": {
+            "#import": [ "opensuse.42.3", "opensuse-x64" ]
         }
     }
  }
