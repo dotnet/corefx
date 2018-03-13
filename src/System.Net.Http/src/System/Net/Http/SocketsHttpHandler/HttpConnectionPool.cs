@@ -644,7 +644,7 @@ namespace System.Net.Http
 
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
-                DateTimeOffset now = DateTimeOffset.Now;
+                DateTimeOffset now = DateTimeOffset.UtcNow;
 
                 // Find the first item which needs to be removed.
                 int freeIndex = 0;
