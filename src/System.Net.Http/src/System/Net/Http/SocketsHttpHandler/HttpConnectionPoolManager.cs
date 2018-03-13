@@ -200,6 +200,8 @@ namespace System.Net.Http
                     }
                     break;
                 }
+
+                pool.Dispose();
             }
 
             return pool.SendAsync(request, doRequestAuth, cancellationToken);
