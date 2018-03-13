@@ -873,7 +873,17 @@ namespace System.Net.Http.Functional.Tests
                 }
                 else
                 {
-                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    if (UseSocketsHttpHandler)
+                    {
+                        using (HttpResponseMessage response = await t)
+                        {
+                            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+                        }
+                    }
+                    else
+                    {
+                        await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    }
                 }
             }
         }
