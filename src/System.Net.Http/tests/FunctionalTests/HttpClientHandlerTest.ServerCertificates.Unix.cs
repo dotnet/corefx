@@ -79,7 +79,7 @@ namespace System.Net.Http.Functional.Tests
         public void HttpClientUsesSslCertEnvironmentVariables(bool setSslCertDir, bool createSslCertDir,
             bool setSslCertFile, bool createSslCertFile, bool expectedFailure)
         {
-            if (expectedFailure && UseSocketsHttpHandler && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (expectedFailure && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return; // [ActiveIssue(28002)]
             }
