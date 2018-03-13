@@ -826,6 +826,7 @@ namespace System.Net.WebSockets
                     catch
                     {
                         // Eat any resulting exceptions.  We were going to close the connection, anyway.
+                        // TODO #24057: Log the exception to NetEventSource.
                     }
                 }
             }
