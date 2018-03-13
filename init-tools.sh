@@ -27,7 +27,6 @@ get_current_linux_name() {
             echo "ubuntu.16.10"
             return 0
         fi
-
         echo "ubuntu"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
@@ -40,23 +39,15 @@ get_current_linux_name() {
         echo "debian"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 23)" -eq 1 ]; then
-            echo "fedora.23"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 24)" -eq 1 ]; then
-            echo "fedora.24"
-            return 0
-        fi
+        echo -n "fedora."; cat /etc/*-release | grep  VERSION_ID= | cut -d "=" -f2
+        return 0;
     elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
         if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
             echo "opensuse.13.2"
             return 0
         fi
-        if [ "$(cat /etc/*-release | grep -cim1 42.1)" -eq 1 ]; then
-            echo "opensuse.42.1"
-            return 0
-        fi
+        echo "opensuse.42.1"
+        return 0
     fi
 
     # Cannot determine Linux distribution, assuming Ubuntu 14.04.

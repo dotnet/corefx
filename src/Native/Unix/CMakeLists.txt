@@ -21,6 +21,10 @@ add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-Wno-c99-extensions)
 
+if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
+    add_compile_options(-Wno-zero-as-null-pointer-constant)
+endif()
+
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
     add_compile_options(-Wno-unreachable-code)
 endif ()
@@ -227,11 +231,6 @@ endfunction()
 include(configure.cmake)
 
 add_subdirectory(System.IO.Compression.Native)
-
-if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
-    add_compile_options(-Wno-zero-as-null-pointer-constant)
-endif()
-
 add_subdirectory(System.Native)
 add_subdirectory(System.Net.Http.Native)
 add_subdirectory(System.Net.Security.Native)
