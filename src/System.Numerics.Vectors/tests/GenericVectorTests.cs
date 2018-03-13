@@ -445,6 +445,41 @@ namespace System.Numerics.Tests
 
         #region System.Object Overloads
         [Fact]
+        public void GetHashCodeByte() { TestGetHashCode<Byte>(); }
+        [Fact]
+        public void GetHashCodeSByte() { TestGetHashCode<SByte>(); }
+        [Fact]
+        public void GetHashCodeUInt16() { TestGetHashCode<UInt16>(); }
+        [Fact]
+        public void GetHashCodeInt16() { TestGetHashCode<Int16>(); }
+        [Fact]
+        public void GetHashCodeUInt32() { TestGetHashCode<UInt32>(); }
+        [Fact]
+        public void GetHashCodeInt32() { TestGetHashCode<Int32>(); }
+        [Fact]
+        public void GetHashCodeUInt64() { TestGetHashCode<UInt64>(); }
+        [Fact]
+        public void GetHashCodeInt64() { TestGetHashCode<Int64>(); }
+        [Fact]
+        public void GetHashCodeSingle() { TestGetHashCode<Single>(); }
+        [Fact]
+        public void GetHashCodeDouble() { TestGetHashCode<Double>(); }
+        private void TestGetHashCode<T>() where T : struct
+        {
+            T[] values1 = GenerateRandomValuesForVector<T>();
+            Vector<T> v1 = new Vector<T>(values1);
+            int hash = v1.GetHashCode();
+
+            var expected = new HashCode();
+            for (int g = 0; g < Vector<T>.Count; g++)
+            {
+                expected.Add(v1[g]);
+            }
+
+            Assert.Equal(expected.ToHashCode(), hash);
+        }
+
+        [Fact]
         public void ToStringGeneralByte() { TestToString<Byte>("G", CultureInfo.CurrentCulture); }
         [Fact]
         public void ToStringGeneralSByte() { TestToString<SByte>("G", CultureInfo.CurrentCulture); }

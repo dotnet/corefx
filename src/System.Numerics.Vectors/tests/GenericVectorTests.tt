@@ -322,6 +322,30 @@ namespace System.Numerics.Tests
     {
 #>
         [Fact]
+        public void GetHashCode<#=type.Name#>() { TestGetHashCode<<#=type.Name#>>(); }
+<#
+    }
+#>
+        private void TestGetHashCode<T>() where T : struct
+        {
+            T[] values1 = GenerateRandomValuesForVector<T>();
+            Vector<T> v1 = new Vector<T>(values1);
+            int hash = v1.GetHashCode();
+
+            var expected = new HashCode();
+            for (int g = 0; g < Vector<T>.Count; g++)
+            {
+                expected.Add(v1[g]);
+            }
+
+            Assert.Equal(expected.ToHashCode(), hash);
+        }
+
+<# 
+    foreach (var type in supportedTypes)
+    {
+#>
+        [Fact]
         public void ToStringGeneral<#=type.Name#>() { TestToString<<#=type.Name#>>("G", CultureInfo.CurrentCulture); }
 <#
     }
