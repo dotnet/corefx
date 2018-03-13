@@ -15,7 +15,6 @@ namespace System.ServiceProcess
     [AttributeUsage(AttributeTargets.All)]
     public class ServiceProcessDescriptionAttribute : DescriptionAttribute
     {
-
         private bool replaced = false;
 
         /// <summary>
@@ -28,13 +27,14 @@ namespace System.ServiceProcess
         /// <summary>
         /// Retrieves the description text.
         /// </summary>
-        public override string Description {
+        public override string Description
+        {
             get
             {
                 if (!replaced)
                 {
                     replaced = true;
-                    DescriptionValue = Res.GetString(base.Description);
+                    DescriptionValue = base.Description;
                 }
                 return base.Description;
             }
