@@ -7,36 +7,19 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include (GenerateExportHeader)
 
-if($ENV{__BuildArch} STREQUAL x86 OR $ENV{__BuildArch} STREQUAL x64)
-    set(NATIVECOMPRESSION_SOURCES
-        zlib-intel/adler32.c
-        zlib-intel/crc_folding.c
-        zlib-intel/crc32.c
-        zlib-intel/deflate_quick.c
-        zlib-intel/deflate.c
-        zlib-intel/fill_window_sse.c
-        zlib-intel/match.c
-        zlib-intel/trees.c
-        zlib-intel/x86.c
-        zlib-intel/zutil.c
-        zlib/compress.c 
-        zlib/inffast.c
-        zlib/inflate.c
-        zlib/inftrees.c
+# todo: https://github.com/dotnet/corefx/issues/28013 Forward port the Intel perf improvements
+
+set(NATIVECOMPRESSION_SOURCES
+    zlib/adler32.c
+    zlib/compress.c
+    zlib/crc32.c
+    zlib/deflate.c
+    zlib/inffast.c
+    zlib/inflate.c
+    zlib/inftrees.c
+    zlib/trees.c
+    zlib/zutil.c
 )
-elseif($ENV{__BuildArch} STREQUAL arm OR $ENV{__BuildArch} STREQUAL arm64)
-    set(NATIVECOMPRESSION_SOURCES
-        zlib/adler32.c
-        zlib/compress.c
-        zlib/crc32.c
-        zlib/deflate.c
-        zlib/inffast.c
-        zlib/inflate.c
-        zlib/inftrees.c
-        zlib/trees.c
-        zlib/zutil.c
-    )
-endif()
 
 if($ENV{__appContainer} STREQUAL true)
     set (NATIVECOMPRESSION_SOURCES
