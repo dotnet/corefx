@@ -1,15 +1,13 @@
-brotli(1) -- brotli, unbrotli - compress or decompress files
-================================================================
+# brotli(1) -- brotli, unbrotli - compress or decompress files
 
-SYNOPSIS
---------
+## SYNOPSIS
 
 `brotli` [*OPTION|FILE*]...
 
 `unbrotli` is equivalent to `brotli --decompress`
 
-DESCRIPTION
------------
+## DESCRIPTION
+
 `brotli` is a generic-purpose lossless compression algorithm that compresses
 data using a combination of a modern variant of the **LZ77** algorithm, Huffman
 coding and 2-nd order context modeling, with a compression ratio comparable to
@@ -52,47 +50,45 @@ Default suffix is `.br`, but it could be specified with `--suffix` option.
 
 Conflicting or duplicate _options_ are not allowed.
 
-OPTIONS
--------
+## OPTIONS
 
 * `-#`:
-    compression level (0-9); bigger values cause denser, but slower compression
+  compression level (0-9); bigger values cause denser, but slower compression
 * `-c`, `--stdout`:
-    write on standard output
+  write on standard output
 * `-d`, `--decompress`:
-    decompress mode
+  decompress mode
 * `-f`, `--force`:
-    force output file overwrite
+  force output file overwrite
 * `-h`, `--help`:
-    display this help and exit
+  display this help and exit
 * `-j`, `--rm`:
-    remove source file(s); `gzip (1)`-like behaviour
+  remove source file(s); `gzip (1)`-like behaviour
 * `-k`, `--keep`:
-    keep source file(s); `zstd (1)`-like behaviour
+  keep source file(s); `zstd (1)`-like behaviour
 * `-n`, `--no-copy-stat`:
-    do not copy source file(s) attributes
+  do not copy source file(s) attributes
 * `-o FILE`, `--output=FILE`
-    output file; valid only if there is a single input entry
+  output file; valid only if there is a single input entry
 * `-q NUM`, `--quality=NUM`:
-    compression level (0-11); bigger values cause denser, but slower compression
+  compression level (0-11); bigger values cause denser, but slower compression
 * `-t`, `--test`:
-    test file integrity mode
+  test file integrity mode
 * `-v`, `--verbose`:
-    increase output verbosity
+  increase output verbosity
 * `-w NUM`, `--lgwin=NUM`:
-    set LZ77 window size (0, 10-24) (default: 22); window size is
-    `(2**NUM - 16)`; 0 lets compressor decide over the optimal value; bigger
-    windows size improve density; decoder might require up to window size
-    memory to operate
+  set LZ77 window size (0, 10-24) (default: 22); window size is
+  `(2**NUM - 16)`; 0 lets compressor decide over the optimal value; bigger
+  windows size improve density; decoder might require up to window size
+  memory to operate
 * `-S SUF`, `--suffix=SUF`:
-    output file suffix (default: `.br`)
+  output file suffix (default: `.br`)
 * `-V`, `--version`:
-    display version and exit
+  display version and exit
 * `-Z`, `--best`:
-    use best compression level (default); same as "`-q 11`"
+  use best compression level (default); same as "`-q 11`"
 
-SEE ALSO
---------
+## SEE ALSO
 
 `brotli` file format is defined in
 [RFC 7932](https://www.ietf.org/rfc/rfc7932.txt).
@@ -102,6 +98,6 @@ SEE ALSO
 
 Mailing list: https://groups.google.com/forum/#!forum/brotli
 
-BUGS
-----
+## BUGS
+
 Report bugs at: https://github.com/google/brotli/issues

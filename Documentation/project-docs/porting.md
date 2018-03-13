@@ -59,11 +59,7 @@ Here are the high level guidelines:
 * **Do not** port APIs of technologies we don't want to support moving forward (see list below).
 * **Do not** port APIs marked as obsolete.
 * **Consider** porting APIs even if considered legacy, problematic, or otherwise inadequate.
-* **Do** factor assemblies appropriately in order to preserve the componentization, specifically:
-	- **Do not** add dependencies from non-legacy to legacy components.
-	- **Do not** expose Windows-only technologies in otherwise fully portable assemblies.
-	- **Do** factor large chunks of functionality that cannot be supported everywhere into their own assemblies.
-	- **Do** consider using tester-doer patterns if only a very small number of APIs cannot be supported in all environments.
+* **Do** factor assemblies appropriately in order to preserve the componentization, specifically: - **Do not** add dependencies from non-legacy to legacy components. - **Do not** expose Windows-only technologies in otherwise fully portable assemblies. - **Do** factor large chunks of functionality that cannot be supported everywhere into their own assemblies. - **Do** consider using tester-doer patterns if only a very small number of APIs cannot be supported in all environments.
 * **Consider** using extension methods and partial facades to accelerate bringing revised APIs to the .NET Framework.
 * **Avoid** making changes that result in loss of binary and/or source compatibility between the .NET Framework and .NET Core.
 * **Avoid** "franken-designs" with extension methods and partial facades purely for the sake of .NET Framework compatibility.
@@ -76,12 +72,12 @@ This list, while not complete, is meant as a reference point. We'll add to it as
 
 Binary Serialization is supported post 1.1, however we do not support cross-platform binary serialization. For new code you may want to consider other serialization approaches such as data contract serialization, XML serialization, JSON.NET, and protobuf-net.
 
-Technology                 | More information
----------------------------|-----------------------------------
-AppDomains                 | [Details](#app_domains)
-Remoting                   | [Details](#remoting)
-Code Access Security (CAS) | [Details](#code-access-security-cas)
-Security Transparency      | [Details](#security-transparency)
+| Technology                 | More information                     |
+| -------------------------- | ------------------------------------ |
+| AppDomains                 | [Details](#app_domains)              |
+| Remoting                   | [Details](#remoting)                 |
+| Code Access Security (CAS) | [Details](#code-access-security-cas) |
+| Security Transparency      | [Details](#security-transparency)    |
 
 ### App Domains
 
@@ -99,12 +95,12 @@ To make code migration from .NET Framework easier, we have exposed some of the `
 
 ### Code Access Security (CAS)
 
-**Justification**. Sandboxing, i.e. relying on the runtime or the framework to constrain which resources a managed application or library can run is [not supported on .NET Framework](https://msdn.microsoft.com/en-us/library/c5tk9z76(v=vs.110).aspx) and therefore is also not supported on .NET Core or .NET Native. We believe that there are simply too many pieces in the .NET Framework and runtime that can result in elevation of privileges. Thus we don't treat [CAS as security boundary](https://msdn.microsoft.com/en-us/library/c5tk9z76(v=vs.110).aspx) anymore. On top of that, it makes the implementation more complicated and often has correctness performance implications for applications that don’t intend to use it.
+**Justification**. Sandboxing, i.e. relying on the runtime or the framework to constrain which resources a managed application or library can run is [not supported on .NET Framework](<https://msdn.microsoft.com/en-us/library/c5tk9z76(v=vs.110).aspx>) and therefore is also not supported on .NET Core or .NET Native. We believe that there are simply too many pieces in the .NET Framework and runtime that can result in elevation of privileges. Thus we don't treat [CAS as security boundary](<https://msdn.microsoft.com/en-us/library/c5tk9z76(v=vs.110).aspx>) anymore. On top of that, it makes the implementation more complicated and often has correctness performance implications for applications that don’t intend to use it.
 
 **Replacement**. Use operating system provided security boundaries, such as virtualization, containers, or user accounts for running processes with the least set of privileges.
 
 ### Security Transparency
 
-**Justification**. Similar to CAS, this feature allows separating sandboxed code from security critical code in a declarative fashion, but is [no longer supported as a security boundary](https://msdn.microsoft.com/en-us/library/ee191569(v=vs.110).aspx). This feature was heavily used by Silverlight. 
+**Justification**. Similar to CAS, this feature allows separating sandboxed code from security critical code in a declarative fashion, but is [no longer supported as a security boundary](<https://msdn.microsoft.com/en-us/library/ee191569(v=vs.110).aspx>). This feature was heavily used by Silverlight.
 
 **Replacement**. Use operating system provided security boundaries, such as virtualization, containers, or user accounts for running processes with the least set of privileges.

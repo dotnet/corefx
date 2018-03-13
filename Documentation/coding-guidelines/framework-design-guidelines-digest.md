@@ -1,9 +1,8 @@
-Framework Design Guidelines - Digest
-====================================
+# Framework Design Guidelines - Digest
 
 This page is a distillation and a simplification of the most basic
 guidelines described in detail in a book titled
-[Framework Design Guidelines][FDG] by Krzysztof Cwalina and Brad Abrams.
+[Framework Design Guidelines][fdg] by Krzysztof Cwalina and Brad Abrams.
 
 Framework Design Guidelines were created in the early days of .NET Framework
 development. They started as a small set of naming and design conventions but
@@ -12,7 +11,7 @@ considered the canonical way to design frameworks at Microsoft. They carry the
 experience and cumulative wisdom of thousands of developer hours over several
 versions of the .NET Framework.
 
-[FDG]: http://amazon.com/dp/0321545613
+[fdg]: http://amazon.com/dp/0321545613
 
 # General Design Principles
 
@@ -115,6 +114,7 @@ should be named `Closed`.
 post events.
 
 &#10003; **DO** use the following prefixes:
+
 * `I` for interfaces.
 * `T` for generic type parameters (except single letter parameters).
 
@@ -303,7 +303,7 @@ public class Foo
 ## FxCop
 
 [FxCop](https://msdn.microsoft.com/en-us/library/bb429476.aspx) is a code analysis tool that checks managed code assemblies for
-conformance to the [Framework Design Guidelines][FDG] (also see [MSDN](https://msdn.microsoft.com/en-us/library/ms229042.aspx)).
+conformance to the [Framework Design Guidelines][fdg] (also see [MSDN](https://msdn.microsoft.com/en-us/library/ms229042.aspx)).
 
 ## Presentations
 

@@ -23,9 +23,11 @@ To help triage breaking changes, we classify them in to four buckets:
 4. Clearly Non-Public
 
 ## Bucket 1: Public Contract
-*Clear [violation of public contract][breaking-change].*
+
+_Clear [violation of public contract][breaking-change]._
 
 Examples:
+
 * Renaming or removing of a public type, member, or parameter
 * Changing the value of a public constant or enum member
 * Sealing a type that wasn't sealed
@@ -38,8 +40,9 @@ Examples:
 [breaking-change]: breaking-change-rules.md#source-and-binary-compatibility-changes
 
 ## Bucket 2: Reasonable Grey Area
-*[Change of behavior][behavioral-changes] that customers would have reasonably
-depended on.*
+
+_[Change of behavior][behavioral-changes] that customers would have reasonably
+depended on._
 
 Examples:
 
@@ -57,8 +60,9 @@ These require judgment: how predictable, obvious, consistent was the behavior?
 [behavioral-changes]: breaking-change-rules.md#behavioral-changes
 
 ## Bucket 3: Unlikely Grey Area
-*Change of behavior that customers could have depended on, but probably
-wouldn't.*
+
+_Change of behavior that customers could have depended on, but probably
+wouldn't._
 
 Examples:
 
@@ -68,8 +72,9 @@ As with changes in bucket 2, these require judgment: what is reasonable and
 what's not?
 
 ## Bucket 4: Clearly Non-Public
-*Changes to surface area or behavior that is clearly internal or non-breaking
-in theory, but breaks an app.*
+
+_Changes to surface area or behavior that is clearly internal or non-breaking
+in theory, but breaks an app._
 
 Examples:
 
@@ -87,17 +92,17 @@ more latitude here in .NET Core.
 
 * All bucket 1, 2, and 3 breaking changes require talking to the repo owners
   first:
-    - We generally **don't accept** change proposals that are in bucket #1.
-    - We **might accept** change proposals that are in #2 and #3 after a
+    * We generally **don't accept** change proposals that are in bucket #1.
+    * We **might accept** change proposals that are in #2 and #3 after a
       risk-benefit analysis. See below for more details.
-    - We **usually accept** changes that are in bucket #4
+    * We **usually accept** changes that are in bucket #4
 * If you're not sure which bucket applies to a given change, contact us.
 
 ### Risk-Benefit Analysis
 
 For buckets #2 and #3 we apply a risk-benefit analysis. It doesn't matter if the
 old behavior is "wrong", we still need to think through the implications. This
-can result in one of the following outcomes: 
+can result in one of the following outcomes:
 
 * **Accepted with compat switch**. Depending on the estimated customer impact,
   we may decide to add a compat switch that allows consumers to bring back the

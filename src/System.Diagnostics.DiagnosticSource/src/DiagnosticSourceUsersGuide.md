@@ -9,17 +9,18 @@ In addition to background on how the class works, this document also covers
 [naming conventions](#naming-conventions) and [best practices](#best-practices) when
 instrumenting code.
 
--------------------------------------------
+---
+
 ## Relationship to Other Logging Facilities
 
 In addition to `DiagnosticSource`, there are two other logging systems provided by Microsoft:
 
-1. `EventSource` [docs](https://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource(v=vs.110).aspx)
+1. `EventSource` [docs](<https://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource(v=vs.110).aspx>)
    and [src](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/DiagnosticSourceEventSource.cs).
    `EventSource` has been available since V4.5 of the .NET Runtime and is what is used
    to instrument the runtime itself. It is designed to be fast and to be strongly
    typed (payloads are typed, named properties), and to interface with OS logging
-   infrastructure like Event Tracing for Windows [(ETW)](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363668(v=vs.85).aspx)
+   infrastructure like Event Tracing for Windows [(ETW)](<https://msdn.microsoft.com/en-us/library/windows/desktop/aa363668(v=vs.85).aspx>)
    or [LTTng](http://lttng.org/) on Linux.
 
 2. `ILogger` [src](https://github.com/aspnet/logging). A number of popular third party
@@ -48,13 +49,14 @@ times. By instrumenting with Diagnostic source, both clients that need the rich 
 (and thus use `DiagnosticListener`) as well as any consumers using `EventListeners`
 (or OS facilities like ETW) can get at the data.
 
-----------------------------------------
+---
+
 ## Instrumenting with DiagnosticSource/DiagnosticListener
 
 Perhaps surprisingly, the heart of the `DiagnosticSource` logging architecture is not the
 `DiagnosticSource` class but rather the `DiagnosticListener` class which 'receives' the
 events. This is because the `DiagnosticSource` type is just an abstract base class
-that defines the methods needed to actually log events. It is the  `DiagnosticListener`
+that defines the methods needed to actually log events. It is the `DiagnosticListener`
 which holds the actual implementation.
 
 Thus the first step in instrumenting code with `DiagnosticSource` is to create a
@@ -63,8 +65,9 @@ Thus the first step in instrumenting code with `DiagnosticSource` is to create a
 ```C#
     private static DiagnosticSource httpLogger = new DiagnosticListener("System.Net.Http");
 ```
+
 Notice that httpLogger is typed as a `DiagnosticSource`. This is because this code
-only cares about writing events and thus only cares about the  `DiagnosticSource` methods that
+only cares about writing events and thus only cares about the `DiagnosticSource` methods that
 the `DiagnosticListener` implements. `DiagnosticListeners` are given names when they are created
 and this name should be the name of logical grouping of related events (typically the component).
 Later this name is used to find the Listener and subscribe to any of its events.
@@ -116,7 +119,8 @@ implicitly make a `DiagnosticSource` as well.
 `DiagnosticListeners` have a name, which is used to represent the component associated with the event.
 Thus the event names only need to be unique within a component.
 
-----------------------------------------
+---
+
 ## Best Practices
 
 ### Naming Conventions
@@ -133,7 +137,7 @@ Thus the event names only need to be unique within a component.
   or the other, so having a System.Net.Http.Incoming and System.Net.Http.Outgoing for
   each sub-case is good.
 
-* CONSIDER -  the likely volume of events. High volume events may deserve their own
+* CONSIDER - the likely volume of events. High volume events may deserve their own
   `DiagnosticListener`. You don't really want to mix high volume and low volume events
   in the same listener unless they both support the same scenario. It is OK however to
   put several **low volume** events in a 'miscellaneous' listener, even if they support different
@@ -166,11 +170,11 @@ Thus the event names only need to be unique within a component.
 ### Payloads
 
 * DO use the anonymous type syntax 'new { property1 = value1 ...}' as the default way to pass
-  a payload *even if there is only one data element*. This makes adding more data later easy
+  a payload _even if there is only one data element_. This makes adding more data later easy
   and compatible.
 
 * CONSIDER - if you have an event that is so frequent that the performance of the logging is
-  an important consideration,  **and** you have only one data item **and** it is unlikely that
+  an important consideration, **and** you have only one data item **and** it is unlikely that
   you will ever have more data to pass to the event, **and** the data item is a normal class
   (not a value type) **then** you save some cost by simply by passing the data `object` directly
   without using an anonymous type wrapper.
@@ -197,8 +201,9 @@ Thus the event names only need to be unique within a component.
 * DO NOT - make the `DiagnosticListener` public. There is no need to as subscribers will
   use the `AllListener` property to hook up.
 
- ----------------------------------------
-## Consuming Data with DiagnosticListener
+    ---
+
+    ## Consuming Data with DiagnosticListener
 
 Up until now, this guide has focused on how to instrument code to generate logging
 information. In this section we focus on subscribing and decoding of that information.
@@ -206,7 +211,7 @@ information. In this section we focus on subscribing and decoding of that inform
 ### Discovery of DiagnosticListeners
 
 The first step in receiving events is to discover which `DiagnosticListeners` you are
-interested in. While it is possible to discover `DiagnosticListeners`  at compile time
+interested in. While it is possible to discover `DiagnosticListeners` at compile time
 by referencing static variables (e.g. like the `httpLogger` in the previous example), this
 is typically not flexible enough.
 
@@ -234,7 +239,7 @@ A typical use of the `AllListeners` static property looks like this:
             // Here is where we put code to subscribe to the Listener.
         }
     });
-    
+
     // Typically you leave the listenerSubscription subscription active forever.
     // However when you no longer want your callback to be called, you can
     // call listenerSubscription.Dispose() to cancel your subscription to the IObservable.
@@ -384,6 +389,7 @@ This very efficiently subscribes to only the 'RequestStart' events. All other ev
 method to return `false`, and thus be efficiently filtered out.
 
 ##### Context-based Filtering
+
 Some scenarios require advanced filtering based on extended context.
 Producers may call `DiagnosticSource.IsEnabled()` overloads and supply additional event properties:
 
@@ -420,7 +426,8 @@ Producers should enclose `IsEnabled()` calls with event name and context with pu
 calls for event name, so consumers must ensure that their filter allows events without context
 to pass through.
 
-----------------------------------------
+---
+
 ## Consuming DiagnosticSource Data with EventListeners and ETW
 
 The `System.Diagnostic.DiagnosticSource` NuGet package comes with a built in `EventSource`

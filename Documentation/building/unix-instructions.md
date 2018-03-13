@@ -1,5 +1,5 @@
-Building CoreFX on FreeBSD, Linux and OS X
-==========================================
+# Building CoreFX on FreeBSD, Linux and OS X
+
 ## Building
 
 1. Install the prerequisites ([Linux](#user-content-linux), [macOS](#user-content-macos))
@@ -13,7 +13,8 @@ Only use it when the parameters that you are passing to the script apply for bot
 For more information about the different options when building, run `build.sh -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
 
 ## Minimum Hardware Requirements
-- 2GB RAM
+
+* 2GB RAM
 
 ## Prerequisites (native build)
 
@@ -38,8 +39,7 @@ components
 * libcurl4-openssl-dev
 * zlib1g-dev
 
-`sudo apt-get install git clang-3.9 cmake make libc6-dev libssl-dev libkrb5-dev
-libcurl4-openssl-dev zlib1g-dev`
+`sudo apt-get install git clang-3.9 cmake make libc6-dev libssl-dev libkrb5-dev libcurl4-openssl-dev zlib1g-dev`
 
 #### Managed build
 
@@ -52,7 +52,7 @@ For Ubuntu 14.04, install the following packages:
 `sudo apt-get install libunwind8 libicu52 curl`
 
 For Ubuntu 16.04 LTS / Bash on Ubuntu on Windows you may need to replace libicu52 with libicu55.
-Ubuntu 16.10 and Ubuntu 17.04 will require libicu57. 
+Ubuntu 16.10 and Ubuntu 17.04 will require libicu57.
 
 `sudo apt-get install libunwind8 libicu55 curl`
 
@@ -65,11 +65,13 @@ most systems when you install the development packages).
 macOS 10.12 or higher is needed to build corefx 2.x.
 
 On macOS a few components are needed which are not provided by a default developer setup:
+
 * CMake
 * pkgconfig
 * OpenSSL 1.0.1 or 1.0.2
 
 One way of obtaining these components is via [Homebrew](http://brew.sh):
+
 ```sh
 $ brew install cmake pkgconfig openssl
 ```
@@ -81,6 +83,7 @@ Some compilers get upset over new headers being in `/usr/local/include` with the
 and so Homebrew does not allow the OpenSSL package to be installed into system default paths. A minimal installation
 is presented here to facilitate simplifying runtime requirements and compile-time requirements (for build systems using
 CMake's `find_package`, like ours):
+
 ```sh
 # We need to make the runtime libraries discoverable, as well as make
 # pkg-config be able to find the headers and current ABI version.
@@ -122,6 +125,7 @@ OPENSSL_ROOT_DIR="/usr/local/Cellar/openssl/1.0.1g cmake
 ```
 
 ### Known Issues
+
 If you see errors along the lines of `SendFailure (Error writing headers)` you may need to import trusted root certificates:
 
 ```sh

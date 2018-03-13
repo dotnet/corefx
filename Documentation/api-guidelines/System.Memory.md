@@ -27,12 +27,11 @@ specs can be found here:
   inappropriate. `ReadOnlyMemory<T>`/`Memory<T>` should be used in such
   situations.
 
-
-[1] *stack-only* isn't the best way to put it. Strictly speaking, these types
-    are called `ref`-like types. These types must be structs, cannot be fields
-    in classes, cannot be boxed, and cannot be used to instantiate generic
-    types. Value types containing fields of `ref`-like types must themselves be
-    `ref`-like types.
+[1] _stack-only_ isn't the best way to put it. Strictly speaking, these types
+are called `ref`-like types. These types must be structs, cannot be fields
+in classes, cannot be boxed, and cannot be used to instantiate generic
+types. Value types containing fields of `ref`-like types must themselves be
+`ref`-like types.
 
 ## Guidance
 
@@ -41,10 +40,10 @@ specs can be found here:
   checking is unacceptable, the method's implementation can still pin the span
   and get the raw pointer if necessary. The key is that you don't spread the
   pointer through the public API.
-    - Synchronous, read-only access needed: `ReadOnlySpan<T>`
-    - Synchronous, writable access needed: `Span<T>`
-    - Asynchronous, read-only access needed: `ReadOnlyMemory<T>`
-    - Asynchronous, writable access needed: `Memory<T>`
+    * Synchronous, read-only access needed: `ReadOnlySpan<T>`
+    * Synchronous, writable access needed: `Span<T>`
+    * Asynchronous, read-only access needed: `ReadOnlyMemory<T>`
+    * Asynchronous, writable access needed: `Memory<T>`
 * **CONSIDER** using `stackalloc` with `Span<T>` when you need small temporary
   storage but you need to avoid allocations and associated life-time management.
 * **AVOID** providing overloads for both `ReadOnlySpan<T>` and `Span<T>` as `Span<T>`
