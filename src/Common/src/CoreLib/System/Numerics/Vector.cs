@@ -1338,7 +1338,16 @@ namespace System.Numerics
         {
             if (Vector.IsHardwareAccelerated)
             {
-                if (typeof(T) == typeof(Byte))
+                if ((typeof(T) == typeof(Byte))
+                || (typeof(T) == typeof(SByte))
+                || (typeof(T) == typeof(UInt16))
+                || (typeof(T) == typeof(Int16))
+                || (typeof(T) == typeof(UInt32))
+                || (typeof(T) == typeof(Int32))
+                || (typeof(T) == typeof(UInt64))
+                || (typeof(T) == typeof(Int64))
+                || (typeof(T) == typeof(Single))
+                || (typeof(T) == typeof(Double)))
                 {
 					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
@@ -1346,47 +1355,6 @@ namespace System.Numerics
                         hash.Add(this[g]);
                     }
                     return hash.ToHashCode();
-                }
-                else if (typeof(T) == typeof(SByte))
-                {
-					var hash = new HashCode();
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash.Add(this[g]);
-                    }
-                    return hash.ToHashCode();
-                }
-                else if (typeof(T) == typeof(UInt16))
-                {
-                    return HashCode.Combine(this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7]);
-                }
-                else if (typeof(T) == typeof(Int16))
-                {
-                    return HashCode.Combine(this[0], this[1], this[2], this[3], this[4], this[5], this[6], this[7]);
-                }
-                else if (typeof(T) == typeof(UInt32))
-                {
-                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
-                }
-                else if (typeof(T) == typeof(Int32))
-                {
-                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
-                }
-                else if (typeof(T) == typeof(UInt64))
-                {
-                    return HashCode.Combine(this[0], this[1]);
-                }
-                else if (typeof(T) == typeof(Int64))
-                {
-                    return HashCode.Combine(this[0], this[1]);
-                }
-                else if (typeof(T) == typeof(Single))
-                {
-                    return HashCode.Combine(this[0], this[1], this[2], this[3]);
-                }
-                else if (typeof(T) == typeof(Double))
-                {
-                    return HashCode.Combine(this[0], this[1]);
                 }
                 else
                 {

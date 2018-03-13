@@ -1699,26 +1699,6 @@ namespace System.Numerics.Tests
 <# } #>
         #endregion Narrow / Widen
         
-        #region Count
-
-<# 
-    foreach (var type in supportedTypes)
-    {
-#>
-        [Fact]
-        public void Count<#=type.Name#>() { Count<<#=type.Name#>>(sizeof(<#=type.Name#>)); }
-<#
-    }
-#>
-        private void Count<T>(int elementSize) where T : struct
-        {
-            const int EffectiveStructureSize = 16;
-            int expected = EffectiveStructureSize / elementSize;
-            Assert.Equal(expected, Vector<T>.Count);
-        }
-
-        #endregion
-
         #region Helper Methods
         private static void AssertEqual<T>(T expected, T actual, string operation, int precision = -1) where T : IEquatable<T>
         {

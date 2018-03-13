@@ -2606,37 +2606,6 @@ namespace System.Numerics.Tests
 
         #endregion Narrow / Widen
         
-        #region Count
-
-        [Fact]
-        public void CountByte() { Count<Byte>(sizeof(Byte)); }
-        [Fact]
-        public void CountSByte() { Count<SByte>(sizeof(SByte)); }
-        [Fact]
-        public void CountUInt16() { Count<UInt16>(sizeof(UInt16)); }
-        [Fact]
-        public void CountInt16() { Count<Int16>(sizeof(Int16)); }
-        [Fact]
-        public void CountUInt32() { Count<UInt32>(sizeof(UInt32)); }
-        [Fact]
-        public void CountInt32() { Count<Int32>(sizeof(Int32)); }
-        [Fact]
-        public void CountUInt64() { Count<UInt64>(sizeof(UInt64)); }
-        [Fact]
-        public void CountInt64() { Count<Int64>(sizeof(Int64)); }
-        [Fact]
-        public void CountSingle() { Count<Single>(sizeof(Single)); }
-        [Fact]
-        public void CountDouble() { Count<Double>(sizeof(Double)); }
-        private void Count<T>(int elementSize) where T : struct
-        {
-            const int EffectiveStructureSize = 16;
-            int expected = EffectiveStructureSize / elementSize;
-            Assert.Equal(expected, Vector<T>.Count);
-        }
-
-        #endregion
-
         #region Helper Methods
         private static void AssertEqual<T>(T expected, T actual, string operation, int precision = -1) where T : IEquatable<T>
         {

@@ -509,30 +509,15 @@ namespace System.Numerics
         {
             if (Vector.IsHardwareAccelerated)
             {
-<#    foreach (Type type in supportedTypes)
-    {
-        int numFields = GetNumFields(type, totalSize);
-#>
-                <#=GenerateIfStatementHeader(type)#>
+                <#=GenerateIfConditionAllTypes(supportedTypes)#>
                 {
-<#					if (numFields <= MaximumCombineFields) 
-                    {
-#>
-                    return <#=GenerateAcceleratedFastCombine(type, numFields)#>;
-<#					} else { 
-#>
 					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
                         hash.Add(this[g]);
                     }
                     return hash.ToHashCode();
-<#					} 
-#>
                 }
-<#
-        }
-#>
                 else
                 {
                     throw new NotSupportedException(SR.Arg_TypeNotSupported);
