@@ -10,7 +10,7 @@ namespace System.ServiceProcess.Tests
     {
         public static TheoryData<string> Ctor_Data => new TheoryData<string>
         {
-            { string.Empty},
+            { string.Empty },
             { null },
             { "hello" }
         };
