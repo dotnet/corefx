@@ -169,7 +169,6 @@
     <Compile Include="System\Security\SecurityState.cs" />
     <Compile Include="System\Security\SecurityZone.cs" />
     <Compile Include="System\Security\XmlSyntaxException.cs" />
-    <Compile Include="System\ServiceProcess\Helpers.cs" />
     <Compile Include="System\ServiceProcess\ServiceControllerPermission.cs" />
     <Compile Include="System\ServiceProcess\ServiceControllerPermissionAccess.cs" />
     <Compile Include="System\ServiceProcess\ServiceControllerPermissionAttribute.cs" />

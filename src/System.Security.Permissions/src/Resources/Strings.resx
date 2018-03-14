@@ -82,10 +82,4 @@
   <data name="PlatformNotSupported_CAS" xml:space="preserve">
     <value>Code Access Security is not supported on this platform.</value>
   </data>
-  <data name="BadMachineName" xml:space="preserve">
-    <value>MachineName value {0} is invalid.</value>
-  </data>
-  <data name="ServiceName" xml:space="preserve">
-    <value>Service name {0} contains invalid characters, is empty, or is too long (max length = {1}).</value>
-  </data>
 </root>
