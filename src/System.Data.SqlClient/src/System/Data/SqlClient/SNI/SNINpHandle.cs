@@ -214,7 +214,7 @@ namespace System.Data.SqlClient.SNI
         public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
-            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV);
+            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV, disposePacketAfterSendAsync);
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 
