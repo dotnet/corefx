@@ -1904,7 +1904,6 @@ namespace System.ServiceProcess.ServiceController
         Browse = 1 << 1,
         Control = 1 << 2 | Browse,
     }
-
     [Serializable]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
     public partial class ServiceControllerPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
@@ -1915,7 +1914,6 @@ namespace System.ServiceProcess.ServiceController
         public string ServiceName { get; set; }
         public override System.Security.IPermission CreatePermission() { throw null; }
     }
-
     [Serializable]
     public partial class ServiceControllerPermissionEntry
     {
