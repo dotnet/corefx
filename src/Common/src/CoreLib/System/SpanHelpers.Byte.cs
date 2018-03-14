@@ -896,10 +896,6 @@ namespace System
             return (int)(byte*)(index + 7);
         }
 
-        // This overload exists to maintain the "pit of success" where apis that specializes for T being byte continue to get directed to the fast byte-based version via the C#
-        // resolution rules.
-        public static bool SequenceEqual(ref byte first, ref byte second, int length) => SequenceEqualBytes(ref first, ref second, (nuint)length);
-
         // Optimized byte-based SequenceEquals. The "length" parameter for this one is declared a nuint rather than int as we also use it for types other than byte
         // where the length can exceed 2Gb once scaled by sizeof(T).
         public static unsafe bool SequenceEqualBytes(ref byte first, ref byte second, nuint length)
