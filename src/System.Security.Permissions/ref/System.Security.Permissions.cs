@@ -1916,7 +1916,6 @@ namespace System.ServiceProcess
     public partial class ServiceControllerPermissionEntry
     {
         public ServiceControllerPermissionEntry() { }
-        internal ServiceControllerPermissionEntry(System.Security.Permissions.ResourcePermissionBaseEntry baseEntry) { }
         public ServiceControllerPermissionEntry(System.ServiceProcess.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
         public string MachineName { get { throw null; } }
         public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
@@ -1924,7 +1923,6 @@ namespace System.ServiceProcess
     }
     public class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
     {
-        internal ServiceControllerPermissionEntryCollection(System.ServiceProcess.ServiceControllerPermission owner, System.Security.Permissions.ResourcePermissionBaseEntry[] entries) { }
         public System.ServiceProcess.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }
         public int Add(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
         public void AddRange(System.ServiceProcess.ServiceControllerPermissionEntry[] value) { }
@@ -1934,6 +1932,10 @@ namespace System.ServiceProcess
         public int IndexOf(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
         public void Insert(int index, System.ServiceProcess.ServiceControllerPermissionEntry value) { }
         public void Remove(System.ServiceProcess.ServiceControllerPermissionEntry value) { }
+        protected override void OnClear() { }
+        protected override void OnInsert(int index, object value) { }
+        protected override void OnRemove(int index, object value) { }
+        protected override void OnSet(int index, object oldValue, object newValue) { }
     }
 }
 namespace System.Transactions

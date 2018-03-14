@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security.Permissions;
 using System.Collections;
 
 namespace System.ServiceProcess
 {
     public class ServiceControllerPermissionEntryCollection : CollectionBase
     {
-        internal ServiceControllerPermissionEntryCollection(ServiceControllerPermission owner, ResourcePermissionBaseEntry[] entries) { }
         public ServiceControllerPermissionEntry this[int index] { get { return null; } set { } }
         public int Add(ServiceControllerPermissionEntry value) { return 0; }
         public void AddRange(ServiceControllerPermissionEntry[] value) { }
