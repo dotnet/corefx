@@ -32,7 +32,7 @@ namespace System.Diagnostics.Tests
             process.StartInfo.RedirectStandardInput = true;
             var encoding = new UTF32Encoding(bigEndian: false, byteOrderMark: true);
             process.StartInfo.StandardInputEncoding = encoding;
-            process.Start().Dispose();
+            process.Start();
 
             Assert.Same(encoding, process.StandardInput.Encoding);
         }
@@ -50,7 +50,7 @@ namespace System.Diagnostics.Tests
 
             try
             {
-                testProcess.Start().Dispose();
+                testProcess.Start();
                 Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
             }
             finally
@@ -75,10 +75,10 @@ namespace System.Diagnostics.Tests
             testProcess.StartInfo = psi;
             try
             {
-                testProcess.Start().Dispose();
+                testProcess.Start();
                 Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
                 secondTestProcess.StartInfo = psi;
-                secondTestProcess.Start().Dispose();
+                secondTestProcess.Start();
                 Assert.Equal(string.Empty, secondTestProcess.StartInfo.Arguments);
             }
             finally
