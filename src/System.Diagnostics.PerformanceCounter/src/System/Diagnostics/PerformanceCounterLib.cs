@@ -56,7 +56,6 @@ namespace System.Diagnostics
         private Hashtable _categoryTable;
         private Hashtable _nameTable;
         private Hashtable _helpTable;
-        private readonly object _customCategoryTableLock = new Object();
         private readonly object _categoryTableLock = new Object();
         private readonly object _nameTableLock = new Object();
         private readonly object _helpTableLock = new Object();
@@ -319,12 +318,8 @@ namespace System.Diagnostics
         {
             _nameTable = null;
             _helpTable = null;
-            _categoryTable = null;
-            //race with FindCustomCategory
-            lock (_customCategoryTableLock)
-            {
-                _customCategoryTable = null;
-            }
+            _categoryTable = null;            
+            _customCategoryTable = null;            
         }
 
         internal void Close()
@@ -642,89 +637,86 @@ namespace System.Diagnostics
             RegistryKey baseKey = null;
             categoryType = PerformanceCounterCategoryType.Unknown;
 
-            //race with CloseTables
-            lock (_customCategoryTableLock)
+            Hashtable table =
+                _customCategoryTable ??
+                Interlocked.CompareExchange(ref _customCategoryTable, new Hashtable(StringComparer.OrdinalIgnoreCase), null) ??
+                _customCategoryTable;
+
+            if (table.ContainsKey(category))
             {
-                if (_customCategoryTable == null)
+                categoryType = (PerformanceCounterCategoryType)table[category];
+                return true;
+            }
+            else
+            {
+                try
                 {
-                    _customCategoryTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-                }
-
-                if (_customCategoryTable.ContainsKey(category))
-                {
-                    categoryType = (PerformanceCounterCategoryType)_customCategoryTable[category];
-                    return true;
-                }
-                else
-                {
-                    try
+                    string keyPath = ServicePath + "\\" + category + "\\Performance";
+                    if (_machineName == "." || string.Equals(_machineName, ComputerName, StringComparison.OrdinalIgnoreCase))
                     {
-                        string keyPath = ServicePath + "\\" + category + "\\Performance";
-                        if (_machineName == "." || string.Equals(_machineName, ComputerName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            key = Registry.LocalMachine.OpenSubKey(keyPath);
-                        }
-                        else
-                        {
-                            baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "\\\\" + _machineName);
-                            if (baseKey != null)
-                            {
-                                try
-                                {
-                                    key = baseKey.OpenSubKey(keyPath);
-                                }
-                                catch (SecurityException)
-                                {
-                                    // we may not have permission to read the registry key on the remote machine.  The security exception  
-                                    // is thrown when RegOpenKeyEx returns ERROR_ACCESS_DENIED or ERROR_BAD_IMPERSONATION_LEVEL
-                                    //
-                                    // In this case we return an 'Unknown' category type and 'false' to indicate the category is *not* custom.
-                                    //
-                                    categoryType = PerformanceCounterCategoryType.Unknown;
-                                    _customCategoryTable[category] = categoryType;
-                                    return false;
-                                }
-                            }
-                        }
-
-                        if (key != null)
-                        {
-                            object systemDllName = key.GetValue("Library", null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-                            if (systemDllName != null && systemDllName is string
-                                && (string.Equals((string)systemDllName, PerformanceCounterLib.PerfShimName, StringComparison.OrdinalIgnoreCase)
-                                  || ((string)systemDllName).EndsWith(PerformanceCounterLib.PerfShimFullNameSuffix, StringComparison.OrdinalIgnoreCase)))
-                            {
-
-                                object isMultiInstanceObject = key.GetValue("IsMultiInstance");
-                                if (isMultiInstanceObject != null)
-                                {
-                                    categoryType = (PerformanceCounterCategoryType)isMultiInstanceObject;
-                                    if (categoryType < PerformanceCounterCategoryType.Unknown || categoryType > PerformanceCounterCategoryType.MultiInstance)
-                                        categoryType = PerformanceCounterCategoryType.Unknown;
-                                }
-                                else
-                                    categoryType = PerformanceCounterCategoryType.Unknown;
-
-                                object objectID = key.GetValue("First Counter");
-                                if (objectID != null)
-                                {
-                                    int firstID = (int)objectID;
-
-                                    _customCategoryTable[category] = categoryType;
-                                    return true;
-                                }
-                            }
-                        }
+                        key = Registry.LocalMachine.OpenSubKey(keyPath);
                     }
-                    finally
+                    else
                     {
-                        if (key != null)
-                            key.Close();
+                        baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "\\\\" + _machineName);
                         if (baseKey != null)
-                            baseKey.Close();
+                        {
+                            try
+                            {
+                                key = baseKey.OpenSubKey(keyPath);
+                            }
+                            catch (SecurityException)
+                            {
+                                // we may not have permission to read the registry key on the remote machine.  The security exception  
+                                // is thrown when RegOpenKeyEx returns ERROR_ACCESS_DENIED or ERROR_BAD_IMPERSONATION_LEVEL
+                                //
+                                // In this case we return an 'Unknown' category type and 'false' to indicate the category is *not* custom.
+                                //
+                                categoryType = PerformanceCounterCategoryType.Unknown;
+                                table[category] = categoryType;
+                                return false;
+                            }
+                        }
                     }
+
+                    if (key != null)
+                    {
+                        object systemDllName = key.GetValue("Library", null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                        if (systemDllName != null && systemDllName is string
+                            && (string.Equals((string)systemDllName, PerformanceCounterLib.PerfShimName, StringComparison.OrdinalIgnoreCase)
+                              || ((string)systemDllName).EndsWith(PerformanceCounterLib.PerfShimFullNameSuffix, StringComparison.OrdinalIgnoreCase)))
+                        {
+
+                            object isMultiInstanceObject = key.GetValue("IsMultiInstance");
+                            if (isMultiInstanceObject != null)
+                            {
+                                categoryType = (PerformanceCounterCategoryType)isMultiInstanceObject;
+                                if (categoryType < PerformanceCounterCategoryType.Unknown || categoryType > PerformanceCounterCategoryType.MultiInstance)
+                                    categoryType = PerformanceCounterCategoryType.Unknown;
+                            }
+                            else
+                                categoryType = PerformanceCounterCategoryType.Unknown;
+
+                            object objectID = key.GetValue("First Counter");
+                            if (objectID != null)
+                            {
+                                int firstID = (int)objectID;
+
+                                table[category] = categoryType;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    if (key != null)
+                        key.Close();
+                    if (baseKey != null)
+                        baseKey.Close();
                 }
             }
+
             return false;
         }
 
@@ -1187,7 +1179,7 @@ namespace System.Diagnostics
                     CreateIniFile(categoryName, categoryHelp, creationData, languageIds);
                     CreateSymbolFile(creationData);
                     RegisterFiles(IniFilePath, false);
-                }                
+                }
                 CloseAllLibraries();
             }
             finally
