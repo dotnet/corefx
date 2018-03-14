@@ -52,8 +52,18 @@ namespace System.Text.RegularExpressions
         /// </summary>
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
+            // to avoid lock:
             if (s_cacheSize == 0)
                 return null;
+            //CachedCodeEntry first = s_livecode_first;
+            //if (first != null)
+            //    if (first.Key == key)
+            //        return first;
+            //    else if (!isToAdd && s_livecode.Count == 1) // Not the only one
+            //        return null;
+            //else if (!isToAdd) // first == null, empty cache
+            //    return null;
+
             lock (s_livecode)
             {
                 // first look for it in the cache and move it to the head
@@ -94,8 +104,6 @@ namespace System.Text.RegularExpressions
         // Always called within s_livecode lock
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
-            if (s_livecode_first?.Key == key) // most used regex should be at the top already
-                return s_livecode_first;
             if (s_livecode.TryGetValue(key, out var entry))
             {
                 if (s_livecode_last == entry)
