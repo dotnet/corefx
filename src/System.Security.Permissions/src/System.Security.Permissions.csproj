@@ -169,6 +169,7 @@
     <Compile Include="System\Security\SecurityState.cs" />
     <Compile Include="System\Security\SecurityZone.cs" />
     <Compile Include="System\Security\XmlSyntaxException.cs" />
+    <Compile Include="System\ServiceProcess.ServiceController\Helpers.cs" />
     <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermission.cs" />
     <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionAccess.cs" />
     <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionAttribute.cs" />
@@ -188,7 +189,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
-    <Reference Include="System.ServiceProcess.ServiceController" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

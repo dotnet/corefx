@@ -50,10 +50,10 @@ namespace System.ServiceProcess
             
             set {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
-                if (!ServiceBase.ValidServiceName(value))
-                   throw new ArgumentException(string.Format(SR.ServiceName, value, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
+                if (!Helpers.ValidServiceName(value))
+                   throw new ArgumentException(string.Format(SR.ServiceName, value, Helpers.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
 
                 this.serviceName = value;
             }

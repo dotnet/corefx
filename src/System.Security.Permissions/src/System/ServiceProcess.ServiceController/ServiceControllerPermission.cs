@@ -48,11 +48,11 @@ namespace System.ServiceProcess {
             }
         }
 
-        internal void AddPermissionAccess(ServiceControllerPermissionEntry entry) => base.AddPermissionAccess(entry.GetBaseEntry());
+        internal void AddPermissionAccess(ServiceControllerPermissionEntry entry) => base.AddPermissionAccess(entry.GetBaseEntry);
 
         internal new void Clear() => base.Clear();
 
-        internal void RemovePermissionAccess(ServiceControllerPermissionEntry entry) => base.RemovePermissionAccess(entry.GetBaseEntry());
+        internal void RemovePermissionAccess(ServiceControllerPermissionEntry entry) => base.RemovePermissionAccess(entry.GetBaseEntry);
 
         private void SetNames()
         {

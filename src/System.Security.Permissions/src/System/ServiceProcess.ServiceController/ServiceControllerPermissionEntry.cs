@@ -24,8 +24,8 @@ namespace System.ServiceProcess
             if (serviceName == null)
                 throw new ArgumentNullException("serviceName");
 
-            if (!ServiceBase.ValidServiceName(serviceName))
-               throw new ArgumentException(string.Format(SR.ServiceName, serviceName, ServiceBase.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
+            if (!Helpers.ValidServiceName(serviceName))
+               throw new ArgumentException(string.Format(SR.ServiceName, serviceName, Helpers.MaxNameLength.ToString(CultureInfo.CurrentCulture)));
             
             if (!SyntaxCheck.CheckMachineName(machineName))
                 throw new ArgumentException(string.Format(SR.BadMachineName, machineName));
