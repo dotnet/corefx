@@ -4,8 +4,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Text.RegularExpressions
@@ -55,8 +53,11 @@ namespace System.Text.RegularExpressions
         {
             // to avoid lock:
             CachedCodeEntry first = s_livecode_first;
-            if (first?.Key == key)
-                 return first;
+            if (first == null)
+                if (!isToAdd)
+                    return null;
+            else if (first.Key == key)
+                    return first;
             if (s_cacheSize == 0)
                 return null;
 
@@ -99,7 +100,6 @@ namespace System.Text.RegularExpressions
 
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
-            Debug.Assert(Monitor.IsEntered(s_livecode));
             if (s_livecode.TryGetValue(key, out var entry))
             {
                 if (s_livecode_last == entry)
