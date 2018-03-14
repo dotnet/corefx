@@ -11,7 +11,7 @@ In the sequel, we assume you are familiar with the basic `EventSource` usage, if
 Without further ado, here is an example on how to use the `EventCounter`
 
 ```c#
-// Give your event sources a descriptive name using the EventSourceAttribute, otherwise the name of the class is used. 
+// Give your event sources a descriptive name using the EventSourceAttribute, otherwise the name of the class is used.
 [EventSource(Name = "Samples-EventCounterDemos-Minimal")]
 public sealed class MinimalEventCounterSource : EventSource
 {
@@ -36,13 +36,13 @@ public sealed class MinimalEventCounterSource : EventSource
         //      measurement in the code.
         //   3. You don't have to have log with WriteEvent if you don't think you will ever care about details
         //       of individual requests (that counter data is sufficient).  
-        WriteEvent(1, url, elapsedMSec);    // This logs it to the event stream if events are on.    
+        WriteEvent(1, url, elapsedMSec);    // This logs it to the event stream if events are on.
         this.requestCounter.WriteMetric(elapsedMSec);        // This adds it to the PerfCounter called 'Request' if PerfCounters are on
     }
 }
 ```
 
-The` WriteEvent` line is the `EventSource` part and is not part of `EventCounter`, it is shown to show that you can log a message together with the event counter.
+The`WriteEvent` line is the `EventSource` part and is not part of `EventCounter`, it is shown to show that you can log a message together with the event counter.
 
 So, with that, we logged the metric to the `EventCounter`, but unless we can actually get the statistics out of it, it is not useful. To get the statistics, we need to enable the `EventCounter` by setting off a timer how frequently we want the events, as well as a listener to capture the events, to do that, you can use PerfView. Again, we assumed familiarity with PerfView, if not, you can refer to Vance's blog on that.
 
@@ -70,7 +70,7 @@ Notice that, this command also log the events, so we will get both the events an
 
 <img src="PerfViewCapture_Events.png" alt="PerfView Capture of Event Traces" title="PerfView Capture of Event Traces" />
 
-As we mentioned, to avoid overhead, sometimes we will want just the counters. This command can be used to log *only* the counters:
+As we mentioned, to avoid overhead, sometimes we will want just the counters. This command can be used to log _only_ the counters:
 
 ```
 PerfView /onlyProviders=*Samples-EventCounterDemos-Minimal:*:Critical:EventCounterIntervalSec=1 collect

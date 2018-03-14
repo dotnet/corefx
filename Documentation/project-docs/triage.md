@@ -8,7 +8,7 @@ The tricky thing is that we need to strike a balance:
 
 * We don't want to close all issues that represent work we're currently not resourced to do. In the end, a healthy open source project requires a well maintained backlog so that we can plan the next version in a transparent fashion.
 
-* On the other hand, we don't want to have so many pending issues that we can't see the forest for the trees. Of course, what is *too many* is highly subjective. As a general rule, it's not so much the sheer number of issues, it's how diverse they are.
+* On the other hand, we don't want to have so many pending issues that we can't see the forest for the trees. Of course, what is _too many_ is highly subjective. As a general rule, it's not so much the sheer number of issues, it's how diverse they are.
 
 At Microsoft, we've a lot of experience on how to run big, multi-year releases with thousands of engineers. I think it's fair to say that we're still learning on how to adjust our processes and tools to deal with short releases, especially around open source. It's interesting to note that the number of engineers and products have pretty stayed the same. What has changed is that we pushed the release management down to the individual teams so that decisions are more localized and thus can be made faster with fewer expensive round trips across large organizational boundaries. This is one of the reasons we introduced the .NET Core platform. Since its release cycle is decoupled from the .NET Framework (and thus Windows) we can iterate much faster.
 
@@ -52,8 +52,8 @@ In particular, we strive to follow these guidelines:
 ## Porting to .NET Framework
 
 ### Constraints for shipping in the .NET Framework
- 
-Each release of .NET Framework ships to over one billion machines world-wide and installs as an *in-place* update, requiring each fix to meet a high level of quality and compatibility.  Each fix is reviewed extensively to determine which release if any is most appropriate.
+
+Each release of .NET Framework ships to over one billion machines world-wide and installs as an _in-place_ update, requiring each fix to meet a high level of quality and compatibility. Each fix is reviewed extensively to determine which release if any is most appropriate.
 
 Here are some of the factors that are considered:
 
@@ -61,9 +61,9 @@ Here are some of the factors that are considered:
 * **Risk and/or size of the change**. We need to consider whether the change is on a common code path or causes a lot of churn.
 * **Measurable quality of the change**. We need to pay attention to our ability to test the change in an complete end-to-end fashion.
 * **Value of the change**. All the risks outlined above need to be balanced against how many customers the change will help and how much the change will help customers.
- 
+
 ### How you can tell whether a change will be ported
- 
+
 Generally, all changes are expected to be tracked as GitHub issues. We are going to introduce the following three labels on GitHub to track and report progress around porting:
 
 * [**netfx-port-consider**](https://github.com/dotnet/corefx/labels/netfx-port-consider): A given issue should be considered for inclusion in the .NET Framework. Once an issue has this label, the team will consider it for inclusion in the .NET Framework.

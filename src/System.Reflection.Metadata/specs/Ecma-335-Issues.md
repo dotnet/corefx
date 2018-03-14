@@ -1,4 +1,4 @@
-# Known Issues in ECMA-335 CLI Specification 
+# Known Issues in ECMA-335 CLI Specification
 
 This is an informal list of notes on issues that have been encountered
 with the ECMA-335 CLI specification, primarily during development,
@@ -9,17 +9,17 @@ as Microsoft implementation quirks.
 
 ## Signatures
 
-There is a general philosophical issue whereby the spec defines the 
-*syntax* of signatures to exclude errors such as:
+There is a general philosophical issue whereby the spec defines the
+_syntax_ of signatures to exclude errors such as:
 
- * using void outside of return types or pointer element types
- * instantiating a generic with a byref type
- * having a field of byref type
- * etc.
+* using void outside of return types or pointer element types
+* instantiating a generic with a byref type
+* having a field of byref type
+* etc.
 
 Another approach is to syntactically treat `VOID`, `TYPEDBYREF`,
 `BYREF Type`, `CMOD_OPT Type`, `CMOD_REQ Type` as the other `Type`s
-and then deal with the cases like those above as semantic errors in their use. 
+and then deal with the cases like those above as semantic errors in their use.
 That is closer to how many implementations work. It is also how type syntax
 is defined in the grammar for IL, with many of the semantic errors
 deferred to peverify and/or runtime checking rather than being checked
@@ -33,22 +33,23 @@ grammars and diagrams.
 Many of the specific issues below arise from the tension between these
 two approaches.
 
-
 ### 1. `(CLASS | VALUETYPE)` cannot be followed by TypeSpec in practice
 
-In II.23.2.12 and II.23.2.14, it is implied that the token in `(CLASS
-| VALUETYPE) TypeDefOrRefOrSpecEncoded` can be a `TypeSpec`, when in
+In II.23.2.12 and II.23.2.14, it is implied that the token in `(CLASS | VALUETYPE) TypeDefOrRefOrSpecEncoded` can be a `TypeSpec`, when in
 fact it must be a `TypeDef` or `TypeRef`.
 
 peverify gives the following error:
+
 ```
 [MD]: Error: Signature has token following ELEMENT_TYPE_CLASS
 (_VALUETYPE) that is not a TypeDef or TypeRef
 ```
+
 An insightful comment in CLR source code notes that this rule prevents
 cycles in signatures, but see #2 below.
 
 Related issue:
+
 * https://github.com/dotnet/roslyn/issues/7970
 
 #### Proposed specification change
@@ -59,11 +60,11 @@ b) Replace
 
 > These items are compact ways to store a TypeDef, TypeRef, or TypeSpec token in a Signature (§II.23.2.12).
 
-with 
+with
 
 > TypeDefOrRefEncoded is a compact representation of either TypeDef or TypeRef token in a Signature (§II.23.2.12). TypeDefOrRefOrSpecEncoded is a compact representation of either TypeDef, TypeRef or TypeSpec token in a Signature.
 
-Also correct 
+Also correct
 
 > The encoded version of this TypeRef token is made up as follows:
 
@@ -94,7 +95,7 @@ Type ::=
       ...
 ```
 
-Note also the correction of ```Type*``` to ```Type+```. A generic type instantiation shall have at least one type argument.
+Note also the correction of `Type*` to `Type+`. A generic type instantiation shall have at least one type argument.
 
 d) In section II.23.2.14 replace
 
@@ -114,7 +115,7 @@ TypeSpecBlob ::=
       ...
 ```
 
-```Type Type*``` is simplified to ```Type+```.
+`Type Type*` is simplified to `Type+`.
 
 #### Rationale of the proposal
 
@@ -124,16 +125,15 @@ TypeSpecBlob ::=
 
 3. PEVerify, the CLR runtime and C# compiler prior to VS 2015 report an error when encountering an encoded TypeSpec in the positions decribed above.
 
-### 2.  `(CMOD_OPT | CMOD_REQ) <TypeSpec>` is permitted in practice
+### 2. `(CMOD_OPT | CMOD_REQ) <TypeSpec>` is permitted in practice
 
 In II.23.2.7, it is noted that CMOD_OPT or CMOD_REQD is followed
-by a TypeRef or TypeDef metadata token, but TypeSpec tokens are 
+by a TypeRef or TypeDef metadata token, but TypeSpec tokens are
 also allowed by ilasm, csc, peverify, and the CLR.
 
 Note, in particular, that TypeSpecs are used there by C++/CLI to
-represent strongly-typed  boxing in C++/CLI. e.g. `Nullable<int>^`
-in C++/CLI becomes `[mscorlib]System.ValueType 
-modopt([mscorlib]System.Nulllable`1<int>) 
+represent strongly-typed boxing in C++/CLI. e.g. `Nullable<int>^`
+in C++/CLI becomes `[mscorlib]System.ValueType modopt([mscorlib]System.Nulllable`1<int>)
 modopt([mscorlib]System.Runtime.CompilerServices.IsBoxed)`
 in IL.
 
@@ -149,6 +149,7 @@ permitted, and ideally readers would detect such cycles and handle the
 error with a suitable message rather than a stack overflow.
 
 Related issues:
+
 * https://github.com/dotnet/roslyn/issues/7971
 * https://github.com/dotnet/coreclr/issues/2674
 
@@ -157,15 +158,15 @@ Related issues:
 In section II.23.2.7, replace
 
 > The CMOD_OPT or CMOD_REQD is followed by a metadata token that indexes a row in the TypeDef
- table or the TypeRef table.  However, these tokens are encoded and compressed – see §II.23.2.8
-for details
+> table or the TypeRef table. However, these tokens are encoded and compressed – see §II.23.2.8
+> for details
 
 with
 
 > The CMOD_OPT or CMOD_REQD is followed by a metadata token that indexes a row in the TypeDef
-table, TypeRef table, or TypeSpec table.  However, these tokens are encoded and compressed – 
-see §II.23.2.8 for details. Furthermore, if a row in the TypeSpec table is indicated, 
-it must not create cycle.
+> table, TypeRef table, or TypeSpec table. However, these tokens are encoded and compressed –
+> see §II.23.2.8 for details. Furthermore, if a row in the TypeSpec table is indicated,
+> it must not create cycle.
 
 ### 3. Custom modifiers can go in more places than specified
 
@@ -196,21 +197,21 @@ Note that this change also allows properties to have BYREF type.
 c) In section II.23.2.6 LocalVarSig, replace the diagram with production rules:
 
 ```
-LocalVarSig ::= 
+LocalVarSig ::=
   LOCAL_SIG Count LocalVarType+
-  
+
 LocalVarType ::=
   Type
   CustomMod* Constraint BYREF? Type
   CustomMod* BYREF Type
   CustomMod* TYPEDBYREF
-  
+
 ```
 
 d) In section II.23.2.10 Param, replace the diagram with production rules:
 
 ```
-Param ::= 
+Param ::=
   Type
   CustomMod* BYREF Type
   CustomMod* TYPEDBYREF
@@ -226,11 +227,11 @@ RetType ::=
   CustomMod* VOID
 ```
 
-f) In section II.23.2.12 Type, add a production rule to the definition of ```Type```:
+f) In section II.23.2.12 Type, add a production rule to the definition of `Type`:
 
 ```
 Type ::= CustomMod* Type
-  
+
 ```
 
 g) In sections II.23.2.12 Type and II.23.2.14 TypeSpec replace production rule
@@ -239,7 +240,7 @@ g) In sections II.23.2.12 Type and II.23.2.14 TypeSpec replace production rule
 PTR CustomMod* Type
 ```
 
-with 
+with
 
 ```
 PTR Type
@@ -251,7 +252,7 @@ and replace production rule
 SZARRAY CustomMod* Type
 ```
 
-with 
+with
 
 ```
 SZARRAY Type
@@ -260,16 +261,14 @@ SZARRAY Type
 ### 4. BYREF can come before custom modifiers
 
 Everywhere `BYREF` appears in the spec's box and pointer diagrams, it
-comes after any custom modifiers, but the C++/CLI declaration `const
-int&` is emitted as `BYREF CMOD_OPT IsConst I4`, and a call-site using
+comes after any custom modifiers, but the C++/CLI declaration `const int&` is emitted as `BYREF CMOD_OPT IsConst I4`, and a call-site using
 `CMOD_OPT IsConst BYREF I4` will not match.
 
 Under the interpretation that `BYREF` is just a managed pointer type, it
 makes sense that there should be parity between `PTR` and `BYREF` with
 respect to modifiers. Consider, `const int*` vs. `int* const` in
 C++. The former (pointer to constant int) is `PTR CMOD_OPT IsConst I4`
-and the latter (constant pointer to int) is `CMOD_OPT IsConst PTR
-I4`. The analogy from `const int*` to `const int&` justifies C++'s
+and the latter (constant pointer to int) is `CMOD_OPT IsConst PTR I4`. The analogy from `const int*` to `const int&` justifies C++'s
 encoding of `BYREF` before `CMOD_OPT` in defiance of the spec.
 
 #### Proposed specification change
@@ -308,8 +307,7 @@ typespec with signature I4.
 
 Even more obscurely, this gives us a way to use `VOID`, `TYPEDBYREF`,
 `CMOD_OPT`, and `CMOD_REQ` at the root of a `TypeSpec`, which are not even
-specified as valid at the root of a `Type`: `modopt(int32
-modopt(int32))`, `modopt(void)`, and `modopt(typedref)` all work in
+specified as valid at the root of a `Type`: `modopt(int32 modopt(int32))`, `modopt(void)`, and `modopt(typedref)` all work in
 practice. `CMOD_OPT` and `CMOD_REQ` at the root can also be otained by putting
 a modifier on the type used with `constrained.`.
 
@@ -319,13 +317,12 @@ The ECMA-335-II specification isn't clear on the maximum sizes of #String, #Blob
 
 #### Proposed specification change
 
-We propose  the limit on #String and #Blob heap size is 2^29 (0.5 GB), that is any index to these heaps fits into 29 bits.
+We propose the limit on #String and #Blob heap size is 2^29 (0.5 GB), that is any index to these heaps fits into 29 bits.
 
 #### Rationale of the proposal
 
-1)      2^29 is the maximum value representable by a compressed integer as defined elsewhere in the spec. Currently the metadata don't encode heap indices anywhere using compressed integers. However the Portable PDB specification uses compressed integers for efficient encoding of heap indices. We could extend the definition of compressed integer to cover all 32 bit integers, but it would be simpler if we could leave it as is.
+1.      2^29 is the maximum value representable by a compressed integer as defined elsewhere in the spec. Currently the metadata don't encode heap indices anywhere using compressed integers. However the Portable PDB specification uses compressed integers for efficient encoding of heap indices. We could extend the definition of compressed integer to cover all 32 bit integers, but it would be simpler if we could leave it as is.
 
-2)      0.5 GB is a very large heap. Having such a big PE file seems unreasonable and very rare scenario (if it exists at all).
+2.      0.5 GB is a very large heap. Having such a big PE file seems unreasonable and very rare scenario (if it exists at all).
 
-3)      Having 3 spare bits available is very beneficial for the implementation. It allows to represent WinRT projected strings, namespaces, etc. in very efficient way. If we had to represent heap indices with all 32 bits it would bloat various structures and increase memory pressure. PE files over 0.5 GB of size are very rare, but the overhead would affect all compilers and tools working with the metadata reader.
-
+3.      Having 3 spare bits available is very beneficial for the implementation. It allows to represent WinRT projected strings, namespaces, etc. in very efficient way. If we had to represent heap indices with all 32 bits it would bloat various structures and increase memory pressure. PE files over 0.5 GB of size are very rare, but the overhead would affect all compilers and tools working with the metadata reader.

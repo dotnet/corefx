@@ -11,46 +11,22 @@
             ]
         },
         "net45.app": {
-            "net45": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net45": ["", "win-x86", "win-x64"]
         },
         "net451.app": {
-            "net451": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net451": ["", "win-x86", "win-x64"]
         },
         "net452.app": {
-            "net452": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net452": ["", "win-x86", "win-x64"]
         },
         "net46.app": {
-            "net46": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net46": ["", "win-x86", "win-x64"]
         },
         "net461.app": {
-            "net461": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net461": ["", "win-x86", "win-x64"]
         },
         "net462.app": {
-            "net462": [
-                "",
-                "win-x86",
-                "win-x64"
-            ]
+            "net462": ["", "win-x86", "win-x64"]
         },
         "netcoreapp1.0.app": {
             "netcoreapp1.0": [
@@ -67,26 +43,22 @@
             ]
         },
         "win8.app": {
-          "win8": ""
+            "win8": ""
         },
         "win81.app": {
-          "win81": ""
+            "win81": ""
         },
         "wp8.app": {
-          "wp8": ""
+            "wp8": ""
         },
         "wp81.app": {
-          "wp81": ""
+            "wp81": ""
         },
         "wpa81.app": {
-          "wpa81": ""
+            "wpa81": ""
         },
         "dnxcore50.app": {
-            "dnxcore50": [
-                "win7-x86",
-                "win7-x64"
-            ]
+            "dnxcore50": ["win7-x86", "win7-x64"]
         }
     }
- }
-
+}

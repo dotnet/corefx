@@ -1,5 +1,4 @@
-Cross-Platform Cryptography
-===========================
+# Cross-Platform Cryptography
 
 Cryptographic operations in .NET are performed by existing system libraries.
 As with most technological decisions, there are various pros and cons.
@@ -30,14 +29,14 @@ This would result in a `PlatformNotSupportedException` when invoking the `Create
 
 The underlying ciphers and chaining are performed by the system libraries.
 
-| Cipher + Mode | Windows | Linux | macOS |
-|---------------|---------|-------|-------|
-| AES-CBC | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| AES-ECB | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| 3DES-CBC | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| 3DES-ECB | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| DES-CBC | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| DES-ECB | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Cipher + Mode | Windows            | Linux              | macOS              |
+| ------------- | ------------------ | ------------------ | ------------------ |
+| AES-CBC       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| AES-ECB       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 3DES-CBC      | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 3DES-ECB      | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| DES-CBC       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| DES-ECB       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 
 In the future there is a possibility that new ciphers may be added to .NET Core before one (or more) supported platforms have system support for it.
 This would result in a `PlatformNotSupportedException` when invoking the `Create()` method for the algorithm.
@@ -58,36 +57,36 @@ RSA key operations are performed by the system libraries, and the types of key t
 .NET Core does not expose "raw" (unpadded) RSA operations, and .NET Core relies on the system libraries for encryption (and decryption) padding.
 Not all platforms support the same padding options.
 
-| Padding Mode | Windows (CNG) | Linux (OpenSSL) | macOS | Windows (CAPI) |
-|--------------|---------------|-----------------|-------|----------------|
-| PKCS1 Encryption | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| OAEP - SHA-1 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| OAEP - SHA-2 (SHA256, SHA384, SHA512) | :white_check_mark: | :x: | :x: | :x: |
-| PKCS1 Signature (MD5, SHA-1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| PKCS1 Signature (SHA-2) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :question: |
-| PSS |  :white_check_mark: | :x: | :x: | :x: |
+| Padding Mode                          | Windows (CNG)      | Linux (OpenSSL)    | macOS              | Windows (CAPI)     |
+| ------------------------------------- | ------------------ | ------------------ | ------------------ | ------------------ |
+| PKCS1 Encryption                      | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| OAEP - SHA-1                          | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| OAEP - SHA-2 (SHA256, SHA384, SHA512) | :white_check_mark: | :x:                | :x:                | :x:                |
+| PKCS1 Signature (MD5, SHA-1)          | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| PKCS1 Signature (SHA-2)               | :white_check_mark: | :white_check_mark: | :white_check_mark: | :question:         |
+| PSS                                   | :white_check_mark: | :x:                | :x:                | :x:                |
 
 Windows CAPI is capable of PKCS1 signature with a SHA-2 algorithm, but the individual RSA object may be loaded in a CSP which does not support it.
 
 #### RSA on Windows
 
- * Windows CNG is used on Windows whenever `new RSACng()` is used.
- * Windows CAPI is used on Windows whenever `new RSACryptoServiceProvider()` is used.
- * The object returned by `RSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
- * The `GetRSAPublicKey()` extension method for X509Certificate2 will currently always return an RSACng instance, but this could change as the platform evolves.
- * The `GetRSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an RSACng instance, but if RSACng cannot open the key RSACryptoServiceProvider will be attempted.
-   * In the future other providers could be preferred over RSACng.
+* Windows CNG is used on Windows whenever `new RSACng()` is used.
+* Windows CAPI is used on Windows whenever `new RSACryptoServiceProvider()` is used.
+* The object returned by `RSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
+* The `GetRSAPublicKey()` extension method for X509Certificate2 will currently always return an RSACng instance, but this could change as the platform evolves.
+* The `GetRSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an RSACng instance, but if RSACng cannot open the key RSACryptoServiceProvider will be attempted.
+    * In the future other providers could be preferred over RSACng.
 
 #### Native Interop
 
 .NET Core exposes types to allow programs to interoperate with the system libraries upon which the .NET cryptography code is layered.
 The types involved do not translate between platforms, and should only be directly used when necessary.
 
-| Type | Windows | Linux | macOS |
-|------|---------|-------|-------|
-| RSACryptoServiceProvider | :white_check_mark: | :question: | :question: |
-| RSACng | :white_check_mark: | :x: | :x: |
-| RSAOpenSsl | :x: | :white_check_mark: | :question: |
+| Type                     | Windows            | Linux              | macOS      |
+| ------------------------ | ------------------ | ------------------ | ---------- |
+| RSACryptoServiceProvider | :white_check_mark: | :question:         | :question: |
+| RSACng                   | :white_check_mark: | :x:                | :x:        |
+| RSAOpenSsl               | :x:                | :white_check_mark: | :question: |
 
 RSAOpenSsl on macOS works if OpenSSL is installed in the system and an appropriate libcrypto dylib can be found via dynamic library loading, otherwise exceptions will be thrown.
 
@@ -98,18 +97,18 @@ On non-Windows systems RSACryptoServiceProvider can be used for compatibility wi
 ECDSA key generation is performed by the system libraries, and is subject to size limitations and performance characteristics thereof.
 ECDSA key curves are defined by the system libraries, and are subject to the limitations thereof.
 
-| EC Curve | Windows 10 | Windows 7 - 8.1 | Linux | macOS |
-|----------|------------|-------|-------|-----------------|
-| NIST P-256 (secp256r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| NIST P-384 (secp384r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| NIST P-521 (secp521r1) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| brainpool curves (as named curves) | :white_check_mark: | :x: | :question: | :x: |
-| other named curves | :question: | :x: | :question: | :x: |
-| explicit curves | :white_check_mark: | :x: | :white_check_mark: | :x: |
-| Export or import as explicit | :white_check_mark: | :x: | :white_check_mark: | :x: |
+| EC Curve                           | Windows 10         | Windows 7 - 8.1    | Linux              | macOS              |
+| ---------------------------------- | ------------------ | ------------------ | ------------------ | ------------------ |
+| NIST P-256 (secp256r1)             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| NIST P-384 (secp384r1)             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| NIST P-521 (secp521r1)             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| brainpool curves (as named curves) | :white_check_mark: | :x:                | :question:         | :x:                |
+| other named curves                 | :question:         | :x:                | :question:         | :x:                |
+| explicit curves                    | :white_check_mark: | :x:                | :white_check_mark: | :x:                |
+| Export or import as explicit       | :white_check_mark: | :x:                | :white_check_mark: | :x:                |
 
 Support for named curves was added to Windows CNG in Windows 10, and is not available in prior OSes, with the exception of the three curves which had special support in Windows 7.
-See [CNG Named Elliptic Curves](https://msdn.microsoft.com/en-us/library/windows/desktop/mt632245(v=vs.85).aspx) for the expected support.
+See [CNG Named Elliptic Curves](<https://msdn.microsoft.com/en-us/library/windows/desktop/mt632245(v=vs.85).aspx>) for the expected support.
 
 Not all Linux distributions have support for the same named curves.
 
@@ -120,10 +119,10 @@ Exporting with explicit curve parameters requires system library support which i
 .NET Core exposes types to allow programs to interoperate with the system libraries upon which the .NET cryptography code is layered.
 The types involved do not translate between platforms, and should only be directly used when necessary.
 
-| Type | Windows | Linux | macOS |
-|------|---------|-------|-------|
-| ECDsaCng | :white_check_mark: | :x: | :x: |
-| ECDsaOpenSsl | :x: | :white_check_mark: | :question: |
+| Type         | Windows            | Linux              | macOS      |
+| ------------ | ------------------ | ------------------ | ---------- |
+| ECDsaCng     | :white_check_mark: | :x:                | :x:        |
+| ECDsaOpenSsl | :x:                | :white_check_mark: | :question: |
 
 ECDsaOpenSsl on macOS works if OpenSSL is installed in the system and an appropriate libcrypto dylib can be found via dynamic library loading, otherwise exceptions will be raised.
 
@@ -131,36 +130,36 @@ ECDsaOpenSsl on macOS works if OpenSSL is installed in the system and an appropr
 
 DSA key generation is performed by the system libraries, and is subject to size limitations and performance characteristics thereof.
 
-| Function | Windows CNG | Linux | macOS | Windows CAPI |
-|----------|-------------|-------|-------|--------------|
-| Key creation (<= 1024 bits) | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: |
-| Key creation (> 1024 bits) | :white_check_mark: | :white_check_mark: | :x: | :x: |
-| Loading keys (<= 1024 bits) | :white_check_mark: | :white_check_mark:  | :white_check_mark: | :white_check_mark: |
-| Loading keys (> 1024 bits) | :white_check_mark: | :white_check_mark: | :question: | :x: |
-| FIPS 186-2 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| FIPS 186-3 (SHA-2 signatures) | :white_check_mark: | :white_check_mark: | :x: | :x: |
+| Function                      | Windows CNG        | Linux              | macOS              | Windows CAPI       |
+| ----------------------------- | ------------------ | ------------------ | ------------------ | ------------------ |
+| Key creation (<= 1024 bits)   | :white_check_mark: | :white_check_mark: | :x:                | :white_check_mark: |
+| Key creation (> 1024 bits)    | :white_check_mark: | :white_check_mark: | :x:                | :x:                |
+| Loading keys (<= 1024 bits)   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Loading keys (> 1024 bits)    | :white_check_mark: | :white_check_mark: | :question:         | :x:                |
+| FIPS 186-2                    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| FIPS 186-3 (SHA-2 signatures) | :white_check_mark: | :white_check_mark: | :x:                | :x:                |
 
 macOS seems to be capable of loading DSA keys whose size exceeds 1024-bit, but does not perform FIPS 186-3 behaviors with those keys, so the behavior of those keys is undefined.
 
 #### DSA on Windows
 
- * Windows CNG is used on Windows whenever `new DSACng()` is used.
- * Windows CAPI is used on Windows whenever `new DSACryptoServiceProvider()` is used.
- * The object returned by `DSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
- * The `GetDSAPublicKey()` extension method for X509Certificate2 will currently always return an DSACng instance, but this could change as the platform evolves.
- * The `GetDSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an DSACng instance, but if DSACng cannot open the key DSACryptoServiceProvider will be attempted.
-   * In the future other providers could be preferred over DSACng.
+* Windows CNG is used on Windows whenever `new DSACng()` is used.
+* Windows CAPI is used on Windows whenever `new DSACryptoServiceProvider()` is used.
+* The object returned by `DSA.Create()` is internally powered by Windows CNG, but this is an implementation detail subject to change.
+* The `GetDSAPublicKey()` extension method for X509Certificate2 will currently always return an DSACng instance, but this could change as the platform evolves.
+* The `GetDSAPrivateKey()` extension method for X509Certiicate2 will currently prefer an DSACng instance, but if DSACng cannot open the key DSACryptoServiceProvider will be attempted.
+    * In the future other providers could be preferred over DSACng.
 
 #### Native Interop
 
 .NET Core exposes types to allow programs to interoperate with the system libraries upon which the .NET cryptography code is layered.
 The types involved do not translate between platforms, and should only be directly used when necessary.
 
-| Type | Windows | Linux | macOS |
-|------|---------|-------|-------|
-| DSACryptoServiceProvider | :white_check_mark: | :question: | :question: |
-| DSACng | :white_check_mark: | :x: | :x: |
-| DSAOpenSsl | :x: | :white_check_mark: | :question: |
+| Type                     | Windows            | Linux              | macOS      |
+| ------------------------ | ------------------ | ------------------ | ---------- |
+| DSACryptoServiceProvider | :white_check_mark: | :question:         | :question: |
+| DSACng                   | :white_check_mark: | :x:                | :x:        |
+| DSAOpenSsl               | :x:                | :white_check_mark: | :question: |
 
 DSAOpenSsl on macOS works if OpenSSL is installed in the system and an appropriate libcrypto dylib can be found via dynamic library loading, otherwise exceptions will be raised.
 
@@ -173,26 +172,26 @@ All certificates are required to be loaded by the underlying system library to b
 
 ### Reading a PKCS12/PFX
 
-| Scenario | Windows | Linux | macOS |
-|----------|---------|-------|-------|
-| Empty | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| One certificate, no private key | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| One certificate, with private key | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Multiple certificates, no private keys | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Multiple certificates, one private key | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Multiple certificates, multiple private keys | :white_check_mark: | :x: | :white_check_mark: |
+| Scenario                                     | Windows            | Linux              | macOS              |
+| -------------------------------------------- | ------------------ | ------------------ | ------------------ |
+| Empty                                        | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| One certificate, no private key              | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| One certificate, with private key            | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Multiple certificates, no private keys       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Multiple certificates, one private key       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Multiple certificates, multiple private keys | :white_check_mark: | :x:                | :white_check_mark: |
 
 ### Writing a PKCS12/PFX
 
-| Scenario | Windows | Linux | macOS |
-|----------|---------|-------|-------|
-| Empty | :white_check_mark: | :white_check_mark: | :x: |
-| One certificate, no private key | :white_check_mark: | :white_check_mark: | :x: |
-| One certificate, with private key | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Multiple certificates, no private keys | :white_check_mark: | :white_check_mark: | :x: |
-| Multiple certificates, one private key | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Multiple certificates, multiple private keys | :white_check_mark: | :x: | :white_check_mark: |
-| Ephemeral loading | :white_check_mark: | :white_check_mark: | :x: |
+| Scenario                                     | Windows            | Linux              | macOS              |
+| -------------------------------------------- | ------------------ | ------------------ | ------------------ |
+| Empty                                        | :white_check_mark: | :white_check_mark: | :x:                |
+| One certificate, no private key              | :white_check_mark: | :white_check_mark: | :x:                |
+| One certificate, with private key            | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Multiple certificates, no private keys       | :white_check_mark: | :white_check_mark: | :x:                |
+| Multiple certificates, one private key       | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Multiple certificates, multiple private keys | :white_check_mark: | :x:                | :white_check_mark: |
+| Ephemeral loading                            | :white_check_mark: | :white_check_mark: | :x:                |
 
 macOS cannot load certificate private keys without a keychain object, which requires writing to disk.
 Keychains are created automatically for PFX loading, and are deleted when no longer in use.
@@ -208,27 +207,27 @@ On Windows the X509Store class is a representation of the Windows Certificate St
 On Linux the X509Store class is a projection of system trust decisions (read-only), user trust decisions (read-write), and user key storage (read-write).
 On macOS the X509Store class is a projection of system trust decisions (read-only), user trust decisions (read-only), and user key storage (read-write).
 
-| Scenario | Windows | Linux | macOS |
-|----------|---------|-------|-------|
-| Open CurrentUser\My (ReadOnly) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Open CurrentUser\My (ReadWrite) | :white_check_mark: | :white_check_mark:  | :white_check_mark: |
-| Open CurrentUser\My (ExistingOnly) | :white_check_mark: | :question: | :white_check_mark: |
-| Open LocalMachine\My | :white_check_mark: | `CryptographicException` | :white_check_mark: |
-| Open CurrentUser\Root (ReadOnly) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Open CurrentUser\Root (ReadWrite) | :white_check_mark: | :white_check_mark: | `CryptographicException` |
-| Open CurrentUser\Root (ExistingOnly) | :white_check_mark: | :question: | :white_check_mark: (if ReadOnly) |
-| Open LocalMachine\Root (ReadOnly) | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| Open LocalMachine\Root (ReadWrite) | :white_check_mark: | `CryptographicException` | `CryptographicException` |
-| Open LocalMachine\Root (ExistingOnly) | :white_check_mark: | :question: | :white_check_mark:  (if ReadOnly) |
-| Open CurrentUser\Disallowed (ReadOnly) | :white_check_mark: | :question: | :white_check_mark: |
-| Open CurrentUser\Disallowed (ReadWrite) | :white_check_mark: | :question: | `CryptographicException` |
-| Open CurrentUser\Disallowed (ExistingOnly) | :white_check_mark: | :question: | :white_check_mark: (if ReadOnly) |
-| Open LocalMachine\Disallowed (ReadOnly) | :white_check_mark: | `CryptographicException` | :white_check_mark: |
-| Open LocalMachine\Disallowed (ReadWrite) | :white_check_mark: | `CryptographicException` | `CryptographicException` |
-| Open LocalMachine\Disallowed (ExistingOnly) | :white_check_mark: | `CryptographicException` | :white_check_mark: (if ReadOnly) |
-| Open non-existant store (ExistingOnly) | `CryptographicException` | `CryptographicException` | `CryptographicException` |
-| Open CurrentUser non-existant store (ReadWrite)  | :white_check_mark: | :white_check_mark: | `CryptographicException` |
-| Open LocalMachine non-existant store (ReadWrite)  | :white_check_mark: | `CryptographicException` | `CryptographicException` |
+| Scenario                                         | Windows                  | Linux                    | macOS                            |
+| ------------------------------------------------ | ------------------------ | ------------------------ | -------------------------------- |
+| Open CurrentUser\My (ReadOnly)                   | :white_check_mark:       | :white_check_mark:       | :white_check_mark:               |
+| Open CurrentUser\My (ReadWrite)                  | :white_check_mark:       | :white_check_mark:       | :white_check_mark:               |
+| Open CurrentUser\My (ExistingOnly)               | :white_check_mark:       | :question:               | :white_check_mark:               |
+| Open LocalMachine\My                             | :white_check_mark:       | `CryptographicException` | :white_check_mark:               |
+| Open CurrentUser\Root (ReadOnly)                 | :white_check_mark:       | :white_check_mark:       | :white_check_mark:               |
+| Open CurrentUser\Root (ReadWrite)                | :white_check_mark:       | :white_check_mark:       | `CryptographicException`         |
+| Open CurrentUser\Root (ExistingOnly)             | :white_check_mark:       | :question:               | :white_check_mark: (if ReadOnly) |
+| Open LocalMachine\Root (ReadOnly)                | :white_check_mark:       | :white_check_mark:       | :white_check_mark:               |
+| Open LocalMachine\Root (ReadWrite)               | :white_check_mark:       | `CryptographicException` | `CryptographicException`         |
+| Open LocalMachine\Root (ExistingOnly)            | :white_check_mark:       | :question:               | :white_check_mark: (if ReadOnly) |
+| Open CurrentUser\Disallowed (ReadOnly)           | :white_check_mark:       | :question:               | :white_check_mark:               |
+| Open CurrentUser\Disallowed (ReadWrite)          | :white_check_mark:       | :question:               | `CryptographicException`         |
+| Open CurrentUser\Disallowed (ExistingOnly)       | :white_check_mark:       | :question:               | :white_check_mark: (if ReadOnly) |
+| Open LocalMachine\Disallowed (ReadOnly)          | :white_check_mark:       | `CryptographicException` | :white_check_mark:               |
+| Open LocalMachine\Disallowed (ReadWrite)         | :white_check_mark:       | `CryptographicException` | `CryptographicException`         |
+| Open LocalMachine\Disallowed (ExistingOnly)      | :white_check_mark:       | `CryptographicException` | :white_check_mark: (if ReadOnly) |
+| Open non-existant store (ExistingOnly)           | `CryptographicException` | `CryptographicException` | `CryptographicException`         |
+| Open CurrentUser non-existant store (ReadWrite)  | :white_check_mark:       | :white_check_mark:       | `CryptographicException`         |
+| Open LocalMachine non-existant store (ReadWrite) | :white_check_mark:       | `CryptographicException` | `CryptographicException`         |
 
 On Linux stores are created on first-write, and no user stores exist by default, so opening CurrentUser\My with ExistingOnly may fail.
 

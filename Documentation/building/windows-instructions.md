@@ -1,13 +1,12 @@
-Building CoreFX on Windows
-==========================
+# Building CoreFX on Windows
 
 You can build .NET Core either via the command line or by using Visual Studio.
 
 ## Required Software
 
 1. **Visual Studio** must be installed. Supported versions:
-    * [Visual Studio 2015](https://www.visualstudio.com/vs/older-downloads/) (Community, Professional, Enterprise).  The Community version is completely free.
-    * [Visual Studio 2017](https://www.visualstudio.com/downloads/) (Community, Professional, Enterprise).  The Community version is completely free.
+    * [Visual Studio 2015](https://www.visualstudio.com/vs/older-downloads/) (Community, Professional, Enterprise). The Community version is completely free.
+    * [Visual Studio 2017](https://www.visualstudio.com/downloads/) (Community, Professional, Enterprise). The Community version is completely free.
 2. **[CMake](https://cmake.org/)** must be installed from [the CMake download page](https://cmake.org/download/#latest) and added to your path.
 
 ### Visual Studio 2015
@@ -20,15 +19,16 @@ You can build .NET Core either via the command line or by using Visual Studio.
 #### Visual Studio 2017 - 'Workloads' based install
 
 The following are the minimum requirements:
-  * .NET desktop development
+
+* .NET desktop development
     * All Required Components
     * .NET Framework 4-4.6 Development Tools
-  * Desktop development with C++
+* Desktop development with C++
     * All Required Components
     * VC++ 2017 v141 Toolset (x86, x64)
     * Windows 8.1 SDK and UCRT SDK
     * VC++ 2015.3 v140 Toolset (x86, x64)
-  * .NET Core cross-platform development
+* .NET Core cross-platform development
     * All Required Components
 
 Note: If you have both VS 2017 and 2015 installed, you need to copy DIA SDK directory from VS 2015 installation into VS 2017 (VS installer bug).
@@ -36,25 +36,26 @@ Note: If you have both VS 2017 and 2015 installed, you need to copy DIA SDK dire
 #### Visual Studio 2017 - 'Individual components' based install
 
 The following are the minimum requirements:
-  * C# and Visual Basic Roslyn Compilers
-  * Static Analysis Tools
-  * .NET Portable Library Targeting Pack
-  * Windows 10 SDK or Windows 8.1 SDK
-  * Visual Studio C++ Core Features
-  * VC++ 2017 v141 Toolset (x86, x64)
-  * MSBuild
-  * .NET Framework 4.6 Targeting Pack
-  * Windows Universal CRT SDK
-  * VC++ 2015.3 v140 Toolset (x86, x64)
+
+* C# and Visual Basic Roslyn Compilers
+* Static Analysis Tools
+* .NET Portable Library Targeting Pack
+* Windows 10 SDK or Windows 8.1 SDK
+* Visual Studio C++ Core Features
+* VC++ 2017 v141 Toolset (x86, x64)
+* MSBuild
+* .NET Framework 4.6 Targeting Pack
+* Windows Universal CRT SDK
+* VC++ 2015.3 v140 Toolset (x86, x64)
 
 ## Building From the Command Line
 
-You must use the Developer Command Prompt. It will have a name like "Developer Command Prompt for VS 2017" or similar in your start menu. 
+You must use the Developer Command Prompt. It will have a name like "Developer Command Prompt for VS 2017" or similar in your start menu.
 
 From a (non-admin) Developer Command Prompt window:
 
-- `build.cmd` - Will cause basic tool initialization and build the default configuration for refs, libs, and packages.
-- `build-tests.cmd` - Will build and run tests for the default configuration.
+* `build.cmd` - Will cause basic tool initialization and build the default configuration for refs, libs, and packages.
+* `build-tests.cmd` - Will build and run tests for the default configuration.
 
 For information on different configurations see [project-guidelines](../coding-guidelines/project-guidelines.md).
 
@@ -95,21 +96,22 @@ Once you've built the source code for netfx from the root (`build.cmd -framework
 2. Open project properties and fill in the next information:
     * Debugger Type -> Managed (v4.6, v4.5, v4.0)
     * Environment -> you need to add an environment variable as follows:
-         * DEVPATH -> `<corefxpath>\bin\testhost\netfx-Windows_NT-Debug-x64\`
+        * DEVPATH -> `<corefxpath>\bin\testhost\netfx-Windows_NT-Debug-x64\`
 3. Set breakpoint appropriately
 4. F5 (Debug)
 
 For advanced debugging using WinDBG see [Debugging CoreFX on Windows](https://github.com/dotnet/corefx/blob/master/Documentation/debugging/windows-instructions.md)
 
 ### Notes
+
 * At any given time, the corefx repo might be configured to use a more recent compiler than
-the one used by the most recent Visual Studio IDE release.  This means the corefx codebase might
-be using language features that are not understood by the IDE, which might result in errors that
-show up as red squiggles while writing code.  Such errors should, however, not affect the actual compilation.
+  the one used by the most recent Visual Studio IDE release. This means the corefx codebase might
+  be using language features that are not understood by the IDE, which might result in errors that
+  show up as red squiggles while writing code. Such errors should, however, not affect the actual compilation.
 
 * Running tests from using the VS test explorer does not currently work after we switched to running on CoreCLR. [We will be working on enabling full VS test integration](https://github.com/dotnet/corefx/issues/1318) but we don't have an ETA yet. In the meantime, use the steps above to launch/debug the tests using the console runner.
 
 * VS 2015 is required to debug tests running on CoreCLR as the CoreCLR
-debug engine is a VS 2015 component.
+  debug engine is a VS 2015 component.
 
-* If the Xamarin PCL profiles are installed, the build will fail due to [issue #449](https://github.com/dotnet/corefx/issues/449).  A possible workaround is listed [in the issue](https://github.com/dotnet/corefx/issues/449#issuecomment-95117040) itself.
+* If the Xamarin PCL profiles are installed, the build will fail due to [issue #449](https://github.com/dotnet/corefx/issues/449). A possible workaround is listed [in the issue](https://github.com/dotnet/corefx/issues/449#issuecomment-95117040) itself.

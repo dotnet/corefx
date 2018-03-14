@@ -34,9 +34,11 @@
             "inputs": {
                 "scriptType": "inlineScript",
                 "scriptName": "",
-                "arguments": "$(PB_CloudDropAccountName) $(PB_CloudDropAccessToken) $(PB_CloudDropContainer)",
+                "arguments":
+                    "$(PB_CloudDropAccountName) $(PB_CloudDropAccessToken) $(PB_CloudDropContainer)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($account, $token, $container)\n.\\sync.cmd -ab -- /p:CloudDropAccountName=$account /p:CloudDropAccessToken=$token /p:ContainerName=$container",
+                "inlineScript":
+                    "param($account, $token, $container)\n.\\sync.cmd -ab -- /p:CloudDropAccountName=$account /p:CloudDropAccessToken=$token /p:ContainerName=$container",
                 "failOnStandardError": "true"
             }
         },
@@ -57,7 +59,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$pkgDir = \"$SrcDir\\packages\\AzureTransfer\\Release\\symbols\"\ngci \"$pkgDir\\*.nupkg\" | rename-item -newname { [io.path]::ChangeExtension($_.name, \"zip\") }\ngci \"$pkgDir\\*.zip\" | % {\n$dstDir = Join-Path \"$secDir\" $($_.BaseName)\nExpand-Archive -Path $($_.FullName) -DestinationPath \"$dstDir\" -Force\n}\n",
+                "inlineScript":
+                    "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$pkgDir = \"$SrcDir\\packages\\AzureTransfer\\Release\\symbols\"\ngci \"$pkgDir\\*.nupkg\" | rename-item -newname { [io.path]::ChangeExtension($_.name, \"zip\") }\ngci \"$pkgDir\\*.zip\" | % {\n$dstDir = Join-Path \"$secDir\" $($_.BaseName)\nExpand-Archive -Path $($_.FullName) -DestinationPath \"$dstDir\" -Force\n}\n",
                 "failOnStandardError": "true"
             }
         },
@@ -78,7 +81,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
+                "inlineScript":
+                    "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
                 "failOnStandardError": "true"
             }
         },
@@ -99,7 +103,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\", \".txt\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n\n",
+                "inlineScript":
+                    "param($SrcDir)\n$secDir = Join-Path \"$SrcDir\" \"security\"\n$extList = \".dll\", \".pdb\", \".txt\"\ngci $secDir -Recurse | where { !$_.PSIsContainer } | % {\nif ($extList -inotcontains $_.Extension)\n{\n    rm $_.FullName -Force -ErrorAction SilentlyContinue\n    Write-Host \"Removed $($_.FullName)\"\n}\n}\n\n",
                 "failOnStandardError": "true"
             }
         },
@@ -107,7 +112,8 @@
             "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
-            "displayName": "Workaround for long path - DELETE files with path length greater than or equal to 240 characters",
+            "displayName":
+                "Workaround for long path - DELETE files with path length greater than or equal to 240 characters",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -120,7 +126,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$longPath = New-Object System.Collections.ArrayList\ngci \"$SrcDir\\*\" -recurse | where {!$_.PSIsContainer}  | % {\nif ($($_.FullName.Length) -ge 240)\n{\n$longPath.Add($($_.Directory.FullName)) | Out-Null\n}\n}\n$longPath | % {\nStart-Process \"cmd\" -ArgumentList \"/c rd /S /Q $_\" -Wait\nWrite-Host \"DELETED $_\"\n}\n",
+                "inlineScript":
+                    "param($SrcDir)\n$longPath = New-Object System.Collections.ArrayList\ngci \"$SrcDir\\*\" -recurse | where {!$_.PSIsContainer}  | % {\nif ($($_.FullName.Length) -ge 240)\n{\n$longPath.Add($($_.Directory.FullName)) | Out-Null\n}\n}\n$longPath | % {\nStart-Process \"cmd\" -ArgumentList \"/c rd /S /Q $_\" -Wait\nWrite-Host \"DELETED $_\"\n}\n",
                 "failOnStandardError": "true"
             }
         },
@@ -141,7 +148,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory)",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
+                "inlineScript":
+                    "param($SrcDir)\n$fileCount = 0\ngci $SrcDir -recurse | % {\nWrite-Host $($_.FullName)\n$fileCount += 1\n}\nWrite-Host \"File Count: $fileCount\"\n",
                 "failOnStandardError": "true"
             }
         },
@@ -159,7 +167,8 @@
             },
             "inputs": {
                 "InputType": "CommandLine",
-                "arguments": "analyze security\\*.dll --recurse --sympath security\\*.pdb --verbose --statistics",
+                "arguments":
+                    "analyze security\\*.dll --recurse --sympath security\\*.pdb --verbose --statistics",
                 "Function": "analyze",
                 "AnalyzeTarget": "$(Build.ArtifactStagingDirectory)",
                 "AnalyzeSymPath": "",
@@ -228,7 +237,8 @@
                 "scriptName": "",
                 "arguments": "$(Build.SourcesDirectory) \"$(PB_Git)\"",
                 "workingFolder": "$(Build.SourcesDirectory)",
-                "inlineScript": "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process \"$git\" -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process \"$git\" -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
+                "inlineScript":
+                    "param($SrcDir, $git)\n$pkgExtPath= Join-Path \"$SrcDir\" \"security\"\ngci \"$pkgExtPath\\version.txt\" -Recurse | % { \n$sha = gc $_\nWrite-Host \"$sha\"\nif (-not [string]::IsNullOrWhiteSpace($sha))\n{\nStart-Process \"$git\" -ArgumentList \"checkout -- .\" -Wait -Verbose -ErrorAction Stop\nStart-Process \"$git\" -ArgumentList \"checkout $sha\" -Wait -Verbose -ErrorAction Stop\nWrite-Host \"Checked out at $sha\"\nbreak\n}\n}",
                 "failOnStandardError": "true"
             }
         },
@@ -269,7 +279,8 @@
             },
             "inputs": {
                 "inputType": "Basic",
-                "cmdLineArgs": "/F:$(Build.SourcesDirectory) /T:9 /O:PoliCheck.xml",
+                "cmdLineArgs":
+                    "/F:$(Build.SourcesDirectory) /T:9 /O:PoliCheck.xml",
                 "targetType": "F",
                 "targetArgument": "$(Build.SourcesDirectory)",
                 "importEx": "0",
@@ -344,7 +355,8 @@
             "inputs": {
                 "ArtifactName": "CodeAnalysisLogs",
                 "ArtifactType": "Container",
-                "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)",
+                "TargetPath":
+                    "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)",
                 "RvName": "",
                 "ProductComponentName": "",
                 "ProductVersionNumber": "",
@@ -357,7 +369,8 @@
             "enabled": true,
             "continueOnError": true,
             "alwaysRun": false,
-            "displayName": "TSA upload to Codebase: DotNet-CoreFx-Trusted_$(CodeBase) Stamp: Azure",
+            "displayName":
+                "TSA upload to Codebase: DotNet-CoreFx-Trusted_$(CodeBase) Stamp: Azure",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -470,18 +483,11 @@
             "value": "https://github.com/dotnet/corefx"
         }
     },
-    "demands": [
-        "Agent.OS -equals windows_nt",
-        "msbuild"
-    ],
+    "demands": ["Agent.OS -equals windows_nt", "msbuild"],
     "retentionRules": [
         {
-            "branches": [
-                "+refs/heads/*"
-            ],
-            "artifacts": [
-                "build.SourceLabel"
-            ],
+            "branches": ["+refs/heads/*"],
+            "artifacts": ["build.SourceLabel"],
             "artifactTypesToDelete": [],
             "daysToKeep": 10,
             "minimumToKeep": 1,
@@ -491,16 +497,20 @@
     ],
     "_links": {
         "self": {
-            "href": "https://devdiv.visualstudio.com/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6389"
+            "href":
+                "https://devdiv.visualstudio.com/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6389"
         },
         "web": {
-            "href": "https://devdiv.visualstudio.com/_permalink/_build/index?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=6389"
+            "href":
+                "https://devdiv.visualstudio.com/_permalink/_build/index?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=6389"
         },
         "editor": {
-            "href": "https://devdiv.visualstudio.com/_permalink/_build/definitionEditor?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=6389"
+            "href":
+                "https://devdiv.visualstudio.com/_permalink/_build/definitionEditor?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=6389"
         },
         "badge": {
-            "href": "https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6389/badge"
+            "href":
+                "https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/6389/badge"
         }
     },
     "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
@@ -522,7 +532,8 @@
         "id": "58fa2458-e392-4373-ba2b-dd3ef0c2d7ce",
         "type": "TfsGit",
         "name": "DotNet-CoreFX-Trusted",
-        "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
+        "url":
+            "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
         "defaultBranch": "refs/heads/master",
         "clean": "true",
         "checkoutSubmodules": false
@@ -533,8 +544,10 @@
         "id": "9d5fdf9f-36b6-4d0c-a12e-2737a673af94",
         "displayName": "Ravi Eda",
         "uniqueName": "raeda@microsoft.com",
-        "url": "https://app.vssps.visualstudio.com/Aa44b2c06-f247-425c-8464-4a0676af910a/_apis/Identities/9d5fdf9f-36b6-4d0c-a12e-2737a673af94",
-        "imageUrl": "https://devdiv.visualstudio.com/_api/_common/identityImage?id=9d5fdf9f-36b6-4d0c-a12e-2737a673af94"
+        "url":
+            "https://app.vssps.visualstudio.com/Aa44b2c06-f247-425c-8464-4a0676af910a/_apis/Identities/9d5fdf9f-36b6-4d0c-a12e-2737a673af94",
+        "imageUrl":
+            "https://devdiv.visualstudio.com/_api/_common/identityImage?id=9d5fdf9f-36b6-4d0c-a12e-2737a673af94"
     },
     "queue": {
         "id": 36,
@@ -546,7 +559,8 @@
     },
     "id": 6389,
     "name": "DotNet-CoreFx-Security-Windows",
-    "url": "https://devdiv.visualstudio.com/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6389",
+    "url":
+        "https://devdiv.visualstudio.com/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/6389",
     "uri": "vstfs:///Build/Definition/6389",
     "path": "\\",
     "type": 2,
@@ -555,8 +569,10 @@
     "project": {
         "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
         "name": "DevDiv",
-        "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
-        "url": "https://devdiv.visualstudio.com/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+        "description":
+            "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
+        "url":
+            "https://devdiv.visualstudio.com/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
         "state": "wellFormed",
         "revision": 418097676,
         "visibility": 0

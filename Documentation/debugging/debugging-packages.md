@@ -1,27 +1,26 @@
-Debugging CoreFX build issues
-========================================
+# Debugging CoreFX build issues
 
 ## MSBuild debug options
 
 * Enable MSBuild diagnostics log (msbuild.log):
-`msbuild my.csproj /flp:v=diag /t:rebuild`
+  `msbuild my.csproj /flp:v=diag /t:rebuild`
 * Generate a flat project file (out.pp):
-`msbuild my.csproj /pp:out.pp`
+  `msbuild my.csproj /pp:out.pp`
 
 ## Steps to debug packaging build issues
 
 (This documentation is work in progress.)
 
-I found the following process to help when investigating some of the build issues caused by incorrect packaging. 
+I found the following process to help when investigating some of the build issues caused by incorrect packaging.
 
-In general, always build the .builds file instead of any of the csproj to ensure that all [Build Pivots](../coding-guidelines/project-guidelines.md#build-pivots) are generated. This applies for running tests as well. For more information, see [Build individual CoreFX DLLs](../project-docs/developer-guide.md#building-individual-corefx-dlls) 
+In general, always build the .builds file instead of any of the csproj to ensure that all [Build Pivots](../coding-guidelines/project-guidelines.md#build-pivots) are generated. This applies for running tests as well. For more information, see [Build individual CoreFX DLLs](../project-docs/developer-guide.md#building-individual-corefx-dlls)
 
 Assuming the current directory is `\src\contractname\`:
 
-1. Build the `\ref` folder: `msbuild /t:rebuild contractname.builds` 
-
+1. Build the `\ref` folder: `msbuild /t:rebuild contractname.builds`
 
 Check the logs for output such as:
+
 ```
 Project "S:\c1\src\System.Net.ServicePoint\ref\System.Net.ServicePoint.builds" (1) is building "S:\c1\src\System.Net.ServicePoint\ref\System.Net.ServicePoint.csproj" (2:3) on node 1
 (Build target(s)).
@@ -56,7 +55,7 @@ Use the same technique above to ensure that the binaries include the correct imp
 
 Ensure that all Build Pivots are actually being built. This should build all .\ref and .\src variations as well as actually creating the NuGet packages.
 
-Verify that the contents of the nuspec as well as the actual package is correct. You can find the packages by searching for the following pattern in the msbuild output: 
+Verify that the contents of the nuspec as well as the actual package is correct. You can find the packages by searching for the following pattern in the msbuild output:
 
 ```
 GetPkgProjPackageDependencies:
@@ -73,6 +72,7 @@ To validate the content of the nupkg, change the extension to .zip. As before, u
 4. Run the tests from `\tests`: `msbuild /t:rebuild,test contractname.Tests.builds`
 
 Ensure that the test is referencing the correct pkg. For example:
+
 ```
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Net.ServicePoint.pkgproj">
@@ -99,7 +99,9 @@ To run a test from a single Build Pivot combination, specify all properties and 
 ```
 msbuild /t:rebuild,test /p:Outerloop=true "/p:XunitOptions=-showprogress" /p:Configuration=Windows_Debug /p:TargetGroup=netstandard1.7 /p:TestTFM=netcoreapp1.1 .\System.Net.ServicePoint.Tests.csproj
 ```
+
 Will run the test using the following pivot values:
+
 * Architecture: AnyCPU
 * Flavor: Debug
 * OS: Windows_NT

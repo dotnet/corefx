@@ -14,7 +14,8 @@ this experience. Make sure to consult this document often.
 
 3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Developer Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`. If you receive an error "The current .NET SDK does not support targeting .NET Core 2.1." then you may be executing an older `dotnet`.
 
-After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than 2.2.0-*  (dotnet CLI is currently numbered 2.2.0-* not 2.1.0-* ). Here is an example output at the time of writing:
+After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than 2.2.0-_ (dotnet CLI is currently numbered 2.2.0-_ not 2.1.0-\* ). Here is an example output at the time of writing:
+
 ```
 >dotnet.exe --info
 .NET Command Line Tools (2.2.0-preview1-007460)
@@ -37,19 +38,22 @@ Microsoft .NET Core Shared Framework Host
 ```
 
 4. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit `%userprofile%\appdata\roaming\nuget\nuget.config` or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
+
 ```xml
 <packageSources>
     <add key="myget.dotnetcore" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     ...
-</packageSources>    
+</packageSources>
 ```
+
 (Documentation for configuring feeds is [here](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior).)
 
 ## Setup the project
 
 1. Create a new project
-    - Create a new folder for your app and change to that folder
-    - Create project file by running `dotnet new console`
+
+    * Create a new folder for your app and change to that folder
+    * Create project file by running `dotnet new console`
 
 2. Restore packages so that you're ready to play:
 
@@ -80,9 +84,9 @@ runtime.
 
 0. You still need to install the prerequisite .NET Core SDK from above.
 1. Also, install the specific .NET Core runtime you require:
-    - https://github.com/dotnet/core-setup#daily-builds
-    - Remember the version number you picked, you'll need it below
-2. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App
+    * https://github.com/dotnet/core-setup#daily-builds
+    * Remember the version number you picked, you'll need it below
+1. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App
 
 ```XML
   <PropertyGroup>
@@ -102,8 +106,8 @@ $ dotnet run
 In this case, the .NET Core runtime will be published along with your application.
 
 0. You still need to install the prerequisite .NET Core SDK from above.
-1. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App *and*
-make it self-contained
+1. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App _and_
+   make it self-contained
 
 ```XML
   <PropertyGroup>
@@ -167,6 +171,7 @@ as a reference to our nightly dotnet-core feed on myget. The Nuget.Config file c
   </packageSources>
 </configuration>
 ```
+
 Be sure to correct the path to your build output above.
 
 You also have the alternative of modifying the Nuget.Config
@@ -182,6 +187,7 @@ Once have made these modifications you will need to rerun the restore and publis
 dotnet restore
 dotnet publish
 ```
+
 Now your publication directory should contain your local built CoreFx binaries.
 
 #### 3 - Consuming subsequent code changes by overwriting the binary (Alternative 1)
@@ -197,16 +203,19 @@ Thus if you modify the source and create a new NuGet package you must give it a 
 application's project. Otherwise the dotnet.exe tool will assume that the existing version is fine and you
 won't get the updated bits. This is what the Minor Build number is all about. By default it is 0, but you can
 give it a value by setting the BuildNumberMinor environment variable.
+
 ```bat
     set BuildNumberMinor=3
 ```
+
 before packaging. You should see this number show up in the version number (e.g. 4.5.0-preview1-25830-03).
 
 Alternatively just delete the existing copy of the package from the Nuget cache. For example on
 windows (on Linux substitute ~/ for %HOMEPATH%) you could delete
+
 ```bat
      %HOMEPATH%\.nuget\packages\Microsoft.Private.CoreFx.NETCoreApp\4.5.0-preview1-25830-0
      %HOMEPATH%\.nuget\packages\runtime.win-x64.microsoft.private.corefx.netcoreapp\4.5.0-preview1-25830-0
 ```
-which should make `dotnet restore` now pick up the new copy.
 
+which should make `dotnet restore` now pick up the new copy.
