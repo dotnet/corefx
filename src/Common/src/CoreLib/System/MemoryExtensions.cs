@@ -10,6 +10,16 @@ using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 #endif
 
+#if netstandard
+using nuint=System.NUInt;
+#else
+#if BIT64
+using nuint=System.UInt64;
+#else
+using nuint=System.UInt32;
+#endif // BIT64
+#endif // netstandard
+
 namespace System
 {
     /// <summary>
@@ -245,12 +255,34 @@ namespace System
             where T : IEquatable<T>
         {
             int length = first.Length;
-            if (typeof(T) == typeof(byte))
+            if (typeof(T) == typeof(byte) || typeof(T) == typeof(sbyte))
                 return length == second.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
                     length);
+
+            if (typeof(T) == typeof(char) || typeof(T) == typeof(short) || typeof(T) == typeof(ushort))
+                return length == second.Length &&
+                SpanHelpers.SequenceEqualBytes(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    ((nuint)length) * 2); // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking. 
+
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(uint))
+                return length == second.Length &&
+                SpanHelpers.SequenceEqualBytes(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    ((nuint)length) * 4); // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking. 
+
+            if (typeof(T) == typeof(long) || typeof(T) == typeof(ulong))
+                return length == second.Length &&
+                SpanHelpers.SequenceEqualBytes(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    ((nuint)length) * 8); // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking. 
+
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
 
@@ -784,34 +816,6 @@ namespace System
 
             return new Span<T>(segment.Array, segment.Offset + start, length);
         }
-
-        /// <summary>
-        /// Creates a new readonly span over the entire target array.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array)
-        {
-            return new ReadOnlySpan<T>(array);
-        }
-
-        /// <summary>
-        /// Creates a new readonly span over the entire target span.
-        /// </summary>
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this Span<T> span) => span;
-
-        /// <summary>
-        /// Creates a new readonly span over the target array segment.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> arraySegment)
-        {
-            return new ReadOnlySpan<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
-        }
-
-        /// <summary>
-        /// Creates a new readonly memory over the entire target memory.
-        /// </summary>
-        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) => memory;
 
         /// <summary>
         /// Creates a new memory over the target array.

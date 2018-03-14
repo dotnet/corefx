@@ -115,6 +115,24 @@ namespace System.Net.Http
                 {
                     GC.SuppressFinalize(this);
                     _stream.Dispose();
+
+                    // Eat any exceptions from the read-ahead task.  We don't need to log, as we expect
+                    // failures from this task due to closing the connection while a read is in progress.
+                    if (_readAheadTask != null)
+                    {
+                        ValueTask<int> t = _readAheadTask.GetValueOrDefault();
+                        if (t.IsCompleted && !t.IsCompletedSuccessfully)
+                        {
+                            Exception ignored = t.AsTask().Exception; // accessing Exception prop is sufficient to suppress unobserved exception events
+                        }
+                        else
+                        {
+                            t.AsTask().ContinueWith(p =>
+                            {
+                                Exception ignored = p.Exception;
+                            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                        }
+                    }
                 }
             }
         }
@@ -151,6 +169,8 @@ namespace System.Net.Http
         public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
 
         public TransportContext TransportContext => _transportContext;
+
+        public bool UsingProxy => _usingProxy;
 
         private int ReadBufferSize => _readBuffer.Length;
 
