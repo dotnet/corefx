@@ -979,6 +979,35 @@ namespace System.Text.Tests
             Assert.Same(string.Empty, builder.ToString());
         }
 
+        [Fact]
+        public static void Clear_ClearEmptyStringBuilder_CapacityNotZero()
+        {
+            var builder = new StringBuilder();
+            builder.Clear();
+            Assert.NotEqual(0, builder.Capacity);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(10000)]
+        public static void Clear_AppendAndInsertBeforeClearManyTimes_CapacityStaysWithinRange(int times)
+        {
+            var builder = new StringBuilder();
+            var s = new string(' ', 10);
+            int oldLength = 0;
+            for (int i = 0; i < times; i++)
+            {
+                builder.Append(s);
+                builder.Append(s);
+                builder.Append(s);
+                builder.Insert(0, s);
+                builder.Insert(0, s);
+                oldLength = builder.Length;
+                builder.Clear();
+            }
+            Assert.InRange(builder.Capacity, 1, oldLength * 1.2);
+        }
+
         [Theory]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0' }, 0, 5, new char[] { 'H', 'e', 'l', 'l', 'o' })]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0', '\0' }, 1, 5, new char[] { '\0', 'H', 'e', 'l', 'l', 'o' })]
