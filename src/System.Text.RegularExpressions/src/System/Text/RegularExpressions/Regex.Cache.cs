@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -12,7 +13,7 @@ namespace System.Text.RegularExpressions
     public partial class Regex
     {
         // the cache of code and factories that are currently loaded:
-        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
+        internal static readonly Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
         internal static CachedCodeEntry s_livecode_first = null;
         internal static CachedCodeEntry s_livecode_last = null;
         internal static int s_cacheSize = 15;
@@ -53,16 +54,11 @@ namespace System.Text.RegularExpressions
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
             // to avoid lock:
+            CachedCodeEntry first = s_livecode_first;
+            if (first?.Key == key)
+                 return first;
             if (s_cacheSize == 0)
                 return null;
-            //CachedCodeEntry first = s_livecode_first;
-            //if (first != null)
-            //    if (first.Key == key)
-            //        return first;
-            //    else if (!isToAdd && s_livecode.Count == 1) // Not the only one
-            //        return null;
-            //else if (!isToAdd) // first == null, empty cache
-            //    return null;
 
             lock (s_livecode)
             {
@@ -88,7 +84,7 @@ namespace System.Text.RegularExpressions
                     {
                         if (s_livecode.Count > s_cacheSize)
                         {
-                            var last = s_livecode_last;
+                            CachedCodeEntry last = s_livecode_last;
                             s_livecode.Remove(last.Key);
 
                             last.Next.Previous = null;
@@ -101,9 +97,9 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        // Always called within s_livecode lock
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
+            Debug.Assert(Monitor.IsEntered(s_livecode));
             if (s_livecode.TryGetValue(key, out var entry))
             {
                 if (s_livecode_last == entry)

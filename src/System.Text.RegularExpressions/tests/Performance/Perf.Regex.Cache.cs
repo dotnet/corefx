@@ -5,48 +5,50 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class Perf_Regex_Cache
     {
-        private const int N = 40_000;
-        private const int UniqueRegsNum = (int)(N * 0.04);
         private static volatile bool s_IsMatch;
-        private readonly string[] _regexes; // shuffled
 
-        public Perf_Regex_Cache()
+        public string[] CreateRegexps(int total, int unique)
         {
-            _regexes = new string[N];
+            var regexps = new string[total];
             // create: 
             {
                 var i = 0;
-                for (; i < UniqueRegsNum; i++)
+                for (; i < unique; i++)
                 {
                     // "(0+)" "(1+)" ..  "(9+)(9+)(8+)" ..
                     var re = new StringBuilder();
                     foreach (var c in i.ToString())
                         re.Append("(" + c + "+)");
-                    _regexes[i] = re.ToString();
+                    regexps[i] = re.ToString();
                 }
 
-                for (; i < N; i++) _regexes[i] = _regexes[i % UniqueRegsNum];
+                for (; i < total; i++) regexps[i] = regexps[i % unique];
             }
             // shuffle:
 			const int someSeed = 101;  // seed for reproducability
             var random = new Random(someSeed);
-            for (var i = 0; i < N; i++)
+            for (var i = 0; i < total; i++)
             {
-                var r = random.Next(i, N);
-                var t = _regexes[i];
-                _regexes[i] = _regexes[r];
-                _regexes[r] = t;
+                var r = random.Next(i, total);
+                var t = regexps[i];
+                regexps[i] = regexps[r];
+                regexps[r] = t;
             }
+
+            return regexps;
         }
 
-        [Benchmark(InnerIterationCount = N)]
+        [Benchmark]
         [MeasureGCAllocations]
-        [InlineData(15)]
-        [InlineData(N*0.02)]
-        [InlineData(N*0.2)]
-        public void IsMatch(int cacheSize)
+        [InlineData(40_000, 7, 15)]         // default size, most common
+        [InlineData(40_000, 1, 15)]         // default size, to test MRU
+        [InlineData(40_000, 7, 0)]          // cache turned off
+        [InlineData(40_000, 1_600, 800)]    // larger size, to test cache is not O(n)
+        [InlineData(40_000, 1_600, 3_200)]  // larger size, to test cache always hit
+        public void IsMatch(int total, int unique, int cacheSize)
         {
             var cacheSizeOld = Regex.CacheSize;
+            string[] regexps = CreateRegexps(total, unique);
             try
             {
                 Regex.CacheSize = 0; // clean up cache
@@ -54,8 +56,8 @@ namespace System.Text.RegularExpressions.Tests
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
                     {
-                        for (var i = 0; i < Benchmark.InnerIterationCount; i++)
-                            s_IsMatch = Regex.IsMatch("0123456789", _regexes[i]);
+                        for (var i = 0; i < total; i++)
+                            s_IsMatch = Regex.IsMatch("0123456789", regexps[i]);
                     }
             }
             finally
