@@ -1,0 +1,7 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <!-- Set env var to use the SocketsHttpHandler --> 
+    <TestCommandLines  Condition="'$(TargetOS)'=='Windows_NT'" Include="set DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=true" />
+    <TestCommandLines  Condition="'$(TargetOS)'!='Windows_NT'" Include="export DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=true" />
+  </ItemGroup>
+</Project>
