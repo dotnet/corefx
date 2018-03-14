@@ -47,7 +47,7 @@ namespace System.Diagnostics
                 throw new InvalidOperationException(SR.CantUseEnvVars);
 
             string arguments;
-            if (startInfo != null && startInfo.ArgumentList.Count > 0)
+            if (startInfo.ArgumentList.Count > 0)
             {
                 arguments = PasteArguments.Paste(startInfo.ArgumentList, pasteFirstArgumentUsingArgV0Rules: false);
             }

@@ -445,17 +445,15 @@ namespace System.Diagnostics
             //    * CreateProcess allows you to redirect all or none of the standard IO handles, so we use
             //      GetStdHandle for the handles that are not being redirected
 
-            string arguments;
+            StringBuilder commandLine = BuildCommandLine(startInfo.FileName, StartInfo.Arguments);
             if (startInfo.ArgumentList.Count > 0)
             {
-                arguments = PasteArguments.Paste(startInfo.ArgumentList, pasteFirstArgumentUsingArgV0Rules: false);
+                foreach (string argument in startInfo.ArgumentList)
+                {
+                    PasteArguments.AppendArgument(commandLine, argument);
+                }
             }
-            else
-            {
-                arguments = startInfo.Arguments;
-            }
-            StringBuilder commandLine = BuildCommandLine(startInfo.FileName, arguments);
-
+            
             Interop.Kernel32.STARTUPINFO startupInfo = new Interop.Kernel32.STARTUPINFO();
             Interop.Kernel32.PROCESS_INFORMATION processInfo = new Interop.Kernel32.PROCESS_INFORMATION();
             Interop.Kernel32.SECURITY_ATTRIBUTES unused_SecAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();

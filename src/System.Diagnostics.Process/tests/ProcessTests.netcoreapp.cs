@@ -32,7 +32,7 @@ namespace System.Diagnostics.Tests
             process.StartInfo.RedirectStandardInput = true;
             var encoding = new UTF32Encoding(bigEndian: false, byteOrderMark: true);
             process.StartInfo.StandardInputEncoding = encoding;
-            process.Start();
+            process.Start().Dispose();
 
             Assert.Same(encoding, process.StandardInput.Encoding);
         }
@@ -50,7 +50,7 @@ namespace System.Diagnostics.Tests
 
             try
             {
-                testProcess.Start();
+                testProcess.Start().Dispose();
                 Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
             }
             finally
@@ -75,10 +75,10 @@ namespace System.Diagnostics.Tests
             testProcess.StartInfo = psi;
             try
             {
-                testProcess.Start();
+                testProcess.Start().Dispose();
                 Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
                 secondTestProcess.StartInfo = psi;
-                secondTestProcess.Start();
+                secondTestProcess.Start().Dispose();
                 Assert.Equal(string.Empty, secondTestProcess.StartInfo.Arguments);
             }
             finally
@@ -96,9 +96,22 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void BothArgumentAndArgumentListSet()
+        public void BothArgumentCtorAndArgumentListSet()
         {
             ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), "arg3");
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
+
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            Assert.Throws<InvalidOperationException>(() => testProcess.Start());
+        }
+
+        [Fact]
+        public void BothArgumentSetAndArgumentListSet()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.Arguments = "arg3";
             psi.ArgumentList.Add("arg1");
             psi.ArgumentList.Add("arg2");
 

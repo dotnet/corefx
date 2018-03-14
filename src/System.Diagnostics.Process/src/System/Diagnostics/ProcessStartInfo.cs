@@ -23,7 +23,7 @@ namespace System.Diagnostics
         private string _directory;
         private string _userName;
         private string _verb;
-        private Collection<string> _argumentList = new Collection<string>();
+        private Collection<string> _argumentList;
         private ProcessWindowStyle _windowStyle;
 
         internal DictionaryWrapper _environmentVariables;
@@ -65,7 +65,14 @@ namespace System.Diagnostics
 
         public Collection<string> ArgumentList
         {
-            get => _argumentList;
+            get
+            {
+                if (_argumentList == null)
+                {
+                    _argumentList = new Collection<string>();
+                }
+                return _argumentList;
+            }
         }
 
         public bool CreateNoWindow { get; set; }
