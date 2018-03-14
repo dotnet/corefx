@@ -247,7 +247,7 @@ namespace System.Data.SqlClient.SNI
             }
             else
             {
-                result = handle.SendAsync(clonedPacket, null, true);
+                result = handle.SendAsync(clonedPacket, true);
             }
             
             return result;

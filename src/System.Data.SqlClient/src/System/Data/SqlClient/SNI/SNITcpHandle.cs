@@ -522,12 +522,12 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null, bool disposeSNIPacketAfterSendAsync = false)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
             lock (this)
             {
-                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV, disposeSNIPacketAfterSendAsync);
+                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV, disposePacketAfterSendAsync);
             }
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }

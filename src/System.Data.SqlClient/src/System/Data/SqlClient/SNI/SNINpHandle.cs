@@ -211,7 +211,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null, bool disposeSNIPacketAfterSendAsync = false)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
             packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV);

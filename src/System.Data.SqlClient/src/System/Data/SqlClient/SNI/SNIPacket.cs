@@ -311,7 +311,7 @@ namespace System.Data.SqlClient.SNI
         /// Write data to a stream asynchronously
         /// </summary>
         /// <param name="stream">Stream to write to</param>
-        public async void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeSNIPacketAfterWriteAsync = false)
+        public async void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeAfterWriteAsync = false)
         {
             uint status = TdsEnums.SNI_SUCCESS;
             try
@@ -325,7 +325,7 @@ namespace System.Data.SqlClient.SNI
             }
             callback(this, status);
 
-            if (disposeSNIPacketAfterWriteAsync)
+            if (disposeAfterWriteAsync)
             {
                 Dispose();
             }

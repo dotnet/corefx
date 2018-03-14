@@ -256,7 +256,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null, bool disposeSNIPacketAfterSendAsync = false)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
             lock (this)
             {

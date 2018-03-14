@@ -95,7 +95,7 @@ namespace System.Data.SqlClient.SNI
         {
             lock (this)
             {
-                return _lowerHandle.SendAsync(packet, callback);
+                return _lowerHandle.SendAsync(packet, false, callback);
             }
         }
 
