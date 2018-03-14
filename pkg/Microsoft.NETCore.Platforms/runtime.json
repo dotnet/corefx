@@ -476,20 +476,20 @@
             "#import": [ "fedora" ]
         },
         "fedora.25-x64": {
-            "#import": [ "fedora.25, "fedora-x64" ]
+            "#import": [ "fedora.25", "fedora-x64" ]
         },
 
         "fedora.26": {
             "#import": [ "fedora" ]
         },
         "fedora.26-x64": {
-            "#import": [ "fedora.26, "fedora-x64" ]
+            "#import": [ "fedora.26", "fedora-x64" ]
         },
 
         "fedora.27": {
             "#import": [ "fedora" ]
         },
-        "fedora.27x64": {
+        "fedora.27-x64": {
             "#import": [ "fedora.27", "fedora-x64" ]
         },
 
