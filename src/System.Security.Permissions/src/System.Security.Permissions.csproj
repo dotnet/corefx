@@ -169,12 +169,12 @@
     <Compile Include="System\Security\SecurityState.cs" />
     <Compile Include="System\Security\SecurityZone.cs" />
     <Compile Include="System\Security\XmlSyntaxException.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\Helpers.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermission.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionAccess.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionAttribute.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionEntry.cs" />
-    <Compile Include="System\ServiceProcess.ServiceController\ServiceControllerPermissionEntryCollection.cs" />
+    <Compile Include="System\ServiceProcess\Helpers.cs" />
+    <Compile Include="System\ServiceProcess\ServiceControllerPermission.cs" />
+    <Compile Include="System\ServiceProcess\ServiceControllerPermissionAccess.cs" />
+    <Compile Include="System\ServiceProcess\ServiceControllerPermissionAttribute.cs" />
+    <Compile Include="System\ServiceProcess\ServiceControllerPermissionEntry.cs" />
+    <Compile Include="System\ServiceProcess\ServiceControllerPermissionEntryCollection.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermission.cs" />
     <Compile Include="System\Transactions\DistributedTransactionPermissionAttribute.cs" />
   </ItemGroup>

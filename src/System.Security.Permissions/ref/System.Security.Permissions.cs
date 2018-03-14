@@ -1887,15 +1887,15 @@ namespace System.Security.Policy
         public System.Security.SecurityElement ToXml(System.Security.Policy.PolicyLevel level) { throw null; }
     }
 }
-namespace System.ServiceProcess.ServiceController
+namespace System.ServiceProcess
 {
     public sealed partial class ServiceControllerPermission : System.Security.Permissions.ResourcePermissionBase
     {
         public ServiceControllerPermission() { }
         public ServiceControllerPermission(System.Security.Permissions.PermissionState state) { }
-        public ServiceControllerPermission(System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
-        public ServiceControllerPermission(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] permissionAccessEntries) { }
-        public System.ServiceProcess.ServiceController.ServiceControllerPermissionEntryCollection PermissionEntries { get { throw null; } }
+        public ServiceControllerPermission(System.ServiceProcess.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
+        public ServiceControllerPermission(System.ServiceProcess.ServiceControllerPermissionEntry[] permissionAccessEntries) { }
+        public System.ServiceProcess.ServiceControllerPermissionEntryCollection PermissionEntries { get { throw null; } }
     }
     [Flags]
     public enum ServiceControllerPermissionAccess
@@ -1904,39 +1904,36 @@ namespace System.ServiceProcess.ServiceController
         Browse = 1 << 1,
         Control = 1 << 2 | Browse,
     }
-    [Serializable]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
     public partial class ServiceControllerPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
     {
         public ServiceControllerPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
         public string MachineName { get; set; }
-        public System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess PermissionAccess { get; set; }
+        public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get; set; }
         public string ServiceName { get; set; }
         public override System.Security.IPermission CreatePermission() { throw null; }
     }
-    [Serializable]
     public partial class ServiceControllerPermissionEntry
     {
         public ServiceControllerPermissionEntry() { }
         internal ServiceControllerPermissionEntry(System.Security.Permissions.ResourcePermissionBaseEntry baseEntry) { }
-        public ServiceControllerPermissionEntry(System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
-        public string MachineName { get { throw null; }}
-        public System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
+        public ServiceControllerPermissionEntry(System.ServiceProcess.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
+        public string MachineName { get { throw null; } }
+        public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
         public string ServiceName { get { throw null; } }
     }
-    [Serializable]
     public class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
     {
-        internal ServiceControllerPermissionEntryCollection(System.ServiceProcess.ServiceController.ServiceControllerPermission owner, System.Security.Permissions.ResourcePermissionBaseEntry[] entries) { }
-        public System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }
-        public int Add(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
-        public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] value) { }
-        public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntryCollection value) { }
-        public bool Contains(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
-        public void CopyTo(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] array, int index) { }
-        public int IndexOf(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
-        public void Insert(int index, System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { }
-        public void Remove(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { }
+        internal ServiceControllerPermissionEntryCollection(System.ServiceProcess.ServiceControllerPermission owner, System.Security.Permissions.ResourcePermissionBaseEntry[] entries) { }
+        public System.ServiceProcess.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }
+        public int Add(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
+        public void AddRange(System.ServiceProcess.ServiceControllerPermissionEntry[] value) { }
+        public void AddRange(System.ServiceProcess.ServiceControllerPermissionEntryCollection value) { }
+        public bool Contains(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
+        public void CopyTo(System.ServiceProcess.ServiceControllerPermissionEntry[] array, int index) { }
+        public int IndexOf(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
+        public void Insert(int index, System.ServiceProcess.ServiceControllerPermissionEntry value) { }
+        public void Remove(System.ServiceProcess.ServiceControllerPermissionEntry value) { }
     }
 }
 namespace System.Transactions

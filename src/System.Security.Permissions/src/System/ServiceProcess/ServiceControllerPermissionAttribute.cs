@@ -7,10 +7,9 @@ using System.Security;
 using System.Security.Permissions;
 using System.Globalization;
 
-namespace System.ServiceProcess.ServiceController
+namespace System.ServiceProcess
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false )]
-    [Serializable]
     public class ServiceControllerPermissionAttribute : CodeAccessSecurityAttribute
     {
         private string machineName;

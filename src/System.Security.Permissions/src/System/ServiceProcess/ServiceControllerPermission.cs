@@ -4,9 +4,8 @@
 
 using System.Security.Permissions;
 
-namespace System.ServiceProcess.ServiceController
+namespace System.ServiceProcess
 {
-    [Serializable]
     public sealed class ServiceControllerPermission : ResourcePermissionBase
     {
         private ServiceControllerPermissionEntryCollection innerCollection;

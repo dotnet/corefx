@@ -6,9 +6,8 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Globalization;
 
-namespace System.ServiceProcess.ServiceController
+namespace System.ServiceProcess
 {
-    [Serializable] 
     public class ServiceControllerPermissionEntry
     {
         public ServiceControllerPermissionEntry() : this(ServiceControllerPermissionAccess.Browse, ".", "*")
