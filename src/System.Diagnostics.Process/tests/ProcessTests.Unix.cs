@@ -178,6 +178,31 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Theory, InlineData("nano"), InlineData("vi")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [OuterLoop("Opens program")]
+        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        {
+            if (IsProgramInstalled(programToOpenWith))
+            {
+                string fileToOpen = GetTestFilePath() + ".txt";
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
+                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
+                psi.ArgumentList.Add(fileToOpen);
+                using (var px = Process.Start(psi))
+                {
+                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    px.Kill();
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+            }
+        }
+
         [Theory, InlineData("/usr/bin/open"), InlineData("/usr/bin/nano")]
         [PlatformSpecific(TestPlatforms.OSX)]
         [OuterLoop("Opens program")]

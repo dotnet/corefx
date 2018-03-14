@@ -49,7 +49,9 @@ namespace System.Diagnostics
             string arguments;
             if (startInfo.ArgumentList.Count > 0)
             {
-                arguments = PasteArguments.Paste(startInfo.ArgumentList, pasteFirstArgumentUsingArgV0Rules: false);
+                StringBuilder sb = new StringBuilder();
+                PasteArguments.AppendArgument(sb, startInfo.ArgumentList);
+                arguments = sb.ToString();
             }
             else
             {

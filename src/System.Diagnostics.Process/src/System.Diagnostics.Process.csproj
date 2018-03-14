@@ -270,9 +270,6 @@
     <Compile Include="$(CommonPath)\System\Text\DBCSDecoder.cs">
       <Link>Common\System\Text\DBCSDecoder.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
-      <Link>Common\System\PasteArguments.Windows.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCPInfoEx.cs</Link>
     </Compile>
@@ -353,9 +350,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitId.cs">
       <Link>Common\Interop\Unix\Interop.WaitId.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
-      <Link>Common\System\PasteArguments.Unix.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true'">
