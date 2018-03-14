@@ -1928,6 +1928,7 @@ namespace System.ServiceProcess.ServiceController
     public class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
     {
         internal ServiceControllerPermissionEntryCollection(System.ServiceProcess.ServiceController.ServiceControllerPermission owner, System.Security.Permissions.ResourcePermissionBaseEntry[] entries) { }
+        public System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }
         public int Add(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
         public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] value) { }
         public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntryCollection value) { }
