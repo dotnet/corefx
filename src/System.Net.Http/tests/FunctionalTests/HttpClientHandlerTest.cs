@@ -2986,7 +2986,7 @@ namespace System.Net.Http.Functional.Tests
 
         [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
         [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public async Task ProxyAuth_Digest_Succeeds()
         {
             if (IsCurlHandler) {
