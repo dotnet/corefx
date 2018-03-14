@@ -5,7 +5,7 @@
 using System.Security.Permissions;
 using System.Collections;
 
-namespace System.ServiceProcess
+namespace System.ServiceProcess.ServiceController
 {
     [Serializable]
     public class ServiceControllerPermissionEntryCollection : CollectionBase

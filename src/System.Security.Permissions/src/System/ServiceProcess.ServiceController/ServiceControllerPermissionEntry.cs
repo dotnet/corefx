@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Globalization;
 
-namespace System.ServiceProcess
+namespace System.ServiceProcess.ServiceController
 {
     [Serializable] 
     public class ServiceControllerPermissionEntry

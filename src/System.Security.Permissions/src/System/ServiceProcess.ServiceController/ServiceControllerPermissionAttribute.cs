@@ -7,7 +7,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Globalization;
 
-namespace System.ServiceProcess
+namespace System.ServiceProcess.ServiceController
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false )]
     [Serializable]

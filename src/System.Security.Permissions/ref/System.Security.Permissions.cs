@@ -1887,6 +1887,59 @@ namespace System.Security.Policy
         public System.Security.SecurityElement ToXml(System.Security.Policy.PolicyLevel level) { throw null; }
     }
 }
+namespace System.ServiceProcess.ServiceController
+{
+    public sealed partial class ServiceControllerPermission : System.Security.Permissions.ResourcePermissionBase
+    {
+        public ServiceControllerPermission() { }
+        public ServiceControllerPermission(System.Security.Permissions.PermissionState state) { }
+        public ServiceControllerPermission(System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
+        public ServiceControllerPermission(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] permissionAccessEntries) { }
+        public System.ServiceProcess.ServiceController.ServiceControllerPermissionEntryCollection PermissionEntries { get { throw null; } }
+    }
+    [Flags]
+    public enum ServiceControllerPermissionAccess
+    {
+        None = 0,
+        Browse = 1 << 1,
+        Control = 1 << 2 | Browse,
+    }
+
+    [Serializable]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
+    public partial class ServiceControllerPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
+    {
+        public ServiceControllerPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
+        public string MachineName { get; set; }
+        public System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess PermissionAccess { get; set; }
+        public string ServiceName { get; set; }
+        public override System.Security.IPermission CreatePermission() { throw null; }
+    }
+
+    [Serializable]
+    public partial class ServiceControllerPermissionEntry
+    {
+        public ServiceControllerPermissionEntry() { }
+        internal ServiceControllerPermissionEntry(System.Security.Permissions.ResourcePermissionBaseEntry baseEntry) { }
+        public ServiceControllerPermissionEntry(System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
+        public string MachineName { get { throw null; }}
+        public System.ServiceProcess.ServiceController.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
+        public string ServiceName { get { throw null; } }
+    }
+    [Serializable]
+    public class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
+    {
+        internal ServiceControllerPermissionEntryCollection(System.ServiceProcess.ServiceController.ServiceControllerPermission owner, System.Security.Permissions.ResourcePermissionBaseEntry[] entries) { }
+        public int Add(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
+        public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] value) { }
+        public void AddRange(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntryCollection value) { }
+        public bool Contains(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
+        public void CopyTo(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry[] array, int index) { }
+        public int IndexOf(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { throw null; }
+        public void Insert(int index, System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { }
+        public void Remove(System.ServiceProcess.ServiceController.ServiceControllerPermissionEntry value) { }
+    }
+}
 namespace System.Transactions
 {
     public sealed partial class DistributedTransactionPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
