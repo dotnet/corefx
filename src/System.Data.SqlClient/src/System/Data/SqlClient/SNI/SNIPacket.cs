@@ -23,7 +23,6 @@ namespace System.Data.SqlClient.SNI
 
         private ArrayPool<byte>  _arrayPool = ArrayPool<byte>.Shared;
         private bool _isBufferFromArrayPool = false;
-        private bool _disposeAfterWriteAsync = false;
 
         public SNIPacket() { }
 
@@ -45,19 +44,6 @@ namespace System.Data.SqlClient.SNI
             set
             {
                 _description = value;
-            }
-        }
-
-        public bool DisposeAfterWriteAsync
-        {
-            get
-            {
-                return _disposeAfterWriteAsync;
-            }
-
-            set
-            {
-                _disposeAfterWriteAsync = value;
             }
         }
 
@@ -325,7 +311,7 @@ namespace System.Data.SqlClient.SNI
         /// Write data to a stream asynchronously
         /// </summary>
         /// <param name="stream">Stream to write to</param>
-        public async void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider)
+        public async void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeSNIPacketAfterWriteAsync = false)
         {
             uint status = TdsEnums.SNI_SUCCESS;
             try
@@ -339,7 +325,7 @@ namespace System.Data.SqlClient.SNI
             }
             callback(this, status);
 
-            if (_disposeAfterWriteAsync)
+            if (disposeSNIPacketAfterWriteAsync)
             {
                 Dispose();
             }
