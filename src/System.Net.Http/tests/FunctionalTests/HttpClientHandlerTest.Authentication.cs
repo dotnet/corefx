@@ -237,6 +237,141 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        // InlineDatas for all values that pass on WinHttpHandler, which is the most restrictive.
+        // Uses numerical values for values named in .NET Core and not in .NET Framework.
+        [Theory]
+        [InlineData(HttpStatusCode.OK)]
+        [InlineData(HttpStatusCode.Created)]
+        [InlineData(HttpStatusCode.Accepted)]
+        [InlineData(HttpStatusCode.NonAuthoritativeInformation)]
+        [InlineData(HttpStatusCode.NoContent)]
+        [InlineData(HttpStatusCode.ResetContent)]
+        [InlineData(HttpStatusCode.PartialContent)]
+        [InlineData((HttpStatusCode)207)] // MultiStatus
+        [InlineData((HttpStatusCode)208)] // AlreadyReported
+        [InlineData((HttpStatusCode)226)] // IMUsed
+        [InlineData(HttpStatusCode.Ambiguous)]
+        [InlineData(HttpStatusCode.Ambiguous)]
+        [InlineData(HttpStatusCode.NotModified)]
+        [InlineData(HttpStatusCode.UseProxy)]
+        [InlineData(HttpStatusCode.Unused)]
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.PaymentRequired)]
+        [InlineData(HttpStatusCode.Forbidden)]
+        [InlineData(HttpStatusCode.NotFound)]
+        [InlineData(HttpStatusCode.MethodNotAllowed)]
+        [InlineData(HttpStatusCode.NotAcceptable)]
+        [InlineData(HttpStatusCode.RequestTimeout)]
+        [InlineData(HttpStatusCode.Conflict)]
+        [InlineData(HttpStatusCode.Gone)]
+        [InlineData(HttpStatusCode.LengthRequired)]
+        [InlineData(HttpStatusCode.PreconditionFailed)]
+        [InlineData(HttpStatusCode.RequestEntityTooLarge)]
+        [InlineData(HttpStatusCode.RequestUriTooLong)]
+        [InlineData(HttpStatusCode.UnsupportedMediaType)]
+        [InlineData(HttpStatusCode.RequestedRangeNotSatisfiable)]
+        [InlineData(HttpStatusCode.ExpectationFailed)]
+        [InlineData((HttpStatusCode)421)] // MisdirectedRequest
+        [InlineData((HttpStatusCode)422)] // UnprocessableEntity
+        [InlineData((HttpStatusCode)423)] // Locked
+        [InlineData((HttpStatusCode)424)] // FailedDependency
+        [InlineData(HttpStatusCode.UpgradeRequired)]
+        [InlineData((HttpStatusCode)428)] // PreconditionRequired
+        [InlineData((HttpStatusCode)429)] // TooManyRequests
+        [InlineData((HttpStatusCode)431)] // RequestHeaderFieldsTooLarge
+        [InlineData((HttpStatusCode)451)] // UnavailableForLegalReasons
+        [InlineData(HttpStatusCode.InternalServerError)]
+        [InlineData(HttpStatusCode.NotImplemented)]
+        [InlineData(HttpStatusCode.BadGateway)]
+        [InlineData(HttpStatusCode.ServiceUnavailable)]
+        [InlineData(HttpStatusCode.GatewayTimeout)]
+        [InlineData(HttpStatusCode.HttpVersionNotSupported)]
+        [InlineData((HttpStatusCode)506)] // VariantAlsoNegotiates
+        [InlineData((HttpStatusCode)507)] // InsufficientStorage
+        [InlineData((HttpStatusCode)508)] // LoopDetected
+        [InlineData((HttpStatusCode)510)] // NotExtended
+        [InlineData((HttpStatusCode)511)] // NetworkAuthenticationRequired
+        public async Task PreAuthenticate_FirstRequestNoHeader_SecondRequestVariousStatusCodes_ThirdRequestPreauthenticates(HttpStatusCode statusCode)
+        {
+            const string AuthResponse = "WWW-Authenticate: Basic realm=\"hello\"\r\n";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    client.DefaultRequestHeaders.ConnectionClose = true; // for simplicity of not needing to know every handler's pooling policy
+                        handler.PreAuthenticate = true;
+                    handler.Credentials = s_credentials;
+                    client.DefaultRequestHeaders.ExpectContinue = false;
+
+                    using (HttpResponseMessage resp = await client.GetAsync(uri))
+                    {
+                        Assert.Equal(statusCode, resp.StatusCode);
+                    }
+                    Assert.Equal("hello world 2", await client.GetStringAsync(uri));
+                }
+            },
+            async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Unauthorized, AuthResponse);
+                Assert.All(headers, header => Assert.DoesNotContain("Authorization", header));
+
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(statusCode, content: "hello world 1");
+                Assert.Contains(headers, header => header.Contains("Authorization"));
+
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.OK, content: "hello world 2");
+                Assert.Contains(headers, header => header.Contains("Authorization"));
+            });
+        }
+
+        [Theory]
+        [InlineData("/something/hello.html", "/something/hello.html", true)]
+        [InlineData("/something/hello.html", "/something/world.html", true)]
+        [InlineData("/something/hello.html", "/something/", true)]
+        [InlineData("/something/hello.html", "/", false)]
+        [InlineData("/something/hello.html", "/hello.html", false)]
+        [InlineData("/something/hello.html", "/world.html", false)]
+        [InlineData("/something/hello.html", "/another/", false)]
+        [InlineData("/something/hello.html", "/another/hello.html", false)]
+        public async Task PreAuthenticate_AuthenticatedUrl_ThenTryDifferentUrl_SendsAuthHeaderOnlyIfPrefixMatches(
+            string originalRelativeUri, string secondRelativeUri, bool expectedAuthHeader)
+        {
+            const string AuthResponse = "WWW-Authenticate: Basic realm=\"hello\"\r\n";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    client.DefaultRequestHeaders.ConnectionClose = true; // for simplicity of not needing to know every handler's pooling policy
+                    handler.PreAuthenticate = true;
+                    handler.Credentials = s_credentials;
+
+                    Assert.Equal("hello world 1", await client.GetStringAsync(new Uri(uri, originalRelativeUri)));
+                    Assert.Equal("hello world 2", await client.GetStringAsync(new Uri(uri, secondRelativeUri)));
+                }
+            },
+            async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Unauthorized, AuthResponse);
+                Assert.All(headers, header => Assert.DoesNotContain("Authorization", header));
+
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(content: "hello world 1");
+                Assert.Contains(headers, header => header.Contains("Authorization"));
+
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(content: "hello world 2");
+                if (expectedAuthHeader)
+                {
+                    Assert.Contains(headers, header => header.Contains("Authorization"));
+                }
+                else
+                {
+                    Assert.All(headers, header => Assert.DoesNotContain("Authorization", header));
+                }
+            });
+        }
+
         [Fact]
         public async Task PreAuthenticate_SuccessfulBasicButThenFails_DoesntLoopInfinitely()
         {
