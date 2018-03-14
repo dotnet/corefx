@@ -17,6 +17,7 @@ namespace System.ServiceProcess.Tests
 
         [Theory,
             MemberData(nameof(Ctor_Data))]
-        public void Ctor_EmptyString(string input) => Assert.Equal(input, new ServiceProcessDescriptionAttribute(input).Description);
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void CtorAndGetDescription_test(string input) => Assert.Equal(input, new ServiceProcessDescriptionAttribute(input).Description);
     }
 }
