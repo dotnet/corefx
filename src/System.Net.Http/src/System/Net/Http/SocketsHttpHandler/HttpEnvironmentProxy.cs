@@ -66,13 +66,7 @@ namespace System.Net.Http
                 return null;
             }
 
-            // The User and password may or may not be URL encoded.
-            // Curl seems to accept both. To match that we do opportunistic decode.
-            try
-            {
-                value = Uri.UnescapeDataString(value);
-            }
-            catch { };
+            value = Uri.UnescapeDataString(value);
 
             string password = "";
             string domain = null;
@@ -82,6 +76,7 @@ namespace System.Net.Http
                 password = value.Substring(idx+1);
                 value = value.Substring(0, idx);
             }
+
             idx = value.IndexOf('\\');
             if (idx != -1)
             {
@@ -183,7 +178,7 @@ namespace System.Net.Http
             {
                 return null;
             }
-            if (value.StartsWith("http://"))
+            if (value.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
             {
                 value = value.Substring(7);
             }
@@ -239,7 +234,9 @@ namespace System.Net.Http
                     return null;
                 }
             }
-            try {
+
+            try
+            {
                 UriBuilder ub = new UriBuilder("http", host, port);
                 if (user != null)
                 {

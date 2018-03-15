@@ -111,6 +111,7 @@ namespace System.Net.Http.Tests
         [InlineData("[::1]", "[::1]", "80", null, null)]
         [InlineData("domain\\foo:bar@1.1.1.1", "1.1.1.1", "80", "foo", "bar")]
         [InlineData("domain%5Cfoo:bar@1.1.1.1", "1.1.1.1", "80", "foo", "bar")]
+        [InlineData("HTTP://ABC.COM/", "abc.com", "80", null, null)]
         public void HttpProxy_Uri_Parsing(string _input, string _host, string _port, string _user , string _password)
         {
             RemoteInvoke((input, host, port, user, password) =>
