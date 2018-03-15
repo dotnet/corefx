@@ -22,10 +22,10 @@ namespace System
                 // https://msdn.microsoft.com/en-us/library/ms679635.aspx
 
                 Span<char> initialBuffer = stackalloc char[40];
-                ValueStringBuilder builder = new ValueStringBuilder(initialBuffer);
+                var builder = new ValueStringBuilder(initialBuffer);
                 GetUserName(ref builder);
 
-                var name = builder.AsSpan();
+                ReadOnlySpan<char> name = builder.AsSpan();
                 int index = name.IndexOf('\\');
                 if (index != -1)
                 {
@@ -62,10 +62,10 @@ namespace System
             {
                 // See the comment in UserName
                 Span<char> initialBuffer = stackalloc char[40];
-                ValueStringBuilder builder = new ValueStringBuilder(initialBuffer);
+                var builder = new ValueStringBuilder(initialBuffer);
                 GetUserName(ref builder);
 
-                var name = builder.AsSpan();
+                ReadOnlySpan<char> name = builder.AsSpan();
                 int index = name.IndexOf('\\');
                 if (index != -1)
                 {
@@ -79,7 +79,7 @@ namespace System
                 // Domain names aren't typically long.
                 // https://support.microsoft.com/en-us/help/909264/naming-conventions-in-active-directory-for-computers-domains-sites-and
                 Span<char> initialDomainNameBuffer = stackalloc char[64];
-                ValueStringBuilder domainBuilder = new ValueStringBuilder(initialBuffer);
+                var domainBuilder = new ValueStringBuilder(initialBuffer);
                 uint length = (uint)domainBuilder.Capacity;
 
                 // This API will fail to return the domain name without a buffer for the SID.
@@ -93,9 +93,9 @@ namespace System
                     int error = Marshal.GetLastWin32Error();
 
                     // The docs don't call this out clearly, but experimenting shows that the error returned is the following.
-                    if (Marshal.GetLastWin32Error() != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
+                    if (error != Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                     {
-                        throw new InvalidOperationException(Win32Marshal.GetExceptionForWin32Error(error).Message);
+                        throw new InvalidOperationException(Win32Marshal.GetMessage(error));
                     }
 
                     domainBuilder.EnsureCapacity((int)length);
@@ -272,8 +272,7 @@ namespace System
         {
             Guid folderId = new Guid(folderGuid);
 
-            string path;
-            int hr = Interop.Shell32.SHGetKnownFolderPath(folderId, (uint)option, IntPtr.Zero, out path);
+            int hr = Interop.Shell32.SHGetKnownFolderPath(folderId, (uint)option, IntPtr.Zero, out string path);
             if (hr != 0) // Not S_OK
             {
                 return string.Empty;
