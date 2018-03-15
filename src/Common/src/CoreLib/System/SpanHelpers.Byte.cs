@@ -986,19 +986,19 @@ namespace System
                 goto Equal;
 
             nuint minLength = firstLength;
-            if ((byte*)(IntPtr)minLength > (byte*)(IntPtr)secondLength) minLength = secondLength;
+            if (minLength > secondLength) minLength = secondLength;
 
-            IntPtr i = (IntPtr)0; // Use IntPtr and byte* for arithmetic to avoid unnecessary 64->32->64 truncations
-            IntPtr n = (IntPtr)minLength;
+            nuint i = (nuint)0;
+            nuint n = minLength;
 
 #if !netstandard11
-            if (Vector.IsHardwareAccelerated && (byte*)n > (byte*)Vector<byte>.Count)
+            if (Vector.IsHardwareAccelerated && n > Vector<byte>.Count)
             {
                 n -= Vector<byte>.Count;
-                while ((byte*)n > (byte*)i)
+                while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
-                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
+                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
+                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
                     {
                         goto NotEqual;
                     }
@@ -1008,13 +1008,13 @@ namespace System
             }
 #endif
 
-            if ((byte*)n > (byte*)sizeof(UIntPtr))
+            if (n > sizeof(UIntPtr))
             {
                 n -= sizeof(UIntPtr);
-                while ((byte*)n > (byte*)i)
+                while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
-                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
+                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
+                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
                     {
                         goto NotEqual;
                     }
@@ -1023,9 +1023,9 @@ namespace System
             }
 
         NotEqual:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
-            while ((byte*)(IntPtr)minLength > (byte*)i)
+            while (minLength > i)
             {
-                int result = Unsafe.AddByteOffset(ref first, i).CompareTo(Unsafe.AddByteOffset(ref second, i));
+                int result = Unsafe.AddByteOffset(ref first, (IntPtr)i).CompareTo(Unsafe.AddByteOffset(ref second, (IntPtr)i));
                 if (result != 0) return result;
                 i += 1;
             }

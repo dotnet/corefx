@@ -30,6 +30,18 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NUInt operator +(NUInt left, int right)
+        {
+            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) + (uint)right) : new NUInt(((ulong)left._value) + (uint)right); }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NUInt operator -(NUInt left, int right)
+        {
+            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) - (uint)right) : new NUInt(((ulong)left._value) - (uint)right); }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(NUInt left, int right)
         {
             unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) >= (uint)right : ((ulong)left._value) >= (uint)right; }
@@ -39,6 +51,11 @@ namespace System
         {
             unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) <= (uint)right : ((ulong)left._value) <= (uint)right; }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(NUInt left, int right) => !(left <= right);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(NUInt left, int right) => !(left >= right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(NUInt left, NUInt right)
