@@ -59,22 +59,22 @@
       <Link>Common\System\Data\ProviderBase\BasicFieldNameLookup.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionInternal.cs">
-      <Link>Common\System\Data\ProviderBase\DbConnectionInternal.cs</Link>
+      <Link>System\Data\ProviderBase\DbConnectionInternal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
-      <Link>Common\System\Data\ProviderBase\DbConnectionFactory.cs</Link>
+      <Link>System\Data\ProviderBase\DbConnectionFactory.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
-      <Link>Common\System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
+      <Link>System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\TimeoutTimer.cs">
-      <Link>Common\System\Data\ProviderBase\TimeoutTimer.cs</Link>
+      <Link>System\Data\ProviderBase\TimeoutTimer.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
-      <Link>Common\System\Data\ProviderBase\DbReferenceCollection.cs</Link>
+      <Link>System\Data\ProviderBase\DbReferenceCollection.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbMetaDataFactory.cs">
-      <Link>Common\System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
+      <Link>System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
     </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />
