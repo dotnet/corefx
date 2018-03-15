@@ -81,12 +81,16 @@ namespace System.Tests
         {
             try
             {
-                // Keep the two statements below together
-                callStack.Push(GetSourceInformation());
+                // Keep the statements below together
+                if (!PlatformDetection.IsFullFramework)
+                    callStack.Push(GetSourceInformation());
                 throw new Exception("Boom!");
             }
             catch
             {
+                // Keep the statements below together
+                if (PlatformDetection.IsFullFramework)
+                    callStack.Push(GetSourceInformation());
                 throw;
             }
         }
@@ -112,12 +116,20 @@ namespace System.Tests
         {
             try
             {
-                // Keep the two statements below together
-                callStack.Push(GetSourceInformation());
+                // Keep the statements below together
+                if (!PlatformDetection.IsFullFramework)
+                    callStack.Push(GetSourceInformation());
                 ThrowException(callStack);
             }
             catch
             {
+                if (PlatformDetection.IsFullFramework)
+                {
+                    var throwFrame = callStack.Pop();
+                    // Keep the statements below in the same line
+                    callStack.Push(GetSourceInformation()); callStack.Push(throwFrame);
+                    throw;
+                }
                 throw;
             }
         }
@@ -139,12 +151,12 @@ namespace System.Tests
                 string frame;
                 while (!string.IsNullOrEmpty(frame = sr.ReadLine()))
                 {
-                    var reportedFrame = expectedCallStack.Pop();
+                    var exptectedFrame = expectedCallStack.Pop();
                     var match = Regex.Match(frame, FrameParserRegex);
                     Assert.True(match.Success);
-                    Assert.Equal(reportedFrame.CallerMemberName, match.Groups["memberName"].Value);
-                    Assert.Equal(reportedFrame.SourceFilePath, match.Groups["filePath"].Value);
-                    Assert.Equal(reportedFrame.SourceLineNumber + 1, Convert.ToInt32(match.Groups["lineNumber"].Value));
+                    Assert.Equal(exptectedFrame.CallerMemberName, match.Groups["memberName"].Value);
+                    Assert.Equal(exptectedFrame.SourceFilePath, match.Groups["filePath"].Value);
+                    Assert.Equal(exptectedFrame.SourceLineNumber + 1, Convert.ToInt32(match.Groups["lineNumber"].Value));
                 }
             }
         }
