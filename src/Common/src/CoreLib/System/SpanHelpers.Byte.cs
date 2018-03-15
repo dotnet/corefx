@@ -109,7 +109,7 @@ namespace System
 
             uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            IntPtr nLength = (IntPtr)length;
+            IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
@@ -256,8 +256,8 @@ namespace System
             Debug.Assert(length >= 0);
 
             uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)length; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            IntPtr nLength = (IntPtr)length;
+            IntPtr index = (IntPtr)(uint)length; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {

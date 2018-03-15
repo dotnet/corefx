@@ -265,7 +265,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking. }
+                    ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
