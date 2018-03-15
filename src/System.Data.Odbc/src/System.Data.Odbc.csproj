@@ -66,11 +66,13 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
       <Link>Common\System\Data\ProviderBase\DbConnectionFactory.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
+    </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionInternal.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPool.cs" />
-    <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolGroup.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolOptions.cs" />

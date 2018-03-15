@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Diagnostics;
@@ -25,7 +26,7 @@ namespace System.Data.ProviderBase
     // and once no pools remain, change state from Active->Idle->Disabled
     // Once Disabled, factory can remove its reference to the pool entry
 
-    internal sealed class DbConnectionPoolGroup
+    sealed internal class DbConnectionPoolGroup
     {
         private readonly DbConnectionOptions _connectionOptions;
         private readonly DbConnectionPoolKey _poolKey;
@@ -35,6 +36,7 @@ namespace System.Data.ProviderBase
         private int _state;          // see PoolGroupState* below
 
         private DbConnectionPoolGroupProviderInfo _providerInfo;
+        private DbMetaDataFactory _metaDataFactory;
 
         // always lock this before changing _state, we don't want to move out of the 'Disabled' state
         // PoolGroupStateUninitialized = 0;
@@ -58,21 +60,9 @@ namespace System.Data.ProviderBase
             _state = PoolGroupStateActive;
         }
 
-        internal DbConnectionOptions ConnectionOptions
-        {
-            get
-            {
-                return _connectionOptions;
-            }
-        }
+        internal DbConnectionOptions ConnectionOptions => _connectionOptions;
 
-        internal DbConnectionPoolKey PoolKey
-        {
-            get
-            {
-                return _poolKey;
-            }
-        }
+        internal DbConnectionPoolKey PoolKey => _poolKey;
 
         internal DbConnectionPoolGroupProviderInfo ProviderInfo
         {
@@ -99,14 +89,20 @@ namespace System.Data.ProviderBase
         }
 
 
-        internal DbConnectionPoolGroupOptions PoolGroupOptions
+        internal DbConnectionPoolGroupOptions PoolGroupOptions => _poolGroupOptions;
+
+        internal DbMetaDataFactory MetaDataFactory
         {
             get
             {
-                return _poolGroupOptions;
+                return _metaDataFactory;
+            }
+
+            set
+            {
+                _metaDataFactory = value;
             }
         }
-
 
         internal int Clear()
         {
@@ -170,20 +166,19 @@ namespace System.Data.ProviderBase
                         currentIdentity = null;
                     }
                 }
+
                 if (null != currentIdentity)
                 {
-                    if (!_poolCollection.TryGetValue(currentIdentity, out pool))
-                    { // find the pool
-                        DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
-
-                        // optimistically create pool, but its callbacks are delayed until after actual add
-                        DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
-
+                    if (!_poolCollection.TryGetValue(currentIdentity, out pool)) // find the pool
+                    { 
                         lock (this)
                         {
                             // Did someone already add it to the list?
                             if (!_poolCollection.TryGetValue(currentIdentity, out pool))
                             {
+                                DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
+                                DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
+
                                 if (MarkPoolGroupAsActive())
                                 {
                                     // If we get here, we know for certain that we there isn't
@@ -193,12 +188,15 @@ namespace System.Data.ProviderBase
                                     bool addResult = _poolCollection.TryAdd(currentIdentity, newPool);
                                     Debug.Assert(addResult, "No other pool with current identity should exist at this point");
                                     pool = newPool;
-                                    newPool = null;
                                 }
                                 else
                                 {
                                     // else pool entry has been disabled so don't create new pools
                                     Debug.Assert(PoolGroupStateDisabled == _state, "state should be disabled");
+
+                                    // don't need to call connectionFactory.QueuePoolForRelease(newPool) because		
+                                    // pool callbacks were delayed and no risk of connections being created		
+                                    newPool.Shutdown();
                                 }
                             }
                             else
@@ -206,13 +204,6 @@ namespace System.Data.ProviderBase
                                 // else found an existing pool to use instead
                                 Debug.Assert(PoolGroupStateActive == _state, "state should be active since a pool exists and lock holds");
                             }
-                        }
-
-                        if (null != newPool)
-                        {
-                            // don't need to call connectionFactory.QueuePoolForRelease(newPool) because
-                            // pool callbacks were delayed and no risk of connections being created
-                            newPool.Shutdown();
                         }
                     }
                     // the found pool could be in any state
