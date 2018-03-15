@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace System
 {
     internal static partial class PasteArguments
     {
-        private static void AppendArgument(StringBuilder stringBuilder, string argument)
+        internal static void AppendArgument(StringBuilder stringBuilder, string argument)
         {
             if (stringBuilder.Length != 0)
             {
@@ -77,17 +76,6 @@ namespace System
                 }
 
                 stringBuilder.Append(Quote);
-            }
-        }
-
-        internal static void AppendArgument(StringBuilder stringBuilder, Collection<string> argumentList)
-        {
-            if (argumentList.Count > 0)
-            {
-                foreach (string argument in argumentList)
-                {
-                    PasteArguments.AppendArgument(stringBuilder, argument);
-                }
             }
         }
 

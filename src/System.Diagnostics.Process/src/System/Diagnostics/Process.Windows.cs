@@ -446,7 +446,7 @@ namespace System.Diagnostics
             //      GetStdHandle for the handles that are not being redirected
 
             StringBuilder commandLine = BuildCommandLine(startInfo.FileName, StartInfo.Arguments);
-            PasteArguments.AppendArgument(commandLine, StartInfo.ArgumentList);
+            Process.AppendArguments(commandLine, StartInfo.ArgumentList);
             
             Interop.Kernel32.STARTUPINFO startupInfo = new Interop.Kernel32.STARTUPINFO();
             Interop.Kernel32.PROCESS_INFORMATION processInfo = new Interop.Kernel32.PROCESS_INFORMATION();

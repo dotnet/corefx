@@ -3,11 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Threading;
 
@@ -1468,6 +1467,17 @@ namespace System.Diagnostics
             {
                 DataReceivedEventArgs e = new DataReceivedEventArgs(data);
                 errorDataReceived(this, e); // Call back to user informing data is available.
+            }
+        }
+
+        private static void AppendArguments(StringBuilder stringBuilder, Collection<string> argumentList)
+        {
+            if (argumentList.Count > 0)
+            {
+                foreach (string argument in argumentList)
+                {
+                    PasteArguments.AppendArgument(stringBuilder, argument);
+                }
             }
         }
 

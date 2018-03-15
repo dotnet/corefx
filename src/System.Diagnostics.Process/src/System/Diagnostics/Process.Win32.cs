@@ -50,7 +50,7 @@ namespace System.Diagnostics
             if (startInfo.ArgumentList.Count > 0)
             {
                 StringBuilder sb = new StringBuilder();
-                PasteArguments.AppendArgument(sb, startInfo.ArgumentList);
+                Process.AppendArguments(sb, startInfo.ArgumentList);
                 arguments = sb.ToString();
             }
             else
