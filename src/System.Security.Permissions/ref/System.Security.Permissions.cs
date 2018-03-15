@@ -1892,25 +1892,26 @@ namespace System.ServiceProcess
     public sealed partial class ServiceControllerPermission : System.Security.Permissions.ResourcePermissionBase
     {
         public ServiceControllerPermission() { }
-        public ServiceControllerPermission(System.Security.Permissions.PermissionState state) { }
         public ServiceControllerPermission(System.ServiceProcess.ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
         public ServiceControllerPermission(System.ServiceProcess.ServiceControllerPermissionEntry[] permissionAccessEntries) { }
+        public ServiceControllerPermission(System.Security.Permissions.PermissionState state) { }
         public System.ServiceProcess.ServiceControllerPermissionEntryCollection PermissionEntries { get { throw null; } }
     }
-    [Flags]
+    [System.Flags]
     public enum ServiceControllerPermissionAccess
     {
         None = 0,
         Browse = 1 << 1,
         Control = 1 << 2 | Browse,
     }
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct
+        | AttributeTargets.Assembly | AttributeTargets.Event, AllowMultiple = true, Inherited = false)]
     public partial class ServiceControllerPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
     {
         public ServiceControllerPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(action) { }
-        public string MachineName { get; set; }
-        public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get; set; }
-        public string ServiceName { get; set; }
+        public string MachineName { get { throw null; } set { } }
+        public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } set { } }
+        public string ServiceName { get { throw null; } set { } }
         public override System.Security.IPermission CreatePermission() { throw null; }
     }
     public partial class ServiceControllerPermissionEntry
@@ -1921,8 +1922,9 @@ namespace System.ServiceProcess
         public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
         public string ServiceName { get { throw null; } }
     }
-    public class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
+    public sealed class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
     {
+        internal ServiceControllerPermissionEntryCollection() { }
         public System.ServiceProcess.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }
         public int Add(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
         public void AddRange(System.ServiceProcess.ServiceControllerPermissionEntry[] value) { }
@@ -1931,11 +1933,11 @@ namespace System.ServiceProcess
         public void CopyTo(System.ServiceProcess.ServiceControllerPermissionEntry[] array, int index) { }
         public int IndexOf(System.ServiceProcess.ServiceControllerPermissionEntry value) { throw null; }
         public void Insert(int index, System.ServiceProcess.ServiceControllerPermissionEntry value) { }
-        public void Remove(System.ServiceProcess.ServiceControllerPermissionEntry value) { }
         protected override void OnClear() { }
         protected override void OnInsert(int index, object value) { }
         protected override void OnRemove(int index, object value) { }
         protected override void OnSet(int index, object oldValue, object newValue) { }
+        public void Remove(System.ServiceProcess.ServiceControllerPermissionEntry value) { }
     }
 }
 namespace System.Transactions

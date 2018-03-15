@@ -4,7 +4,7 @@
 
 namespace System.ServiceProcess
 {
-    [Flags]         
+    [Flags]
     public enum ServiceControllerPermissionAccess
     {
         None = 0,
