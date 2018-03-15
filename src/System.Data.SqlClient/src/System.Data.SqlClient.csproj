@@ -89,6 +89,9 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
       <Link>Common\System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\TimeoutTimer.cs">
+      <Link>Common\System\Data\ProviderBase\TimeoutTimer.cs</Link>
+    </Compile>
     <Compile Include="System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionInternal.cs" />
@@ -99,7 +102,6 @@
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
     <Compile Include="System\Data\ProviderBase\DbMetaDataFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbReferenceCollection.cs" />
-    <Compile Include="System\Data\ProviderBase\TimeoutTimer.cs" />
     <Compile Include="System\Data\Sql\IBinarySerialize.cs" />
     <Compile Include="System\Data\Sql\InvalidUdtException.cs" />
     <Compile Include="System\Data\Sql\SqlFunctionAttribute.cs" />
