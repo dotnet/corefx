@@ -71,6 +71,9 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\TimeoutTimer.cs">
       <Link>Common\System\Data\ProviderBase\TimeoutTimer.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
+      <Link>Common\System\Data\ProviderBase\DbReferenceCollection.cs</Link>
+    </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionInternal.cs" />
@@ -79,7 +82,6 @@
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
-    <Compile Include="Common\System\Data\ProviderBase\DbReferenceCollection.cs" />
     <Compile Include="System\Data\Odbc\DbDataRecord.cs" />
     <Compile Include="System\Data\Odbc\Odbc32.cs" />
     <Compile Include="System\Data\Odbc\OdbcCommand.cs">
