@@ -83,6 +83,9 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionInternal.cs">
       <Link>Common\System\Data\ProviderBase\DbConnectionInternal.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionFactory.cs</Link>
+    </Compile>
     <Compile Include="System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionInternal.cs" />
