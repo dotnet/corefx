@@ -122,9 +122,9 @@ namespace System.Net
             }
 
             WebExceptionStatus status;
-            switch (socketEx.ErrorCode)
+            switch (socketEx.SocketErrorCode)
             {
-                case (int)SocketError.HostNotFound:
+                case SocketError.HostNotFound:
                     status = WebExceptionStatus.NameResolutionFailure;
                     break;
                 default:
