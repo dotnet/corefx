@@ -907,9 +907,9 @@ namespace System
             nuint n = length;
 
 #if !netstandard11
-            if (Vector.IsHardwareAccelerated && n >= Vector<byte>.Count)
+            if (Vector.IsHardwareAccelerated && n >= (nuint)Vector<byte>.Count)
             {
-                n -= Vector<byte>.Count;
+                n -= (nuint)Vector<byte>.Count;
                 while (n > i)
                 {
                     if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
@@ -917,16 +917,16 @@ namespace System
                     {
                         goto NotEqual;
                     }
-                    i += Vector<byte>.Count;
+                    i += (nuint)Vector<byte>.Count;
                 }
                 return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)n)) ==
                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, (IntPtr)n));
             }
 #endif
 
-            if (n >= sizeof(UIntPtr))
+            if (n >= (nuint)sizeof(UIntPtr))
             {
-                n -= sizeof(UIntPtr);
+                n -= (nuint)sizeof(UIntPtr);
                 while (n > i)
                 {
                     if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
@@ -934,7 +934,7 @@ namespace System
                     {
                         goto NotEqual;
                     }
-                    i += sizeof(UIntPtr);
+                    i += (nuint)sizeof(UIntPtr);
                 }
                 return Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)n)) ==
                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, (IntPtr)n));
@@ -992,9 +992,9 @@ namespace System
             nuint n = minLength;
 
 #if !netstandard11
-            if (Vector.IsHardwareAccelerated && n > Vector<byte>.Count)
+            if (Vector.IsHardwareAccelerated && n > (nuint)Vector<byte>.Count)
             {
-                n -= Vector<byte>.Count;
+                n -= (nuint)Vector<byte>.Count;
                 while (n > i)
                 {
                     if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
@@ -1002,15 +1002,15 @@ namespace System
                     {
                         goto NotEqual;
                     }
-                    i += Vector<byte>.Count;
+                    i += (nuint)Vector<byte>.Count;
                 }
                 goto NotEqual;
             }
 #endif
 
-            if (n > sizeof(UIntPtr))
+            if (n > (nuint)sizeof(UIntPtr))
             {
-                n -= sizeof(UIntPtr);
+                n -= (nuint)sizeof(UIntPtr);
                 while (n > i)
                 {
                     if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
@@ -1018,7 +1018,7 @@ namespace System
                     {
                         goto NotEqual;
                     }
-                    i += sizeof(UIntPtr);
+                    i += (nuint)sizeof(UIntPtr);
                 }
             }
 

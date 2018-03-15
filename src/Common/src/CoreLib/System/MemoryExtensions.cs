@@ -265,7 +265,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+                    ((nuint)length) * (nuint)size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
@@ -279,9 +279,9 @@ namespace System
             if (IsTypeNumeric<T>(out int size))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ((nuint)first.Length) * size,
+                    ((nuint)first.Length) * (nuint)size,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)second.Length) * size);
+                    ((nuint)second.Length) * (nuint)size);
 
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
@@ -617,7 +617,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)length) * size);
+                    ((nuint)length) * (nuint)size);
 
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
@@ -632,9 +632,9 @@ namespace System
             if (IsTypeNumeric<T>(out int size))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ((nuint)first.Length) * size,
+                    ((nuint)first.Length) * (nuint)size,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)second.Length) * size);
+                    ((nuint)second.Length) * (nuint)size);
 
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
@@ -652,7 +652,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * size);
+                    ((nuint)valueLength) * (nuint)size);
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -670,7 +670,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * size);
+                    ((nuint)valueLength) * (nuint)size);
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -689,7 +689,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * size);
+                    ((nuint)valueLength) * (nuint)size);
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
@@ -712,7 +712,7 @@ namespace System
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * size);
+                    ((nuint)valueLength) * (nuint)size);
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
