@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -109,6 +110,29 @@ namespace System.Net
             }
 
             return exception;
+        }
+        
+        private static WebExceptionStatus GetStatusFromExceptionHelper(HttpRequestException ex)
+        {
+            WebExceptionStatus status;
+            SocketException socketEx = ex.InnerException as SocketException;
+
+            if (socketEx is null)
+            {
+                return WebExceptionStatus.UnknownError;
+            }
+
+            switch (socketEx.ErrorCode)
+            {
+                case (int)SocketError.HostNotFound:
+                    status = WebExceptionStatus.NameResolutionFailure;
+                    break;
+                default:
+                    status = WebExceptionStatus.UnknownError;
+                    break;
+            }
+
+            return status;
         }
     }
 }
