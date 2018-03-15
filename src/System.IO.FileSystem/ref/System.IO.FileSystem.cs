@@ -206,7 +206,7 @@ namespace System.IO
         public System.IO.FileAttributes Attributes { get { throw null; } set { } }
         public System.DateTime CreationTime { get { throw null; } set { } }
         public System.DateTime CreationTimeUtc { get { throw null; } set { } }
-        public abstract bool Exists { get; }
+        public virtual bool Exists { get; }
         public string Extension { get { throw null; } }
         public virtual string FullName { get { throw null; } }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
@@ -214,7 +214,7 @@ namespace System.IO
         public System.DateTime LastAccessTimeUtc { get { throw null; } set { } }
         public System.DateTime LastWriteTime { get { throw null; } set { } }
         public System.DateTime LastWriteTimeUtc { get { throw null; } set { } }
-        public abstract string Name { get; }
+        public virtual string Name { get; }
         public abstract void Delete();
         public void Refresh() { }
     }
