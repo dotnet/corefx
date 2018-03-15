@@ -58,6 +58,30 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
+        public static void TestAddNullValue()
+        {
+            // using ConcurrentDictionary<TKey, TValue> class
+            ConcurrentDictionary<string, string> dict1 = new ConcurrentDictionary<string, string>();
+            dict1["key"] = null;
+
+            // using IDictionary<TKey, TValue> interface
+            IDictionary<string, string> dict2 = new ConcurrentDictionary<string, string>();
+            dict2["key"] = null;
+
+            // using IDictionary interface
+            IDictionary dict3 = new ConcurrentDictionary<string, string>();
+            dict3["key"] = null;
+
+            // using IDictionary interface and value type values
+            Action action = () =>
+            {
+                IDictionary dict4 = new ConcurrentDictionary<string, int>();
+                dict4["key"] = null;
+            };
+            Assert.Throws<ArgumentException>(action);
+        }
+
+        [Fact]
         public static void TestAdd1()
         {
             TestAdd1(1, 1, 1, 10000);
@@ -646,7 +670,7 @@ namespace System.Collections.Concurrent.Tests
 
             // Duplicate keys.
             AssertExtensions.Throws<ArgumentException>(null, () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1), new KeyValuePair<int, int>(1, 2) }));
-            
+
             Assert.Throws<ArgumentNullException>(
                () => new ConcurrentDictionary<int, int>(1, null, EqualityComparer<int>.Default));
             // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null collection is passed");
