@@ -80,14 +80,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        internal bool IsDisabled
-        {
-            get
-            {
-                return (PoolGroupStateDisabled == _state);
-            }
-        }
-
+        internal bool IsDisabled => (PoolGroupStateDisabled == _state);
 
         internal DbConnectionPoolGroupOptions PoolGroupOptions => _poolGroupOptions;
 
@@ -170,7 +163,7 @@ namespace System.Data.ProviderBase
                 if (null != currentIdentity)
                 {
                     if (!_poolCollection.TryGetValue(currentIdentity, out pool)) // find the pool
-                    { 
+                    {
                         lock (this)
                         {
                             // Did someone already add it to the list?

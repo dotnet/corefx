@@ -119,7 +119,7 @@ namespace System.Data.ProviderBase
             return null;
         }
 
-        private Timer CreatePruningTimer() => 
+        private Timer CreatePruningTimer() =>
             ADP.UnsafeCreateTimer(
                 new TimerCallback(PruneConnectionPoolGroups),
                 null,
@@ -413,7 +413,6 @@ namespace System.Data.ProviderBase
         abstract internal DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
 
         abstract internal DbConnectionInternal GetInnerConnection(DbConnection connection);
-
 
         abstract internal void PermissionDemand(DbConnection outerConnection);
 
