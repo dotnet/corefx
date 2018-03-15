@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using SysDebug = System.Diagnostics.Debug;  // as Regex.Debug
 
 namespace System.Text.RegularExpressions
 {
@@ -38,9 +39,17 @@ namespace System.Text.RegularExpressions
                         // update linked list:
                         s_livecode_last = last.Next;
                         if (last.Next != null)
+                        {
+                            SysDebug.Assert(s_livecode_first != null);
+                            SysDebug.Assert(s_livecode_first != last);
+                            SysDebug.Assert(last.Next.Previous == last);
                             last.Next.Previous = null;
-                        else  // last one removed
+                        }
+                        else // last one removed
+                        {
+                            SysDebug.Assert(s_livecode_first == last);
                             s_livecode_first = null;
+                        }
                     }
                 }
             }
@@ -53,11 +62,8 @@ namespace System.Text.RegularExpressions
         {
             // to avoid lock:
             CachedCodeEntry first = s_livecode_first;
-            if (first == null)
-                if (!isToAdd)
-                    return null;
-            else if (first.Key == key)
-                    return first;
+            if (first?.Key == key)
+                return first;
             if (s_cacheSize == 0)
                 return null;
 
@@ -70,9 +76,10 @@ namespace System.Text.RegularExpressions
                 {
                     entry = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
                     s_livecode.Add(key, entry);
-                    // put in linked list:
+                    // put first in linked list:
                     if (s_livecode_first != null)
                     {
+                        SysDebug.Assert(s_livecode_first.Next == null);
                         s_livecode_first.Next = entry;
                         entry.Previous = s_livecode_first;
                     }
@@ -81,17 +88,17 @@ namespace System.Text.RegularExpressions
                     {
                         s_livecode_last = entry;
                     }
-                    else
+                    else if (s_livecode.Count > s_cacheSize) // remove last
                     {
-                        if (s_livecode.Count > s_cacheSize)
-                        {
-                            CachedCodeEntry last = s_livecode_last;
-                            s_livecode.Remove(last.Key);
+                        CachedCodeEntry last = s_livecode_last;
+                        SysDebug.Assert(s_livecode[last.Key] == s_livecode_last);
+                        s_livecode.Remove(last.Key);
 
-                            last.Next.Previous = null;
-                            s_livecode_last = last.Next;
-                            last.Next = null;
-                        }
+                        SysDebug.Assert(last.Previous == null);
+                        SysDebug.Assert(last.Next != null);
+                        SysDebug.Assert(last.Next.Previous == last);
+                        last.Next.Previous = null;
+                        s_livecode_last = last.Next;
                     }
                 }
                 return entry;
@@ -100,18 +107,32 @@ namespace System.Text.RegularExpressions
 
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
+            SysDebug.Assert(Monitor.IsEntered(s_livecode));
+            if (s_livecode_first?.Key == key) // again check this as could have been promoted by other thread
+                return s_livecode_first;
+            SysDebug.Assert((s_livecode_first != null && s_livecode_last != null && s_livecode.Count > 0) || 
+                            (s_livecode_first == null && s_livecode_last == null && s_livecode.Count == 0), "Linked list and Dict should be synchronized");
             if (s_livecode.TryGetValue(key, out var entry))
             {
+                SysDebug.Assert(s_livecode_first != entry, "key should not get s_livecode_first");
                 if (s_livecode_last == entry)
                 {
+                    SysDebug.Assert(entry.Previous == null, "last");
                     s_livecode_last = entry.Next;
                 }
-                else // in middle
+                else
                 {
+                    SysDebug.Assert(entry.Previous != null, "in middle");
+                    SysDebug.Assert(entry.Previous.Next == entry);
                     entry.Previous.Next = entry.Next;
                 }
-                entry.Next.Previous = entry.Previous;  // not first so Next should exist
+                SysDebug.Assert(entry.Next != null, "not first so Next should exist");
+                SysDebug.Assert(entry.Next.Previous == entry);
+                entry.Next.Previous = entry.Previous;
 
+                SysDebug.Assert(s_livecode_first != null, "as Dict has at least one");
+                SysDebug.Assert(s_livecode_first.Next == null);
+                SysDebug.Assert(s_livecode_first.Previous != null);
                 s_livecode_first.Next = entry;
                 entry.Previous = s_livecode_first;
                 entry.Next = null;
