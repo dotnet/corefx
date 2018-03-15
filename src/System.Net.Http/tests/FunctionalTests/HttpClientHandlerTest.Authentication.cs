@@ -97,7 +97,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (IsCurlHandler && authenticateHeader.Contains("Digest"))
             {
-                // TODO: #27113: Fix failing authentication test cases on different httpclienthandlers.
+                // TODO: #28065: Fix failing authentication test cases on different httpclienthandlers.
                 return;
             }
 
