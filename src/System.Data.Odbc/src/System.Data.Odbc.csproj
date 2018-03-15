@@ -191,6 +191,11 @@
     <Reference Include="System.Transactions.Local" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\System.Data.Odbc.OdbcMetaData.xml">
+      <LogicalName>System.Data.Odbc.OdbcMetaData.xml</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="DatabaseSetupInstructions.md" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
