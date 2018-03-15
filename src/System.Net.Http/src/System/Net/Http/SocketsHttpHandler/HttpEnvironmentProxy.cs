@@ -65,16 +65,31 @@ namespace System.Net.Http
             {
                 return null;
             }
-            int idx = value.IndexOf(":");
-            if (idx < 0)
+
+            // The User and password may or may not be URL encoded.
+            // Curl seems to accept both. To match that we do opportunistic decode.
+            try
             {
-                // only user name without password
-                return new NetworkCredential(value, "");
+                value = Uri.UnescapeDataString(value);
             }
-            else
+            catch { };
+
+            string password = "";
+            string domain = null;
+            int idx = value.IndexOf(':');
+            if (idx != -1)
             {
-                return new NetworkCredential(value.Substring(0, idx), value.Substring(idx+1, value.Length - idx -1 ));
+                password = value.Substring(idx+1);
+                value = value.Substring(0, idx);
             }
+            idx = value.IndexOf('\\');
+            if (idx != -1)
+            {
+                domain = value.Substring(0, idx);
+                value = value.Substring(idx+1);
+            }
+
+            return new NetworkCredential(value, password, domain);
         }
     }
 
@@ -168,18 +183,75 @@ namespace System.Net.Http
             {
                 return null;
             }
-
-            if (!value.Contains("://"))
+            if (value.StartsWith("http://"))
             {
-                value = "http://" + value;
+                value = value.Substring(7);
+            }
+            string user = null;
+            string password = null;
+            int port = 80;
+            string host = null;
+
+            // Check if there is authentication part with user and possibly password.
+            // Curl accepts raw text and that may break URI parser.
+            int separatorIndex = value.LastIndexOf('@');
+            if (separatorIndex != -1)
+            {
+                string auth = value.Substring(0, separatorIndex);
+                // The User and password may or may not be URL encoded.
+                // Curl seems to accept both. To match that,
+                // we do opportunistic decode and we use original string if it fails.
+                try
+                {
+                    auth = Uri.UnescapeDataString(auth);
+                }
+                catch { };
+
+                value = value.Substring(separatorIndex + 1);
+                separatorIndex = auth.IndexOf(':');
+                if (separatorIndex == -1)
+                {
+                    user = auth;
+                }
+                else
+                {
+                    user = auth.Substring(0, separatorIndex);
+                    password = auth.Substring(separatorIndex + 1);
+                }
             }
 
-            if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri) &&
-                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            int ipV6AddressEnd = value.IndexOf(']');
+            separatorIndex = value.LastIndexOf(':');
+            // No ':' or it is part of IPv6 address.
+            if (separatorIndex == -1 || (ipV6AddressEnd != -1 && separatorIndex < ipV6AddressEnd))
             {
-                // We only support http and https for now.
-                return uri;
+                host = value;
             }
+            else
+            {
+                try
+                {
+                    host = value.Substring(0, separatorIndex);
+                    port = Convert.ToInt32(value.Substring(separatorIndex + 1));
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            try {
+                UriBuilder ub = new UriBuilder("http", host, port);
+                if (user != null)
+                {
+                    ub.UserName = Uri.EscapeDataString(user);
+                }
+                if (password != null)
+                {
+                    ub.Password = Uri.EscapeDataString(password);
+                }
+                return ub.Uri;
+            }
+            catch { };
             return null;
         }
 
