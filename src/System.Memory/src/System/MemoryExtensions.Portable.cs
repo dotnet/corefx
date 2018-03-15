@@ -60,7 +60,7 @@ namespace System
 
             return string.Compare(span.ToString(), value.ToString(), comparisonType);
         }
-        
+
         /// <summary>
         /// Reports the zero-based index of the first occurrence of the specified <paramref name="value"/> in the current <paramref name="span"/>.
         /// <param name="span">The source span.</param>
@@ -76,7 +76,7 @@ namespace System
 
             return span.ToString().IndexOf(value.ToString(), comparisonType);
         }
-        
+
         /// <summary>
         /// Copies the characters from the source span into the destination, converting each character to lowercase,
         /// using the casing rules of the specified culture.

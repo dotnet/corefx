@@ -19,7 +19,7 @@ using nuint=System.NUInt;
 #if BIT64
 using nuint=System.UInt64;
 #else
-using nuint=System.UInt32;
+using nuint = System.UInt32;
 #endif // BIT64
 #endif // netstandard
 
@@ -1023,7 +1023,7 @@ namespace System
             }
 
         NotEqual:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
-            while((byte*)(IntPtr)minLength > (byte*)i)
+            while ((byte*)(IntPtr)minLength > (byte*)i)
             {
                 int result = Unsafe.AddByteOffset(ref first, i).CompareTo(Unsafe.AddByteOffset(ref second, i));
                 if (result != 0) return result;
