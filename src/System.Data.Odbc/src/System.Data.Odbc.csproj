@@ -52,7 +52,6 @@
     <Compile Include="Common\System\Data\Common\SafeNativeMethods.cs" />
     <Compile Include="Common\System\Data\DataStorage.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbBuffer.cs" />
-    <Compile Include="Common\System\Data\ProviderBase\DbMetaDataFactory.cs" />
     <Compile Include="$(CommonPath)\System\Data\Common\FieldNameLookup.cs">
       <Link>Common\System\Data\ProviderBase\FieldNameLookup.cs</Link>
     </Compile>
@@ -73,6 +72,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
       <Link>Common\System\Data\ProviderBase\DbReferenceCollection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbMetaDataFactory.cs">
+      <Link>Common\System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
     </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />

@@ -375,7 +375,7 @@ namespace System.Data.ProviderBase
             DataColumn parameterName = null;
             DataColumn restrictionName = null;
             DataColumn restrictionNumber = null;
-            ;
+
             string result = null;
 
             restrictionsTable = _metaDataCollectionsDataSet.Tables[DbMetaDataCollectionNames.Restrictions];
