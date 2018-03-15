@@ -36,20 +36,9 @@
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
     <!-- add specific native builds / pkgproj's here to include in servicing builds -->
-    <Project Include="Native\pkg\**\*.builds" Condition="'$(SkipNativePackageBuild)' != 'true'">
+    <Project Include="Native\pkg\**\*.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-      <BuildAllOSGroups>False</BuildAllOSGroups>
-      <FilterToOSGroup>fedora.27</FilterToOSGroup>
-    </Project>
-    <Project Include="Native\pkg\**\*.builds" Condition="'$(SkipNativePackageBuild)' != 'true'">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-      <BuildAllOSGroups>False</BuildAllOSGroups>
-      <FilterToOSGroup>opensuse.42.3</FilterToOSGroup>
-    </Project>
-    <Project Include="Native\pkg\**\*.builds" Condition="'$(SkipNativePackageBuild)' != 'true'">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-      <BuildAllOSGroups>False</BuildAllOSGroups>
-      <FilterToOSGroup>ubuntu.18.04</FilterToOSGroup>
+      <BuildAllOSGroups>true</BuildAllOSGroups>
     </Project>
   </ItemGroup>
 
