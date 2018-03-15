@@ -42,7 +42,8 @@ namespace System.Text.RegularExpressions.Tests
         [MeasureGCAllocations]
         [InlineData(400_000, 7, 15)]         // default size, most common
         [InlineData(400_000, 1, 15)]         // default size, to test MRU
-        [InlineData(80_000, 7, 0)]          // cache turned off
+        [InlineData(40_000, 7, 0)]          // cache turned off
+        [InlineData(40_000, 1_600, 15)]    // default size, to compare when cache used
         [InlineData(40_000, 1_600, 800)]    // larger size, to test cache is not O(n)
         [InlineData(40_000, 1_600, 3_200)]  // larger size, to test cache always hit
         public void IsMatch(int total, int unique, int cacheSize)
