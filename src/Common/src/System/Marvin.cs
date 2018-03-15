@@ -57,11 +57,11 @@ namespace System
                     break;
 
                 case 2:
-                    p0 += 0x800000u | MemoryMarshal.Cast<byte, ushort>(data)[0];
+                    p0 += 0x800000u | (((uint)data[0]) << 8) | data[1];
                     break;
 
                 case 3:
-                    p0 += 0x80000000u | (((uint)data[2]) << 16) | (uint)(MemoryMarshal.Cast<byte, ushort>(data)[0]);
+                    p0 += 0x80000000u | (((uint)data[2]) << 16) | (((uint)data[0]) << 8) | data[1];
                     break;
 
                 default:
