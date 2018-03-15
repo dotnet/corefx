@@ -260,12 +260,12 @@ namespace System
         {
             int length = first.Length;
 
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return length == second.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)length) * (nuint)size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
+                    ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
@@ -276,12 +276,12 @@ namespace System
         public static int SequenceCompareTo<T>(this Span<T> first, ReadOnlySpan<T> second)
             where T : IComparable<T>
         {
-            if (IsTypeNumeric<T>(out int size))
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ((nuint)first.Length) * (nuint)size,
+                    first.Length,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)second.Length) * (nuint)size);
+                    second.Length);
 
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
@@ -612,12 +612,12 @@ namespace System
             where T : IEquatable<T>
         {
             int length = first.Length;
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return length == second.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)length) * (nuint)size);
+                    ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
         }
@@ -629,12 +629,12 @@ namespace System
         public static int SequenceCompareTo<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
             where T : IComparable<T>
         {
-            if (IsTypeNumeric<T>(out int size))
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ((nuint)first.Length) * (nuint)size,
+                    first.Length,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    ((nuint)second.Length) * (nuint)size);
+                    second.Length);
 
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
@@ -647,12 +647,12 @@ namespace System
             where T : IEquatable<T>
         {
             int valueLength = value.Length;
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * (nuint)size);
+                    ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -665,12 +665,12 @@ namespace System
             where T : IEquatable<T>
         {
             int valueLength = value.Length;
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * (nuint)size);
+                    ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
@@ -684,12 +684,12 @@ namespace System
         {
             int spanLength = span.Length;
             int valueLength = value.Length;
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * (nuint)size);
+                    ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
@@ -707,12 +707,12 @@ namespace System
         {
             int spanLength = span.Length;
             int valueLength = value.Length;
-            if (IsTypeNumeric<T>(out int size))
+            if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
-                    ((nuint)valueLength) * (nuint)size);
+                    ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
@@ -1307,33 +1307,33 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsTypeNumeric<T>(out int size)
+        private static bool IsTypeComparableAsBytes<T>(out nuint size)
         {
             if (typeof(T) == typeof(byte) || typeof(T) == typeof(sbyte))
             {
-                size = sizeof(byte);
+                size = (nuint)sizeof(byte);
                 return true;
             }
 
             if (typeof(T) == typeof(char) || typeof(T) == typeof(short) || typeof(T) == typeof(ushort))
             {
-                size = sizeof(char);
+                size = (nuint)sizeof(char);
                 return true;
             }
 
             if (typeof(T) == typeof(int) || typeof(T) == typeof(uint))
             {
-                size = sizeof(int);
+                size = (nuint)sizeof(int);
                 return true;
             }
 
             if (typeof(T) == typeof(long) || typeof(T) == typeof(ulong))
             {
-                size = sizeof(long);
+                size = (nuint)sizeof(long);
                 return true;
             }
 
-            size = 0;
+            size = default;
             return false;
         }
     }

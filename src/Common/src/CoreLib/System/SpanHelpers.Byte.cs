@@ -903,7 +903,7 @@ namespace System
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
-            nuint i = (nuint)0;
+            nuint i = (nuint)0; // Explicit conversion required for netfx (NUInt)
             nuint n = length;
 
 #if !netstandard11
@@ -977,7 +977,7 @@ namespace System
         }
 #endif
 
-        public static unsafe int SequenceCompareTo(ref byte first, nuint firstLength, ref byte second, nuint secondLength)
+        public static unsafe int SequenceCompareTo(ref byte first, int firstLength, ref byte second, int secondLength)
         {
             Debug.Assert(firstLength >= 0);
             Debug.Assert(secondLength >= 0);
@@ -985,10 +985,10 @@ namespace System
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
-            nuint minLength = firstLength;
-            if (minLength > secondLength) minLength = secondLength;
+            nuint minLength = (nuint)firstLength;
+            if (minLength > (nuint)secondLength) minLength = (nuint)secondLength;
 
-            nuint i = (nuint)0;
+            nuint i = (nuint)0;  // Explicit conversion required for netfx (NUInt)
             nuint n = minLength;
 
 #if !netstandard11
@@ -1031,9 +1031,7 @@ namespace System
             }
 
         Equal:
-            if (firstLength < secondLength) return -1;
-            if (firstLength > secondLength) return 1;
-            return 0;
+            return firstLength - secondLength;
         }
 
 #if !netstandard11
