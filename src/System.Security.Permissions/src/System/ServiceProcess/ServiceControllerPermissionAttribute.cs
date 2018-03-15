@@ -11,9 +11,9 @@ namespace System.ServiceProcess
     public class ServiceControllerPermissionAttribute : CodeAccessSecurityAttribute
     {
         public ServiceControllerPermissionAttribute(SecurityAction action): base(action) { }
-        public string MachineName { get; set; }
-        public ServiceControllerPermissionAccess PermissionAccess { get; set; }
-        public string ServiceName { get; set; }
+        public string MachineName { get => null; set { } }
+        public ServiceControllerPermissionAccess PermissionAccess { get => default(ServiceControllerPermissionAccess); set { } }
+        public string ServiceName { get => null; set { } }
         public override IPermission CreatePermission() { return default(IPermission); }
     }
 }

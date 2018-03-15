@@ -6,10 +6,10 @@ namespace System.ServiceProcess
 {
     public class ServiceControllerPermissionEntry
     {
-        public ServiceControllerPermissionEntry() { MachineName = null; ServiceName = null; PermissionAccess = default(ServiceControllerPermissionAccess); }
-        public ServiceControllerPermissionEntry(ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { MachineName = null; ServiceName = null; PermissionAccess = default(ServiceControllerPermissionAccess); }
-        public string MachineName { get; }
-        public ServiceControllerPermissionAccess PermissionAccess { get; }
-        public string ServiceName { get; }
+        public ServiceControllerPermissionEntry() { }
+        public ServiceControllerPermissionEntry(ServiceControllerPermissionAccess permissionAccess, string machineName, string serviceName) { }
+        public string MachineName { get => null; }
+        public ServiceControllerPermissionAccess PermissionAccess { get => default(ServiceControllerPermissionAccess); }
+        public string ServiceName { get => null; }
     }
 }
