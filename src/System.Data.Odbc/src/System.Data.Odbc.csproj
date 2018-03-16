@@ -76,6 +76,9 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbMetaDataFactory.cs">
       <Link>System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionClosed.cs">
+      <Link>System\Data\ProviderBase\DbConnectionClosed.cs</Link>
+    </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionInternal.cs" />
