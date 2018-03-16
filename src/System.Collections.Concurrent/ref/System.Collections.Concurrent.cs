@@ -124,6 +124,7 @@ namespace System.Collections.Concurrent
         public bool TryGetValue(TKey key, out TValue value) { throw null; }
         public bool TryRemove(TKey key, out TValue value) { throw null; }
         public bool TryUpdate(TKey key, TValue newValue, TValue comparisonValue) { throw null; }
+        public bool TryUpdate(TKey key, TValue newValue, TValue comparisonValue, System.Collections.Generic.IEqualityComparer<TValue> comparer) { throw null; }
     }
     public partial class ConcurrentQueue<T> : System.Collections.Concurrent.IProducerConsumerCollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.ICollection, System.Collections.IEnumerable
     {
