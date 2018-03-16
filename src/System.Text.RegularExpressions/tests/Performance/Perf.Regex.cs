@@ -19,15 +19,24 @@ namespace System.Text.RegularExpressions.Tests
         [MeasureGCAllocations]
         public void Match()
         {
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < InnerIterations; i++)
+            var cacheSizeOld = Regex.CacheSize;
+            try
+            {
+                Regex.CacheSize = 0; // disable cache to get clearer results
+                foreach (var iteration in Benchmark.Iterations)
+                    using (iteration.StartMeasurement())
                     {
-                        foreach(var test in Match_TestData())
-                            Regex.Match((string)test[1], (string)test[0], (RegexOptions)test[2]);
+                        for (int i = 0; i < InnerIterations; i++)
+                        {
+                            foreach(var test in Match_TestData())
+                                Regex.Match((string)test[1], (string)test[0], (RegexOptions)test[2]);
+                        }
                     }
-                }
+            }
+            finally
+            {
+                Regex.CacheSize = cacheSizeOld;
+            }
         }
 
         // A series of patterns (all valid and non pathological) and inputs (which they may or may not match)
