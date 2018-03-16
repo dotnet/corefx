@@ -35,7 +35,7 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(GetFullPath_Windows_NonFullyQualified))]
+            MemberData(nameof(GetFullPath_Windows_FullyQualified))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
@@ -70,7 +70,7 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(GetFullPath_CommonUnRootedWindowsData))]
+            MemberData(nameof(GetFullPath_CommonRootedWindowsData))]
         public void GetFullPath_CommonUnRooted_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));

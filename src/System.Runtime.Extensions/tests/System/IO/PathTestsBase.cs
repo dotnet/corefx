@@ -205,7 +205,7 @@ namespace System.IO.Tests
             { @"C:\\foo2", @"C:\" },
         };
 
-        public static TheoryData<string, string, string> GetFullPath_Windows_NonFullyQualified => new TheoryData<string, string, string>
+        public static TheoryData<string, string, string> GetFullPath_Windows_FullyQualified => new TheoryData<string, string, string>
         {
             { @"C:\git\corefx", @"C:\git\corefx", @"C:\git\corefx" },
             { @"C:\git\corefx.\.\.\.\.\.", @"C:\git\corefx", @"C:\git\corefx" },
@@ -221,7 +221,7 @@ namespace System.IO.Tests
             { @"C:\.\corefx\", @"C:\git\corefx", @"C:\corefx\" },
         };
 
-        public static TheoryData<string, string, string> GetFullPath_CommonUnRootedWindowsData => new TheoryData<string, string, string>
+        public static TheoryData<string, string, string> GetFullPath_CommonRootedWindowsData => new TheoryData<string, string, string>
         {
             { "", @"C:\git\corefx", @"C:\git\corefx" },
             { "..", @"C:\git\corefx", @"C:\git" },
@@ -233,6 +233,13 @@ namespace System.IO.Tests
             { @"\tmp\bar\..", @"C:\git\corefx", @"C:\tmp" },
             { @"\tmp\bar\..", @"C:\git\corefx", @"C:\tmp" },
             { @"\", @"C:\git\corefx", @"C:\" },
+
+            { @"..\..\tmp\bar", @"C:\git\corefx", @"C:\tmp\bar" },
+            { @"..\..\.\bar", @"C:\git\corefx", @"C:\bar" },
+            { @"..\..\..\..\tmp\..", @"C:\git\corefx", @"C:\" },
+            { @"\tmp\..\bar..\..\..", @"C:\git\corefx", @"C:\" },
+            { @"\tmp\..\bar\..", @"C:\git\corefx", @"C:\" },
+            { @"\.\.\..\..\", @"C:\git\corefx", @"C:\" },
 
             // Specific drive rooted
             { @"C:tmp\foo\..", @"C:\git\corefx", @"C:\git\corefx\tmp" },
@@ -247,7 +254,39 @@ namespace System.IO.Tests
             { @"Z:tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
             { @"Z:tmp", @"C:\git\corefx", @"Z:\tmp" },
             { @"Z:", @"C:\git\corefx", @"Z:\" },
-            { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" }
+            { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" },
+
+            // Relative segments eating into the root
+            { @"C:..\..\..\tmp\foo\..", @"C:\git\corefx", @"C:\tmp" },
+            { @"C:tmp\..\..\foo\.", @"C:\git\corefx", @"C:\git\foo" },
+            { @"C:..\..\tmp\foo\..", @"C:\git\corefx", @"C:\tmp" },
+            { @"C:tmp\..\", @"C:\git\corefx", @"C:\git\corefx\" },
+            { @"C:", @"C:\git\corefx", @"C:\git\corefx" },
+            { @"C", @"C:\git\corefx", @"C:\git\corefx\C" },
+
+            { @"C:tmp\..\..\..\..\foo\..", @"C:\git\corefx", @"C:\" },
+            { @"C:tmp\..\..\foo\.", @"C:\", @"C:\foo" },
+            { @"C:..\..\tmp\..\foo\..", @"C:\", @"C:\" },
+            { @"C:tmp\..\", @"C:\", @"C:\" },
+
+            { @"Z:tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
+            { @"Z:tmp\foo\.", @"C:\git\corefx", @"Z:\tmp\foo" },
+            { @"Z:tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
+            { @"Z:tmp", @"C:\git\corefx", @"Z:\tmp" },
+            { @"Z:", @"C:\git\corefx", @"Z:\" },
+            { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" },
+
+            { @"Z:..\..\..\tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
+            { @"Z:tmp\..\..\foo\.", @"C:\git\corefx", @"Z:\foo" },
+            { @"Z:..\..\tmp\foo\..", @"C:\git\corefx", @"Z:\tmp" },
+            { @"Z:tmp\..\", @"C:\git\corefx", @"Z:\" },
+            { @"Z:", @"C:\git\corefx", @"Z:\" },
+            { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" },
+
+            { @"Z:tmp\..\..\..\..\foo\..", @"C:\git\corefx", @"Z:\" },
+            { @"Z:tmp\..\..\foo\.", @"C:\", @"Z:\foo" },
+            { @"Z:..\..\tmp\..\foo\..", @"C:\", @"Z:\" },
+            { @"Z:tmp\..\", @"C:\", @"Z:\" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_Windows_UNC => new TheoryData<string, string, string>
@@ -273,6 +312,17 @@ namespace System.IO.Tests
             { "foo", @"LOCALHOST\shareH\dir", @"LOCALHOST\shareH\dir\foo" },
             { "foo", @"LOCALHOST\shareK\", @"LOCALHOST\shareK\foo" },
             { "foo", @"LOCALHOST\  shareL\", @"LOCALHOST\  shareL\foo" },
+
+            // Relative segments eating into the root
+            { @".\..\foo\..\", @"server\share", @"server\share\" },
+            { @"..\foo\tmp\..\..\", @"server\share", @"server\share\" },
+            { @"..\..\..\foo", @"server\share", @"server\share\foo" },
+            { @"..\foo\..\..\tmp", @"server\share", @"server\share\tmp" },
+            { @"..\foo", @"server\share", @"server\share\foo" },
+            { @"...\\foo", @"server\share", @"server\share\...\foo" },
+            { @"...\..\.\foo", @"server\share", @"server\share\foo" },
+            { @"..\foo\tmp\..\..\..\..\..\", @"server\share", @"server\share\" },
+            { @"..\..\..\..\foo", @"server\share", @"server\share\foo" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_Windows_CommonDevicePaths => new TheoryData<string, string, string>
@@ -302,6 +352,16 @@ namespace System.IO.Tests
             { @".\foo", @"", @".\foo" },
             { @"..\foo", @"", @"..\foo" },
             { @"C:", @"", @"C:\"},
+
+            // Relative segments eating into the root
+            { @"foo", @"GLOBALROOT\", @"GLOBALROOT\foo" },
+            { @"..\..\foo\..\..\", @"", @"..\" },
+            { @".\..\..\..\..\foo", @"", @".\foo" },
+            { @"..\foo\..\..\..\", @"", @"..\" },
+            { @"\.\.\..\", @"C:\", @"C:\"},
+            { @"..\..\..\foo", @"GLOBALROOT\", @"GLOBALROOT\foo" },
+            { @"foo\..\..\", @"", @"foo\" },
+            { @".\.\foo\..\", @"", @".\" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_Windows_PathIsDevicePath => new TheoryData<string, string, string>
@@ -355,6 +415,26 @@ namespace System.IO.Tests
             { @"/tmp/bar/..", @"/home/git", @"/tmp" },
             { @"/tmp/..", @"/home/git", @"/" },
             { @"/", @"/home/git", @"/" },
+
+            { @"/tmp/../../../bar", @"/home/git", @"/bar" },
+            { @"/bar/././././../../..", @"/home/git", @"/" },
+            { @"/../../tmp/../../", @"/home/git", @"/" },
+            { @"/../../tmp/bar/..", @"/home/git", @"/tmp" },
+            { @"/tmp/..", @"/home/git", @"/" },
+            { @"/././../../../../", @"/home/git", @"/" },
+
+            { @"/tmp/../../../../../bar", @"/home/git", @"/bar" },
+            { @"/./././bar/../../../", @"/home/git", @"/bar/" },
+            { @"/tmp/..", @"/home/git", @"/" },
+            { @"/../../tmp/bar/..", @"/home/git", @"/tmp" },
+            { @"/tmp/..", @"/home/git", @"/" },
+            { @"../../../", @"/home/git", @"/" },
+
+            { @"../.././././bar/../../../", @"/home/git", @"/" },
+            { @"../../.././tmp/..", @"/home/git", @"/" },
+            { @"../../../tmp/bar/..", @"/home/git", @"/tmp" },
+            { @"../../././tmp/..", @"/home/git", @"/" },
+            { @"././../../../", @"/home/git", @"/" },
         };
 
         public static TheoryData<string, string, string> GetFullPathBasePath_ArgumentNullException => new TheoryData<string, string, string>
