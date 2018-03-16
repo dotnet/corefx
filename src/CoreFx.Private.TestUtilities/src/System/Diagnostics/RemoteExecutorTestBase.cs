@@ -40,7 +40,7 @@ namespace System.Diagnostics
         /// <param name="method">The method to invoke.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<int> method, 
+            Func<int> method,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), Array.Empty<string>(), options);
@@ -58,6 +58,7 @@ namespace System.Diagnostics
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
+        /// <param name="arg">The argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
             Func<string, Task<int>> method,
@@ -70,10 +71,23 @@ namespace System.Diagnostics
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
         /// <param name="arg1">The first argument to pass to the method.</param>
+        /// <param name="arg2">The second argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<string, int> method, 
-            string arg, 
+            Func<string, string, Task<int>> method,
+            string arg1, string arg2,
+            RemoteInvokeOptions options = null)
+        {
+            return RemoteInvoke(GetMethodInfo(method), new[] { arg1, arg2 }, options);
+        }
+
+        /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
+        /// <param name="method">The method to invoke.</param>
+        /// <param name="arg">The argument to pass to the method.</param>
+        /// <param name="options">Options to use for the invocation.</param>
+        public static RemoteInvokeHandle RemoteInvoke(
+            Func<string, int> method,
+            string arg,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), new[] { arg }, options);
@@ -85,8 +99,8 @@ namespace System.Diagnostics
         /// <param name="arg2">The second argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<string, string, int> method, 
-            string arg1, string arg2, 
+            Func<string, string, int> method,
+            string arg1, string arg2,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), new[] { arg1, arg2 }, options);
@@ -99,8 +113,8 @@ namespace System.Diagnostics
         /// <param name="arg3">The third argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<string, string, string, int> method, 
-            string arg1, string arg2, string arg3, 
+            Func<string, string, string, int> method,
+            string arg1, string arg2, string arg3,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), new[] { arg1, arg2, arg3 }, options);
@@ -114,8 +128,8 @@ namespace System.Diagnostics
         /// <param name="arg4">The fourth argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<string, string, string, string, int> method, 
-            string arg1, string arg2, string arg3, string arg4, 
+            Func<string, string, string, string, int> method,
+            string arg1, string arg2, string arg3, string arg4,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), new[] { arg1, arg2, arg3, arg4 }, options);
@@ -130,8 +144,8 @@ namespace System.Diagnostics
         /// <param name="arg5">The fifth argument to pass to the method.</param>
         /// <param name="options">Options to use for the invocation.</param>
         public static RemoteInvokeHandle RemoteInvoke(
-            Func<string, string, string, string, string, int> method, 
-            string arg1, string arg2, string arg3, string arg4, string arg5, 
+            Func<string, string, string, string, string, int> method,
+            string arg1, string arg2, string arg3, string arg4, string arg5,
             RemoteInvokeOptions options = null)
         {
             return RemoteInvoke(GetMethodInfo(method), new[] { arg1, arg2, arg3, arg4, arg5 }, options);
@@ -172,17 +186,31 @@ namespace System.Diagnostics
         /// <summary>A cleanup handle to the Process created for the remote invocation.</summary>
         public sealed class RemoteInvokeHandle : IDisposable
         {
-            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options)
+            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options, string assemblyName = null, string className = null, string methodName = null)
             {
                 Process = process;
                 Options = options;
+                AssemblyName = assemblyName;
+                ClassName = className;
+                MethodName = methodName;
             }
 
-            public Process Process { get; private set; }
+            public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
+            public string AssemblyName { get; private set; }
+            public string ClassName { get; private set; }
+            public string MethodName { get; private set; }
 
             public void Dispose()
             {
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                Assert.True(disposing, $"A test {AssemblyName}!{ClassName}.{MethodName} forgot to Dispose() the result of RemoteInvoke()");
+
                 if (Process != null)
                 {
                     // A bit unorthodox to do throwing operations in a Dispose, but by doing it here we avoid
@@ -222,6 +250,13 @@ namespace System.Diagnostics
                 }
             }
 
+            ~RemoteInvokeHandle()
+            {
+                // Finalizer flags tests that omitted the explicit Dispose() call; they must have it, or they aren't
+                // waiting on the remote execution
+                Dispose(disposing: false);
+            }
+
             private sealed class RemoteExecutionException : XunitException
             {
                 internal RemoteExecutionException(string stackTrace) : base("Remote process failed with an unhandled exception.", stackTrace) { }
@@ -232,6 +267,8 @@ namespace System.Diagnostics
     /// <summary>Options used with RemoteInvoke.</summary>
     public sealed class RemoteInvokeOptions
     {
+        private bool _runAsSudo;
+
         public bool Start { get; set; } = true;
         public ProcessStartInfo StartInfo { get; set; } = new ProcessStartInfo();
         public bool EnableProfiling { get; set; } = true;
@@ -240,5 +277,22 @@ namespace System.Diagnostics
         public int TimeOut {get; set; } = RemoteExecutorTestBase.FailWaitTimeoutMilliseconds;
         public int ExpectedExitCode { get; set; } = RemoteExecutorTestBase.SuccessExitCode;
         public string ExceptionFile { get; } = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+        public bool RunAsSudo
+        {
+            get
+            {
+                return _runAsSudo;
+            }
+            set
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    throw new PlatformNotSupportedException();
+                }
+
+                _runAsSudo = value;
+            }
+        }
     }
 }

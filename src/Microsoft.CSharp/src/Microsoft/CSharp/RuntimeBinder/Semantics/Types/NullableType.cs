@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CSharp.RuntimeBinder.Errors;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -16,24 +18,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class NullableType : CType
     {
-        private AggregateType ats;
-        public BSYMMGR symmgr;
-        public TypeManager typeManager;
+        private AggregateType _ats;
 
-        public AggregateType GetAts()
+        public NullableType(CType underlyingType)
+            : base(TypeKind.TK_NullableType)
         {
-            if (ats == null)
-            {
-                AggregateSymbol aggNullable = typeManager.GetNullable();
-                CType typePar = GetUnderlyingType();
-                CType[] typeParArray = { typePar };
-                TypeArray ta = symmgr.AllocParams(1, typeParArray);
-                ats = typeManager.GetAggregate(aggNullable, ta);
-            }
-
-            return ats;
+            UnderlyingType = underlyingType;
         }
-        public CType GetUnderlyingType() { return UnderlyingType; }
+
+        public override AggregateType GetAts() =>
+            _ats ?? (_ats = TypeManager.GetAggregate(TypeManager.GetNullable(), TypeArray.Allocate(UnderlyingType)));
 
         public override CType StripNubs() => UnderlyingType;
 
@@ -43,8 +37,28 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return UnderlyingType;
         }
 
-        public void SetUnderlyingType(CType pType) { UnderlyingType = pType; }
+        public CType UnderlyingType { get; }
 
-        public CType UnderlyingType;
+        public override bool IsValueType => true;
+
+        public override bool IsStructOrEnum => true;
+
+        public override bool IsStructType => true;
+
+        public override Type AssociatedSystemType => typeof(Nullable<>).MakeGenericType(UnderlyingType.AssociatedSystemType);
+
+        public override CType BaseOrParameterOrElementType => UnderlyingType;
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_STRUCT;
+
+        [ExcludeFromCodeCoverage] // Should be unreachable. Overload exists just to catch it being hit during debug.
+        public override ConstValKind ConstValKind
+        {
+            get
+            {
+                Debug.Fail("Constant nullable?");
+                return ConstValKind.Decimal; // Equivalent to previous code, so least change for this unreachable branch.
+            }
+        }
     }
 }

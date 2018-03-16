@@ -7,9 +7,11 @@
       net46;
     </PackageConfigurations>
     <BuildConfigurations>
+      uapaot-Windows_NT;
       uap-Windows_NT;
       netfx-Windows_NT;
-      netcoreapp;
+      netcoreapp-Windows_NT;
+      netcoreapp-Unix;
       $(PackageConfigurations)
     </BuildConfigurations>
   </PropertyGroup>

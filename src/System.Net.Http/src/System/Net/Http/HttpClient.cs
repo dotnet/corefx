@@ -452,8 +452,18 @@ namespace System.Net.Http
                 cts = _pendingRequestsCts;
             }
 
-            // Initiate the send
-            Task<HttpResponseMessage> sendTask = base.SendAsync(request, cts.Token);
+            // Initiate the send.
+            Task<HttpResponseMessage> sendTask;
+            try
+            {
+                sendTask = base.SendAsync(request, cts.Token);
+            }
+            catch
+            {
+                HandleFinishSendAsyncCleanup(cts, disposeCts);
+                throw;
+            }
+
             return completionOption == HttpCompletionOption.ResponseContentRead ?
                 FinishSendAsyncBuffered(sendTask, request, cts, disposeCts) :
                 FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts);
@@ -475,7 +485,7 @@ namespace System.Net.Http
                 // Buffer the response content if we've been asked to and we have a Content to buffer.
                 if (response.Content != null)
                 {
-                    await response.Content.LoadIntoBufferAsync(_maxResponseContentBufferSize).ConfigureAwait(false);
+                    await response.Content.LoadIntoBufferAsync(_maxResponseContentBufferSize, cts.Token).ConfigureAwait(false);
                 }
 
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);

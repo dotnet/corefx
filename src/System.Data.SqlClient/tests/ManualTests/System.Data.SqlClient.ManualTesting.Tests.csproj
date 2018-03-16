@@ -13,6 +13,7 @@
     <Compile Include="DataCommon\CheckConnStrSetupFactAttribute.cs" />
     <Compile Include="SQL\AdapterTest\AdapterTest.cs" />
     <Compile Include="SQL\AsyncTest\BeginExecAsyncTest.cs" />
+    <Compile Include="SQL\AsyncTest\XmlReaderAsyncTest.cs" />
     <Compile Include="SQL\Common\AsyncDebugScope.cs" />
     <Compile Include="SQL\Common\ConnectionPoolWrapper.cs" />
     <Compile Include="SQL\Common\InternalConnectionWrapper.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="SQL\MARSTest\MARSTest.cs" />
     <Compile Include="SQL\MirroringTest\ConnectionOnMirroringTest.cs" />
     <Compile Include="SQL\ParallelTransactionsTest\ParallelTransactionsTest.cs" />
+    <Compile Include="SQL\SqlCredentialTest\SqlCredentialTest.cs" />
     <Compile Include="SQL\SqlSchemaInfoTest\SqlSchemaInfoTest.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\AdjustPrecScaleForBulkCopy.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\ErrorOnRowsMarkedAsDeleted.cs" />

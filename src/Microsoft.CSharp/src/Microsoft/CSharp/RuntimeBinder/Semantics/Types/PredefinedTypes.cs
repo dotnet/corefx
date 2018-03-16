@@ -9,23 +9,15 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class PredefinedTypes
+    internal static class PredefinedTypes
     {
-        private SymbolTable _runtimeBinderSymbolTable;
-        private readonly BSYMMGR _symbolManager;
-        private AggregateSymbol[] _predefSyms;    // array of predefined symbol types.
-
-        public PredefinedTypes(BSYMMGR symbolManager)
-        {
-            _symbolManager = symbolManager;
-            _runtimeBinderSymbolTable = null;
-        }
+        private static readonly AggregateSymbol[] s_predefSymbols = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
 
         // We want to delay load the predefined symbols as needed.
-        private AggregateSymbol DelayLoadPredefSym(PredefinedType pt)
+        private static AggregateSymbol DelayLoadPredefSym(PredefinedType pt)
         {
-            CType type = _runtimeBinderSymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
-            AggregateSymbol sym = type.getAggregate();
+            AggregateType type = (AggregateType)SymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
+            AggregateSymbol sym = type.OwningAggregate;
             return InitializePredefinedType(sym, pt);
         }
 
@@ -38,35 +30,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return sym;
         }
 
-        public void Init(SymbolTable symtable)
-        {
-            _runtimeBinderSymbolTable = symtable;
-            Debug.Assert(_symbolManager != null);
-            Debug.Assert(_predefSyms == null);
-
-            _predefSyms = new AggregateSymbol[(int)PredefinedType.PT_COUNT];
-        }
-
-        public AggregateSymbol GetPredefinedAggregate(PredefinedType pt) =>
-            _predefSyms[(int)pt] ?? (_predefSyms[(int)pt] = DelayLoadPredefSym(pt));
+        public static AggregateSymbol GetPredefinedAggregate(PredefinedType pt) =>
+            s_predefSymbols[(int)pt] ?? (s_predefSymbols[(int)pt] = DelayLoadPredefSym(pt));
 
         ////////////////////////////////////////////////////////////////////////////////
         // Some of the predefined types have built-in names, like "int" or "string" or
-        // "object". This return the nice name if one exists; otherwise null is 
+        // "object". This return the nice name if one exists; otherwise null is
         // returned.
 
         private static string GetNiceName(PredefinedType pt) => PredefinedTypeFacts.GetNiceName(pt);
 
         public static string GetNiceName(AggregateSymbol type) =>
             type.IsPredefined() ? GetNiceName(type.GetPredefType()) : null;
-
-        public static string GetFullName(PredefinedType pt) => PredefinedTypeFacts.GetName(pt);
     }
 
     internal static class PredefinedTypeFacts
     {
-        internal static string GetName(PredefinedType type) => s_types[(int)type].Name;
-
         internal static FUNDTYPE GetFundType(PredefinedType type) => s_types[(int)type].FundType;
 
         internal static Type GetAssociatedSystemType(PredefinedType type) => s_types[(int)type].AssociatedSystemType;

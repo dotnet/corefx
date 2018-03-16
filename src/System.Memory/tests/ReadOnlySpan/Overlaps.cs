@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.SpanTests
@@ -32,8 +33,8 @@ namespace System.SpanTests
 
                 ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
 
-                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
-                Span<int> actual = a.AsSpan().Slice(i, 5);
+                Span<int> expected = new int[a.Length].AsSpan(i, 5);
+                Span<int> actual = a.AsSpan(i, 5);
 
                 DoubleEachElementForwards(source, expected);
                 DoubleEachElementForwards(source, actual);
@@ -49,11 +50,11 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int))
-                    .NonPortableCast<byte, int>();
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
+                    a.AsReadOnlySpan().AsBytes()
+                    .Slice(2, 5 * sizeof(int)));
 
-                Span<int> actual = a.AsSpan().Slice(0, 5);
+                Span<int> actual = a.AsSpan(0, 5);
 
                 DoubleEachElementForwards(source, actual);
             });
@@ -62,11 +63,11 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int))
-                    .NonPortableCast<byte, int>();
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
+                    a.AsReadOnlySpan().AsBytes()
+                    .Slice(2, 5 * sizeof(int)));
 
-                Span<int> actual = a.AsSpan().Slice(1, 5);
+                Span<int> actual = a.AsSpan(1, 5);
 
                 DoubleEachElementForwards(source, actual);
             });
@@ -96,8 +97,8 @@ namespace System.SpanTests
 
                 ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
 
-                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
-                Span<int> actual = a.AsSpan().Slice(i, 5);
+                Span<int> expected = new int[a.Length].AsSpan(i, 5);
+                Span<int> actual = a.AsSpan(i, 5);
 
                 DoubleEachElementBackwards(source, expected);
                 DoubleEachElementBackwards(source, actual);
@@ -113,11 +114,10 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int))
-                    .NonPortableCast<byte, int>();
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
+                    a.AsReadOnlySpan().AsBytes().Slice(2, 5 * sizeof(int)));
 
-                Span<int> actual = a.AsSpan().Slice(0, 5);
+                Span<int> actual = a.AsSpan(0, 5);
 
                 DoubleEachElementBackwards(source, actual);
             });
@@ -126,11 +126,10 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int))
-                    .NonPortableCast<byte, int>();
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
+                    a.AsReadOnlySpan().AsBytes().Slice(2, 5 * sizeof(int)));
 
-                Span<int> actual = a.AsSpan().Slice(1, 5);
+                Span<int> actual = a.AsSpan(1, 5);
 
                 DoubleEachElementBackwards(source, actual);
             });

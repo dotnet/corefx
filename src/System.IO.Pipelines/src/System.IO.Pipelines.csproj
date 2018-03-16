@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{1032D5F6-5AE7-4002-A0E4-FEBEADFEA977}</ProjectGuid>
+    <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.3-Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
+    <Compile Include="System\IO\Pipelines\BufferSegment.cs" />
+    <Compile Include="System\IO\Pipelines\CompletionData.cs" />
+    <Compile Include="System\IO\Pipelines\FlushResult.cs" />
+    <Compile Include="System\IO\Pipelines\InlineScheduler.cs" />
+    <Compile Include="System\IO\Pipelines\IDuplexPipe.cs" />
+    <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeReader.cs" />
+    <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeWriter.cs" />
+    <Compile Include="System\IO\Pipelines\Pipe.cs" />
+    <Compile Include="System\IO\Pipelines\PipeAwaitable.cs" />
+    <Compile Include="System\IO\Pipelines\PipeCompletion.cs" />
+    <Compile Include="System\IO\Pipelines\PipeCompletionCallback.cs" />
+    <Compile Include="System\IO\Pipelines\PipeCompletionCallbacks.cs" />
+    <Compile Include="System\IO\Pipelines\PipeOptions.cs" />
+    <Compile Include="System\IO\Pipelines\PipeReader.cs" />
+    <Compile Include="System\IO\Pipelines\PipeReaderState.cs" />
+    <Compile Include="System\IO\Pipelines\PipeScheduler.cs" />
+    <Compile Include="System\IO\Pipelines\PipeWriter.cs" />
+    <Compile Include="System\IO\Pipelines\ReadResult.cs" />
+    <Compile Include="System\IO\Pipelines\ResultFlags.cs" />
+    <Compile Include="System\IO\Pipelines\ThrowHelper.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+    <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netcoreapp.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.3'">
+    <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netstandard1.3.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+    <Compile Include="System\IO\Pipelines\ThreadPoolScheduler.netstandard.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" Condition="'$(TargetGroup)' == 'netstandard1.3'" />
+    <Reference Include="System.Threading.Tasks.Extensions" />
+    <Reference Include="System.Threading.ThreadPool" Condition="'$(TargetGroup)' != 'netstandard1.3'" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

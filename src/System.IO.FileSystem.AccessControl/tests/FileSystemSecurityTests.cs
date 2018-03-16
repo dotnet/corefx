@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information
 
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace System.IO
                 fileSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
             Assert.Equal(1, rules.Count);
             var actualAddedRule = (FileSystemAccessRule)rules[0];
-            Assert.Equal(accessRule.IdentityReference, actualAddedRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), actualAddedRule.IdentityReference);
             Assert.Equal(accessRule.FileSystemRights, actualAddedRule.FileSystemRights);
             Assert.Equal(accessRule.AccessControlType, actualAddedRule.AccessControlType);
         }
@@ -80,7 +81,7 @@ namespace System.IO
 
             Assert.Equal(2, rules.Count);
             var existingAccessRule = (FileSystemAccessRule)rules[0];
-            Assert.Equal(new NTAccount(@"NT AUTHORITY\SYSTEM"), existingAccessRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), existingAccessRule.IdentityReference);
             existingAccessRule = (FileSystemAccessRule)rules[1];
             Assert.Equal(new NTAccount(@"NT AUTHORITY\Network Service"), existingAccessRule.IdentityReference);
         }
@@ -255,7 +256,7 @@ namespace System.IO
 
             Assert.Equal(2, rules.Count);
             var existingAccessRule = (FileSystemAccessRule)rules[0];
-            Assert.Equal(new NTAccount(@"NT AUTHORITY\SYSTEM"), existingAccessRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), existingAccessRule.IdentityReference);
             Assert.Equal(AccessControlType.Deny, existingAccessRule.AccessControlType);
             Assert.Equal(FileSystemRights.ReadPermissions, existingAccessRule.FileSystemRights);
             existingAccessRule = (FileSystemAccessRule)rules[1];
@@ -285,7 +286,7 @@ namespace System.IO
                 fileSecurity.GetAuditRules(true, true, typeof(System.Security.Principal.NTAccount));
             Assert.Equal(1, auditRules.Count);
             var actualAddedRule = (FileSystemAuditRule)auditRules[0];
-            Assert.Equal(new NTAccount(@"NT AUTHORITY\SYSTEM"), actualAddedRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), actualAddedRule.IdentityReference);
             Assert.Equal(AuditFlags.Success, actualAddedRule.AuditFlags);
             Assert.Equal(FileSystemRights.AppendData, actualAddedRule.FileSystemRights);
         }
@@ -308,7 +309,7 @@ namespace System.IO
 
             Assert.Equal(2, auditRules.Count);
             var firstAuditRule = (FileSystemAuditRule)auditRules[0];
-            Assert.Equal(new NTAccount(@"NT AUTHORITY\SYSTEM"), firstAuditRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), firstAuditRule.IdentityReference);
             Assert.Equal(AuditFlags.Success, firstAuditRule.AuditFlags);
             Assert.Equal(FileSystemRights.Delete, firstAuditRule.FileSystemRights);
             var secondAuditRule = (FileSystemAuditRule)auditRules[1];
@@ -336,7 +337,7 @@ namespace System.IO
             var existingRule = (FileSystemAuditRule)rules[0];
             Assert.Equal(FileSystemRights.Read, existingRule.FileSystemRights);
             Assert.Equal(AuditFlags.Failure, existingRule.AuditFlags);
-            Assert.Equal(new NTAccount(@"NT AUTHORITY\SYSTEM"), existingRule.IdentityReference);
+            Assert.Equal(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), existingRule.IdentityReference);
         }
 
         [Fact]

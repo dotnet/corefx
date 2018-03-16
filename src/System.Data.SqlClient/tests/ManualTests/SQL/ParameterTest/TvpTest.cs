@@ -41,6 +41,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         // data value and server consts
         private string _connStr;
 
+        [ActiveIssue(27858, TestPlatforms.AnyUnix)]
         [CheckConnStrSetupFact]
         public void TestMain()
         {
@@ -1115,7 +1116,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
                 catch (SqlException se)
                 {
-                    Console.WriteLine("SqlException: {0}", se.Message);
+                    Console.WriteLine("SqlException. Error Code: {0}", se.Number);
                 }
                 catch (InvalidOperationException ioe)
                 {

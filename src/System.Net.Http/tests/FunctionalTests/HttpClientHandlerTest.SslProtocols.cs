@@ -16,7 +16,7 @@ namespace System.Net.Http.Functional.Tests
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16805")]
-    public partial class HttpClientHandler_SslProtocols_Test : HttpClientTestBase
+    public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientTestBase
     {
         [Fact]
         public void DefaultProtocols_MatchesExpected()
@@ -57,11 +57,11 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 });
                 Assert.Throws<InvalidOperationException>(() => handler.SslProtocols = SslProtocols.Tls12);
@@ -100,16 +100,16 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseManagedHandler)
+            if (UseSocketsHttpHandler)
             {
-                // TODO #26186: The managed handler is failing on some OSes.
+                // TODO #26186: SocketsHttpHandler is failing on some OSes.
                 return;
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 if (requestOnlyThisProtocol)
                 {
@@ -119,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 }, options);
             }
@@ -141,9 +141,9 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
-            if (UseManagedHandler)
+            if (UseSocketsHttpHandler)
             {
-                // TODO #26186: The managed handler is failing on some OSes.
+                // TODO #26186: SocketsHttpHandler is failing on some OSes.
                 return;
             }
 
@@ -197,7 +197,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseManagedHandler && !PlatformDetection.IsWindows10Version1607OrGreater)
+            if (UseSocketsHttpHandler && !PlatformDetection.IsWindows10Version1607OrGreater)
             {
                 // On Windows, https://github.com/dotnet/corefx/issues/21925#issuecomment-313408314
                 // On Linux, an older version of OpenSSL may permit negotiating SSLv3.
@@ -215,34 +215,36 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_NoSpecifiedProtocol_DefaultsToTls12()
         {
             if (!BackendSupportsSslConfiguration)
+            {
                 return;
+            }
+
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 var options = new LoopbackServer.Options { UseSsl = true };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         client.GetAsync(url),
-                        LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                        server.AcceptConnectionAsync(async connection =>
                         {
-                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(stream).SslProtocol);
-                            await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
-                            return null;
-                        }, options));
+                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(connection.Stream).SslProtocol);
+                            await connection.ReadRequestHeaderAndSendResponseAsync();
+                        }));
                 }, options);
             }
         }
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
-        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
-        [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
+        [InlineData(SslProtocols.Tls11, SslProtocols.Tls)]
+        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11)]
+        [InlineData(SslProtocols.Tls, SslProtocols.Tls12)]
         public async Task GetAsync_AllowedSSLVersionDiffersFromServer_ThrowsException(
-            SslProtocols allowedProtocol, SslProtocols acceptedProtocol, Type exceptedServerException)
+            SslProtocols allowedProtocol, SslProtocols acceptedProtocol)
         {
             if (!BackendSupportsSslConfiguration)
                 return;
@@ -250,14 +252,25 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient(handler))
             {
                 handler.SslProtocols = allowedProtocol;
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedProtocol };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        Assert.ThrowsAsync(exceptedServerException, () => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
-                        Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                    Task serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                    try
+                    {
+                        await serverTask;
+                    }
+                    catch (Exception e) when (e is IOException || e is AuthenticationException)
+                    {
+                        // Some SSL implementations simply close or reset connection after protocol mismatch.
+                        // Newer OpenSSL sends Fatal Alert message before closing.
+                        return;
+                    }
+                    // We expect negotiation to fail so one or the other expected exception should be thrown.
+                    Assert.True(false, "Expected exception did not happen.");
                 }, options);
             }
         }
@@ -271,7 +284,7 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient(handler))
             {
                 handler.SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
                 if (BackendSupportsSslConfiguration)
                 {
@@ -280,9 +293,20 @@ namespace System.Net.Http.Functional.Tests
                     options.SslProtocols = SslProtocols.Tls;
                     await LoopbackServer.CreateServerAsync(async (server, url) =>
                     {
-                        await TestHelper.WhenAllCompletedOrAnyFailed(
-                            Assert.ThrowsAsync<IOException>(() => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
-                            Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                        Task serverTask =  server.AcceptConnectionSendResponseAndCloseAsync();
+                        await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                        try
+                        {
+                            await serverTask;
+                        }
+                        catch (Exception e) when (e is IOException || e is AuthenticationException)
+                        {
+                            // Some SSL implementations simply close or reset connection after protocol mismatch.
+                            // Newer OpenSSL sends Fatal Alert message before closing.
+                            return;
+                        }
+                        // We expect negotiation to fail so one or the other expected exception should be thrown.
+                        Assert.True(false, "Expected exception did not happen.");
                     }, options);
 
                     foreach (var prot in new[] { SslProtocols.Tls11, SslProtocols.Tls12 })
@@ -291,7 +315,7 @@ namespace System.Net.Http.Functional.Tests
                         await LoopbackServer.CreateServerAsync(async (server, url) =>
                         {
                             await TestHelper.WhenAllCompletedOrAnyFailed(
-                                LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                                server.AcceptConnectionSendResponseAndCloseAsync(),
                                 client.GetAsync(url));
                         }, options);
                     }

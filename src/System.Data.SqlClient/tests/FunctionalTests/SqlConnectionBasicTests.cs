@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Reflection;
+using System.Security;
 using System.Threading;
 using Xunit;
 
@@ -14,7 +15,6 @@ namespace System.Data.SqlClient.Tests
     public class SqlConnectionBasicTests
     {
         [Fact]
-        [ActiveIssue("dotnet/corefx #23435", TestPlatforms.Any)]
         public void ConnectionTest()
         {
             using (TestTdsServer server = TestTdsServer.StartTestServer())
@@ -27,7 +27,6 @@ namespace System.Data.SqlClient.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotArmProcess))] 
-        [ActiveIssue("dotnet/corefx #23435", TestPlatforms.Any)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void IntegratedAuthConnectionTest()
         {
@@ -83,6 +82,32 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        public void ClosedConnectionSchemaRetrieval()
+        {
+            using (SqlConnection connection = new SqlConnection(string.Empty))
+            {
+                Assert.Throws<InvalidOperationException>(() => connection.GetSchema());
+            }
+        }
+
+        [Theory]
+        [InlineData("RandomStringForTargetServer", false, true)]
+        [InlineData("RandomStringForTargetServer", true, false)]
+        [InlineData(null, false, false)]
+        [InlineData("", false, false)]
+        public void RetrieveWorkstationId(string workstation, bool withDispose, bool shouldMatchSetWorkstationId)
+        {
+            string connectionString = $"Workstation Id={workstation}";
+            SqlConnection conn = new SqlConnection(connectionString);
+            if(withDispose)
+            {
+                conn.Dispose();
+            }
+            string expected = shouldMatchSetWorkstationId ? workstation : Environment.MachineName;
+            Assert.Equal(expected, conn.WorkstationId);
+        }
+
+        [Fact]
         public void ConnectionTimeoutTestWithThread()
         {
             int timeoutSec = 5;
@@ -109,6 +134,66 @@ namespace System.Data.SqlClient.Tests
             int threshold = (timeoutSec + 1) * 1000;
 
             Console.WriteLine($"ConnectionTimeoutTestWithThread: Elapsed Time {theMax} and threshold {threshold}");
+        }
+
+        [OuterLoop("Can take up to 4 seconds")]
+        [Fact]
+        public void ExceptionsWithMinPoolSizeCanBeHandled()
+        {
+            string connectionString = $"Data Source={Guid.NewGuid().ToString()};uid=random;pwd=asd;Connect Timeout=2; Min Pool Size=3";
+            for (int i = 0; i < 2; i++)
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    Exception exception = Record.Exception(() => connection.Open());
+                    Assert.True(exception is InvalidOperationException || exception is SqlException, $"Unexpected exception: {exception}");
+                }
+            }
+        }
+
+        [Fact]
+        public void ConnectionTestInvalidCredentialCombination()
+        {
+            var cleartextCredsConnStr = "User=test;Password=test;";
+            var sspiConnStr = "Integrated Security=true;";
+            var testPassword = new SecureString();
+            testPassword.MakeReadOnly();
+            var sqlCredential = new SqlCredential(string.Empty, testPassword);
+
+            // Verify that SSPI and cleartext username/password are not in the connection string.
+            Assert.Throws<ArgumentException>(() => { new SqlConnection(cleartextCredsConnStr, sqlCredential); });
+
+            Assert.Throws<ArgumentException>(() => { new SqlConnection(sspiConnStr, sqlCredential); });
+
+            // Verify that credential may not be set with cleartext username/password or SSPI.
+            using (var conn = new SqlConnection(cleartextCredsConnStr))
+            {
+                Assert.Throws<InvalidOperationException>(() => { conn.Credential = sqlCredential; });
+            }
+
+            using (var conn = new SqlConnection(sspiConnStr))
+            {
+                Assert.Throws<InvalidOperationException>(() => { conn.Credential = sqlCredential; });
+            }
+
+            // Verify that connection string with username/password or SSPI may not be set with credential present.
+            using (var conn = new SqlConnection(string.Empty, sqlCredential))
+            {
+                Assert.Throws<InvalidOperationException>(() => { conn.ConnectionString = cleartextCredsConnStr; });
+
+                Assert.Throws<InvalidOperationException>(() => { conn.ConnectionString = sspiConnStr; });
+            }
+        }
+
+        [Fact]
+        public void ConnectionTestValidCredentialCombination()
+        {
+            var testPassword = new SecureString();
+            testPassword.MakeReadOnly();
+            var sqlCredential = new SqlCredential(string.Empty, testPassword);
+            var conn = new SqlConnection(string.Empty, sqlCredential);
+
+            Assert.Equal(sqlCredential, conn.Credential);
         }
 
         public class ConnectionWorker

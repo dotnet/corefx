@@ -90,11 +90,14 @@ namespace System.Collections.Generic
         public void Clear() { }
         public bool ContainsKey(TKey key) { throw null; }
         public bool ContainsValue(TValue value) { throw null; }
+        public int EnsureCapacity(int capacity) { throw null; }
         public System.Collections.Generic.Dictionary<TKey, TValue>.Enumerator GetEnumerator() { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public virtual void OnDeserialization(object sender) { }
         public bool Remove(TKey key) { throw null; }
         public bool Remove(TKey key, out TValue value) { throw null; }
+        public void TrimExcess(int capacity) { }
+        public void TrimExcess() { }
         public bool TryAdd(TKey key, TValue value) { throw null; }
         void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Add(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Contains(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { throw null; }
@@ -201,6 +204,7 @@ namespace System.Collections.Generic
         public void CopyTo(T[] array, int arrayIndex) { }
         public void CopyTo(T[] array, int arrayIndex, int count) { }
         public static IEqualityComparer<HashSet<T>> CreateSetComparer() { throw null; }
+        public int EnsureCapacity(int capacity) { throw null; }
         public void ExceptWith(System.Collections.Generic.IEnumerable<T> other) { }
         public System.Collections.Generic.HashSet<T>.Enumerator GetEnumerator() { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }

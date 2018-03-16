@@ -7,7 +7,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         // ----------------------------------------------------------------------------
         // BindImplicitConversion
@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_exprSrc == null || _typeSrc == _exprSrc.Type);    // type of source should be correct if source supplied
                 Debug.Assert(!_needsExprDest || _exprSrc != null);           // need source expr to create dest expr
 
-                switch (_typeDest.GetTypeKind())
+                switch (_typeDest.TypeKind)
                 {
                     case TypeKind.TK_NullType:
                         // Can only convert to the null type if src is null.
@@ -114,7 +114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // such that an entity that already has a required type can be said to be convertible to that type.
 
                 if (_typeSrc == _typeDest &&
-                    ((_flags & CONVERTTYPE.ISEXPLICIT) == 0 || (!_typeSrc.isPredefType(PredefinedType.PT_FLOAT) && !_typeSrc.isPredefType(PredefinedType.PT_DOUBLE))))
+                    ((_flags & CONVERTTYPE.ISEXPLICIT) == 0 || (!_typeSrc.IsPredefType(PredefinedType.PT_FLOAT) && !_typeSrc.IsPredefType(PredefinedType.PT_DOUBLE))))
                 {
                     if (_needsExprDest)
                     {
@@ -139,13 +139,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // Get the fundamental types of destination.
-                FUNDTYPE ftDest = _typeDest.fundType();
+                FUNDTYPE ftDest = _typeDest.FundamentalType;
                 Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest is ParameterModifierType);
 
-                switch (_typeSrc.GetTypeKind())
+                switch (_typeSrc.TypeKind)
                 {
                     default:
-                        Debug.Fail($"Bad type symbol kind: {_typeSrc.GetTypeKind()}");
+                        Debug.Fail($"Bad type symbol kind: {_typeSrc.TypeKind}");
                         break;
                     case TypeKind.TK_VoidType:
                     case TypeKind.TK_ParameterModifierType:
@@ -191,7 +191,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 object srcRuntimeObject = _exprSrc?.RuntimeObject;
                 if (srcRuntimeObject != null
                     && _typeDest.AssociatedSystemType.IsInstanceOfType(srcRuntimeObject)
-                    && _binder.GetSemanticChecker().CheckTypeAccess(_typeDest, _binder.Context.ContextForMemberLookup))
+                    && CSemanticChecker.CheckTypeAccess(_typeDest, _binder.Context.ContextForMemberLookup))
                 {
                     if (_needsExprDest)
                     {
@@ -270,7 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateType atsDst = nubDst.GetAts();
 
                 // Check for the unboxing conversion. This takes precedence over the wrapping conversions.
-                if (GetSymbolLoader().HasBaseConversion(nubDst.GetUnderlyingType(), _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
+                if (SymbolLoader.HasBaseConversion(nubDst.UnderlyingType, _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
                 {
                     // These should be different! Fix the caller if typeSrc is an AggregateType of Nullable.
                     Debug.Assert(atsDst != _typeSrc);
@@ -310,8 +310,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (_needsExprDest)
                         {
                             _exprDest = _exprSrc is ExprConstant
-                                ? GetExprFactory().CreateZeroInit(nubDst)
-                                : GetExprFactory().CreateCast(_typeDest, _exprSrc);
+                                ? ExprFactory.CreateZeroInit(nubDst)
+                                : ExprFactory.CreateCast(_typeDest, _exprSrc);
                         }
                         return true;
                     }
@@ -331,7 +331,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                             if (dstWasNullable)
                             {
-                                ExprCall call = _binder.BindNubNew(exprTmp);
+                                ExprCall call = BindNubNew(exprTmp);
                                 exprTmp = call;
                                 call.NullableCallLiftKind = NullableCallLiftKind.NullableConversionConstructor;
                             }
@@ -363,8 +363,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_needsExprDest)
                 {
                     MethWithInst mwi = new MethWithInst(null, null);
-                    ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
-                    ExprCall exprDst = GetExprFactory().CreateCall(0, nubDst, _exprSrc, pMemGroup, null);
+                    ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(null, mwi);
+                    ExprCall exprDst = ExprFactory.CreateCall(0, nubDst, _exprSrc, pMemGroup, null);
 
                     // Here we want to first check whether or not the conversions work on the base types.
 
@@ -395,10 +395,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // null type can be implicitly converted to any reference type or pointer type or type
                 // variable with reference-type constraint.
 
-                FUNDTYPE ftDest = _typeDest.fundType();
+                FUNDTYPE ftDest = _typeDest.FundamentalType;
                 if (ftDest != FUNDTYPE.FT_REF && ftDest != FUNDTYPE.FT_PTR &&
                     // null is convertible to System.Nullable<T>.
-                    !_typeDest.isPredefType(PredefinedType.PT_G_OPTIONAL))
+                    !_typeDest.IsPredefType(PredefinedType.PT_G_OPTIONAL))
                 {
                     return false;
                 }
@@ -408,8 +408,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Otherwise, bind this as a cast to the destination type. In a later
                     // rewrite pass we will rewrite the cast as SEQ(side effects, ZEROINIT).
                     _exprDest = _exprSrc is ExprConstant
-                        ? GetExprFactory().CreateZeroInit(_typeDest)
-                        : GetExprFactory().CreateCast(_typeDest, _exprSrc);
+                        ? ExprFactory.CreateZeroInit(_typeDest)
+                        : ExprFactory.CreateCast(_typeDest, _exprSrc);
                 }
                 return true;
             }
@@ -440,12 +440,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
                 }
-                if (GetSymbolLoader().HasBaseConversion(nubSrc.GetUnderlyingType(), _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
+                if (SymbolLoader.HasBaseConversion(nubSrc.UnderlyingType, _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
                 {
                     if (_needsExprDest)
                     {
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_BOX);
-                        if (!_typeDest.isPredefType(PredefinedType.PT_OBJECT))
+                        if (!_typeDest.IsPredefType(PredefinedType.PT_OBJECT))
                         {
                             // The base type of a nullable is always a non-nullable value type, 
                             // therefore so is typeDest unless typeDest is PT_OBJECT. In this case the conversion 
@@ -475,7 +475,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // *   From any array-type to System.Array.
                 // *   From any array-type to any interface implemented by System.Array.
 
-                if (!GetSymbolLoader().HasBaseConversion(_typeSrc, _typeDest))
+                if (!SymbolLoader.HasBaseConversion(_typeSrc, _typeDest))
                 {
                     return false;
                 }
@@ -486,9 +486,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // and the non-generic versions.
 
                 if ((_typeDest is ArrayType ||
-                     (_typeDest is AggregateType aggDest && aggDest.isInterfaceType() &&
-                      aggDest.GetTypeArgsAll().Count == 1 &&
-                      ((aggDest.GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).GetElementType()) ||
+                     (_typeDest is AggregateType aggDest && aggDest.IsInterfaceType &&
+                      aggDest.TypeArgsAll.Count == 1 &&
+                      (aggDest.TypeArgsAll[0] != ((ArrayType)_typeSrc).ElementType ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
                     &&
                     (0 != (_flags & CONVERTTYPE.FORCECAST) ||
@@ -513,12 +513,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to the type void*.
 
-                if (_typeDest is PointerType ptDest && ptDest.GetReferentType() == _binder.getVoidType())
+                if (_typeDest is PointerType ptDest && ptDest.ReferentType == VoidType.Instance)
                 {
                     if (_needsExprDest)
+                    {
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
+                    }
+
                     return true;
                 }
+
                 return false;
             }
 
@@ -529,13 +533,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // below. They could be relevant if we had user-defined conversions on
                 // generic types.
 
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
                 if (aggSrc.IsEnum())
                 {
                     return bindImplicitConversionFromEnum(aggTypeSrc);
                 }
 
-                if (_typeDest.isEnumType())
+                if (_typeDest.IsEnumType)
                 {
                     if (bindImplicitConversionToEnum(aggTypeSrc))
                     {
@@ -544,7 +548,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Even though enum is sealed, a class can derive from enum in LAF scenarios -- 
                     // continue testing for derived to base conversions below.
                 }
-                else if (aggSrc.getThisType().isSimpleType() && _typeDest.isSimpleType())
+                else if (aggSrc.getThisType().IsSimpleType && _typeDest.IsSimpleType)
                 {
                     if (bindImplicitConversionBetweenSimpleTypes(aggTypeSrc))
                     {
@@ -567,12 +571,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // *   From any delegate-type to System.Delegate.
                 // *   From any delegate-type to System.ICloneable.
 
-                if (!(_typeDest is AggregateType) || !GetSymbolLoader().HasBaseConversion(pSource, _typeDest))
+                if (!(_typeDest is AggregateType) || !SymbolLoader.HasBaseConversion(pSource, _typeDest))
                 {
                     return false;
                 }
                 EXPRFLAG flags = 0x00;
-                if (pSource.getAggregate().IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
+                if (pSource.OwningAggregate.IsStruct() && _typeDest.FundamentalType == FUNDTYPE.FT_REF)
                 {
                     flags = EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL;
                 }
@@ -597,7 +601,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // base class for all enums (21.4). A struct or enum can be boxed to the type System.ValueType, 
                 // since that is the direct base class for all structs (18.3.2) and a base class for all enums.
 
-                if (_typeDest is AggregateType aggDest && GetSymbolLoader().HasBaseConversion(aggTypeSrc, aggDest))
+                if (_typeDest is AggregateType aggDest && SymbolLoader.HasBaseConversion(aggTypeSrc, aggDest))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL);
@@ -630,10 +634,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Note: Don't use GetConst here since the conversion only applies to bona-fide compile time constants.
                 if (
-                    aggTypeSrc.getAggregate().GetPredefType() != PredefinedType.PT_BOOL &&
+                    aggTypeSrc.OwningAggregate.GetPredefType() != PredefinedType.PT_BOOL &&
                     _exprSrc != null &&
                     _exprSrc.IsZero() &&
-                    _exprSrc.Type.isNumericType() &&
+                    _exprSrc.Type.IsNumericType &&
                     /*(exprSrc.flags & EXF_LITERALCONST) &&*/
                     0 == (_flags & CONVERTTYPE.STANDARD))
                 {
@@ -644,7 +648,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // into a constant here - we should move this to a later pass.
                     if (_needsExprDest)
                     {
-                        _exprDest = GetExprFactory().CreateConstant(_typeDest, ConstVal.GetDefaultValue(_typeDest.constValKind()));
+                        _exprDest = ExprFactory.CreateConstant(_typeDest, ConstVal.GetDefaultValue(_typeDest.ConstValKind));
                     }
                     return true;
                 }
@@ -653,13 +657,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool bindImplicitConversionBetweenSimpleTypes(AggregateType aggTypeSrc)
             {
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
-                Debug.Assert(aggSrc.getThisType().isSimpleType());
-                Debug.Assert(_typeDest.isSimpleType());
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
+                Debug.Assert(aggSrc.getThisType().IsSimpleType);
+                Debug.Assert(_typeDest.IsSimpleType);
 
-                Debug.Assert(aggSrc.IsPredefined() && _typeDest.isPredefined());
+                Debug.Assert(aggSrc.IsPredefined() && _typeDest.IsPredefined);
                 PredefinedType ptSrc = aggSrc.GetPredefType();
-                PredefinedType ptDest = _typeDest.getPredefType();
+                PredefinedType ptDest = _typeDest.PredefinedType;
                 ConvKind convertKind;
 
                 Debug.Assert((int)ptSrc < NUM_SIMPLE_TYPES && (int)ptDest < NUM_SIMPLE_TYPES);
@@ -725,15 +729,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_needsExprDest)
                     _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
                 return true;
-            }
-
-            private SymbolLoader GetSymbolLoader()
-            {
-                return _binder.GetSymbolLoader();
-            }
-            private ExprFactory GetExprFactory()
-            {
-                return _binder.GetExprFactory();
             }
         }
     }

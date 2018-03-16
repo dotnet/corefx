@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         // ----------------------------------------------------------------------------
         // This class takes an EXPRMEMGRP and a set of arguments and binds the arguments
@@ -59,11 +59,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         if (pTypeArgs1[i] is AggregateType aggArg1)
                         {
-                            leftErrors += NumberOfErrorTypes(aggArg1.GetTypeArgsAll());
+                            leftErrors += NumberOfErrorTypes(aggArg1.TypeArgsAll);
                         }
                         if (pTypeArgs2[i] is AggregateType aggArg2)
                         {
-                            rightErrors += NumberOfErrorTypes(aggArg2.GetTypeArgsAll());
+                            rightErrors += NumberOfErrorTypes(aggArg2.TypeArgsAll);
                         }
                     }
                 }

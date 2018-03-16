@@ -47,6 +47,9 @@
     <Compile Include="System\Diagnostics\ThreadWaitReason.cs" />
     <Compile Include="System\Diagnostics\MonitoringDescriptionAttribute.cs" />
     <Compile Include="System\Collections\Specialized\StringDictionaryWrapper.cs" />
+    <Compile Include="..\..\Common\src\System\PasteArguments.cs">
+      <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
@@ -318,6 +321,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPid.cs">
       <Link>Common\Interop\Unix\Interop.GetPid.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPwUid.cs">
+      <Link>Common\Interop\Unix\Interop.GetPwUid.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSetPriority.cs">
       <Link>Common\Interop\Unix\Interop.GetSetPriority.cs</Link>
     </Compile>
@@ -330,6 +336,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadLink.cs">
       <Link>Common\Interop\Unix\Interop.ReadLink.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RegisterForSigChld.cs">
+      <Link>Common\Interop\Unix\Interop.RegisterForRegisterForSigChld.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ResourceLimits.cs">
       <Link>Common\Interop\Unix\Interop.ResourceLimits.cs</Link>
     </Compile>
@@ -339,8 +348,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.POpen.cs">
       <Link>Common\Interop\Unix\Interop.POpen.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitPid.cs">
-      <Link>Common\Interop\Unix\Interop.WaitPid.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitId.cs">
+      <Link>Common\Interop\Unix\Interop.WaitId.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true'">
@@ -352,15 +361,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SchedGetSetAffinity.cs">
       <Link>Common\Interop\Linux\Interop.SchedGetSetAffinity.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
-      <Link>Common\System\Collections\Generic\ArrayBuilder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
-      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
-      <Link>Common\System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Text\ReusableTextReader.cs">
       <Link>Common\System\Text\ReusableTextReader.cs</Link>
@@ -436,6 +436,7 @@
     <Reference Include="System.Diagnostics.FileVersionInfo" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Linq" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />

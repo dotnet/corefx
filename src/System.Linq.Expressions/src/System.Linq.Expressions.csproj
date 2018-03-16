@@ -13,14 +13,12 @@
     <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <DefineConstants>$(DefineConstants);FEATURE_DYNAMIC_DELEGATE</DefineConstants>
   </PropertyGroup>
@@ -40,12 +38,6 @@
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
       <Link>Common\System\Collections\Generic\ArrayBuilder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
-      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
-      <Link>Common\System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
     <Compile Include="System\Dynamic\Utils\CacheDict.cs" />
     <Compile Include="System\Dynamic\Utils\ContractUtils.cs" />

@@ -60,19 +60,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return name;
         }
 
-        public static bool IsLocalDBInstalled()
-        {
-            string localDBInstallationFlag = Environment.GetEnvironmentVariable("TEST_LOCALDB_INSTALLED");
-            if (!string.IsNullOrWhiteSpace(localDBInstallationFlag))
-            {
-                int result;
-                if (int.TryParse(localDBInstallationFlag.Trim(), out result))
-                {
-                    return result == 1;
-                }
-            }
-            return false;
-        }
+        public static bool IsLocalDBInstalled() => int.TryParse(Environment.GetEnvironmentVariable("TEST_LOCALDB_INSTALLED"), out int result) ? result == 1 : false;
+
+        public static bool IsIntegratedSecuritySetup() => int.TryParse(Environment.GetEnvironmentVariable("TEST_INTEGRATEDSECURITY_SETUP"), out int result) ? result == 1 : false;
 
         private static bool CheckException<TException>(Exception ex, string exceptionMessage, bool innerExceptionMustBeNull) where TException : Exception
         {
@@ -151,7 +141,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return ex;
         }
 
-        public static TException ExpectFailure<TException>(Action actionThatFails, string exceptionMessage = null, bool innerExceptionMustBeNull = false, Func<TException, bool> customExceptionVerifier = null) where TException : Exception
+        public static TException ExpectFailure<TException>(Action actionThatFails, string[] exceptionMessages, bool innerExceptionMustBeNull = false, Func<TException, bool> customExceptionVerifier = null) where TException : Exception
         {
             try
             {
@@ -161,14 +151,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
             catch (Exception ex)
             {
-                if ((CheckException<TException>(ex, exceptionMessage, innerExceptionMustBeNull)) && ((customExceptionVerifier == null) || (customExceptionVerifier(ex as TException))))
+                foreach (string exceptionMessage in exceptionMessages)
                 {
-                    return (ex as TException);
+                    if ((CheckException<TException>(ex, exceptionMessage, innerExceptionMustBeNull)) && ((customExceptionVerifier == null) || (customExceptionVerifier(ex as TException))))
+                    {
+                        return (ex as TException);
+                    }
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
         }
 

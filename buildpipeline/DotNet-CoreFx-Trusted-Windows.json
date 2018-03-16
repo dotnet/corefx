@@ -3,6 +3,30 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Run AgentTools/Begin.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\Begin.ps1\") {\n     \"Begin.ps1 script found. Executing...\"\n    & $(AgentToolsPath)\\Begin.ps1\n} else {\n   \"Begin.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Delete 'corefx'",
@@ -80,7 +104,8 @@
         "signType": "real",
         "zipSources": "false",
         "version": "",
-        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -206,7 +231,7 @@
         "msbuildLocation": "",
         "platform": "",
         "configuration": "",
-        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
@@ -232,31 +257,6 @@
         "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Index symbol sources",
-      "timeoutInMinutes": 0,
-      "refName": "Task13",
-      "task": {
-        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SymbolsPath": "",
-        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
-        "SymbolsFolder": "",
-        "SkipIndexing": "false",
-        "TreatNotIndexedAsWarning": "false",
-        "SymbolsMaximumWaitTime": "",
-        "SymbolsProduct": "",
-        "SymbolsVersion": "",
-        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -371,6 +371,30 @@
         "logProjectEvents": "false",
         "createLogFile": "false"
       }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Run AgentTools/End.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\End.ps1\") {\n     \"End.ps1 script found. Executing...\"\n    & $(AgentToolsPath)\\End.ps1\n} else {\n   \"End.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
     }
   ],
   "options": [
@@ -410,8 +434,20 @@
       "value": null,
       "isSecret": true
     },
+    "HelixApiAccessKey": {
+      "value": null,
+      "isSecret": true
+    },
+    "OutputCloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "ProductBuildId": {
+      "value": "",
       "allowOverride": true
     },
     "PB_BuildArguments": {
@@ -523,6 +559,10 @@
     },
     "PB_AssetRootUrl": {
       "value": ""
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "demands": [
@@ -570,11 +610,17 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 36,
-    "name": "DotNet-Build",
+    "_links": {
+      "self": {
+        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330"
+      }
+    },
+    "id": 330,
+    "name": "DotNetCore-Build",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330",
     "pool": {
-      "id": 39,
-      "name": "DotNet-Build"
+      "id": 97,
+      "name": "DotNetCore-Build"
     }
   },
   "id": 893,

@@ -15,7 +15,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientHandler_ServerCertificates_Test
+    public abstract partial class HttpClientHandler_ServerCertificates_Test
     {
         private static bool ShouldSuppressRevocationException
         {
@@ -41,7 +41,7 @@ namespace System.Net.Http.Functional.Tests
                 //     MustNotCheck,
                 // }
 
-                if (CurlSslVersionDescription() == "SecureTransport")
+                if (Interop.Http.GetSslVersionDescription() == "SecureTransport")
                 {
                     return true;
                 }
@@ -53,7 +53,7 @@ namespace System.Net.Http.Functional.Tests
         {
             get
             {
-                if (UseManagedHandler)
+                if (UseSocketsHttpHandler)
                 {
                     return true;
                 }
@@ -65,12 +65,9 @@ namespace System.Net.Http.Functional.Tests
 
                 // For other Unix-based systems it's true if (and only if) the openssl backend
                 // is used with libcurl.
-                return (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
+                return (Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) ?? false);
             }
         }
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
 
         [Theory]
         [PlatformSpecific(~TestPlatforms.OSX)] // Not implemented
@@ -82,6 +79,11 @@ namespace System.Net.Http.Functional.Tests
         public void HttpClientUsesSslCertEnvironmentVariables(bool setSslCertDir, bool createSslCertDir,
             bool setSslCertFile, bool createSslCertFile, bool expectedFailure)
         {
+            if (expectedFailure && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return; // [ActiveIssue(28002)]
+            }
+
             // This test sets SSL_CERT_DIR and SSL_CERT_FILE to empty/non-existing locations and then
             // checks the http request fails.
             // Some platforms will use the system default when not specifying a value, while others

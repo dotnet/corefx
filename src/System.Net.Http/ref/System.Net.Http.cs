@@ -236,6 +236,34 @@ namespace System.Net.Http
         protected override System.Threading.Tasks.Task SerializeToStreamAsync(System.IO.Stream stream, System.Net.TransportContext context) => throw null;
         protected internal override bool TryComputeLength(out long length) => throw null;
     }
+#if !uap
+    public sealed class SocketsHttpHandler : HttpMessageHandler
+    {
+        public SocketsHttpHandler() { }
+        public bool AllowAutoRedirect { get { throw null; } set { } }
+        public System.Net.DecompressionMethods AutomaticDecompression { get { throw null; } set { } }
+        public System.TimeSpan ConnectTimeout { get; set; }
+        public System.Net.CookieContainer CookieContainer { get { throw null; } set { } }
+        public System.Net.ICredentials Credentials { get { throw null; } set { } }
+        public System.Net.ICredentials DefaultProxyCredentials { get { throw null; } set { } }
+        public System.TimeSpan Expect100ContinueTimeout { get; set; }
+        public int MaxAutomaticRedirections { get { throw null; } set { } }
+        public int MaxConnectionsPerServer { get { throw null; } set { } }
+        public int MaxResponseDrainSize { get { throw null; } set { } }
+        public int MaxResponseHeadersLength { get { throw null; } set { } }
+        public bool PreAuthenticate { get { throw null; } set { } }
+        public System.TimeSpan PooledConnectionIdleTimeout { get { throw null; } set { } }
+        public System.TimeSpan PooledConnectionLifetime { get { throw null; } set { } }
+        public System.Collections.Generic.IDictionary<string, object> Properties { get { throw null; } }
+        public System.Net.IWebProxy Proxy { get { throw null; } set { } }
+        public System.TimeSpan ResponseDrainTimeout { get { throw null; } set { } }
+        public System.Net.Security.SslClientAuthenticationOptions SslOptions { get { throw null; } set { } }
+        public bool UseCookies { get { throw null; } set { } }
+        public bool UseProxy { get { throw null; } set { } }
+        protected override void Dispose(bool disposing) { }
+        protected internal override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { throw null; }
+    }
+#endif
     public partial class StreamContent : System.Net.Http.HttpContent
     {
         public StreamContent(System.IO.Stream content) { }
