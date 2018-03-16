@@ -215,6 +215,10 @@ namespace System.IO.Tests
             { @"C:\", @"C:\git\corefx", @"C:\" },
             { @"..\..\..\..", @"C:\git\corefx", @"C:\" },
             { @"C:\\\", @"C:\git\corefx", @"C:\" },
+            { @"C:\..\..\", @"C:\git\corefx", @"C:\" },
+            { @"C:\..\git\..\.\", @"C:\git\corefx", @"C:\" },
+            { @"C:\git\corefx\..\..\..\", @"C:\git\corefx", @"C:\" },
+            { @"C:\.\corefx\", @"C:\git\corefx", @"C:\corefx\" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_CommonUnRootedWindowsData => new TheoryData<string, string, string>
@@ -245,7 +249,6 @@ namespace System.IO.Tests
             { @"Z:", @"C:\git\corefx", @"Z:\" },
             { @"Z", @"C:\git\corefx", @"C:\git\corefx\Z" }
         };
-
 
         public static TheoryData<string, string, string> GetFullPath_Windows_UNC => new TheoryData<string, string, string>
         {
@@ -301,29 +304,28 @@ namespace System.IO.Tests
             { @"C:", @"", @"C:\"},
         };
 
-        public static TheoryData<string, string, string> GetFullPath_Windows_FullyQualified_Diff => new TheoryData<string, string, string>
+        public static TheoryData<string, string, string> GetFullPath_Windows_PathIsDevicePath => new TheoryData<string, string, string>
         {
-            // Path argument is a device path.
             // Device Paths with \\?\ wont get normalized i.e. relative segments wont get removed.
-            { @"\\?\C:\git\corefx.\.\.\.\.\.", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx.\.\.\.\.\." },
-            { @"\\?\C:\git\corefx\\\.", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\\\." },
-            { @"\\?\C:\git\corefx\..\corefx\.\..\corefx", @"\\?\C:\git\corefx", @"\\?\C:\git\corefx\..\corefx\.\..\corefx" },
-            { @"\\?\\somedir\..", @"\\?\C:\git\corefx", @"\\?\\somedir\.." },
-            { @"\\?\", @"\\?\C:\git\corefx", @"\\?\" },
-            { @"\\?\..\..\..\..", @"\\?\C:\git\corefx", @"\\?\..\..\..\.." },
-            { @"\\?\\\\" , @"\\?\C:\git\corefx", @"\\?\\\\" },
-            { @"\\?\C:\Foo." , @"\\?\C:\git\corefx", @"\\?\C:\Foo." },
-            { @"\\?\C:\Foo " , @"\\?\C:\git\corefx", @"\\?\C:\Foo " },
+            { @"\\?\C:\git\corefx.\.\.\.\.\.", @"C:\git\corefx", @"\\?\C:\git\corefx.\.\.\.\.\." },
+            { @"\\?\C:\git\corefx\\\.", @"C:\git\corefx", @"\\?\C:\git\corefx\\\." },
+            { @"\\?\C:\git\corefx\..\corefx\.\..\corefx", @"C:\git\corefx", @"\\?\C:\git\corefx\..\corefx\.\..\corefx" },
+            { @"\\?\\somedir\..", @"C:\git\corefx", @"\\?\\somedir\.." },
+            { @"\\?\", @"C:\git\corefx", @"\\?\" },
+            { @"\\?\..\..\..\..", @"C:\git\corefx", @"\\?\..\..\..\.." },
+            { @"\\?\\\\" , @"C:\git\corefx", @"\\?\\\\" },
+            { @"\\?\C:\Foo." , @"C:\git\corefx", @"\\?\C:\Foo." },
+            { @"\\?\C:\Foo " , @"C:\git\corefx", @"\\?\C:\Foo " },
 
-            { @"\\.\C:\git\corefx.\.\.\.\.\.", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
-            { @"\\.\C:\git\corefx\\\.", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
-            { @"\\.\C:\git\corefx\..\corefx\.\..\corefx", @"\\.\C:\git\corefx", @"\\.\C:\git\corefx" },
-            { @"\\.\\somedir\..", @"\\.\C:\git\corefx", @"\\.\" },
-            { @"\\.\", @"\\.\C:\git\corefx", @"\\.\" },
-            { @"\\.\..\..\..\..", @"\\.\C:\git\corefx", @"\\.\" },
-            { @"\\.\", @"\\.\C:\git\corefx", @"\\.\" },
-            { @"\\.\C:\Foo." , @"\\?\C:\git\corefx", @"\\.\C:\Foo" },
-            { @"\\.\C:\Foo " , @"\\?\C:\git\corefx", @"\\.\C:\Foo" },
+            { @"\\.\C:\git\corefx.\.\.\.\.\.", @"C:\git\corefx", @"\\.\C:\git\corefx" },
+            { @"\\.\C:\git\corefx\\\.", @"C:\git\corefx", @"\\.\C:\git\corefx" },
+            { @"\\.\C:\git\corefx\..\corefx\.\..\corefx", @"C:\git\corefx", @"\\.\C:\git\corefx" },
+            { @"\\.\\somedir\..", @"C:\git\corefx", @"\\.\" },
+            { @"\\.\", @"C:\git\corefx", @"\\.\" },
+            { @"\\.\..\..\..\..", @"C:\git\corefx", @"\\.\" },
+            { @"\\.\", @"C:\git\corefx", @"\\.\" },
+            { @"\\.\C:\Foo." , @"C:\git\corefx", @"\\.\C:\Foo" },
+            { @"\\.\C:\Foo " , @"C:\git\corefx", @"\\.\C:\Foo" },
         };
 
         public static TheoryData<string, string, string> GetFullPath_BasePath_BasicExpansions_TestData_Unix => new TheoryData<string, string, string>

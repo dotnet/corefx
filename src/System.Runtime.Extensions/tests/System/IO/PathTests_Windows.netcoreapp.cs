@@ -35,12 +35,21 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(GetFullPath_Windows_NonFullyQualified)),           
-            MemberData(nameof(GetFullPath_Windows_FullyQualified_Diff))]
+            MemberData(nameof(GetFullPath_Windows_NonFullyQualified))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_PathIsDevicePath))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetFullPath_BasicExpansions_Windows_PathIsDevicePath(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+            Assert.Equal(expected, Path.GetFullPath(path, @"\\.\" + basePath));
+            Assert.Equal(expected, Path.GetFullPath(path, @"\\?\" + basePath));
         }
 
         [Theory,
