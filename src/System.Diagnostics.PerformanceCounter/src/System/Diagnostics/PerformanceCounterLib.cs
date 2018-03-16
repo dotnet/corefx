@@ -319,7 +319,7 @@ namespace System.Diagnostics
             _nameTable = null;
             _helpTable = null;
             _categoryTable = null;
-            _customCategoryTable = null;            
+            _customCategoryTable = null;    
         }
 
         internal void Close()
