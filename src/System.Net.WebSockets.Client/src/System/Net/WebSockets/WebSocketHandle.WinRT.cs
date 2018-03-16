@@ -39,6 +39,11 @@ namespace System.Net.WebSockets
         
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
+            if (options.RemoteCertificateValidationCallback != null)
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             try
             {
                 await _webSocket.ConnectAsync(uri, cancellationToken, options).ConfigureAwait(false);
