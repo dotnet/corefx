@@ -55,7 +55,7 @@ namespace System.Diagnostics
         private Hashtable _customCategoryTable;
         private Hashtable _categoryTable;
         private Hashtable _nameTable;
-        private Hashtable _helpTable;        
+        private Hashtable _helpTable;
         private readonly object _categoryTableLock = new Object();
         private readonly object _nameTableLock = new Object();
         private readonly object _helpTableLock = new Object();
