@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using System.Threading;
+
 #if !netstandard
 using Internal.Runtime.CompilerServices;
 #else
@@ -21,13 +23,14 @@ namespace System.Buffers
             public ArrayMemoryPoolBuffer(int size)
             {
                 _array = ArrayPool<T>.Shared.Rent(size);
+                _refCount = 1;
             }
 
             public sealed override int Length => _array.Length;
 
             public sealed override bool IsDisposed => _array == null;
 
-            protected sealed override bool IsRetained => _refCount > 0;
+            protected sealed override bool IsRetained => Volatile.Read(ref _refCount) > 0;
 
             public sealed override Span<T> Span
             {
@@ -69,32 +72,51 @@ namespace System.Buffers
                 {
                     Retain(); // this checks IsDisposed
 
-                    if (byteOffset != 0 && (((uint)byteOffset) - 1) / Unsafe.SizeOf<T>() >= _array.Length)
-                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteOffset);
+                    try
+                    {
+                        if ((IntPtr.Size == 4 && (uint)byteOffset > (uint)_array.Length * (uint)Unsafe.SizeOf<T>())
+                            || (IntPtr.Size != 4 && (ulong)byteOffset > (uint)_array.Length * (ulong)Unsafe.SizeOf<T>()))
+                        {
+                            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteOffset);
+                        }
 
-                    GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                    return new MemoryHandle(this, ((byte*)handle.AddrOfPinnedObject()) + byteOffset, handle);
+                        GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
+                        return new MemoryHandle(this, ((byte*)handle.AddrOfPinnedObject()) + byteOffset, handle);
+                    }
+                    catch
+                    {
+                        Release();
+                        throw;
+                    }
                 }
             }
 
             public sealed override void Retain()
             {
-                if (IsDisposed)
-                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                _refCount++;
+                while (true)
+                {
+                    int currentCount = Volatile.Read(ref _refCount);
+                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount) break;
+                }
             }
 
             public sealed override bool Release()
             {
-                if (IsDisposed)
-                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                int newRefCount = --_refCount;
-                if (newRefCount < 0)
-                    ThrowHelper.ThrowInvalidOperationException();
-
-                return newRefCount != 0;
+                while (true)
+                {
+                    int currentCount = Volatile.Read(ref _refCount);
+                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    if (Interlocked.CompareExchange(ref _refCount, currentCount - 1, currentCount) == currentCount)
+                    {
+                        if (currentCount == 1)
+                        {
+                            Dispose();
+                            return false;
+                        }
+                        return true;
+                    }
+                }
             }
         }
     }

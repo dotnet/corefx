@@ -147,7 +147,6 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
 
-        [ActiveIssue(27269)]
         [Theory,
             MemberData(nameof(ControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -159,7 +158,16 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Simple whitespace is trimmed in path
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WindowsSimpleWhiteSpaceThrowsException(string component)
+        {
+            Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
+        }
+
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // Simple whitespace is trimmed in path
         public void WindowsSimpleWhiteSpace(string component)
         {
             DirectoryInfo result = new DirectoryInfo(TestDirectory).CreateSubdirectory(component);
@@ -209,6 +217,16 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<ArgumentException>(() => testDir.CreateSubdirectory("//"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void ParentDirectoryNameAsPrefixShouldThrow()
+        {
+            string randomName = GetTestFileName();
+            DirectoryInfo di = Directory.CreateDirectory(Path.Combine(TestDirectory, randomName));
+
+            Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(Path.Combine("..", randomName + "abc", GetTestFileName())));
         }
 
         #endregion

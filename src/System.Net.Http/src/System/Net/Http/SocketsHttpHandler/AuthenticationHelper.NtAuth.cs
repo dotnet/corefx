@@ -19,7 +19,7 @@ namespace System.Net.Http
                 connection.SendWithNtProxyAuthAsync(request, cancellationToken);
         }
 
-        private static bool CheckIfProxySupportsConnectionAuth(HttpResponseMessage response)
+        private static bool ProxySupportsConnectionAuth(HttpResponseMessage response)
         {
             if (!response.Headers.TryGetValues(KnownHeaders.ProxySupport.Descriptor, out IEnumerable<string> values))
             {
@@ -41,8 +41,13 @@ namespace System.Net.Http
         {
             HttpResponseMessage response = await InnerSendAsync(request, isProxyAuth, connection, cancellationToken).ConfigureAwait(false);
 
-            if (TryGetAuthenticationChallenge(response, isProxyAuth, authUri, credentials, out AuthenticationChallenge challenge) &&
-                (!isProxyAuth || CheckIfProxySupportsConnectionAuth(response)))
+            if (!isProxyAuth && connection.UsingProxy && !ProxySupportsConnectionAuth(response))
+            {
+                // Proxy didn't indicate that it supports connection-based auth, so we can't proceed.
+                return response;
+            }
+
+            if (TryGetAuthenticationChallenge(response, isProxyAuth, authUri, credentials, out AuthenticationChallenge challenge))
             {
                 if (challenge.AuthenticationType == AuthenticationType.Negotiate || 
                     challenge.AuthenticationType == AuthenticationType.Ntlm)
@@ -51,23 +56,19 @@ namespace System.Net.Http
 
                     string spn = "HTTP/" + authUri.IdnHost;
                     ChannelBinding channelBinding = connection.TransportContext?.GetChannelBinding(ChannelBindingKind.Endpoint);
-                    NTAuthentication authContext = new NTAuthentication(false, challenge.SchemeName, challenge.Credential, spn, ContextFlagsPal.Connection, channelBinding);
+                    NTAuthentication authContext = new NTAuthentication(isServer:false, challenge.SchemeName, challenge.Credential, spn, ContextFlagsPal.Connection, channelBinding);
                     try
                     {
                         while (true)
                         {
                             string challengeResponse = authContext.GetOutgoingBlob(challengeData);
-                            if (authContext.IsCompleted)
-                            {
-                                break;
-                            }
 
                             await connection.DrainResponseAsync(response).ConfigureAwait(false);
 
                             SetRequestAuthenticationHeaderValue(request, new AuthenticationHeaderValue(challenge.SchemeName, challengeResponse), isProxyAuth);
 
                             response = await InnerSendAsync(request, isProxyAuth, connection, cancellationToken).ConfigureAwait(false);
-                            if (!TryGetRepeatedChallenge(response, challenge.SchemeName, isProxyAuth, out challengeData))
+                            if (authContext.IsCompleted || !TryGetRepeatedChallenge(response, challenge.SchemeName, isProxyAuth, out challengeData))
                             {
                                 break;
                             }
@@ -85,12 +86,12 @@ namespace System.Net.Http
 
         public static Task<HttpResponseMessage> SendWithNtProxyAuthAsync(HttpRequestMessage request, Uri proxyUri, ICredentials proxyCredentials, HttpConnection connection, CancellationToken cancellationToken)
         {
-            return SendWithNtAuthAsync(request, proxyUri, proxyCredentials, true, connection, cancellationToken);
+            return SendWithNtAuthAsync(request, proxyUri, proxyCredentials, isProxyAuth:true, connection, cancellationToken);
         }
 
         public static Task<HttpResponseMessage> SendWithNtConnectionAuthAsync(HttpRequestMessage request, ICredentials credentials, HttpConnection connection, CancellationToken cancellationToken)
         {
-            return SendWithNtAuthAsync(request, request.RequestUri, credentials, false, connection, cancellationToken);
+            return SendWithNtAuthAsync(request, request.RequestUri, credentials, isProxyAuth:false, connection, cancellationToken);
         }
     }
 }

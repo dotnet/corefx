@@ -167,6 +167,22 @@ namespace System.Net.Http
             }
         }
 
+        public TimeSpan ResponseDrainTimeout
+        {
+            get => _settings._maxResponseDrainTime;
+            set
+            {
+                if ((value < TimeSpan.Zero && value != Timeout.InfiniteTimeSpan) ||
+                    (value.TotalMilliseconds > int.MaxValue))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
+                CheckDisposedOrStarted();
+                _settings._maxResponseDrainTime = value;
+            }
+        }
+
         public int MaxResponseHeadersLength
         {
             get => _settings._maxResponseHeadersLength;

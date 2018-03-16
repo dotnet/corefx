@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.IO.Pipelines
@@ -52,6 +53,7 @@ namespace System.IO.Pipelines
                 _ownedMemory = ownedMemory;
                 _pool = pool;
                 _leaser = Environment.StackTrace;
+                _referenceCount = 1;
             }
 
             ~PooledMemory()
@@ -74,12 +76,15 @@ namespace System.IO.Pipelines
             public override void Retain()
             {
                 _pool.CheckDisposed();
+                _ownedMemory.Retain();
                 Interlocked.Increment(ref _referenceCount);
             }
 
             public override bool Release()
             {
                 _pool.CheckDisposed();
+                _ownedMemory.Release();
+
                 int newRefCount = Interlocked.Decrement(ref _referenceCount);
 
                 if (newRefCount < 0)
@@ -96,7 +101,7 @@ namespace System.IO.Pipelines
             protected override bool TryGetArray(out ArraySegment<byte> arraySegment)
             {
                 _pool.CheckDisposed();
-                return _ownedMemory.Memory.TryGetArray(out arraySegment);
+                return MemoryMarshal.TryGetArray(_ownedMemory.Memory, out arraySegment);
             }
 
             public override bool IsDisposed

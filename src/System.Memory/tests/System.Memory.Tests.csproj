@@ -6,12 +6,12 @@
     <ProjectGuid>{15DB0DCC-68B4-4CFB-8BD2-F26BCCAF5A3F}</ProjectGuid>
     <IncludePartialFacadeTests Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IncludePartialFacadeTests>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
     <!-- Tests specific to the fast span -->
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
@@ -63,6 +63,7 @@
     <Compile Include="Span\SequenceEqual.T.cs" />
     <Compile Include="Span\SequenceEqual.byte.cs" />
     <Compile Include="Span\SequenceEqual.char.cs" />
+    <Compile Include="Span\SequenceEqual.long.cs" />
     <Compile Include="Span\Slice.cs" />
     <Compile Include="Span\StartsWith.T.cs" />
     <Compile Include="Span\StartsWith.byte.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.char.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.TryGet.cs" />
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +122,7 @@
     <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
+    <Compile Include="ReadOnlySpan\SequenceEqual.long.cs" />
     <Compile Include="ReadOnlySpan\Slice.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.char.cs" />
@@ -149,7 +152,7 @@
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
-    <Compile Include="Memory\TryGetArray.cs" />
+    <Compile Include="Memory\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsMemory.cs" />
@@ -158,6 +161,7 @@
     <Compile Include="MemoryMarshal\GetReference.cs" />
     <Compile Include="MemoryMarshal\TryGetArray.cs" />
     <Compile Include="MemoryMarshal\TryGetOwnedMemory.cs" />
+    <Compile Include="MemoryMarshal\TryGetString.cs" />
     <Compile Include="MemoryMarshal\ToEnumerable.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -176,13 +180,11 @@
     <Compile Include="ReadOnlyMemory\Span.cs" />
     <Compile Include="ReadOnlyMemory\Strings.cs" />
     <Compile Include="ReadOnlyMemory\ToArray.cs" />
+    <Compile Include="ReadOnlyMemory\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binary\BinaryReaderUnitTests.cs" />
     <Compile Include="Binary\BinaryWriterUnitTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Common\src\System\MutableDecimal.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParsersAndFormatters\Formatter\FormatterTestData.cs" />
@@ -215,8 +217,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Buffers\NativeOwnedMemory.cs">
-    <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
-  </Compile>
+      <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
+      <Link>Common\System\MutableDecimal.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

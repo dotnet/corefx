@@ -236,6 +236,7 @@ namespace System.Net.Http
         protected override System.Threading.Tasks.Task SerializeToStreamAsync(System.IO.Stream stream, System.Net.TransportContext context) => throw null;
         protected internal override bool TryComputeLength(out long length) => throw null;
     }
+#if !uap
     public sealed class SocketsHttpHandler : HttpMessageHandler
     {
         public SocketsHttpHandler() { }
@@ -255,12 +256,14 @@ namespace System.Net.Http
         public System.TimeSpan PooledConnectionLifetime { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, object> Properties { get { throw null; } }
         public System.Net.IWebProxy Proxy { get { throw null; } set { } }
+        public System.TimeSpan ResponseDrainTimeout { get { throw null; } set { } }
         public System.Net.Security.SslClientAuthenticationOptions SslOptions { get { throw null; } set { } }
         public bool UseCookies { get { throw null; } set { } }
         public bool UseProxy { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected internal override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
+#endif
     public partial class StreamContent : System.Net.Http.HttpContent
     {
         public StreamContent(System.IO.Stream content) { }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -53,7 +54,6 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
         }
 
-        [ActiveIssue(27269)]
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void PathWithIllegalCharacters_Core(string invalidPath)
@@ -250,7 +250,6 @@ namespace System.IO.Tests
             }
         }
 
-        [ActiveIssue(27269)]
         [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
@@ -258,7 +257,7 @@ namespace System.IO.Tests
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
-            Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, invalidPath));
+            Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, testFile.DirectoryName + Path.DirectorySeparatorChar + invalidPath));
         }
 
         [Fact]
@@ -272,7 +271,6 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Move(GetTestFilePath(), "*Test"));
         }
 
-        [ActiveIssue(27269)]
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
@@ -319,7 +317,6 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Move(testFile.FullName, whitespace));
         }
 
-        [ActiveIssue(27269)]
         [Theory,
             MemberData(nameof(ControlWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -352,6 +349,29 @@ namespace System.IO.Tests
 
         }
 
+        [Theory,
+            InlineData("", ":bar"),
+            InlineData("", ":bar:$DATA"),
+            InlineData("::$DATA", ":bar"),
+            InlineData("::$DATA", ":bar:$DATA")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsAlternateDataStreamMove(string defaultStream, string alternateStream)
+        {
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            string testFile = Path.Combine(testDirectory.FullName, GetTestFileName());
+            string testFileDefaultStream = testFile + defaultStream;
+            string testFileAlternateStream = testFile + alternateStream;
+
+            // Cannot move into an alternate stream
+            File.WriteAllText(testFileDefaultStream, "Foo");
+            Assert.Throws<IOException>(() => Move(testFileDefaultStream, testFileAlternateStream));
+
+            // Cannot move out of an alternate stream
+            File.WriteAllText(testFileAlternateStream, "Bar");
+            string testFile2 = Path.Combine(testDirectory.FullName, GetTestFileName());
+            Assert.Throws<IOException>(() => Move(testFileAlternateStream, testFile2));
+        }
         #endregion
     }
 }

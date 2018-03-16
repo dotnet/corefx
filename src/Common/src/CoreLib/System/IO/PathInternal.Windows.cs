@@ -70,7 +70,7 @@ namespace System.IO
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
-        private static bool EndsWithPeriodOrSpace(string path)
+        internal static bool EndsWithPeriodOrSpace(string path)
         {
             if (string.IsNullOrEmpty(path))
                 return false;
@@ -268,19 +268,6 @@ namespace System.IO
             }
 
             return i;
-        }
-
-        private static bool StartsWithOrdinal(ReadOnlySpan<char> source, string value)
-        {
-            if (source.Length < value.Length)
-                return false;
-
-            for (int i = 0; i < value.Length; i++)
-            {
-                if (value[i] != source[i])
-                    return false;
-            }
-            return true;
         }
 
         /// <summary>

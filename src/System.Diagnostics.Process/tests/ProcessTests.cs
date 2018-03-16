@@ -122,19 +122,19 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void ProcessStart_TryExitCommandAsFileName_ThrowsWin32Exception()
         {
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "exit", Arguments = "42" }));
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "exit", Arguments = "42" }));
         }
 
         [Fact]
         public void ProcessStart_UseShellExecuteFalse_FilenameIsUrl_ThrowsWin32Exception()
         {
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "https://www.github.com/corefx" }));
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "https://www.github.com/corefx" }));
         }
 
         [Fact]
         public void ProcessStart_TryOpenFolder_UseShellExecuteIsFalse_ThrowsWin32Exception()
         {
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
         }
 
         [Fact]
@@ -176,13 +176,12 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
-        public void ProcessStart_UseShellExecuteTrue_OpenMissingFile_Throws()
+        public void ProcessStart_UseShellExecute_OnWindows_OpenMissingFile_Throws()
         {
             string fileToOpen = Path.Combine(Environment.CurrentDirectory, "_no_such_file.TXT");
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
+            Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [InlineData(true)]
         [InlineData(false)]
@@ -923,10 +922,10 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [ActiveIssue(26720, TargetFrameworkMonikers.Uap)]
-        [ActiveIssue(27459)]
         public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
         {
-            Assert.Throws<InvalidOperationException>(() => Process.GetProcesses(Guid.NewGuid().ToString()));
+            Type exceptionType = PlatformDetection.IsWindows ? typeof(InvalidOperationException) : typeof(PlatformNotSupportedException);
+            Assert.Throws(exceptionType, () => Process.GetProcesses(Guid.NewGuid().ToString()));
         }
 
         [Fact]
@@ -1285,7 +1284,6 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]  // Expected process HandleCounts differs on OSX
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Handle count change is not reliable, but seems less robust on NETFX")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
-        [ActiveIssue(27459)]
         public void HandleCountChanges()
         {
             RemoteInvoke(() =>
@@ -1617,14 +1615,15 @@ namespace System.Diagnostics.Tests
             string domain = "thisDomain";
             SecureString password = AsSecureString("Value");
 
-            Process p = Process.Start(currentProcessName, userName, password, domain); // This writes junk to the Console but with this overload, we can't prevent that.
-            Assert.NotNull(p);
-            Assert.Equal(currentProcessName, p.StartInfo.FileName);
-            Assert.Equal(userName, p.StartInfo.UserName);
-            Assert.Same(password, p.StartInfo.Password);
-            Assert.Equal(domain, p.StartInfo.Domain);
-
-            Assert.True(p.WaitForExit(WaitInMS));
+            using (Process p = Process.Start(currentProcessName, userName, password, domain)) // This writes junk to the Console but with this overload, we can't prevent that.
+            {
+                Assert.NotNull(p);
+                Assert.Equal(currentProcessName, p.StartInfo.FileName);
+                Assert.Equal(userName, p.StartInfo.UserName);
+                Assert.Same(password, p.StartInfo.Password);
+                Assert.Equal(domain, p.StartInfo.Domain);
+                Assert.True(p.WaitForExit(WaitInMS));
+            }
             password.Dispose();
         }
 
@@ -1638,15 +1637,16 @@ namespace System.Diagnostics.Tests
             string domain = Environment.UserDomainName;
             string arguments = "-xml testResults.xml";
             SecureString password = AsSecureString("Value");
-
-            Process p = Process.Start(currentProcessName, arguments, userName, password, domain);
-            Assert.NotNull(p);
-            Assert.Equal(currentProcessName, p.StartInfo.FileName);
-            Assert.Equal(arguments, p.StartInfo.Arguments);
-            Assert.Equal(userName, p.StartInfo.UserName);
-            Assert.Same(password, p.StartInfo.Password);
-            Assert.Equal(domain, p.StartInfo.Domain);
-            p.Kill();
+            using (Process p = Process.Start(currentProcessName, arguments, userName, password, domain))
+            {
+                Assert.NotNull(p);
+                Assert.Equal(currentProcessName, p.StartInfo.FileName);
+                Assert.Equal(arguments, p.StartInfo.Arguments);
+                Assert.Equal(userName, p.StartInfo.UserName);
+                Assert.Same(password, p.StartInfo.Password);
+                Assert.Equal(domain, p.StartInfo.Domain);
+                p.Kill();
+            }
             password.Dispose();
         }
 

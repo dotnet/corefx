@@ -25,6 +25,14 @@ namespace System.Threading.Tasks
     [StructLayout(LayoutKind.Auto)]
     public readonly struct ValueTask : IEquatable<ValueTask>
     {
+        /// <summary>A task canceled using `new CancellationToken(true)`.</summary>
+        private static readonly Task s_canceledTask =
+#if netstandard
+            Task.Delay(Timeout.Infinite, new CancellationToken(canceled: true));
+#else
+            Task.FromCanceled(new CancellationToken(canceled: true));
+#endif
+        /// <summary>A successfully completed task.</summary>
         internal static Task CompletedTask
 #if netstandard
             { get; } = Task.Delay(0);
@@ -101,27 +109,21 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Returns the <see cref="Task"/> stored in <see cref="_obj"/>.  This uses <see cref="Unsafe"/>.</summary>
-        internal Task UnsafeTask
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Task UnsafeGetTask()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Debug.Assert(ObjectIsTask);
-                Debug.Assert(_obj is Task);
-                return Unsafe.As<Task>(_obj);
-            }
+            Debug.Assert(ObjectIsTask);
+            Debug.Assert(_obj is Task);
+            return Unsafe.As<Task>(_obj);
         }
 
         /// <summary>Returns the <see cref="IValueTaskSource"/> stored in <see cref="_obj"/>.  This uses <see cref="Unsafe"/>.</summary>
-        internal IValueTaskSource UnsafeValueTaskSource
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal IValueTaskSource UnsafeGetValueTaskSource()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Debug.Assert(!ObjectIsTask);
-                Debug.Assert(_obj is IValueTaskSource);
-                return Unsafe.As<IValueTaskSource>(_obj);
-            }
+            Debug.Assert(!ObjectIsTask);
+            Debug.Assert(_obj is IValueTaskSource);
+            return Unsafe.As<IValueTaskSource>(_obj);
         }
 
         /// <summary>Returns the hash code for this instance.</summary>
@@ -152,7 +154,7 @@ namespace System.Threading.Tasks
         /// </remarks>
         public Task AsTask() =>
             _obj == null ? ValueTask.CompletedTask :
-            ObjectIsTask ? UnsafeTask :
+            ObjectIsTask ? UnsafeGetTask() :
             GetTaskForValueTaskSource();
 
         /// <summary>Gets a <see cref="ValueTask"/> that may be used at any point in the future.</summary>
@@ -161,7 +163,7 @@ namespace System.Threading.Tasks
         /// <summary>Creates a <see cref="Task"/> to represent the <see cref="IValueTaskSource"/>.</summary>
         private Task GetTaskForValueTaskSource()
         {
-            IValueTaskSource t = UnsafeValueTaskSource;
+            IValueTaskSource t = UnsafeGetValueTaskSource();
             ValueTaskSourceStatus status = t.GetStatus(_token);
             if (status != ValueTaskSourceStatus.Pending)
             {
@@ -181,22 +183,15 @@ namespace System.Threading.Tasks
                 {
                     if (status == ValueTaskSourceStatus.Canceled)
                     {
-#if netstandard
-                        var tcs = new TaskCompletionSource<bool>();
-                        tcs.TrySetCanceled();
-                        return tcs.Task;
-#else
+#if !netstandard
                         if (exc is OperationCanceledException oce)
                         {
                             var task = new Task<VoidTaskResult>();
                             task.TrySetCanceled(oce.CancellationToken, oce);
                             return task;
                         }
-                        else
-                        {
-                            return Task.FromCanceled(new CancellationToken(true));
-                        }
 #endif
+                        return s_canceledTask;
                     }
                     else
                     {
@@ -288,7 +283,7 @@ namespace System.Threading.Tasks
         public bool IsCompleted
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _obj == null || (ObjectIsTask ? UnsafeTask.IsCompleted : UnsafeValueTaskSource.GetStatus(_token) != ValueTaskSourceStatus.Pending);
+            get => _obj == null || (ObjectIsTask ? UnsafeGetTask().IsCompleted : UnsafeGetValueTaskSource().GetStatus(_token) != ValueTaskSourceStatus.Pending);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask"/> represents a successfully completed operation.</summary>
@@ -299,11 +294,11 @@ namespace System.Threading.Tasks
                 _obj == null ||
                 (ObjectIsTask ?
 #if netstandard
-                    UnsafeTask.Status == TaskStatus.RanToCompletion :
+                    UnsafeGetTask().Status == TaskStatus.RanToCompletion :
 #else
-                    UnsafeTask.IsCompletedSuccessfully :
+                    UnsafeGetTask().IsCompletedSuccessfully :
 #endif
-                    UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Succeeded);
+                    UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Succeeded);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask"/> represents a failed operation.</summary>
@@ -311,7 +306,7 @@ namespace System.Threading.Tasks
         {
             get =>
                 _obj != null &&
-                (ObjectIsTask ? UnsafeTask.IsFaulted : UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Faulted);
+                (ObjectIsTask ? UnsafeGetTask().IsFaulted : UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Faulted);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask"/> represents a canceled operation.</summary>
@@ -324,7 +319,7 @@ namespace System.Threading.Tasks
         {
             get =>
                 _obj != null &&
-                (ObjectIsTask ? UnsafeTask.IsCanceled : UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Canceled);
+                (ObjectIsTask ? UnsafeGetTask().IsCanceled : UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Canceled);
         }
 
         /// <summary>Throws the exception that caused the <see cref="ValueTask"/> to fail.  If it completed successfully, nothing is thrown.</summary>
@@ -337,14 +332,14 @@ namespace System.Threading.Tasks
                 if (ObjectIsTask)
                 {
 #if netstandard
-                    UnsafeTask.GetAwaiter().GetResult();
+                    UnsafeGetTask().GetAwaiter().GetResult();
 #else
-                    TaskAwaiter.ValidateEnd(UnsafeTask);
+                    TaskAwaiter.ValidateEnd(UnsafeGetTask());
 #endif
                 }
                 else
                 {
-                    UnsafeValueTaskSource.GetResult(_token);
+                    UnsafeGetValueTaskSource().GetResult(_token);
                 }
             }
         }
@@ -377,6 +372,8 @@ namespace System.Threading.Tasks
     [StructLayout(LayoutKind.Auto)]
     public readonly struct ValueTask<TResult> : IEquatable<ValueTask<TResult>>
     {
+        /// <summary>A task canceled using `new CancellationToken(true)`. Lazily created only when first needed.</summary>
+        private static Task<TResult> s_canceledTask;
         /// <summary>null if <see cref="_result"/> has the result, otherwise a <see cref="Task{TResult}"/> or a <see cref="IValueTaskSource{TResult}"/>.</summary>
         internal readonly object _obj;
         /// <summary>The result to be used if the operation completed successfully synchronously.</summary>
@@ -465,27 +462,21 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Returns the <see cref="Task{TResult}"/> stored in <see cref="_obj"/>.  This uses <see cref="Unsafe"/>.</summary>
-        internal Task<TResult> UnsafeTask
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Task<TResult> UnsafeGetTask()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Debug.Assert(ObjectIsTask);
-                Debug.Assert(_obj is Task<TResult>);
-                return Unsafe.As<Task<TResult>>(_obj);
-            }
+            Debug.Assert(ObjectIsTask);
+            Debug.Assert(_obj is Task<TResult>);
+            return Unsafe.As<Task<TResult>>(_obj);
         }
 
         /// <summary>Returns the <see cref="IValueTaskSource{TResult}"/> stored in <see cref="_obj"/>.  This uses <see cref="Unsafe"/>.</summary>
-        internal IValueTaskSource<TResult> UnsafeValueTaskSource
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal IValueTaskSource<TResult> UnsafeGetValueTaskSource()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                Debug.Assert(!ObjectIsTask);
-                Debug.Assert(_obj is IValueTaskSource<TResult>);
-                return Unsafe.As<IValueTaskSource<TResult>>(_obj);
-            }
+            Debug.Assert(!ObjectIsTask);
+            Debug.Assert(_obj is IValueTaskSource<TResult>);
+            return Unsafe.As<IValueTaskSource<TResult>>(_obj);
         }
 
         /// <summary>Returns the hash code for this instance.</summary>
@@ -527,7 +518,7 @@ namespace System.Threading.Tasks
 #else
                 AsyncTaskMethodBuilder<TResult>.GetTaskForResult(_result) :
 #endif
-            ObjectIsTask ? UnsafeTask :
+            ObjectIsTask ? UnsafeGetTask() :
             GetTaskForValueTaskSource();
 
         /// <summary>Gets a <see cref="ValueTask{TResult}"/> that may be used at any point in the future.</summary>
@@ -536,7 +527,7 @@ namespace System.Threading.Tasks
         /// <summary>Creates a <see cref="Task{TResult}"/> to represent the <see cref="IValueTaskSource{TResult}"/>.</summary>
         private Task<TResult> GetTaskForValueTaskSource()
         {
-            IValueTaskSource<TResult> t = UnsafeValueTaskSource;
+            IValueTaskSource<TResult> t = UnsafeGetValueTaskSource();
             ValueTaskSourceStatus status = t.GetStatus(_token);
             if (status != ValueTaskSourceStatus.Pending)
             {
@@ -560,22 +551,29 @@ namespace System.Threading.Tasks
                 {
                     if (status == ValueTaskSourceStatus.Canceled)
                     {
-#if netstandard
-                        var tcs = new TaskCompletionSource<TResult>();
-                        tcs.TrySetCanceled();
-                        return tcs.Task;
-#else
+#if !netstandard
                         if (exc is OperationCanceledException oce)
                         {
                             var task = new Task<TResult>();
                             task.TrySetCanceled(oce.CancellationToken, oce);
                             return task;
                         }
-                        else
-                        {
-                            return Task.FromCanceled<TResult>(new CancellationToken(true));
-                        }
 #endif
+
+                        Task<TResult> canceledTask = s_canceledTask;
+                        if (canceledTask == null)
+                        {
+#if netstandard
+                            var tcs = new TaskCompletionSource<TResult>();
+                            tcs.TrySetCanceled();
+                            canceledTask = tcs.Task;
+#else
+                            canceledTask = Task.FromCanceled<TResult>(new CancellationToken(true));
+#endif
+                            // Benign race condition to initialize cached task, as identity doesn't matter.
+                            s_canceledTask = canceledTask;
+                        }
+                        return canceledTask;
                     }
                     else
                     {
@@ -666,7 +664,7 @@ namespace System.Threading.Tasks
         public bool IsCompleted
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _obj == null || (ObjectIsTask ? UnsafeTask.IsCompleted : UnsafeValueTaskSource.GetStatus(_token) != ValueTaskSourceStatus.Pending);
+            get => _obj == null || (ObjectIsTask ? UnsafeGetTask().IsCompleted : UnsafeGetValueTaskSource().GetStatus(_token) != ValueTaskSourceStatus.Pending);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a successfully completed operation.</summary>
@@ -677,11 +675,11 @@ namespace System.Threading.Tasks
                 _obj == null ||
                 (ObjectIsTask ?
 #if netstandard
-                    UnsafeTask.Status == TaskStatus.RanToCompletion :
+                    UnsafeGetTask().Status == TaskStatus.RanToCompletion :
 #else
-                    UnsafeTask.IsCompletedSuccessfully :
+                    UnsafeGetTask().IsCompletedSuccessfully :
 #endif
-                    UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Succeeded);
+                    UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Succeeded);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a failed operation.</summary>
@@ -689,7 +687,7 @@ namespace System.Threading.Tasks
         {
             get =>
                 _obj != null &&
-                (ObjectIsTask ? UnsafeTask.IsFaulted : UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Faulted);
+                (ObjectIsTask ? UnsafeGetTask().IsFaulted : UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Faulted);
         }
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a canceled operation.</summary>
@@ -702,7 +700,7 @@ namespace System.Threading.Tasks
         {
             get =>
                 _obj != null &&
-                (ObjectIsTask ? UnsafeTask.IsCanceled : UnsafeValueTaskSource.GetStatus(_token) == ValueTaskSourceStatus.Canceled);
+                (ObjectIsTask ? UnsafeGetTask().IsCanceled : UnsafeGetValueTaskSource().GetStatus(_token) == ValueTaskSourceStatus.Canceled);
         }
 
         /// <summary>Gets the result.</summary>
@@ -719,15 +717,15 @@ namespace System.Threading.Tasks
                 if (ObjectIsTask)
                 {
 #if netstandard
-                    return UnsafeTask.GetAwaiter().GetResult();
+                    return UnsafeGetTask().GetAwaiter().GetResult();
 #else
-                    Task<TResult> t = UnsafeTask;
+                    Task<TResult> t = UnsafeGetTask();
                     TaskAwaiter.ValidateEnd(t);
                     return t.ResultOnSuccess;
 #endif
                 }
 
-                return UnsafeValueTaskSource.GetResult(_token);
+                return UnsafeGetValueTaskSource().GetResult(_token);
             }
         }
 

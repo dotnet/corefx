@@ -111,13 +111,13 @@
 // 
 // On output there are the following routines
 //    Writing to all listeners that are NOT ETW, we have the following routines
-//       * WriteToAllListeners(ID, Guid*, COUNT, EventData*) 
-//       * WriteToAllListeners(ID, Guid*, object[])
-//       * WriteToAllListeners(NAME, Guid*, EventPayload)
+//       * WriteToAllListeners(ID, Guid*, Guid*, COUNT, EventData*)
+//       * WriteToAllListeners(ID, Guid*, Guid*, object[])
+//       * WriteToAllListeners(NAME, Guid*, Guid*, EventPayload)
 //
 //       EventPayload is the internal type that implements the IDictionary<string, object> interface
 //       The EventListeners will pass back for serialized classes for nested object, but  
-//       WriteToAllListeners(NAME, Guid*, EventPayload) unpacks this uses the fields as if they
+//       WriteToAllListeners(NAME, Guid*, Guid*, EventPayload) unpacks this uses the fields as if they
 //       were parameters to a method.  
 // 
 //       The first two are used for the WriteEvent* case, and the later is used for the Write<T> case.  
@@ -1261,7 +1261,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
 
                     if (m_Dispatchers != null && m_eventData[eventId].EnabledForAnyListener)
-                        WriteToAllListeners(eventId, relatedActivityId, eventDataCount, data);
+                        WriteToAllListeners(eventId, pActivityId, relatedActivityId, eventDataCount, data);
                 }
                 catch (Exception ex)
                 {
@@ -1935,13 +1935,13 @@ namespace System.Diagnostics.Tracing
                         // Maintain old behavior - object identity is preserved
                         if (AppContextSwitches.PreserveEventListnerObjectIdentity)
                         {
-                            WriteToAllListeners(eventId, childActivityID, args);
+                            WriteToAllListeners(eventId, pActivityId, childActivityID, args);
                         }
                         else
 #endif // !ES_BUILD_STANDALONE
                         {
                             object[] serializedArgs = SerializeEventArgs(eventId, args);
-                            WriteToAllListeners(eventId, childActivityID, serializedArgs);
+                            WriteToAllListeners(eventId, pActivityId, childActivityID, serializedArgs);
                         }
                     }
                 }
@@ -1955,7 +1955,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        unsafe private object[] SerializeEventArgs(int eventId, object[] args)
+        private unsafe object[] SerializeEventArgs(int eventId, object[] args)
         {
             TraceLoggingEventTypes eventTypes = m_eventData[eventId].TraceLoggingEventTypes;
             if (eventTypes == null)
@@ -2012,7 +2012,7 @@ namespace System.Diagnostics.Tracing
 #endif //!ES_BUILD_PCL
         }
 
-        unsafe private void WriteToAllListeners(int eventId, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
+        private unsafe void WriteToAllListeners(int eventId, Guid* activityID, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
         {
             // We represent a byte[] as a integer denoting the length  and then a blob of bytes in the data pointer. This causes a spurious
             // warning because eventDataCount is off by one for the byte[] case since a byte[] has 2 items associated it. So we want to check
@@ -2043,14 +2043,16 @@ namespace System.Diagnostics.Tracing
             EventSource.EventData* dataPtr = data;
             for (int i = 0; i < paramCount; i++)
                 args[i] = DecodeObject(eventId, i, ref dataPtr);
-            WriteToAllListeners(eventId, childActivityID, args);
+            WriteToAllListeners(eventId, activityID, childActivityID, args);
         }
 
         // helper for writing to all EventListeners attached the current eventSource.  
-        unsafe private void WriteToAllListeners(int eventId, Guid* childActivityID, params object[] args)
+        private unsafe void WriteToAllListeners(int eventId, Guid* activityID, Guid* childActivityID, params object[] args)
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
             eventCallbackArgs.EventId = eventId;
+            if (activityID != null)
+                eventCallbackArgs.ActivityId = *activityID;
             if (childActivityID != null)
                 eventCallbackArgs.RelatedActivityId = *childActivityID;
             eventCallbackArgs.EventName = m_eventData[eventId].Name;
@@ -3465,7 +3467,7 @@ namespace System.Diagnostics.Tracing
         /// <param name="method">The method to probe.</param>
         /// <returns>The literal value or -1 if the value could not be determined. </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Switch statement is clearer than alternatives")]
-        static private int GetHelperCallFirstArg(MethodInfo method)
+        private static int GetHelperCallFirstArg(MethodInfo method)
         {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
             // Currently searches for the following pattern
@@ -4401,7 +4403,20 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public Guid ActivityId
         {
-            get { return EventSource.CurrentThreadActivityId; }
+            get
+            {
+                Guid activityId = m_activityId;
+                if (activityId == Guid.Empty)
+                {
+                    activityId = EventSource.CurrentThreadActivityId;
+                }
+
+                return activityId;
+            }
+            internal set
+            {
+                m_activityId = value;
+            }
         }
 
         /// <summary>
@@ -4576,6 +4591,7 @@ namespace System.Diagnostics.Tracing
         private string m_eventName;
         private EventSource m_eventSource;
         private ReadOnlyCollection<string> m_payloadNames;
+        private Guid m_activityId;
         internal EventTags m_tags;
         internal EventOpcode m_opcode;
         internal EventLevel m_level;

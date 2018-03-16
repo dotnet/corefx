@@ -477,22 +477,6 @@ namespace System.IO
             return true;
         }
 
-        private static string CombineInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
-        {
-            if (first.Length == 0)
-                return second.Length == 0
-                    ? string.Empty
-                    : new string(second);
-
-            if (second.Length == 0)
-                return new string(first);
-
-            if (IsPathRooted(second))
-                return new string(second);
-
-            return JoinInternal(first, second);
-        }
-
         private static string CombineInternal(string first, string second)
         {
             if (string.IsNullOrEmpty(first))
@@ -545,7 +529,7 @@ namespace System.IO
             return JoinInternal(first, second, third, fourth);
         }
 
-        private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
+        private static unsafe string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0, "should have dealt with empty paths");
 
@@ -567,7 +551,7 @@ namespace System.IO
             }
         }
 
-        private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
+        private static unsafe string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0, "should have dealt with empty paths");
 
@@ -595,7 +579,7 @@ namespace System.IO
             }
         }
 
-        private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third, ReadOnlySpan<char> fourth)
+        private static unsafe string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third, ReadOnlySpan<char> fourth)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0 && fourth.Length > 0, "should have dealt with empty paths");
 
@@ -685,93 +669,6 @@ namespace System.IO
             chars[9] = s_base32Char[(bytes[5] & 0x1F)];
             chars[10] = s_base32Char[(bytes[6] & 0x1F)];
             chars[11] = s_base32Char[(bytes[7] & 0x1F)];
-        }
-
-        /// <summary>
-        /// Try to remove relative segments from the given path (without combining with a root).
-        /// </summary>
-        /// <param name="skip">Skip the specified number of characters before evaluating.</param>
-        private static string RemoveRelativeSegments(string path, int skip = 0)
-        {
-            bool flippedSeparator = false;
-
-            // Remove "//", "/./", and "/../" from the path by copying each character to the output, 
-            // except the ones we're removing, such that the builder contains the normalized path 
-            // at the end.
-            StringBuilder sb = StringBuilderCache.Acquire(path.Length);
-            if (skip > 0)
-            {
-                sb.Append(path, 0, skip);
-            }
-
-            for (int i = skip; i < path.Length; i++)
-            {
-                char c = path[i];
-
-                if (PathInternal.IsDirectorySeparator(c) && i + 1 < path.Length)
-                {
-                    // Skip this character if it's a directory separator and if the next character is, too,
-                    // e.g. "parent//child" => "parent/child"
-                    if (PathInternal.IsDirectorySeparator(path[i + 1]))
-                    {
-                        continue;
-                    }
-
-                    // Skip this character and the next if it's referring to the current directory,
-                    // e.g. "parent/./child" => "parent/child"
-                    if ((i + 2 == path.Length || PathInternal.IsDirectorySeparator(path[i + 2])) &&
-                        path[i + 1] == '.')
-                    {
-                        i++;
-                        continue;
-                    }
-
-                    // Skip this character and the next two if it's referring to the parent directory,
-                    // e.g. "parent/child/../grandchild" => "parent/grandchild"
-                    if (i + 2 < path.Length &&
-                        (i + 3 == path.Length || PathInternal.IsDirectorySeparator(path[i + 3])) &&
-                        path[i + 1] == '.' && path[i + 2] == '.')
-                    {
-                        // Unwind back to the last slash (and if there isn't one, clear out everything).
-                        int s;
-                        for (s = sb.Length - 1; s >= 0; s--)
-                        {
-                            if (PathInternal.IsDirectorySeparator(sb[s]))
-                            {
-                                sb.Length = s;
-                                break;
-                            }
-                        }
-                        if (s < 0)
-                        {
-                            sb.Length = 0;
-                        }
-
-                        i += 2;
-                        continue;
-                    }
-                }
-
-                // Normalize the directory separator if needed
-                if (c != PathInternal.DirectorySeparatorChar && c == PathInternal.AltDirectorySeparatorChar)
-                {
-                    c = PathInternal.DirectorySeparatorChar;
-                    flippedSeparator = true;
-                }
-
-                sb.Append(c);
-            }
-
-            if (flippedSeparator || sb.Length != path.Length)
-            {
-                return StringBuilderCache.GetStringAndRelease(sb);
-            }
-            else
-            {
-                // We haven't changed the source path, return the original
-                StringBuilderCache.Release(sb);
-                return path;
-            }
         }
 
         /// <summary>

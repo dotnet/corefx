@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.Test.Common;
-using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -77,6 +74,13 @@ namespace System.Net.Http.Functional.Tests
     {
         protected override bool UseSocketsHttpHandler => true;
 
+        protected override void SetResponseDrainTimeout(HttpClientHandler handler, TimeSpan time)
+        {
+            SocketsHttpHandler s = (SocketsHttpHandler)GetUnderlyingSocketsHttpHandler(handler);
+            Assert.NotNull(s);
+            s.ResponseDrainTimeout = time;
+        }
+
         [Fact]
         public void MaxResponseDrainSize_Roundtrips()
         {
@@ -119,6 +123,49 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public void ResponseDrainTimeout_Roundtrips()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(TimeSpan.FromSeconds(2), handler.ResponseDrainTimeout);
+
+                handler.ResponseDrainTimeout = TimeSpan.Zero;
+                Assert.Equal(TimeSpan.Zero, handler.ResponseDrainTimeout);
+
+                handler.ResponseDrainTimeout = TimeSpan.FromTicks(int.MaxValue);
+                Assert.Equal(TimeSpan.FromTicks(int.MaxValue), handler.ResponseDrainTimeout);
+            }
+        }
+
+        [Fact]
+        public void MaxResponseDraiTime_InvalidArgument_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            {
+                Assert.Equal(TimeSpan.FromSeconds(2), handler.ResponseDrainTimeout);
+
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.ResponseDrainTimeout = TimeSpan.FromSeconds(-1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.ResponseDrainTimeout = TimeSpan.MaxValue);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.ResponseDrainTimeout = TimeSpan.FromSeconds(int.MaxValue));
+
+                Assert.Equal(TimeSpan.FromSeconds(2), handler.ResponseDrainTimeout);
+            }
+        }
+
+        [Fact]
+        public void ResponseDrainTimeout_SetAfterUse_Throws()
+        {
+            using (var handler = new SocketsHttpHandler())
+            using (var client = new HttpClient(handler))
+            {
+                handler.ResponseDrainTimeout = TimeSpan.FromSeconds(42);
+                client.GetAsync("http://" + Guid.NewGuid().ToString("N")); // ignoring failure
+                Assert.Equal(TimeSpan.FromSeconds(42), handler.ResponseDrainTimeout);
+                Assert.Throws<InvalidOperationException>(() => handler.ResponseDrainTimeout = TimeSpan.FromSeconds(42));
+            }
+        }
+
         [OuterLoop]
         [Theory]
         [InlineData(1024 * 1024 * 2, 9_500, 1024 * 1024 * 3, ContentMode.ContentLength)]
@@ -131,6 +178,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     var handler = new SocketsHttpHandler();
                     handler.MaxResponseDrainSize = maxDrainSize;
+                    handler.ResponseDrainTimeout = Timeout.InfiniteTimeSpan;
 
                     // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
                     handler.MaxConnectionsPerServer = 1;
@@ -176,6 +224,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     var handler = new SocketsHttpHandler();
                     handler.MaxResponseDrainSize = maxDrainSize;
+                    handler.ResponseDrainTimeout = Timeout.InfiniteTimeSpan;
 
                     // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
                     handler.MaxConnectionsPerServer = 1;
@@ -202,6 +251,58 @@ namespace System.Net.Http.Functional.Tests
                         try
                         {
                             await connection.Writer.WriteAsync(response);
+                        }
+                        catch (Exception) { }     // Eat errors from client disconnect.
+
+                        await server.AcceptConnectionSendCustomResponseAndCloseAsync(response);
+                    });
+                });
+        }
+
+        [OuterLoop]
+        [Theory]
+        [InlineData(ContentMode.ContentLength)]
+        [InlineData(ContentMode.SingleChunk)]
+        [InlineData(ContentMode.BytePerChunk)]
+        public async Task GetAsyncWithMaxConnections_DrainTakesLongerThanTimeout_KillsConnection(ContentMode mode)
+        {
+            const int ContentLength = 10_000;
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    var handler = new SocketsHttpHandler();
+                    handler.MaxResponseDrainSize = int.MaxValue;
+                    handler.ResponseDrainTimeout = TimeSpan.FromMilliseconds(1);
+
+                    // Set MaxConnectionsPerServer to 1.  This will ensure we will wait for the previous request to drain (or fail to)
+                    handler.MaxConnectionsPerServer = 1;
+
+                    using (var client = new HttpClient(handler))
+                    {
+                        client.Timeout = Timeout.InfiniteTimeSpan;
+
+                        HttpResponseMessage response1 = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        ValidateResponseHeaders(response1, ContentLength, mode);
+                        response1.Dispose();
+
+                        // Issue another request.  We'll confirm that it comes on a new connection.
+                        HttpResponseMessage response2 = await client.GetAsync(url);
+                        ValidateResponseHeaders(response2, ContentLength, mode);
+                        Assert.Equal(ContentLength, (await response2.Content.ReadAsStringAsync()).Length);
+                    }
+                },
+                async server =>
+                {
+                    string content = new string('a', ContentLength);
+                    string response = GetResponseForContentMode(content, mode);
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.ReadRequestHeaderAsync();
+                        try
+                        {
+                            // Write out only part of the response
+                            await connection.Writer.WriteAsync(response.Substring(0, response.Length / 2));
                         }
                         catch (Exception) { }     // Eat errors from client disconnect.
 
@@ -458,7 +559,7 @@ namespace System.Net.Http.Functional.Tests
         public static IEnumerable<object[]> Authentication_SocketsHttpHandler_TestData()
         {
             // These test cases pass on SocketsHttpHandler, fail everywhere else.
-            // TODO: #27113: Fix failing authentication test cases on different httpclienthandlers.
+            // TODO: #28065: Investigate failing authentication test cases on WinHttpHandler & CurlHandler.
             yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic something digest something", true };
             yield return new object[] { "Digest ", false };
@@ -839,6 +940,50 @@ namespace System.Net.Http.Functional.Tests
                 }
             }
         }
+
+        [OuterLoop]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ConnectionsPooledThenDisposed_NoUnobservedTaskExceptions(bool secure)
+        {
+            RemoteInvoke(async secureString =>
+            {
+                var releaseServer = new TaskCompletionSource<bool>();
+                await LoopbackServer.CreateClientAndServerAsync(async uri =>
+                {
+                    using (var handler = new SocketsHttpHandler())
+                    using (var client = new HttpClient(handler))
+                    {
+                        handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
+                        handler.PooledConnectionLifetime = TimeSpan.FromMilliseconds(1);
+
+                        var exceptions = new List<Exception>();
+                        TaskScheduler.UnobservedTaskException += (s, e) => exceptions.Add(e.Exception);
+
+                        await client.GetStringAsync(uri);
+                        await Task.Delay(10); // any value >= the lifetime
+                        Task ignored = client.GetStringAsync(uri); // force the pool to look for the previous connection and find it's too old
+                        await Task.Delay(100); // give some time for the connection close to fail pending reads
+
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+
+                        // Note that there are race conditions here such that we may not catch every failure,
+                        // and thus could have some false negatives, but there won't be any false positives.
+                        Assert.True(exceptions.Count == 0, string.Concat(exceptions));
+
+                        releaseServer.SetResult(true);
+                    }
+                }, server => server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestHeaderAndSendResponseAsync(content: "hello world");
+                    await releaseServer.Task;
+                }),
+                new LoopbackServer.Options { UseSsl = bool.Parse(secureString) });
+                return SuccessExitCode;
+            }, secure.ToString()).Dispose();
+        }
     }
 
     public sealed class SocketsHttpHandler_PublicAPIBehavior_Test
@@ -1186,8 +1331,8 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("1", true)]
         [InlineData("0", false)]
         [InlineData("false", false)]
-        [InlineData("helloworld", false)]
-        [InlineData("", false)]
+        [InlineData("helloworld", true)]
+        [InlineData("", true)]
         public void HttpClientHandler_SettingEnvironmentVariableChangesDefault(string envVarValue, bool expectedUseSocketsHandler)
         {
             RemoteInvoke((innerEnvVarValue, innerExpectedUseSocketsHandler) =>
