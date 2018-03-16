@@ -102,7 +102,7 @@ namespace System.IO.Tests
             { @"/././../../../../", @"/home/git", @"/" },
 
             { @"/tmp/../../../../../bar", @"/home/git", @"/bar" },
-            { @"/./././bar/../../../", @"/home/git", @"/bar/" },
+            { @"/./././bar/../../../", @"/home/git", @"/" },
             { @"/tmp/..", @"/home/git", @"/" },
             { @"/../../tmp/bar/..", @"/home/git", @"/tmp" },
             { @"/tmp/..", @"/home/git", @"/" },
