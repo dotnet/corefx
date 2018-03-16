@@ -1140,11 +1140,11 @@ public class TypeWithVirtualGenericPropertyDerived<T> : TypeWithVirtualGenericPr
 
 public class DefaultValuesSetToNaN
 {
-    [DefaultValue(double.NaN)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.NaN)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.NaN)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.NaN)]
+    public Single FloatProp { get; set; }
 
     [DefaultValue(Double.NaN)]
     public Double DoubleField;
@@ -1169,11 +1169,11 @@ public class DefaultValuesSetToNaN
 
 public class DefaultValuesSetToPositiveInfinity
 {
-    [DefaultValue(double.PositiveInfinity)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.PositiveInfinity)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.PositiveInfinity)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.PositiveInfinity)]
+    public Single FloatProp { get; set; }
 
     [DefaultValue(Double.PositiveInfinity)]
     public Double DoubleField;
@@ -1198,11 +1198,11 @@ public class DefaultValuesSetToPositiveInfinity
 
 public class DefaultValuesSetToNegativeInfinity
 {
-    [DefaultValue(double.NegativeInfinity)]
-    public double DoubleProp { get; set; }
+    [DefaultValue(Double.NegativeInfinity)]
+    public Double DoubleProp { get; set; }
 
-    [DefaultValue(float.NegativeInfinity)]
-    public float FloatProp { get; set; }
+    [DefaultValue(Single.NegativeInfinity)]
+    public Single FloatProp { get; set; }
 
     [DefaultValue(Double.NegativeInfinity)]
     public Double DoubleField;

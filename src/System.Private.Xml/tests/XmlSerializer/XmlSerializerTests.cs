@@ -1646,13 +1646,28 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
     [Fact]
+    public static void SerializeWithDefaultValueSetToNaNTest()
+    {
+        var value = new DefaultValuesSetToNaN();
+        value.DoubleField = Double.NaN;
+        value.SingleField = Single.NaN;
+        value.FloatProp = Single.NaN;
+        value.DoubleProp = Double.NaN;
+
+        bool result=SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNaN xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
     public static void SerializeWithDefaultValueSetToPositiveInfinityTest()
     {
         var value = new DefaultValuesSetToPositiveInfinity();
         value.DoubleField = Double.PositiveInfinity;
         value.SingleField = Single.PositiveInfinity;
-        value.FloatProp = float.PositiveInfinity;
-        value.DoubleProp = double.PositiveInfinity;
+        value.FloatProp = Single.PositiveInfinity;
+        value.DoubleProp = Double.PositiveInfinity;
 
         bool result = SerializeWithDefaultValue(value,
 @"<?xml version=""1.0""?>
@@ -1666,8 +1681,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var value = new DefaultValuesSetToNegativeInfinity();
         value.DoubleField = Double.NegativeInfinity;
         value.SingleField = Single.NegativeInfinity;
-        value.FloatProp = float.NegativeInfinity;
-        value.DoubleProp = double.NegativeInfinity;
+        value.FloatProp = Single.NegativeInfinity;
+        value.DoubleProp = Double.NegativeInfinity;
 
         bool result = SerializeWithDefaultValue(value,
         @"<?xml version=""1.0""?>
