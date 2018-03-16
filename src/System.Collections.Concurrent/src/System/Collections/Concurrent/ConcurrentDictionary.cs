@@ -1434,18 +1434,9 @@ namespace System.Collections.Concurrent
         {
             if (key == null) ThrowKeyNullException();
             if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
+            ThrowIfNullAndNullsAreIllegal(value);
 
-            TValue typedValue;
-            try
-            {
-                typedValue = (TValue)value;
-            }
-            catch (InvalidCastException)
-            {
-                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-            }
-
-            ((IDictionary<TKey, TValue>)this).Add((TKey)key, typedValue);
+            ((IDictionary<TKey, TValue>)this).Add((TKey)key, (TValue)value);
         }
 
         /// <summary>
@@ -1577,10 +1568,7 @@ namespace System.Collections.Concurrent
                 if (key == null) ThrowKeyNullException();
 
                 if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
-                if (((value != null) || (default(TValue) != null)) && !(value is TValue))
-                {
-                    throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-                }
+                ThrowIfNullAndNullsAreIllegal(value);
 
                 ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value;
             }
@@ -1693,6 +1681,17 @@ namespace System.Collections.Concurrent
         }
 
         #endregion
+
+        // Allow nulls for reference types and Nullable<U>, but not for value types.
+        // Aggressively inline so the jit evaluates the if in place and either drops the call altogether
+        // Or just leaves null test and call to the Non-returning ThrowHelper.ThrowArgumentNullException
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ThrowIfNullAndNullsAreIllegal(object value)
+        {
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
+            if (!(default(TValue) == null) && value == null)
+                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
+        }
 
         /// <summary>
         /// Replaces the bucket table with a larger one. To prevent multiple threads from resizing the

@@ -67,16 +67,25 @@ namespace System.Collections.Concurrent.Tests
             // using IDictionary<TKey, TValue> interface
             IDictionary<string, string> dict2 = new ConcurrentDictionary<string, string>();
             dict2["key"] = null;
+            dict2.Add("key2", null);
 
             // using IDictionary interface
             IDictionary dict3 = new ConcurrentDictionary<string, string>();
             dict3["key"] = null;
+            dict3.Add("key2", null);
 
             // using IDictionary interface and value type values
             Action action = () =>
             {
                 IDictionary dict4 = new ConcurrentDictionary<string, int>();
                 dict4["key"] = null;
+            };
+            Assert.Throws<ArgumentException>(action);
+
+            action = () =>
+            {
+                IDictionary dict5 = new ConcurrentDictionary<string, int>();
+                dict5.Add("key", null);
             };
             Assert.Throws<ArgumentException>(action);
         }
