@@ -55,8 +55,7 @@ namespace System.Diagnostics
         private Hashtable _customCategoryTable;
         private Hashtable _categoryTable;
         private Hashtable _nameTable;
-        private Hashtable _helpTable;
-        private readonly object _customCategoryTableLock = new Object();
+        private Hashtable _helpTable;        
         private readonly object _categoryTableLock = new Object();
         private readonly object _nameTableLock = new Object();
         private readonly object _helpTableLock = new Object();
@@ -320,11 +319,7 @@ namespace System.Diagnostics
             _nameTable = null;
             _helpTable = null;
             _categoryTable = null;
-            //race with FindCustomCategory
-            lock (_customCategoryTableLock)
-            {
-                _customCategoryTable = null;
-            }
+            _customCategoryTable = null;            
         }
 
         internal void Close()
@@ -678,7 +673,7 @@ namespace System.Diagnostics
                                 // In this case we return an 'Unknown' category type and 'false' to indicate the category is *not* custom.
                                 //
                                 categoryType = PerformanceCounterCategoryType.Unknown;
-                                lock (_customCategoryTableLock)
+                                lock (table)
                                 {
                                     table[category] = categoryType;
                                 }
@@ -709,7 +704,7 @@ namespace System.Diagnostics
                             if (objectID != null)
                             {
                                 int firstID = (int)objectID;
-                                lock (_customCategoryTableLock)
+                                lock (table)
                                 {
                                     table[category] = categoryType;
                                 }
