@@ -5,6 +5,7 @@
   <PropertyGroup>
     <PackageTargetRuntime>unix</PackageTargetRuntime>
     <PreventImplementationReference>true</PreventImplementationReference>
+    <Version>4.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Console.csproj" >
