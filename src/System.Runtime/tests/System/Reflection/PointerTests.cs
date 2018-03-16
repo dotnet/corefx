@@ -23,9 +23,9 @@ namespace System.Reflection.Tests
         }
     }
 
-    delegate void MethodDelegate(byte* ptr, int expected);
+    unsafe delegate void MethodDelegate(byte* ptr, int expected);
 
-    delegate bool* ReturnDelegate(int expected);
+    unsafe delegate bool* ReturnDelegate(int expected);
 
     public unsafe class PointerTests
     {
@@ -95,6 +95,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Bug that will be fixed along with the rest of UAPAOT issues here")]
         public void PointerFieldSetNullValue()
         {
             var obj = new PointerHolder();
@@ -203,7 +204,7 @@ namespace System.Reflection.Tests
         {
             var obj = new PointerHolder();
             MethodInfo method = typeof(PointerHolder).GetMethod("Method");
-            method.Invoke(obj, new[] { null, 0 });
+            method.Invoke(obj, new object[] { null, 0 });
         }
 
         [Theory]
