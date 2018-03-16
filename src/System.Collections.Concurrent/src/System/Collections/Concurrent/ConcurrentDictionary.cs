@@ -475,7 +475,32 @@ namespace System.Collections.Concurrent
         public bool TryUpdate(TKey key, TValue newValue, TValue comparisonValue)
         {
             if (key == null) ThrowKeyNullException();
-            return TryUpdateInternal(key, _comparer.GetHashCode(key), newValue, comparisonValue);
+            IEqualityComparer<TValue> comparer = EqualityComparer<TValue>.Default;
+            return TryUpdateInternal(key, _comparer.GetHashCode(key), newValue, comparisonValue, comparer);
+        }
+
+        /// <summary>
+        /// Uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer{TValue}"/> to compare the
+        /// existing value for the specified key with a specified value, and if they're equal, updates the key
+        /// with a third value.
+        /// </summary>
+        /// <param name="key">The key whose value is compared with <paramref name="comparisonValue"/> and
+        /// possibly replaced.</param>
+        /// <param name="newValue">The value that replaces the value of the element with <paramref
+        /// name="key"/> if the comparison results in equality.</param>
+        /// <param name="comparisonValue">The value that is compared to the value of the element with
+        /// <paramref name="key"/>.</param>
+        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TValue}"/>
+        /// implementation to use when comparing value.</param>
+        /// <returns>true if the value with <paramref name="key"/> was equal to <paramref
+        /// name="comparisonValue"/> and replaced with <paramref name="newValue"/>; otherwise,
+        /// false.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null
+        /// reference.</exception>
+        public bool TryUpdate(TKey key, TValue newValue, TValue comparisonValue, IEqualityComparer<TValue> comparer)
+        {
+            if (key == null) ThrowKeyNullException();
+            return TryUpdateInternal(key, _comparer.GetHashCode(key), newValue, comparisonValue, comparer);
         }
 
         /// <summary>
@@ -489,16 +514,16 @@ namespace System.Collections.Concurrent
         /// name="key"/> if the comparison results in equality.</param>
         /// <param name="comparisonValue">The value that is compared to the value of the element with
         /// <paramref name="key"/>.</param>
+        /// <param name="valueComparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TValue}"/>
+        /// implementation to use when comparing value.</param>
         /// <returns>true if the value with <paramref name="key"/> was equal to <paramref
         /// name="comparisonValue"/> and replaced with <paramref name="newValue"/>; otherwise,
         /// false.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null
         /// reference.</exception>
-        private bool TryUpdateInternal(TKey key, int hashcode, TValue newValue, TValue comparisonValue)
+        private bool TryUpdateInternal(TKey key, int hashcode, TValue newValue, TValue comparisonValue, IEqualityComparer<TValue> valueComparer)
         {
             Debug.Assert(_comparer.GetHashCode(key) == hashcode);
-
-            IEqualityComparer<TValue> valueComparer = EqualityComparer<TValue>.Default;
             
             while (true)
             {
@@ -557,6 +582,11 @@ namespace System.Collections.Concurrent
                     return false;
                 }
             }
+        }
+
+        private bool TryUpdateInternal(TKey key, int hashcode, TValue newValue, TValue comparisonValue)
+        {
+            return TryUpdateInternal(key, hashcode, newValue, EqualityComparer<TValue>.Default);
         }
 
         /// <summary>
