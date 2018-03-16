@@ -905,6 +905,24 @@ namespace System.Collections.Concurrent
             throw new ArgumentNullException("key");
         }
 
+
+        // Allow nulls for reference types and Nullable<U>, but not for value types.
+        // Aggressively inline so the jit evaluates the if in place and either drops the call altogether
+        // Or just leaves null test and call to the Non-returning ThrowValueNullException
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ThrowIfNullAndNullsAreIllegal(object value)
+        {
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
+            if (!(default(TValue) == null) && value == null)
+                ThrowValueNullException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowValueNullException()
+        {
+            throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
+        }
+
         /// <summary>
         /// Gets the number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>.
@@ -1681,17 +1699,6 @@ namespace System.Collections.Concurrent
         }
 
         #endregion
-
-        // Allow nulls for reference types and Nullable<U>, but not for value types.
-        // Aggressively inline so the jit evaluates the if in place and either drops the call altogether
-        // Or just leaves null test and call to the Non-returning ThrowHelper.ThrowArgumentNullException
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ThrowIfNullAndNullsAreIllegal(object value)
-        {
-            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
-            if (!(default(TValue) == null) && value == null)
-                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-        }
 
         /// <summary>
         /// Replaces the bucket table with a larger one. To prevent multiple threads from resizing the
