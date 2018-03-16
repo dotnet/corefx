@@ -91,9 +91,9 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: Negotiate\r\nx-identifier: Test\r\n", "Basic")]
-        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\nWWW-Authenticate: Negotiate\r\nx-identifier: Test\r\n", "Digest")]
-        public async Task HttpClientHandler_MultipleAuthenticateHeaders_PicksSupported(string authenticateHeader, string supportedAuth)
+        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: NTLM\r\n", "Basic", "Negotiate")]
+        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\nWWW-Authenticate: NTLM\r\n", "Digest", "Negotiate")]
+        public async Task HttpClientHandler_MultipleAuthenticateHeaders_PicksSupported(string authenticateHeader, string supportedAuth, string unsupportedAuth)
         {
             if (IsCurlHandler && authenticateHeader.Contains("Digest"))
             {
@@ -105,10 +105,11 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
+                handler.UseDefaultCredentials = false;
 
                 var credentials = new CredentialCache();
                 credentials.Add(url, supportedAuth, new NetworkCredential(Username, Password, Domain));
-                handler.UseDefaultCredentials = false;
+                credentials.Add(url, unsupportedAuth, new NetworkCredential(Username, Password, Domain));
 
                 Task serverTask = server.AcceptConnectionPerformAuthenticationAndCloseAsync(authenticateHeader);
                 await TestHelper.WhenAllCompletedOrAnyFailed(s_createAndValidateRequest(handler, url, HttpStatusCode.OK, credentials), serverTask);
