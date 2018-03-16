@@ -21,7 +21,8 @@ namespace Microsoft.XmlSerializer.Generator
             return sgen.Run(args);
         }
 
-        private static string references = string.Empty;
+        private static string s_references = string.Empty;
+
         private int Run(string[] args)
         {
             string assembly = null;
@@ -35,7 +36,6 @@ namespace Microsoft.XmlSerializer.Generator
             bool parsableErrors = false;
             bool silent = false;
             bool warnings = false;
-            
 
             AppDomain.CurrentDomain.AssemblyResolve += SgenAssemblyResolver;
 
@@ -121,7 +121,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "reference"))
                     {
-                        references = value;
+                        s_references = value;
                     }
                     else
                     {
@@ -500,20 +500,20 @@ namespace Microsoft.XmlSerializer.Generator
 
         private static void ParseReferences(string value, Dictionary<string, string> dictionary)
         {
-            List<string> list = new List<string>();
+            var referencelist = new List<string>();
             if (value.Length > 0)
             {
                 string[] entries = value.Split(new char[] { ';' });
                 for (int i = 0; i < entries.Length; i++)
                 {
                     string entry = entries[i].Trim();
-                    if (entry == null || entry.Length == 0)
+                    if (string.IsNullOrEmpty(entry))
                         continue;
-                    list.Add(entry);
+                    referencelist.Add(entry);
                 }
             }
 
-            foreach (var reference in list)
+            foreach (var reference in referencelist)
             {
                 if (reference.EndsWith(".dll") || reference.EndsWith(".exe"))
                 {
@@ -534,7 +534,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             try
             {
-                if (string.IsNullOrEmpty(references) || string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Count() == 0)
+                if (string.IsNullOrEmpty(s_references) || string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Count() == 0)
                 {
                     return null;
                 }
@@ -545,15 +545,18 @@ namespace Microsoft.XmlSerializer.Generator
                     return null;
                 }
 
-                Dictionary<string, string> referencedic = new Dictionary<string, string>();
-                ParseReferences(references, referencedic);
+                Dictionary<string, string> referencedic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                ParseReferences(s_references, referencedic);
 
-                string reference = referencedic[assemblyname];
-                if (!string.IsNullOrEmpty(reference))
+                if(referencedic.ContainsKey(assemblyname))
                 {
-                    if (File.Exists(reference))
+                    string reference = referencedic[assemblyname];
+                    if (!string.IsNullOrEmpty(reference))
                     {
-                        return Assembly.LoadFrom(reference);
+                        if (File.Exists(reference))
+                        {
+                            return Assembly.LoadFrom(reference);
+                        }
                     }
                 }
             }
