@@ -5,7 +5,6 @@
   <PropertyGroup>
     <PackageTargetRuntime>win</PackageTargetRuntime>
     <PreventImplementationReference>true</PreventImplementationReference>
-    <Version>4.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
