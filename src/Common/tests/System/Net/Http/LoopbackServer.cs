@@ -149,9 +149,10 @@ namespace System.Net.Test.Common
 
         public static string GetRequestHeaderValue(List<string> headers, string name)
         {
+            var sep = new char[] { ':' };
             foreach (string line in headers)
             {
-                string[] tokens = line.Split(new char[] { ':' }, 2);
+                string[] tokens = line.Split(sep , 2);
                 if (name.Equals(tokens[0], StringComparison.InvariantCultureIgnoreCase))
                 {
                     return tokens[1].Trim();
