@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration;
+using System.Globalization;
+
 using Xunit;
 
 namespace System.ConfigurationTests
@@ -111,27 +113,49 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot,"Exception messages are different")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MinValueString_TooSmall()
         {
-            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
+            var cc = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            try
+            {
+                TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
-            attribute.MaxValueString = new TimeSpan(2, 2, 2, 2).ToString();
-            ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() => attribute.MinValueString = new TimeSpan(3, 3, 3, 3).ToString());
-            ArgumentOutOfRangeException expectedException = new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
-            Assert.Equal(expectedException.Message, result.Message);
+                attribute.MaxValueString = new TimeSpan(2, 2, 2, 2).ToString();
+                ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                    attribute.MinValueString = new TimeSpan(3, 3, 3, 3).ToString());
+                ArgumentOutOfRangeException expectedException =
+                    new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
+                Assert.Equal(expectedException.Message, result.Message);
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cc;
+            }
         }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MaxValueString_TooBig()
         {
-            TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
+            var cc = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            try
+            {
+                TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
-            attribute.MinValueString = new TimeSpan(2, 2, 2, 2).ToString();
-            ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() => attribute.MaxValueString = new TimeSpan(1, 1, 1, 1).ToString());
-            ArgumentOutOfRangeException expectedException = new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
-            Assert.Equal(expectedException.Message, result.Message);
+                attribute.MinValueString = new TimeSpan(2, 2, 2, 2).ToString();
+                ArgumentOutOfRangeException result = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                    attribute.MaxValueString = new TimeSpan(1, 1, 1, 1).ToString());
+                ArgumentOutOfRangeException expectedException =
+                    new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
+                Assert.Equal(expectedException.Message, result.Message);
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cc;
+            }
         }
     }
 }

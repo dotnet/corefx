@@ -30,6 +30,7 @@
 using System;
 using System.Configuration;
 using System.Configuration.Internal;
+using System.Globalization;
 using System.IO;
 using System.Xml;
 
@@ -42,15 +43,25 @@ namespace MonoTests.System.Configuration
         [Fact] // ctor ()
         public void Constructor1()
         {
-            ConfigurationErrorsException cee = new ConfigurationErrorsException();
-            Assert.NotNull(cee.BareMessage);
-            Assert.True(cee.BareMessage.IndexOf("'" + typeof(ConfigurationErrorsException).FullName + "'") != -1, "#2:" + cee.BareMessage);
-            Assert.NotNull(cee.Data);
-            Assert.Equal(0, cee.Data.Count);
-            Assert.Null(cee.Filename);
-            Assert.Null(cee.InnerException);
-            Assert.Equal(0, cee.Line);
-            Assert.Equal(cee.BareMessage, cee.Message);
+            var cc = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            try
+            {
+
+                ConfigurationErrorsException cee = new ConfigurationErrorsException();
+                Assert.NotNull(cee.BareMessage);
+                Assert.True(cee.BareMessage.IndexOf("'" + typeof(ConfigurationErrorsException).FullName + "'") != -1, "#2:" + cee.BareMessage);
+                Assert.NotNull(cee.Data);
+                Assert.Equal(0, cee.Data.Count);
+                Assert.Null(cee.Filename);
+                Assert.Null(cee.InnerException);
+                Assert.Equal(0, cee.Line);
+                Assert.Equal(cee.BareMessage, cee.Message);
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cc;
+            }
         }
 
         [Fact] // ctor (String)
