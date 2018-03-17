@@ -180,6 +180,75 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [MemberData(nameof(JoinMultipleData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
+        public static void Join_Multiple_LeftWithOrderingColisions(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            ParallelQuery<int> leftQuery = left.Item.AsUnordered().OrderBy(x => x % 2);
+            ParallelQuery<int> rightQuery = right.Item;
+
+            HashSet<int> seenLeft = new HashSet<int>();
+            HashSet<int> seenRight = new HashSet<int>();
+
+            int currentLeft = -1;
+            bool seenOdd = false;
+
+            Assert.All(leftQuery.Join(rightQuery, x => x, y => y % KeyFactor, (x, y) => KeyValuePair.Create(x, y)),
+                p =>
+                {
+                    try
+                    {
+                        if (currentLeft != p.Key)
+                        {
+                            try
+                            {
+                                if (p.Key % 2 == 1)
+                                {
+                                    seenOdd = true;
+                                }
+                                else
+                                {
+                                    Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
+                                }
+                                Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
+                                if(currentLeft != -1)
+                                {
+                                    Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                                }
+                            }
+                            finally
+                            {
+                                currentLeft = p.Key;
+                                seenRight.Clear();
+                            }
+                        }
+                        Assert.Equal(p.Key, p.Value % KeyFactor);
+                        Assert.Equal(p.Key + seenRight.Count * KeyFactor, p.Value);
+                        Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
+                    }
+                    finally
+                    {
+                        seenRight.Add(p.Value);
+                    }
+                });
+            Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+            Assert.Equal(Math.Min(KeyFactor, Math.Min(rightCount, leftCount)), seenLeft.Count);
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(JoinMultipleData), new[] { 512, 1024 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
+        public static void Join_Multiple_LeftWithOrderingColisions_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            Join_Multiple_LeftWithOrderingColisions(left, leftCount, right, rightCount);
+        }
+
+        [Theory]
         [MemberData(nameof(JoinUnorderedData), new[] { 0, 1, 2, KeyFactor * 2 })]
         public static void Join_Unordered_CustomComparator(int leftCount, int rightCount)
         {
@@ -254,6 +323,76 @@ namespace System.Linq.Parallel.Tests
         public static void Join_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Join_CustomComparator(left, leftCount, right, rightCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(JoinMultipleData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
+        public static void Join_CustomComparator_LeftWithOrderingColisions(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            ParallelQuery<int> leftQuery = left.Item.AsUnordered().OrderBy(x => x % 2);
+            ParallelQuery<int> rightQuery = right.Item;
+
+            HashSet<int> seenLeft = new HashSet<int>();
+            HashSet<int> seenRight = new HashSet<int>();
+
+            int currentLeft = -1;
+            bool seenOdd = false;
+
+            Assert.All(leftQuery.Join(rightQuery, x => x, y => y,
+                (x, y) => KeyValuePair.Create(x, y), new ModularCongruenceComparer(KeyFactor)),
+                p =>
+                {
+                    try
+                    {
+                        if (currentLeft != p.Key)
+                        {
+                            try
+                            {
+                                if (p.Key % 2 == 1)
+                                {
+                                    seenOdd = true;
+                                }
+                                else
+                                {
+                                    Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
+                                }
+                                Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
+                                if (currentLeft != -1)
+                                {
+                                    Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                                }
+                            }
+                            finally
+                            {
+                                currentLeft = p.Key;
+                                seenRight.Clear();
+                            }
+                        }
+                        Assert.Equal(p.Key % KeyFactor, p.Value % KeyFactor);
+                        Assert.Equal(p.Key % KeyFactor + seenRight.Count * KeyFactor, p.Value);
+                        Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
+                    }
+                    finally
+                    {
+                        seenRight.Add(p.Value);
+                    }
+                });
+            Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+            Assert.Equal((rightCount >= KeyFactor) ? leftCount : leftCount / KeyFactor * rightCount + Math.Min(leftCount % KeyFactor, rightCount), seenLeft.Count);
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(JoinMultipleData), new[] { 512, 1024 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
+        public static void Join_CustomComparator_LeftWithOrderingColisions_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            Join_CustomComparator_LeftWithOrderingColisions(left, leftCount, right, rightCount);
         }
 
         [Theory]

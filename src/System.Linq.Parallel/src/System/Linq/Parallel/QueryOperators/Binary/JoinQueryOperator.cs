@@ -80,9 +80,21 @@ namespace System.Linq.Parallel
 
             if (LeftChild.OutputOrdered)
             {
-                WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
-                    ExchangeUtilities.HashRepartitionOrdered(leftStream, _leftKeySelector, _keyComparer, null, settings.CancellationState.MergedCancellationToken),
-                    rightStream, outputRecipient, settings.CancellationState.MergedCancellationToken);
+                if(ExchangeUtilities.IsWorseThan(LeftChild.OrdinalIndexState, OrdinalIndexState.Increasing))
+                {
+                    PartitionedStream<TLeftInput, int> leftStreamInt =
+                        QueryOperator<TLeftInput>.ExecuteAndCollectResults(leftStream, leftStream.PartitionCount, OutputOrdered, preferStriping, settings)
+                        .GetPartitionedStream();
+                    WrapPartitionedStreamHelper<int, TRightKey>(
+                        ExchangeUtilities.HashRepartitionOrdered(leftStreamInt, _leftKeySelector, _keyComparer, null, settings.CancellationState.MergedCancellationToken),
+                        rightStream, outputRecipient, settings.CancellationState.MergedCancellationToken);
+                }
+                else
+                {
+                    WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
+                        ExchangeUtilities.HashRepartitionOrdered(leftStream, _leftKeySelector, _keyComparer, null, settings.CancellationState.MergedCancellationToken),
+                        rightStream, outputRecipient, settings.CancellationState.MergedCancellationToken);
+                }
             }
             else
             {
