@@ -185,7 +185,7 @@ namespace System
         public object GetObject() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
-        public bool Equals(System.SequencePosition position) { throw null; }
+        public bool Equals(System.SequencePosition other) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.SequencePosition left, System.SequencePosition right) { throw null; }
         public static bool operator !=(System.SequencePosition left, System.SequencePosition right) { throw null; }
