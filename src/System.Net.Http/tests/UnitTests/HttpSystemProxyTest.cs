@@ -45,7 +45,6 @@ namespace System.Net.Http.Tests
         [InlineData("http://localhost/", true)]
         [InlineData("http://127.0.0.1/", true)]
         [InlineData("http://128.0.0.1/", false)]
-        [InlineData("http://10.37.129.2/", true)]
         [InlineData("http://[::1]/", true)]
         [InlineData("http://foo/", true)]
         [InlineData("http://www.foo.com/", true)]
