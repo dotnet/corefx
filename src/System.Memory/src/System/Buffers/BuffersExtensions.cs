@@ -101,36 +101,36 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Writes contents of <paramref name="source"/> to <paramref name="bufferWriter"/>
+        /// Writes contents of <paramref name="source"/> to <paramref name="writer"/>
         /// </summary>
-        public static void Write<T>(this IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source)
+        public static void Write<T>(this IBufferWriter<T> writer, ReadOnlySpan<T> source)
         {
-            Span<T> destination = bufferWriter.GetSpan();
+            Span<T> destination = writer.GetSpan();
 
             // Fast path, try copying to the available memory directly
             if (source.Length <= destination.Length)
             {
                 source.CopyTo(destination);
-                bufferWriter.Advance(source.Length);
+                writer.Advance(source.Length);
             }
             else
             {
-                WriteMultiSegment(bufferWriter, source, destination);
+                WriteMultiSegment(writer, source, destination);
             }
         }
 
-        private static void WriteMultiSegment<T>(IBufferWriter<T> bufferWriter, in ReadOnlySpan<T> source, Span<T> destination)
+        private static void WriteMultiSegment<T>(IBufferWriter<T> writer, in ReadOnlySpan<T> source, Span<T> destination)
         {
             ReadOnlySpan<T> input = source;
             while (true)
             {
                 int writeSize = Math.Min(destination.Length, input.Length);
                 input.Slice(0, writeSize).CopyTo(destination);
-                bufferWriter.Advance(writeSize);
+                writer.Advance(writeSize);
                 input = input.Slice(writeSize);
                 if (input.Length > 0)
                 {
-                    destination = bufferWriter.GetSpan(input.Length);
+                    destination = writer.GetSpan(input.Length);
                     continue;
                 }
 
