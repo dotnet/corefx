@@ -29,27 +29,8 @@ internal partial class Interop
             ushort serverPort,
             uint reserved);
 
-        // NOTE: except for the return type, this refers to the same function as WinHttpConnect.
-        [DllImport(Interop.Libraries.WinHttp, EntryPoint = "WinHttpConnect", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpConnectWithCallback(
-            SafeWinHttpHandle sessionHandle,
-            string serverName,
-            ushort serverPort,
-            uint reserved);
-
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern SafeWinHttpHandle WinHttpOpenRequest(
-            SafeWinHttpHandle connectHandle,
-            string verb,
-            string objectName,
-            string version,
-            string referrer,
-            string acceptTypes,
-            uint flags);
-
-        // NOTE: except for the return type, this refers to the same function as WinHttpOpenRequest.
-        [DllImport(Interop.Libraries.WinHttp, EntryPoint = "WinHttpOpenRequest", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpOpenRequestWithCallback(
             SafeWinHttpHandle connectHandle,
             string verb,
             string objectName,
@@ -256,11 +237,6 @@ internal partial class Interop
             WINHTTP_STATUS_CALLBACK callback,
             uint notificationFlags,
             IntPtr reserved);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpWebSocketCompleteUpgrade(
-            SafeWinHttpHandle requestHandle,
-            IntPtr context);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
         public static extern uint WinHttpWebSocketSend(
