@@ -295,7 +295,7 @@ namespace System.Buffers
         public static void CopyTo<T>(in this System.Buffers.ReadOnlySequence<T> source, System.Span<T> destination) { }
         public static System.Nullable<System.SequencePosition> PositionOf<T>(in this System.Buffers.ReadOnlySequence<T> source, T value) where T : System.IEquatable<T> { throw null; }
         public static T[] ToArray<T>(in this System.Buffers.ReadOnlySequence<T> source) { throw null; }
-        public static void Write<T>(this System.Buffers.IBufferWriter<T> writer, ReadOnlySpan<T> source) { }
+        public static void Write<T>(this System.Buffers.IBufferWriter<T> writer, ReadOnlySpan<T> span) { }
     }
     public readonly partial struct ReadOnlySequence<T>
     {

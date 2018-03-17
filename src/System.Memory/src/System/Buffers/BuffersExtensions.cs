@@ -101,21 +101,21 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Writes contents of <paramref name="source"/> to <paramref name="writer"/>
+        /// Writes contents of <paramref name="span"/> to <paramref name="writer"/>
         /// </summary>
-        public static void Write<T>(this IBufferWriter<T> writer, ReadOnlySpan<T> source)
+        public static void Write<T>(this IBufferWriter<T> writer, ReadOnlySpan<T> span)
         {
             Span<T> destination = writer.GetSpan();
 
             // Fast path, try copying to the available memory directly
-            if (source.Length <= destination.Length)
+            if (span.Length <= destination.Length)
             {
-                source.CopyTo(destination);
-                writer.Advance(source.Length);
+                span.CopyTo(destination);
+                writer.Advance(span.Length);
             }
             else
             {
-                WriteMultiSegment(writer, source, destination);
+                WriteMultiSegment(writer, span, destination);
             }
         }
 
