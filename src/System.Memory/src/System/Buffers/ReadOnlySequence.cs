@@ -116,14 +116,14 @@ namespace System.Buffers
         /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="ReadOnlyMemory{T}"/>.
         /// Consumer is expected to manage lifetime of memory until <see cref="ReadOnlySequence{T}"/> is not used anymore.
         /// </summary>
-        public ReadOnlySequence(ReadOnlyMemory<T> readOnlyMemory)
+        public ReadOnlySequence(ReadOnlyMemory<T> memory)
         {
-            if (MemoryMarshal.TryGetOwnedMemory(readOnlyMemory, out OwnedMemory<T> ownedMemory, out int index, out int length))
+            if (MemoryMarshal.TryGetOwnedMemory(memory, out OwnedMemory<T> ownedMemory, out int index, out int length))
             {
                 _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index));
                 _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(length));
             }
-            else if (MemoryMarshal.TryGetArray(readOnlyMemory, out ArraySegment<T> segment))
+            else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
                 T[] array = segment.Array;
                 int start = segment.Offset;
@@ -132,7 +132,7 @@ namespace System.Buffers
             }
             else if (typeof(T) == typeof(char))
             {
-                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length))
+                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out length))
                     ThrowHelper.ThrowInvalidOperationException();
 
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));

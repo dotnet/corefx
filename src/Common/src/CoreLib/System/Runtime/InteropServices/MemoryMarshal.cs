@@ -18,9 +18,9 @@ namespace System.Runtime.InteropServices
         /// Get an array segment from the underlying memory.
         /// If unable to get the array segment, return false with a default array segment.
         /// </summary>
-        public static bool TryGetArray<T>(ReadOnlyMemory<T> readOnlyMemory, out ArraySegment<T> segment)
+        public static bool TryGetArray<T>(ReadOnlyMemory<T> memory, out ArraySegment<T> segment)
         {
-            object obj = readOnlyMemory.GetObjectStartLength(out int index, out int length);
+            object obj = memory.GetObjectStartLength(out int index, out int length);
             if (index < 0)
             {
                 if (((OwnedMemory<T>)obj).TryGetArray(out var segment))
@@ -50,38 +50,38 @@ namespace System.Runtime.InteropServices
         }
 
         /// <summary>
-        /// Gets an <see cref="OwnedMemory{T}"/> from the underlying readOnlyMemory.
+        /// Gets an <see cref="OwnedMemory{T}"/> from the underlying read-only memory.
         /// If unable to get the <typeparamref name="TOwner"/> type, returns false.
         /// </summary>
-        /// <typeparam name="T">The element type of the <paramref name="readOnlyMemory" />.</typeparam>
+        /// <typeparam name="T">The element type of the <paramref name="memory" />.</typeparam>
         /// <typeparam name="TOwner">The type of <see cref="OwnedMemory{T}"/> to try and retrive.</typeparam>
-        /// <param name="readOnlyMemory">The memory to get the owner for.</param>
+        /// <param name="memory">The memory to get the owner for.</param>
         /// <param name="ownedMemory">The returned owner of the <see cref="ReadOnlyMemory{T}"/>.</param>
         /// <returns>A <see cref="bool"/> indicating if it was successful.</returns>
-        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory)
+        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner ownedMemory)
             where TOwner : OwnedMemory<T>
         {
             TOwner owner; // Use register for null comparison rather than byref
-            ownedMemory = owner = readOnlyMemory.GetObjectStartLength(out int index, out int length) as TOwner;
+            ownedMemory = owner = memory.GetObjectStartLength(out int index, out int length) as TOwner;
             return !ReferenceEquals(owner, null);
         }
 
         /// <summary>
-        /// Gets an <see cref="OwnedMemory{T}"/> and <paramref name="index" />, <paramref name="length" /> from the underlying memory.
+        /// Gets an <see cref="OwnedMemory{T}"/> and <paramref name="index" />, <paramref name="length" /> from the underlying read-only memory.
         /// If unable to get the <typeparamref name="TOwner"/> type, returns false.
         /// </summary>
-        /// <typeparam name="T">The element type of the <paramref name="readOnlyMemory" />.</typeparam>
+        /// <typeparam name="T">The element type of the <paramref name="memory" />.</typeparam>
         /// <typeparam name="TOwner">The type of <see cref="OwnedMemory{T}"/> to try and retrive.</typeparam>
-        /// <param name="readOnlyMemory">The memory to get the owner for.</param>
+        /// <param name="memory">The memory to get the owner for.</param>
         /// <param name="ownedMemory">The returned owner of the <see cref="ReadOnlyMemory{T}"/>.</param>
-        /// <param name="index">The offset from the start of the <paramref name="ownedMemory" /> that the <paramref name="readOnlyMemory" /> represents.</param>
-        /// <param name="length">The length of the <paramref name="ownedMemory" /> that the <paramref name="readOnlyMemory" /> represents.</param>
+        /// <param name="index">The offset from the start of the <paramref name="ownedMemory" /> that the <paramref name="memory" /> represents.</param>
+        /// <param name="length">The length of the <paramref name="ownedMemory" /> that the <paramref name="memory" /> represents.</param>
         /// <returns>A <see cref="bool"/> indicating if it was successful.</returns>
-        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory, out int index, out int length)
+        public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner ownedMemory, out int index, out int length)
            where TOwner : OwnedMemory<T>
         {
             TOwner owner; // Use register for null comparison rather than byref
-            ownedMemory = owner = readOnlyMemory.GetObjectStartLength(out index, out length) as TOwner;
+            ownedMemory = owner = memory.GetObjectStartLength(out index, out length) as TOwner;
             index &= ReadOnlyMemory<T>.RemoveOwnedFlagBitMask;
             return !ReferenceEquals(owner, null);
         }
@@ -100,14 +100,14 @@ namespace System.Runtime.InteropServices
         }
 
         /// <summary>Attempts to get the underlying <see cref="string"/> from a <see cref="ReadOnlyMemory{T}"/>.</summary>
-        /// <param name="readOnlyMemory">The memory that may be wrapping a <see cref="string"/> object.</param>
+        /// <param name="memory">The memory that may be wrapping a <see cref="string"/> object.</param>
         /// <param name="text">The string.</param>
         /// <param name="start">The starting location in <paramref name="text"/>.</param>
         /// <param name="length">The number of items in <paramref name="text"/>.</param>
         /// <returns></returns>
-        public static bool TryGetString(ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length)
+        public static bool TryGetString(ReadOnlyMemory<char> memory, out string text, out int start, out int length)
         {
-            if (readOnlyMemory.GetObjectStartLength(out int offset, out int count) is string s)
+            if (memory.GetObjectStartLength(out int offset, out int count) is string s)
             {
                 text = s;
                 start = offset;

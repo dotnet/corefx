@@ -46,9 +46,9 @@ namespace System.Runtime.InteropServices
         /// Get <see cref="ReadOnlyMemory{T}"/> from the underlying <see cref="ReadOnlySequence{T}"/>.
         /// If unable to get the <see cref="ReadOnlyMemory{T}"/>, return false.
         /// </summary>
-        public static bool TryGetReadOnlyMemory<T>(ReadOnlySequence<T> sequence, out ReadOnlyMemory<T> readOnlyMemory)
+        public static bool TryGetReadOnlyMemory<T>(ReadOnlySequence<T> sequence, out ReadOnlyMemory<T> memory)
         {
-            return sequence.TryGetReadOnlyMemory(out readOnlyMemory);
+            return sequence.TryGetReadOnlyMemory(out memory);
         }
 
         /// <summary>
