@@ -410,44 +410,44 @@ namespace System.Buffers.Binary
         public static bool TryReadUInt64BigEndian(System.ReadOnlySpan<byte> source, out ulong value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static bool TryReadUInt64LittleEndian(System.ReadOnlySpan<byte> source, out ulong value) { throw null; }
-        public static bool TryWriteInt16BigEndian(System.Span<byte> source, short value) { throw null; }
-        public static bool TryWriteInt16LittleEndian(System.Span<byte> source, short value) { throw null; }
-        public static bool TryWriteInt32BigEndian(System.Span<byte> source, int value) { throw null; }
-        public static bool TryWriteInt32LittleEndian(System.Span<byte> source, int value) { throw null; }
-        public static bool TryWriteInt64BigEndian(System.Span<byte> source, long value) { throw null; }
-        public static bool TryWriteInt64LittleEndian(System.Span<byte> source, long value) { throw null; }
-        public static bool TryWriteMachineEndian<T>(System.Span<byte> source, ref T value) where T : struct { throw null; }
+        public static bool TryWriteInt16BigEndian(System.Span<byte> destination, short value) { throw null; }
+        public static bool TryWriteInt16LittleEndian(System.Span<byte> destination, short value) { throw null; }
+        public static bool TryWriteInt32BigEndian(System.Span<byte> destination, int value) { throw null; }
+        public static bool TryWriteInt32LittleEndian(System.Span<byte> destination, int value) { throw null; }
+        public static bool TryWriteInt64BigEndian(System.Span<byte> destination, long value) { throw null; }
+        public static bool TryWriteInt64LittleEndian(System.Span<byte> destination, long value) { throw null; }
+        public static bool TryWriteMachineEndian<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt16BigEndian(System.Span<byte> source, ushort value) { throw null; }
+        public static bool TryWriteUInt16BigEndian(System.Span<byte> destination, ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt16LittleEndian(System.Span<byte> source, ushort value) { throw null; }
+        public static bool TryWriteUInt16LittleEndian(System.Span<byte> destination, ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt32BigEndian(System.Span<byte> source, uint value) { throw null; }
+        public static bool TryWriteUInt32BigEndian(System.Span<byte> destination, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt32LittleEndian(System.Span<byte> source, uint value) { throw null; }
+        public static bool TryWriteUInt32LittleEndian(System.Span<byte> destination, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt64BigEndian(System.Span<byte> source, ulong value) { throw null; }
+        public static bool TryWriteUInt64BigEndian(System.Span<byte> destination, ulong value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt64LittleEndian(System.Span<byte> source, ulong value) { throw null; }
-        public static void WriteInt16BigEndian(System.Span<byte> source, short value) { }
-        public static void WriteInt16LittleEndian(System.Span<byte> source, short value) { }
-        public static void WriteInt32BigEndian(System.Span<byte> source, int value) { }
-        public static void WriteInt32LittleEndian(System.Span<byte> source, int value) { }
-        public static void WriteInt64BigEndian(System.Span<byte> source, long value) { }
-        public static void WriteInt64LittleEndian(System.Span<byte> source, long value) { }
-        public static void WriteMachineEndian<T>(System.Span<byte> source, ref T value) where T : struct { }
+        public static bool TryWriteUInt64LittleEndian(System.Span<byte> destination, ulong value) { throw null; }
+        public static void WriteInt16BigEndian(System.Span<byte> destination, short value) { }
+        public static void WriteInt16LittleEndian(System.Span<byte> destination, short value) { }
+        public static void WriteInt32BigEndian(System.Span<byte> destination, int value) { }
+        public static void WriteInt32LittleEndian(System.Span<byte> destination, int value) { }
+        public static void WriteInt64BigEndian(System.Span<byte> destination, long value) { }
+        public static void WriteInt64LittleEndian(System.Span<byte> destination, long value) { }
+        public static void WriteMachineEndian<T>(System.Span<byte> destination, ref T value) where T : struct { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt16BigEndian(System.Span<byte> source, ushort value) { }
+        public static void WriteUInt16BigEndian(System.Span<byte> destination, ushort value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt16LittleEndian(System.Span<byte> source, ushort value) { }
+        public static void WriteUInt16LittleEndian(System.Span<byte> destination, ushort value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt32BigEndian(System.Span<byte> source, uint value) { }
+        public static void WriteUInt32BigEndian(System.Span<byte> destination, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt32LittleEndian(System.Span<byte> source, uint value) { }
+        public static void WriteUInt32LittleEndian(System.Span<byte> destination, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt64BigEndian(System.Span<byte> source, ulong value) { }
+        public static void WriteUInt64BigEndian(System.Span<byte> destination, ulong value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt64LittleEndian(System.Span<byte> source, ulong value) { }
+        public static void WriteUInt64LittleEndian(System.Span<byte> destination, ulong value) { }
     }
 }
 namespace System.Buffers.Text

@@ -17,7 +17,7 @@ namespace System.Buffers.Binary
         /// Writes a structure of type T into a span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteMachineEndian<T>(Span<byte> source, ref T value)
+        public static void WriteMachineEndian<T>(Span<byte> destination, ref T value)
             where T : struct
         {
 #if netstandard
@@ -31,11 +31,11 @@ namespace System.Buffers.Binary
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
-            if ((uint)Unsafe.SizeOf<T>() > (uint)source.Length)
+            if ((uint)Unsafe.SizeOf<T>() > (uint)destination.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
-            Unsafe.WriteUnaligned<T>(ref MemoryMarshal.GetReference(source), value);
+            Unsafe.WriteUnaligned<T>(ref MemoryMarshal.GetReference(destination), value);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryWriteMachineEndian<T>(Span<byte> source, ref T value)
+        public static bool TryWriteMachineEndian<T>(Span<byte> destination, ref T value)
             where T : struct
         {
 #if netstandard
@@ -57,11 +57,11 @@ namespace System.Buffers.Binary
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
-            if (Unsafe.SizeOf<T>() > (uint)source.Length)
+            if (Unsafe.SizeOf<T>() > (uint)destination.Length)
             {
                 return false;
             }
-            Unsafe.WriteUnaligned<T>(ref MemoryMarshal.GetReference(source), value);
+            Unsafe.WriteUnaligned<T>(ref MemoryMarshal.GetReference(destination), value);
             return true;
         }
     }
