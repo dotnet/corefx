@@ -108,16 +108,13 @@ namespace System
             Debug.Assert(length >= 0);
 
             uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -190,10 +187,7 @@ namespace System
 
                 if ((int)(byte*)index < length)
                 {
-                    unchecked
-                    {
-                        nLength = (IntPtr)(length - (int)(byte*)index);
-                    }
+                    nLength = (IntPtr)(length - (int)(byte*)index);
                     goto SequentialScan;
                 }
             }
@@ -256,16 +250,13 @@ namespace System
             Debug.Assert(length >= 0);
 
             uint uValue = value; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)(uint)length; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)(uint)length; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -366,16 +357,13 @@ namespace System
 
             uint uValue0 = value0; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue1 = value1; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -467,10 +455,7 @@ namespace System
 
                 if ((int)(byte*)index < length)
                 {
-                    unchecked
-                    {
-                        nLength = (IntPtr)(length - (int)(byte*)index);
-                    }
+                    nLength = (IntPtr)(length - (int)(byte*)index);
                     goto SequentialScan;
                 }
             }
@@ -501,16 +486,13 @@ namespace System
             uint uValue0 = value0; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue1 = value1; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue2 = value2; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)0; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(uint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -606,10 +588,7 @@ namespace System
 
                 if ((int)(byte*)index < length)
                 {
-                    unchecked
-                    {
-                        nLength = (IntPtr)(length - (int)(byte*)index);
-                    }
+                    nLength = (IntPtr)(length - (int)(byte*)index);
                     goto SequentialScan;
                 }
             }
@@ -639,16 +618,13 @@ namespace System
 
             uint uValue0 = value0; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue1 = value1; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)(uint)length; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)(uint)length; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -769,16 +745,13 @@ namespace System
             uint uValue0 = value0; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue1 = value1; // Use uint for comparisons to avoid unnecessary 8->32 extensions
             uint uValue2 = value2; // Use uint for comparisons to avoid unnecessary 8->32 extensions
-            IntPtr index = (IntPtr)(uint)length; // Use UIntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr index = (IntPtr)(uint)length; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
             IntPtr nLength = (IntPtr)(uint)length;
 #if !netstandard11
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
-                unchecked
-                {
-                    int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                    nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
-                }
+                int unaligned = (int)(byte*)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
+                nLength = (IntPtr)(((length & (Vector<byte>.Count - 1)) + unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
@@ -903,7 +876,7 @@ namespace System
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
-            nuint i = (nuint)0; // Explicit conversion required for netfx (NUInt)
+            nuint i = 0;
             nuint n = length;
 
 #if !netstandard11
@@ -912,15 +885,15 @@ namespace System
                 n -= (nuint)Vector<byte>.Count;
                 while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
-                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
+                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
                     i += (nuint)Vector<byte>.Count;
                 }
-                return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)n)) ==
-                       Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, (IntPtr)n));
+                return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, n)) ==
+                       Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, n));
             }
 #endif
 
@@ -929,20 +902,20 @@ namespace System
                 n -= (nuint)sizeof(UIntPtr);
                 while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
-                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
+                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
                     i += (nuint)sizeof(UIntPtr);
                 }
-                return Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)n)) ==
-                       Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, (IntPtr)n));
+                return Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, n)) ==
+                       Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, n));
             }
 
             while (n > i)
             {
-                if (Unsafe.AddByteOffset(ref first, (IntPtr)i) != Unsafe.AddByteOffset(ref second, (IntPtr)i))
+                if (Unsafe.AddByteOffset(ref first, i) != Unsafe.AddByteOffset(ref second, i))
                     goto NotEqual;
                 i += 1;
             }
@@ -988,7 +961,7 @@ namespace System
             nuint minLength = (nuint)firstLength;
             if (minLength > (nuint)secondLength) minLength = (nuint)secondLength;
 
-            nuint i = (nuint)0;  // Explicit conversion required for netfx (NUInt)
+            nuint i = 0;
             nuint n = minLength;
 
 #if !netstandard11
@@ -997,8 +970,8 @@ namespace System
                 n -= (nuint)Vector<byte>.Count;
                 while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
-                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
+                    if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
@@ -1013,8 +986,8 @@ namespace System
                 n -= (nuint)sizeof(UIntPtr);
                 while (n > i)
                 {
-                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, (IntPtr)i)) !=
-                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, (IntPtr)i)))
+                    if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
+                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
@@ -1025,7 +998,7 @@ namespace System
         NotEqual:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
             while (minLength > i)
             {
-                int result = Unsafe.AddByteOffset(ref first, (IntPtr)i).CompareTo(Unsafe.AddByteOffset(ref second, (IntPtr)i));
+                int result = Unsafe.AddByteOffset(ref first, i).CompareTo(Unsafe.AddByteOffset(ref second, i));
                 if (result != 0) return result;
                 i += 1;
             }
@@ -1061,13 +1034,10 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateFirstFoundByte(ulong match)
         {
-            unchecked
-            {
-                // Flag least significant power of two bit
-                var powerOfTwoFlag = match ^ (match - 1);
-                // Shift all powers of two into the high byte and extract
-                return (int)((powerOfTwoFlag * XorPowerOfTwoToHighByte) >> 57);
-            }
+            // Flag least significant power of two bit
+            var powerOfTwoFlag = match ^ (match - 1);
+            // Shift all powers of two into the high byte and extract
+            return (int)((powerOfTwoFlag * XorPowerOfTwoToHighByte) >> 57);
         }
 #endif
 
