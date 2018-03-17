@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xunit.Performance;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
@@ -59,6 +61,41 @@ namespace System.Text.RegularExpressions.Tests
                     {
                         for (var i = 0; i < total; i++)
                             s_IsMatch = Regex.IsMatch("0123456789", regexps[i]);
+                    }
+            }
+            finally
+            {
+                Regex.CacheSize = cacheSizeOld;
+            }
+        }
+
+        [Benchmark]
+        [MeasureGCAllocations]
+        [InlineData(400_000, 7, 15)]         // default size, most common
+        [InlineData(400_000, 1, 15)]         // default size, to test MRU
+        [InlineData(40_000, 7, 0)]          // cache turned off
+        [InlineData(40_000, 1_600, 15)]    // default size, to compare when cache used
+        [InlineData(40_000, 1_600, 800)]    // larger size, to test cache is not O(n)
+        [InlineData(40_000, 1_600, 3_200)]  // larger size, to test cache always hit
+        public void IsMatch_Multithreading(int total, int unique, int cacheSize)
+        {
+            var cacheSizeOld = Regex.CacheSize;
+            string[] regexps = CreateRegexps(total, unique);
+			void RunTest(int start) {
+				for (var i = 0; i < total; i++)
+					s_IsMatch = Regex.IsMatch("0123456789", regexps[(start + i)%total]);
+			}
+            try
+            {
+                Regex.CacheSize = 0; // clean up cache
+                Regex.CacheSize = cacheSize;
+                foreach (var iteration in Benchmark.Iterations)
+                    using (iteration.StartMeasurement())
+                    {
+                        int threads = 4;
+                        var tasks = Enumerable.Range(0, threads)
+							.Select(i => Task.Run(() => RunTest((int)(i*total/threads)))).ToArray();
+						Task.WaitAll(tasks);
                     }
             }
             finally
