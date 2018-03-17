@@ -980,32 +980,37 @@ namespace System.Text.Tests
         }
 
         [Fact]
-        public static void Clear_ClearEmptyStringBuilder_CapacityNotZero()
+        public static void Clear_Empty_CapacityNotZero()
         {
             var builder = new StringBuilder();
             builder.Clear();
             Assert.NotEqual(0, builder.Capacity);
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(10000)]
-        public static void Clear_AppendAndInsertBeforeClearManyTimes_CapacityStaysWithinRange(int times)
+        [Fact]
+        public static void Clear_Empty_CapacityStaysUnchanged()
         {
-            var builder = new StringBuilder();
-            var s = new string(' ', 10);
-            int oldLength = 0;
-            for (int i = 0; i < times; i++)
-            {
-                builder.Append(s);
-                builder.Append(s);
-                builder.Append(s);
-                builder.Insert(0, s);
-                builder.Insert(0, s);
-                oldLength = builder.Length;
-                builder.Clear();
-            }
-            Assert.InRange(builder.Capacity, 1, oldLength * 1.2);
+            var sb = new StringBuilder(14);
+            sb.Clear();
+            Assert.Equal(14, sb.Capacity);
+        }
+
+        [Fact]
+        public static void Clear_Full_CapacityStaysUnchanged()
+        {
+            var sb = new StringBuilder(14);
+            sb.Append("Hello World!!!");
+            sb.Clear();
+            Assert.Equal(14, sb.Capacity);
+        }
+
+        [Fact]
+        public static void Clear_AtMaxCapacity_CapacityStaysUnchanged()
+        {
+            var builder = new StringBuilder(14, 14);
+            builder.Append("Hello World!!!");
+            builder.Clear();
+            Assert.Equal(14, builder.Capacity);
         }
 
         [Theory]
