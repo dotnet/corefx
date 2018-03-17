@@ -115,6 +115,11 @@ namespace System.Text.RegularExpressions
             if (s_livecode.TryGetValue(key, out var entry))
             {
                 SysDebug.Assert(s_livecode_first != entry, "key should not get s_livecode_first");
+                SysDebug.Assert(s_livecode_first != null, "as Dict has at least one");
+                SysDebug.Assert(s_livecode_first.Next == null);
+                SysDebug.Assert(s_livecode_first.Previous != null);
+                SysDebug.Assert(entry.Next != null, "not first so Next should exist");
+                SysDebug.Assert(entry.Next.Previous == entry);
                 if (s_livecode_last == entry)
                 {
                     SysDebug.Assert(entry.Previous == null, "last");
@@ -126,13 +131,8 @@ namespace System.Text.RegularExpressions
                     SysDebug.Assert(entry.Previous.Next == entry);
                     entry.Previous.Next = entry.Next;
                 }
-                SysDebug.Assert(entry.Next != null, "not first so Next should exist");
-                SysDebug.Assert(entry.Next.Previous == entry);
                 entry.Next.Previous = entry.Previous;
 
-                SysDebug.Assert(s_livecode_first != null, "as Dict has at least one");
-                SysDebug.Assert(s_livecode_first.Next == null);
-                SysDebug.Assert(s_livecode_first.Previous != null);
                 s_livecode_first.Next = entry;
                 entry.Previous = s_livecode_first;
                 entry.Next = null;
