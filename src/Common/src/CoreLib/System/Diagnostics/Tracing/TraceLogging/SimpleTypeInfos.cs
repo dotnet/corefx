@@ -136,7 +136,7 @@ namespace System.Diagnostics.Tracing
         public static TraceLoggingTypeInfo UIntPtr() { return new ScalarArrayTypeInfo(typeof(UIntPtr[]), Statics.FormatPtr, Statics.UIntPtrType, System.IntPtr.Size); }
         public static TraceLoggingTypeInfo Single() { return new ScalarArrayTypeInfo(typeof(Single[]), Statics.Format32, TraceLoggingDataType.Float, sizeof(Single)); }
         public static TraceLoggingTypeInfo Double() { return new ScalarArrayTypeInfo(typeof(Double[]), Statics.Format64, TraceLoggingDataType.Double, sizeof(Double)); }
-        public unsafe static TraceLoggingTypeInfo Guid() { return new ScalarArrayTypeInfo(typeof(Guid), (f, t) => Statics.MakeDataType(TraceLoggingDataType.Guid, f), TraceLoggingDataType.Guid, sizeof(Guid)); }
+        public static unsafe TraceLoggingTypeInfo Guid() { return new ScalarArrayTypeInfo(typeof(Guid), (f, t) => Statics.MakeDataType(TraceLoggingDataType.Guid, f), TraceLoggingDataType.Guid, sizeof(Guid)); }
     }
 
     /// <summary>
@@ -151,12 +151,12 @@ namespace System.Diagnostics.Tracing
             string name,
             EventFieldFormat format)
         {
-            collector.AddBinary(name, Statics.MakeDataType(TraceLoggingDataType.CountedUtf16String, format));
+            collector.AddNullTerminatedString(name, Statics.MakeDataType(TraceLoggingDataType.Utf16String, format));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            collector.AddBinary((string)value.ReferenceValue);
+            collector.AddNullTerminatedString((string)value.ReferenceValue);
         }
         
         public override object GetData(object value)
@@ -187,8 +187,14 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            var ticks = value.ScalarValue.AsDateTime.Ticks;
-            collector.AddScalar(ticks < 504911232000000000 ? 0 : ticks - 504911232000000000);
+            DateTime dateTime = value.ScalarValue.AsDateTime;
+            const long UTCMinTicks = 504911232000000000;
+            long dateTimeTicks = 0;
+            // We cannot translate dates sooner than 1/1/1601 in UTC.
+            // To avoid getting an ArgumentOutOfRangeException we compare with 1/1/1601 DateTime ticks
+            if (dateTime.Ticks > UTCMinTicks)
+                dateTimeTicks = dateTime.ToFileTimeUtc();
+            collector.AddScalar(dateTimeTicks);
         }
     }
 

@@ -5,6 +5,7 @@
     <ProjectGuid>{56B9D0A9-44D3-488E-8B42-C14A6E30CAB2}</ProjectGuid>
     <AssemblyName>System.Runtime</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -12,8 +13,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Action.cs" />
     <Compile Include="System\Collections\Generic\ISet.cs" />

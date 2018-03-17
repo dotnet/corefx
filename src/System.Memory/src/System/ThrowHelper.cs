@@ -60,13 +60,37 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException_SymbolDoesNotFit() { return new ArgumentOutOfRangeException("symbol", SR.Argument_BadFormatSpecifier); }
 
+        internal static void ThrowInvalidOperationException() { throw CreateInvalidOperationException(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateInvalidOperationException() { return new InvalidOperationException(); }
+
         internal static void ThrowInvalidOperationException_OutstandingReferences() { throw CreateInvalidOperationException_OutstandingReferences(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateInvalidOperationException_OutstandingReferences() { return new InvalidOperationException(SR.OutstandingReferences); }
 
-        internal static void ThrowObjectDisposedException_MemoryDisposed(string objectName) { throw CreateObjectDisposedException_MemoryDisposed(objectName); }
+        internal static void ThrowInvalidOperationException_UnexpectedSegmentType() { throw CreateInvalidOperationException_UnexpectedSegmentType(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateObjectDisposedException_MemoryDisposed(string objectName) { return new ObjectDisposedException(objectName, SR.MemoryDisposed); }
+        private static Exception CreateInvalidOperationException_UnexpectedSegmentType() { return new InvalidOperationException(SR.UnexpectedSegmentType); }
+
+        internal static void ThrowInvalidOperationException_EndPositionNotReached() { throw CreateInvalidOperationException_EndPositionNotReached(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateInvalidOperationException_EndPositionNotReached() { return new InvalidOperationException(SR.EndPositionNotReached); }
+
+        internal static void ThrowArgumentOutOfRangeException_PositionOutOfRange() { throw CreateArgumentOutOfRangeException_PositionOutOfRange(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange() { return new ArgumentOutOfRangeException("position"); }
+
+        internal static void ThrowArgumentOutOfRangeException_CountOutOfRange() { throw CreateArgumentOutOfRangeException_CountOutOfRange(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentOutOfRangeException_CountOutOfRange() { return new ArgumentOutOfRangeException("count"); }
+
+        internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer() { throw CreateObjectDisposedException_ArrayMemoryPoolBuffer(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateObjectDisposedException_ArrayMemoryPoolBuffer() { return new ObjectDisposedException("ArrayMemoryPoolBuffer"); }
+
+        internal static void ThrowObjectDisposedException_MemoryDisposed() { throw CreateObjectDisposedException_MemoryDisposed(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateObjectDisposedException_MemoryDisposed() { return new ObjectDisposedException("OwnedMemory<T>", SR.MemoryDisposed); }
 
         internal static void ThrowFormatException_BadFormatSpecifier() { throw CreateFormatException_BadFormatSpecifier(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -75,6 +99,10 @@ namespace System
         internal static void ThrowArgumentException_OverlapAlignmentMismatch() { throw CreateArgumentException_OverlapAlignmentMismatch(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
+
+        internal static void ThrowNotSupportedException() { throw CreateThrowNotSupportedException(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateThrowNotSupportedException() { return new NotSupportedException(); }
 
         //
         // Enable use of ThrowHelper from TryFormat() routines without introducing dozens of non-code-coveraged "bytesWritten = 0; return false" boilerplate.
@@ -96,18 +124,71 @@ namespace System
             ThrowHelper.ThrowFormatException_BadFormatSpecifier();
             return false;
         }
+
+        //
+        // ReadOnlySequence .ctor validation Throws coalesced to enable inlining of the .ctor
+        //
+        public static void ThrowArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+            => throw CreateArgumentValidationException(startSegment, startIndex, endSegment);
+
+        private static Exception CreateArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+        {
+            if (startSegment == null)
+                return CreateArgumentNullException(ExceptionArgument.startSegment);
+            else if (endSegment == null)
+                return CreateArgumentNullException(ExceptionArgument.endSegment);
+            else if ((uint)startSegment.Memory.Length < (uint)startIndex)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
+            else
+                return CreateArgumentOutOfRangeException(ExceptionArgument.endIndex);
+        }
+
+        public static void ThrowArgumentValidationException(Array array, int start)
+            => throw CreateArgumentValidationException(array, start);
+
+        private static Exception CreateArgumentValidationException(Array array, int start)
+        {
+            if (array == null)
+                return CreateArgumentNullException(ExceptionArgument.array);
+            else if ((uint)start > (uint)array.Length)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            else
+                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
+
+        public static void ThrowArgumentValidationException<T>(OwnedMemory<T> ownedMemory, int start)
+            => throw CreateArgumentValidationException(ownedMemory, start);
+
+        private static Exception CreateArgumentValidationException<T>(OwnedMemory<T> ownedMemory, int start)
+        {
+            if (ownedMemory == null)
+                return CreateArgumentNullException(ExceptionArgument.ownedMemory);
+            else if ((uint)start > (uint)ownedMemory.Length)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            else
+                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
     }
 
+    //
+    // The convention for this enum is using the argument name as the enum name
+    //
     internal enum ExceptionArgument
     {
-        array,
         length,
         start,
-        text,
-        obj,
-        ownedMemory,
-        pointer,
+        minimumBufferSize,
+        byteOffset,
         comparable,
-        comparer
+        comparer,
+        destination,
+        offset,
+        startSegment,
+        endSegment,
+        startIndex,
+        endIndex,
+        array,
+        ownedMemory,
+        culture
     }
 }

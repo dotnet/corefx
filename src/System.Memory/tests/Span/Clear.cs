@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using static System.TestHelpers;
 
@@ -199,6 +200,31 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ClearReferenceTypeSlice()
+        {
+            // A string array [ ""1", ..., "20" ]
+            string[] baseline = Enumerable.Range(1, 20).Select(i => i.ToString()).ToArray();
+
+            for (int i = 0; i < 16; i++)
+            {
+                // Going to clear array.Slice(1, i) manually,
+                // then compare it against array.Slice(1, i).Clear().
+                // Test is written this way to allow detecting overrunning bounds.
+
+                string[] expected = (string[])baseline.Clone();
+                for (int j = 1; j <= i; j++)
+                {
+                    expected[j] = null;
+                }
+
+                string[] actual = (string[])baseline.Clone();
+                actual.AsSpan(1, i).Clear();
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        [Fact]
         public static void ClearEnumType()
         {
             TestEnum[] actual = { TestEnum.e0, TestEnum.e1, TestEnum.e2 };
@@ -249,20 +275,14 @@ namespace System.SpanTests
 
                 try
                 {
-                    ref int data = ref Unsafe.AsRef<int>(memory.ToPointer());
-
-                    int initial = 5;
-                    for (int i = 0; i < length; i++)
-                    {
-                        Unsafe.Add(ref data, i) = initial;
-                    }
-
                     Span<int> span = new Span<int>(memory.ToPointer(), length);
+                    span.Fill(5);
 
                     // Act
                     span.Clear();
 
                     // Assert using custom code for perf and to avoid allocating extra memory
+                    ref int data = ref Unsafe.AsRef<int>(memory.ToPointer());
                     for (int i = 0; i < length; i++)
                     {
                         var actual = Unsafe.Add(ref data, i);

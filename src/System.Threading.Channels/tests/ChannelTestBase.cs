@@ -1,9 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,9 +13,13 @@ namespace System.Threading.Channels.Tests
 {
     public abstract class ChannelTestBase : TestBase
     {
-        protected abstract Channel<int> CreateChannel();
-        protected abstract Channel<int> CreateFullChannel();
+        protected Channel<int> CreateChannel() => CreateChannel<int>();
+        protected abstract Channel<T> CreateChannel<T>();
 
+        protected Channel<int> CreateFullChannel() => CreateFullChannel<int>();
+        protected abstract Channel<T> CreateFullChannel<T>();
+
+        protected virtual bool AllowSynchronousContinuations => false;
         protected virtual bool RequiresSingleReader => false;
         protected virtual bool RequiresSingleWriter => false;
         protected virtual bool BuffersItems => true;
@@ -78,10 +84,10 @@ namespace System.Threading.Channels.Tests
         public async Task Complete_BeforeEmpty_WaitingReaders_TriggersCompletion()
         {
             Channel<int> c = CreateChannel();
-            Task<int> read = c.Reader.ReadAsync().AsTask();
+            ValueTask<int> read = c.Reader.ReadAsync();
             c.Writer.Complete();
             await c.Reader.Completion;
-            await Assert.ThrowsAnyAsync<InvalidOperationException>(() => read);
+            await Assert.ThrowsAnyAsync<InvalidOperationException>(async () => await read);
         }
 
         [Fact]
@@ -246,18 +252,18 @@ namespace System.Threading.Channels.Tests
         public void WaitToReadAsync_DataAvailableBefore_CompletesSynchronously()
         {
             Channel<int> c = CreateChannel();
-            Task write = c.Writer.WriteAsync(42);
-            Task<bool> read = c.Reader.WaitToReadAsync();
-            Assert.Equal(TaskStatus.RanToCompletion, read.Status);
+            ValueTask write = c.Writer.WriteAsync(42);
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
+            Assert.True(read.IsCompletedSuccessfully);
         }
 
         [Fact]
         public void WaitToReadAsync_DataAvailableAfter_CompletesAsynchronously()
         {
             Channel<int> c = CreateChannel();
-            Task<bool> read = c.Reader.WaitToReadAsync();
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
             Assert.False(read.IsCompleted);
-            Task write = c.Writer.WriteAsync(42);
+            ValueTask write = c.Writer.WriteAsync(42);
             Assert.True(read.Result);
         }
 
@@ -266,8 +272,8 @@ namespace System.Threading.Channels.Tests
         {
             Channel<int> c = CreateChannel();
             c.Writer.Complete();
-            Task<bool> read = c.Reader.WaitToReadAsync();
-            Assert.Equal(TaskStatus.RanToCompletion, read.Status);
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
+            Assert.True(read.IsCompletedSuccessfully);
             Assert.False(read.Result);
         }
 
@@ -275,7 +281,7 @@ namespace System.Threading.Channels.Tests
         public void WaitToReadAsync_BeforeComplete_AsynchronouslyCompletes()
         {
             Channel<int> c = CreateChannel();
-            Task<bool> read = c.Reader.WaitToReadAsync();
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
             Assert.False(read.IsCompleted);
             c.Writer.Complete();
             Assert.False(read.Result);
@@ -286,8 +292,8 @@ namespace System.Threading.Channels.Tests
         {
             Channel<int> c = CreateChannel();
             c.Writer.Complete();
-            Task<bool> write = c.Writer.WaitToWriteAsync();
-            Assert.Equal(TaskStatus.RanToCompletion, write.Status);
+            ValueTask<bool> write = c.Writer.WaitToWriteAsync();
+            Assert.True(write.IsCompletedSuccessfully);
             Assert.False(write.Result);
         }
 
@@ -300,8 +306,8 @@ namespace System.Threading.Channels.Tests
             }
 
             Channel<int> c = CreateChannel();
-            Task<bool> write = c.Writer.WaitToWriteAsync();
-            Assert.Equal(TaskStatus.RanToCompletion, write.Status);
+            ValueTask<bool> write = c.Writer.WaitToWriteAsync();
+            Assert.True(write.IsCompletedSuccessfully);
             Assert.True(write.Result);
         }
 
@@ -315,7 +321,7 @@ namespace System.Threading.Channels.Tests
 
             Channel<int> c = CreateChannel();
 
-            Task[] writers = Enumerable.Range(0, 100).Select(_ => c.Writer.WaitToWriteAsync()).ToArray();
+            Task[] writers = Enumerable.Range(0, 100).Select(_ => c.Writer.WaitToWriteAsync().AsTask()).ToArray();
             Task[] readers = Enumerable.Range(0, 100).Select(_ => c.Reader.ReadAsync().AsTask()).ToArray();
 
             await Task.WhenAll(writers);
@@ -333,7 +339,7 @@ namespace System.Threading.Channels.Tests
         public void TryRead_DataAvailable_Success()
         {
             Channel<int> c = CreateChannel();
-            Task write = c.Writer.WriteAsync(42);
+            ValueTask write = c.Writer.WriteAsync(42);
             Assert.True(c.Reader.TryRead(out int result));
             Assert.Equal(42, result);
         }
@@ -359,7 +365,7 @@ namespace System.Threading.Channels.Tests
         {
             Channel<int> c = CreateChannel();
             c.Writer.Complete();
-            await Assert.ThrowsAnyAsync<InvalidOperationException>(() => c.Writer.WriteAsync(42));
+            await Assert.ThrowsAnyAsync<InvalidOperationException>(async () => await c.Writer.WriteAsync(42));
         }
 
         [Fact]
@@ -392,10 +398,10 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateFullChannel();
             if (c != null)
             {
-                Task write = c.Writer.WriteAsync(42);
+                ValueTask write = c.Writer.WriteAsync(42);
                 var exc = new FormatException();
                 c.Writer.Complete(exc);
-                Assert.Same(exc, (await Assert.ThrowsAsync<ChannelClosedException>(() => write)).InnerException);
+                Assert.Same(exc, (await Assert.ThrowsAsync<ChannelClosedException>(async () => await write)).InnerException);
             }
         }
 
@@ -405,18 +411,18 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             var exc = new FormatException();
             c.Writer.Complete(exc);
-            Task write = c.Writer.WriteAsync(42);
-            Assert.Same(exc, (await Assert.ThrowsAsync<ChannelClosedException>(() => write)).InnerException);
+            ValueTask write = c.Writer.WriteAsync(42);
+            Assert.Same(exc, (await Assert.ThrowsAsync<ChannelClosedException>(async () => await write)).InnerException);
         }
 
         [Fact]
         public async Task Complete_WithException_PropagatesToExistingWaitingReader()
         {
             Channel<int> c = CreateChannel();
-            Task<bool> read = c.Reader.WaitToReadAsync();
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
             var exc = new FormatException();
             c.Writer.Complete(exc);
-            await Assert.ThrowsAsync<FormatException>(() => read);
+            await Assert.ThrowsAsync<FormatException>(async () => await read);
         }
 
         [Fact]
@@ -425,8 +431,8 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             var exc = new FormatException();
             c.Writer.Complete(exc);
-            Task<bool> read = c.Reader.WaitToReadAsync();
-            await Assert.ThrowsAsync<FormatException>(() => read);
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
+            await Assert.ThrowsAsync<FormatException>(async () => await read);
         }
 
         [Fact]
@@ -435,8 +441,8 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             var exc = new FormatException();
             c.Writer.Complete(exc);
-            Task<bool> write = c.Writer.WaitToWriteAsync();
-            await Assert.ThrowsAsync<FormatException>(() => write);
+            ValueTask<bool> write = c.Writer.WaitToWriteAsync();
+            await Assert.ThrowsAsync<FormatException>(async () => await write);
         }
 
         [Theory]
@@ -453,7 +459,7 @@ namespace System.Threading.Channels.Tests
 
             const int NumItems = 2000;
 
-            Task[] writers = new Task[NumItems];
+            ValueTask[] writers = new ValueTask[NumItems];
             for (int i = 0; i < writers.Length; i++)
             {
                 writers[i] = c.Writer.WriteAsync(i);
@@ -475,11 +481,11 @@ namespace System.Threading.Channels.Tests
         {
             Channel<int> c = CreateChannel();
 
-            Task writeTask = c.Writer.WriteAsync(42, new CancellationToken(true));
-            Assert.Equal(TaskStatus.Canceled, writeTask.Status);
+            ValueTask writeTask = c.Writer.WriteAsync(42, new CancellationToken(true));
+            Assert.True(writeTask.IsCanceled);
 
-            Task<bool> waitTask = c.Writer.WaitToWriteAsync(new CancellationToken(true));
-            Assert.Equal(TaskStatus.Canceled, waitTask.Status);
+            ValueTask<bool> waitTask = c.Writer.WaitToWriteAsync(new CancellationToken(true));
+            Assert.True(writeTask.IsCanceled);
         }
 
         [Fact]
@@ -490,13 +496,19 @@ namespace System.Threading.Channels.Tests
             AssertSynchronousTrue(c.Reader.WaitToReadAsync());
         }
 
-        [Fact]
-        public void Precancellation_WaitToReadAsync_ReturnsImmediately()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Precancellation_WaitToReadAsync_ReturnsImmediately(bool dataAvailable)
         {
             Channel<int> c = CreateChannel();
+            if (dataAvailable)
+            {
+                Assert.True(c.Writer.TryWrite(42));
+            }
 
-            Task writeTask = c.Reader.WaitToReadAsync(new CancellationToken(true));
-            Assert.Equal(TaskStatus.Canceled, writeTask.Status);
+            ValueTask<bool> waitTask = c.Reader.WaitToReadAsync(new CancellationToken(true));
+            Assert.True(waitTask.IsCanceled);
         }
 
         [Theory]
@@ -507,10 +519,10 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             CancellationToken token = cancelable ? new CancellationTokenSource().Token : default;
 
-            Task<bool> read = c.Reader.WaitToReadAsync(token);
+            ValueTask<bool> read = c.Reader.WaitToReadAsync(token);
             Assert.False(read.IsCompleted);
 
-            Task write = c.Writer.WriteAsync(42, token);
+            ValueTask write = c.Writer.WriteAsync(42, token);
 
             Assert.True(await read);
         }
@@ -521,10 +533,10 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             var cts = new CancellationTokenSource();
 
-            Task<bool> read = c.Reader.WaitToReadAsync(cts.Token);
+            ValueTask<bool> read = c.Reader.WaitToReadAsync(cts.Token);
             Assert.False(read.IsCompleted);
             cts.Cancel();
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => read);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await read);
         }
 
         [Fact]
@@ -535,7 +547,7 @@ namespace System.Threading.Channels.Tests
             ValueTask<int> r = c.Reader.ReadAsync();
             Assert.False(r.IsCompleted);
 
-            Task w = c.Writer.WriteAsync(42);
+            ValueTask w = c.Writer.WriteAsync(42);
             AssertSynchronousSuccess(w);
 
             Assert.Equal(42, await r);
@@ -546,21 +558,27 @@ namespace System.Threading.Channels.Tests
         {
             Channel<int> c = CreateChannel();
 
-            Task w = c.Writer.WriteAsync(42);
+            ValueTask w = c.Writer.WriteAsync(42);
             ValueTask<int> r = c.Reader.ReadAsync();
 
-            await Task.WhenAll(w, r.AsTask());
+            await Task.WhenAll(w.AsTask(), r.AsTask());
 
             Assert.Equal(42, await r);
         }
 
-        [Fact]
-        public void ReadAsync_Precanceled_CanceledSynchronously()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Precancellation_ReadAsync_ReturnsImmediately(bool dataAvailable)
         {
             Channel<int> c = CreateChannel();
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            AssertSynchronouslyCanceled(c.Reader.ReadAsync(cts.Token).AsTask(), cts.Token);
+            if (dataAvailable)
+            {
+                Assert.True(c.Writer.TryWrite(42));
+            }
+
+            ValueTask<int> readTask = c.Reader.ReadAsync(new CancellationToken(true));
+            Assert.True(readTask.IsCanceled);
         }
 
         [Fact]
@@ -613,8 +631,8 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             const int Items = 100;
 
-            ValueTask<int>[] readers = (from i in Enumerable.Range(0, Items) select c.Reader.ReadAsync()).ToArray();
-            var remainingReaders = new List<Task<int>>(readers.Select(r => r.AsTask()));
+            Task<int>[] readers = (from i in Enumerable.Range(0, Items) select c.Reader.ReadAsync().AsTask()).ToArray();
+            var remainingReaders = new List<Task<int>>(readers);
 
             for (int i = 0; i < Items; i++)
             {
@@ -624,7 +642,7 @@ namespace System.Threading.Channels.Tests
                 remainingReaders.Remove(r);
             }
 
-            Assert.Equal((Items * (Items - 1)) / 2, Enumerable.Sum(await Task.WhenAll(readers.Select(r => r.AsTask()))));
+            Assert.Equal((Items * (Items - 1)) / 2, Enumerable.Sum(await Task.WhenAll(readers)));
         }
 
         [Fact]
@@ -689,6 +707,521 @@ namespace System.Threading.Channels.Tests
                 await c.Writer.WriteAsync(i);
                 Assert.Equal(i, await r);
             }
+        }
+
+        [Fact]
+        public async Task ReadAsync_ConsecutiveReadsSucceed()
+        {
+            Channel<int> c = CreateChannel();
+            for (int i = 0; i < 5; i++)
+            {
+                ValueTask<int> r = c.Reader.ReadAsync();
+                await c.Writer.WriteAsync(i);
+                Assert.Equal(i, await r);
+            }
+        }
+
+        [Fact]
+        public async Task WaitToReadAsync_ConsecutiveReadsSucceed()
+        {
+            Channel<int> c = CreateChannel();
+            for (int i = 0; i < 5; i++)
+            {
+                ValueTask<bool> r = c.Reader.WaitToReadAsync();
+                await c.Writer.WriteAsync(i);
+                Assert.True(await r);
+                Assert.True(c.Reader.TryRead(out int item));
+                Assert.Equal(i, item);
+            }
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, null)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void WaitToReadAsync_MultipleContinuations_Throws(bool onCompleted, bool? continueOnCapturedContext)
+        {
+            Channel<int> c = CreateChannel();
+
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
+            switch (continueOnCapturedContext)
+            {
+                case null:
+                    if (onCompleted)
+                    {
+                        read.GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        read.GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+
+                default:
+                    if (onCompleted)
+                    {
+                        read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+            }
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, null)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void ReadAsync_MultipleContinuations_Throws(bool onCompleted, bool? continueOnCapturedContext)
+        {
+            Channel<int> c = CreateChannel();
+
+            ValueTask<int> read = c.Reader.ReadAsync();
+            switch (continueOnCapturedContext)
+            {
+                case null:
+                    if (onCompleted)
+                    {
+                        read.GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        read.GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+
+                default:
+                    if (onCompleted)
+                    {
+                        read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => read.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+            }
+        }
+
+        [Fact]
+        public async Task WaitToReadAsync_AwaitThenGetResult_Throws()
+        {
+            Channel<int> c = CreateChannel();
+
+            ValueTask<bool> read = c.Reader.WaitToReadAsync();
+            Assert.True(c.Writer.TryWrite(42));
+            Assert.True(await read);
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().IsCompleted);
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().OnCompleted(() => { }));
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().GetResult());
+        }
+
+        [Fact]
+        public async Task ReadAsync_AwaitThenGetResult_Throws()
+        {
+            Channel<int> c = CreateChannel();
+
+            ValueTask<int> read = c.Reader.ReadAsync();
+            Assert.True(c.Writer.TryWrite(42));
+            Assert.Equal(42, await read);
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().IsCompleted);
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().OnCompleted(() => { }));
+            Assert.Throws<InvalidOperationException>(() => read.GetAwaiter().GetResult());
+        }
+
+        [Fact]
+        public async Task WaitToWriteAsync_AwaitThenGetResult_Throws()
+        {
+            Channel<int> c = CreateFullChannel();
+            if (c == null)
+            {
+                return;
+            }
+
+            ValueTask<bool> write = c.Writer.WaitToWriteAsync();
+            await c.Reader.ReadAsync();
+            Assert.True(await write);
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().IsCompleted);
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().OnCompleted(() => { }));
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().GetResult());
+        }
+
+        [Fact]
+        public async Task WriteAsync_AwaitThenGetResult_Throws()
+        {
+            Channel<int> c = CreateFullChannel();
+            if (c == null)
+            {
+                return;
+            }
+
+            ValueTask write = c.Writer.WriteAsync(42);
+            await c.Reader.ReadAsync();
+            await write;
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().IsCompleted);
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().OnCompleted(() => { }));
+            Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().GetResult());
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, null)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void WaitToWriteAsync_MultipleContinuations_Throws(bool onCompleted, bool? continueOnCapturedContext)
+        {
+            Channel<int> c = CreateFullChannel();
+            if (c == null)
+            {
+                return;
+            }
+
+            ValueTask<bool> write = c.Writer.WaitToWriteAsync();
+            switch (continueOnCapturedContext)
+            {
+                case null:
+                    if (onCompleted)
+                    {
+                        write.GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        write.GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+
+                default:
+                    if (onCompleted)
+                    {
+                        write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+            }
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, null)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void WriteAsync_MultipleContinuations_Throws(bool onCompleted, bool? continueOnCapturedContext)
+        {
+            Channel<int> c = CreateFullChannel();
+            if (c == null)
+            {
+                return;
+            }
+
+            ValueTask write = c.Writer.WriteAsync(42);
+            switch (continueOnCapturedContext)
+            {
+                case null:
+                    if (onCompleted)
+                    {
+                        write.GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        write.GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+
+                default:
+                    if (onCompleted)
+                    {
+                        write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(() => { }));
+                    }
+                    else
+                    {
+                        write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { });
+                        Assert.Throws<InvalidOperationException>(() => write.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(() => { }));
+                    }
+                    break;
+            }
+        }
+
+        public static IEnumerable<object[]> Reader_ContinuesOnCurrentContextIfDesired_MemberData() =>
+            from readOrWait in new[] { true, false }
+            from completeBeforeOnCompleted in new[] { true, false }
+            from flowExecutionContext in new[] { true, false }
+            from continueOnCapturedContext in new bool?[] { null, false, true }
+            select new object[] { readOrWait, completeBeforeOnCompleted, flowExecutionContext, continueOnCapturedContext };
+
+        [Theory]
+        [MemberData(nameof(Reader_ContinuesOnCurrentContextIfDesired_MemberData))]
+        public async Task Reader_ContinuesOnCurrentSynchronizationContextIfDesired(
+            bool readOrWait, bool completeBeforeOnCompleted, bool flowExecutionContext, bool? continueOnCapturedContext)
+        {
+            if (AllowSynchronousContinuations)
+            {
+                return;
+            }
+
+            await Task.Run(async () =>
+            {
+                Assert.Null(SynchronizationContext.Current);
+
+                Channel<bool> c = CreateChannel<bool>();
+                ValueTask<bool> vt = readOrWait ?
+                    c.Reader.ReadAsync() :
+                    c.Reader.WaitToReadAsync();
+
+                var continuationRan = new TaskCompletionSource<bool>();
+                var asyncLocal = new AsyncLocal<int>();
+                bool schedulerWasFlowed = false;
+                bool executionContextWasFlowed = false;
+                Action continuation = () =>
+                {
+                    schedulerWasFlowed = SynchronizationContext.Current is CustomSynchronizationContext;
+                    executionContextWasFlowed = 42 == asyncLocal.Value;
+                    continuationRan.SetResult(true);
+                };
+
+                if (completeBeforeOnCompleted)
+                {
+                    Assert.False(vt.IsCompleted);
+                    Assert.False(vt.IsCompletedSuccessfully);
+                    c.Writer.TryWrite(true);
+                }
+
+                SynchronizationContext.SetSynchronizationContext(new CustomSynchronizationContext());
+                asyncLocal.Value = 42;
+                switch (continueOnCapturedContext)
+                {
+                    case null:
+                        if (flowExecutionContext)
+                        {
+                            vt.GetAwaiter().OnCompleted(continuation);
+                        }
+                        else
+                        {
+                            vt.GetAwaiter().UnsafeOnCompleted(continuation);
+                        }
+                        break;
+                    default:
+                        if (flowExecutionContext)
+                        {
+                            vt.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(continuation);
+                        }
+                        else
+                        {
+                            vt.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(continuation);
+                        }
+                        break;
+                }
+                asyncLocal.Value = 0;
+                SynchronizationContext.SetSynchronizationContext(null);
+
+                if (!completeBeforeOnCompleted)
+                {
+                    Assert.False(vt.IsCompleted);
+                    Assert.False(vt.IsCompletedSuccessfully);
+                    c.Writer.TryWrite(true);
+                }
+
+                await continuationRan.Task;
+                Assert.True(vt.IsCompleted);
+                Assert.True(vt.IsCompletedSuccessfully);
+
+                Assert.Equal(continueOnCapturedContext != false, schedulerWasFlowed);
+                if (completeBeforeOnCompleted) // OnCompleted will simply queue using a mechanism that happens to flow
+                {
+                    Assert.True(executionContextWasFlowed);
+                }
+                else
+                {
+                    Assert.Equal(flowExecutionContext, executionContextWasFlowed);
+                }
+            });
+        }
+
+        [Theory]
+        [MemberData(nameof(Reader_ContinuesOnCurrentContextIfDesired_MemberData))]
+        public async Task Reader_ContinuesOnCurrentTaskSchedulerIfDesired(
+            bool readOrWait, bool completeBeforeOnCompleted, bool flowExecutionContext, bool? continueOnCapturedContext)
+        {
+            if (AllowSynchronousContinuations)
+            {
+                return;
+            }
+
+            await Task.Run(async () =>
+            {
+                Assert.Null(SynchronizationContext.Current);
+
+                Channel<bool> c = CreateChannel<bool>();
+                ValueTask<bool> vt = readOrWait ?
+                    c.Reader.ReadAsync() :
+                    c.Reader.WaitToReadAsync();
+
+                var continuationRan = new TaskCompletionSource<bool>();
+                var asyncLocal = new AsyncLocal<int>();
+                bool schedulerWasFlowed = false;
+                bool executionContextWasFlowed = false;
+                Action continuation = () =>
+                {
+                    schedulerWasFlowed = TaskScheduler.Current is CustomTaskScheduler;
+                    executionContextWasFlowed = 42 == asyncLocal.Value;
+                    continuationRan.SetResult(true);
+                };
+
+                if (completeBeforeOnCompleted)
+                {
+                    Assert.False(vt.IsCompleted);
+                    Assert.False(vt.IsCompletedSuccessfully);
+                    c.Writer.TryWrite(true);
+                }
+
+                await Task.Factory.StartNew(() =>
+                {
+                    Assert.IsType<CustomTaskScheduler>(TaskScheduler.Current);
+                    asyncLocal.Value = 42;
+                    switch (continueOnCapturedContext)
+                    {
+                        case null:
+                            if (flowExecutionContext)
+                            {
+                                vt.GetAwaiter().OnCompleted(continuation);
+                            }
+                            else
+                            {
+                                vt.GetAwaiter().UnsafeOnCompleted(continuation);
+                            }
+                            break;
+                        default:
+                            if (flowExecutionContext)
+                            {
+                                vt.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().OnCompleted(continuation);
+                            }
+                            else
+                            {
+                                vt.ConfigureAwait(continueOnCapturedContext.Value).GetAwaiter().UnsafeOnCompleted(continuation);
+                            }
+                            break;
+                    }
+                    asyncLocal.Value = 0;
+                }, CancellationToken.None, TaskCreationOptions.None, new CustomTaskScheduler());
+
+                if (!completeBeforeOnCompleted)
+                {
+                    Assert.False(vt.IsCompleted);
+                    Assert.False(vt.IsCompletedSuccessfully);
+                    c.Writer.TryWrite(true);
+                }
+
+                await continuationRan.Task;
+                Assert.True(vt.IsCompleted);
+                Assert.True(vt.IsCompletedSuccessfully);
+
+                Assert.Equal(continueOnCapturedContext != false, schedulerWasFlowed);
+                if (completeBeforeOnCompleted) // OnCompleted will simply queue using a mechanism that happens to flow
+                {
+                    Assert.True(executionContextWasFlowed);
+                }
+                else
+                {
+                    Assert.Equal(flowExecutionContext, executionContextWasFlowed);
+                }
+            });
+        }
+
+        [Fact]
+        public void ValueTask_GetResultWhenNotCompleted_Throws()
+        {
+            ValueTaskAwaiter<int> readVt = CreateChannel().Reader.ReadAsync().GetAwaiter();
+            Assert.Throws<InvalidOperationException>(() => readVt.GetResult());
+
+            ValueTaskAwaiter<bool> waitReadVt = CreateChannel().Reader.WaitToReadAsync().GetAwaiter();
+            Assert.Throws<InvalidOperationException>(() => waitReadVt.GetResult());
+
+            if (CreateFullChannel() != null)
+            {
+                ValueTaskAwaiter writeVt = CreateFullChannel().Writer.WriteAsync(42).GetAwaiter();
+                Assert.Throws<InvalidOperationException>(() => writeVt.GetResult());
+
+                ValueTaskAwaiter<bool> waitWriteVt = CreateFullChannel().Writer.WaitToWriteAsync().GetAwaiter();
+                Assert.Throws<InvalidOperationException>(() => waitWriteVt.GetResult());
+            }
+        }
+
+        [Fact]
+        public void ValueTask_MultipleContinuations_Throws()
+        {
+            ValueTaskAwaiter<int> readVt = CreateChannel().Reader.ReadAsync().GetAwaiter();
+            readVt.OnCompleted(() => { });
+            Assert.Throws<InvalidOperationException>(() => readVt.OnCompleted(() => { }));
+
+            ValueTaskAwaiter<bool> waitReadVt = CreateChannel().Reader.WaitToReadAsync().GetAwaiter();
+            waitReadVt.OnCompleted(() => { });
+            Assert.Throws<InvalidOperationException>(() => waitReadVt.OnCompleted(() => { }));
+
+            if (CreateFullChannel() != null)
+            {
+                ValueTaskAwaiter writeVt = CreateFullChannel().Writer.WriteAsync(42).GetAwaiter();
+                writeVt.OnCompleted(() => { });
+                Assert.Throws<InvalidOperationException>(() => writeVt.OnCompleted(() => { }));
+
+                ValueTaskAwaiter<bool> waitWriteVt = CreateFullChannel().Writer.WaitToWriteAsync().GetAwaiter();
+                waitWriteVt.OnCompleted(() => { });
+                Assert.Throws<InvalidOperationException>(() => waitWriteVt.OnCompleted(() => { }));
+            }
+        }
+
+        private sealed class CustomSynchronizationContext : SynchronizationContext
+        {
+            public override void Post(SendOrPostCallback d, object state)
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SetSynchronizationContext(this);
+                    try
+                    {
+                        d(state);
+                    }
+                    finally
+                    {
+                        SetSynchronizationContext(null);
+                    }
+                }, null);
+            }
+        }
+
+        private sealed class CustomTaskScheduler : TaskScheduler
+        {
+            protected override void QueueTask(Task task) => ThreadPool.QueueUserWorkItem(_ => TryExecuteTask(task));
+            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
+            protected override IEnumerable<Task> GetScheduledTasks() => null;
         }
     }
 }

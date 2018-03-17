@@ -12,13 +12,9 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    using Configuration = System.Net.Test.Common.Configuration;
-
-    public class HttpClientMiniStress : HttpClientTestBase
+    public abstract class HttpClientMiniStress : HttpClientTestBase
     {
-        private static bool HttpStressEnabled => Configuration.Http.StressEnabled;
-
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(GetStressOptions))]
         public void SingleClient_ManyGets_Sync(int numRequests, int dop, HttpCompletionOption completionOption)
         {
@@ -32,7 +28,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         public async Task SingleClient_ManyGets_Async(int numRequests, int dop, HttpCompletionOption completionOption)
         {
             string responseText = CreateResponse("abcdefghijklmnopqrstuvwxyz");
@@ -42,7 +38,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(GetStressOptions))]
         public void ManyClients_ManyGets(int numRequests, int dop, HttpCompletionOption completionOption)
         {
@@ -56,7 +52,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [MemberData(nameof(PostStressOptions))]
         public async Task ManyClients_ManyPosts_Async(int numRequests, int dop, int numBytes)
         {
@@ -70,7 +66,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [InlineData(1000000)]
         public void CreateAndDestroyManyClients(int numClients)
         {
@@ -80,7 +76,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalTheory(nameof(HttpStressEnabled))]
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         [InlineData(5000)]
         public async Task MakeAndFaultManyRequests(int numRequests)
         {
@@ -90,13 +86,12 @@ namespace System.Net.Http.Functional.Tests
                 {
                     client.Timeout = Timeout.InfiniteTimeSpan;
 
-                    var ep = (IPEndPoint)server.LocalEndPoint;
                     Task<string>[] tasks =
                         (from i in Enumerable.Range(0, numRequests)
-                         select client.GetStringAsync($"http://{ep.Address}:{ep.Port}"))
+                         select client.GetStringAsync(url))
                          .ToArray();
 
-                    Assert.All(tasks, t => 
+                    Assert.All(tasks, t =>
                         Assert.True(t.IsFaulted || t.Status == TaskStatus.WaitingForActivation, $"Unexpected status {t.Status}"));
 
                     server.Dispose();
@@ -123,14 +118,14 @@ namespace System.Net.Http.Functional.Tests
             {
                 Task<HttpResponseMessage> getAsync = client.GetAsync(url, completionOption);
 
-                LoopbackServer.AcceptSocketAsync(server, (s, stream, reader, writer) =>
+                server.AcceptConnectionAsync(connection => 
                 {
-                    while (!string.IsNullOrEmpty(reader.ReadLine())) ;
+                    while (!string.IsNullOrEmpty(connection.Reader.ReadLine())) ;
 
-                    writer.Write(responseText);
-                    s.Shutdown(SocketShutdown.Send);
+                    connection.Writer.Write(responseText);
+                    connection.Socket.Shutdown(SocketShutdown.Send);
 
-                    return Task.FromResult<List<string>>(null);
+                    return Task.CompletedTask;
                 }).GetAwaiter().GetResult();
 
                 getAsync.GetAwaiter().GetResult().Dispose();
@@ -144,14 +139,12 @@ namespace System.Net.Http.Functional.Tests
             {
                 Task<HttpResponseMessage> getAsync = client.GetAsync(url, completionOption);
 
-                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                await server.AcceptConnectionAsync(async connection => 
                 {
-                    while (!string.IsNullOrEmpty(await reader.ReadLineAsync().ConfigureAwait(false))) ;
+                    while (!string.IsNullOrEmpty(await connection.Reader.ReadLineAsync().ConfigureAwait(false))) ;
 
-                    await writer.WriteAsync(responseText).ConfigureAwait(false);
-                    s.Shutdown(SocketShutdown.Send);
-                    
-                    return null;
+                    await connection.Writer.WriteAsync(responseText).ConfigureAwait(false);
+                    connection.Socket.Shutdown(SocketShutdown.Send);
                 });
 
                 (await getAsync.ConfigureAwait(false)).Dispose();
@@ -173,35 +166,33 @@ namespace System.Net.Http.Functional.Tests
                 var content = new ByteArrayContent(new byte[numBytes]);
                 Task<HttpResponseMessage> postAsync = client.PostAsync(url, content);
 
-                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                await server.AcceptConnectionAsync(async connection => 
                 {
-                    while (!string.IsNullOrEmpty(await reader.ReadLineAsync().ConfigureAwait(false))) ;
-                    for (int i = 0; i < numBytes; i++) Assert.NotEqual(-1, reader.Read());
+                    while (!string.IsNullOrEmpty(await connection.Reader.ReadLineAsync().ConfigureAwait(false))) ;
+                    for (int i = 0; i < numBytes; i++) Assert.NotEqual(-1, connection.Reader.Read());
 
-                    await writer.WriteAsync(responseText).ConfigureAwait(false);
-                    s.Shutdown(SocketShutdown.Send);
-                    
-                    return null;
+                    await connection.Writer.WriteAsync(responseText).ConfigureAwait(false);
+                    connection.Socket.Shutdown(SocketShutdown.Send);
                 });
 
                 (await postAsync.ConfigureAwait(false)).Dispose();
             });
         }
 
-        [ConditionalFact(nameof(HttpStressEnabled))]
+        [ConditionalFact(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
         public async Task UnreadResponseMessage_Collectible()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
                 {
-                    Func<Task<WeakReference>> getAsync = async () => new WeakReference(await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead));
+                    Func<Task<WeakReference>> getAsync = () => client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).ContinueWith(t => new WeakReference(t.Result));
                     Task<WeakReference> wrt = getAsync();
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    await server.AcceptConnectionAsync(async connection =>
                     {
-                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
-                        await writer.WriteAsync(CreateResponse(new string('a', 32 * 1024)));
+                        while (!string.IsNullOrEmpty(await connection.Reader.ReadLineAsync())) ;
+                        await connection.Writer.WriteAsync(CreateResponse(new string('a', 32 * 1024)));
 
                         WeakReference wr = wrt.GetAwaiter().GetResult();
                         Assert.True(SpinWait.SpinUntil(() =>
@@ -211,8 +202,6 @@ namespace System.Net.Http.Functional.Tests
                             GC.Collect();
                             return !wr.IsAlive;
                         }, 10 * 1000), "Response object should have been collected");
-                        
-                        return null;
                     });
                 }
             });
@@ -224,7 +213,7 @@ namespace System.Net.Http.Functional.Tests
             "Content-Type: text/plain\r\n" +
             $"Content-Length: {asciiBody.Length}\r\n" +
             "\r\n" +
-            $"{asciiBody}\r\n";
+            $"{asciiBody}";
 
         private static Task ForCountAsync(int count, int dop, Func<int, Task> bodyAsync)
         {

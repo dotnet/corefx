@@ -14,7 +14,7 @@ namespace System.Net.Http.Functional.Tests
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public class PostScenarioTest : HttpClientTestBase
+    public abstract class PostScenarioTest : HttpClientTestBase
     {
         private const string ExpectedContent = "Test contest";
         private const string UserName = "user1";
@@ -160,9 +160,14 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        [ActiveIssue(9228, TestPlatforms.Windows)]
         public async Task PostNonRewindableContentUsingAuth_PreAuthenticate_Success(Uri serverUri)
         {
+            if (IsWinHttpHandler)
+            {
+                // Issue #9228
+                return;
+            }
+
             HttpContent content = CustomContent.Create(ExpectedContent, false);
             var credential = new NetworkCredential(UserName, Password);
             await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: true);
@@ -191,9 +196,17 @@ namespace System.Net.Http.Functional.Tests
         {
             using (HttpClient client = CreateHttpClient())
             {
-                if (!useContentLengthUpload && requestContent != null)
+                if (requestContent != null)
                 {
-                    requestContent.Headers.ContentLength = null;
+                    if (useContentLengthUpload)
+                    {
+                        // Ensure that Content-Length is populated (see issue #27245)
+                        requestContent.Headers.ContentLength = requestContent.Headers.ContentLength;
+                    }
+                    else
+                    {
+                        requestContent.Headers.ContentLength = null;
+                    }
                 }
                 
                 if (useChunkedEncodingUpload)

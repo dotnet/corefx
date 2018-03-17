@@ -78,7 +78,7 @@ namespace System.ServiceModel.Syndication
             _feedType = feedToWrite.GetType();
         }
 
-        internal override Func<string, string, string, DateTimeOffset> GetDefaultDateTimeParser()
+        internal override TryParseDateTimeCallback GetDefaultDateTimeParser()
         {
             return DateTimeHelper.DefaultRss20DateTimeParser;
         }
@@ -275,7 +275,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri)
+        internal static SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri, TryParseUriCallback uriParser, bool preserveAttributeExtensions)
         {
             SyndicationLink link = new SyndicationLink();
             link.BaseUri = baseUri;
@@ -290,7 +290,7 @@ namespace System.ServiceModel.Syndication
                     }
                     else if (!FeedUtils.IsXmlns(reader.LocalName, reader.NamespaceURI))
                     {
-                        if (this.PreserveAttributeExtensions)
+                        if (preserveAttributeExtensions)
                         {
                             link.AttributeExtensions.Add(new XmlQualifiedName(reader.LocalName, reader.NamespaceURI), reader.Value);
                         }
@@ -302,8 +302,9 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            string uri = reader.ReadElementString();
-            link.Uri = UriParser(uri, UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
+            string uriString = reader.ReadElementString();
+            Uri uri = UriFromString(uriParser, uriString, UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace, reader);
+            link.Uri = uri;
             return link;
         }
 
@@ -421,7 +422,7 @@ namespace System.ServiceModel.Syndication
                             }
                             else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                             {
-                                result.Links.Add(ReadAlternateLink(reader, result.BaseUri));
+                                result.Links.Add(ReadAlternateLink(reader, result.BaseUri, UriParser, PreserveAttributeExtensions));
                                 readAlternateLink = true;
                             }
                             else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
@@ -494,7 +495,7 @@ namespace System.ServiceModel.Syndication
                                         string val = reader.Value;
                                         if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                                         {
-                                            feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace)));
+                                            feed.Links.Add(SyndicationLink.CreateSelfLink(UriFromString(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, reader)));
                                         }
                                         else if (!FeedUtils.IsXmlns(name, ns))
                                         {
@@ -547,7 +548,7 @@ namespace System.ServiceModel.Syndication
                     reader.ReadEndElement(); // item
                     if (!readAlternateLink && fallbackAlternateLink != null)
                     {
-                        result.Links.Add(SyndicationLink.CreateAlternateLink(UriParser(fallbackAlternateLink, UriKind.RelativeOrAbsolute, fallbackAlternateLinkLocalName, fallbackAlternateLinkNamespace)));
+                        result.Links.Add(SyndicationLink.CreateAlternateLink(UriFromString(fallbackAlternateLink, UriKind.RelativeOrAbsolute, fallbackAlternateLinkLocalName, fallbackAlternateLinkNamespace, reader)));
                         readAlternateLink = true;
                     }
 
@@ -593,7 +594,7 @@ namespace System.ServiceModel.Syndication
                     string val = reader.Value;
                     if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                     {
-                        link.Uri = UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace);
+                        link.Uri = UriFromString(val, UriKind.RelativeOrAbsolute, Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace, reader);
                     }
                     else if (name == Rss20Constants.TypeTag && ns == Rss20Constants.Rss20Namespace)
                     {
@@ -737,7 +738,7 @@ namespace System.ServiceModel.Syndication
 
                 if (!string.IsNullOrEmpty(baseUri))
                 {
-                    result.BaseUri = UriParser(baseUri, UriKind.RelativeOrAbsolute, baseUriLocalName, baseUriNamespace);
+                    result.BaseUri = UriFromString(baseUri, UriKind.RelativeOrAbsolute, baseUriLocalName, baseUriNamespace, reader);
                 }
 
                 bool areAllItemsRead = true;
@@ -757,7 +758,7 @@ namespace System.ServiceModel.Syndication
                         }
                         else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Links.Add(ReadAlternateLink(reader, result.BaseUri));
+                            result.Links.Add(ReadAlternateLink(reader, result.BaseUri, UriParser, PreserveAttributeExtensions));
                         }
                         else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
                         {
@@ -811,7 +812,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 if (reader.IsStartElement(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace))
                                 {
-                                    result.ImageUrl = UriParser(reader.ReadElementString(), UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
+                                    result.ImageUrl = UriFromString(reader.ReadElementString(), UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, reader);
                                 }
                                 else
                                 {
@@ -1023,6 +1024,53 @@ namespace System.ServiceModel.Syndication
                 string imgAlternateLink = (alternateLink != null) ? FeedUtils.GetUriString(alternateLink.Uri) : string.Empty;
                 writer.WriteElementString(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace, imgAlternateLink);
                 writer.WriteEndElement(); // image
+            }
+
+            // Optional spec items
+            if (Feed.InternalDocumentation?.Uri != null)
+            {
+                writer.WriteElementString(Rss20Constants.DocumentationTag, Feed.InternalDocumentation.Uri.ToString());
+            }
+
+            if (Feed.InternalTimeToLive != null)
+            {
+                writer.WriteElementString(Rss20Constants.TimeToLiveTag, ((int)Feed.InternalTimeToLive.Value.TotalMinutes).ToString());
+            }
+
+            if (Feed.InternalSkipHours?.Count > 0)
+            {
+                writer.WriteStartElement(Rss20Constants.SkipHoursTag);
+
+                foreach (int hour in Feed.InternalSkipHours)
+                {
+                    writer.WriteElementString(Rss20Constants.HourTag, hour.ToString());
+                }
+
+                writer.WriteEndElement();
+            }
+
+            if (Feed.InternalSkipDays?.Count > 0)
+            {
+                writer.WriteStartElement(Rss20Constants.SkipDaysTag);
+
+                foreach (string day in Feed.InternalSkipDays)
+                {
+                    writer.WriteElementString(Rss20Constants.DayTag, day);
+                }
+
+                writer.WriteEndElement();
+            }
+
+            if (Feed.InternalTextInput != null)
+            {
+                writer.WriteStartElement(Rss20Constants.TextInputTag);
+
+                writer.WriteElementString(Rss20Constants.DescriptionTag, Feed.InternalTextInput.Description);
+                writer.WriteElementString(Rss20Constants.TitleTag, Feed.InternalTextInput.Title);
+                writer.WriteElementString(Rss20Constants.LinkTag, Feed.InternalTextInput.Link.GetAbsoluteUri().ToString());
+                writer.WriteElementString(Rss20Constants.NameTag, Feed.InternalTextInput.Name);
+
+                writer.WriteEndElement();
             }
 
             if (_serializeExtensionsAsAtom)

@@ -79,6 +79,18 @@
   <data name="Arg_CryptographyException" xml:space="preserve">
     <value>Error occurred during a cryptographic operation.</value>
   </data>
+  <data name="Cryptography_ArgECDHKeySizeMismatch" xml:space="preserve">
+    <value>The keys from both parties must be the same size to generate a secret agreement.</value>
+  </data>
+  <data name="Cryptography_ArgECDHRequiresECDHKey" xml:space="preserve">
+    <value>Keys used with the ECDiffieHellmanCng algorithm must have an algorithm group of ECDiffieHellman.</value>
+  </data>
+  <data name="Cryptography_TlsRequiresLabelAndSeed" xml:space="preserve">
+    <value>The TLS key derivation function requires both the label and seed properties to be set.</value>
+  </data>
+  <data name="Cryptography_TlsRequires64ByteSeed" xml:space="preserve">
+    <value>The TLS key derivation function requires a seed value of exactly 64 bytes.</value>
+  </data>
   <data name="Cryptography_BadHashSize_ForAlgorithm" xml:space="preserve">
     <value>The provided value of {0} bytes does not match the expected size of {1} bytes for the algorithm ({2}).</value>
   </data>
@@ -93,6 +105,9 @@
   </data>
   <data name="Cryptography_DSA_KeyGenNotSupported" xml:space="preserve">
     <value>DSA keys can be imported, but new key generation is not supported on this platform.</value>
+  </data>
+  <data name="Cryptography_Encryption_MessageTooLong" xml:space="preserve">
+    <value>The message exceeds the maximum allowable length for the chosen options ({0}).</value>
   </data>
   <data name="Cryptography_ECXmlSerializationFormatRequired" xml:space="preserve">
     <value>XML serialization of an elliptic curve key requires using an overload which specifies the XML format to be used.</value>
@@ -172,6 +187,9 @@
   <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
     <value>The string contains a character not in the 7 bit ASCII character set.</value>
   </data>
+  <data name="Cryptography_KeyTooSmall" xml:space="preserve">
+    <value>The key is too small for the requested operation.</value>
+  </data>
   <data name="Cryptography_MissingIV" xml:space="preserve">
     <value>The cipher mode specified requires that an initialization vector (IV) be used.</value>
   </data>
@@ -190,8 +208,14 @@
   <data name="Cryptography_NotValidPublicOrPrivateKey" xml:space="preserve">
     <value>Key is not a valid public or private key.</value>
   </data>
+  <data name="Cryptography_OAEP_Decryption_Failed" xml:space="preserve">
+    <value>Error occurred while decoding OAEP padding.</value>
+  </data>
   <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
     <value>Cannot open an invalid handle.</value>
+  </data>
+  <data name="Cryptography_Padding_DecDataTooBig" xml:space="preserve">
+    <value>The data to be decrypted exceeds the maximum for this modulus of {0} bytes.</value>
   </data>
   <data name="Cryptography_PartialBlock" xml:space="preserve">
     <value>The input data is not a complete block.</value>
@@ -210,6 +234,9 @@
   </data>
   <data name="Cryptography_Rijndael_BlockSize" xml:space="preserve">
     <value>BlockSize must be 128 in this implementation.</value>
+  </data>
+  <data name="Cryptography_SignHash_WrongSize" xml:space="preserve">
+    <value>The provided hash value is not the expected size for the specified hash algorithm.</value>
   </data>
   <data name="Cryptography_TransformBeyondEndOfBuffer" xml:space="preserve">
     <value>Attempt to transform beyond end of buffer.</value>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -172,7 +173,7 @@ namespace System
             FormatDigits(outputBuffer, value, len, false);
         }
 
-        internal unsafe static void FormatDigits(StringBuilder outputBuffer, int value, int len, bool overrideLengthLimit)
+        internal static unsafe void FormatDigits(StringBuilder outputBuffer, int value, int len, bool overrideLengthLimit)
         {
             Debug.Assert(value >= 0, "DateTimeFormat.FormatDigits(): value >= 0");
 
@@ -703,7 +704,7 @@ namespace System
                         if (nextChar >= 0 && nextChar != '%')
                         {
                             char nextCharChar = (char)nextChar;
-                            StringBuilder origStringBuilder = FormatCustomized(dateTime, ReadOnlySpan<char>.DangerousCreate(null, ref nextCharChar, 1), dtfi, offset, result);
+                            StringBuilder origStringBuilder = FormatCustomized(dateTime, MemoryMarshal.CreateReadOnlySpan<char>(ref nextCharChar, 1), dtfi, offset, result);
                             Debug.Assert(ReferenceEquals(origStringBuilder, result));
                             tokenLen = 2;
                         }

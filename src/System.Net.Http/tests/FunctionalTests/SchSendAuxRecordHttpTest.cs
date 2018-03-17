@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 namespace System.Net.Http.Functional.Tests
 {
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public class SchSendAuxRecordHttpTest : HttpClientTestBase
+    public abstract class SchSendAuxRecordHttpTest : HttpClientTestBase
     {
         readonly ITestOutputHelper _output;
         
@@ -33,7 +33,7 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
-                handler.ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 server.Start();
 
                 var tasks = new Task[2];

@@ -18,6 +18,10 @@ namespace System.Diagnostics
     {
         private static readonly UTF8Encoding s_utf8NoBom =
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        private static volatile bool s_sigchildHandlerRegistered = false;
+        private static readonly object s_sigchildGate = new object();
+        private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
+        private static readonly ReaderWriterLockSlim s_processStartLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -106,6 +110,8 @@ namespace System.Diagnostics
                         }
                         catch
                         {
+                            _waitHandle?.Dispose();
+                            _waitHandle = null;
                             _watchingForExit = false;
                             throw;
                         }
@@ -257,6 +263,8 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
+            EnsureSigChildHandler();
+
             string filename;
             string[] argv;
 
@@ -293,21 +301,44 @@ namespace System.Diagnostics
                 throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
             }
 
-            // Invoke the shim fork/execve routine.  It will create pipes for all requested
-            // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
-            // descriptors, and execve to execute the requested process.  The shim implementation
-            // is used to fork/execve as executing managed code in a forked process is not safe (only
-            // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
-            Interop.Sys.ForkAndExecProcess(
+            bool setCredentials = !string.IsNullOrEmpty(startInfo.UserName);
+            uint userId = 0;
+            uint groupId = 0;
+            if (setCredentials)
+            {
+                (userId, groupId) = GetUserAndGroupIds(startInfo);
+            }
+
+            // Lock to avoid races with OnSigChild
+            // By using a ReaderWriterLock we allow multiple processes to start concurrently.
+            s_processStartLock.EnterReadLock();
+            try
+            {
+                // Invoke the shim fork/execve routine.  It will create pipes for all requested
+                // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
+                // descriptors, and execve to execute the requested process.  The shim implementation
+                // is used to fork/execve as executing managed code in a forked process is not safe (only
+                // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
+                Interop.Sys.ForkAndExecProcess(
                     filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
+                    setCredentials, userId, groupId, 
                     out childPid,
                     out stdinFd, out stdoutFd, out stderrFd);
 
-            // Store the child's information into this Process object.
-            Debug.Assert(childPid >= 0);
-            SetProcessId(childPid);
-            SetProcessHandle(new SafeProcessHandle(childPid));
+                // Ensure we'll reap this process.
+                // note: SetProcessId will set this if we don't set it first.
+                _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true);
+
+                // Store the child's information into this Process object.
+                Debug.Assert(childPid >= 0);
+                SetProcessId(childPid);
+                SetProcessHandle(new SafeProcessHandle(childPid));
+            }
+            finally
+            {
+                s_processStartLock.ExitReadLock();
+            }
 
             // Configure the parent's ends of the redirection streams.
             // We use UTF8 encoding without BOM by-default(instead of Console encoding as on Windows)
@@ -345,7 +376,6 @@ namespace System.Diagnostics
         /// <summary>Size to use for redirect streams and stream readers/writers.</summary>
         private const int StreamBufferSize = 4096;
 
-
         /// <summary>Converts the filename and arguments information from a ProcessStartInfo into an argv array.</summary>
         /// <param name="psi">The ProcessStartInfo.</param>
         /// <param name="alternativePath">alternative resolved path to use as first argument</param>
@@ -353,7 +383,7 @@ namespace System.Diagnostics
         private static string[] ParseArgv(ProcessStartInfo psi, string alternativePath = null)
         {
             string argv0 = psi.FileName; // when no alternative path exists, pass filename (instead of resolved path) as argv[0], to match what caller supplied
-            if (string.IsNullOrEmpty(psi.Arguments) && string.IsNullOrEmpty(alternativePath))
+            if (string.IsNullOrEmpty(psi.Arguments) && string.IsNullOrEmpty(alternativePath) && psi.ArgumentList.Count == 0)
             {
                 return new string[] { argv0 };
             }
@@ -367,8 +397,16 @@ namespace System.Diagnostics
                     argvList.Add("openURL"); // kfmclient needs OpenURL
                 }
             }
+
             argvList.Add(argv0);
-            ParseArgumentsIntoList(psi.Arguments, argvList);
+            if (!string.IsNullOrEmpty(psi.Arguments))
+            {
+                ParseArgumentsIntoList(psi.Arguments, argvList);
+            }
+            else
+            {
+                argvList.AddRange(psi.ArgumentList);
+            }
             return argvList.ToArray();
         }
 
@@ -597,6 +635,94 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
+        private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)
+        {
+            Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
+
+            (uint? userId, uint? groupId) = GetUserAndGroupIds(startInfo.UserName);
+
+            Debug.Assert(userId.HasValue == groupId.HasValue, "userId and groupId both need to have values, or both need to be null.");
+            if (!userId.HasValue)
+            {
+                throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
+            }
+
+            return (userId.Value, groupId.Value);
+        }
+
+        private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)
+        {
+            Interop.Sys.Passwd? passwd;
+            // First try with a buffer that should suffice for 99% of cases.
+            // Note: on CentOS/RedHat 7.1 systems, getpwnam_r returns 'user not found' if the buffer is too small
+            // see https://bugs.centos.org/view.php?id=7324
+            const int BufLen = Interop.Sys.Passwd.InitialBufferSize;
+            byte* stackBuf = stackalloc byte[BufLen];
+            if (TryGetPasswd(userName, stackBuf, BufLen, out passwd))
+            {
+                if (passwd == null)
+                {
+                    return (null, null);
+                }
+                return (passwd.Value.UserId, passwd.Value.GroupId);
+            }
+
+            // Fallback to heap allocations if necessary, growing the buffer until
+            // we succeed.  TryGetPasswd will throw if there's an unexpected error.
+            int lastBufLen = BufLen;
+            while (true)
+            {
+                lastBufLen *= 2;
+                byte[] heapBuf = new byte[lastBufLen];
+                fixed (byte* buf = &heapBuf[0])
+                {
+                    if (TryGetPasswd(userName, buf, heapBuf.Length, out passwd))
+                    {
+                        if (passwd == null)
+                        {
+                            return (null, null);
+                        }
+                        return (passwd.Value.UserId, passwd.Value.GroupId);
+                    }
+                }
+            }
+        }
+
+        private static unsafe bool TryGetPasswd(string name, byte* buf, int bufLen, out Interop.Sys.Passwd? passwd)
+        {
+            // Call getpwnam_r to get the passwd struct
+            Interop.Sys.Passwd tempPasswd;
+            int error = Interop.Sys.GetPwNamR(name, out tempPasswd, buf, bufLen);
+
+            // If the call succeeds, give back the passwd retrieved
+            if (error == 0)
+            {
+                passwd = tempPasswd;
+                return true;
+            }
+
+            // If the current user's entry could not be found, give back null,
+            // but still return true as false indicates the buffer was too small.
+            if (error == -1)
+            {
+                passwd = null;
+                return true;
+            }
+
+            var errorInfo = new Interop.ErrorInfo(error);
+
+            // If the call failed because the buffer was too small, return false to 
+            // indicate the caller should try again with a larger buffer.
+            if (errorInfo.Error == Interop.Error.ERANGE)
+            {
+                passwd = null;
+                return false;
+            }
+
+            // Otherwise, fail.
+            throw new Win32Exception(errorInfo.RawErrno, errorInfo.GetErrorMessage());
+        }
+
         public IntPtr MainWindowHandle => IntPtr.Zero;
 
         private bool CloseMainWindowCore() => false;
@@ -606,5 +732,41 @@ namespace System.Diagnostics
         public bool Responding => true;
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
+
+        private static void EnsureSigChildHandler()
+        {
+            if (s_sigchildHandlerRegistered)
+            {
+                return;
+            }
+
+            lock (s_sigchildGate)
+            {
+                if (!s_sigchildHandlerRegistered)
+                {
+                    // Ensure signal handling is setup and register our callback.
+                    if (!Interop.Sys.RegisterForSigChld(s_sigChildHandler))
+                    {
+                        throw new Win32Exception();
+                    }
+
+                    s_sigchildHandlerRegistered = true;
+                }
+            }
+        }
+
+        private static void OnSigChild(bool reapAll)
+        {
+            // Lock to avoid races with Process.Start
+            s_processStartLock.EnterWriteLock();
+            try
+            {
+                ProcessWaitState.CheckChildren(reapAll);
+            }
+            finally
+            {
+                s_processStartLock.ExitWriteLock();
+            }
+        }
     }
 }

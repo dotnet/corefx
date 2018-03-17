@@ -175,7 +175,7 @@
       },
       "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/Tools/msbuild.sh",
-        "arguments": "$(Agent.BuildDirectory)/s/corefx/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:\"TargetQueues=$(PB_TargetQueue)\" /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "arguments": "$(Agent.BuildDirectory)/s/corefx/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:\"TargetQueues=$(PB_TargetQueue)\" /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -291,8 +291,20 @@
       "value": null,
       "isSecret": true
     },
+    "OutputCloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
+    "HelixApiAccessKey": {
+      "value": null,
+      "isSecret": true
+    },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "ProductBuildId": {
+      "value": "",
       "allowOverride": true
     },
     "PB_Label": {
@@ -367,7 +379,7 @@
   ],
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
   "jobAuthorizationScope": "projectCollection",
-  "jobTimeoutInMinutes": 60,
+  "jobTimeoutInMinutes": 120,
   "jobCancelTimeoutInMinutes": 5,
   "repository": {
     "properties": {

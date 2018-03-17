@@ -34,7 +34,7 @@ namespace System.Buffers
             {
                 if (IsDisposed)
                 {
-                    ThrowHelper.ThrowObjectDisposedException_MemoryDisposed(nameof(OwnedMemory<T>));
+                    ThrowHelper.ThrowObjectDisposedException_MemoryDisposed();
                 }
                 return new Memory<T>(owner: this, 0, Length);
             }
@@ -43,7 +43,7 @@ namespace System.Buffers
         /// <summary>
         /// Returns a handle for the array that has been pinned and hence its address can be taken
         /// </summary>
-        public abstract MemoryHandle Pin(int offset = 0);
+        public abstract MemoryHandle Pin(int byteOffset = 0);
 
         /// <summary>
         /// Returns an array segment.

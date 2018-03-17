@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
-using System;
-using System.Diagnostics;
-using System.Security.Principal;
 using Xunit;
 
 namespace System.ServiceProcess.Tests
@@ -13,6 +9,7 @@ namespace System.ServiceProcess.Tests
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceControllerTests : IDisposable
     {
+        private const int connectionTimeout = 30000;
         private readonly TestServiceProvider _testService;
 
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
@@ -77,27 +74,6 @@ namespace System.ServiceProcess.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void StartWithArguments()
-        {
-            var controller = new ServiceController(_testService.TestServiceName);
-            controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Running, controller.Status);
-
-            controller.Stop();
-            controller.WaitForStatus(ServiceControllerStatus.Stopped, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Stopped, controller.Status);
-
-            var args = new[] { "a", "b", "c", "d", "e" };
-            controller.Start(args);
-            controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Running, controller.Status);
-
-            string argsOutput = _testService.GetServiceOutput().Trim();
-            string argsInput = "OnStart args=" + string.Join(",", args);
-            Assert.Equal(argsInput, argsOutput);
-        }
-
-        [ConditionalFact(nameof(IsProcessElevated))]
         public void Start_NullArg_ThrowsArgumentNullException()
         {
             var controller = new ServiceController(_testService.TestServiceName);
@@ -126,20 +102,32 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void PauseAndContinue()
         {
-            var controller = new ServiceController(_testService.TestServiceName);
+            string serviceName = _testService.TestServiceName;
+            var controller = new ServiceController(serviceName);
+
             controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
             Assert.Equal(ServiceControllerStatus.Running, controller.Status);
+
+            _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
 
             for (int i = 0; i < 2; i++)
             {
                 controller.Pause();
+                Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
                 controller.WaitForStatus(ServiceControllerStatus.Paused, _testService.ControlTimeout);
                 Assert.Equal(ServiceControllerStatus.Paused, controller.Status);
 
                 controller.Continue();
+                Assert.Equal((int)PipeMessageByteCode.Continue, _testService.GetByte());
                 controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
                 Assert.Equal(ServiceControllerStatus.Running, controller.Status);
             }
+
+            controller.Stop();
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
+            controller.WaitForStatus(ServiceControllerStatus.Stopped, _testService.ControlTimeout);
+            Assert.Equal(ServiceControllerStatus.Stopped, controller.Status);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]

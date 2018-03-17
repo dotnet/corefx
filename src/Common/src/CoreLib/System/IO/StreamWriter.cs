@@ -432,7 +432,7 @@ namespace System.IO
         {
             if (value != null)
             {
-                WriteCore(value.AsReadOnlySpan(), _autoFlush);
+                WriteCore(value.AsSpan(), _autoFlush);
             }
         }
 
@@ -445,7 +445,7 @@ namespace System.IO
             CheckAsyncTaskInProgress();
             if (value != null)
             {
-                WriteCore(value.AsReadOnlySpan(), autoFlush: false);
+                WriteCore(value.AsSpan(), autoFlush: false);
             }
             WriteCore(new ReadOnlySpan<char>(CoreNewLine), autoFlush: true);
         }
@@ -963,14 +963,14 @@ namespace System.IO
                 byte[] preamble = encoding.GetPreamble();
                 if (preamble.Length > 0)
                 {
-                    await stream.WriteAsync(preamble, 0, preamble.Length, cancellationToken).ConfigureAwait(false);
+                    await stream.WriteAsync(new ReadOnlyMemory<byte>(preamble), cancellationToken).ConfigureAwait(false);
                 }
             }
 
             int count = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
             if (count > 0)
             {
-                await stream.WriteAsync(byteBuffer, 0, count, cancellationToken).ConfigureAwait(false);
+                await stream.WriteAsync(new ReadOnlyMemory<byte>(byteBuffer, 0, count), cancellationToken).ConfigureAwait(false);
             }
 
             // By definition, calling Flush should flush the stream, but this is

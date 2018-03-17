@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <PropertyGroup>
-    <!-- we need to be supported on pre-nuget-3 platforms (Dev12, Dev11, etc) -->
-    <MinClientVersion>2.8.6</MinClientVersion>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Threading.Tasks.Dataflow.csproj">
       <SupportedFramework>net45;netcore45;wp8;wpa81;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>
@@ -12,20 +8,12 @@
 
     <!-- Since UAP and .NETCoreApp are package based we still want to enable
          OOBing libraries that happen to overlap with their framework package.
-         This avoids us having to lock the API in our NuGet packages just
-         to match what shipped inbox: since we can provide a new library
+         This avoids us having to lock the API in our NuGet packages just 
+         to match what shipped inbox: since we can provide a new library 
          we can update it to add API without raising the netstandard version. -->
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
       <Value>.NETCoreApp;UAP</Value>
     </ValidatePackageSuppression>
-
-    <!--
-      Include empty dependency group for net45 and higher to avoid unncessary package dependencies
-      because all the dependencies are known to be inbox already.
-    -->
-    <Dependency Include="_._">
-      <TargetFramework>net45</TargetFramework>
-    </Dependency>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

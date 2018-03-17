@@ -64,6 +64,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
                             exception is ActiveDirectoryOperationException,
                             $"We got unrecognized exception {exception}");
 
+
                 // The result of validation is cached, so repeat this to make sure it's cached properly.
                 exception = Record.Exception(() => Forest.GetForest(context));
                 Assert.NotNull(exception);

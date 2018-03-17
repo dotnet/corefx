@@ -11,36 +11,31 @@ namespace System.IO
     internal static partial class PathInternal
     {
         /// <summary>
-        /// Returns the start index of the filename
-        /// in the given path, or 0 if no directory
-        /// or volume separator is found.
-        /// </summary>
-        /// <param name="path">The path in which to find the index of the filename.</param>
-        /// <remarks>
-        /// This method returns path.Length for
-        /// inputs like "/usr/foo/" on Unix. As such,
-        /// it is not safe for being used to index
-        /// the string without additional verification.
-        /// </remarks>
-        internal static int FindFileNameIndex(string path)
-        {
-            Debug.Assert(path != null);
-
-            for (int i = path.Length - 1; i >= 0; i--)
-            {
-                char ch = path[i];
-                if (IsDirectoryOrVolumeSeparator(ch))
-                    return i + 1;
-            }
-
-            return 0; // the whole path is the filename
-        }
-
-        /// <summary>
         /// Returns true if the path ends in a directory separator.
         /// </summary>
-        internal static bool EndsInDirectorySeparator(string path) =>
-            !string.IsNullOrEmpty(path) && IsDirectorySeparator(path[path.Length - 1]);
+        internal static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
+
+        /// <summary>
+        /// Returns true if the path starts in a directory separator.
+        /// </summary>
+        internal static bool StartsWithDirectorySeparator(ReadOnlySpan<char> path) => path.Length > 0 && IsDirectorySeparator(path[0]);
+
+        internal static string EnsureTrailingSeparator(string path)
+            => EndsInDirectorySeparator(path) ? path : path + DirectorySeparatorCharAsString;
+
+        internal static string TrimEndingDirectorySeparator(string path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Substring(0, path.Length - 1) :
+                path;
+
+        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        internal static bool IsRoot(ReadOnlySpan<char> path)
+            => path.Length == GetRootLength(path);
 
         /// <summary>
         /// Get the common path length from the start of the string.
@@ -71,7 +66,7 @@ namespace System.IO
         /// <summary>
         /// Gets the count of common characters from the left optionally ignoring case
         /// </summary>
-        unsafe internal static int EqualStartingCharacterCount(string first, string second, bool ignoreCase)
+        internal static unsafe int EqualStartingCharacterCount(string first, string second, bool ignoreCase)
         {
             if (string.IsNullOrEmpty(first) || string.IsNullOrEmpty(second)) return 0;
 
@@ -116,24 +111,98 @@ namespace System.IO
         }
 
         /// <summary>
-        /// Returns false for ".." unless it is specified as a part of a valid File/Directory name.
-        /// (Used to avoid moving up directories.)
-        ///
-        ///       Valid: a..b   abc..d
-        ///     Invalid: ..ab   ab..   ..   abc..d\abc..
+        /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
-        internal static void CheckSearchPattern(string searchPattern)
+        /// <param name="rootLength">The length of the root of the given path</param>
+        internal static string RemoveRelativeSegments(string path, int rootLength)
         {
-            int index;
-            while ((index = searchPattern.IndexOf("..", StringComparison.Ordinal)) != -1)
-            {
-                // Terminal ".." . Files names cannot end in ".."
-                if (index + 2 == searchPattern.Length
-                    || IsDirectorySeparator(searchPattern[index + 2]))
-                    throw new ArgumentException(SR.Format(SR.Arg_InvalidSearchPattern, searchPattern));
+            Debug.Assert(rootLength > 0);
+            bool flippedSeparator = false;
 
-                searchPattern = searchPattern.Substring(index + 2);
+            int skip = rootLength;
+            // We treat "\.." , "\." and "\\" as a relative segment. We want to collapse the first separator past the root presuming
+            // the root actually ends in a separator. Otherwise the first segment for RemoveRelativeSegments
+            // in cases like "\\?\C:\.\" and "\\?\C:\..\", the first segment after the root will be ".\" and "..\" which is not considered as a relative segment and hence not be removed.
+            if (PathInternal.IsDirectorySeparator(path[skip - 1]))
+                skip--;
+
+            Span<char> initialBuffer = stackalloc char[260 /* PathInternal.MaxShortPath */];
+            ValueStringBuilder sb = new ValueStringBuilder(initialBuffer);
+
+            // Remove "//", "/./", and "/../" from the path by copying each character to the output, 
+            // except the ones we're removing, such that the builder contains the normalized path 
+            // at the end.
+            if (skip > 0)
+            {
+                sb.Append(path.AsSpan().Slice(0, skip));
             }
+
+            for (int i = skip; i < path.Length; i++)
+            {
+                char c = path[i];
+
+                if (PathInternal.IsDirectorySeparator(c) && i + 1 < path.Length)
+                {
+                    // Skip this character if it's a directory separator and if the next character is, too,
+                    // e.g. "parent//child" => "parent/child"
+                    if (PathInternal.IsDirectorySeparator(path[i + 1]))
+                    {
+                        continue;
+                    }
+
+                    // Skip this character and the next if it's referring to the current directory,
+                    // e.g. "parent/./child" => "parent/child"
+                    if ((i + 2 == path.Length || PathInternal.IsDirectorySeparator(path[i + 2])) &&
+                        path[i + 1] == '.')
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    // Skip this character and the next two if it's referring to the parent directory,
+                    // e.g. "parent/child/../grandchild" => "parent/grandchild"
+                    if (i + 2 < path.Length &&
+                        (i + 3 == path.Length || PathInternal.IsDirectorySeparator(path[i + 3])) &&
+                        path[i + 1] == '.' && path[i + 2] == '.')
+                    {
+                        // Unwind back to the last slash (and if there isn't one, clear out everything).
+                        int s;
+                        for (s = sb.Length - 1; s >= skip; s--)
+                        {
+                            if (PathInternal.IsDirectorySeparator(sb[s]))
+                            {
+                                sb.Length = (i + 3 >= path.Length && s == skip) ? s + 1 : s; // to avoid removing the complete "\tmp\" segment in cases like \\?\C:\tmp\..\, C:\tmp\..
+                                break;
+                            }
+                        }
+                        if (s < skip)
+                        {
+                            sb.Length = skip;
+                        }
+
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                // Normalize the directory separator if needed
+                if (c != PathInternal.DirectorySeparatorChar && c == PathInternal.AltDirectorySeparatorChar)
+                {
+                    c = PathInternal.DirectorySeparatorChar;
+                    flippedSeparator = true;
+                }
+
+                sb.Append(c);
+            }
+
+            // If we haven't changed the source path, return the original
+            if (!flippedSeparator && sb.Length == path.Length)
+            {
+                sb.Dispose();
+                return path;
+            }
+
+            return sb.Length < rootLength ? path.Substring(0, rootLength) : sb.ToString();
         }
     }
 }

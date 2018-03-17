@@ -140,27 +140,40 @@ namespace System.IO.Tests
 
         [Theory,
             MemberData(nameof(ControlWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Control whitespace in path throws ArgumentException
-        public void WindowsControlWhiteSpace(string component)
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlWhiteSpace_Desktop(string component)
         {
-            // CreateSubdirectory will throw when passed a path with control whitespace e.g. "\t"
-            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
+            Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
+        }
+
+        [Theory,
+            MemberData(nameof(ControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlWhiteSpace_Core(string component)
+        {
+            Assert.Throws<IOException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
+        }
+
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WindowsSimpleWhiteSpaceThrowsException(string component)
+        {
             Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(component));
         }
 
         [Theory,
             MemberData(nameof(SimpleWhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Simple whitespace is trimmed in path
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] // Simple whitespace is trimmed in path
         public void WindowsSimpleWhiteSpace(string component)
         {
-            // CreateSubdirectory trims all simple whitespace, returning us the parent directory
-            // that called CreateSubdirectory
-            string path = IOServices.RemoveTrailingSlash(GetTestFileName());
             DirectoryInfo result = new DirectoryInfo(TestDirectory).CreateSubdirectory(component);
 
             Assert.True(Directory.Exists(result.FullName));
             Assert.Equal(TestDirectory, IOServices.RemoveTrailingSlash(result.FullName));
-
         }
 
         [Theory,
@@ -170,7 +183,6 @@ namespace System.IO.Tests
         {
             new DirectoryInfo(TestDirectory).CreateSubdirectory(path);
             Assert.True(Directory.Exists(Path.Combine(TestDirectory, path)));
-
         }
 
         [Theory,
@@ -205,6 +217,16 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Assert.Throws<ArgumentException>(() => testDir.CreateSubdirectory("//"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void ParentDirectoryNameAsPrefixShouldThrow()
+        {
+            string randomName = GetTestFileName();
+            DirectoryInfo di = Directory.CreateDirectory(Path.Combine(TestDirectory, randomName));
+
+            Assert.Throws<ArgumentException>(() => di.CreateSubdirectory(Path.Combine("..", randomName + "abc", GetTestFileName())));
         }
 
         #endregion

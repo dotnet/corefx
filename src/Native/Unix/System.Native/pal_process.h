@@ -26,6 +26,9 @@ SystemNative_ForkAndExecProcess(const char* filename,   // filename argument to 
                    int32_t redirectStdin,  // whether to redirect standard input from the parent
                    int32_t redirectStdout, // whether to redirect standard output to the parent
                    int32_t redirectStderr, // whether to redirect standard error to the parent
+                   int32_t setCredentials, // whether to set the userId and groupId for the child process
+                   uint32_t userId,        // the user id under which the child process should run
+                   uint32_t groupId,       // the group id under which the child process should run
                    int32_t* childPid,      // [out] the child process' id
                    int32_t* stdinFd,       // [out] if redirectStdin, the parent's fd for the child's stdin
                    int32_t* stdoutFd,      // [out] if redirectStdout, the parent's fd for the child's stdout
@@ -68,15 +71,6 @@ enum RLimitResources : int32_t
 enum Signals : int32_t
 {
     PAL_SIGKILL = 9, /* kill the specified process */
-};
-
-/**
- * Constants for passing to waitpid determining how waitpid behaves
- */
-enum WaitPidOptions : int32_t
-{
-    PAL_WNOHANG = 1,   /* don't block waiting */
-    PAL_WUNTRACED = 2, /* report status of stopped children */
 };
 
 /**
@@ -212,26 +206,13 @@ extern "C" int32_t SystemNative_GetSid(int32_t pid);
 extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message, const char* arg1);
 
 /**
- * Waits for child process(s) or gathers resource utilization information about child processes
+ * Waits for terminated child processes.
  *
- * The return value from WaitPid can very greatly.
- * 1) returns the process id of a terminating or stopped child process
- * 2) if no children are waiting, -1 is returned and errno is set to ECHILD
- * 3) if WNOHANG is specified and there are no stopped or exited children, 0 is returned
- * 4) on error, -1 is returned and errno is set
+ * 1) returns the process id of a terminated child process
+ * 2) if no children are waiting, 0 is returned
+ * 3) on error, -1 is returned
  */
-extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions options);
-
-/**
- * The four functions below are wrappers around the platform-specific macros of the same name.
- */
-extern "C" int32_t SystemNative_WExitStatus(int32_t status);
-
-extern "C" int32_t SystemNative_WIfExited(int32_t status);
-
-extern "C" int32_t SystemNative_WIfSignaled(int32_t status);
-
-extern "C" int32_t SystemNative_WTermSig(int32_t status);
+extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable);
 
 /**
  * Gets the configurable limit or variable for system path or file descriptor options.

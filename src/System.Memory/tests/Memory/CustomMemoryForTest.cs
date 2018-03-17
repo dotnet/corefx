@@ -15,15 +15,23 @@ namespace System.MemoryTests
         private int _referenceCount;
         private int _noReferencesCalledCount;
         private T[] _array;
+        private readonly int _offset;
+        private readonly int _length;
 
-        public CustomMemoryForTest(T[] array)
+        public CustomMemoryForTest(T[] array): this(array, 0, array.Length)
+        {
+        }
+
+        public CustomMemoryForTest(T[] array, int offset, int length)
         {
             _array = array;
+            _offset = offset;
+            _length = length;
         }
 
         public int OnNoRefencesCalledCount => _noReferencesCalledCount;
 
-        public override int Length => _array.Length;
+        public override int Length => _length;
 
         public override bool IsDisposed => _disposed;
 
@@ -35,18 +43,32 @@ namespace System.MemoryTests
             {
                 if (IsDisposed)
                     throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-                return new Span<T>(_array, 0, _array.Length);
+                return new Span<T>(_array, _offset, _length);
             }
         }
 
-        public override MemoryHandle Pin(int offset = 0)
+        public override MemoryHandle Pin(int byteOffset = 0)
         {
             unsafe
             {
-                Retain();
-                if (offset < 0 || offset > _array.Length) throw new ArgumentOutOfRangeException(nameof(offset));
-                var handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                return new MemoryHandle(this, Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), offset), handle);
+                Retain(); // this checks IsDisposed
+
+                try
+                {
+                    if ((IntPtr.Size == 4 && (uint)byteOffset > (uint)_array.Length * (uint)Unsafe.SizeOf<T>())
+                        || (IntPtr.Size != 4 && (ulong)byteOffset > (uint)_array.Length * (ulong)Unsafe.SizeOf<T>()))
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(byteOffset));
+                    }
+
+                    var handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
+                    return new MemoryHandle(this, Unsafe.Add<byte>((void*)handle.AddrOfPinnedObject(), _offset + byteOffset), handle);
+                }
+                catch
+                {
+                    Release();
+                    throw;
+                }
             }
         }
 
@@ -54,7 +76,7 @@ namespace System.MemoryTests
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-            arraySegment = new ArraySegment<T>(_array);
+            arraySegment = new ArraySegment<T>(_array, _offset, _length);
             return true;
         }
 
