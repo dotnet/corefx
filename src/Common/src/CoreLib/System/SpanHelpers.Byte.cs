@@ -178,7 +178,7 @@ namespace System
                     var vMatches = Vector.Equals(vComparison, Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index)));
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index += Vector<byte>.Count;
+                        index += (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match
@@ -313,13 +313,13 @@ namespace System
 
                 // Get comparison Vector
                 Vector<byte> vComparison = GetVector(value);
-                while (nLength > (Vector<byte>.Count - 1))
+                while (nLength > (uint)(Vector<byte>.Count - 1))
                 {
-                    var vMatches = Vector.Equals(vComparison, Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count)));
+                    var vMatches = Vector.Equals(vComparison, Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - (uint)Vector<byte>.Count)));
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index -= Vector<byte>.Count;
-                        nLength -= Vector<byte>.Count;
+                        index -= (uint)Vector<byte>.Count;
+                        nLength -= (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match
@@ -446,7 +446,7 @@ namespace System
                                     Vector.Equals(vData, values1));
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index += Vector<byte>.Count;
+                        index += (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match
@@ -579,7 +579,7 @@ namespace System
 
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index += Vector<byte>.Count;
+                        index += (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match
@@ -696,16 +696,16 @@ namespace System
                 // Get comparison Vector
                 Vector<byte> values0 = GetVector(value0);
                 Vector<byte> values1 = GetVector(value1);
-                while (nLength > (Vector<byte>.Count - 1))
+                while (nLength > (uint)(Vector<byte>.Count - 1))
                 {
-                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - (uint)Vector<byte>.Count));
                     var vMatches = Vector.BitwiseOr(
                                     Vector.Equals(vData, values0),
                                     Vector.Equals(vData, values1));
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index -= Vector<byte>.Count;
-                        nLength -= Vector<byte>.Count;
+                        index -= (uint)Vector<byte>.Count;
+                        nLength -= (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match
@@ -824,9 +824,9 @@ namespace System
                 Vector<byte> values0 = GetVector(value0);
                 Vector<byte> values1 = GetVector(value1);
                 Vector<byte> values2 = GetVector(value2);
-                while (nLength > (Vector<byte>.Count - 1))
+                while (nLength > (uint)(Vector<byte>.Count - 1))
                 {
-                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - (uint)Vector<byte>.Count));
 
                     var vMatches = Vector.BitwiseOr(
                                     Vector.BitwiseOr(
@@ -836,8 +836,8 @@ namespace System
 
                     if (Vector<byte>.Zero.Equals(vMatches))
                     {
-                        index -= Vector<byte>.Count;
-                        nLength -= Vector<byte>.Count;
+                        index -= (uint)Vector<byte>.Count;
+                        nLength -= (uint)Vector<byte>.Count;
                         continue;
                     }
                     // Find offset of first match

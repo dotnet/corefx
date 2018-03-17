@@ -25,66 +25,66 @@ namespace System
         public static explicit operator uint(NUInt value) => (uint)value._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NUInt operator *(NUInt left, int right)
+        public static NUInt operator *(NUInt left, uint right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) * (uint)right) : new NUInt(((ulong)left._value) * (uint)right); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) * right) : new NUInt(((ulong)left._value) * right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NUInt operator +(NUInt left, int right)
+        public static NUInt operator +(NUInt left, uint right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) + (uint)right) : new NUInt(((ulong)left._value) + (uint)right); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) + right) : new NUInt(((ulong)left._value) + right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NUInt operator -(NUInt left, int right)
+        public static NUInt operator -(NUInt left, uint right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) - (uint)right) : new NUInt(((ulong)left._value) - (uint)right); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) - right) : new NUInt(((ulong)left._value) - right);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator *(NUInt left, NUInt right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) * (uint)right._value) : new NUInt(((ulong)left._value) * (ulong)right._value); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) * (uint)right._value) : new NUInt(((ulong)left._value) * (ulong)right._value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator +(NUInt left, NUInt right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) + (uint)right._value) : new NUInt(((ulong)left._value) + (ulong)right._value); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) + (uint)right._value) : new NUInt(((ulong)left._value) + (ulong)right._value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator -(NUInt left, NUInt right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) - (uint)right._value) : new NUInt(((ulong)left._value) - (ulong)right._value); }
+            return (sizeof(IntPtr) == 4) ? new NUInt(((uint)left._value) - (uint)right._value) : new NUInt(((ulong)left._value) - (ulong)right._value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(NUInt left, int right)
+        public static bool operator >=(NUInt left, uint right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) >= (uint)right : ((ulong)left._value) >= (uint)right; }
+            return (sizeof(IntPtr) == 4) ? ((uint)left._value) >= right : ((ulong)left._value) >= right;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(NUInt left, int right)
+        public static bool operator <=(NUInt left, uint right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) <= (uint)right : ((ulong)left._value) <= (uint)right; }
+            return (sizeof(IntPtr) == 4) ? ((uint)left._value) <= right : ((ulong)left._value) <= right;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(NUInt left, int right) => !(left <= right);
+        public static bool operator >(NUInt left, uint right) => !(left <= right);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(NUInt left, int right) => !(left >= right);
+        public static bool operator <(NUInt left, uint right) => !(left >= right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(NUInt left, NUInt right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) <= (uint)right._value : ((ulong)left._value) <= (ulong)right._value; }
+            return (sizeof(IntPtr) == 4) ? ((uint)left._value) <= (uint)right._value : ((ulong)left._value) <= (ulong)right._value;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(NUInt left, NUInt right)
         {
-            unsafe { return (sizeof(IntPtr) == 4) ? ((uint)left._value) >= (uint)right._value : ((ulong)left._value) >= (ulong)right._value; }
+            return (sizeof(IntPtr) == 4) ? ((uint)left._value) >= (uint)right._value : ((ulong)left._value) >= (ulong)right._value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
