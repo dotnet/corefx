@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using Xunit;
 
@@ -266,7 +267,16 @@ namespace System.ComponentModel.Design.Tests
         public void DesignerOptionConverter_ConvertToString_ReturnsExpected()
         {
             TypeConverter converter = TypeDescriptor.GetConverter(typeof(DesignerOptionService.DesignerOptionCollection));
-            Assert.Equal("(Collection)", converter.ConvertToString(null));
+            var cuic = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            try
+            {
+                Assert.Equal("(Collection)", converter.ConvertToString(null));
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cuic;
+            }
         }
 
         [Fact]

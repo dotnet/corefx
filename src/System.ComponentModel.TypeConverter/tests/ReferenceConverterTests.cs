@@ -33,6 +33,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Globalization;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -200,7 +201,16 @@ namespace System.ComponentModel.Tests
             ReferenceConverter converter = new ReferenceConverter(typeof(ITestInterface));
             string referenceName = "reference name";
 
-            Assert.Equal("(none)", (string)converter.ConvertTo(null, null, null, typeof(string)));
+            var cuic = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            try
+            {
+                Assert.Equal("(none)", (string)converter.ConvertTo(null, null, null, typeof(string)));
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cuic;
+            }
 
             TestComponent component = new TestComponent();
 

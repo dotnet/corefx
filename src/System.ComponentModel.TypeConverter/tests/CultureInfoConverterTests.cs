@@ -153,7 +153,19 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void ConvertFrom_Value_Null()
         {
-            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, (string)null));
+            var cuic = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+            NotSupportedException ex;
+            try
+            {
+                ex = Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, (string)null));
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = cuic;
+            }
+
             // CultureInfoConverter cannot convert from (null)
             Assert.Equal(typeof(NotSupportedException), ex.GetType());
             Assert.Null(ex.InnerException);
