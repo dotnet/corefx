@@ -26,7 +26,7 @@ namespace System.IO.Pipelines
 
             public override void CancelPendingFlush() => _pipe.CancelPendingFlush();
 
-            public override void OnReaderCompleted(Action<Exception, object> callback, object state) => _pipe.OnReaderCompleted(callback, state);
+            public override void RegisterReaderCompleted(Action<Exception, object> callback, object state) => _pipe.RegisterReaderCompleted(callback, state);
 
             public override ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken = default) => _pipe.FlushAsync(cancellationToken);
 
