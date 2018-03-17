@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Net.NetworkInformation;
 
 using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
@@ -12,8 +14,9 @@ namespace System.Net.Http
     internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
         private readonly Uri _proxyUri;         // URI of the system proxy if set
-        private string[] _bypass;               // list of domains not to proxy
+        private List<Regex> _bypass;            // list of domains not to proxy
         private bool _bypassLocal = false;      // we should bypass domain considered local
+        private List<IPAddress> _localIp;
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
@@ -62,24 +65,45 @@ namespace System.Net.Http
                 {
                     // Process bypass list for manual setting.
                     string[] list = proxyHelper.ProxyBypass.Split(';');
-                    List<string> tmpList = new List<string>();
+                    _bypass = new List<Regex>();
 
                     foreach (string value in list)
                     {
                         string tmp = value.Trim();
+                        if (tmp.Length == 0)
+                        {
+                            continue;
+                        }
                         if (tmp == "<local>")
                         {
                             _bypassLocal = true;
                             continue;
                         }
-                        if (tmp.Length > 0)
+                        try
                         {
-                            tmpList.Add(tmp);
+                            Regex re = new Regex(tmp.Replace(".", "\\.").Replace("*", ".*?") + "$",
+                                            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                            _bypass.Add(re);
+                        }
+                        catch
+                        {
+                            if (NetEventSource.IsEnabled)
+                            {
+                                NetEventSource.Info(this, $"Failed to process {tmp} from bypass list.");
+                            }
                         }
                     }
-                    if (tmpList.Count > 0)
+                }
+                if (_bypassLocal)
+                {
+                    _localIp =  new List<IPAddress>();
+                    foreach (NetworkInterface netInterface in NetworkInterface.GetAllNetworkInterfaces())
                     {
-                        _bypass = tmpList.ToArray();
+                        IPInterfaceProperties ipProps = netInterface.GetIPProperties();
+                        foreach (UnicastIPAddressInformation addr in ipProps.UnicastAddresses)
+                        {
+                            _localIp.Add(addr.Address);
+                        }
                     }
                 }
             }
@@ -131,8 +155,63 @@ namespace System.Net.Http
         {
             if (_proxyHelper.ManualSettingsOnly)
             {
+                if ( _bypassLocal)
+                {
+                    IPAddress address = null;
+
+                    if (uri.IsLoopback)
+                    {
+                        // This is optimization for loopback addresses.
+                        // Unfortunately this does not work for all local addresses.
+                        return null;
+                    }
+                    if (uri.Host[0] == '[' || Char.IsNumber(uri.Host[0]))
+                    {
+                        // RFC1123 allows labels to start with number.
+                        // Leading number may or may not be IP address.
+                        // IPv6 [::1] notation. '[' is not valid character in names.
+                        try
+                        {
+                            address = IPAddress.Parse(uri.Host);
+                        }
+                        catch { };
+                    }
+                    if (address != null)
+                    {
+                        // Host is valid IP address.
+                        // Check if it belongs to local system.
+                        foreach (var a in _localIp)
+                        {
+                            if (a.Equals(address))
+                            {
+                                return null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Hosts without FQDN are considered local.
+                        if (uri.Host.IndexOf('.') == -1) return null;
+                    }
+                }
+
+                // Check if we have other rules for bypass.
+                if (_bypass != null)
+                {
+                    foreach (var entry in _bypass)
+                    {
+                        if (entry.IsMatch(uri.Host))
+                        {
+                            return null;
+                        }
+                    }
+                }
+
+                // We did not find match on bypass list.
                 return _proxyUri;
             }
+
+            // For anything else ask WinHTTP.
             var proxyInfo = new Interop.WinHttp.WINHTTP_PROXY_INFO();
             try
             {
