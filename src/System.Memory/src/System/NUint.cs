@@ -17,11 +17,13 @@ namespace System
         private NUInt(uint value) => _value = (UIntPtr)value;
         private NUInt(ulong value) => _value = (UIntPtr)value;
 
-        public static explicit operator NUInt(uint value) => new NUInt(value);
-        public static explicit operator UIntPtr(NUInt value) => value._value;
+
+        public static implicit operator NUInt(uint value) => new NUInt(value);
+        public static implicit operator IntPtr(NUInt value) => (IntPtr)(long)(ulong)value._value;
 
         public static explicit operator NUInt(int value) => new NUInt(value);
-        public static explicit operator IntPtr(NUInt value) => (IntPtr)(long)(ulong)value._value;
+        public static explicit operator int(NUInt value) => (int)(long)value._value;
+        public static explicit operator uint(NUInt value) => (uint)(long)value._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator *(NUInt left, int right)
