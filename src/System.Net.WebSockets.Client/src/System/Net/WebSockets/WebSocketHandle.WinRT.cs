@@ -41,7 +41,7 @@ namespace System.Net.WebSockets
         {
             if (options.RemoteCertificateValidationCallback != null)
             {
-                throw new PlatformNotSupportedException();
+                throw new PlatformNotSupportedException(SR.net_WebSockets_RemoteValidationCallbackNotSupported);
             }
 
             try
