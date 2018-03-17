@@ -486,26 +486,26 @@ namespace System.Buffers.Text
     }
     public static partial class Utf8Parser
     {
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out bool value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out byte value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out System.DateTime value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out System.DateTimeOffset value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out decimal value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out double value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out System.Guid value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out short value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out int value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out long value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out bool value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out byte value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out System.DateTime value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out System.DateTimeOffset value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out decimal value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out double value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out System.Guid value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out short value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out int value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out long value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out sbyte value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out float value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out System.TimeSpan value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out sbyte value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out float value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out System.TimeSpan value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out ushort value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out ushort value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out uint value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out uint value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<byte> text, out ulong value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<byte> source, out ulong value, out int bytesConsumed, char standardFormat = '\0') { throw null; }
     }
 }
 namespace System.Runtime.InteropServices
