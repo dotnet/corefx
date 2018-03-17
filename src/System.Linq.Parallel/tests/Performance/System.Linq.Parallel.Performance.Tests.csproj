@@ -12,6 +12,26 @@
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
+    <Compile Include="..\Helpers\DeliberateTestException.cs">
+      <Link>Helpers\DeliberateTestException.cs</Link>
+    </Compile>
+    <Compile Include="..\Helpers\Enumerables.cs">
+      <Link>Helpers\Enumerables.cs</Link>
+    </Compile>
+    <Compile Include="..\Helpers\KeyValuePair.cs">
+      <Link>Helpers\KeyValuePair.cs</Link>
+    </Compile>
+    <Compile Include="..\Helpers\Labeled.cs">
+      <Link>Helpers\Labeled.cs</Link>
+    </Compile>
+    <Compile Include="..\Helpers\Sources.cs">
+      <Link>Helpers\Sources.cs</Link>
+    </Compile>
+    <Compile Include="..\Helpers\UnorderedSources.cs">
+      <Link>Helpers\UnorderedSources.cs</Link>
+    </Compile>
+    <Compile Include="QueryOperators\Perf.GroupJoin.cs" />
+    <Compile Include="QueryOperators\Perf.Join.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonPath)\..\perf\PerfRunner\PerfRunner.csproj">
