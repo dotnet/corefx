@@ -28,9 +28,9 @@ namespace System.Runtime.InteropServices
         /// Get an array segment from the underlying <see cref="ReadOnlySequence{T}"/>.
         /// If unable to get the array segment, return false with a default array segment.
         /// </summary>
-        public static bool TryGetArray<T>(ReadOnlySequence<T> sequence, out ArraySegment<T> arraySegment)
+        public static bool TryGetArray<T>(ReadOnlySequence<T> sequence, out ArraySegment<T> segment)
         {
-            return sequence.TryGetArray(out arraySegment);
+            return sequence.TryGetArray(out segment);
         }
 
         /// <summary>

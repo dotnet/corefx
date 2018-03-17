@@ -106,7 +106,7 @@ namespace System
         public override bool Equals(object obj) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
-        public static implicit operator System.Memory<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.Memory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (System.Memory<T> memory) { throw null; }
         public static implicit operator System.Memory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
@@ -131,7 +131,7 @@ namespace System
         public bool Equals(System.ReadOnlyMemory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
-        public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
@@ -160,7 +160,7 @@ namespace System
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
-        public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (T[] array) { throw null; }
         public static bool operator !=(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start) { throw null; }
@@ -213,7 +213,7 @@ namespace System
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Span<T> left, System.Span<T> right) { throw null; }
-        public static implicit operator System.Span<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.Span<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (System.Span<T> span) { throw null; }
         public static implicit operator System.Span<T> (T[] array) { throw null; }
         public static bool operator !=(System.Span<T> left, System.Span<T> right) { throw null; }
@@ -288,7 +288,7 @@ namespace System.Buffers
         public abstract System.Buffers.MemoryHandle Pin(int byteOffset = 0);
         public abstract bool Release();
         public abstract void Retain();
-        protected internal abstract bool TryGetArray(out System.ArraySegment<T> arraySegment);
+        protected internal abstract bool TryGetArray(out System.ArraySegment<T> segment);
     }
     public static partial class BuffersExtensions
     {
@@ -522,7 +522,7 @@ namespace System.Runtime.InteropServices
         public static ref T GetReference<T>(System.ReadOnlySpan<T> span) { throw null; }
         public static ref T GetReference<T>(System.Span<T> span) { throw null; }
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(System.ReadOnlyMemory<T> memory) { throw null; }
-        public static bool TryGetArray<T>(System.ReadOnlyMemory<T> readOnlyMemory, out System.ArraySegment<T> arraySegment) { throw null; }
+        public static bool TryGetArray<T>(System.ReadOnlyMemory<T> readOnlyMemory, out System.ArraySegment<T> segment) { throw null; }
         public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory)
             where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
         public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> readOnlyMemory, out TOwner ownedMemory, out int index, out int length)
@@ -532,7 +532,7 @@ namespace System.Runtime.InteropServices
 
     public static partial class SequenceMarshal
     {
-        public static bool TryGetArray<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> arraySegment) { throw null; }
+        public static bool TryGetArray<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> segment) { throw null; }
         public static bool TryGetReadOnlySequenceSegment<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.ReadOnlySequenceSegment<T> startSegment, out int startIndex, out System.Buffers.ReadOnlySequenceSegment<T> endSegment, out int endIndex) { throw null; }
         public static bool TryGetOwnedMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.OwnedMemory<T> ownedMemory, out int start, out int length) { throw null; }
         public static bool TryGetReadOnlyMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> readOnlyMemory) { throw null; }

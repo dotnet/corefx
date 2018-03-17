@@ -123,12 +123,12 @@ namespace System.Buffers
                 _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index));
                 _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(length));
             }
-            else if (MemoryMarshal.TryGetArray(readOnlyMemory, out ArraySegment<T> arraySegment))
+            else if (MemoryMarshal.TryGetArray(readOnlyMemory, out ArraySegment<T> segment))
             {
-                T[] array = arraySegment.Array;
-                int start = arraySegment.Offset;
+                T[] array = segment.Array;
+                int start = segment.Offset;
                 _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
-                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + arraySegment.Count));
+                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + segment.Count));
             }
             else if (typeof(T) == typeof(char))
             {

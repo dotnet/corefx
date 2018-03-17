@@ -18,20 +18,20 @@ namespace System.Runtime.InteropServices
         /// Get an array segment from the underlying memory.
         /// If unable to get the array segment, return false with a default array segment.
         /// </summary>
-        public static bool TryGetArray<T>(ReadOnlyMemory<T> readOnlyMemory, out ArraySegment<T> arraySegment)
+        public static bool TryGetArray<T>(ReadOnlyMemory<T> readOnlyMemory, out ArraySegment<T> segment)
         {
             object obj = readOnlyMemory.GetObjectStartLength(out int index, out int length);
             if (index < 0)
             {
                 if (((OwnedMemory<T>)obj).TryGetArray(out var segment))
                 {
-                    arraySegment = new ArraySegment<T>(segment.Array, segment.Offset + (index & ReadOnlyMemory<T>.RemoveOwnedFlagBitMask), length);
+                    segment = new ArraySegment<T>(segment.Array, segment.Offset + (index & ReadOnlyMemory<T>.RemoveOwnedFlagBitMask), length);
                     return true;
                 }
             }
             else if (obj is T[] arr)
             {
-                arraySegment = new ArraySegment<T>(arr, index, length);
+                segment = new ArraySegment<T>(arr, index, length);
                 return true;
             }
 
@@ -40,12 +40,12 @@ namespace System.Runtime.InteropServices
 #if FEATURE_PORTABLE_SPAN
                 arraySegment = new ArraySegment<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
 #else
-                arraySegment = ArraySegment<T>.Empty;
+                segment = ArraySegment<T>.Empty;
 #endif // FEATURE_PORTABLE_SPAN
                 return true;
             }
 
-            arraySegment = default;
+            segment = default;
             return false;
         }
 
