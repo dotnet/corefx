@@ -19,46 +19,46 @@ namespace System
         public static Span<T> AsSpan<T>(this T[] array, int start) => Span<T>.Create(array, start);
 
         /// <summary>
-        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
+        /// Returns a value indicating whether the specified <paramref name="other"/> occurs within the <paramref name="span"/>.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to seek within the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
-            => (IndexOf(span, value, comparisonType) >= 0);
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
+            => (IndexOf(span, other, comparisonType) >= 0);
 
         /// <summary>
-        /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="other"/> span have the same characters
         /// when compared using the specified <paramref name="comparisonType"/> option.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.SequenceEqual<char>(value);
+                return span.SequenceEqual<char>(other);
             }
 
-            return span.ToString().Equals(value.ToString(), comparisonType);
+            return span.ToString().Equals(other.ToString(), comparisonType);
         }
 
         /// <summary>
-        /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
+        /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,
         /// and returns an integer that indicates their relative position in the sort order.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.SequenceCompareTo(value);
+                return span.SequenceCompareTo(other);
             }
 
-            return string.Compare(span.ToString(), value.ToString(), comparisonType);
+            return string.Compare(span.ToString(), other.ToString(), comparisonType);
         }
 
         /// <summary>
@@ -164,38 +164,38 @@ namespace System
             => ToUpper(source, destination, CultureInfo.InvariantCulture);
 
         /// <summary>
-        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="other"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
         /// <param name="span">The source span.</param>
-        /// <param name="value">The sequence to compare to the end of the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
-        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        /// <param name="other">The sequence to compare to the end of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.EndsWith<char>(value);
+                return span.EndsWith<char>(other);
             }
 
             string sourceString = span.ToString();
-            string valueString = value.ToString();
+            string valueString = other.ToString();
             return sourceString.EndsWith(valueString, comparisonType);
         }
 
         /// <summary>
-        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="other"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
         /// <param name="span">The source span.</param>
-        /// <param name="value">The sequence to compare to the beginning of the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
-        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        /// <param name="other">The sequence to compare to the beginning of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.StartsWith<char>(value);
+                return span.StartsWith<char>(other);
             }
 
             string sourceString = span.ToString();
-            string valueString = value.ToString();
+            string valueString = other.ToString();
             return sourceString.StartsWith(valueString, comparisonType);
         }
 

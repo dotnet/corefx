@@ -17,46 +17,46 @@ namespace System
     public static partial class MemoryExtensions
     {
         /// <summary>
-        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
+        /// Returns a value indicating whether the specified <paramref name="other"/> occurs within the <paramref name="span"/>.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to seek within the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
-            return (IndexOf(span, value, comparisonType) >= 0);
+            return (IndexOf(span, other, comparisonType) >= 0);
         }
 
         /// <summary>
-        /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="other"/> span have the same characters
         /// when compared using the specified <paramref name="comparisonType"/> option.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             string.CheckStringComparison(comparisonType);
 
             switch (comparisonType)
             {
                 case StringComparison.CurrentCulture:
-                    return (CultureInfo.CurrentCulture.CompareInfo.CompareOptionNone(span, value) == 0);
+                    return (CultureInfo.CurrentCulture.CompareInfo.CompareOptionNone(span, other) == 0);
 
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return (CultureInfo.CurrentCulture.CompareInfo.CompareOptionIgnoreCase(span, value) == 0);
+                    return (CultureInfo.CurrentCulture.CompareInfo.CompareOptionIgnoreCase(span, other) == 0);
 
                 case StringComparison.InvariantCulture:
-                    return (CompareInfo.Invariant.CompareOptionNone(span, value) == 0);
+                    return (CompareInfo.Invariant.CompareOptionNone(span, other) == 0);
 
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return (CompareInfo.Invariant.CompareOptionIgnoreCase(span, value) == 0);
+                    return (CompareInfo.Invariant.CompareOptionIgnoreCase(span, other) == 0);
 
                 case StringComparison.Ordinal:
-                    return EqualsOrdinal(span, value);
+                    return EqualsOrdinal(span, other);
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return EqualsOrdinalIgnoreCase(span, value);
+                    return EqualsOrdinalIgnoreCase(span, other);
             }
 
             Debug.Fail("StringComparison outside range");
@@ -98,37 +98,37 @@ namespace System
         }
 
         /// <summary>
-        /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
+        /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,
         /// and returns an integer that indicates their relative position in the sort order.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             string.CheckStringComparison(comparisonType);
 
             switch (comparisonType)
             {
                 case StringComparison.CurrentCulture:
-                    return CultureInfo.CurrentCulture.CompareInfo.CompareOptionNone(span, value);
+                    return CultureInfo.CurrentCulture.CompareInfo.CompareOptionNone(span, other);
 
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return CultureInfo.CurrentCulture.CompareInfo.CompareOptionIgnoreCase(span, value);
+                    return CultureInfo.CurrentCulture.CompareInfo.CompareOptionIgnoreCase(span, other);
 
                 case StringComparison.InvariantCulture:
-                    return CompareInfo.Invariant.CompareOptionNone(span, value);
+                    return CompareInfo.Invariant.CompareOptionNone(span, other);
 
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return CompareInfo.Invariant.CompareOptionIgnoreCase(span, value);
+                    return CompareInfo.Invariant.CompareOptionIgnoreCase(span, other);
 
                 case StringComparison.Ordinal:
-                    if (span.Length == 0 || value.Length == 0)
-                        return span.Length - value.Length;
-                    return string.CompareOrdinal(span, value);
+                    if (span.Length == 0 || other.Length == 0)
+                        return span.Length - other.Length;
+                    return string.CompareOrdinal(span, other);
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return CompareInfo.CompareOrdinalIgnoreCase(span, value);
+                    return CompareInfo.CompareOrdinalIgnoreCase(span, other);
             }
 
             Debug.Fail("StringComparison outside range");
@@ -279,14 +279,14 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="other"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
         /// <param name="span">The source span.</param>
-        /// <param name="value">The sequence to compare to the end of the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
-        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        /// <param name="other">The sequence to compare to the end of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
-            if (value.Length == 0)
+            if (other.Length == 0)
             {
                 string.CheckStringComparison(comparisonType);
                 return true;
@@ -295,22 +295,22 @@ namespace System
             switch (comparisonType)
             {
                 case StringComparison.CurrentCulture:
-                    return SpanHelpers.EndsWithCultureHelper(span, value, CultureInfo.CurrentCulture.CompareInfo);
+                    return SpanHelpers.EndsWithCultureHelper(span, other, CultureInfo.CurrentCulture.CompareInfo);
 
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return SpanHelpers.EndsWithCultureIgnoreCaseHelper(span, value, CultureInfo.CurrentCulture.CompareInfo);
+                    return SpanHelpers.EndsWithCultureIgnoreCaseHelper(span, other, CultureInfo.CurrentCulture.CompareInfo);
 
                 case StringComparison.InvariantCulture:
-                    return SpanHelpers.EndsWithCultureHelper(span, value, CompareInfo.Invariant);
+                    return SpanHelpers.EndsWithCultureHelper(span, other, CompareInfo.Invariant);
 
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return SpanHelpers.EndsWithCultureIgnoreCaseHelper(span, value, CompareInfo.Invariant);
+                    return SpanHelpers.EndsWithCultureIgnoreCaseHelper(span, other, CompareInfo.Invariant);
 
                 case StringComparison.Ordinal:
-                    return span.EndsWith(value); //TODO: Optimize - https://github.com/dotnet/corefx/issues/27487
+                    return span.EndsWith(other); //TODO: Optimize - https://github.com/dotnet/corefx/issues/27487
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return SpanHelpers.EndsWithOrdinalIgnoreCaseHelper(span, value);
+                    return SpanHelpers.EndsWithOrdinalIgnoreCaseHelper(span, other);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
@@ -318,14 +318,14 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="other"/> when compared using the specified <paramref name="comparisonType"/> option.
         /// </summary>
         /// <param name="span">The source span.</param>
-        /// <param name="value">The sequence to compare to the beginning of the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
-        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        /// <param name="other">The sequence to compare to the beginning of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
-            if (value.Length == 0)
+            if (other.Length == 0)
             {
                 string.CheckStringComparison(comparisonType);
                 return true;
@@ -334,22 +334,22 @@ namespace System
             switch (comparisonType)
             {
                 case StringComparison.CurrentCulture:
-                    return SpanHelpers.StartsWithCultureHelper(span, value, CultureInfo.CurrentCulture.CompareInfo);
+                    return SpanHelpers.StartsWithCultureHelper(span, other, CultureInfo.CurrentCulture.CompareInfo);
 
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return SpanHelpers.StartsWithCultureIgnoreCaseHelper(span, value, CultureInfo.CurrentCulture.CompareInfo);
+                    return SpanHelpers.StartsWithCultureIgnoreCaseHelper(span, other, CultureInfo.CurrentCulture.CompareInfo);
 
                 case StringComparison.InvariantCulture:
-                    return SpanHelpers.StartsWithCultureHelper(span, value, CompareInfo.Invariant);
+                    return SpanHelpers.StartsWithCultureHelper(span, other, CompareInfo.Invariant);
 
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return SpanHelpers.StartsWithCultureIgnoreCaseHelper(span, value, CompareInfo.Invariant);
+                    return SpanHelpers.StartsWithCultureIgnoreCaseHelper(span, other, CompareInfo.Invariant);
 
                 case StringComparison.Ordinal:
-                    return span.StartsWith(value); //TODO: Optimize - https://github.com/dotnet/corefx/issues/27487
+                    return span.StartsWith(other); //TODO: Optimize - https://github.com/dotnet/corefx/issues/27487
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return SpanHelpers.StartsWithOrdinalIgnoreCaseHelper(span, value);
+                    return SpanHelpers.StartsWithOrdinalIgnoreCaseHelper(span, other);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));

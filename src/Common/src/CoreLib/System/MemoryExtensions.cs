@@ -255,35 +255,35 @@ namespace System
         /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second)
+        public static bool SequenceEqual<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
-            int length = first.Length;
+            int length = span.Length;
 
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
-                return length == second.Length &&
+                return length == other.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
-            return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
+            return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
         /// <summary>
         /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
         /// </summary>
-        public static int SequenceCompareTo<T>(this Span<T> first, ReadOnlySpan<T> second)
+        public static int SequenceCompareTo<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    first.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    second.Length);
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
+                    other.Length);
 
-            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
         }
 
         /// <summary>
@@ -608,93 +608,93 @@ namespace System
         /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static bool SequenceEqual<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
-            int length = first.Length;
+            int length = span.Length;
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
-                return length == second.Length &&
+                return length == other.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)length) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
-            return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
+            return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
         /// <summary>
         /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int SequenceCompareTo<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static int SequenceCompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
-                    first.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
-                    second.Length);
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
+                    other.Length);
 
-            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
         }
 
         /// <summary>
         /// Determines whether the specified sequence appears at the start of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
-            int valueLength = value.Length;
+            int valueLength = other.Length;
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
-            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), valueLength);
         }
 
         /// <summary>
         /// Determines whether the specified sequence appears at the start of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
-            int valueLength = value.Length;
+            int valueLength = other.Length;
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
-            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), valueLength);
         }
 
         /// <summary>
         /// Determines whether the specified sequence appears at the end of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+        public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
             int spanLength = span.Length;
-            int valueLength = value.Length;
+            int valueLength = other.Length;
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength),
-                    ref MemoryMarshal.GetReference(value),
+                    ref MemoryMarshal.GetReference(other),
                     valueLength);
         }
 
@@ -702,22 +702,22 @@ namespace System
         /// Determines whether the specified sequence appears at the end of the span.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+        public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IEquatable<T>
         {
             int spanLength = span.Length;
-            int valueLength = value.Length;
+            int valueLength = other.Length;
             if (default(T) != null && IsTypeComparableAsBytes<T>(out nuint size))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     ((nuint)valueLength) * size);  // If this multiplication overflows, the Span we got overflows the entire address range. There's no happy outcome for this api in such a case so we choose not to take the overhead of checking.
 
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength),
-                    ref MemoryMarshal.GetReference(value),
+                    ref MemoryMarshal.GetReference(other),
                     valueLength);
         }
 
@@ -1062,65 +1062,65 @@ namespace System
         /// Determines whether two sequences overlap in memory.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
+        public static bool Overlaps<T>(this Span<T> span, ReadOnlySpan<T> other)
         {
-            return Overlaps((ReadOnlySpan<T>)first, second);
+            return Overlaps((ReadOnlySpan<T>)span, other);
         }
 
         /// <summary>
         /// Determines whether two sequences overlap in memory and outputs the element offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset)
+        public static bool Overlaps<T>(this Span<T> span, ReadOnlySpan<T> other, out int elementOffset)
         {
-            return Overlaps((ReadOnlySpan<T>)first, second, out elementOffset);
+            return Overlaps((ReadOnlySpan<T>)span, other, out elementOffset);
         }
 
         /// <summary>
         /// Determines whether two sequences overlap in memory.
         /// </summary>
-        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static bool Overlaps<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
         {
-            if (first.IsEmpty || second.IsEmpty)
+            if (span.IsEmpty || other.IsEmpty)
             {
                 return false;
             }
 
             IntPtr byteOffset = Unsafe.ByteOffset(
-                ref MemoryMarshal.GetReference(first),
-                ref MemoryMarshal.GetReference(second));
+                ref MemoryMarshal.GetReference(span),
+                ref MemoryMarshal.GetReference(other));
 
             if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
             {
-                return (uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
-                       (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>());
+                return (uint)byteOffset < (uint)(span.Length * Unsafe.SizeOf<T>()) ||
+                       (uint)byteOffset > (uint)-(other.Length * Unsafe.SizeOf<T>());
             }
             else
             {
-                return (ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
-                       (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>());
+                return (ulong)byteOffset < (ulong)((long)span.Length * Unsafe.SizeOf<T>()) ||
+                       (ulong)byteOffset > (ulong)-((long)other.Length * Unsafe.SizeOf<T>());
             }
         }
 
         /// <summary>
         /// Determines whether two sequences overlap in memory and outputs the element offset.
         /// </summary>
-        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset)
+        public static bool Overlaps<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other, out int elementOffset)
         {
-            if (first.IsEmpty || second.IsEmpty)
+            if (span.IsEmpty || other.IsEmpty)
             {
                 elementOffset = 0;
                 return false;
             }
 
             IntPtr byteOffset = Unsafe.ByteOffset(
-                ref MemoryMarshal.GetReference(first),
-                ref MemoryMarshal.GetReference(second));
+                ref MemoryMarshal.GetReference(span),
+                ref MemoryMarshal.GetReference(other));
 
             if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
             {
-                if ((uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
-                    (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
+                if ((uint)byteOffset < (uint)(span.Length * Unsafe.SizeOf<T>()) ||
+                    (uint)byteOffset > (uint)-(other.Length * Unsafe.SizeOf<T>()))
                 {
                     if ((int)byteOffset % Unsafe.SizeOf<T>() != 0)
                         ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
@@ -1136,8 +1136,8 @@ namespace System
             }
             else
             {
-                if ((ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
-                    (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
+                if ((ulong)byteOffset < (ulong)((long)span.Length * Unsafe.SizeOf<T>()) ||
+                    (ulong)byteOffset > (ulong)-((long)other.Length * Unsafe.SizeOf<T>()))
                 {
                     if ((long)byteOffset % Unsafe.SizeOf<T>() != 0)
                         ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
