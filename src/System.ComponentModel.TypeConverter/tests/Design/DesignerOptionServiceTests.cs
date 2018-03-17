@@ -181,7 +181,7 @@ namespace System.ComponentModel.Design.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void Properties_GetBeforeAddingChild_ReturnsEmpty()
+        public void Properties_GetBeforeAddingChild_ReturnsNonEmpty()
         {
             var service = new TestDesignerOptionService();
             Assert.Empty(service.Options.Properties);
