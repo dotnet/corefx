@@ -60,7 +60,7 @@ namespace System.IO
                 default:
                     return string.IsNullOrEmpty(path)
                         ? new IOException(GetMessage(errorCode), MakeHRFromErrorCode(errorCode))
-                        : new IOException($"{GetMessage(errorCode)} : '{path}'");
+                        : new IOException($"{GetMessage(errorCode)} : '{path}'", MakeHRFromErrorCode(errorCode));
             }
         }
 
