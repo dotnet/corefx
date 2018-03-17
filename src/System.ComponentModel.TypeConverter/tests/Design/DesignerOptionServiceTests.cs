@@ -180,13 +180,14 @@ namespace System.ComponentModel.Design.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Properties_GetBeforeAddingChild_ReturnsEmpty()
         {
             var service = new TestDesignerOptionService();
             Assert.Empty(service.Options.Properties);
 
             DesignerOptionService.DesignerOptionCollection options = service.DoCreateOptionCollection(service.Options, "name", "value");
-            Assert.Empty(service.Options.Properties);
+            Assert.NotEmpty(service.Options.Properties);
         }
 
         [Fact]
