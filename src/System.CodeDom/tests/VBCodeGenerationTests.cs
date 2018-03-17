@@ -596,71 +596,51 @@ namespace System.CodeDom.Tests
                 cu.Namespaces.Add(ns);
 
                 var attrs = cu.AssemblyCustomAttributes;
-                attrs.Add(new CodeAttributeDeclaration("System.Reflection.AssemblyTitle",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("MyAssembly"))));
-                attrs.Add(new CodeAttributeDeclaration("System.Reflection.AssemblyVersion",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("1.0.6.2"))));
-                attrs.Add(new CodeAttributeDeclaration("System.CLSCompliantAttribute",
-                    new CodeAttributeArgument(new CodePrimitiveExpression(false))));
+                attrs.Add(new CodeAttributeDeclaration("System.Reflection.AssemblyTitle", new CodeAttributeArgument(new CodePrimitiveExpression("MyAssembly"))));
+                attrs.Add(new CodeAttributeDeclaration("System.Reflection.AssemblyVersion", new CodeAttributeArgument(new CodePrimitiveExpression("1.0.6.2"))));
+                attrs.Add(new CodeAttributeDeclaration("System.CLSCompliantAttribute", new CodeAttributeArgument(new CodePrimitiveExpression(false))));
 
-                var class1 = new CodeTypeDeclaration() {Name = "MyClass"};
+                var class1 = new CodeTypeDeclaration() { Name = "MyClass" };
                 class1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Serializable"));
-                class1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Class"))));
+                class1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete", new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Class"))));
                 ns.Types.Add(class1);
 
-                var nestedClass = new CodeTypeDeclaration("NestedClass")
-                {
-                    IsClass = true,
-                    TypeAttributes = TypeAttributes.NestedPublic
-                };
+                var nestedClass = new CodeTypeDeclaration("NestedClass") { IsClass = true, TypeAttributes = TypeAttributes.NestedPublic };
                 nestedClass.CustomAttributes.Add(new CodeAttributeDeclaration("System.Serializable"));
                 class1.Members.Add(nestedClass);
 
-                var method1 = new CodeMemberMethod() {Name = "MyMethod"};
-                method1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Method"))));
-                method1.CustomAttributes.Add(new CodeAttributeDeclaration("System.ComponentModel.Editor",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("This")),
-                    new CodeAttributeArgument(new CodePrimitiveExpression("That"))));
+                var method1 = new CodeMemberMethod() { Name = "MyMethod" };
+                method1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete", new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Method"))));
+                method1.CustomAttributes.Add(new CodeAttributeDeclaration("System.ComponentModel.Editor", new CodeAttributeArgument(new CodePrimitiveExpression("This")), new CodeAttributeArgument(new CodePrimitiveExpression("That"))));
                 var param1 = new CodeParameterDeclarationExpression(typeof(string), "blah");
                 param1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Xml.Serialization.XmlElementAttribute",
-                    new CodeAttributeArgument("Form",
-                        new CodeFieldReferenceExpression(
-                            new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
-                    new CodeAttributeArgument("IsNullable", new CodePrimitiveExpression(false))));
+                                new CodeAttributeArgument("Form", new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
+                                new CodeAttributeArgument("IsNullable", new CodePrimitiveExpression(false))));
                 method1.Parameters.Add(param1);
                 var param2 = new CodeParameterDeclarationExpression(typeof(int[]), "arrayit");
                 param2.CustomAttributes.Add(
-                    new CodeAttributeDeclaration("System.Xml.Serialization.XmlElementAttribute",
-                        new CodeAttributeArgument("Form",
-                            new CodeFieldReferenceExpression(
-                                new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
-                        new CodeAttributeArgument("IsNullable", new CodePrimitiveExpression(false))));
+                            new CodeAttributeDeclaration("System.Xml.Serialization.XmlElementAttribute",
+                                new CodeAttributeArgument("Form", new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
+                                new CodeAttributeArgument("IsNullable", new CodePrimitiveExpression(false))));
                 method1.Parameters.Add(param2);
                 class1.Members.Add(method1);
 
                 var function1 = new CodeMemberMethod();
                 function1.Name = "MyFunction";
                 function1.ReturnType = new CodeTypeReference(typeof(string));
-                function1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Function"))));
-                function1.ReturnTypeCustomAttributes.Add(
-                    new CodeAttributeDeclaration("System.Xml.Serialization.XmlIgnoreAttribute"));
-                function1.ReturnTypeCustomAttributes.Add(new CodeAttributeDeclaration(
-                    "System.Xml.Serialization.XmlRootAttribute", new
-                        CodeAttributeArgument("Namespace", new CodePrimitiveExpression("Namespace Value")), new
-                        CodeAttributeArgument("ElementName", new CodePrimitiveExpression("Root, hehehe"))));
+                function1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete", new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Function"))));
+                function1.ReturnTypeCustomAttributes.Add(new CodeAttributeDeclaration("System.Xml.Serialization.XmlIgnoreAttribute"));
+                function1.ReturnTypeCustomAttributes.Add(new CodeAttributeDeclaration("System.Xml.Serialization.XmlRootAttribute", new
+                    CodeAttributeArgument("Namespace", new CodePrimitiveExpression("Namespace Value")), new
+                    CodeAttributeArgument("ElementName", new CodePrimitiveExpression("Root, hehehe"))));
                 function1.Statements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression("Return")));
                 class1.Members.Add(function1);
 
                 CodeMemberMethod function2 = new CodeMemberMethod();
                 function2.Name = "GlobalKeywordFunction";
-                function2.CustomAttributes.Add(new CodeAttributeDeclaration(
-                    new CodeTypeReference(typeof(ObsoleteAttribute), CodeTypeReferenceOptions.GlobalReference), new
-                        CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Function"))));
-                CodeTypeReference typeRef = new CodeTypeReference("System.Xml.Serialization.XmlIgnoreAttribute",
-                    CodeTypeReferenceOptions.GlobalReference);
+                function2.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference(typeof(ObsoleteAttribute), CodeTypeReferenceOptions.GlobalReference), new
+                    CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Function"))));
+                CodeTypeReference typeRef = new CodeTypeReference("System.Xml.Serialization.XmlIgnoreAttribute", CodeTypeReferenceOptions.GlobalReference);
                 CodeAttributeDeclaration codeAttrib = new CodeAttributeDeclaration(typeRef);
                 function2.ReturnTypeCustomAttributes.Add(codeAttrib);
                 class1.Members.Add(function2);
@@ -668,24 +648,19 @@ namespace System.CodeDom.Tests
                 CodeMemberField field1 = new CodeMemberField();
                 field1.Name = "myField";
                 field1.Type = new CodeTypeReference(typeof(string));
-                field1.CustomAttributes.Add(
-                    new CodeAttributeDeclaration("System.Xml.Serialization.XmlElementAttribute"));
+                field1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Xml.Serialization.XmlElementAttribute"));
                 field1.InitExpression = new CodePrimitiveExpression("hi!");
                 class1.Members.Add(field1);
 
                 CodeMemberProperty prop1 = new CodeMemberProperty();
                 prop1.Name = "MyProperty";
                 prop1.Type = new CodeTypeReference(typeof(string));
-                prop1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Property"))));
-                prop1.GetStatements.Add(
-                    new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(),
-                        "myField")));
+                prop1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete", new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Property"))));
+                prop1.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "myField")));
                 class1.Members.Add(prop1);
 
                 CodeConstructor const1 = new CodeConstructor();
-                const1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete",
-                    new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Constructor"))));
+                const1.CustomAttributes.Add(new CodeAttributeDeclaration("System.Obsolete", new CodeAttributeArgument(new CodePrimitiveExpression("Don't use this Constructor"))));
                 class1.Members.Add(const1);
 
                 class1 = new CodeTypeDeclaration("Test");
@@ -699,23 +674,18 @@ namespace System.CodeDom.Tests
 
                 CodeConstructor ctor = new CodeConstructor();
                 ctor.Attributes = MemberAttributes.Public;
-                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                    new CodeThisReferenceExpression(),
-                    "Size"), new CodeObjectCreateExpression(new CodeTypeReference("Size"),
-                    new CodePrimitiveExpression(600), new CodePrimitiveExpression(600))));
-                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                    new CodeTypeReferenceExpression("b"),
-                    "Text"), new CodePrimitiveExpression("Test")));
-                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                    new CodeTypeReferenceExpression("b"),
-                    "TabIndex"), new CodePrimitiveExpression(0)));
-                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                    new CodeTypeReferenceExpression("b"),
-                    "Location"), new CodeObjectCreateExpression(new CodeTypeReference("Point"),
-                    new CodePrimitiveExpression(400), new CodePrimitiveExpression(525))));
+                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(),
+                                    "Size"), new CodeObjectCreateExpression(new CodeTypeReference("Size"),
+                                    new CodePrimitiveExpression(600), new CodePrimitiveExpression(600))));
+                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
+                                    "Text"), new CodePrimitiveExpression("Test")));
+                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
+                                    "TabIndex"), new CodePrimitiveExpression(0)));
+                ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
+                                    "Location"), new CodeObjectCreateExpression(new CodeTypeReference("Point"),
+                                    new CodePrimitiveExpression(400), new CodePrimitiveExpression(525))));
                 ctor.Statements.Add(new CodeAttachEventStatement(new CodeEventReferenceExpression(new
-                    CodeThisReferenceExpression(), "MyEvent"), new CodeDelegateCreateExpression(
-                    new CodeTypeReference("EventHandler")
+                    CodeThisReferenceExpression(), "MyEvent"), new CodeDelegateCreateExpression(new CodeTypeReference("EventHandler")
                     , new CodeThisReferenceExpression(), "b_Click")));
                 class1.Members.Add(ctor);
 
@@ -723,8 +693,7 @@ namespace System.CodeDom.Tests
                 evt.Name = "MyEvent";
                 evt.Type = new CodeTypeReference("System.EventHandler");
                 evt.Attributes = MemberAttributes.Public;
-                evt.CustomAttributes.Add(new CodeAttributeDeclaration("System.CLSCompliantAttribute",
-                    new CodeAttributeArgument(new CodePrimitiveExpression(false))));
+                evt.CustomAttributes.Add(new CodeAttributeDeclaration("System.CLSCompliantAttribute", new CodeAttributeArgument(new CodePrimitiveExpression(false))));
                 class1.Members.Add(evt);
 
                 CodeMemberMethod cmm = new CodeMemberMethod();
@@ -735,87 +704,87 @@ namespace System.CodeDom.Tests
 
                 AssertEqual(cu,
                     @"'------------------------------------------------------------------------------
-                  ' <auto-generated>
-                  '     This code was generated by a tool.
-                  '     Runtime Version:4.0.30319.42000
-                  '
-                  '     Changes to this file may cause incorrect behavior and will be lost if
-                  '     the code is regenerated.
-                  ' </auto-generated>
-                  '------------------------------------------------------------------------------
+                      ' <auto-generated>
+                      '     This code was generated by a tool.
+                      '     Runtime Version:4.0.30319.42000
+                      '
+                      '     Changes to this file may cause incorrect behavior and will be lost if
+                      '     the code is regenerated.
+                      ' </auto-generated>
+                      '------------------------------------------------------------------------------
 
-                  Option Strict Off
-                  Option Explicit On
+                      Option Strict Off
+                      Option Explicit On
 
-                  Imports System
-                  Imports System.ComponentModel
-                  Imports System.Drawing
-                  Imports System.Windows.Forms
-                  <Assembly: System.Reflection.AssemblyTitle(""MyAssembly""),  _
-                   Assembly: System.Reflection.AssemblyVersion(""1.0.6.2""),  _
-                   Assembly: System.CLSCompliantAttribute(false)>
+                      Imports System
+                      Imports System.ComponentModel
+                      Imports System.Drawing
+                      Imports System.Windows.Forms
+                      <Assembly: System.Reflection.AssemblyTitle(""MyAssembly""),  _
+                       Assembly: System.Reflection.AssemblyVersion(""1.0.6.2""),  _
+                       Assembly: System.CLSCompliantAttribute(false)>
 
-                  Namespace MyNamespace
+                      Namespace MyNamespace
 
-                      <System.Serializable(),  _
-                       System.Obsolete(""Don't use this Class"")>  _
-                      Public Class [MyClass]
+                          <System.Serializable(),  _
+                           System.Obsolete(""Don't use this Class"")>  _
+                          Public Class [MyClass]
 
-                          <System.Xml.Serialization.XmlElementAttribute()>  _
-                          Private myField As String = ""hi!""
+                              <System.Xml.Serialization.XmlElementAttribute()>  _
+                              Private myField As String = ""hi!""
 
-                          <System.Obsolete(""Don't use this Constructor"")>  _
-                          Private Sub New()
-                              MyBase.New
-                          End Sub
+                              <System.Obsolete(""Don't use this Constructor"")>  _
+                              Private Sub New()
+                                  MyBase.New
+                              End Sub
 
-                          <System.Obsolete(""Don't use this Property"")>  _
-                          Private ReadOnly Property MyProperty() As String
-                              Get
-                                  Return Me.myField
-                              End Get
-                          End Property
+                              <System.Obsolete(""Don't use this Property"")>  _
+                              Private ReadOnly Property MyProperty() As String
+                                  Get
+                                      Return Me.myField
+                                  End Get
+                              End Property
 
-                          <System.Obsolete(""Don't use this Method""),  _
-                           System.ComponentModel.Editor(""This"", ""That"")>  _
-                          Private Sub MyMethod(<System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal blah As String, <System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal arrayit() As Integer)
-                          End Sub
+                              <System.Obsolete(""Don't use this Method""),  _
+                               System.ComponentModel.Editor(""This"", ""That"")>  _
+                              Private Sub MyMethod(<System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal blah As String, <System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal arrayit() As Integer)
+                              End Sub
 
-                          <System.Obsolete(""Don't use this Function"")>  _
-                          Private Function MyFunction() As <System.Xml.Serialization.XmlIgnoreAttribute(), System.Xml.Serialization.XmlRootAttribute([Namespace]:=""Namespace Value"", ElementName:=""Root, hehehe"")> String
-                              Return ""Return""
-                          End Function
+                              <System.Obsolete(""Don't use this Function"")>  _
+                              Private Function MyFunction() As <System.Xml.Serialization.XmlIgnoreAttribute(), System.Xml.Serialization.XmlRootAttribute([Namespace]:=""Namespace Value"", ElementName:=""Root, hehehe"")> String
+                                  Return ""Return""
+                              End Function
 
-                          <Global.System.ObsoleteAttribute(""Don't use this Function"")>  _
-                          Private Sub GlobalKeywordFunction()
-                          End Sub
+                              <Global.System.ObsoleteAttribute(""Don't use this Function"")>  _
+                              Private Sub GlobalKeywordFunction()
+                              End Sub
 
-                          <System.Serializable()>  _
-                          Public Class NestedClass
+                              <System.Serializable()>  _
+                              Public Class NestedClass
+                              End Class
                           End Class
-                      End Class
 
-                      Public Class Test
-                          Inherits Form
+                          Public Class Test
+                              Inherits Form
 
-                          Private b As Button = New Button()
+                              Private b As Button = New Button()
 
-                          Public Sub New()
-                              MyBase.New
-                              Me.Size = New Size(600, 600)
-                              b.Text = ""Test""
-                              b.TabIndex = 0
-                              b.Location = New Point(400, 525)
-                              AddHandler MyEvent, AddressOf Me.b_Click
-                          End Sub
+                              Public Sub New()
+                                  MyBase.New
+                                  Me.Size = New Size(600, 600)
+                                  b.Text = ""Test""
+                                  b.TabIndex = 0
+                                  b.Location = New Point(400, 525)
+                                  AddHandler MyEvent, AddressOf Me.b_Click
+                              End Sub
 
-                          <System.CLSCompliantAttribute(false)>  _
-                          Public Event MyEvent As System.EventHandler
+                              <System.CLSCompliantAttribute(false)>  _
+                              Public Event MyEvent As System.EventHandler
 
-                          Private Sub b_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-                          End Sub
-                      End Class
-                  End Namespace");
+                              Private Sub b_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+                              End Sub
+                          End Class
+                      End Namespace");
             }
             finally
             {
@@ -1482,11 +1451,9 @@ namespace System.CodeDom.Tests
                 method1.Statements.Add(
                     new CodeDelegateInvokeExpression(
                         new CodeEventReferenceExpression(new CodeThisReferenceExpression(), "Event1"),
-                        new CodeExpression[]
-                        {
+                        new CodeExpression[] {
                             new CodeThisReferenceExpression(),
-                            new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.EventArgs"),
-                                "Empty")
+                            new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.EventArgs"), "Empty")
                         }));
 
                 CodeMemberMethod method2 = new CodeMemberMethod();
@@ -1495,11 +1462,9 @@ namespace System.CodeDom.Tests
                 method2.Statements.Add(
                     new CodeDelegateInvokeExpression(
                         new CodeEventReferenceExpression(new CodeThisReferenceExpression(), "Event2"),
-                        new CodeExpression[]
-                        {
-                            new CodeThisReferenceExpression(),
-                            new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.EventArgs"),
-                                "Empty")
+                        new CodeExpression[] {
+                        new CodeThisReferenceExpression(),
+                        new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.EventArgs"), "Empty")
                         }));
                 method2.LinePragma = new CodeLinePragma("MethodLinePragma.txt", 500);
                 method2.Comments.Add(new CodeCommentStatement("Method 2 Comment"));
@@ -1531,20 +1496,19 @@ namespace System.CodeDom.Tests
                 property2.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, string.Empty));
 
                 CodeConstructor constructor1 = new CodeConstructor();
-                constructor1.Attributes =
-                    (constructor1.Attributes & ~MemberAttributes.AccessMask) | MemberAttributes.Public;
+                constructor1.Attributes = (constructor1.Attributes & ~MemberAttributes.AccessMask) | MemberAttributes.Public;
                 CodeStatement conState1 = new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(
-                        new CodeThisReferenceExpression(),
-                        "field1"),
-                    new CodePrimitiveExpression("value1"));
+                                            new CodeFieldReferenceExpression(
+                                                new CodeThisReferenceExpression(),
+                                                "field1"),
+                                            new CodePrimitiveExpression("value1"));
                 conState1.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start, "Statements Region"));
                 constructor1.Statements.Add(conState1);
                 CodeStatement conState2 = new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(
-                        new CodeThisReferenceExpression(),
-                        "field2"),
-                    new CodePrimitiveExpression("value2"));
+                                            new CodeFieldReferenceExpression(
+                                                new CodeThisReferenceExpression(),
+                                                "field2"),
+                                            new CodePrimitiveExpression("value2"));
                 conState2.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, string.Empty));
                 constructor1.Statements.Add(conState2);
 
@@ -1552,15 +1516,13 @@ namespace System.CodeDom.Tests
                 constructor1.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, string.Empty));
 
                 CodeConstructor constructor2 = new CodeConstructor();
-                constructor2.Attributes =
-                    (constructor2.Attributes & ~MemberAttributes.AccessMask) | MemberAttributes.Public;
+                constructor2.Attributes = (constructor2.Attributes & ~MemberAttributes.AccessMask) | MemberAttributes.Public;
                 constructor2.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "value1"));
                 constructor2.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "value2"));
 
                 CodeTypeConstructor typeConstructor2 = new CodeTypeConstructor();
 
-                typeConstructor2.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start,
-                    "Type Constructor Region"));
+                typeConstructor2.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start, "Type Constructor Region"));
                 typeConstructor2.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, string.Empty));
 
                 CodeEntryPointMethod methodMain = new CodeEntryPointMethod();
@@ -1575,17 +1537,13 @@ namespace System.CodeDom.Tests
 
                 CodeTypeDelegate delegate1 = new CodeTypeDelegate();
                 delegate1.Name = "nestedDelegate1";
-                delegate1.Parameters.Add(
-                    new CodeParameterDeclarationExpression(new CodeTypeReference("System.Object"), "sender"));
-                delegate1.Parameters.Add(
-                    new CodeParameterDeclarationExpression(new CodeTypeReference("System.EventArgs"), "e"));
+                delegate1.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("System.Object"), "sender"));
+                delegate1.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("System.EventArgs"), "e"));
 
                 CodeTypeDelegate delegate2 = new CodeTypeDelegate();
                 delegate2.Name = "nestedDelegate2";
-                delegate2.Parameters.Add(
-                    new CodeParameterDeclarationExpression(new CodeTypeReference("System.Object"), "sender"));
-                delegate2.Parameters.Add(
-                    new CodeParameterDeclarationExpression(new CodeTypeReference("System.EventArgs"), "e"));
+                delegate2.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("System.Object"), "sender"));
+                delegate2.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("System.EventArgs"), "e"));
 
                 delegate2.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start, "Delegate Region"));
                 delegate2.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, string.Empty));
@@ -1624,88 +1582,88 @@ namespace System.CodeDom.Tests
 
                 AssertEqual(cu,
                     @"#Region ""Compile Unit Region""
-                  '------------------------------------------------------------------------------
-                  ' <auto-generated>
-                  '     This code was generated by a tool.
-                  '     Runtime Version:4.0.30319.42000
-                  '
-                  '     Changes to this file may cause incorrect behavior and will be lost if
-                  '     the code is regenerated.
-                  ' </auto-generated>
-                  '------------------------------------------------------------------------------
-                  Option Strict Off
-                  Option Explicit On
-                  Namespace Namespace1
-                      #Region ""Outer Type Region""
-                      'Outer Type Comment
-                      Public Class Class1
-                          'Field 1 Comment
-                          Private field1 As String
-                          #Region ""Field Region""
-                          Private field2 As String
-                          #End Region
-                          #Region ""Snippet Region""
-                          #End Region
-                          #Region ""Type Constructor Region""
-                          Shared Sub New()
-                          End Sub
-                          #End Region
-                          #Region ""Constructor Region""
-                          Public Sub New()
-                              MyBase.New
-                              Me.field1 = ""value1""
-                              Me.field2 = ""value2""
-                          End Sub
-                          #End Region
-                          Public Sub New(ByVal value1 As String, ByVal value2 As String)
-                              MyBase.New
-                          End Sub
-                          Public ReadOnly Property Property1() As String
-                              Get
-                                  Return Me.field1
-                              End Get
-                          End Property
-                          #Region ""Property Region""
-                          Public ReadOnly Property Property2() As String
-                              Get
-                                  Return Me.field2
-                              End Get
-                          End Property
-                          #End Region
-                          Public Event Event1 As System.EventHandler
-                          #Region ""Event Region""
-                          Public Event Event2 As System.EventHandler
-                          #End Region
-                          Public Sub Method1()
-                              RaiseEvent Event1(Me, System.EventArgs.Empty)
-                          End Sub
-                          Public Shared Sub Main()
-                          End Sub
-                          #Region ""Method Region""
-                          'Method 2 Comment
-                          #ExternalSource(""MethodLinePragma.txt"",500)
-                          Public Sub Method2()
-                              RaiseEvent Event2(Me, System.EventArgs.Empty)
-                          End Sub
-                          #End ExternalSource
-                          #End Region
-                          Public Class NestedClass1
+                      '------------------------------------------------------------------------------
+                      ' <auto-generated>
+                      '     This code was generated by a tool.
+                      '     Runtime Version:4.0.30319.42000
+                      '
+                      '     Changes to this file may cause incorrect behavior and will be lost if
+                      '     the code is regenerated.
+                      ' </auto-generated>
+                      '------------------------------------------------------------------------------
+                      Option Strict Off
+                      Option Explicit On
+                      Namespace Namespace1
+                          #Region ""Outer Type Region""
+                          'Outer Type Comment
+                          Public Class Class1
+                              'Field 1 Comment
+                              Private field1 As String
+                              #Region ""Field Region""
+                              Private field2 As String
+                              #End Region
+                              #Region ""Snippet Region""
+                              #End Region
+                              #Region ""Type Constructor Region""
+                              Shared Sub New()
+                              End Sub
+                              #End Region
+                              #Region ""Constructor Region""
+                              Public Sub New()
+                                  MyBase.New
+                                  Me.field1 = ""value1""
+                                  Me.field2 = ""value2""
+                              End Sub
+                              #End Region
+                              Public Sub New(ByVal value1 As String, ByVal value2 As String)
+                                  MyBase.New
+                              End Sub
+                              Public ReadOnly Property Property1() As String
+                                  Get
+                                      Return Me.field1
+                                  End Get
+                              End Property
+                              #Region ""Property Region""
+                              Public ReadOnly Property Property2() As String
+                                  Get
+                                      Return Me.field2
+                                  End Get
+                              End Property
+                              #End Region
+                              Public Event Event1 As System.EventHandler
+                              #Region ""Event Region""
+                              Public Event Event2 As System.EventHandler
+                              #End Region
+                              Public Sub Method1()
+                                  RaiseEvent Event1(Me, System.EventArgs.Empty)
+                              End Sub
+                              Public Shared Sub Main()
+                              End Sub
+                              #Region ""Method Region""
+                              'Method 2 Comment
+                              #ExternalSource(""MethodLinePragma.txt"",500)
+                              Public Sub Method2()
+                                  RaiseEvent Event2(Me, System.EventArgs.Empty)
+                              End Sub
+                              #End ExternalSource
+                              #End Region
+                              Public Class NestedClass1
+                              End Class
+                              Public Delegate Sub nestedDelegate1(ByVal sender As Object, ByVal e As System.EventArgs)
+                              #Region ""Nested Type Region""
+                              'Nested Type Comment
+                              #ExternalSource(""NestedTypeLinePragma.txt"",400)
+                              Public Class NestedClass2
+                              End Class
+                              #End ExternalSource
+                              #End Region
+                              #Region ""Delegate Region""
+                              Public Delegate Sub nestedDelegate2(ByVal sender As Object, ByVal e As System.EventArgs)
+                              #End Region
                           End Class
-                          Public Delegate Sub nestedDelegate1(ByVal sender As Object, ByVal e As System.EventArgs)
-                          #Region ""Nested Type Region""
-                          'Nested Type Comment
-                          #ExternalSource(""NestedTypeLinePragma.txt"",400)
-                          Public Class NestedClass2
-                          End Class
-                          #End ExternalSource
                           #End Region
-                          #Region ""Delegate Region""
-                          Public Delegate Sub nestedDelegate2(ByVal sender As Object, ByVal e As System.EventArgs)
-                          #End Region
-                      End Class
-                      #End Region
-                  End Namespace
-                  #End Region");
+                      End Namespace
+                      #End Region");
             }
             finally
             {
@@ -2442,20 +2400,16 @@ namespace System.CodeDom.Tests
                 {
                     cmm.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(typeof(int[][])),
                         "arrayOfArrays", new CodeArrayCreateExpression(typeof(int[][]),
-                            new CodeArrayCreateExpression(typeof(int[]), new CodePrimitiveExpression(3),
-                                new CodePrimitiveExpression(4)),
-                            new CodeArrayCreateExpression(typeof(int[]),
-                                new CodeExpression[] {new CodePrimitiveExpression(1)}))));
+                        new CodeArrayCreateExpression(typeof(int[]), new CodePrimitiveExpression(3), new CodePrimitiveExpression(4)),
+                        new CodeArrayCreateExpression(typeof(int[]), new CodeExpression[] { new CodePrimitiveExpression(1) }))));
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeArrayIndexerExpression(
-                        new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("arrayOfArrays"),
-                            new CodePrimitiveExpression(0))
+                        new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("arrayOfArrays"), new CodePrimitiveExpression(0))
                         , new CodePrimitiveExpression(1))));
                 }
                 else
                 {
                     throw new Exception("not supported");
                 }
-
                 cd.Members.Add(cmm);
 
                 // assembly attributes
@@ -2480,11 +2434,10 @@ namespace System.CodeDom.Tests
                     prop.Name = "accessStringField";
                     prop.Attributes = MemberAttributes.Public | MemberAttributes.Final;
                     prop.Type = new CodeTypeReference(typeof(String));
-                    prop.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(
-                        new CodeThisReferenceExpression(),
+                    prop.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(),
                         "stringField")));
                     prop.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new
-                            CodeThisReferenceExpression(), "stringField"),
+                        CodeThisReferenceExpression(), "stringField"),
                         new CodePropertySetValueReferenceExpression()));
                     class1.Members.Add(prop);
 
@@ -2500,8 +2453,7 @@ namespace System.CodeDom.Tests
                     cc.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "p1"));
                     cc.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "p2"));
                     cc.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "p3"));
-                    cc.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                        new CodeThisReferenceExpression()
+                    cc.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression()
                         , "stringField"), new CodeVariableReferenceExpression("p1")));
                     class1.Members.Add(cc);
                     // verify chained constructors work
@@ -2510,8 +2462,7 @@ namespace System.CodeDom.Tests
                     cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
                     cmm.ReturnType = new CodeTypeReference(typeof(String));
                     // utilize constructor
-                    cmm.Statements.Add(new CodeVariableDeclarationStatement("Test2", "t",
-                        new CodeObjectCreateExpression("Test2")));
+                    cmm.Statements.Add(new CodeVariableDeclarationStatement("Test2", "t", new CodeObjectCreateExpression("Test2")));
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeMethodReferenceExpression(
                         new CodeVariableReferenceExpression("t"), "accessStringField")));
                     cd.Members.Add(cmm);
@@ -2526,11 +2477,9 @@ namespace System.CodeDom.Tests
                     cmm.Attributes = MemberAttributes.Final | MemberAttributes.Public;
                     cmm.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "i"));
                     cmm.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("i"),
-                        new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("i"),
-                            CodeBinaryOperatorType.Multiply,
-                            new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("i"),
-                                CodeBinaryOperatorType.Add,
-                                new CodePrimitiveExpression(3)))));
+                        new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.Multiply,
+                        new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.Add,
+                        new CodePrimitiveExpression(3)))));
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("i")));
                     cd.Members.Add(cmm);
                 }
@@ -2548,7 +2497,6 @@ namespace System.CodeDom.Tests
                         Field.InitExpression = new CodePrimitiveExpression(k);
                         ce.Members.Add(Field);
                     }
-
                     cmm = new CodeMemberMethod();
                     cmm.Name = "OutputDecimalEnumVal";
                     cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
@@ -2559,7 +2507,7 @@ namespace System.CodeDom.Tests
                         new CodePrimitiveExpression(3));
                     CodeMethodReturnStatement truestmt = new CodeMethodReturnStatement(
                         new CodeCastExpression(typeof(int),
-                            new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DecimalEnum"), "Num3")));
+                        new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DecimalEnum"), "Num3")));
                     CodeConditionStatement condstmt = new CodeConditionStatement(eq, truestmt);
                     cmm.Statements.Add(condstmt);
 
@@ -2593,8 +2541,7 @@ namespace System.CodeDom.Tests
                     cmm.ReturnType = new CodeTypeReference("System.int32");
 
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeBinaryOperatorExpression(
-                        new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.Add,
-                        new CodePrimitiveExpression(10))));
+                        new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.Add, new CodePrimitiveExpression(10))));
                     cd.Members.Add(cmm);
                 }
 
@@ -2605,10 +2552,8 @@ namespace System.CodeDom.Tests
                     cmm.ReturnType = new CodeTypeReference(typeof(int));
                     cmm.Parameters.Add(new CodeParameterDeclarationExpression(typeof(int), "i"));
                     cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
-                    cmm.Statements.Add(new CodeVariableDeclarationStatement("TestSingleInterfaceImp", "t",
-                        new CodeObjectCreateExpression("TestSingleInterfaceImp")));
-                    CodeMethodInvokeExpression methodinvoke = new CodeMethodInvokeExpression(
-                        new CodeVariableReferenceExpression("t")
+                    cmm.Statements.Add(new CodeVariableDeclarationStatement("TestSingleInterfaceImp", "t", new CodeObjectCreateExpression("TestSingleInterfaceImp")));
+                    CodeMethodInvokeExpression methodinvoke = new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("t")
                         , "InterfaceMethod");
                     methodinvoke.Parameters.Add(new CodeVariableReferenceExpression("i"));
                     cmm.Statements.Add(new CodeMethodReturnStatement(methodinvoke));
@@ -2657,20 +2602,15 @@ namespace System.CodeDom.Tests
                         cmm.ReturnType = new CodeTypeReference(typeof(int));
                         cmm.Parameters.Add(new CodeParameterDeclarationExpression(typeof(int), "i"));
                         cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
-                        cmm.Statements.Add(new CodeVariableDeclarationStatement("TestMultipleInterfaceImp", "t",
-                            new CodeObjectCreateExpression("TestMultipleInterfaceImp")));
-                        cmm.Statements.Add(new CodeVariableDeclarationStatement("InterfaceA", "interfaceAobject",
-                            new CodeCastExpression("InterfaceA",
-                                new CodeVariableReferenceExpression("t"))));
-                        cmm.Statements.Add(new CodeVariableDeclarationStatement("InterfaceB", "interfaceBobject",
-                            new CodeCastExpression("InterfaceB",
-                                new CodeVariableReferenceExpression("t"))));
-                        methodinvoke = new CodeMethodInvokeExpression(
-                            new CodeVariableReferenceExpression("interfaceAobject")
+                        cmm.Statements.Add(new CodeVariableDeclarationStatement("TestMultipleInterfaceImp", "t", new CodeObjectCreateExpression("TestMultipleInterfaceImp")));
+                        cmm.Statements.Add(new CodeVariableDeclarationStatement("InterfaceA", "interfaceAobject", new CodeCastExpression("InterfaceA",
+                            new CodeVariableReferenceExpression("t"))));
+                        cmm.Statements.Add(new CodeVariableDeclarationStatement("InterfaceB", "interfaceBobject", new CodeCastExpression("InterfaceB",
+                            new CodeVariableReferenceExpression("t"))));
+                        methodinvoke = new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("interfaceAobject")
                             , "InterfaceMethod");
                         methodinvoke.Parameters.Add(new CodeVariableReferenceExpression("i"));
-                        CodeMethodInvokeExpression methodinvoke2 = new CodeMethodInvokeExpression(
-                            new CodeVariableReferenceExpression("interfaceBobject")
+                        CodeMethodInvokeExpression methodinvoke2 = new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("interfaceBobject")
                             , "InterfaceMethod");
                         methodinvoke2.Parameters.Add(new CodeVariableReferenceExpression("i"));
                         cmm.Statements.Add(new CodeMethodReturnStatement(new CodeBinaryOperatorExpression(
@@ -2718,24 +2658,17 @@ namespace System.CodeDom.Tests
                     nestedStructMethod.Name = "NestedStructMethod";
                     nestedStructMethod.ReturnType = new CodeTypeReference(typeof(int));
                     nestedStructMethod.Attributes = MemberAttributes.Public | MemberAttributes.Static;
-                    CodeVariableDeclarationStatement varStructA =
-                        new CodeVariableDeclarationStatement("structA", "varStructA");
+                    CodeVariableDeclarationStatement varStructA = new CodeVariableDeclarationStatement("structA", "varStructA");
                     nestedStructMethod.Statements.Add(varStructA);
                     nestedStructMethod.Statements.Add
-                    (
+                        (
                         new CodeAssignStatement
                         (
-                            /* Expression1 */
-                            new CodeFieldReferenceExpression(
-                                new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("varStructA"),
-                                    "innerStruct"), "int1"),
-                            /* Expression1 */ new CodePrimitiveExpression(3)
+                        /* Expression1 */ new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("varStructA"), "innerStruct"), "int1"),
+                        /* Expression1 */ new CodePrimitiveExpression(3)
                         )
-                    );
-                    nestedStructMethod.Statements.Add(new CodeMethodReturnStatement(
-                        new CodeFieldReferenceExpression(
-                            new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("varStructA"),
-                                "innerStruct"), "int1")));
+                        );
+                    nestedStructMethod.Statements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("varStructA"), "innerStruct"), "int1")));
                     cd.Members.Add(nestedStructMethod);
                 }
 
@@ -2755,8 +2688,7 @@ namespace System.CodeDom.Tests
                     CodeParameterDeclarationExpression param = new CodeParameterDeclarationExpression(typeof(int), "i");
                     cmm.Parameters.Add(param);
                     CodeConditionStatement condstmt = new CodeConditionStatement(new CodeBinaryOperatorExpression(
-                            new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.LessThan,
-                            new CodePrimitiveExpression(1)),
+                        new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.LessThan, new CodePrimitiveExpression(1)),
                         new CodeGotoStatement("comehere"));
                     cmm.Statements.Add(condstmt);
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression(6)));
@@ -2773,11 +2705,10 @@ namespace System.CodeDom.Tests
                     cmm.ReturnType = new CodeTypeReference(typeof(int));
                     cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
                     cmm.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference
-                            ("PublicNestedClassA+PublicNestedClassB2+PublicNestedClassC"), "t",
+                        ("PublicNestedClassA+PublicNestedClassB2+PublicNestedClassC"), "t",
                         new CodeObjectCreateExpression(new CodeTypeReference
-                            ("PublicNestedClassA+PublicNestedClassB2+PublicNestedClassC"))));
-                    cmm.Statements.Add(new CodeMethodReturnStatement(new CodeMethodInvokeExpression(
-                        new CodeVariableReferenceExpression("t"),
+                        ("PublicNestedClassA+PublicNestedClassB2+PublicNestedClassC"))));
+                    cmm.Statements.Add(new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeVariableReferenceExpression("t"),
                         "publicNestedClassesMethod",
                         new CodeVariableReferenceExpression("i"))));
                     cd.Members.Add(cmm);
@@ -2812,18 +2743,16 @@ namespace System.CodeDom.Tests
                     CodeMemberMethod method1 = new CodeMemberMethod();
                     method1.Name = "MyMethod";
                     method1.Attributes = MemberAttributes.Public | MemberAttributes.Final;
-                    CodeParameterDeclarationExpression param1 =
-                        new CodeParameterDeclarationExpression(typeof(string), "blah");
+                    CodeParameterDeclarationExpression param1 = new CodeParameterDeclarationExpression(typeof(string), "blah");
                     param1.CustomAttributes.Add(
                         new CodeAttributeDeclaration(
-                            "System.Xml.Serialization.XmlElementAttribute",
-                            new CodeAttributeArgument(
-                                "Form",
-                                new CodeFieldReferenceExpression(
-                                    new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
-                            new CodeAttributeArgument(
-                                "IsNullable",
-                                new CodePrimitiveExpression(false))));
+                        "System.Xml.Serialization.XmlElementAttribute",
+                        new CodeAttributeArgument(
+                        "Form",
+                        new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("System.Xml.Schema.XmlSchemaForm"), "Unqualified")),
+                        new CodeAttributeArgument(
+                        "IsNullable",
+                        new CodePrimitiveExpression(false))));
                     method1.Parameters.Add(param1);
                     cd.Members.Add(method1);
                 }
@@ -2856,7 +2785,7 @@ namespace System.CodeDom.Tests
                     cmm.Parameters.Add(param);
                     cmm.Statements.Add(new CodeAssignStatement(new CodeArgumentReferenceExpression("i"),
                         new CodeBinaryOperatorExpression(new CodeArgumentReferenceExpression("i"),
-                            CodeBinaryOperatorType.Add, new CodePrimitiveExpression(4))));
+                        CodeBinaryOperatorType.Add, new CodePrimitiveExpression(4))));
                     cmm.Statements.Add(new CodeAssignStatement(new CodeArgumentReferenceExpression("j"),
                         new CodePrimitiveExpression(5)));
                     cd.Members.Add(cmm);
@@ -2864,29 +2793,25 @@ namespace System.CodeDom.Tests
                     cmm = new CodeMemberMethod();
                     cmm.Name = "CallingWork";
                     cmm.Attributes = MemberAttributes.Public | MemberAttributes.Static;
-                    CodeParameterDeclarationExpression parames =
-                        new CodeParameterDeclarationExpression(typeof(int), "a");
+                    CodeParameterDeclarationExpression parames = new CodeParameterDeclarationExpression(typeof(int), "a");
                     cmm.Parameters.Add(parames);
                     cmm.ReturnType = new CodeTypeReference("System.int32");
                     cmm.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("a"),
                         new CodePrimitiveExpression(10)));
                     cmm.Statements.Add(new CodeVariableDeclarationStatement(typeof(int), "b"));
                     // invoke the method called "work"
-                    CodeMethodInvokeExpression methodinvoked = new CodeMethodInvokeExpression(
-                        new CodeMethodReferenceExpression
-                            (new CodeTypeReferenceExpression("TEST"), "Work"));
+                    CodeMethodInvokeExpression methodinvoked = new CodeMethodInvokeExpression(new CodeMethodReferenceExpression
+                        (new CodeTypeReferenceExpression("TEST"), "Work"));
                     // add parameter with ref direction
                     CodeDirectionExpression parameter = new CodeDirectionExpression(FieldDirection.Ref,
                         new CodeVariableReferenceExpression("a"));
                     methodinvoked.Parameters.Add(parameter);
                     // add parameter with out direction
-                    parameter = new CodeDirectionExpression(FieldDirection.Out,
-                        new CodeVariableReferenceExpression("b"));
+                    parameter = new CodeDirectionExpression(FieldDirection.Out, new CodeVariableReferenceExpression("b"));
                     methodinvoked.Parameters.Add(parameter);
                     cmm.Statements.Add(methodinvoked);
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeBinaryOperatorExpression
-                    (new CodeVariableReferenceExpression("a"), CodeBinaryOperatorType.Add,
-                        new CodeVariableReferenceExpression("b"))));
+                        (new CodeVariableReferenceExpression("a"), CodeBinaryOperatorType.Add, new CodeVariableReferenceExpression("b"))));
                     cd.Members.Add(cmm);
                 }
 
@@ -2898,10 +2823,9 @@ namespace System.CodeDom.Tests
                     function1.Attributes = MemberAttributes.Public | MemberAttributes.Final;
                     function1.ReturnTypeCustomAttributes.Add(new
                         CodeAttributeDeclaration("System.Xml.Serialization.XmlIgnoreAttribute"));
-                    function1.ReturnTypeCustomAttributes.Add(new CodeAttributeDeclaration(
-                        "System.Xml.Serialization.XmlRootAttribute", new
-                            CodeAttributeArgument("Namespace", new CodePrimitiveExpression("Namespace Value")), new
-                            CodeAttributeArgument("ElementName", new CodePrimitiveExpression("Root, hehehe"))));
+                    function1.ReturnTypeCustomAttributes.Add(new CodeAttributeDeclaration("System.Xml.Serialization.XmlRootAttribute", new
+                        CodeAttributeArgument("Namespace", new CodePrimitiveExpression("Namespace Value")), new
+                        CodeAttributeArgument("ElementName", new CodePrimitiveExpression("Root, hehehe"))));
                     function1.Statements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression("Return")));
                     cd.Members.Add(function1);
                 }
@@ -2915,11 +2839,9 @@ namespace System.CodeDom.Tests
                     CodeParameterDeclarationExpression param = new CodeParameterDeclarationExpression(typeof(int), "a");
                     cmm.Parameters.Add(param);
                     // utilize constructor
-                    cmm.Statements.Add(new CodeVariableDeclarationStatement("Test4", "t",
-                        new CodeObjectCreateExpression("Test4")));
+                    cmm.Statements.Add(new CodeVariableDeclarationStatement("Test4", "t", new CodeObjectCreateExpression("Test4")));
                     // set then get number
-                    cmm.Statements.Add(new CodeAssignStatement(
-                        new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("t"), "i")
+                    cmm.Statements.Add(new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("t"), "i")
                         , new CodeVariableReferenceExpression("a")));
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeMethodReferenceExpression(
                         new CodeVariableReferenceExpression("t"), "i")));
@@ -2935,8 +2857,7 @@ namespace System.CodeDom.Tests
                     prop.Name = "i";
                     prop.Attributes = MemberAttributes.Public | MemberAttributes.Final;
                     prop.Type = new CodeTypeReference(typeof(int));
-                    prop.GetStatements.Add(
-                        new CodeMethodReturnStatement(new CodeVariableReferenceExpression("number")));
+                    prop.GetStatements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("number")));
                     prop.SetStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("number"),
                         new CodePropertySetValueReferenceExpression()));
                     class1.Members.Add(prop);
@@ -2955,9 +2876,8 @@ namespace System.CodeDom.Tests
 
                     CodeTryCatchFinallyStatement tcfstmt = new CodeTryCatchFinallyStatement();
                     tcfstmt.FinallyStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("a"), new
-                        CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("a"),
-                            CodeBinaryOperatorType.Add,
-                            new CodePrimitiveExpression(5))));
+                        CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("a"), CodeBinaryOperatorType.Add,
+                        new CodePrimitiveExpression(5))));
                     cmm.Statements.Add(tcfstmt);
                     cmm.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("a")));
                     cd.Members.Add(cmm);
@@ -2983,23 +2903,18 @@ namespace System.CodeDom.Tests
 
                     CodeConstructor ctor = new CodeConstructor();
                     ctor.Attributes = MemberAttributes.Public;
-                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                        new CodeThisReferenceExpression(),
+                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(),
                         "Size"), new CodeObjectCreateExpression(new CodeTypeReference("Size"),
                         new CodePrimitiveExpression(600), new CodePrimitiveExpression(600))));
-                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                        new CodeTypeReferenceExpression("b"),
+                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
                         "Text"), new CodePrimitiveExpression("Test")));
-                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                        new CodeTypeReferenceExpression("b"),
+                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
                         "TabIndex"), new CodePrimitiveExpression(0)));
-                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(
-                        new CodeTypeReferenceExpression("b"),
+                    ctor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("b"),
                         "Location"), new CodeObjectCreateExpression(new CodeTypeReference("Point"),
                         new CodePrimitiveExpression(400), new CodePrimitiveExpression(525))));
                     ctor.Statements.Add(new CodeAttachEventStatement(new CodeEventReferenceExpression(new
-                        CodeThisReferenceExpression(), "MyEvent"), new CodeDelegateCreateExpression(
-                        new CodeTypeReference("EventHandler")
+                        CodeThisReferenceExpression(), "MyEvent"), new CodeDelegateCreateExpression(new CodeTypeReference("EventHandler")
                         , new CodeThisReferenceExpression(), "b_Click")));
                     class1.Members.Add(ctor);
 
@@ -3018,267 +2933,267 @@ namespace System.CodeDom.Tests
 
                 AssertEqual(cu,
                     @"'------------------------------------------------------------------------------
-                  ' <auto-generated>
-                  '     This code was generated by a tool.
-                  '     Runtime Version:4.0.30319.42000
-                  '
-                  '     Changes to this file may cause incorrect behavior and will be lost if
-                  '     the code is regenerated.
-                  ' </auto-generated>
-                  '------------------------------------------------------------------------------
+                      ' <auto-generated>
+                      '     This code was generated by a tool.
+                      '     Runtime Version:4.0.30319.42000
+                      '
+                      '     Changes to this file may cause incorrect behavior and will be lost if
+                      '     the code is regenerated.
+                      ' </auto-generated>
+                      '------------------------------------------------------------------------------
 
-                  Option Strict Off
-                  Option Explicit On
+                      Option Strict Off
+                      Option Explicit On
 
-                  Imports System
-                  Imports System.ComponentModel
-                  Imports System.Drawing
-                  Imports System.Windows.Forms
-                  <Assembly: System.Reflection.AssemblyTitle(""MyAssembly""),  _
-                   Assembly: System.Reflection.AssemblyVersion(""1.0.6.2"")>
+                      Imports System
+                      Imports System.ComponentModel
+                      Imports System.Drawing
+                      Imports System.Windows.Forms
+                      <Assembly: System.Reflection.AssemblyTitle(""MyAssembly""),  _
+                       Assembly: System.Reflection.AssemblyVersion(""1.0.6.2"")>
 
-                  Namespace NSPC
+                      Namespace NSPC
 
-                      Public Class TEST
+                          Public Class TEST
 
-                          Public Function ArraysOfArrays() As Integer
-                              Dim arrayOfArrays()() As Integer = New Integer()() {New Integer() {3, 4}, New Integer() {1}}
-                              Return arrayOfArrays(0)(1)
-                          End Function
+                              Public Function ArraysOfArrays() As Integer
+                                  Dim arrayOfArrays()() As Integer = New Integer()() {New Integer() {3, 4}, New Integer() {1}}
+                                  Return arrayOfArrays(0)(1)
+                              End Function
 
-                          Public Shared Function ChainedConstructorUse() As String
-                              Dim t As Test2 = New Test2()
-                              Return t.accessStringField
-                          End Function
+                              Public Shared Function ChainedConstructorUse() As String
+                                  Dim t As Test2 = New Test2()
+                                  Return t.accessStringField
+                              End Function
 
-                          Public Function ComplexExpressions(ByVal i As Integer) As Integer
-                              i = (i  _
-                                          * (i + 3))
-                              Return i
-                          End Function
+                              Public Function ComplexExpressions(ByVal i As Integer) As Integer
+                                  i = (i  _
+                                              * (i + 3))
+                                  Return i
+                              End Function
 
-                          Public Shared Function OutputDecimalEnumVal(ByVal i As Integer) As Integer
-                              If (i = 3) Then
-                                  Return CType(DecimalEnum.Num3,Integer)
-                              End If
-                              If (i = 4) Then
-                                  Return CType(DecimalEnum.Num4,Integer)
-                              End If
-                              If (i = 2) Then
-                                  Return CType(DecimalEnum.Num2,Integer)
-                              End If
-                              If (i = 1) Then
-                                  Return CType(DecimalEnum.Num1,Integer)
-                              End If
-                              If (i = 0) Then
-                                  Return CType(DecimalEnum.Num0,Integer)
-                              End If
-                              Return (i + 10)
-                          End Function
+                              Public Shared Function OutputDecimalEnumVal(ByVal i As Integer) As Integer
+                                  If (i = 3) Then
+                                      Return CType(DecimalEnum.Num3,Integer)
+                                  End If
+                                  If (i = 4) Then
+                                      Return CType(DecimalEnum.Num4,Integer)
+                                  End If
+                                  If (i = 2) Then
+                                      Return CType(DecimalEnum.Num2,Integer)
+                                  End If
+                                  If (i = 1) Then
+                                      Return CType(DecimalEnum.Num1,Integer)
+                                  End If
+                                  If (i = 0) Then
+                                      Return CType(DecimalEnum.Num0,Integer)
+                                  End If
+                                  Return (i + 10)
+                              End Function
 
-                          Public Shared Function TestSingleInterface(ByVal i As Integer) As Integer
-                              Dim t As TestSingleInterfaceImp = New TestSingleInterfaceImp()
-                              Return t.InterfaceMethod(i)
-                          End Function
+                              Public Shared Function TestSingleInterface(ByVal i As Integer) As Integer
+                                  Dim t As TestSingleInterfaceImp = New TestSingleInterfaceImp()
+                                  Return t.InterfaceMethod(i)
+                              End Function
 
-                          Public Shared Function TestMultipleInterfaces(ByVal i As Integer) As Integer
-                              Dim t As TestMultipleInterfaceImp = New TestMultipleInterfaceImp()
-                              Dim interfaceAobject As InterfaceA = CType(t,InterfaceA)
-                              Dim interfaceBobject As InterfaceB = CType(t,InterfaceB)
-                              Return (interfaceAobject.InterfaceMethod(i) - interfaceBobject.InterfaceMethod(i))
-                          End Function
+                              Public Shared Function TestMultipleInterfaces(ByVal i As Integer) As Integer
+                                  Dim t As TestMultipleInterfaceImp = New TestMultipleInterfaceImp()
+                                  Dim interfaceAobject As InterfaceA = CType(t,InterfaceA)
+                                  Dim interfaceBobject As InterfaceB = CType(t,InterfaceB)
+                                  Return (interfaceAobject.InterfaceMethod(i) - interfaceBobject.InterfaceMethod(i))
+                              End Function
 
-                          Public Shared Function NestedStructMethod() As Integer
-                              Dim varStructA As structA
-                              varStructA.innerStruct.int1 = 3
-                              Return varStructA.innerStruct.int1
-                          End Function
+                              Public Shared Function NestedStructMethod() As Integer
+                                  Dim varStructA As structA
+                                  varStructA.innerStruct.int1 = 3
+                                  Return varStructA.innerStruct.int1
+                              End Function
 
-                          Public Shared Sub Main()
-                          End Sub
+                              Public Shared Sub Main()
+                              End Sub
 
-                          Public Function GoToMethod(ByVal i As Integer) As Integer
-                              If (i < 1) Then
-                                  goto comehere
-                              End If
-                              Return 6
-                          comehere:
-                              Return 7
-                          End Function
+                              Public Function GoToMethod(ByVal i As Integer) As Integer
+                                  If (i < 1) Then
+                                      goto comehere
+                                  End If
+                                  Return 6
+                              comehere:
+                                  Return 7
+                              End Function
 
-                          Public Shared Function CallingPublicNestedScenario(ByVal i As Integer) As Integer
-                              Dim t As PublicNestedClassA.PublicNestedClassB2.PublicNestedClassC = New PublicNestedClassA.PublicNestedClassB2.PublicNestedClassC()
-                              Return t.publicNestedClassesMethod(i)
-                          End Function
+                              Public Shared Function CallingPublicNestedScenario(ByVal i As Integer) As Integer
+                                  Dim t As PublicNestedClassA.PublicNestedClassB2.PublicNestedClassC = New PublicNestedClassA.PublicNestedClassB2.PublicNestedClassC()
+                                  Return t.publicNestedClassesMethod(i)
+                              End Function
 
-                          Public Sub MyMethod(<System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal blah As String)
-                          End Sub
+                              Public Sub MyMethod(<System.Xml.Serialization.XmlElementAttribute(Form:=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable:=false)> ByVal blah As String)
+                              End Sub
 
-                          Public Shared Function PublicStaticMethod() As Integer
-                              Return 16
-                          End Function
+                              Public Shared Function PublicStaticMethod() As Integer
+                                  Return 16
+                              End Function
 
-                          Shared Sub Work(ByRef i As Integer, ByRef j As Integer)
-                              i = (i + 4)
-                              j = 5
-                          End Sub
+                              Shared Sub Work(ByRef i As Integer, ByRef j As Integer)
+                                  i = (i + 4)
+                                  j = 5
+                              End Sub
 
-                          Public Shared Function CallingWork(ByVal a As Integer) As Integer
-                              a = 10
-                              Dim b As Integer
-                              TEST.Work(a, b)
-                              Return (a + b)
-                          End Function
+                              Public Shared Function CallingWork(ByVal a As Integer) As Integer
+                                  a = 10
+                                  Dim b As Integer
+                                  TEST.Work(a, b)
+                                  Return (a + b)
+                              End Function
 
-                          Public Function MyFunction() As <System.Xml.Serialization.XmlIgnoreAttribute(), System.Xml.Serialization.XmlRootAttribute([Namespace]:=""Namespace Value"", ElementName:=""Root, hehehe"")> String
-                              Return ""Return""
-                          End Function
+                              Public Function MyFunction() As <System.Xml.Serialization.XmlIgnoreAttribute(), System.Xml.Serialization.XmlRootAttribute([Namespace]:=""Namespace Value"", ElementName:=""Root, hehehe"")> String
+                                  Return ""Return""
+                              End Function
 
-                          Public Shared Function TestStaticConstructor(ByVal a As Integer) As Integer
-                              Dim t As Test4 = New Test4()
-                              t.i = a
-                              Return t.i
-                          End Function
+                              Public Shared Function TestStaticConstructor(ByVal a As Integer) As Integer
+                                  Dim t As Test4 = New Test4()
+                                  t.i = a
+                                  Return t.i
+                              End Function
 
-                          Public Shared Function TryCatchMethod(ByVal a As Integer) As Integer
-                              Try
-                              Finally
-                                  a = (a + 5)
-                              End Try
-                              Return a
-                          End Function
-                      End Class
-
-                      Public Class Test2
-
-                          Private stringField As String
-
-                          Public Sub New()
-                              Me.New(""testingString"", Nothing, Nothing)
-                          End Sub
-
-                          Public Sub New(ByVal p1 As String, ByVal p2 As String, ByVal p3 As String)
-                              MyBase.New
-                              Me.stringField = p1
-                          End Sub
-
-                          Public Property accessStringField() As String
-                              Get
-                                  Return Me.stringField
-                              End Get
-                              Set
-                                  Me.stringField = value
-                              End Set
-                          End Property
-                      End Class
-
-                      Public Enum DecimalEnum
-
-                          Num0 = 0
-
-                          Num1 = 1
-
-                          Num2 = 2
-
-                          Num3 = 3
-
-                          Num4 = 4
-                      End Enum
-
-                      Public Interface InterfaceA
-
-                          Function InterfaceMethod(ByVal a As Integer) As Integer
-                      End Interface
-
-                      Public Interface InterfaceB
-
-                          Function InterfaceMethod(ByVal a As Integer) As Integer
-                      End Interface
-
-                      Public Class TestMultipleInterfaceImp
-                          Inherits Object
-                          Implements InterfaceB, InterfaceA
-
-                          Public Function InterfaceMethod(ByVal a As Integer) As Integer Implements InterfaceA.InterfaceMethod , InterfaceB.InterfaceMethod
-                              Return a
-                          End Function
-                      End Class
-
-                      Public Class TestSingleInterfaceImp
-                          Inherits Object
-                          Implements InterfaceA
-
-                          Public Overridable Function InterfaceMethod(ByVal a As Integer) As Integer Implements InterfaceA.InterfaceMethod
-                              Return a
-                          End Function
-                      End Class
-
-                      Public Structure structA
-
-                          Public innerStruct As structB
-
-                          Public Structure structB
-
-                              Public int1 As Integer
-                          End Structure
-                      End Structure
-
-                      Public Class PublicNestedClassA
-
-                          Public Class PublicNestedClassB1
+                              Public Shared Function TryCatchMethod(ByVal a As Integer) As Integer
+                                  Try
+                                  Finally
+                                      a = (a + 5)
+                                  End Try
+                                  Return a
+                              End Function
                           End Class
 
-                          Public Class PublicNestedClassB2
+                          Public Class Test2
 
-                              Public Class PublicNestedClassC
+                              Private stringField As String
 
-                                  Public Function publicNestedClassesMethod(ByVal a As Integer) As Integer
-                                      Return a
-                                  End Function
+                              Public Sub New()
+                                  Me.New(""testingString"", Nothing, Nothing)
+                              End Sub
+
+                              Public Sub New(ByVal p1 As String, ByVal p2 As String, ByVal p3 As String)
+                                  MyBase.New
+                                  Me.stringField = p1
+                              End Sub
+
+                              Public Property accessStringField() As String
+                                  Get
+                                      Return Me.stringField
+                                  End Get
+                                  Set
+                                      Me.stringField = value
+                                  End Set
+                              End Property
+                          End Class
+
+                          Public Enum DecimalEnum
+
+                              Num0 = 0
+
+                              Num1 = 1
+
+                              Num2 = 2
+
+                              Num3 = 3
+
+                              Num4 = 4
+                          End Enum
+
+                          Public Interface InterfaceA
+
+                              Function InterfaceMethod(ByVal a As Integer) As Integer
+                          End Interface
+
+                          Public Interface InterfaceB
+
+                              Function InterfaceMethod(ByVal a As Integer) As Integer
+                          End Interface
+
+                          Public Class TestMultipleInterfaceImp
+                              Inherits Object
+                              Implements InterfaceB, InterfaceA
+
+                              Public Function InterfaceMethod(ByVal a As Integer) As Integer Implements InterfaceA.InterfaceMethod , InterfaceB.InterfaceMethod
+                                  Return a
+                              End Function
+                          End Class
+
+                          Public Class TestSingleInterfaceImp
+                              Inherits Object
+                              Implements InterfaceA
+
+                              Public Overridable Function InterfaceMethod(ByVal a As Integer) As Integer Implements InterfaceA.InterfaceMethod
+                                  Return a
+                              End Function
+                          End Class
+
+                          Public Structure structA
+
+                              Public innerStruct As structB
+
+                              Public Structure structB
+
+                                  Public int1 As Integer
+                              End Structure
+                          End Structure
+
+                          Public Class PublicNestedClassA
+
+                              Public Class PublicNestedClassB1
+                              End Class
+
+                              Public Class PublicNestedClassB2
+
+                                  Public Class PublicNestedClassC
+
+                                      Public Function publicNestedClassesMethod(ByVal a As Integer) As Integer
+                                          Return a
+                                      End Function
+                                  End Class
                               End Class
                           End Class
-                      End Class
 
-                      Public Class Test4
+                          Public Class Test4
 
-                          Private number As Integer
+                              Private number As Integer
 
-                          Shared Sub New()
-                          End Sub
+                              Shared Sub New()
+                              End Sub
 
-                          Public Property i() As Integer
-                              Get
-                                  Return number
-                              End Get
-                              Set
-                                  number = value
-                              End Set
-                          End Property
-                      End Class
-                  End Namespace
+                              Public Property i() As Integer
+                                  Get
+                                      Return number
+                                  End Get
+                                  Set
+                                      number = value
+                                  End Set
+                              End Property
+                          End Class
+                      End Namespace
 
-                  Namespace MyNamespace
+                      Namespace MyNamespace
 
-                      Public Class Test
-                          Inherits Form
+                          Public Class Test
+                              Inherits Form
 
-                          Private b As Button = New Button()
+                              Private b As Button = New Button()
 
-                          Public Sub New()
-                              MyBase.New
-                              Me.Size = New Size(600, 600)
-                              b.Text = ""Test""
-                              b.TabIndex = 0
-                              b.Location = New Point(400, 525)
-                              AddHandler MyEvent, AddressOf Me.b_Click
-                          End Sub
+                              Public Sub New()
+                                  MyBase.New
+                                  Me.Size = New Size(600, 600)
+                                  b.Text = ""Test""
+                                  b.TabIndex = 0
+                                  b.Location = New Point(400, 525)
+                                  AddHandler MyEvent, AddressOf Me.b_Click
+                              End Sub
 
-                          Public Event MyEvent As System.EventHandler
+                              Public Event MyEvent As System.EventHandler
 
-                          Private Sub b_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-                          End Sub
-                      End Class
-                  End Namespace");
+                              Private Sub b_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+                              End Sub
+                          End Class
+                      End Namespace");
             }
             finally
             {
