@@ -55,20 +55,20 @@ namespace System.Buffers
         /// <summary>
         /// Copy the <see cref="ReadOnlySequence{T}"/> to the specified <see cref="Span{Byte}"/>.
         /// </summary>
-        /// <param name="sequence">The source <see cref="ReadOnlySequence{T}"/>.</param>
+        /// <param name="source">The source <see cref="ReadOnlySequence{T}"/>.</param>
         /// <param name="destination">The destination <see cref="Span{Byte}"/>.</param>
-        public static void CopyTo<T>(in this ReadOnlySequence<T> sequence, Span<T> destination)
+        public static void CopyTo<T>(in this ReadOnlySequence<T> source, Span<T> destination)
         {
-            if (sequence.Length > destination.Length)
+            if (source.Length > destination.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
 
-            if (sequence.IsSingleSegment)
+            if (source.IsSingleSegment)
             {
-                sequence.First.Span.CopyTo(destination);
+                source.First.Span.CopyTo(destination);
             }
             else
             {
-                CopyToMultiSegement(sequence, destination);
+                CopyToMultiSegement(source, destination);
             }
         }
 

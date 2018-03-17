@@ -37,8 +37,8 @@ namespace System
         public static int BinarySearch<T, TComparable>(this System.Span<T> span, TComparable comparable) where TComparable : System.IComparable<T> { throw null; }
         public static int CompareTo(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool Contains(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
-        public static void CopyTo<T>(this T[] array, System.Memory<T> destination) { }
-        public static void CopyTo<T>(this T[] array, System.Span<T> destination) { }
+        public static void CopyTo<T>(this T[] source, System.Memory<T> destination) { }
+        public static void CopyTo<T>(this T[] source, System.Span<T> destination) { }
         public static bool EndsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool EndsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool EndsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
@@ -292,7 +292,7 @@ namespace System.Buffers
     }
     public static partial class BuffersExtensions
     {
-        public static void CopyTo<T>(in this System.Buffers.ReadOnlySequence<T> sequence, System.Span<T> destination) { }
+        public static void CopyTo<T>(in this System.Buffers.ReadOnlySequence<T> source, System.Span<T> destination) { }
         public static System.Nullable<System.SequencePosition> PositionOf<T>(in this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
         public static T[] ToArray<T>(in this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
         public static void Write<T>(this System.Buffers.IBufferWriter<T> bufferWriter, ReadOnlySpan<T> source) { }

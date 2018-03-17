@@ -901,16 +901,16 @@ namespace System
         /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
         /// 
-        ///<param name="array">The array to copy items from.</param>
+        ///<param name="source">The array to copy items from.</param>
         /// <param name="destination">The span to copy items into.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when the destination Span is shorter than the source array.
         /// </exception>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, Span<T> destination)
+        public static void CopyTo<T>(this T[] source, Span<T> destination)
         {
-            new ReadOnlySpan<T>(array).CopyTo(destination);
+            new ReadOnlySpan<T>(source).CopyTo(destination);
         }
 
         /// <summary>
@@ -918,16 +918,16 @@ namespace System
         /// and destinations overlap, this method behaves as if the original values are in
         /// a temporary location before the destination is overwritten.
         /// 
-        ///<param name="array">The array to copy items from.</param>
+        ///<param name="source">The array to copy items from.</param>
         /// <param name="destination">The memory to copy items into.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when the destination is shorter than the source array.
         /// </exception>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, Memory<T> destination)
+        public static void CopyTo<T>(this T[] source, Memory<T> destination)
         {
-            array.CopyTo(destination.Span);
+            source.CopyTo(destination.Span);
         }
 
         //
