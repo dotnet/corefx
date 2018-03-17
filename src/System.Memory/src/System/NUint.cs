@@ -9,21 +9,20 @@ namespace System
     //
     // A makeshift native uint type for build configurations that don't build 32/64-bit specific binaries (and hence, can't alias them to UInt32/UInt64 via an ifdef.)
     //
-    internal struct NUInt
+    internal unsafe struct NUInt
     {
-        private readonly UIntPtr _value;
+        private readonly void* _value;
 
-        private NUInt(int value) => _value = (UIntPtr)value;
-        private NUInt(uint value) => _value = (UIntPtr)value;
-        private NUInt(ulong value) => _value = (UIntPtr)value;
-
+        private NUInt(uint value) => _value = (void*)value;
+        private NUInt(ulong value) => _value = (void*)value;
 
         public static implicit operator NUInt(uint value) => new NUInt(value);
-        public static implicit operator IntPtr(NUInt value) => (IntPtr)(long)(ulong)value._value;
+        public static implicit operator IntPtr(NUInt value) => (IntPtr)value._value;
 
-        public static explicit operator NUInt(int value) => new NUInt(value);
-        public static explicit operator int(NUInt value) => (int)(long)value._value;
-        public static explicit operator uint(NUInt value) => (uint)(long)value._value;
+        public static explicit operator NUInt(int value) => new NUInt((uint)value);
+
+        public static explicit operator int(NUInt value) => (int)value._value;
+        public static explicit operator uint(NUInt value) => (uint)value._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator *(NUInt left, int right)
@@ -97,8 +96,8 @@ namespace System
         public static bool operator !=(NUInt left, NUInt right) => left._value != right._value;
 
         public override bool Equals(object obj) => obj is NUInt other && _value == other._value;
-        public override int GetHashCode() => _value.GetHashCode();
+        public override int GetHashCode() => new UIntPtr(_value).GetHashCode();
 
-        public override string ToString() => _value.ToString();
+        public override string ToString() => new UIntPtr(_value).ToString();
     }
 }
