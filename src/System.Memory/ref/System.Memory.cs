@@ -360,25 +360,25 @@ namespace System.Buffers.Binary
 {
     public static partial class BinaryPrimitives
     {
-        public static short ReadInt16BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static short ReadInt16LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static int ReadInt32BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static int ReadInt32LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static long ReadInt64BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static long ReadInt64LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
-        public static T ReadMachineEndian<T>(System.ReadOnlySpan<byte> buffer) where T : struct { throw null; }
+        public static short ReadInt16BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static short ReadInt16LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static int ReadInt32BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static int ReadInt32LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static long ReadInt64BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static long ReadInt64LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
+        public static T ReadMachineEndian<T>(System.ReadOnlySpan<byte> source) where T : struct { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ushort ReadUInt16BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static ushort ReadUInt16BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ushort ReadUInt16LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static ushort ReadUInt16LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static uint ReadUInt32BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static uint ReadUInt32BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static uint ReadUInt32LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static uint ReadUInt32LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ulong ReadUInt64BigEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static ulong ReadUInt64BigEndian(System.ReadOnlySpan<byte> source) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ulong ReadUInt64LittleEndian(System.ReadOnlySpan<byte> buffer) { throw null; }
+        public static ulong ReadUInt64LittleEndian(System.ReadOnlySpan<byte> source) { throw null; }
         public static byte ReverseEndianness(byte value) { throw null; }
         public static short ReverseEndianness(short value) { throw null; }
         public static int ReverseEndianness(int value) { throw null; }
@@ -391,63 +391,63 @@ namespace System.Buffers.Binary
         public static uint ReverseEndianness(uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static ulong ReverseEndianness(ulong value) { throw null; }
-        public static bool TryReadInt16BigEndian(System.ReadOnlySpan<byte> buffer, out short value) { throw null; }
-        public static bool TryReadInt16LittleEndian(System.ReadOnlySpan<byte> buffer, out short value) { throw null; }
-        public static bool TryReadInt32BigEndian(System.ReadOnlySpan<byte> buffer, out int value) { throw null; }
-        public static bool TryReadInt32LittleEndian(System.ReadOnlySpan<byte> buffer, out int value) { throw null; }
-        public static bool TryReadInt64BigEndian(System.ReadOnlySpan<byte> buffer, out long value) { throw null; }
-        public static bool TryReadInt64LittleEndian(System.ReadOnlySpan<byte> buffer, out long value) { throw null; }
-        public static bool TryReadMachineEndian<T>(System.ReadOnlySpan<byte> buffer, out T value) where T : struct { throw null; }
+        public static bool TryReadInt16BigEndian(System.ReadOnlySpan<byte> source, out short value) { throw null; }
+        public static bool TryReadInt16LittleEndian(System.ReadOnlySpan<byte> source, out short value) { throw null; }
+        public static bool TryReadInt32BigEndian(System.ReadOnlySpan<byte> source, out int value) { throw null; }
+        public static bool TryReadInt32LittleEndian(System.ReadOnlySpan<byte> source, out int value) { throw null; }
+        public static bool TryReadInt64BigEndian(System.ReadOnlySpan<byte> source, out long value) { throw null; }
+        public static bool TryReadInt64LittleEndian(System.ReadOnlySpan<byte> source, out long value) { throw null; }
+        public static bool TryReadMachineEndian<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt16BigEndian(System.ReadOnlySpan<byte> buffer, out ushort value) { throw null; }
+        public static bool TryReadUInt16BigEndian(System.ReadOnlySpan<byte> source, out ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt16LittleEndian(System.ReadOnlySpan<byte> buffer, out ushort value) { throw null; }
+        public static bool TryReadUInt16LittleEndian(System.ReadOnlySpan<byte> source, out ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt32BigEndian(System.ReadOnlySpan<byte> buffer, out uint value) { throw null; }
+        public static bool TryReadUInt32BigEndian(System.ReadOnlySpan<byte> source, out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt32LittleEndian(System.ReadOnlySpan<byte> buffer, out uint value) { throw null; }
+        public static bool TryReadUInt32LittleEndian(System.ReadOnlySpan<byte> source, out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt64BigEndian(System.ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
+        public static bool TryReadUInt64BigEndian(System.ReadOnlySpan<byte> source, out ulong value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryReadUInt64LittleEndian(System.ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
-        public static bool TryWriteInt16BigEndian(System.Span<byte> buffer, short value) { throw null; }
-        public static bool TryWriteInt16LittleEndian(System.Span<byte> buffer, short value) { throw null; }
-        public static bool TryWriteInt32BigEndian(System.Span<byte> buffer, int value) { throw null; }
-        public static bool TryWriteInt32LittleEndian(System.Span<byte> buffer, int value) { throw null; }
-        public static bool TryWriteInt64BigEndian(System.Span<byte> buffer, long value) { throw null; }
-        public static bool TryWriteInt64LittleEndian(System.Span<byte> buffer, long value) { throw null; }
-        public static bool TryWriteMachineEndian<T>(System.Span<byte> buffer, ref T value) where T : struct { throw null; }
+        public static bool TryReadUInt64LittleEndian(System.ReadOnlySpan<byte> source, out ulong value) { throw null; }
+        public static bool TryWriteInt16BigEndian(System.Span<byte> source, short value) { throw null; }
+        public static bool TryWriteInt16LittleEndian(System.Span<byte> source, short value) { throw null; }
+        public static bool TryWriteInt32BigEndian(System.Span<byte> source, int value) { throw null; }
+        public static bool TryWriteInt32LittleEndian(System.Span<byte> source, int value) { throw null; }
+        public static bool TryWriteInt64BigEndian(System.Span<byte> source, long value) { throw null; }
+        public static bool TryWriteInt64LittleEndian(System.Span<byte> source, long value) { throw null; }
+        public static bool TryWriteMachineEndian<T>(System.Span<byte> source, ref T value) where T : struct { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt16BigEndian(System.Span<byte> buffer, ushort value) { throw null; }
+        public static bool TryWriteUInt16BigEndian(System.Span<byte> source, ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt16LittleEndian(System.Span<byte> buffer, ushort value) { throw null; }
+        public static bool TryWriteUInt16LittleEndian(System.Span<byte> source, ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt32BigEndian(System.Span<byte> buffer, uint value) { throw null; }
+        public static bool TryWriteUInt32BigEndian(System.Span<byte> source, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt32LittleEndian(System.Span<byte> buffer, uint value) { throw null; }
+        public static bool TryWriteUInt32LittleEndian(System.Span<byte> source, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt64BigEndian(System.Span<byte> buffer, ulong value) { throw null; }
+        public static bool TryWriteUInt64BigEndian(System.Span<byte> source, ulong value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryWriteUInt64LittleEndian(System.Span<byte> buffer, ulong value) { throw null; }
-        public static void WriteInt16BigEndian(System.Span<byte> buffer, short value) { }
-        public static void WriteInt16LittleEndian(System.Span<byte> buffer, short value) { }
-        public static void WriteInt32BigEndian(System.Span<byte> buffer, int value) { }
-        public static void WriteInt32LittleEndian(System.Span<byte> buffer, int value) { }
-        public static void WriteInt64BigEndian(System.Span<byte> buffer, long value) { }
-        public static void WriteInt64LittleEndian(System.Span<byte> buffer, long value) { }
-        public static void WriteMachineEndian<T>(System.Span<byte> buffer, ref T value) where T : struct { }
+        public static bool TryWriteUInt64LittleEndian(System.Span<byte> source, ulong value) { throw null; }
+        public static void WriteInt16BigEndian(System.Span<byte> source, short value) { }
+        public static void WriteInt16LittleEndian(System.Span<byte> source, short value) { }
+        public static void WriteInt32BigEndian(System.Span<byte> source, int value) { }
+        public static void WriteInt32LittleEndian(System.Span<byte> source, int value) { }
+        public static void WriteInt64BigEndian(System.Span<byte> source, long value) { }
+        public static void WriteInt64LittleEndian(System.Span<byte> source, long value) { }
+        public static void WriteMachineEndian<T>(System.Span<byte> source, ref T value) where T : struct { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt16BigEndian(System.Span<byte> buffer, ushort value) { }
+        public static void WriteUInt16BigEndian(System.Span<byte> source, ushort value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt16LittleEndian(System.Span<byte> buffer, ushort value) { }
+        public static void WriteUInt16LittleEndian(System.Span<byte> source, ushort value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt32BigEndian(System.Span<byte> buffer, uint value) { }
+        public static void WriteUInt32BigEndian(System.Span<byte> source, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt32LittleEndian(System.Span<byte> buffer, uint value) { }
+        public static void WriteUInt32LittleEndian(System.Span<byte> source, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt64BigEndian(System.Span<byte> buffer, ulong value) { }
+        public static void WriteUInt64BigEndian(System.Span<byte> source, ulong value) { }
         [System.CLSCompliantAttribute(false)]
-        public static void WriteUInt64LittleEndian(System.Span<byte> buffer, ulong value) { }
+        public static void WriteUInt64LittleEndian(System.Span<byte> source, ulong value) { }
     }
 }
 namespace System.Buffers.Text
@@ -463,26 +463,26 @@ namespace System.Buffers.Text
     }
     public static partial class Utf8Formatter
     {
-        public static bool TryFormat(bool value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(byte value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(System.DateTime value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(System.DateTimeOffset value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(decimal value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(double value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(System.Guid value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(short value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(int value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(long value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(bool value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(byte value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(System.DateTime value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(System.DateTimeOffset value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(decimal value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(double value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(System.Guid value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(short value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(int value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(long value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryFormat(sbyte value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(float value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
-        public static bool TryFormat(System.TimeSpan value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(sbyte value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(float value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(System.TimeSpan value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryFormat(ushort value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(ushort value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryFormat(uint value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(uint value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryFormat(ulong value, System.Span<byte> buffer, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
+        public static bool TryFormat(ulong value, System.Span<byte> destination, out int bytesWritten, System.Buffers.StandardFormat format = default(System.Buffers.StandardFormat)) { throw null; }
     }
     public static partial class Utf8Parser
     {
