@@ -360,7 +360,7 @@ namespace System
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
         /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="T"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="T"/> contains pointers.
         /// </exception>
@@ -368,22 +368,22 @@ namespace System
         /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> AsBytes<T>(this Span<T> source)
+        public static Span<byte> AsBytes<T>(this Span<T> span)
             where T : struct
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(T));
 
             return new Span<byte>(
-                ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(source)),
-                checked(source.Length * Unsafe.SizeOf<T>()));
+                ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                checked(span.Length * Unsafe.SizeOf<T>()));
         }
 
         /// <summary>
         /// Casts a ReadOnlySpan of one primitive type <typeparamref name="T"/> to ReadOnlySpan of bytes.
         /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
         /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="T"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="T"/> contains pointers.
         /// </exception>
@@ -391,15 +391,15 @@ namespace System
         /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
+        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> span)
             where T : struct
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(T));
 
             return new ReadOnlySpan<byte>(
-                ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(source)),
-                checked(source.Length * Unsafe.SizeOf<T>()));
+                ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                checked(span.Length * Unsafe.SizeOf<T>()));
         }
 
         /// <summary>

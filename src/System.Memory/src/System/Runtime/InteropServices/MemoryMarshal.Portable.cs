@@ -55,11 +55,11 @@ namespace System.Runtime.InteropServices
         /// <remarks>
         /// Supported only for platforms that support misaligned memory access.
         /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
         /// </exception>
-        public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> source)
+        public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> span)
             where TFrom : struct
             where TTo : struct
         {
@@ -69,8 +69,8 @@ namespace System.Runtime.InteropServices
             if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
 
-            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
-            return new Span<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
+            int newLength = checked((int)((long)span.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
+            return new Span<TTo>(Unsafe.As<Pinnable<TTo>>(span.Pinnable), span.ByteOffset, newLength);
         }
 
         /// <summary>
@@ -80,11 +80,11 @@ namespace System.Runtime.InteropServices
         /// <remarks>
         /// Supported only for platforms that support misaligned memory access.
         /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
         /// </exception>
-        public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> source)
+        public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> span)
             where TFrom : struct
             where TTo : struct
         {
@@ -94,8 +94,8 @@ namespace System.Runtime.InteropServices
             if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
 
-            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
-            return new ReadOnlySpan<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
+            int newLength = checked((int)((long)span.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
+            return new ReadOnlySpan<TTo>(Unsafe.As<Pinnable<TTo>>(span.Pinnable), span.ByteOffset, newLength);
         }
     }
 }

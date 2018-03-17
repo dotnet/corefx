@@ -9,8 +9,8 @@ namespace System
 {
     public static partial class MemoryExtensions
     {
-        public static System.ReadOnlySpan<byte> AsBytes<T>(this System.ReadOnlySpan<T> source) where T : struct { throw null; }
-        public static System.Span<byte> AsBytes<T>(this System.Span<T> source) where T : struct { throw null; }
+        public static System.ReadOnlySpan<byte> AsBytes<T>(this System.ReadOnlySpan<T> span) where T : struct { throw null; }
+        public static System.Span<byte> AsBytes<T>(this System.Span<T> span) where T : struct { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
@@ -513,8 +513,8 @@ namespace System.Runtime.InteropServices
     public static partial class MemoryMarshal
     {
         public static System.Memory<T> AsMemory<T>(System.ReadOnlyMemory<T> readOnlyMemory) { throw null; }
-        public static System.ReadOnlySpan<TTo> Cast<TFrom, TTo>(System.ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
-        public static System.Span<TTo> Cast<TFrom, TTo>(System.Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
+        public static System.ReadOnlySpan<TTo> Cast<TFrom, TTo>(System.ReadOnlySpan<TFrom> span) where TFrom : struct where TTo : struct { throw null; }
+        public static System.Span<TTo> Cast<TFrom, TTo>(System.Span<TFrom> span) where TFrom : struct where TTo : struct { throw null; }
 #if !FEATURE_PORTABLE_SPAN
         public static System.ReadOnlySpan<T> CreateReadOnlySpan<T>(ref T reference, int length) { throw null; }
         public static System.Span<T> CreateSpan<T>(ref T reference, int length) { throw null; }

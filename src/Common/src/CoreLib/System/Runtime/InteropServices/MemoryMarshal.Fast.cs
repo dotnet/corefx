@@ -60,12 +60,12 @@ namespace System.Runtime.InteropServices
         /// <remarks>
         /// Supported only for platforms that support misaligned memory access.
         /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> source)
+        public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> span)
             where TFrom : struct
             where TTo : struct
         {
@@ -78,7 +78,7 @@ namespace System.Runtime.InteropServices
             // and checked casts are faster and smaller.
             uint fromSize = (uint)Unsafe.SizeOf<TFrom>();
             uint toSize = (uint)Unsafe.SizeOf<TTo>();
-            uint fromLength = (uint)source.Length;
+            uint fromLength = (uint)span.Length;
             int toLength;
             if (fromSize == toSize)
             {
@@ -104,7 +104,7 @@ namespace System.Runtime.InteropServices
             }
 
             return new Span<TTo>(
-                ref Unsafe.As<TFrom, TTo>(ref source._pointer.Value),
+                ref Unsafe.As<TFrom, TTo>(ref span._pointer.Value),
                 toLength);
         }
 
@@ -115,12 +115,12 @@ namespace System.Runtime.InteropServices
         /// <remarks>
         /// Supported only for platforms that support misaligned memory access.
         /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
+        /// <param name="span">The source slice, of type <typeparamref name="TFrom"/>.</param>
         /// <exception cref="System.ArgumentException">
         /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> source)
+        public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> span)
             where TFrom : struct
             where TTo : struct
         {
@@ -133,7 +133,7 @@ namespace System.Runtime.InteropServices
             // and checked casts are faster and smaller.
             uint fromSize = (uint)Unsafe.SizeOf<TFrom>();
             uint toSize = (uint)Unsafe.SizeOf<TTo>();
-            uint fromLength = (uint)source.Length;
+            uint fromLength = (uint)span.Length;
             int toLength;
             if (fromSize == toSize)
             {
@@ -159,7 +159,7 @@ namespace System.Runtime.InteropServices
             }
 
             return new ReadOnlySpan<TTo>(
-                ref Unsafe.As<TFrom, TTo>(ref MemoryMarshal.GetReference(source)),
+                ref Unsafe.As<TFrom, TTo>(ref MemoryMarshal.GetReference(span)),
                 toLength);
         }
 
