@@ -293,8 +293,8 @@ namespace System.Buffers
     public static partial class BuffersExtensions
     {
         public static void CopyTo<T>(in this System.Buffers.ReadOnlySequence<T> source, System.Span<T> destination) { }
-        public static System.Nullable<System.SequencePosition> PositionOf<T>(in this System.Buffers.ReadOnlySequence<T> sequence, T value) where T : System.IEquatable<T> { throw null; }
-        public static T[] ToArray<T>(in this System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
+        public static System.Nullable<System.SequencePosition> PositionOf<T>(in this System.Buffers.ReadOnlySequence<T> source, T value) where T : System.IEquatable<T> { throw null; }
+        public static T[] ToArray<T>(in this System.Buffers.ReadOnlySequence<T> source) { throw null; }
         public static void Write<T>(this System.Buffers.IBufferWriter<T> writer, ReadOnlySpan<T> source) { }
     }
     public readonly partial struct ReadOnlySequence<T>
@@ -326,7 +326,7 @@ namespace System.Buffers
         public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start, long length) { throw null; }
         public System.Buffers.ReadOnlySequence<T> Slice(System.SequencePosition start, System.SequencePosition end) { throw null; }
         public override string ToString() { throw null; }
-        public bool TryGet(ref System.SequencePosition position, out System.ReadOnlyMemory<T> data, bool advance = true) { throw null; }
+        public bool TryGet(ref System.SequencePosition position, out System.ReadOnlyMemory<T> memory, bool advance = true) { throw null; }
         public partial struct Enumerator
         {
             private object _dummy;

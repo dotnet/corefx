@@ -327,13 +327,13 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Tries to retrieve next segment after <paramref name="position"/> and return its contents in <paramref name="data"/>.
+        /// Tries to retrieve next segment after <paramref name="position"/> and return its contents in <paramref name="memory"/>.
         /// Returns <code>false</code> if end of <see cref="ReadOnlySequence{T}"/> was reached otherwise <code>true</code>.
         /// Sets <paramref name="position"/> to the beginning of next segment if <paramref name="advance"/> is set to <code>true</code>.
         /// </summary>
-        public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> data, bool advance = true)
+        public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> memory, bool advance = true)
         {
-            bool result = TryGetBuffer(position, End, out data, out SequencePosition next);
+            bool result = TryGetBuffer(position, End, out memory, out SequencePosition next);
             if (advance)
             {
                 position = next;

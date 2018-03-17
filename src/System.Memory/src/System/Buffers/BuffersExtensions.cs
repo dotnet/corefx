@@ -12,34 +12,34 @@ namespace System.Buffers
         /// <summary>
         /// Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}"/>
         /// </summary>
-        public static SequencePosition? PositionOf<T>(in this ReadOnlySequence<T> sequence, T value) where T : IEquatable<T>
+        public static SequencePosition? PositionOf<T>(in this ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
-            if (sequence.IsSingleSegment)
+            if (source.IsSingleSegment)
             {
-                int index = sequence.First.Span.IndexOf(value);
+                int index = source.First.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return sequence.GetPosition(index);
+                    return source.GetPosition(index);
                 }
 
                 return null;
             }
             else
             {
-                return PositionOfMultiSegement(sequence, value);
+                return PositionOfMultiSegement(source, value);
             }
         }
 
-        private static SequencePosition? PositionOfMultiSegement<T>(in ReadOnlySequence<T> sequence, T value) where T : IEquatable<T>
+        private static SequencePosition? PositionOfMultiSegement<T>(in ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
-            SequencePosition position = sequence.Start;
+            SequencePosition position = source.Start;
             SequencePosition result = position;
-            while (sequence.TryGet(ref position, out ReadOnlyMemory<T> memory))
+            while (source.TryGet(ref position, out ReadOnlyMemory<T> memory))
             {
                 int index = memory.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return sequence.GetPosition(index, result);
+                    return source.GetPosition(index, result);
                 }
                 else if (position.GetObject() == null)
                 {
@@ -93,10 +93,10 @@ namespace System.Buffers
         /// <summary>
         /// Converts the <see cref="ReadOnlySequence{T}"/> to an array
         /// </summary>
-        public static T[] ToArray<T>(in this ReadOnlySequence<T> sequence)
+        public static T[] ToArray<T>(in this ReadOnlySequence<T> source)
         {
-            var array = new T[sequence.Length];
-            sequence.CopyTo(array);
+            var array = new T[source.Length];
+            source.CopyTo(array);
             return array;
         }
 
