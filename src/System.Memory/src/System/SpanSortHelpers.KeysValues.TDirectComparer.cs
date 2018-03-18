@@ -166,7 +166,7 @@ namespace System
             Debug.Assert(comparer != null);
             Debug.Assert(lo >= 0);
 
-            //TKey d = keys[lo + i - 1];
+            // Below lines are equivalent to: TKey d = keys[lo + i - 1];
             ref TKey keysAtLo = ref Unsafe.Add(ref keys, lo);
             ref TKey keysAtLoMinus1 = ref Unsafe.Add(ref keysAtLo, -1); // TODO: Use Subtract when available
 
@@ -180,25 +180,24 @@ namespace System
             {
                 int child = i << 1;
 
-                //if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
+                // Below lines are equivalent to: if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
                 if (child < n &&
                     comparer.LessThan(Unsafe.Add(ref keysAtLoMinus1, child), Unsafe.Add(ref keysAtLo, child)))
                 {
                     ++child;
                 }
 
-                //if (!(comparer(d, keys[lo + child - 1]) < 0))
+                // Below lines are equivalent to: if (!(comparer(d, keys[lo + child - 1]) < 0))
                 if (!(comparer.LessThan(d, Unsafe.Add(ref keysAtLoMinus1, child))))
-                //if (comparer.LessThan(Unsafe.Add(ref keysAtLoMinus1, child), d))
                     break;
 
-                // keys[lo + i - 1] = keys[lo + child - 1]
+                // Below lines are equivalent to: keys[lo + i - 1] = keys[lo + child - 1]
                 Unsafe.Add(ref keysAtLoMinus1, i) = Unsafe.Add(ref keysAtLoMinus1, child);
                 Unsafe.Add(ref valuesAtLoMinus1, i) = Unsafe.Add(ref valuesAtLoMinus1, child);
 
                 i = child;
             }
-            //keys[lo + i - 1] = d;
+            // Below lines are equivalent to: keys[lo + i - 1] = d;
             Unsafe.Add(ref keysAtLoMinus1, i) = d;
             Unsafe.Add(ref valuesAtLoMinus1, i) = dValue;
         }
