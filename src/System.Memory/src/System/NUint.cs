@@ -23,6 +23,7 @@ namespace System
 
         public static explicit operator int(NUInt value) => (int)value._value;
         public static explicit operator uint(NUInt value) => (uint)value._value;
+        public static explicit operator void* (NUInt value) => value._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NUInt operator *(NUInt left, uint right)

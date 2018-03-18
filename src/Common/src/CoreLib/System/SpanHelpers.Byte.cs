@@ -885,44 +885,44 @@ namespace System
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
-            nuint i = 0;
-            nuint n = length;
+            IntPtr i = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr n = (IntPtr)(void*)length;
 
 #if !netstandard11
-            if (Vector.IsHardwareAccelerated && n >= (nuint)Vector<byte>.Count)
+            if (Vector.IsHardwareAccelerated && (byte*)n >= (byte*)Vector<byte>.Count)
             {
-                n -= (nuint)Vector<byte>.Count;
-                while (n > i)
+                n -= Vector<byte>.Count;
+                while ((byte*)n > (byte*)i)
                 {
                     if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
                         Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
-                    i += (nuint)Vector<byte>.Count;
+                    i += Vector<byte>.Count;
                 }
                 return Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, n)) ==
                        Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, n));
             }
 #endif
 
-            if (n >= (nuint)sizeof(UIntPtr))
+            if ((byte*)n >= (byte*)sizeof(UIntPtr))
             {
-                n -= (nuint)sizeof(UIntPtr);
-                while (n > i)
+                n -= sizeof(UIntPtr);
+                while ((byte*)n > (byte*)i)
                 {
                     if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
                         Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
-                    i += (nuint)sizeof(UIntPtr);
+                    i += sizeof(UIntPtr);
                 }
                 return Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, n)) ==
                        Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, n));
             }
 
-            while (n > i)
+            while ((byte*)n > (byte*)i)
             {
                 if (Unsafe.AddByteOffset(ref first, i) != Unsafe.AddByteOffset(ref second, i))
                     goto NotEqual;
@@ -967,45 +967,44 @@ namespace System
             if (Unsafe.AreSame(ref first, ref second))
                 goto Equal;
 
-            nuint minLength = (nuint)firstLength;
-            if (minLength > (nuint)secondLength) minLength = (nuint)secondLength;
+            IntPtr minLength = (IntPtr)((firstLength < secondLength) ? firstLength : secondLength);
 
-            nuint i = 0;
-            nuint n = minLength;
+            IntPtr i = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
+            IntPtr n = (IntPtr)(void*)minLength;
 
 #if !netstandard11
-            if (Vector.IsHardwareAccelerated && n > (nuint)Vector<byte>.Count)
+            if (Vector.IsHardwareAccelerated && (byte*)n > (byte*)Vector<byte>.Count)
             {
-                n -= (nuint)Vector<byte>.Count;
-                while (n > i)
+                n -= Vector<byte>.Count;
+                while ((byte*)n > (byte*)i)
                 {
                     if (Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref first, i)) !=
                         Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
-                    i += (nuint)Vector<byte>.Count;
+                    i += Vector<byte>.Count;
                 }
                 goto NotEqual;
             }
 #endif
 
-            if (n > (nuint)sizeof(UIntPtr))
+            if ((byte*)n > (byte*)sizeof(UIntPtr))
             {
-                n -= (nuint)sizeof(UIntPtr);
-                while (n > i)
+                n -= sizeof(UIntPtr);
+                while ((byte*)n > (byte*)i)
                 {
                     if (Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref first, i)) !=
                         Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.AddByteOffset(ref second, i)))
                     {
                         goto NotEqual;
                     }
-                    i += (nuint)sizeof(UIntPtr);
+                    i += sizeof(UIntPtr);
                 }
             }
 
         NotEqual:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
-            while (minLength > i)
+            while ((byte*)minLength > (byte*)i)
             {
                 int result = Unsafe.AddByteOffset(ref first, i).CompareTo(Unsafe.AddByteOffset(ref second, i));
                 if (result != 0) return result;
