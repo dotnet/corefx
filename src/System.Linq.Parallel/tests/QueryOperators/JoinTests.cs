@@ -198,71 +198,6 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        private abstract class LeftOrderingCollisionTest
-        {
-            protected ParallelQuery<int> ReorderLeft(ParallelQuery<int> left)
-            {
-                return left.AsUnordered().OrderBy(x => x % 2);
-            }
-
-            protected abstract ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right);
-            protected abstract void ValidateRightValue(int left, int right, int seenRightCount);
-            protected abstract int GetExpectedSeenLeftCount(int leftCount, int rightCount);
-
-            public void Validate(ParallelQuery<int> left, int leftCount, ParallelQuery<int> right, int rightCount)
-            {
-                HashSet<int> seenLeft = new HashSet<int>();
-                HashSet<int> seenRight = new HashSet<int>();
-
-                int currentLeft = -1;
-                bool seenOdd = false;
-
-                Assert.All(Join(left, right),
-                    p =>
-                    {
-                        try
-                        {
-                            if (currentLeft != p.Key)
-                            {
-                                try
-                                {
-                                    if (p.Key % 2 == 1)
-                                    {
-                                        seenOdd = true;
-                                    }
-                                    else
-                                    {
-                                        Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
-                                    }
-                                    Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
-                                    if (currentLeft != -1)
-                                    {
-                                        Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-                                    }
-                                }
-                                finally
-                                {
-                                    currentLeft = p.Key;
-                                    seenRight.Clear();
-                                }
-                            }
-                            ValidateRightValue(p.Key, p.Value, seenRight.Count);
-                            Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
-                        }
-                        finally
-                        {
-                            seenRight.Add(p.Value);
-                        }
-                    });
-                Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-                Assert.Equal(GetExpectedSeenLeftCount(leftCount, rightCount), seenLeft.Count);
-            }
-        }
-
         [Theory]
         [MemberData(nameof(JoinMultipleData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
@@ -465,6 +400,71 @@ namespace System.Linq.Parallel.Tests
             AssertExtensions.Throws<ArgumentNullException>("outerKeySelector", () => ParallelEnumerable.Range(0, 1).Join(ParallelEnumerable.Range(0, 1), (Func<int, int>)null, i => i, (i, j) => i, EqualityComparer<int>.Default));
             AssertExtensions.Throws<ArgumentNullException>("innerKeySelector", () => ParallelEnumerable.Range(0, 1).Join(ParallelEnumerable.Range(0, 1), i => i, (Func<int, int>)null, (i, j) => i, EqualityComparer<int>.Default));
             AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).Join(ParallelEnumerable.Range(0, 1), i => i, i => i, (Func<int, int, int>)null, EqualityComparer<int>.Default));
+        }
+
+        private abstract class LeftOrderingCollisionTest
+        {
+            protected ParallelQuery<int> ReorderLeft(ParallelQuery<int> left)
+            {
+                return left.AsUnordered().OrderBy(x => x % 2);
+            }
+
+            protected abstract ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right);
+            protected abstract void ValidateRightValue(int left, int right, int seenRightCount);
+            protected abstract int GetExpectedSeenLeftCount(int leftCount, int rightCount);
+
+            public void Validate(ParallelQuery<int> left, int leftCount, ParallelQuery<int> right, int rightCount)
+            {
+                HashSet<int> seenLeft = new HashSet<int>();
+                HashSet<int> seenRight = new HashSet<int>();
+
+                int currentLeft = -1;
+                bool seenOdd = false;
+
+                Assert.All(Join(left, right),
+                    p =>
+                    {
+                        try
+                        {
+                            if (currentLeft != p.Key)
+                            {
+                                try
+                                {
+                                    if (p.Key % 2 == 1)
+                                    {
+                                        seenOdd = true;
+                                    }
+                                    else
+                                    {
+                                        Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
+                                    }
+                                    Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
+                                    if (currentLeft != -1)
+                                    {
+                                        Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                                    }
+                                }
+                                finally
+                                {
+                                    currentLeft = p.Key;
+                                    seenRight.Clear();
+                                }
+                            }
+                            ValidateRightValue(p.Key, p.Value, seenRight.Count);
+                            Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
+                        }
+                        finally
+                        {
+                            seenRight.Add(p.Value);
+                        }
+                    });
+                Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                Assert.Equal(GetExpectedSeenLeftCount(leftCount, rightCount), seenLeft.Count);
+            }
         }
     }
 }
