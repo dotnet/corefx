@@ -27,7 +27,7 @@ namespace System.Text.RegularExpressions.Tests
                 for (; i < total; i++) regexps[i] = regexps[i % unique];
             }
             // shuffle:
-			const int someSeed = 101;  // seed for reproducability
+            const int someSeed = 101;  // seed for reproducability
             var random = new Random(someSeed);
             for (var i = 0; i < total; i++)
             {
@@ -59,14 +59,19 @@ namespace System.Text.RegularExpressions.Tests
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
                     {
-                        for (var i = 0; i < total; i++)
-                            s_IsMatch = Regex.IsMatch("0123456789", regexps[i]);
+                        RunTest(0, total, regexps);
                     }
             }
             finally
             {
                 Regex.CacheSize = cacheSizeOld;
             }
+        }
+
+        void RunTest(int start, int total, string[] regexps)
+        {
+            for (var i = 0; i < total; i++)
+                s_IsMatch = Regex.IsMatch("0123456789", regexps[(start + i)%total]);
         }
 
         [Benchmark]
@@ -81,10 +86,6 @@ namespace System.Text.RegularExpressions.Tests
         {
             var cacheSizeOld = Regex.CacheSize;
             string[] regexps = CreateRegexps(total, unique);
-			void RunTest(int start) {
-				for (var i = 0; i < total; i++)
-					s_IsMatch = Regex.IsMatch("0123456789", regexps[(start + i)%total]);
-			}
             try
             {
                 Regex.CacheSize = 0; // clean up cache
@@ -94,8 +95,9 @@ namespace System.Text.RegularExpressions.Tests
                     {
                         int threads = 4;
                         var tasks = Enumerable.Range(0, threads)
-							.Select(i => Task.Run(() => RunTest((int)(i*total/threads)))).ToArray();
-						Task.WaitAll(tasks);
+                            .Select(i => Task.Run(() => RunTest((int)(i*total/threads), total, regexps)))
+                            .ToArray();
+                        Task.WaitAll(tasks);
                     }
             }
             finally
