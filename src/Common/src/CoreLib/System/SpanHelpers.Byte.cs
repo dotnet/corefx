@@ -496,7 +496,7 @@ namespace System
             if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
             {
                 int unaligned = (int)Unsafe.AsPointer(ref searchSpace) & (Vector<byte>.Count - 1);
-                nLength = (nuint)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
+                nLength = (IntPtr)((Vector<byte>.Count - unaligned) & (Vector<byte>.Count - 1));
             }
         SequentialScan:
 #endif
