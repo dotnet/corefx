@@ -247,7 +247,26 @@ namespace System.Collections.Immutable
             /// Adds an item to the <see cref="ICollection{T}"/>.
             /// </summary>
             /// <param name="item">The object to add to the <see cref="ICollection{T}"/>.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Add(T item)
+            {
+                int count = _count;
+                T[] elements = _elements;
+
+                if ((uint)count < (uint)elements.Length)
+                {
+                    elements[count] = item;
+                    _count = count + 1;
+                }
+                else
+                {
+                    AddWithResize(item);
+                }
+            }
+
+            // Improve code quality as uncommon path
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            private void AddWithResize(T item)
             {
                 int newCount = _count + 1;
                 this.EnsureCapacity(newCount);
