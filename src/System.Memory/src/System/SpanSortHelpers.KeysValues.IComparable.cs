@@ -27,7 +27,7 @@ namespace System
             ref TKey keys, ref TValue values, int length)
             where TKey : IComparable<TKey>
         {
-            var depthLimit = 2 * FloorLog2PlusOne(length);
+            int depthLimit = 2 * FloorLog2PlusOne(length);
             IntroSort(ref keys, ref values, 0, length - 1, depthLimit);
         }
 
@@ -69,6 +69,8 @@ namespace System
                 depthLimit--;
 
                 // We should never reach here, unless > 3 elements due to partition size
+                Debug.Assert(partitionSize > 3);
+
                 int p = PickPivotAndPartition(ref keys, ref values, lo, hi);
                 // Note we've already partitioned around the pivot and do not have to move the pivot again.
                 IntroSort(ref keys, ref values, p + 1, hi, depthLimit);
@@ -108,8 +110,6 @@ namespace System
 
             while (left < right)
             {
-                // TODO: Would be good to be able to update local ref here
-
                 if (pivot == null)
                 {
                     while (left < (hi - 1) && Unsafe.Add(ref keys, ++left) == null) ;
@@ -175,14 +175,14 @@ namespace System
 
             //TKey d = keys[lo + i - 1];
             ref TKey keysAtLo = ref Unsafe.Add(ref keys, lo);
-            ref TKey keysAtLoMinus1 = ref Unsafe.Add(ref keysAtLo, -1); // No Subtract??
+            ref TKey keysAtLoMinus1 = ref Unsafe.Add(ref keysAtLo, -1); // TODO: Use Subtract when available
 
             ref TValue valuesAtLoMinus1 = ref Unsafe.Add(ref values, lo - 1);
 
             TKey d = Unsafe.Add(ref keysAtLoMinus1, i);
             TValue dValue = Unsafe.Add(ref valuesAtLoMinus1, i);
 
-            var nHalf = n / 2;
+            int nHalf = n / 2;
             while (i <= nHalf)
             {
                 int child = i << 1;
@@ -222,9 +222,9 @@ namespace System
             for (int i = lo; i < hi; ++i)
             {
                 int j = i;
-                //t = keys[i + 1];
+
                 var t = Unsafe.Add(ref keys, j + 1);
-                // TODO: Would be good to be able to update local ref here
+
                 if (j >= lo && (t == null || t.CompareTo(Unsafe.Add(ref keys, j)) < 0))
                 {
                     var v = Unsafe.Add(ref values, j + 1);

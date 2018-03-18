@@ -1,4 +1,3 @@
-#define OUTER_LOOP
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -218,10 +217,7 @@ namespace System.SpanTests
             //                              1,          4, 2, 3
         }
 
-
         #region Keys Tests
-
-
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -349,7 +345,7 @@ namespace System.SpanTests
         {
             Test_Keys_BogusComparable(sortCases);
         }
-#if OUTER_LOOP
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -358,6 +354,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int8(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -366,6 +363,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt8(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -374,6 +372,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int16(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -382,6 +381,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt16(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -390,6 +390,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -398,6 +399,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -406,6 +408,7 @@ namespace System.SpanTests
         {
             Test_Keys_Int64(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -414,6 +417,7 @@ namespace System.SpanTests
         {
             Test_Keys_UInt64(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -422,6 +426,7 @@ namespace System.SpanTests
         {
             Test_Keys_Single(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -430,6 +435,7 @@ namespace System.SpanTests
         {
             Test_Keys_Double(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -438,6 +444,7 @@ namespace System.SpanTests
         {
             Test_Keys_Boolean(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -446,6 +453,7 @@ namespace System.SpanTests
         {
             Test_Keys_Char(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -454,6 +462,7 @@ namespace System.SpanTests
         {
             Test_Keys_String(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -462,6 +471,7 @@ namespace System.SpanTests
         {
             Test_Keys_ComparableStructInt32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -470,6 +480,7 @@ namespace System.SpanTests
         {
             Test_Keys_ComparableClassInt32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -478,13 +489,9 @@ namespace System.SpanTests
         {
             Test_Keys_BogusComparable(sortCases);
         }
-#endif
-
         #endregion
 
         #region Keys and Values Tests
-
-
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
         [MemberData(nameof(s_fastSortTests))]
@@ -612,7 +619,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_BogusComparable_Int32(sortCases);
         }
-#if OUTER_LOOP
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -621,6 +628,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int8_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -629,6 +637,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt8_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -637,6 +646,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int16_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -645,6 +655,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt16_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -653,6 +664,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int32_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -661,6 +673,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt32_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -669,6 +682,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Int64_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -677,6 +691,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_UInt64_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -685,6 +700,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Single_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -693,6 +709,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Double_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -701,6 +718,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Boolean_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -709,6 +727,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_Char_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -717,6 +736,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_String_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -725,6 +745,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_ComparableStructInt32_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -733,6 +754,7 @@ namespace System.SpanTests
         {
             Test_KeysValues_ComparableClassInt32_Int32(sortCases);
         }
+
         [OuterLoop]
         [Theory]
         [Trait(SortTrait, SortTraitValue)]
@@ -741,7 +763,6 @@ namespace System.SpanTests
         {
             Test_KeysValues_BogusComparable_Int32(sortCases);
         }
-#endif
         #endregion
 
         // NOTE: Sort_MaxLength_NoOverflow test is constrained to run on Windows and MacOSX because it causes
@@ -749,7 +770,7 @@ namespace System.SpanTests
         //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
         //       time the memory is accessed which triggers the full memory allocation.
         [Fact]
-        [Trait("MyTrait", "MyTraitValue")]
+        [Trait(SortTrait, SortTraitValue)]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public unsafe static void Sort_MaxLength_NoOverflow()

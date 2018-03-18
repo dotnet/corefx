@@ -27,7 +27,7 @@ namespace System
             ref TKey keys, int length)
             where TKey : IComparable<TKey>
         {
-            var depthLimit = 2 * FloorLog2PlusOne(length);
+            int depthLimit = 2 * FloorLog2PlusOne(length);
             IntroSort(ref keys, 0, length - 1, depthLimit);
         }
 
@@ -57,7 +57,6 @@ namespace System
                         ref TKey loRef = ref Unsafe.Add(ref keys, lo);
                         ref TKey miRef = ref Unsafe.Add(ref keys, hi - 1);
                         ref TKey hiRef = ref Unsafe.Add(ref keys, hi);
-                        //ref TKey miRef = ref Unsafe.SubtractByteOffset(ref hiRef, new IntPtr(Unsafe.SizeOf<TKey>()));
                         Sort3(ref loRef, ref miRef, ref hiRef);
                         return;
                     }
@@ -74,6 +73,8 @@ namespace System
                 depthLimit--;
 
                 // We should never reach here, unless > 3 elements due to partition size
+                Debug.Assert(partitionSize > 3);
+
                 int p = PickPivotAndPartition(ref keys, lo, hi);
                 // Note we've already partitioned around the pivot and do not have to move the pivot again.
                 IntroSort(ref keys, p + 1, hi, depthLimit);
@@ -115,8 +116,6 @@ namespace System
 
             while (left < right)
             {
-                // TODO: Would be good to be able to update local ref here
-
                 if (pivot == null)
                 {
                     while (left < (hi - 1) && Unsafe.Add(ref keys, ++left) == null) ;
@@ -178,9 +177,9 @@ namespace System
 
             //TKey d = keys[lo + i - 1];
             ref TKey keysAtLo = ref Unsafe.Add(ref keys, lo);
-            ref TKey keysAtLoMinus1 = ref Unsafe.Add(ref keysAtLo, -1); // No Subtract??
+            ref TKey keysAtLoMinus1 = ref Unsafe.Add(ref keysAtLo, -1); // TODO: Use Subtract when available
             TKey d = Unsafe.Add(ref keysAtLoMinus1, i);
-            var nHalf = n / 2;
+            int nHalf = n / 2;
             while (i <= nHalf)
             {
                 int child = i << 1;
@@ -218,9 +217,9 @@ namespace System
             for (int i = lo; i < hi; ++i)
             {
                 int j = i;
-                //t = keys[i + 1];
+
                 var t = Unsafe.Add(ref keys, j + 1);
-                // TODO: Would be good to be able to update local ref here
+
                 if (j >= lo && (t == null || t.CompareTo(Unsafe.Add(ref keys, j)) < 0))
                 {
                     do
@@ -229,7 +228,6 @@ namespace System
                         --j;
                     }
                     while (j >= lo && (t == null || t.CompareTo(Unsafe.Add(ref keys, j)) < 0));
-                    //while (j >= lo && (t == null || t.CompareTo(keys[j]) < 0))
 
                     Unsafe.Add(ref keys, j + 1) = t;
                 }

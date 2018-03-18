@@ -10,7 +10,6 @@ namespace System.Memory.Tests
     public class Perf_Span_Sort
     {
         private const int InnerCountForNoSorting = 1000000;
-        //private const string NumberFormat = "D9";
 
         [Benchmark(InnerIterationCount = InnerCountForNoSorting)]
         public void ArraySort_Int_Length_0()
@@ -61,11 +60,6 @@ namespace System.Memory.Tests
             BenchmarkAndAssertArray(length, i => i);
         }
 
-        //private static void BenchmarkAndAssertArrayString(int length)
-        //{
-        //    BenchmarkAndAssertArray(length, i => i.ToString(NumberFormat));
-        //}
-
         const int Seed = 213718398;
         private static void BenchmarkAndAssertArray<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>
@@ -88,11 +82,6 @@ namespace System.Memory.Tests
         {
             BenchmarkAndAssertSpan(length, i => i);
         }
-
-        //private static void BenchmarkAndAssertSpanString(int length)
-        //{
-        //    BenchmarkAndAssertSpan(length, i => i.ToString(NumberFormat));
-        //}
 
         private static void BenchmarkAndAssertSpan<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>

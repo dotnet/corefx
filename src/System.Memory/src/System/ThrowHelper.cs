@@ -72,23 +72,22 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
 
-        // TODO
         internal static void ThrowArgumentException_ItemsMustHaveSameLength() { throw CreateArgumentException_ItemsMustHaveSameLength(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentException_ItemsMustHaveSameLength() { return new ArgumentException("Items must have same length as keys"); }//SR.Argument_ItemsMustHaveSameLength); }
+        private static Exception CreateArgumentException_ItemsMustHaveSameLength() { return new ArgumentException("Items must have same length as keys."); }
 
         // coreclr does not have an exception for bad IComparable but instead throws with comparer == null
         internal static void ThrowArgumentException_BadComparer(object comparer) { throw CreateArgumentException_BadComparer(comparer); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_BadComparer(object comparer) { return new ArgumentException(
-            string.Format("Unable to sort because the IComparer.Compare() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparer: '{0}'.", comparer)); }//SR.Format(SR.Arg_BogusIComparer, comparer));; }
+            string.Format("Unable to sort because the IComparer.Compare() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparer: '{0}'.", comparer));
+        }
         // here we throw if bad comparable, including the case when user uses Comparer<TKey>.Default and TKey is IComparable<TKey>
         internal static void ThrowArgumentException_BadComparable(Type comparableType) { throw CreateArgumentException_BadComparable(comparableType); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentException_BadComparable(Type comparableType) {
-            return new ArgumentException(
+        private static Exception CreateArgumentException_BadComparable(Type comparableType) { return new ArgumentException(
             string.Format("Unable to sort because the IComparable.CompareTo() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparable: '{0}'.", comparableType.FullName));
-        }//SR.Format(SR.Arg_BogusIComparable, comparableType));; }
+        }
 
         //
         // Enable use of ThrowHelper from TryFormat() routines without introducing dozens of non-code-coveraged "bytesWritten = 0; return false" boilerplate.
