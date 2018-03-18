@@ -40,6 +40,14 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
+        public static IEnumerable<object[]> JoinOrderedLeftUnorderedRightData(int[] counts)
+        {
+            foreach (object[] parms in UnorderedSources.BinaryRanges(counts, counts))
+            {
+                yield return new object[] { ((Labeled<ParallelQuery<int>>)parms[0]).Order(), parms[1], ((Labeled<ParallelQuery<int>>)parms[2]), parms[3] };
+            }
+        }
+
         //
         // Join
         //
@@ -217,6 +225,43 @@ namespace System.Linq.Parallel.Tests
             Join_Multiple_LeftWithOrderingColisions(left, leftCount, right, rightCount);
         }
 
+        private class LeftOrderingCollisionTestWithUnorderedRight : LeftOrderingCollisionTest
+        {
+            protected override ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right)
+            {
+                return ReorderLeft(left).Join(right, x => x, y => y % KeyFactor, (x, y) => KeyValuePair.Create(x, y)).Distinct();
+            }
+
+            protected override void ValidateRightValue(int left, int right, int seenRightCount)
+            {
+                Assert.Equal(left, right % KeyFactor);
+            }
+
+            protected override int GetExpectedSeenLeftCount(int leftCount, int rightCount)
+            {
+                return Math.Min(KeyFactor, Math.Min(rightCount, leftCount));
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JoinOrderedLeftUnorderedRightData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve grouping of order-identical left keys through repartitioning (see https://github.com/dotnet/corefx/pull/27930#issuecomment-372084741)")]
+        public static void Join_Multiple_LeftWithOrderingColisions_UnorderedRight(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            LeftOrderingCollisionTestWithUnorderedRight validator = new LeftOrderingCollisionTestWithUnorderedRight();
+
+            validator.Validate(left.Item, leftCount, right.Item, rightCount);
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(JoinOrderedLeftUnorderedRightData), new[] { 512, 1024 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve grouping of order-identical left keys through repartitioning (see https://github.com/dotnet/corefx/pull/27930#issuecomment-372084741)")]
+        public static void Join_Multiple_LeftWithOrderingColisions_UnorderedRight_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            Join_Multiple_LeftWithOrderingColisions_UnorderedRight(left, leftCount, right, rightCount);
+        }
+
         [Theory]
         [MemberData(nameof(JoinUnorderedData), new[] { 0, 1, 2, KeyFactor * 2 })]
         public static void Join_Unordered_CustomComparator(int leftCount, int rightCount)
@@ -336,6 +381,50 @@ namespace System.Linq.Parallel.Tests
         public static void Join_CustomComparator_LeftWithOrderingColisions_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Join_CustomComparator_LeftWithOrderingColisions(left, leftCount, right, rightCount);
+        }
+
+        private class LeftOrderingCollisionTestWithUnorderedRightAndCustomComparator : LeftOrderingCollisionTest
+        {
+            protected override ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right)
+            {
+                return ReorderLeft(left).Join(right, x => x, y => y, (x, y) => KeyValuePair.Create(x, y), new ModularCongruenceComparer(KeyFactor)).Distinct();
+            }
+
+            protected override void ValidateRightValue(int left, int right, int seenRightCount)
+            {
+                Assert.Equal(left % KeyFactor, right % KeyFactor);
+            }
+
+            protected override int GetExpectedSeenLeftCount(int leftCount, int rightCount)
+            {
+                if (rightCount >= KeyFactor)
+                {
+                    return leftCount;
+                }
+                else
+                {
+                    return leftCount / KeyFactor * rightCount + Math.Min(leftCount % KeyFactor, rightCount);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JoinOrderedLeftUnorderedRightData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve grouping of order-identical left keys through repartitioning (see https://github.com/dotnet/corefx/pull/27930#issuecomment-372084741)")]
+        public static void Join_CustomComparator_LeftWithOrderingColisions_UnorderedRight(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            LeftOrderingCollisionTestWithUnorderedRightAndCustomComparator validator = new LeftOrderingCollisionTestWithUnorderedRightAndCustomComparator();
+
+            validator.Validate(left.Item, leftCount, right.Item, rightCount);
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(JoinOrderedLeftUnorderedRightData), new[] { 512, 1024 })]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve grouping of order-identical left keys through repartitioning (see https://github.com/dotnet/corefx/pull/27930#issuecomment-372084741)")]
+        public static void Join_CustomComparator_LeftWithOrderingColisions_UnorderedRight_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        {
+            Join_CustomComparator_LeftWithOrderingColisions_UnorderedRight(left, leftCount, right, rightCount);
         }
 
         [Theory]
