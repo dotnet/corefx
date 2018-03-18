@@ -179,64 +179,98 @@ namespace System.Linq.Parallel.Tests
             Join_Multiple(left, leftCount, right, rightCount);
         }
 
+        private class LeftOrderingCollisionTestWithOrderedRight : LeftOrderingCollisionTest
+        {
+            protected override ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right)
+            {
+                return ReorderLeft(left).Join(right, x => x, y => y % KeyFactor, (x, y) => KeyValuePair.Create(x, y));
+            }
+
+            protected override void ValidateRightValue(int left, int right, int seenRightCount)
+            {
+                Assert.Equal(left, right % KeyFactor);
+                Assert.Equal(left + seenRightCount * KeyFactor, right);
+            }
+
+            protected override int GetExpectedSeenLeftCount(int leftCount, int rightCount)
+            {
+                return Math.Min(KeyFactor, Math.Min(rightCount, leftCount));
+            }
+        }
+
+        private abstract class LeftOrderingCollisionTest
+        {
+            protected ParallelQuery<int> ReorderLeft(ParallelQuery<int> left)
+            {
+                return left.AsUnordered().OrderBy(x => x % 2);
+            }
+
+            protected abstract ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right);
+            protected abstract void ValidateRightValue(int left, int right, int seenRightCount);
+            protected abstract int GetExpectedSeenLeftCount(int leftCount, int rightCount);
+
+            public void Validate(ParallelQuery<int> left, int leftCount, ParallelQuery<int> right, int rightCount)
+            {
+                HashSet<int> seenLeft = new HashSet<int>();
+                HashSet<int> seenRight = new HashSet<int>();
+
+                int currentLeft = -1;
+                bool seenOdd = false;
+
+                Assert.All(Join(left, right),
+                    p =>
+                    {
+                        try
+                        {
+                            if (currentLeft != p.Key)
+                            {
+                                try
+                                {
+                                    if (p.Key % 2 == 1)
+                                    {
+                                        seenOdd = true;
+                                    }
+                                    else
+                                    {
+                                        Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
+                                    }
+                                    Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
+                                    if (currentLeft != -1)
+                                    {
+                                        Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                                    }
+                                }
+                                finally
+                                {
+                                    currentLeft = p.Key;
+                                    seenRight.Clear();
+                                }
+                            }
+                            ValidateRightValue(p.Key, p.Value, seenRight.Count);
+                            Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
+                        }
+                        finally
+                        {
+                            seenRight.Add(p.Value);
+                        }
+                    });
+                Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
+                Assert.Equal(GetExpectedSeenLeftCount(leftCount, rightCount), seenLeft.Count);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(JoinMultipleData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void Join_Multiple_LeftWithOrderingColisions(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
-            ParallelQuery<int> leftQuery = left.Item.AsUnordered().OrderBy(x => x % 2);
-            ParallelQuery<int> rightQuery = right.Item;
+            LeftOrderingCollisionTestWithOrderedRight validator = new LeftOrderingCollisionTestWithOrderedRight();
 
-            HashSet<int> seenLeft = new HashSet<int>();
-            HashSet<int> seenRight = new HashSet<int>();
-
-            int currentLeft = -1;
-            bool seenOdd = false;
-
-            Assert.All(leftQuery.Join(rightQuery, x => x, y => y % KeyFactor, (x, y) => KeyValuePair.Create(x, y)),
-                p =>
-                {
-                    try
-                    {
-                        if (currentLeft != p.Key)
-                        {
-                            try
-                            {
-                                if (p.Key % 2 == 1)
-                                {
-                                    seenOdd = true;
-                                }
-                                else
-                                {
-                                    Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
-                                }
-                                Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
-                                if(currentLeft != -1)
-                                {
-                                    Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-                                }
-                            }
-                            finally
-                            {
-                                currentLeft = p.Key;
-                                seenRight.Clear();
-                            }
-                        }
-                        Assert.Equal(p.Key, p.Value % KeyFactor);
-                        Assert.Equal(p.Key + seenRight.Count * KeyFactor, p.Value);
-                        Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
-                    }
-                    finally
-                    {
-                        seenRight.Add(p.Value);
-                    }
-                });
-            Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-            Assert.Equal(Math.Min(KeyFactor, Math.Min(rightCount, leftCount)), seenLeft.Count);
+            validator.Validate(left.Item, leftCount, right.Item, rightCount);
         }
 
         [Theory]
@@ -303,8 +337,8 @@ namespace System.Linq.Parallel.Tests
                     {
                         Assert.Equal(seenOuter, p.Key);
                         Assert.Equal(p.Key % 8, p.Value);
-                        // If there aren't sufficient elements in the RHS (< 8), the LHS skips an entry at the end of the mod cycle.
-                        seenOuter = Math.Min(leftCount, seenOuter + (p.Key % KeyFactor + 1 == rightCount ? KeyFactor - p.Key % KeyFactor : 1));
+                    // If there aren't sufficient elements in the RHS (< 8), the LHS skips an entry at the end of the mod cycle.
+                    seenOuter = Math.Min(leftCount, seenOuter + (p.Key % KeyFactor + 1 == rightCount ? KeyFactor - p.Key % KeyFactor : 1));
                         Assert.Equal(Math.Max(previousOuter % KeyFactor, rightCount - KeyFactor + previousOuter % KeyFactor), seenInner);
                         previousOuter = p.Key;
                         seenInner = (p.Key % KeyFactor) - KeyFactor;
@@ -325,65 +359,39 @@ namespace System.Linq.Parallel.Tests
             Join_CustomComparator(left, leftCount, right, rightCount);
         }
 
+        private class LeftOrderingCollisionTestWithOrderedRightAndCustomComparator : LeftOrderingCollisionTest
+        {
+            protected override ParallelQuery<KeyValuePair<int, int>> Join(ParallelQuery<int> left, ParallelQuery<int> right)
+            {
+                return ReorderLeft(left).Join(right, x => x, y => y, (x, y) => KeyValuePair.Create(x, y), new ModularCongruenceComparer(KeyFactor));
+            }
+
+            protected override void ValidateRightValue(int left, int right, int seenRightCount)
+            {
+                Assert.Equal(left % KeyFactor, right % KeyFactor);
+                Assert.Equal(left % KeyFactor + seenRightCount * KeyFactor, right);
+            }
+
+            protected override int GetExpectedSeenLeftCount(int leftCount, int rightCount)
+            {
+                if (rightCount >= KeyFactor) 
+                {
+                    return leftCount;
+                }
+                else {
+                    return leftCount / KeyFactor * rightCount + Math.Min(leftCount % KeyFactor, rightCount);
+                }
+            }
+        }
+
         [Theory]
         [MemberData(nameof(JoinMultipleData), new[] { 2, KeyFactor - 1, KeyFactor, KeyFactor + 1, KeyFactor * 2 - 1, KeyFactor * 2, KeyFactor * 2 + 1 })]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.Net core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void Join_CustomComparator_LeftWithOrderingColisions(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
-            ParallelQuery<int> leftQuery = left.Item.AsUnordered().OrderBy(x => x % 2);
-            ParallelQuery<int> rightQuery = right.Item;
+            LeftOrderingCollisionTestWithOrderedRightAndCustomComparator validator = new LeftOrderingCollisionTestWithOrderedRightAndCustomComparator();
 
-            HashSet<int> seenLeft = new HashSet<int>();
-            HashSet<int> seenRight = new HashSet<int>();
-
-            int currentLeft = -1;
-            bool seenOdd = false;
-
-            Assert.All(leftQuery.Join(rightQuery, x => x, y => y,
-                (x, y) => KeyValuePair.Create(x, y), new ModularCongruenceComparer(KeyFactor)),
-                p =>
-                {
-                    try
-                    {
-                        if (currentLeft != p.Key)
-                        {
-                            try
-                            {
-                                if (p.Key % 2 == 1)
-                                {
-                                    seenOdd = true;
-                                }
-                                else
-                                {
-                                    Assert.False(seenOdd, "Key out of order! " + p.Key.ToString());
-                                }
-                                Assert.True(seenLeft.Add(p.Key), "Key already seen! " + p.Key.ToString());
-                                if (currentLeft != -1)
-                                {
-                                    Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-                                }
-                            }
-                            finally
-                            {
-                                currentLeft = p.Key;
-                                seenRight.Clear();
-                            }
-                        }
-                        Assert.Equal(p.Key % KeyFactor, p.Value % KeyFactor);
-                        Assert.Equal(p.Key % KeyFactor + seenRight.Count * KeyFactor, p.Value);
-                        Assert.True(seenRight.Add(p.Value), "Value already seen! " + p.Value.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(string.Format("Key: {0}, Value: {1}", p.Key, p.Value), ex);
-                    }
-                    finally
-                    {
-                        seenRight.Add(p.Value);
-                    }
-                });
-            Assert.Equal((rightCount / KeyFactor) + (((rightCount % KeyFactor) > (currentLeft % KeyFactor)) ? 1 : 0), seenRight.Count);
-            Assert.Equal((rightCount >= KeyFactor) ? leftCount : leftCount / KeyFactor * rightCount + Math.Min(leftCount % KeyFactor, rightCount), seenLeft.Count);
+            validator.Validate(left.Item, leftCount, right.Item, rightCount);
         }
 
         [Theory]
