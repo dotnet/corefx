@@ -125,21 +125,21 @@ namespace System
             {
                 nLength -= 8;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 1))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1))
                     goto Found1;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 2))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2))
                     goto Found2;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 3))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3))
                     goto Found3;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 4))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 4))
                     goto Found4;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 5))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 5))
                     goto Found5;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 6))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 6))
                     goto Found6;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 7))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 7))
                     goto Found7;
 
                 index += 8;
@@ -149,13 +149,13 @@ namespace System
             {
                 nLength -= 4;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 1))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1))
                     goto Found1;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 2))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2))
                     goto Found2;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 3))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3))
                     goto Found3;
 
                 index += 4;
@@ -165,7 +165,7 @@ namespace System
             {
                 nLength -= 1;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
 
                 index += 1;
@@ -274,21 +274,21 @@ namespace System
                 nLength -= 8;
                 index -= 8;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index + 7))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 7))
                     goto Found7;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 6))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 6))
                     goto Found6;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 5))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 5))
                     goto Found5;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 4))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 4))
                     goto Found4;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 3))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3))
                     goto Found3;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 2))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2))
                     goto Found2;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 1))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1))
                     goto Found1;
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
             }
 
@@ -297,13 +297,13 @@ namespace System
                 nLength -= 4;
                 index -= 4;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index + 3))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 3))
                     goto Found3;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 2))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 2))
                     goto Found2;
-                if (uValue == Unsafe.Add(ref searchSpace, index + 1))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index + 1))
                     goto Found1;
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
             }
 
@@ -312,7 +312,7 @@ namespace System
                 nLength -= 1;
                 index -= 1;
 
-                if (uValue == Unsafe.Add(ref searchSpace, index))
+                if (uValue == Unsafe.AddByteOffset(ref searchSpace, index))
                     goto Found;
             }
 #if !netstandard11
@@ -384,28 +384,28 @@ namespace System
             {
                 nLength -= 8;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 4);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found4;
-                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 5);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found5;
-                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 6);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found6;
-                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 7);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found7;
 
@@ -416,16 +416,16 @@ namespace System
             {
                 nLength -= 4;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
 
@@ -436,7 +436,7 @@ namespace System
             {
                 nLength -= 1;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
 
@@ -519,28 +519,28 @@ namespace System
             {
                 nLength -= 8;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 4);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found4;
-                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 5);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found5;
-                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 6);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found6;
-                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 7);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found7;
 
@@ -551,16 +551,16 @@ namespace System
             {
                 nLength -= 4;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
 
@@ -571,7 +571,7 @@ namespace System
             {
                 nLength -= 1;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
 
@@ -658,28 +658,28 @@ namespace System
                 nLength -= 8;
                 index -= 8;
 
-                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 7);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found7;
-                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 6);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found6;
-                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 5);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found5;
-                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 4);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found4;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
             }
@@ -689,16 +689,16 @@ namespace System
                 nLength -= 4;
                 index -= 4;
 
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
             }
@@ -708,7 +708,7 @@ namespace System
                 nLength -= 1;
                 index -= 1;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp)
                     goto Found;
             }
@@ -788,28 +788,28 @@ namespace System
                 nLength -= 8;
                 index -= 8;
 
-                lookUp = Unsafe.Add(ref searchSpace, index + 7);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 7);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found7;
-                lookUp = Unsafe.Add(ref searchSpace, index + 6);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 6);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found6;
-                lookUp = Unsafe.Add(ref searchSpace, index + 5);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 5);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found5;
-                lookUp = Unsafe.Add(ref searchSpace, index + 4);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 4);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found4;
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
             }
@@ -819,16 +819,16 @@ namespace System
                 nLength -= 4;
                 index -= 4;
 
-                lookUp = Unsafe.Add(ref searchSpace, index + 3);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 3);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found3;
-                lookUp = Unsafe.Add(ref searchSpace, index + 2);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 2);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found2;
-                lookUp = Unsafe.Add(ref searchSpace, index + 1);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index + 1);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found1;
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
             }
@@ -838,7 +838,7 @@ namespace System
                 nLength -= 1;
                 index -= 1;
 
-                lookUp = Unsafe.Add(ref searchSpace, index);
+                lookUp = Unsafe.AddByteOffset(ref searchSpace, index);
                 if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
                     goto Found;
             }
