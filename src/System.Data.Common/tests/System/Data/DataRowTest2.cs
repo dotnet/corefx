@@ -26,7 +26,7 @@
 using System.Collections;
 using System.Globalization;
 using System.IO;
-
+using System.Text.RegularExpressions;
 
 
 using Xunit;
@@ -1048,7 +1048,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col0'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col0" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
 
@@ -1063,7 +1063,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'ZZZ'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "ZZZ" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
 
@@ -1080,7 +1080,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col1'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col1" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
         }
@@ -1177,7 +1177,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col0'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col0" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("DBNull") != -1);
             }
 
@@ -1427,7 +1427,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col0'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col0" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("DBNull") != -1);
             }
 
@@ -1550,7 +1550,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("''") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("Persons") != -1);
                 Assert.Null(ex.ParamName);
             }
@@ -1566,7 +1566,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("''") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("Persons") != -1);
                 Assert.Null(ex.ParamName);
             }
@@ -1649,7 +1649,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col0'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col0" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("DBNull") != -1);
             }
 
@@ -1823,7 +1823,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col0'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col0" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
 
@@ -1838,7 +1838,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'ZZZ'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "ZZZ" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
 
@@ -1855,7 +1855,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Col1'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Col1" + @"[\p{Pf}\p{Po}]"));
                 Assert.True(ex.Message.IndexOf("TableA") != -1);
             }
         }
@@ -2524,9 +2524,10 @@ namespace System.Data.Tests
             DataRow[] rows = table.GetErrors();
 
             Assert.Equal(2, rows.Length);
-            Assert.Equal("Column 'col1' does not allow DBNull.Value.", table.Rows[0].RowError);
-            Assert.Equal("Column 'col2, col3' is constrained to be unique.  Value '1, 1' is already present."
-                    , table.Rows[1].RowError);
+            Assert.True(Regex.IsMatch(table.Rows[0].RowError, @"[\p{Pi}\p{Po}]" + "col1" + @"[\p{Pf}\p{Po}]"));
+            Assert.Contains("DBNull.Value", table.Rows[0].RowError);
+            Assert.True(Regex.IsMatch(table.Rows[1].RowError, @"[\p{Pi}\p{Po}]" + "col2" + @"\p{Po}\s*" + "col3" + @"[\p{Pf}\p{Po}]"));
+            Assert.True(Regex.IsMatch(table.Rows[1].RowError, @"[\p{Pi}\p{Po}]" + "1" + @"\p{Po}\s*" + "1" + @"[\p{Pf}\p{Po}]"));
 
             Assert.Equal(table.Rows[0].RowError, table.Rows[0].GetColumnError(0));
             Assert.Equal(table.Rows[1].RowError, table.Rows[0].GetColumnError(1));

@@ -24,6 +24,7 @@
 //
 
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Xunit;
 
@@ -650,7 +651,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'Table1'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
                 Assert.Null(ex.ParamName);
             }
         }
@@ -1520,7 +1521,7 @@ namespace System.Data.Tests
                     Assert.Equal(typeof(ArgumentException), ex.GetType());
                     Assert.Null(ex.InnerException);
                     Assert.NotNull(ex.Message);
-                    Assert.True(ex.Message.IndexOf("'Table1'") != -1);
+                    Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
                     Assert.Null(ex.ParamName);
                 }
             }
@@ -1699,7 +1700,7 @@ namespace System.Data.Tests
                     Assert.Equal(typeof(ArgumentException), ex.GetType());
                     Assert.Null(ex.InnerException);
                     Assert.NotNull(ex.Message);
-                    Assert.True(ex.Message.IndexOf("'Table1'") != -1);
+                    Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
                     Assert.Null(ex.ParamName);
                 }
             }

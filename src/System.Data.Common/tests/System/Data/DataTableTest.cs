@@ -34,6 +34,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Formatters.Tests;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Xunit;
 
@@ -1249,8 +1250,8 @@ Assert.False(true);
                 Assert.Equal(typeof(ConstraintException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'id'") != -1);
-                Assert.True(ex.Message.IndexOf("'3'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "id" + @"[\p{Pf}\p{Po}]"));
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "3" + @"[\p{Pf}\p{Po}]"));
             }
 
             // check row states
@@ -1353,8 +1354,8 @@ Assert.False(true);
                 Assert.Equal(typeof(ConstraintException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'col'") != -1);
-                Assert.True(ex.Message.IndexOf("'1'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "col" + @"[\p{Pf}\p{Po}]"));
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "1" + @"[\p{Pf}\p{Po}]"));
             }
         }
 

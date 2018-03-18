@@ -26,7 +26,7 @@
 using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 
 
 using Xunit;
@@ -267,7 +267,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'TEST'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "TEST" + @"[\p{Pf}\p{Po}]"));
                 Assert.Null(ex.ParamName);
             }
         }
@@ -1640,7 +1640,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(NoNullAllowedException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'ParentId'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "ParentId" + @"[\p{Pf}\p{Po}]"));
             }
 
             DataTable dt1 = DataProvider.CreateUniqueConstraint();

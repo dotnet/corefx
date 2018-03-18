@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Xunit;
 
@@ -319,7 +320,7 @@ namespace System.Data.Tests.Common
                     Assert.Equal(typeof(ArgumentException), ex.GetType());
                     Assert.Null(ex.InnerException);
                     Assert.NotNull(ex.Message);
-                    Assert.True(ex.Message.IndexOf("'" + keyword + "'") != -1);
+                    Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape(keyword) + @"[\p{Pf}\p{Po}]"));
                     Assert.Null(ex.ParamName);
                 }
             }
@@ -339,7 +340,7 @@ namespace System.Data.Tests.Common
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'abc'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "abc" + @"[\p{Pf}\p{Po}]"));
                 Assert.Null(ex.ParamName);
             }
         }
@@ -403,7 +404,7 @@ namespace System.Data.Tests.Common
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("'DriverID'") != -1);
+                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "DriverID" + @"[\p{Pf}\p{Po}]"));
                 Assert.Null(ex.ParamName);
             }
             Assert.False(_builder.ContainsKey("DriverID"));
