@@ -56,72 +56,52 @@ namespace System
         //
         internal struct SByteDirectComparer : IDirectComparer<sbyte>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(sbyte x, sbyte y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(sbyte x, sbyte y) => x < y;
         }
         internal struct ByteDirectComparer : IDirectComparer<byte>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(byte x, byte y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(byte x, byte y) => x < y;
         }
         internal struct Int16DirectComparer : IDirectComparer<short>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(short x, short y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(short x, short y) => x < y;
         }
         internal struct UInt16DirectComparer : IDirectComparer<ushort>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(ushort x, ushort y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(ushort x, ushort y) => x < y;
         }
         internal struct Int32DirectComparer : IDirectComparer<int>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(int x, int y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(int x, int y) => x < y;
         }
         internal struct UInt32DirectComparer : IDirectComparer<uint>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(uint x, uint y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(uint x, uint y) => x < y;
         }
         internal struct Int64DirectComparer : IDirectComparer<long>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(long x, long y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(long x, long y) => x < y;
         }
         internal struct UInt64DirectComparer : IDirectComparer<ulong>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(ulong x, ulong y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(ulong x, ulong y) => x < y;
         }
         internal struct SingleDirectComparer : IDirectComparer<float>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(float x, float y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(float x, float y) => x < y;
         }
         internal struct DoubleDirectComparer : IDirectComparer<double>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool GreaterThan(double x, double y) => x > y;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool LessThan(double x, double y) => x < y;
         }
 
@@ -131,12 +111,10 @@ namespace System
         }
         internal struct SingleIsNaN : IIsNaN<float>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool IsNaN(float value) => float.IsNaN(value);
         }
         internal struct DoubleIsNaN : IIsNaN<double>
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool IsNaN(double value) => double.IsNaN(value);
         }
     }
