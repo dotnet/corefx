@@ -171,6 +171,9 @@ namespace System.Xml
             _textContentMarks[0] = 1;
 
             _charEntityFallback = new CharEntityEncoderFallback();
+
+            ReadOnlySpan<byte> bom = encoding.Preamble;
+
             this.encoding = Encoding.GetEncoding(
                 settings.Encoding.CodePage,
                 _charEntityFallback,
@@ -180,7 +183,6 @@ namespace System.Xml
 
             if (!stream.CanSeek || stream.Position == 0)
             {
-                ReadOnlySpan<byte> bom = encoding.Preamble;
                 if (bom.Length != 0)
                 {
                     this.stream.Write(bom);
