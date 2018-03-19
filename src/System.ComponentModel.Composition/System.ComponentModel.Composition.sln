@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{2E666815-2EDB-464B-9DF6-380BF4789AD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.Composition.Test.Assembly", "tests\System.ComponentModel.Composition.Test.Assembly\System.ComponentModel.Composition.Test.Assembly.csproj", "{396D6EBF-60BD-4DAF-8783-FB403E070A56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.ComponentModel.Composition.Noop.Assembly", "tests\System.ComponentModel.Composition.Noop.Assembly\System.ComponentModel.Composition.Noop.Assembly.csproj", "{396D6EBF-60BD-4DAF-8783-FB403E070A56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
