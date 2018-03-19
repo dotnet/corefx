@@ -540,5 +540,29 @@ namespace System.PrivateUri.Tests
             Assert.Equal(authority, fileTwoSlashes.Authority); // Two slashes must be followed by an authority
             Assert.Equal(authority, fileFourSlashes.Authority); // More than three slashes looks like a UNC share
         }
+
+        [Theory]
+        [InlineData(@"c:/path/with/unicode/ö/test.xml")]
+        [InlineData(@"file://c:/path/with/unicode/ö/test.xml")]
+        public void Iri_WindowsPathWithUnicode_DoesRemoveScheme(string uriString)
+        {
+            var uri = new Uri(uriString);
+            Assert.False(uri.LocalPath.StartsWith("file:"));
+        }
+
+        [Theory]
+        public void Iri_RelativeUriCreation_ShouldNotNormalize()
+        {
+            Uri href;
+            Uri hrefAbsolute;
+            Uri baseIri = new Uri("http://www.contoso.com");
+            string[] iriTestData = { "http:%C3%A8", "http:\u00E8", "%C3%A8", "\u00E8" };
+            foreach (string iriToTest in iriTestData)
+            {
+                Assert.True(Uri.TryCreate(iriToTest, UriKind.RelativeOrAbsolute, out href));
+                Assert.True(Uri.TryCreate(baseIri, href, out hrefAbsolute));
+                Assert.Equal("http://www.contoso.com/\u00E8", hrefAbsolute.ToString());
+            }
+        }
     }
 }
