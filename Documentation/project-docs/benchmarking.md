@@ -4,7 +4,7 @@ We recommend using [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) 
 
 ```
 <ItemGroup>
-   <PackageReference Include="BenchmarkDotNet" Version="0.10.12" />
+   <PackageReference Include="BenchmarkDotNet" Version="0.10.13" />
 </ItemGroup>
 ```
 
@@ -24,7 +24,7 @@ The shared framework is a set of assemblies that are packed into a `netcoreapp` 
 
 # Benchmarking local CoreFX builds
 
-Since [0.10.12.433](https://ci.appveyor.com/project/dotnetfoundation/benchmarkdotnet/build/0.10.12.433/artifacts) BenchmarkDotNet knows [how to](./dogfooding.md#more-advanced-scenario---using-your-local-corefx-build) build a self-contained app against local CoreFX build. You just need to provide it the version you would like to benchmark and path to the folder with NuGet packages.
+Since `0.10.13` BenchmarkDotNet knows [how to](./dogfooding.md#more-advanced-scenario---using-your-local-corefx-build) build a self-contained app against local CoreFX build. You just need to provide it the version you would like to benchmark and path to the folder with NuGet packages.
 
 **Important:** BenchmarkDotNet will generate the right `.csproj` file for the self-contained app. It's going to reference the `.csproj` file of the project which defines benchmarks. It's going to work even if your project is not self-contained app targeting local CoreFX build. So you can just create a new solution with console app in Visual Studio, install BenchmarkDotNet and it's going to do the right thing for you. 
 
@@ -79,7 +79,7 @@ Once you run the benchmarks with such a config it should be clear if you have im
 
 # Benchmarking nightly CoreFX builds
 
-Since [0.10.12.433](https://ci.appveyor.com/project/dotnetfoundation/benchmarkdotnet/build/0.10.12.433/artifacts) BenchmarkDotNet knows [how to](./dogfooding.md#advanced-scenario---using-a-nightly-build-of-microsoftnetcoreap) build a self-contained app against nightly CoreFX build. You just need to provide it the version you would like to benchmark. You don't need to provide url to MyGet feed, the default value is "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json".
+Since `0.10.13` BenchmarkDotNet knows [how to](./dogfooding.md#advanced-scenario---using-a-nightly-build-of-microsoftnetcoreap) build a self-contained app against nightly CoreFX build. You just need to provide it the version you would like to benchmark. You don't need to provide url to MyGet feed, the default value is "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json".
 
 ```cs
 static void Main(string[] args)
