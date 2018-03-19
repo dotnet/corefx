@@ -551,18 +551,19 @@ namespace System.PrivateUri.Tests
         }
 
         [Theory]
-        public void Iri_RelativeUriCreation_ShouldNotNormalize()
+        [InlineData("http:%C3%A8")]
+        [InlineData("http:\u00E8")]
+        [InlineData("%C3%A8")]
+        [InlineData("\u00E8")]
+        public void Iri_RelativeUriCreation_ShouldNotNormalize(string uriString)
         {
             Uri href;
             Uri hrefAbsolute;
             Uri baseIri = new Uri("http://www.contoso.com");
-            string[] iriTestData = { "http:%C3%A8", "http:\u00E8", "%C3%A8", "\u00E8" };
-            foreach (string iriToTest in iriTestData)
-            {
-                Assert.True(Uri.TryCreate(iriToTest, UriKind.RelativeOrAbsolute, out href));
-                Assert.True(Uri.TryCreate(baseIri, href, out hrefAbsolute));
-                Assert.Equal("http://www.contoso.com/\u00E8", hrefAbsolute.ToString());
-            }
+
+            Assert.True(Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out href));
+            Assert.True(Uri.TryCreate(baseIri, href, out hrefAbsolute));
+            Assert.Equal("http://www.contoso.com/%C3%A8", hrefAbsolute.AbsoluteUri);
         }
     }
 }
