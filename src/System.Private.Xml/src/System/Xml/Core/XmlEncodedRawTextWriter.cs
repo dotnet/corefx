@@ -172,8 +172,10 @@ namespace System.Xml
 
             _charEntityFallback = new CharEntityEncoderFallback();
 
+            // grab bom before possibly changing encoding settings
             ReadOnlySpan<byte> bom = encoding.Preamble;
-
+            
+            // the encoding instance this creates can differ from the one passed in
             this.encoding = Encoding.GetEncoding(
                 settings.Encoding.CodePage,
                 _charEntityFallback,
