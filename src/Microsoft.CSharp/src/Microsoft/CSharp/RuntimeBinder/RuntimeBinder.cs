@@ -122,7 +122,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal static void EnsureLockIsTaken()
         {
             // Make sure that the binder lock is taken
-            System.Threading.Monitor.IsEntered(s_bindLock);
+            Debug.Assert(System.Threading.Monitor.IsEntered(s_bindLock));
         }
 
         private bool DeferBinding(
