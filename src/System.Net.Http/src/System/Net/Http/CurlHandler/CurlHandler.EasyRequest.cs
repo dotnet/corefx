@@ -221,17 +221,6 @@ namespace System.Net.Http
                 // and doing it here prevents reuse by an intermediate handler sitting between the client
                 // and this handler.
 
-                // However, if we got an original position for the request stream, we seek back to that position,
-                // for the corner case where the stream does get reused before it's disposed by the HttpClient
-                // (if the same request object is used multiple times from an intermediate handler, we'll be using
-                // ReadAsStreamAsync, which on the same request object will return the same stream object, which
-                // we've already advanced).
-                if (_requestContentStream != null && _requestContentStream.CanSeek)
-                {
-                    Debug.Assert(_requestContentStreamStartingPosition.HasValue, "The stream is seekable, but we don't have a starting position?");
-                    _requestContentStream.Position = _requestContentStreamStartingPosition.GetValueOrDefault();
-                }
-
                 // Dispose of the underlying easy handle.  We're no longer processing it.
                 _easyHandle?.Dispose();
 
