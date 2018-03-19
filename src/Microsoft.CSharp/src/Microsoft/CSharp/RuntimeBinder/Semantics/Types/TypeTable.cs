@@ -46,8 +46,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return (hash << 5) - hash + (_pKey2 == null ? 0 : _pKey2.GetHashCode());
             }
         }
-
-	// The RuntimeBinder uses a global lock when Binding that keeps these dictionary safe
+        
+        // The RuntimeBinder uses a global lock when Binding that keeps these dictionary safe
         // Two way hashes
         private static readonly Dictionary<KeyPair<AggregateSymbol, KeyPair<AggregateType, TypeArray>>, AggregateType> s_aggregateTable =
                 new Dictionary<KeyPair<AggregateSymbol, KeyPair<AggregateType, TypeArray>>, AggregateType>();
@@ -67,6 +67,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static AggregateType LookupAggregate(AggregateSymbol aggregate, AggregateType outer, TypeArray args)
         {
+            Debug.Assert(System.Threading.Monitor.IsEntered(Microsoft.CSharp.RuntimeBinder.RuntimeBinder.s_bindLock));
             s_aggregateTable.TryGetValue(MakeKey(aggregate, MakeKey(outer, args)), out AggregateType result);
             return result;
         }

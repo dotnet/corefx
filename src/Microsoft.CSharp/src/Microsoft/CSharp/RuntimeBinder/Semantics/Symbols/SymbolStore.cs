@@ -15,7 +15,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal static class SymbolStore
     {
-	// The RuntimeBinder uses a global lock when Binding that keeps this dictionary safe
+        // The RuntimeBinder uses a global lock when Binding that keeps this dictionary safe
         private static readonly Dictionary<Key, Symbol> s_dictionary = new Dictionary<Key, Symbol>();
 
         public static Symbol LookupSym(Name name, ParentSymbol parent, symbmask_t kindmask) =>
