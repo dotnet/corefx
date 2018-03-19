@@ -67,8 +67,8 @@ namespace System.IO.Tests
         [Fact]
         public void FileSystemWatcher_ctor()
         {
-            string path = String.Empty;
-            string pattern = "*";
+            string path = string.Empty;
+            string pattern = PlatformDetection.IsFullFramework ? "*.*" : "*";
             using (FileSystemWatcher watcher = new FileSystemWatcher())
                 ValidateDefaults(watcher, path, pattern);
         }
@@ -77,7 +77,7 @@ namespace System.IO.Tests
         public void FileSystemWatcher_ctor_path()
         {
             string path = @".";
-            string pattern = "*";
+            string pattern = PlatformDetection.IsFullFramework ? "*.*" : "*";
             using (FileSystemWatcher watcher = new FileSystemWatcher(path))
                 ValidateDefaults(watcher, path, pattern);
         }
@@ -216,14 +216,14 @@ namespace System.IO.Tests
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
 
-            Assert.Equal("*", watcher.Filter);
+            Assert.Equal(PlatformDetection.IsFullFramework ? "*.*" : "*", watcher.Filter);
 
             // Null and empty should be mapped to "*"
             watcher.Filter = null;
-            Assert.Equal("*", watcher.Filter);
+            Assert.Equal(PlatformDetection.IsFullFramework ? "*.*" : "*", watcher.Filter);
 
-            watcher.Filter = String.Empty;
-            Assert.Equal("*", watcher.Filter);
+            watcher.Filter = string.Empty;
+            Assert.Equal(PlatformDetection.IsFullFramework ? "*.*" : "*", watcher.Filter);
 
             watcher.Filter = " ";
             Assert.Equal(" ", watcher.Filter);
