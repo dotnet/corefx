@@ -47,6 +47,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
+	// The RuntimeBinder uses a global lock when Binding that keeps these dictionary safe
         // Two way hashes
         private static readonly Dictionary<KeyPair<AggregateSymbol, KeyPair<AggregateType, TypeArray>>, AggregateType> s_aggregateTable =
                 new Dictionary<KeyPair<AggregateSymbol, KeyPair<AggregateType, TypeArray>>, AggregateType>();
