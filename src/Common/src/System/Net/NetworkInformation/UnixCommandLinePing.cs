@@ -88,7 +88,7 @@ namespace System.Net.NetworkInformation
             int msIndex = pingOutput.IndexOf("ms", afterTime);
             int numLength = msIndex - afterTime - 1;
             string timeSubstring = pingOutput.Substring(afterTime, numLength);
-            double parsedRtt = double.Parse(timeSubstring);
+            double parsedRtt = double.Parse(timeSubstring, System.Globalization.CultureInfo.InvariantCulture);
             return (long)Math.Round(parsedRtt);
         }
     }
