@@ -26,21 +26,12 @@ namespace System.ComponentModel.Tests
                 () => converter.ConvertTo(TypeConverterTests.s_context, null, "", null));
             // This type converter should had thrown ArgumentNullException in ConvertTo, because the destination type is null.");
 
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            for (int i = 0; i < data.GetLength(0); i++)
             {
-                for (int i = 0; i < data.GetLength(0); i++)
-                {
-                    object source = data[i, 0];
-                    object expected = data[i, 1];
-                    CultureInfo culture = data[i, 2] as CultureInfo;
-                    Assert.Equal(expected, converter.ConvertTo(TypeConverterTests.s_context, culture, source, expected.GetType()));
-                }
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
+                object source = data[i, 0];
+                object expected = data[i, 1];
+                CultureInfo culture = data[i, 2] as CultureInfo;
+                Assert.Equal(expected, converter.ConvertTo(TypeConverterTests.s_context, culture, source, expected.GetType()));
             }
         }
 

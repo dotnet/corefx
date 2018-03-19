@@ -11,19 +11,16 @@
 //
 
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public class CultureInfoConverterTest
+    public class CultureInfoConverterTest : RemoteExecutorTestBase
     {
-        private CultureInfoConverter converter;
-
-        public CultureInfoConverterTest()
-        {
-            converter = new CultureInfoConverter();
-        }
+        private CultureInfoConverter converter => new CultureInfoConverter();
 
         [Fact]
         public void CanConvertFrom()
@@ -153,25 +150,20 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void ConvertFrom_Value_Null()
         {
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            NotSupportedException ex;
-            try
+            RemoteInvoke(() =>
             {
-                ex = Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, (string)null));
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
-            }
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
-            // CultureInfoConverter cannot convert from (null)
-            Assert.Equal(typeof(NotSupportedException), ex.GetType());
-            Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.True(ex.Message.IndexOf(typeof(CultureInfoConverter).Name) != -1);
-            Assert.True(ex.Message.IndexOf("(null)") != -1);
+                NotSupportedException ex = Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, (string)null));
+                // CultureInfoConverter cannot convert from (null)
+                Assert.Equal(typeof(NotSupportedException), ex.GetType());
+                Assert.Null(ex.InnerException);
+                Assert.NotNull(ex.Message);
+                Assert.True(ex.Message.IndexOf(typeof(CultureInfoConverter).Name) != -1);
+                Assert.True(ex.Message.IndexOf("(null)") != -1);
+
+                return SuccessExitCode;
+            }).Dispose();
         }
 
         [Fact]

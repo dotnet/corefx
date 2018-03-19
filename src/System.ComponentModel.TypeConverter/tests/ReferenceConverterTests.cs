@@ -33,12 +33,13 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Globalization;
 using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public class ReferenceConverterTest
+    public class ReferenceConverterTest : RemoteExecutorTestBase
     {
 
         class TestReferenceService : IReferenceService
@@ -198,20 +199,18 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void ConvertTo()
         {
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                ReferenceConverter remoteConverter = new ReferenceConverter(typeof(ITestInterface));
+                Assert.Equal("(none)", (string)remoteConverter.ConvertTo(null, null, null, typeof(string)));
+
+                return SuccessExitCode;
+            }).Dispose();
+
             ReferenceConverter converter = new ReferenceConverter(typeof(ITestInterface));
             string referenceName = "reference name";
-
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
-            {
-                Assert.Equal("(none)", (string)converter.ConvertTo(null, null, null, typeof(string)));
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
-            }
-
             TestComponent component = new TestComponent();
 
             // no context
