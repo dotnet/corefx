@@ -22,6 +22,7 @@ internal static partial class Interop
 
         internal const string SelfExeFilePath = RootPath + "self" + ExeFileName;
         internal const string ProcUptimeFilePath = RootPath + "uptime";
+        internal const string ProcStatFilePath = RootPath + "stat";
 
         internal struct ParsedStat
         {

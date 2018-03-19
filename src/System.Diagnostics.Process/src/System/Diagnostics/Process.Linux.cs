@@ -64,36 +64,40 @@ namespace System.Diagnostics
         /// <returns>The converted time.</returns>
         internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
         {
-            // Use the uptime and the current time to determine the absolute boot time.
-            DateTime bootTime = DateTime.UtcNow - Uptime;
-
             // And use that to determine the absolute time for timespan.
-            DateTime dt = bootTime + timespanAfterBoot;
+            DateTime dt = BootTime + timespanAfterBoot;
 
             // The return value is expected to be in the local time zone.
             // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
             return dt.ToLocalTime();
         }
 
-        /// <summary>Gets the elapsed time since the system was booted.</summary>
-        private static TimeSpan Uptime
+        /// <summary>Gets the system boot time.</summary>
+        private static DateTime GetBootTime()
         {
-            get
+            // '/proc/stat -> btime' gets the boot time.
+            const string StatFile = Interop.procfs.ProcStatFilePath;
+            string text = File.ReadAllText(StatFile);
+            var btimeLineStart = text.IndexOf("\nbtime ");
+            if (btimeLineStart >= 0)
             {
-                // '/proc/uptime' accounts time a device spends in sleep mode.
-                const string UptimeFile = Interop.procfs.ProcUptimeFilePath;
-                string text = File.ReadAllText(UptimeFile);
-
-                double uptimeSeconds = 0;
-                int length = text.IndexOf(' ');
-                if (length != -1)
+                var btimeStart = btimeLineStart + "\nbtime ".Length;
+                var btimeEnd = text.IndexOf('\n', btimeStart);
+                if (btimeEnd > btimeStart)
                 {
-                    Double.TryParse(text.AsSpan(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
+                    var btimeStr = text.Substring(btimeStart, btimeEnd - btimeStart);
+                    if (Int64.TryParse(btimeStr, out var bootTimeSeconds))
+                    {
+                        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(bootTimeSeconds);
+                    }
                 }
-
-                return TimeSpan.FromSeconds(uptimeSeconds);
             }
+
+            return DateTime.UtcNow;
         }
+
+        /// <summary>System boot time.</summary>
+        private static readonly DateTime BootTime = GetBootTime();
 
         /// <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
