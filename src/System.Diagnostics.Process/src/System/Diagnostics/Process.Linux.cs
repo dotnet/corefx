@@ -73,31 +73,32 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets the system boot time.</summary>
-        private static DateTime GetBootTime()
+        private static DateTime BootTime
         {
-            // '/proc/stat -> btime' gets the boot time.
-            const string StatFile = Interop.procfs.ProcStatFilePath;
-            string text = File.ReadAllText(StatFile);
-            var btimeLineStart = text.IndexOf("\nbtime ");
-            if (btimeLineStart >= 0)
+            get
             {
-                var btimeStart = btimeLineStart + "\nbtime ".Length;
-                var btimeEnd = text.IndexOf('\n', btimeStart);
-                if (btimeEnd > btimeStart)
+                // '/proc/stat -> btime' gets the boot time.
+                // btime is the time of system boot in seconds since the Unix epoch.
+                // It includes suspended time and is updated based on the system time (settimeofday).
+                const string StatFile = Interop.procfs.ProcStatFilePath;
+                string text = File.ReadAllText(StatFile);
+                var btimeLineStart = text.IndexOf("\nbtime ");
+                if (btimeLineStart >= 0)
                 {
-                    var btimeStr = text.Substring(btimeStart, btimeEnd - btimeStart);
-                    if (Int64.TryParse(btimeStr, out var bootTimeSeconds))
+                    var btimeStart = btimeLineStart + "\nbtime ".Length;
+                    var btimeEnd = text.IndexOf('\n', btimeStart);
+                    if (btimeEnd > btimeStart)
                     {
-                        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(bootTimeSeconds);
+                        if (Int64.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out var bootTimeSeconds))
+                        {
+                            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(bootTimeSeconds);
+                        }
                     }
                 }
+
+                return DateTime.UtcNow;
             }
-
-            return DateTime.UtcNow;
         }
-
-        /// <summary>System boot time.</summary>
-        private static readonly DateTime BootTime = GetBootTime();
 
         /// <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
