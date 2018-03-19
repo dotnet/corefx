@@ -185,7 +185,7 @@ namespace System.IO
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    // Skip the string compare for "*.*" since it has no case-insensitive representation that differs from
+                    // Skip the string compare for "*" since it has no case-insensitive representation that differs from
                     // the case-sensitive representation.
                     _filter = "*";
                 }
@@ -398,7 +398,7 @@ namespace System.IO
         {
             ReadOnlySpan<char> name = IO.Path.GetFileName(relativePath.AsSpan());
             return name.Length > 0
-                ? FileSystemName.MatchesSimpleExpression(_filter, name, ignoreCase: false)
+                ? FileSystemName.MatchesSimpleExpression(_filter, name, ignoreCase: !PathInternal.IsCaseSensitive)
                 : false;
         }
 
