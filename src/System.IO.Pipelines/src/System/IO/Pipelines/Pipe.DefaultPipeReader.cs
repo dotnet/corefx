@@ -34,7 +34,7 @@ namespace System.IO.Pipelines
 
             public override void Complete(Exception exception = null) => _pipe.CompleteReader(exception);
 
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state) => _pipe.OnWriterCompleted(callback, state);
+            public override void RegisterWriterCompleted(Action<Exception, object> callback, object state) => _pipe.RegisterWriterCompleted(callback, state);
 
             public ValueTaskSourceStatus GetStatus(short token) => _pipe.GetReadAsyncStatus();
 

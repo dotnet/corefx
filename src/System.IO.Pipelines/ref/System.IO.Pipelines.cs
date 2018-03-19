@@ -46,7 +46,7 @@ namespace System.IO.Pipelines
         public abstract void AdvanceTo(System.SequencePosition consumed, System.SequencePosition examined);
         public abstract void CancelPendingRead();
         public abstract void Complete(System.Exception exception = null);
-        public abstract void OnWriterCompleted(System.Action<System.Exception, object> callback, object state);
+        public abstract void RegisterWriterCompleted(System.Action<System.Exception, object> callback, object state);
         public abstract System.Threading.Tasks.ValueTask<System.IO.Pipelines.ReadResult> ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         public abstract bool TryRead(out System.IO.Pipelines.ReadResult result);
     }
@@ -66,7 +66,7 @@ namespace System.IO.Pipelines
         public abstract System.Threading.Tasks.ValueTask<System.IO.Pipelines.FlushResult> FlushAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         public abstract System.Memory<byte> GetMemory(int sizeHint = 0);
         public abstract System.Span<byte> GetSpan(int sizeHint = 0);
-        public abstract void OnReaderCompleted(System.Action<System.Exception, object> callback, object state);
+        public abstract void RegisterReaderCompleted(System.Action<System.Exception, object> callback, object state);
         public virtual System.Threading.Tasks.ValueTask<System.IO.Pipelines.FlushResult> WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
     public partial struct ReadResult

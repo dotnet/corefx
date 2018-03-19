@@ -527,7 +527,7 @@ namespace System.IO.Pipelines.Tests
             Task reading = ExecuteOnNonThreadPoolThread(DoRead);
 
             PipeWriter buffer = pipe.Writer;
-            pipe.Writer.OnReaderCompleted((state, exception) =>
+            pipe.Writer.RegisterReaderCompleted((state, exception) =>
             {
                 callbackRan = true;
                 Assert.True(Thread.CurrentThread.IsThreadPoolThread);

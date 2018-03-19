@@ -48,9 +48,9 @@ namespace System.IO.Pipelines.Tests
             var callbackRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, pauseWriterThreshold: 5, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            pipe.Writer.OnReaderCompleted((exception, state) => { pipe.Writer.Complete(); }, null);
+            pipe.Writer.RegisterReaderCompleted((exception, state) => { pipe.Writer.Complete(); }, null);
 
-            pipe.Reader.OnWriterCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Reader.RegisterWriterCompleted((exception, state) => { callbackRan = true; }, null);
 
             pipe.Reader.Complete();
             Assert.True(callbackRan);
@@ -62,16 +62,16 @@ namespace System.IO.Pipelines.Tests
             var callbackRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, pauseWriterThreshold: 5, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            pipe.Reader.OnWriterCompleted((exception, state) => { pipe.Reader.Complete(); }, null);
+            pipe.Reader.RegisterWriterCompleted((exception, state) => { pipe.Reader.Complete(); }, null);
 
-            pipe.Writer.OnReaderCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Writer.RegisterReaderCompleted((exception, state) => { callbackRan = true; }, null);
 
             pipe.Writer.Complete();
             Assert.True(callbackRan);
         }
 
         [Fact]
-        public void OnReaderCompletedContinuesOnException()
+        public void RegisterReaderCompletedContinuesOnException()
         {
             var callbackState1 = new object();
             var callbackState2 = new object();
@@ -81,7 +81,7 @@ namespace System.IO.Pipelines.Tests
             var counter = 0;
 
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState1, state);
@@ -90,7 +90,7 @@ namespace System.IO.Pipelines.Tests
                     throw exception1;
                 }, callbackState1);
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState2, state);
@@ -106,12 +106,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedExceptionSurfacesToWriterScheduler()
+        public void RegisterReaderCompletedExceptionSurfacesToWriterScheduler()
         {
             var exception = new Exception();
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, writerScheduler: scheduler, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted((e, state) => throw exception, null);
+            pipe.Writer.RegisterReaderCompleted((e, state) => throw exception, null);
             pipe.Reader.Complete();
 
             Assert.Equal(1, scheduler.CallCount);
@@ -120,14 +120,14 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedExecutesOnSchedulerIfCompleted()
+        public void RegisterReaderCompletedExecutesOnSchedulerIfCompleted()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, writerScheduler: scheduler, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             pipe.Reader.Complete();
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Null(exception);
@@ -139,12 +139,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedIsDetachedDuringReset()
+        public void RegisterReaderCompletedIsDetachedDuringReset()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, writerScheduler: scheduler, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Writer.RegisterReaderCompleted((exception, state) => { callbackRan = true; }, null);
 
             pipe.Reader.Complete();
             pipe.Writer.Complete();
@@ -161,13 +161,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedPassesException()
+        public void RegisterReaderCompletedPassesException()
         {
             var callbackRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             var readerException = new Exception();
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     callbackRan = true;
@@ -179,12 +179,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedPassesState()
+        public void RegisterReaderCompletedPassesState()
         {
             var callbackRan = false;
             var callbackState = new object();
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState, state);
@@ -196,13 +196,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedRanBeforeFlushContinuation()
+        public void RegisterReaderCompletedRanBeforeFlushContinuation()
         {
             var callbackRan = false;
             var continuationRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, pauseWriterThreshold: 5, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.False(continuationRan);
@@ -221,7 +221,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedRunsInRegistrationOrder()
+        public void RegisterReaderCompletedRunsInRegistrationOrder()
         {
             var callbackState1 = new object();
             var callbackState2 = new object();
@@ -229,7 +229,7 @@ namespace System.IO.Pipelines.Tests
             var counter = 0;
 
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState1, state);
@@ -237,7 +237,7 @@ namespace System.IO.Pipelines.Tests
                     counter++;
                 }, callbackState1);
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState2, state);
@@ -245,7 +245,7 @@ namespace System.IO.Pipelines.Tests
                     counter++;
                 }, callbackState2);
 
-            pipe.Writer.OnReaderCompleted(
+            pipe.Writer.RegisterReaderCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState3, state);
@@ -259,20 +259,20 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedThrowsWithNullCallback()
+        public void RegisterReaderCompletedThrowsWithNullCallback()
         {
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            Assert.Throws<ArgumentNullException>(() => pipe.Writer.OnReaderCompleted(null, null));
+            Assert.Throws<ArgumentNullException>(() => pipe.Writer.RegisterReaderCompleted(null, null));
         }
 
         [Fact]
-        public void OnReaderCompletedUsingWriterScheduler()
+        public void RegisterReaderCompletedUsingWriterScheduler()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, writerScheduler: scheduler, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Writer.OnReaderCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Writer.RegisterReaderCompleted((exception, state) => { callbackRan = true; }, null);
             pipe.Reader.Complete();
 
             Assert.True(callbackRan);
@@ -280,7 +280,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedContinuesOnException()
+        public void RegisterWriterCompletedContinuesOnException()
         {
             var callbackState1 = new object();
             var callbackState2 = new object();
@@ -290,7 +290,7 @@ namespace System.IO.Pipelines.Tests
             var counter = 0;
 
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState1, state);
@@ -299,7 +299,7 @@ namespace System.IO.Pipelines.Tests
                     throw exception1;
                 }, callbackState1);
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState2, state);
@@ -315,12 +315,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedExceptionSurfacesToReaderScheduler()
+        public void RegisterWriterCompletedExceptionSurfacesToReaderScheduler()
         {
             var exception = new Exception();
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, scheduler, PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted((e, state) => throw exception, null);
+            pipe.Reader.RegisterWriterCompleted((e, state) => throw exception, null);
             pipe.Writer.Complete();
 
             Assert.Equal(1, scheduler.CallCount);
@@ -329,14 +329,14 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedExecutedSchedulerIfCompleted()
+        public void RegisterWriterCompletedExecutedSchedulerIfCompleted()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, scheduler, PipeScheduler.Inline, useSynchronizationContext: false));
             pipe.Writer.Complete();
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Null(exception);
@@ -348,12 +348,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedIsDetachedDuringReset()
+        public void RegisterWriterCompletedIsDetachedDuringReset()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, scheduler, PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Reader.RegisterWriterCompleted((exception, state) => { callbackRan = true; }, null);
             pipe.Reader.Complete();
             pipe.Writer.Complete();
             pipe.Reset();
@@ -369,13 +369,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedPassesException()
+        public void RegisterWriterCompletedPassesException()
         {
             var callbackRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
             var readerException = new Exception();
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     callbackRan = true;
@@ -387,12 +387,12 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedPassesState()
+        public void RegisterWriterCompletedPassesState()
         {
             var callbackRan = false;
             var callbackState = new object();
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState, state);
@@ -404,13 +404,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedRanBeforeReadContinuation()
+        public void RegisterWriterCompletedRanBeforeReadContinuation()
         {
             var callbackRan = false;
             var continuationRan = false;
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     callbackRan = true;
@@ -426,7 +426,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedRunsInRegistrationOrder()
+        public void RegisterWriterCompletedRunsInRegistrationOrder()
         {
             var callbackState1 = new object();
             var callbackState2 = new object();
@@ -434,7 +434,7 @@ namespace System.IO.Pipelines.Tests
             var counter = 0;
 
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState1, state);
@@ -442,7 +442,7 @@ namespace System.IO.Pipelines.Tests
                     counter++;
                 }, callbackState1);
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState2, state);
@@ -450,7 +450,7 @@ namespace System.IO.Pipelines.Tests
                     counter++;
                 }, callbackState2);
 
-            pipe.Reader.OnWriterCompleted(
+            pipe.Reader.RegisterWriterCompleted(
                 (exception, state) =>
                 {
                     Assert.Equal(callbackState3, state);
@@ -464,20 +464,20 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedThrowsWithNullCallback()
+        public void RegisterWriterCompletedThrowsWithNullCallback()
         {
             var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            Assert.Throws<ArgumentNullException>(() => pipe.Reader.OnWriterCompleted(null, null));
+            Assert.Throws<ArgumentNullException>(() => pipe.Reader.RegisterWriterCompleted(null, null));
         }
 
         [Fact]
-        public void OnWriterCompletedUsingReaderScheduler()
+        public void RegisterWriterCompletedUsingReaderScheduler()
         {
             var callbackRan = false;
             var scheduler = new TestScheduler();
             var pipe = new Pipe(new PipeOptions(_pool, scheduler, PipeScheduler.Inline, useSynchronizationContext: false));
-            pipe.Reader.OnWriterCompleted((exception, state) => { callbackRan = true; }, null);
+            pipe.Reader.RegisterWriterCompleted((exception, state) => { callbackRan = true; }, null);
             pipe.Writer.Complete();
 
             Assert.True(callbackRan);
