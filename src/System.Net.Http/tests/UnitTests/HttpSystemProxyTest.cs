@@ -40,5 +40,44 @@ namespace System.Net.Http.Tests
             Assert.Equal(fakeProxyUri, p.GetProxy(fooHttp));
             Assert.Equal(fakeProxyUri, p.GetProxy(fooHttps));
         }
+
+        [Theory]
+        [InlineData("http://localhost/", true)]
+        [InlineData("http://127.0.0.1/", true)]
+        [InlineData("http://128.0.0.1/", false)]
+        [InlineData("http://[::1]/", true)]
+        [InlineData("http://foo/", true)]
+        [InlineData("http://www.foo.com/", true)]
+        [InlineData("http://WWW.FOO.COM/", true)]
+        [InlineData("http://foo.com/", false)]
+        [InlineData("http://bar.com/", true)]
+        [InlineData("http://BAR.COM/", true)]
+        [InlineData("http://162.1.1.1/", true)]
+        [InlineData("http://[2a01:5b40:0:248::52]/", false)]
+        [InlineData("http://[2002::11]/", true)]
+        [InlineData("http://[2607:f8b0:4005:80a::200e]/", true)]
+        [InlineData("http://[2607:f8B0:4005:80A::200E]/", true)]
+        public void HttpProxy_Local_Bypassed(string name, bool shouldBypass)
+        {
+
+            RemoteInvoke((url, expected) =>
+            {
+                bool expectedResult = Boolean.Parse(expected);
+                IWebProxy p;
+
+                FakeRegistry.Reset();
+                FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
+                FakeRegistry.WinInetProxySettings.ProxyBypass = "23.23.86.44;*.foo.com;<local>;BAR.COM; ; 162*;[2002::11];[*:f8b0:4005:80a::200e]";
+                WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
+
+                Assert.True(HttpSystemProxy.TryCreate(out p));
+                Assert.NotNull(p);
+
+                Uri u = new Uri(url);
+                Assert.Equal(expectedResult, p.GetProxy(u) == null);
+
+                return SuccessExitCode;
+           }, name, shouldBypass.ToString()).Dispose();
+        }
     }
 }
