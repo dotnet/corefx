@@ -3419,6 +3419,9 @@ namespace CoreXml.Test.XLinq
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
                         if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
                         {
+                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
                             Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("]]>") + @"[\p{Pf}\p{Po}]"));
                             Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
                             Assert.True(Regex.IsMatch(exception.Message, @"\b" + "CDATA" + @"\b"));
@@ -3614,6 +3617,10 @@ namespace CoreXml.Test.XLinq
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
                         if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
                         {
+                            // \b word boundary
+                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
                             Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
                             Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("--") + @"[\p{Pf}\p{Po}]"));
                             Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("-") + @"[\p{Pf}\p{Po}]"));
@@ -4218,6 +4225,10 @@ namespace CoreXml.Test.XLinq
                         Exception exception = AssertExtensions.Throws<ArgumentException>(null, () => MoveToFirstElement(reader).ReadOuterXml());
                         if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away Exception messages
                         {
+                            // \b word boundary
+                            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
                             Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("?>") + @"[\p{Pf}\p{Po}]"));
                             Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
                         }
