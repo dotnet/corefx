@@ -22,7 +22,6 @@ namespace System.Data.Odbc.Tests
 
                 DataTable tableSchema = connection.GetSchema("Tables");
                 Assert.NotNull(tableSchema);
-
             }
         }
 
