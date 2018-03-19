@@ -697,6 +697,8 @@ namespace System.Diagnostics.Tests
                 p.StartInfo.RedirectStandardInput = true;
                 p.Start();
                 Assert.Equal(p.StartTime, p.StartTime);
+                var p2 = Process.GetProcessById(p.Id);
+                Assert.Equal(p.StartTime, p2.StartTime);
                 DateTime processStartTime = p.StartTime;
                 using (StreamWriter writer = p.StandardInput)
                 {
