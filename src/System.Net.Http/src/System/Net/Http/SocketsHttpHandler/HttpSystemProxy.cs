@@ -81,7 +81,8 @@ namespace System.Net.Http
                         }
                         try
                         {
-                            Regex re = new Regex(tmp.Replace(".", "\\.").Replace("*", ".*?") + "$",
+                            // Escape any special characters and unescape * to get wildcard pattern match.
+                            Regex re = new Regex(Regex.Escape(tmp).Replace("\\*", ".*?") + "$",
                                             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
                             _bypass.Add(re);
                         }
