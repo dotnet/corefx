@@ -257,6 +257,7 @@ namespace System.Collections.Generic
         {
             if (_buckets != null)
             {
+                int collisionCount = 0;
                 int hashCode = InternalGetHashCode(item);
                 // see note at "HashSet" level describing why "- 1" appears in for loop
                 for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
@@ -265,6 +266,13 @@ namespace System.Collections.Generic
                     {
                         return true;
                     }
+
+                    if (collisionCount >= _slots.Length)
+                    {
+                        // The chain of entries forms a loop; which means a concurrent update has happened.
+                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    }
+                    collisionCount++;
                 }
             }
             // either _buckets is null or wasn't found
@@ -293,6 +301,7 @@ namespace System.Collections.Generic
                 int hashCode = InternalGetHashCode(item);
                 int bucket = hashCode % _buckets.Length;
                 int last = -1;
+                int collisionCount = 0;
                 for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].next)
                 {
                     if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
@@ -327,6 +336,13 @@ namespace System.Collections.Generic
                         }
                         return true;
                     }
+
+                    if (collisionCount >= _slots.Length)
+                    {
+                        // The chain of entries forms a loop; which means a concurrent update has happened.
+                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    }
+                    collisionCount++;
                 }
             }
             // either _buckets is null or wasn't found
@@ -1196,13 +1212,20 @@ namespace System.Collections.Generic
 
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
-
+            int collisionCount = 0;
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
                 if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
                 {
                     return false;
                 }
+
+                if (collisionCount >= _slots.Length)
+                {
+                    // The chain of entries forms a loop; which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
 
             int index;
@@ -1376,6 +1399,7 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_buckets != null, "_buckets was null; callers should check first");
 
+            int collisionCount = 0;
             int hashCode = InternalGetHashCode(item);
             for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
             {
@@ -1383,6 +1407,13 @@ namespace System.Collections.Generic
                 {
                     return i;
                 }
+
+                if (collisionCount >= _slots.Length)
+                {
+                    // The chain of entries forms a loop; which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
             // wasn't found
             return -1;
@@ -1500,6 +1531,7 @@ namespace System.Collections.Generic
 
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
+            int collisionCount = 0;
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
                 if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
@@ -1507,6 +1539,13 @@ namespace System.Collections.Generic
                     location = i;
                     return false; //already present
                 }
+
+                if (collisionCount >= _slots.Length)
+                {
+                    // The chain of entries forms a loop; which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
             int index;
             if (_freeList >= 0)
