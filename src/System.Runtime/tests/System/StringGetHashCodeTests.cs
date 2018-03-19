@@ -19,11 +19,10 @@ namespace System.Tests
         [Fact]
         public void GetHashCodeWithStringComparer_UseSameStringInTwoProcesses_ReturnsDifferentHashCodes()
         {
-            int parentHashCode, childHashCode;
-            foreach (var ComputeHashCode in HashCodeComputers())
+            foreach (Func<int> ComputeHashCode in HashCodeComputers())
             {
-                parentHashCode = ComputeHashCode();
-                childHashCode = GetChildHashCode(ComputeHashCode, parentHashCode);
+                int parentHashCode = ComputeHashCode();
+                int childHashCode = GetChildHashCode(ComputeHashCode, parentHashCode);
                 Assert.NotEqual(parentHashCode, childHashCode);
             }
         }
@@ -52,20 +51,15 @@ namespace System.Tests
 
         private int GetChildHashCode(Func<int> computeHash, int parentHashCode)
         {
-            Func<int> computeChildHashRemote = () =>
-            {
-                using (RemoteInvokeHandle handle = RemoteInvoke(computeHash, new RemoteInvokeOptions { CheckExitCode = false }))
-                {
-                    handle.Process.WaitForExit();
-                    return handle.Process.ExitCode;
-                }
-            };
-
             int childHashCode, timesTried = 0;
             do
             {
                 // very small chance the child and parent hashcode are the same. To further reduce chance of collision we try up to 3 times
-                childHashCode = computeChildHashRemote();
+                using (RemoteInvokeHandle handle = RemoteInvoke(computeHash, new RemoteInvokeOptions { CheckExitCode = false }))
+                {
+                    handle.Process.WaitForExit();
+                    childHashCode = handle.Process.ExitCode;
+                }
                 timesTried++;
             } while (parentHashCode == childHashCode && timesTried < 3);
 
