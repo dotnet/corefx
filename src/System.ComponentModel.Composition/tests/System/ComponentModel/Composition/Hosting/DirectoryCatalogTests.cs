@@ -256,203 +256,187 @@ namespace System.ComponentModel.Composition
         [ActiveIssue(25498)]
         public void Parts()
         {
-            var catalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
-            Assert.NotNull(catalog.Parts);
-            Assert.True(catalog.Parts.Count() > 0);
+                var catalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                Assert.NotNull(catalog.Parts);
+                Assert.True(catalog.Parts.Count() > 0);
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void Parts_ShouldSetDefinitionOriginToCatalogItself()
         {
-            var catalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
-            Assert.True(catalog.Parts.Count() > 0);
+                var catalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                Assert.True(catalog.Parts.Count() > 0);
 
-            foreach (ICompositionElement definition in catalog.Parts)
-            {
-                Assert.Same(catalog, definition.Origin);
-            }
+                foreach (ICompositionElement definition in catalog.Parts)
+                {
+                    Assert.Same(catalog, definition.Origin);
+                }
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void Path_ValidPath_ShouldBeFine()
         {
-            var expectations = new ExpectationCollection<string, string>();
+                var expectations = new ExpectationCollection<string, string>();
 
-            expectations.Add(".", ".");
-            expectations.Add(TemporaryFileCopier.RootTemporaryDirectoryName, TemporaryFileCopier.RootTemporaryDirectoryName);
-            expectations.Add(TemporaryFileCopier.GetRootTemporaryDirectory(), TemporaryFileCopier.GetRootTemporaryDirectory());
-            expectations.Add(TemporaryFileCopier.GetTemporaryDirectory(), TemporaryFileCopier.GetTemporaryDirectory());
+                expectations.Add(".", ".");
+                expectations.Add(TemporaryFileCopier.RootTemporaryDirectoryName, TemporaryFileCopier.RootTemporaryDirectoryName);
+                expectations.Add(TemporaryFileCopier.GetRootTemporaryDirectory(), TemporaryFileCopier.GetRootTemporaryDirectory());
+                expectations.Add(TemporaryFileCopier.GetTemporaryDirectory(), TemporaryFileCopier.GetTemporaryDirectory());
 
-            foreach (var e in expectations)
-            {
-                var cat = CreateDirectoryCatalog(e.Input, NonExistentSearchPattern);
+                foreach (var e in expectations)
+                {
+                    var cat = CreateDirectoryCatalog(e.Input, NonExistentSearchPattern);
 
-                Assert.Equal(e.Output, cat.Path);
-            }
+                    Assert.Equal(e.Output, cat.Path);
+                }
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void FullPath_ValidPath_ShouldBeFine()
         {
-            var expectations = new ExpectationCollection<string, string>();
+                var expectations = new ExpectationCollection<string, string>();
 
-            // Ensure the path is always normalized properly.
-            string rootTempPath = Path.GetFullPath(TemporaryFileCopier.GetRootTemporaryDirectory()).ToUpperInvariant();
+                // Ensure the path is always normalized properly.
+                string rootTempPath = Path.GetFullPath(TemporaryFileCopier.GetRootTemporaryDirectory()).ToUpperInvariant();
 
-            // Note: These relative paths work properly because the unit test temporary directories are always
-            // created as a subfolder off the AppDomain.CurrentDomain.BaseDirectory.
-            expectations.Add(".", Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".")).ToUpperInvariant());
-            expectations.Add(TemporaryFileCopier.RootTemporaryDirectoryName, rootTempPath);
-            expectations.Add(TemporaryFileCopier.GetRootTemporaryDirectory(), rootTempPath);
-            expectations.Add(TemporaryFileCopier.GetTemporaryDirectory(), Path.GetFullPath(TemporaryFileCopier.GetTemporaryDirectory()).ToUpperInvariant());
+                // Note: These relative paths work properly because the unit test temporary directories are always
+                // created as a subfolder off the AppDomain.CurrentDomain.BaseDirectory.
+                expectations.Add(".", Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".")).ToUpperInvariant());
+                expectations.Add(TemporaryFileCopier.RootTemporaryDirectoryName, rootTempPath);
+                expectations.Add(TemporaryFileCopier.GetRootTemporaryDirectory(), rootTempPath);
+                expectations.Add(TemporaryFileCopier.GetTemporaryDirectory(), Path.GetFullPath(TemporaryFileCopier.GetTemporaryDirectory()).ToUpperInvariant());
 
-            foreach (var e in expectations)
-            {
-                var cat = CreateDirectoryCatalog(e.Input, NonExistentSearchPattern);
+                foreach (var e in expectations)
+                {
+                    var cat = CreateDirectoryCatalog(e.Input, NonExistentSearchPattern);
 
-                Assert.Equal(e.Output, cat.FullPath);
-            }
+                    Assert.Equal(e.Output, cat.FullPath);
+                }
         }
 
         [Fact]
         public void LoadedFiles_EmptyDirectory_ShouldBeFine()
         {
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-            Assert.Equal(0, cat.LoadedFiles.Count);
+                Assert.Equal(0, cat.LoadedFiles.Count);
         }
 
         [Fact]
         public void LoadedFiles_ContainsMultipleDllsAndSomeNonDll_ShouldOnlyContainDlls()
         {
-            // Add one text file
-            using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt")))
-            { }
+                // Add one text file
+                using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt"))) { }
 
-            // Add two dll's
-            string dll1 = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test1.dll");
-            string dll2 = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test2.dll");
-            File.Copy(Assembly.GetExecutingAssembly().Location, dll1);
-            File.Copy(Assembly.GetExecutingAssembly().Location, dll2);
+                // Add two dll's
+                string dll1 = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test1.dll");
+                string dll2 = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test2.dll");
+                File.Copy(Assembly.GetExecutingAssembly().Location, dll1);
+                File.Copy(Assembly.GetExecutingAssembly().Location, dll2);
 
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-            EqualityExtensions.CheckEquals(new string[] { dll1.ToUpperInvariant(), dll2.ToUpperInvariant() },
-                cat.LoadedFiles);
-        }
-
-        [Fact]        
-        public void LoadedFiles_NonStaticallyReferencedAssembly()
-        {
-            string testAssembly = "System.ComponentModel.Composition.Test.Assembly.dll";
-            var directory = TemporaryFileCopier.GetNewTemporaryDirectory();
-            Directory.CreateDirectory(directory);
-            var finalPath = Path.Combine(directory, testAssembly);
-            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
-            File.Move(sourcePath, finalPath);
-            var catalog = new DirectoryCatalog(directory, "*.dll");
-            Assert.NotEmpty(catalog);
+                EqualityExtensions.CheckEquals(new string[] { dll1.ToUpperInvariant(), dll2.ToUpperInvariant() },
+                    cat.LoadedFiles);
         }
 
         [Fact]
         public void Constructor_InvalidAssembly_ShouldBeFine()
         {
-            using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll")))
-            { }
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll"))) { }
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
         }
 
         [Fact]
         public void Constructor_NonExistentDirectory_ShouldThrow()
         {
-            Assert.Throws<DirectoryNotFoundException>(() =>
-               new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory() + @"\NonexistentDirectoryWithoutEndingSlash"));
+                Assert.Throws<DirectoryNotFoundException>(() =>
+                   new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory() + @"\NonexistentDirectoryWithoutEndingSlash"));
 
-            Assert.Throws<DirectoryNotFoundException>(() =>
-               new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory() + @"\NonexistentDirectoryWithEndingSlash\"));
-
+                Assert.Throws<DirectoryNotFoundException>(() =>
+                   new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory() + @"\NonexistentDirectoryWithEndingSlash\"));
+            
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void Constructor_PassExistingFileName_ShouldThrow()
         {
-            using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt")))
-            { }
-            Assert.Throws<IOException>(() =>
-                new DirectoryCatalog(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt")));
+                using (File.CreateText(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt"))) { }
+                Assert.Throws<IOException>(() =>
+                    new DirectoryCatalog(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.txt")));
         }
 
         [Fact]
         public void Constructor_PassNonExistingFileName_ShouldThrow()
         {
-            Assert.Throws<DirectoryNotFoundException>(() =>
-                new DirectoryCatalog(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "NonExistingFile.txt")));
+                Assert.Throws<DirectoryNotFoundException>(() =>
+                    new DirectoryCatalog(Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "NonExistingFile.txt")));
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void Refresh_AssemblyAdded_ShouldFireOnChanged()
         {
-            bool changedFired = false;
-            bool changingFired = false;
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                bool changedFired = false;
+                bool changingFired = false;
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-            Assert.Equal(0, cat.Parts.Count());
+                Assert.Equal(0, cat.Parts.Count());
 
-            cat.Changing += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
-                {
-                    Assert.Equal(0, cat.Parts.Count());
-                    changingFired = true;
-                });
+                cat.Changing += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
+                    {
+                        Assert.Equal(0, cat.Parts.Count());
+                        changingFired = true;
+                    });
 
-            cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
-                {
-                    Assert.NotEqual(0, cat.Parts.Count());
-                    changedFired = true;
-                });
+                cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
+                    {
+                        Assert.NotEqual(0, cat.Parts.Count());
+                        changedFired = true;
+                    });
 
-            File.Copy(Assembly.GetExecutingAssembly().Location, Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll"));
+                File.Copy(Assembly.GetExecutingAssembly().Location, Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll"));
 
-            cat.Refresh();
+                cat.Refresh();
 
-            Assert.True(changingFired);
-            Assert.True(changedFired);
+                Assert.True(changingFired);
+                Assert.True(changedFired);
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void Refresh_AssemblyRemoved_ShouldFireOnChanged()
         {
-            string file = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll");
-            File.Copy(Assembly.GetExecutingAssembly().Location, file);
-            bool changedFired = false;
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                string file = Path.Combine(TemporaryFileCopier.GetTemporaryDirectory(), "Test.dll");
+                File.Copy(Assembly.GetExecutingAssembly().Location, file);
+                bool changedFired = false;
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-            cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
-                changedFired = true);
+                cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
+                    changedFired = true);
 
-            // This assembly can be deleted because it was already loaded by the CLR in another context
-            // in another location so it isn't locked on disk.
-            File.Delete(file);
+                // This assembly can be deleted because it was already loaded by the CLR in another context
+                // in another location so it isn't locked on disk.
+                File.Delete(file);
 
-            cat.Refresh();
+                cat.Refresh();
 
-            Assert.True(changedFired);
+                Assert.True(changedFired);
         }
 
         [Fact]
         public void Refresh_NoChanges_ShouldNotFireOnChanged()
         {
-            var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-            cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
-                Assert.False(true));
+                cat.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
+                    Assert.False(true));
 
-            cat.Refresh();
+                cat.Refresh();
         }
 
         [Fact]
@@ -460,7 +444,7 @@ namespace System.ComponentModel.Composition
         public void Refresh_DirectoryRemoved_ShouldThrowDirectoryNotFound()
         {
             DirectoryCatalog cat;
-            cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
             ExceptionAssert.Throws<DirectoryNotFoundException>(RetryMode.DoNotRetry, () =>
                 cat.Refresh());
@@ -469,49 +453,49 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExports()
         {
-            var catalog = new AggregateCatalog();
-            Expression<Func<ExportDefinition, bool>> constraint = (ExportDefinition exportDefinition) => exportDefinition.ContractName == AttributedModelServices.GetContractName(typeof(MyExport));
-            IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> matchingExports = null;
+                var catalog = new AggregateCatalog();
+                Expression<Func<ExportDefinition, bool>> constraint = (ExportDefinition exportDefinition) => exportDefinition.ContractName == AttributedModelServices.GetContractName(typeof(MyExport));
+                IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> matchingExports = null;
 
-            matchingExports = catalog.GetExports(constraint);
-            Assert.NotNull(matchingExports);
-            Assert.True(matchingExports.Count() == 0);
+                matchingExports = catalog.GetExports(constraint);
+                Assert.NotNull(matchingExports);
+                Assert.True(matchingExports.Count() == 0);
 
-            var testsDirectoryCatalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
-            catalog.Catalogs.Add(testsDirectoryCatalog);
-            matchingExports = catalog.GetExports(constraint);
+                var testsDirectoryCatalog = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                catalog.Catalogs.Add(testsDirectoryCatalog);
+                matchingExports = catalog.GetExports(constraint);
 
-            Assert.NotNull(matchingExports);
-            Assert.True(matchingExports.Count() >= 0);
+                Assert.NotNull(matchingExports);
+                Assert.True(matchingExports.Count() >= 0);
 
-            IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> expectedMatchingExports = catalog.Parts
-                .SelectMany(part => part.ExportDefinitions, (part, export) => new Tuple<ComposablePartDefinition, ExportDefinition>(part, export))
-                .Where(partAndExport => partAndExport.Item2.ContractName == AttributedModelServices.GetContractName(typeof(MyExport)));
+                IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> expectedMatchingExports = catalog.Parts
+                    .SelectMany(part => part.ExportDefinitions, (part, export) => new Tuple<ComposablePartDefinition, ExportDefinition>(part, export))
+                    .Where(partAndExport => partAndExport.Item2.ContractName == AttributedModelServices.GetContractName(typeof(MyExport)));
 
-            Assert.True(matchingExports.SequenceEqual(expectedMatchingExports));
+                Assert.True(matchingExports.SequenceEqual(expectedMatchingExports));
 
-            catalog.Catalogs.Remove(testsDirectoryCatalog);
-            matchingExports = catalog.GetExports(constraint);
-            Assert.NotNull(matchingExports);
-            Assert.True(matchingExports.Count() == 0);
+                catalog.Catalogs.Remove(testsDirectoryCatalog);
+                matchingExports = catalog.GetExports(constraint);
+                Assert.NotNull(matchingExports);
+                Assert.True(matchingExports.Count() == 0);
         }
 
         [Fact]
         [ActiveIssue(25498)]
         public void AddAndRemoveDirectory()
         {
-            var cat = new AggregateCatalog();
-            var container = new CompositionContainer(cat);
+                var cat = new AggregateCatalog();
+                var container = new CompositionContainer(cat);
 
-            Assert.False(container.IsPresent<MyExport>());
+                Assert.False(container.IsPresent<MyExport>());
 
-            var dir1 = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
-            cat.Catalogs.Add(dir1);
-            Assert.True(container.IsPresent<MyExport>());
+                var dir1 = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
+                cat.Catalogs.Add(dir1);
+                Assert.True(container.IsPresent<MyExport>());
 
-            cat.Catalogs.Remove(dir1);
+                cat.Catalogs.Remove(dir1);
 
-            Assert.False(container.IsPresent<MyExport>());
+                Assert.False(container.IsPresent<MyExport>());
         }
 
         [Fact]
