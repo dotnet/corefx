@@ -23,9 +23,9 @@ namespace System.Runtime.InteropServices
             object obj = memory.GetObjectStartLength(out int index, out int length);
             if (index < 0)
             {
-                if (((OwnedMemory<T>)obj).TryGetArray(out var segment))
+                if (((OwnedMemory<T>)obj).TryGetArray(out ArraySegment<T> arraySegment))
                 {
-                    segment = new ArraySegment<T>(segment.Array, segment.Offset + (index & ReadOnlyMemory<T>.RemoveOwnedFlagBitMask), length);
+                    segment = new ArraySegment<T>(arraySegment.Array, arraySegment.Offset + (index & ReadOnlyMemory<T>.RemoveOwnedFlagBitMask), length);
                     return true;
                 }
             }
@@ -38,7 +38,7 @@ namespace System.Runtime.InteropServices
             if (length == 0)
             {
 #if FEATURE_PORTABLE_SPAN
-                arraySegment = new ArraySegment<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
+                segment = new ArraySegment<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
 #else
                 segment = ArraySegment<T>.Empty;
 #endif // FEATURE_PORTABLE_SPAN
