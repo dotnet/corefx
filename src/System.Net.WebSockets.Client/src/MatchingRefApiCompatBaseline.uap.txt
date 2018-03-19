@@ -1,4 +1,0 @@
-Compat issues with assembly System.Net.WebSockets.Client:
-MembersMustExist : Member 'System.Net.WebSockets.ClientWebSocketOptions.RemoteCertificateValidationCallback.get()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Net.WebSockets.ClientWebSocketOptions.RemoteCertificateValidationCallback.set(System.Net.Security.RemoteCertificateValidationCallback)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 2
