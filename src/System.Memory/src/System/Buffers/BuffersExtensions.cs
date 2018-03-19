@@ -93,10 +93,10 @@ namespace System.Buffers
         /// <summary>
         /// Converts the <see cref="ReadOnlySequence{T}"/> to an array
         /// </summary>
-        public static T[] ToArray<T>(in this ReadOnlySequence<T> source)
+        public static T[] ToArray<T>(in this ReadOnlySequence<T> sequence)
         {
-            var array = new T[source.Length];
-            source.CopyTo(array);
+            var array = new T[sequence.Length];
+            sequence.CopyTo(array);
             return array;
         }
 
