@@ -29,14 +29,14 @@ namespace System.Linq.Parallel.Tests
 
     public abstract class GroupJoinPerfTests
     {
-        const int LeftCount = 100;
+        const int LeftCount = 75;
         const int RightsPerLeft = 20;
         protected virtual ParallelQuery<int> Left => UnorderedSources.Default(LeftCount);
         protected virtual ParallelQuery<int> Right => UnorderedSources.Default(LeftCount * RightsPerLeft);
 
         private ParallelQuery<KeyValuePair<int, int>> CreateQuery()
         {
-            return Left.GroupJoin(Right, x => x, y => y / LeftCount, (x, y) => KeyValuePair.Create(x, y.Sum()));
+            return Left.GroupJoin(Right, x => x, y => y / RightsPerLeft, (x, y) => KeyValuePair.Create(x, y.Sum()));
         }
 
         private static volatile ParallelQuery<KeyValuePair<int, int>> _queryCreationResult;
@@ -44,8 +44,6 @@ namespace System.Linq.Parallel.Tests
         [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
         public void QueryCreation()
         {
-            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery();
-
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 long iters = Benchmark.InnerIterationCount;
