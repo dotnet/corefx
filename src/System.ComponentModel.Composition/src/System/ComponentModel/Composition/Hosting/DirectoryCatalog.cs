@@ -32,7 +32,7 @@ namespace System.ComponentModel.Composition.Hosting
         private string _fullPath;
         private string _searchPattern;
         private ReadOnlyCollection<string> _loadedFiles;
-
+        
         private readonly ReflectionContext _reflectionContext = null;
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll")
         {
         }
-
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
         ///     in the given directory path.
@@ -141,11 +141,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="UnauthorizedAccessException">
         ///     The caller does not have the required permission. 
         /// </exception>
-        public DirectoryCatalog(string path, ICompositionElement definitionOrigin)
+        public DirectoryCatalog(string path, ICompositionElement definitionOrigin) 
             : this(path, "*.dll", definitionOrigin)
         {
         }
-
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -274,7 +274,7 @@ namespace System.ComponentModel.Composition.Hosting
             _definitionOrigin = definitionOrigin;
             Initialize(path, searchPattern);
         }
-
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -388,7 +388,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 Contract.Ensures(Contract.Result<string>() != null);
-
+                
                 return _fullPath;
             }
         }
@@ -417,7 +417,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 Contract.Ensures(Contract.Result<string>() != null);
-
+                
                 return _path;
             }
         }
@@ -664,22 +664,12 @@ namespace System.ComponentModel.Composition.Hosting
         private AssemblyCatalog CreateAssemblyCatalogGuarded(string assemblyFilePath)
         {
             Exception exception = null;
+
             try
             {
-                try
-                {
-                    return (_reflectionContext != null)
-                        ? new AssemblyCatalog(assemblyFilePath, _reflectionContext, this)
-                        : new AssemblyCatalog(assemblyFilePath, this);
-                }
-                //fallback attempt issue https://github.com/dotnet/corefx/issues/27433
-                catch (FileNotFoundException)
-                {
-                    var loadedAssembly = Assembly.LoadFrom(assemblyFilePath);
-                    return (_reflectionContext != null)
-                        ? new AssemblyCatalog(loadedAssembly, _reflectionContext, this)
-                        : new AssemblyCatalog(loadedAssembly, this);
-                }
+                return (_reflectionContext != null)
+                    ? new AssemblyCatalog(assemblyFilePath, _reflectionContext, this)
+                    : new AssemblyCatalog(assemblyFilePath, this);
             }
             catch (FileNotFoundException ex)
             {   // Files should always exists but don't blow up here if they don't
@@ -786,7 +776,7 @@ namespace System.ComponentModel.Composition.Hosting
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
         }
-
+       
         /// <summary>
         ///     Gets the display name of the directory catalog.
         /// </summary>
