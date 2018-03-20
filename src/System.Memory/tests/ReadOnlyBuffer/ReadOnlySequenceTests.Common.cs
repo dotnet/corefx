@@ -181,6 +181,37 @@ namespace System.Memory.Tests
 
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
+
+            // Go out of bounds for segment
+            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(150, buffer.Start));
+            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(250, buffer.Start));
+        }
+
+        [Fact]
+        public void SeekEmptySkipDoesNotCrossPastEndWithExtraChainedBlocks()
+        {
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
+            BufferSegment<byte> bufferSegment5 = bufferSegment4.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment6 = bufferSegment5.Append(new byte[100]);
+
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+
+            SequencePosition c1 = buffer.GetPosition(100);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(100, buffer.Start);
+
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            // Go out of bounds for segment
+            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(150, buffer.Start));
+            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(250, buffer.Start));
         }
 
         [Fact]
