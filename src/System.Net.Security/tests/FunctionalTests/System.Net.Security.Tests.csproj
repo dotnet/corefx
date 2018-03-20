@@ -36,6 +36,7 @@
     <Compile Include="ServerRequireEncryptionTest.cs" />
     <Compile Include="SslStreamStreamToStreamTest.cs" />
     <Compile Include="SslStreamNetworkStreamTest.cs" />
+    <Compile Include="SslStreamSNITest.cs" />
     <Compile Include="TransportContextTest.cs" />
     <!-- NegotiateStream Tests -->
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
