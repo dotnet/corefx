@@ -275,7 +275,7 @@ namespace System.Buffers
 
                     // Move to next
                     count -= memoryLength;
-                    currentSegment = currentSegment.Next;
+                    currentSegment = isCurrentAtEnd ? null : currentSegment.Next;
                 }
             }
 
