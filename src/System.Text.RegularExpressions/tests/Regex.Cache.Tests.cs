@@ -101,9 +101,9 @@ namespace System.Text.RegularExpressions.Tests
         private int GetCachedItemsNum()
         {
             Type type = typeof(Regex);
-            FieldInfo info = type.GetField("s_livecode", BindingFlags.NonPublic | BindingFlags.Static);
-            var dictionary = (ICollection) info.GetValue(null);
-            return dictionary.Count;
+            FieldInfo info = type.GetField("s_livecode_count", BindingFlags.NonPublic | BindingFlags.Static);
+            var count = (int) info.GetValue(null);
+            return count;
         }
     }
 }
