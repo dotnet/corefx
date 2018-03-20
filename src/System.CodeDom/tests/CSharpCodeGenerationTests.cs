@@ -615,10 +615,10 @@ namespace System.CodeDom.Tests
         [Fact]
         public void MetadataAttributes()
         {
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
                 var cu = new CodeCompileUnit();
 
                 var ns = new CodeNamespace();
@@ -826,11 +826,7 @@ namespace System.CodeDom.Tests
                               }
                           }
                       }");
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
-            }
+            }).Dispose();
         }
 
         [Fact]
