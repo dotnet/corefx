@@ -6,6 +6,8 @@
     <BinPlaceRef>true</BinPlaceRef>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
     <RefOutputPath>$(RefPath)</RefOutputPath>
+    <TargetingPackPackageVersion>1.0.1</TargetingPackPackageVersion>
+    <TargetingPackPackageVersion Condition="'$(TargetGroup)' == 'net471'">1.0.0-preview</TargetingPackPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NuGetTargetMoniker)' == '.NETFramework,Version=v4.6.3'">
     <!-- Missing 4.6.3 targeting pack, use 462 for now -->
@@ -20,10 +22,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="$(TargetingPackNugetPackageId)">
-      <Version>1.0.1</Version>
+      <Version>$(TargetingPackPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library" Condition="'$(TargetGroup)' == 'netfx'">
-      <Version>$(NETStandardPackageVersion)</Version>
+      <Version>$(NETStandardLibraryPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -39,12 +41,14 @@
   <Target Name="FilterNETStandardShims" BeforeTargets="FilterNugetPackages"
           Condition="'$(RefOutputPath)' == '$(NetFxRefPath)'">
     <PropertyGroup>
-      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardPackageId.ToLower())\$(NETStandardPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
+      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
     </PropertyGroup>
     <ItemGroup>
       <_excludeForNetFx Include="@(NetFxReference);netstandard" />
-      <_netstandardShimAssemblies Include="$(_NETStandardRefFolder)\*.dll" Exclude="@(_excludeForNetFx->'$(_NETStandardRefFolder)\%(Identity).dll')" />
-      <FileToExclude Include="@(_netstandardShimAssemblies->'%(FileName)')" />
+      <_allnetstandardAssemblies Include="$(_NETStandardRefFolder)\*.dll" />
+      <_netstandardAssemblyFileNames Include="@(_allnetstandardAssemblies->'%(Filename)')" Exclude="@(_excludeForNetFx)" />
+      <_netstandardShimAssemblies Include="@(_netstandardAssemblyFileNames->'$(_NETStandardRefFolder)\%(Identity).dll')" />
+      <FileToExclude Include="@(_netstandardAssemblyFileNames)" />
     </ItemGroup>
   </Target>
 
@@ -53,8 +57,8 @@
     <ItemGroup>
       <Reference Include="@(_netstandardShimAssemblies)">
         <Private>False</Private>
-        <NuGetPackageId>$(NETStandardPackageId)</NuGetPackageId>
-        <NuGetPackageVersion>$(NETStandardPackageVersion)</NuGetPackageVersion>
+        <NuGetPackageId>$(NETStandardLibraryPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(NETStandardLibraryPackageVersion)</NuGetPackageVersion>
       </Reference>
     </ItemGroup>
   </Target>

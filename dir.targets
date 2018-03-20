@@ -48,8 +48,7 @@
       <PackageFileRuntimePath>$(UAPAOTPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="('$(IsNetFxNETStandard)' == 'true' OR '$(IsNetFxNETStandardRef)' == 'true') AND '$(BuildingNETFxVertical)' == 'true'"
-                           Include="netfx-$(_bc_OSGroup);net462-$(_bc_OSGroup);net47-$(_bc_OSGroup)">
-      <PackageFileRefPath Condition="'$(IsNetFxNETStandardRef)'=='true'">$(NetFxPackageRefPath)</PackageFileRefPath>
+                           Include="netfx-$(_bc_OSGroup);net462-$(_bc_OSGroup);net47-$(_bc_OSGroup);net471-$(_bc_OSGroup)">
       <PackageFileRuntimePath Condition="'$(IsNetFxNETStandard)'=='true'">$(NetFxPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
 
@@ -130,5 +129,9 @@
     <Exec Command="$(_GenAPICmd)" />
     <Message Text="Generated reference assembly source code: $(_RefSourceFileOutputPath)" />
   </Target>
+  
+  <!-- HACK: Removing Pri file generation for building of tests -->
+  <Target Name="MakeCommonResourcesPriFile" />
+  <Target Name="MakeTestSpecificResourcesPriFile" />
 
 </Project>

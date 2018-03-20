@@ -11,6 +11,8 @@ namespace System.Xml.XPath
 {
     // Represents the exception that is thrown when there is error processing an
     // XPath expression.
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XPathException : SystemException
     {
         // we need to keep this members for V1 serialization compatibility

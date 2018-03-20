@@ -438,61 +438,6 @@ namespace System.Data.SqlClient
         }
 
         //
-        // SQL.SqlDependency
-        //
-        internal static Exception SqlCommandHasExistingSqlNotificationRequest()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SQLNotify_AlreadyHasCommand));
-        }
-
-        internal static Exception SqlDepDefaultOptionsButNoStart()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DefaultOptionsButNoStart));
-        }
-
-        internal static Exception SqlDependencyDatabaseBrokerDisabled()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DatabaseBrokerDisabled));
-        }
-
-        internal static Exception SqlDependencyEventNoDuplicate()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_EventNoDuplicate));
-        }
-
-        internal static Exception SqlDependencyDuplicateStart()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_DuplicateStart));
-        }
-
-        internal static Exception SqlDependencyIdMismatch()
-        {
-            // do not include the id because it may require SecurityPermission(Infrastructure) permission
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_IdMismatch));
-        }
-
-        internal static Exception SqlDependencyNoMatchingServerStart()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerStart));
-        }
-
-        internal static Exception SqlDependencyNoMatchingServerDatabaseStart()
-        {
-            return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_NoMatchingServerDatabaseStart));
-        }
-
-        //
-        // SQL.SqlDelegatedTransaction
-        //
-        internal static TransactionPromotionException PromotionFailed(Exception inner)
-        {
-            TransactionPromotionException e = new TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);
-            ADP.TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        //Failure while attempting to promote transaction.
-
-        //
         // SQL.SqlMetaData
         //
         internal static Exception InvalidSqlDbTypeForConstructor(SqlDbType type)

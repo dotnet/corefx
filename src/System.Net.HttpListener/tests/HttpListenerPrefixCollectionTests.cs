@@ -217,7 +217,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndNotStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -232,7 +232,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredWithDifferentPathAndNotStarted_Works(string hostname)
         {
@@ -249,7 +249,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -275,7 +275,7 @@ namespace System.Net.Tests
             }
         }
         
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerNotStarted_Works(string host)
         {
@@ -294,7 +294,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerStarted_Works(string host)
         {
@@ -322,7 +322,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathMultipleStarted_Success(string host)
         {

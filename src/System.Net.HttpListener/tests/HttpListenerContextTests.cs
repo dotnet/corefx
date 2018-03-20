@@ -31,7 +31,8 @@ namespace System.Net.Tests
             Socket.Dispose();
         }
 
-        public static bool IsNotWindows7 { get; } = !PlatformDetection.IsWindows7;
+        public static bool IsNotWindows7OrUapCore { get; } = !PlatformDetection.IsWindows7 && PlatformDetection.IsNotOneCoreUAP;
+        public static bool IsNotWindows7OrUapCoreAndIsWindowsImplementation { get; } = IsNotWindows7OrUapCore && Helpers.IsWindowsImplementationAndNotUap;
 
         public static IEnumerable<object[]> SubProtocol_TestData()
         {
@@ -45,7 +46,7 @@ namespace System.Net.Tests
             yield return new object[] { new string[] { "MyProtocol1", "MyProtocol2" }, "MyProtocol2" };
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20246, TestPlatforms.AnyUnix)] // CI hanging frequently
         [MemberData(nameof(SubProtocol_TestData))]
         public async Task AcceptWebSocketAsync_ValidSubProtocol_Success(string[] clientProtocols, string serverProtocol)
         {
@@ -54,7 +55,7 @@ namespace System.Net.Tests
             Assert.Equal(serverProtocol, socketContext.WebSocket.SubProtocol);
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20246, TestPlatforms.AnyUnix)] // CI hanging frequently
         public async Task AcceptWebSocketAsync_ValidWebSocket_SetsUpHeadersInResponse()
         {
             HttpListenerContext context = await GetWebSocketContext(new string[] { "SubProtocol", "SubProtocol2" });
@@ -78,7 +79,7 @@ namespace System.Net.Tests
             Assert.Equal("websocket", socketContext.Headers["Upgrade"], ignoreCase: true);
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_ValidWebSocket_SetsUpContextProperties()
         {
             Socket.Options.SetRequestHeader("origin", "Browser");
@@ -96,7 +97,7 @@ namespace System.Net.Tests
             Assert.False(socketContext.IsSecureConnection);
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_AuthorizationInHeaders_ThrowsNotImplementedException()
         {
             Socket.Options.SetRequestHeader("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes("user:password")));
@@ -115,21 +116,21 @@ namespace System.Net.Tests
             Assert.Equal("Basic", webSocketContext.User.Identity.AuthenticationType);
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20246, TestPlatforms.AnyUnix)] // CI hanging frequently
         public async Task AcceptWebSocketAsync_UnsupportedProtocol_ThrowsWebSocketException()
         {
             HttpListenerContext context = await GetWebSocketContext(new string[] { "MyProtocol" });
             await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync("MyOtherProtocol"));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_NoClientSubProtocol_ThrowsWebSocketException()
         {
             HttpListenerContext context = await GetWebSocketContext();
             await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync("SubProtocol"));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("Connection: ")]
         [InlineData("Connection: Connection\r\nUpgrade: ")]
         [InlineData("Connection: Test1\r\nUpgrade: Test2")]
@@ -149,7 +150,8 @@ namespace System.Net.Tests
             });
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("random(text")]
@@ -177,7 +179,8 @@ namespace System.Net.Tests
             await AssertExtensions.ThrowsAsync<ArgumentException>("subProtocol", () => context.AcceptWebSocketAsync(subProtocol));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData("!")]
         [InlineData("#")]
         [InlineData("YouDontKnowMe")]
@@ -187,7 +190,8 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<WebSocketException>(() => context.AcceptWebSocketAsync(subProtocol));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task AcceptWebSocketAsync_InvalidKeepAlive_ThrowsWebSocketException()
         {
             HttpListenerContext context = await GetWebSocketContext();
@@ -196,7 +200,8 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>("keepAliveInterval", () => context.AcceptWebSocketAsync(null, keepAlive));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(255)]
@@ -216,7 +221,8 @@ namespace System.Net.Tests
             await AssertExtensions.ThrowsAsync<ArgumentNullException>("internalBuffer.Array", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(-1)]
         [InlineData(11)]
         public async Task AcceptWebSocketAsync_InvalidOffsetInArraySegment_ThrowsArgumentNullException(int offset)
@@ -227,7 +233,8 @@ namespace System.Net.Tests
             await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("internalBuffer.Offset", () => context.AcceptWebSocketAsync(null, 1024, TimeSpan.MaxValue, internalBuffer));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ActiveIssue(20246)] // CI hanging frequently
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(0, -1)]
         [InlineData(0, 11)]
         [InlineData(10, 1)]

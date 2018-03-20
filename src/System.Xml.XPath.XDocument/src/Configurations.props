@@ -6,6 +6,7 @@
       netcoreapp-Windows_NT;
       netcoreapp-Unix;
       netfx;
+      net471;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -44,6 +44,7 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => CreateFileStream(path, FileMode.Open));
         }
 
+        [ActiveIssue(19965, TestPlatforms.AnyUnix)]
         [Theory, MemberData(nameof(TrailingCharacters))]
         public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
         {

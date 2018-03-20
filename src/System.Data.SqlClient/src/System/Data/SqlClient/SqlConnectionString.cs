@@ -206,6 +206,7 @@ namespace System.Data.SqlClient
             ThrowUnsupportedIfKeywordSet(KEY.AsynchronousProcessing);
             ThrowUnsupportedIfKeywordSet(KEY.Connection_Reset);
             ThrowUnsupportedIfKeywordSet(KEY.Context_Connection);
+            ThrowUnsupportedIfKeywordSet(KEY.TransactionBinding);
 
             // Network Library has its own special error message
             if (ContainsKey(KEY.Network_Library))

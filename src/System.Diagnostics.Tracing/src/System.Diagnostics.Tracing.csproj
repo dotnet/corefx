@@ -7,8 +7,8 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <!-- CSC adds a typeforward for the internal nested type EventSource.EventMetadata but
          GenFacades doesn't consider this as a viable target for a typeforward since it's internal -->
-    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx'">true</GenFacadesIgnoreMissingTypes>
-    <DefineContants Condition="'$(TargetGroup)' != 'netfx'">$(DefineConstants);SUPPORTS_EVENTCOMMANDEXECUTED</DefineContants>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">true</GenFacadesIgnoreMissingTypes>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">$(DefineConstants);NO_EVENTCOMMANDEXECUTED_SUPPORT</DefineConstants> 
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -17,6 +17,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
@@ -25,11 +27,12 @@
     <Compile Include="FxCopBaseline.cs" />
     <Compile Include="System\Diagnostics\Tracing\EventCounter.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">
     <Reference Include="mscorlib" />
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

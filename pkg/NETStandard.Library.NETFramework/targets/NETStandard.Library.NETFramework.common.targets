@@ -27,7 +27,7 @@
     </Otherwise>
   </Choose>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'">
     <!-- Ensure this runs before conflict resolution since the added files may cause conflicts -->
     <HandlePackageFileConflictsDependsOn>ImplicitlyExpandNETStandardFacades;$(HandlePackageFileConflictsDependsOn)</HandlePackageFileConflictsDependsOn>
   </PropertyGroup>
@@ -44,17 +44,9 @@
            consider a project with an Reference Include="System", and some NuGet package is providing System.dll.
            Simple references can also come from NuGet framework assemblies, hence this statement should occur after
            including all computed references. -->
-      <Reference Remove="%(_NETStandardLibraryNETFrameworkReference.FileName)" />
-
-      <Reference Include="@(_NETStandardLibraryNETFrameworkReference)">
-        <!-- Private = false to make these reference only -->
-        <Private>false</Private>
-        <NuGetPackageId>NETStandard.Library.NETFramework</NuGetPackageId>
-        <NuGetPackageVersion>$(NETStandardLibraryNETFrameworkPackageVersion)</NuGetPackageVersion>
-      </Reference>
+      <Reference Remove="%(_NETStandardLibraryNETFrameworkLib.FileName)" />
 
       <ReferenceCopyLocalPaths Include="@(_NETStandardLibraryNETFrameworkLib)">
-        <Private>false</Private>
         <NuGetPackageId>NETStandard.Library.NETFramework</NuGetPackageId>
         <NuGetPackageVersion>$(NETStandardLibraryPackageVersion)</NuGetPackageVersion>
       </ReferenceCopyLocalPaths>

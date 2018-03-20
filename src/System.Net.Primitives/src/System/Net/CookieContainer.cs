@@ -820,16 +820,14 @@ namespace System.Net
 
                 lock (pathList.SyncRoot)
                 {
-                    // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
-                    IDictionaryEnumerator e = pathList.GetEnumerator();
-                    while (e.MoveNext())
+                    foreach (DictionaryEntry entry in pathList)
                     {
-                        string path = (string)e.Key;
+                        string path = (string)entry.Key;
                         if (uri.AbsolutePath.StartsWith(CookieParser.CheckQuoted(path)))
                         {
                             found = true;
 
-                            CookieCollection cc = (CookieCollection)e.Value;
+                            CookieCollection cc = (CookieCollection)entry.Value;
                             cc.TimeStamp(CookieCollection.Stamp.Set);
                             MergeUpdateCollections(ref cookies, cc, port, isSecure, matchOnlyPlainCookie);
 
@@ -997,22 +995,20 @@ namespace System.Net
         // adding any mutable fields to it would result in breaks.
         private readonly SortedList m_list = SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)); // Do not rename (binary serialization)
 
-        internal int Count => m_list.Count;
+        public int Count => m_list.Count;
 
-        internal int GetCookiesCount()
+        internal ICollection Values
         {
-            int count = 0;
-            lock (SyncRoot)
+            get
             {
                 foreach (CookieCollection cc in m_list.Values)
                 {
                     count += cc.Count;
                 }
             }
-            return count;
         }
 
-        internal ICollection Values
+        public ICollection Values
         {
             get
             {
@@ -1020,7 +1016,7 @@ namespace System.Net
             }
         }
 
-        internal object this[string s]
+        public object this[string s]
         {
             get
             {
@@ -1039,7 +1035,7 @@ namespace System.Net
             }
         }
 
-        internal IDictionaryEnumerator GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
             lock (SyncRoot)
             {
@@ -1047,7 +1043,7 @@ namespace System.Net
             }
         }
 
-        internal object SyncRoot => m_list.SyncRoot;
+        public object SyncRoot => m_list.SyncRoot;
 
         [Serializable]
         [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]

@@ -5,6 +5,7 @@
       uapaot-Windows_NT;
       uap-Windows_NT;
       netfx-Windows_NT;
+      net471-Windows_NT;
       netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>

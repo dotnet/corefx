@@ -58,8 +58,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
-        [ActiveIssue("dotnet/corefx #18268", TargetFrameworkMonikers.NetFramework)]
+        [Theory, MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18268")]
         public void CreateDirectory_Existance(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

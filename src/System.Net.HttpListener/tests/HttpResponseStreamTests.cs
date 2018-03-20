@@ -300,7 +300,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooMuch_ThrowsProtocolViolationException()
         {
             using (HttpClient client = new HttpClient())
@@ -328,7 +328,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleAsynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())
@@ -354,7 +354,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotUap))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleSynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())

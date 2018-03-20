@@ -14,6 +14,8 @@ namespace System.Net.NetworkInformation
     ///       Provides NetworkInformation exceptions to the application.
     ///    </para>
     /// </devdoc>
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class NetworkInformationException : Win32Exception
     {
         /// <devdoc>

@@ -26,6 +26,20 @@ if exist "%BUILD_TOOLS_SEMAPHORE%" (
 
 if exist "%TOOLRUNTIME_DIR%" rmdir /S /Q "%TOOLRUNTIME_DIR%"
 
+if exist "%DotNetBuildToolsDir%" (
+  echo Using tools from '%DotNetBuildToolsDir%'.
+  mklink /j "%TOOLRUNTIME_DIR%" "%DotNetBuildToolsDir%"
+
+  if not exist "%DOTNET_CMD%" (
+    echo ERROR: Ensure that '%DotNetBuildToolsDir%' contains the .NET Core SDK at '%DOTNET_PATH%'
+    exit /b 1
+  )
+
+  echo Done initializing tools.
+  echo Using tools from '%DotNetBuildToolsDir%'. > "%BUILD_TOOLS_SEMAPHORE%"
+  exit /b 0
+)
+
 echo Running %0 > "%INIT_TOOLS_LOG%"
 
 set /p DOTNET_VERSION=< "%~dp0DotnetCLIVersion.txt"
@@ -33,7 +47,7 @@ if exist "%DOTNET_CMD%" goto :afterdotnetrestore
 
 echo Installing dotnet cli...
 if NOT exist "%DOTNET_PATH%" mkdir "%DOTNET_PATH%"
-set DOTNET_ZIP_NAME=dotnet-dev-win-x64.%DOTNET_VERSION%.zip
+set DOTNET_ZIP_NAME=dotnet-sdk-%DOTNET_VERSION%-win-x64.zip
 set DOTNET_REMOTE_PATH=https://dotnetcli.azureedge.net/dotnet/Sdk/%DOTNET_VERSION%/%DOTNET_ZIP_NAME%
 set DOTNET_LOCAL_PATH=%DOTNET_PATH%%DOTNET_ZIP_NAME%
 echo Installing '%DOTNET_REMOTE_PATH%' to '%DOTNET_LOCAL_PATH%' >> "%INIT_TOOLS_LOG%"

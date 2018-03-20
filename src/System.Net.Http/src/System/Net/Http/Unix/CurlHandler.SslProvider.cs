@@ -78,7 +78,7 @@ namespace System.Net.Http
                         // certificate as part of that, disable libcurl's verification of the host name; we need to get
                         // the callback from libcurl even if the host name doesn't match, so we take on the responsibility
                         // of doing the host name match in the callback prior to invoking the user's delegate.
-                        if (easy._handler.ServerCertificateCustomValidationCallback != null)
+                        if (easy._handler.ServerCertificateValidationCallback != null)
                         {
                             easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYHOST, 0);
                             // But don't change the CURLOPT_SSL_VERIFYPEER setting, as setting it to 0 will
@@ -111,7 +111,7 @@ namespace System.Net.Http
                     throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported, CurlVersionDescription, CurlSslVersionDescription));
                 }
 
-                if (easy._handler.ServerCertificateCustomValidationCallback != null)
+                if (easy._handler.ServerCertificateValidationCallback != null)
                 {
                     if (easy.ServerCertificateValidationCallbackAcceptsAll)
                     {
@@ -266,7 +266,7 @@ namespace System.Net.Http
                 catch (Exception exc)
                 {
                     EventSourceTrace("Unexpected exception: {0}", exc, easy: easy);
-                    easy.FailRequest(CreateHttpRequestException(new CurlException((int)CURLcode.CURLE_ABORTED_BY_CALLBACK, exc)));
+                    easy.FailRequest(exc);
                     return FailureResult;
                 }
                 finally
@@ -292,7 +292,7 @@ namespace System.Net.Http
                     // We need to respect the user's server validation callback if there is one.  If there isn't one,
                     // we can start by first trying to use OpenSSL's verification, though only if CRL checking is disabled,
                     // as OpenSSL doesn't do that.
-                    if (easy._handler.ServerCertificateCustomValidationCallback == null &&
+                    if (easy._handler.ServerCertificateValidationCallback == null &&
                         !easy._handler.CheckCertificateRevocationList)
                     {
                         // Start by using the default verification provided directly by OpenSSL.

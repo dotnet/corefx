@@ -17,7 +17,7 @@ namespace System.Globalization.Tests
                 || (PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404)
                 || PlatformDetection.IsFedora
                 || (PlatformDetection.IsDebian && !PlatformDetection.IsDebian8)
-                || PlatformDetection.IsTizen
+                || PlatformDetection.IsRedHatFamily69
                )
             {
                 return new int[] { 3 };
@@ -48,6 +48,10 @@ namespace System.Globalization.Tests
                     if (PlatformDetection.IsWindows)
                     {
                         return (PlatformDetection.WindowsVersion < 10) ? new int[] { 3 } : new int[] { 6, 3 };
+                    }
+                    else if (PlatformDetection.IsMacOsHighSierraOrHigher)
+                    {
+                        return new int[] { 8 };
                     }
                     else
                     {

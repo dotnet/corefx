@@ -2,6 +2,7 @@
   "build": [
     {
       "environment": {},
+<<<<<<< HEAD
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
@@ -26,6 +27,8 @@
     },
     {
       "environment": {},
+=======
+>>>>>>> upstream/release/2.0.0
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -41,6 +44,10 @@
         "scriptType": "inlineScript",
         "scriptName": "",
         "arguments": "-path $(build.SourcesDirectory)\\corefx",
+<<<<<<< HEAD
+=======
+        "inlineScript": "param($path)\n\nif (Test-Path $path){\n    Stop-Process -processname msbuild -ErrorAction Ignore -Verbose\n    Stop-Process -processname dotnet -ErrorAction Ignore -Verbose\n    Stop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n    Stop-Process -processname cmake -ErrorAction Ignore -Verbose\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n",
+>>>>>>> upstream/release/2.0.0
         "workingFolder": "",
         "inlineScript": "param($path)\n\nif (Test-Path $path){\n    Stop-Process -processname msbuild -ErrorAction Ignore -Verbose\n    Stop-Process -processname dotnet -ErrorAction Ignore -Verbose\n    Stop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }",
         "failOnStandardError": "true"
@@ -100,7 +107,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "signType": "$(PB_SignType)",
+        "signType": "real",
         "zipSources": "false",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"

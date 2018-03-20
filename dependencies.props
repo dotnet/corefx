@@ -19,7 +19,7 @@
     <StandardCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</StandardCurrentRef>
   </PropertyGroup>
 
-  <!-- Auto-upgraded properties for each build info dependency. -->
+  <!-- Product dependency versions. -->
   <PropertyGroup>
     <PlatformPackageVersion>2.1.0-preview1-25631-01</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>preview1-25801-01</CoreFxExpectedPrerelease>
@@ -35,8 +35,9 @@
     <SniPackageVersion>4.4.0</SniPackageVersion>
   </PropertyGroup>
 
-  <!-- Full package version strings that are used in other parts of the build. -->
-  <PropertyGroup>
+    <!-- CoreFX-built SNI identity package -->
+    <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
+
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0007</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
@@ -64,6 +65,7 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(Uwp6ReleaseDependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
+<!--
     <RemoteDependencyBuildInfo Include="External">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ExternalCurrentRef)</CurrentRef>
@@ -71,10 +73,6 @@
     <RemoteDependencyBuildInfo Include="Sni">
       <BuildInfoPath>$(BaseDotNetBuildInfo)sni/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(SniCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="Standard">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)standard/$(DependencyBranch)</BuildInfoPath>
-      <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfs">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs/$(Uwp6ReleaseDependencyBranch)</BuildInfoPath>
@@ -84,7 +82,11 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(Uwp6ReleaseDependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-
+    <RemoteDependencyBuildInfo Include="CoreSetup">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
+-->
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
       <RawVersionsBaseUrl>https://raw.githubusercontent.com/dotnet/versions</RawVersionsBaseUrl>
     </DependencyBuildInfo>
@@ -104,16 +106,17 @@
       <ElementName>CoreClrPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Include="External">
+    <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>ExternalExpectedPrerelease</ElementName>
-      <BuildInfoName>External</BuildInfoName>
+      <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>NETStandardPackageVersion</ElementName>
-      <PackageId>$(NETStandardPackageId)</PackageId>
+      <ElementName>NETStandardLibraryPackageVersion</ElementName>
+      <PackageId>$(NETStandardLibraryPackageId)</PackageId>
     </XmlUpdateStep>
+<!--
     <XmlUpdateStep Include="ProjectNTfs">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsExpectedPrerelease</ElementName>
@@ -131,7 +134,7 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="Sni">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>SniPackageVersion</ElementName>
+      <ElementName>RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion</ElementName>
       <PackageId>runtime.win-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreSetup">
@@ -139,6 +142,7 @@
       <ElementName>MicrosoftNETCoreAppPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.App</PackageId>
     </XmlUpdateStep>
+-->
   </ItemGroup>
 
   <PropertyGroup>
@@ -193,4 +197,17 @@
     <!-- project.json files to update -->
     <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)external\**\optional.json" />
   </ItemGroup>
+
+  <!-- Override isolated build dependency versions with versions from Repo API. -->
+  <Import Project="$(DotNetPackageVersionPropsPath)"
+          Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
+
+  <!--
+    Map PackageVersion properties that don't match the Repo API naming conventions. This must be
+    defined after the DotNetPackageVersionPropsPath Import so overrides apply correctly.
+  -->
+  <PropertyGroup>
+    <!-- Backward compatibility for BuildTools usage. -->
+    <PlatformPackageVersion>$(MicrosoftNETCorePlatformsPackageVersion)</PlatformPackageVersion>
+  </PropertyGroup>
 </Project>

@@ -128,6 +128,52 @@ namespace System.Net.Tests
         [InlineData(false, "")]
         [InlineData(true, "Non-Empty")]
         [InlineData(false, "Non-Empty")]
+        public async Task Read_FullLengthAsynchronous_PadBuffer_Success(bool transferEncodingChunked, string text)
+        {
+            byte[] expected = Encoding.UTF8.GetBytes(text);
+            Task<HttpListenerContext> contextTask = _listener.GetContextAsync();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.TransferEncodingChunked = transferEncodingChunked;
+                Task<HttpResponseMessage> clientTask = client.PostAsync(_factory.ListeningUrl, new StringContent(text));
+
+                HttpListenerContext context = await contextTask;
+                if (transferEncodingChunked)
+                {
+                    Assert.Equal(-1, context.Request.ContentLength64);
+                    Assert.Equal("chunked", context.Request.Headers["Transfer-Encoding"]);
+                }
+                else
+                {
+                    Assert.Equal(expected.Length, context.Request.ContentLength64);
+                    Assert.Null(context.Request.Headers["Transfer-Encoding"]);
+                }
+
+                const int pad = 128;
+
+                // Add padding at beginning and end to test for correct offset/size handling
+                byte[] buffer = new byte[pad + expected.Length + pad];
+                int bytesRead = await context.Request.InputStream.ReadAsync(buffer, pad, expected.Length);
+                Assert.Equal(expected.Length, bytesRead);
+                Assert.Equal(expected, buffer.Skip(pad).Take(bytesRead));
+
+                // Subsequent reads don't do anything.
+                Assert.Equal(0, await context.Request.InputStream.ReadAsync(buffer, pad, 1));
+
+                context.Response.Close();
+                using (HttpResponseMessage response = await clientTask)
+                {
+                    Assert.Equal(200, (int)response.StatusCode);
+                }
+            }
+        }
+
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
+        [InlineData(true, "")]
+        [InlineData(false, "")]
+        [InlineData(true, "Non-Empty")]
+        [InlineData(false, "Non-Empty")]
         public async Task Read_FullLengthSynchronous_Success(bool transferEncodingChunked, string text)
         {
             byte[] expected = Encoding.UTF8.GetBytes(text);
@@ -244,9 +290,8 @@ namespace System.Net.Tests
                 context.Response.Close();
             }
         }
-
-        [ActiveIssue(22110, TargetFrameworkMonikers.UapAot)]
-        [Theory]
+        
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Read_TooMuchAsynchronous_Success(bool transferEncodingChunked)
@@ -490,7 +535,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task Read_FromClosedConnectionAsynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";
@@ -516,7 +561,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task Read_FromClosedConnectionSynchronously_ThrowsHttpListenerException()
         {
             const string Text = "Some-String";

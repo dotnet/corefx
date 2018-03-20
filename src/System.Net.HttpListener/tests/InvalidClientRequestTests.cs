@@ -91,7 +91,7 @@ namespace System.Net.Tests
             yield return new object[] { "PUT {path} HTTP/1.1", null, null, null, "Length Required" };
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public async Task GetContext_InvalidRequest_DoesNotGetContext()
         {
             // These tests take upwards of 20s if this uses [Theory].

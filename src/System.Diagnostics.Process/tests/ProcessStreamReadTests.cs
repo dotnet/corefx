@@ -125,8 +125,17 @@ namespace System.Diagnostics.Tests
             // Set the O_CLOEXEC flag when creating the redirection pipes. So that no child process would inherit the
             // file descriptors referencing those pipes.
             const string ExpectedLine = "NULL";
-            Process p1 = CreateProcessPortable(RemotelyInvokable.ReadLineWriteIfNull);
-            Process p2 = CreateProcessPortable(RemotelyInvokable.ReadLine);
+            Process p1 = CreateProcess(() =>
+            {
+                string line = Console.ReadLine();
+                Console.WriteLine(line == null ? ExpectedLine : "NOT_" + ExpectedLine);
+                return SuccessExitCode;
+            });
+            Process p2 = CreateProcess(() =>
+            {
+                Console.ReadLine();
+                return SuccessExitCode;
+            });
 
             // Start the first child process
             p1.StartInfo.RedirectStandardInput = true;

@@ -705,7 +705,6 @@ namespace System.Net.Http
                 bool suppressContentType;
                 if (_requestMessage.Content != null)
                 {
-                    // Add content request headers
                     AddRequestHeaders(_requestMessage.Content.Headers, slist);
                     suppressContentType = _requestMessage.Content.Headers.ContentType == null;
                 }
@@ -764,7 +763,7 @@ namespace System.Net.Http
             }
 
             internal bool ServerCertificateValidationCallbackAcceptsAll => ReferenceEquals(
-                _handler.ServerCertificateCustomValidationCallback,
+                _handler.ServerCertificateValidationCallback,
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator);
 
             internal void SetCurlCallbacks(

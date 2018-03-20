@@ -9,6 +9,8 @@ using System.Xml.XPath;
 
 namespace System.Xml.Xsl
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XsltException : SystemException
     {
         private string _res;
@@ -74,7 +76,7 @@ namespace System.Xml.Xsl
         {
             get
             {
-                return base.Message;
+                return _message ?? base.Message;
             }
         }
 
@@ -106,11 +108,12 @@ namespace System.Xml.Xsl
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XsltCompileException : XsltException
     {
         protected XsltCompileException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

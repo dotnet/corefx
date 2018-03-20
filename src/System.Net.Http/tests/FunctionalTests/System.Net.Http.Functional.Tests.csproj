@@ -4,7 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -104,15 +103,7 @@
     <Compile Include="DefaultCredentialsTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="ManagedHandlerTest.cs" />
     <Compile Include="HttpClientHandlerTest.AcceptAllCerts.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <Reference Include="Windows" />
-    <Compile Include="MultiInterfaceNonRewindableReadOnlyStream.cs" />
-    <Compile Include="MultiInterfaceReadOnlyStream.cs" />
-    <Compile Include="MultiInterfaceStreamContent.cs" />
-    <Compile Include="PostScenarioUWPTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netfx;
+      net471;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

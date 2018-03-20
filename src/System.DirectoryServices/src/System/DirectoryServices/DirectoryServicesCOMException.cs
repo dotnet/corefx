@@ -9,6 +9,16 @@ using System.DirectoryServices.Interop;
 
 namespace System.DirectoryServices
 {
+    using System;
+    using System.Text;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Serialization;
+    using System.DirectoryServices.Interop;
+    using System.Security.Permissions;
+    using System.Globalization;
+
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class DirectoryServicesCOMException : COMException, ISerializable
     {
         public DirectoryServicesCOMException() { }
@@ -16,6 +26,9 @@ namespace System.DirectoryServices
         public DirectoryServicesCOMException(string message) : base(message) { }
 
         public DirectoryServicesCOMException(string message, Exception inner) : base(message, inner) { }
+        protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
@@ -28,9 +41,13 @@ namespace System.DirectoryServices
             ExtendedErrorMessage = extendedMessage;
         }
 
-        public int ExtendedError { get; }
-
-        public string ExtendedErrorMessage { get; }
+        public string ExtendedErrorMessage
+        {
+            get
+            {
+                return _extendedmessage;
+            }
+        }
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {

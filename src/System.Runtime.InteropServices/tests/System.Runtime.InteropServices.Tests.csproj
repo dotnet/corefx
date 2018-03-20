@@ -27,9 +27,6 @@
     <Compile Include="System\Runtime\InteropServices\ComAwareEventInfoTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Runtime\InteropServices\ComCompatibleVersionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComConversionLossAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComDefaultInterfaceAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComEventInterfaceAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComEventsHelperTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComRegisterFunctionAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComSourceInterfacesAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ComUnregisterFunctionAttributeTests.cs" />
@@ -46,24 +43,9 @@
     <Compile Include="System\Runtime\InteropServices\GuidAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\HandleCollectorTests.cs" />
     <Compile Include="System\Runtime\InteropServices\HandleRefTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\IDispatchImplAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\InterfaceTypeAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\LCIDConversionAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\MarshalAsAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\MarshalTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\MarshalTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
-    <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttributeTests.cs" />
+    <Compile Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttributeTests.cs" />
     <Compile Include="System\Runtime\InteropServices\ProgIdAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\RuntimeEnvironmentTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\SafeBufferTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\SetWin32ContextInIDispatchAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\TypeIdentifierAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\UnknownWrapperTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\UnmanagedFunctionPointerAttributeTests.cs" />
-    <Compile Include="System\Runtime\InteropServices\VariantWrapperTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>

@@ -9,8 +9,8 @@
     <DefineConstants>INTERNAL_ASYMMETRIC_IMPLEMENTATIONS</DefineConstants>
     <NoWarn>CA5351;$(NoWarn)</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx' or '$(TargetGroup)' == 'net47'">true</IsPartialFacadeAssembly>
-    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx'">true</GenFacadesIgnoreMissingTypes>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471' or '$(TargetGroup)' == 'net47'">true</IsPartialFacadeAssembly>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Windows_NT-Release|AnyCPU'" />
@@ -22,6 +22,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
@@ -500,7 +502,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Compile Include="System\Security\Cryptography\IncrementalHash.net46.cs" />
+    <Compile Condition="'$(TargetGroup)' != 'net471'" Include="System\Security\Cryptography\IncrementalHash.net46.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

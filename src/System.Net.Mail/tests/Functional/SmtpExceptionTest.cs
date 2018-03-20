@@ -85,6 +85,12 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
+        public void TestConstructorThrowsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new MySmtpException((SerializationInfo)null, new StreamingContext()));
+        }
+
+        [Fact]
         public void TestConstructorWithStatusCodeAndStringArgument()
         {
             string msg;

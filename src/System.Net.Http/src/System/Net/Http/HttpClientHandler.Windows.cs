@@ -312,10 +312,8 @@ namespace System.Net.Http
             }
         }
 
-        public X509CertificateCollection ClientCertificates => _winHttpHandler != null ?
-            _winHttpHandler.ClientCertificates :
-            _managedHandler.ClientCertificates;
-        
+        public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
+
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
             get => _winHttpHandler != null ? _winHttpHandler.ServerCertificateValidationCallback : _managedHandler.ServerCertificateCustomValidationCallback;

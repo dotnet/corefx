@@ -42,7 +42,7 @@ namespace System.ConfigurationTests
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp)),
+        [Theory,
             InlineData(true),
             InlineData(false)
             ]
@@ -56,7 +56,7 @@ namespace System.ConfigurationTests
             Assert.NotNull(settings.Context);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp)),
+        [Theory,
             InlineData(true),
             InlineData(false)
             ]
@@ -71,7 +71,7 @@ namespace System.ConfigurationTests
             Assert.NotNull(settings.Providers[typeof(LocalFileSettingsProvider).Name]);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp)),
+        [Theory,
             InlineData(true),
             InlineData(false)
             ]
@@ -87,7 +87,7 @@ namespace System.ConfigurationTests
             Assert.Equal("Foo", settings.StringProperty);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp)),
+        [Theory,
             InlineData(true),
             InlineData(false)
             ]

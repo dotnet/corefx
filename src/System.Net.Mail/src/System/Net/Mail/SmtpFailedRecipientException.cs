@@ -8,11 +8,12 @@ using System.Runtime.Serialization;
 
 namespace System.Net.Mail
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SmtpFailedRecipientException : SmtpException, ISerializable
     {
         private string _failedRecipient;
         internal bool fatal;
-
 
         public SmtpFailedRecipientException() : base() { }
 

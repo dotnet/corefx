@@ -360,6 +360,24 @@ namespace System.Tests
             Assert.NotSame(e, Assert.ThrowsAny<Exception>(() => x.Value));
         }
 
+        [Fact]
+        [ActiveIssue(19119, TargetFrameworkMonikers.Netcoreapp)]
+        public static void Serialization_ValueType()
+        {
+            Lazy<int> fortytwo = BinaryFormatterHelpers.Clone(new Lazy<int>(() => 42));
+            Assert.True(fortytwo.IsValueCreated);
+            Assert.Equal(fortytwo.Value, 42);
+        }
+
+        [Fact]
+        [ActiveIssue(19119, TargetFrameworkMonikers.Netcoreapp)]
+        public static void Serialization_RefType()
+        {
+            Lazy<string> fortytwo = BinaryFormatterHelpers.Clone(new Lazy<string>(() => "42"));
+            Assert.True(fortytwo.IsValueCreated);
+            Assert.Equal(fortytwo.Value, "42");
+        }
+
         [Theory]
         [InlineData(LazyThreadSafetyMode.ExecutionAndPublication)]
         [InlineData(LazyThreadSafetyMode.None)]

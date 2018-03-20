@@ -122,7 +122,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotOneCoreUAP))]
         public void EndGetContext_InvalidAsyncResult_ThrowsArgumentException()
         {
             using (var listener1 = new HttpListener())

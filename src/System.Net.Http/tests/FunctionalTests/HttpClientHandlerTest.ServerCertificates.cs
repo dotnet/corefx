@@ -22,9 +22,10 @@ namespace System.Net.Http.Functional.Tests
     {
         // TODO: https://github.com/dotnet/corefx/issues/7812
         private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
-        private static bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
+        private bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
             (BackendSupportsCustomCertificateHandling && ClientSupportsDHECipherSuites);
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
         public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
@@ -293,9 +294,8 @@ namespace System.Net.Http.Functional.Tests
 
         public async Task UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(string url, SslPolicyErrors expectedErrors)
         {
-            if (BackendDoesNotSupportCustomCertificateHandling) // can't use [Conditional*] right now as it's evaluated at the wrong time for the managed handler
+            if (!BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites)
             {
-                Console.WriteLine($"Skipping {nameof(UseCallback_BadCertificate_ExpectedPolicyErrors)}({url}, {expectedErrors})");
                 return;
             }
 

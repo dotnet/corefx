@@ -387,6 +387,7 @@ namespace System.Tests
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);
+
             Assert.NotEmpty(knownFolder);
 
             // Call the older folder API to compare our results.

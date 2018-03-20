@@ -189,6 +189,16 @@ namespace System.Data.SqlClient
             return new SqlRowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
         }
 
+        protected override RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
+        {
+            return new SqlRowUpdatedEventArgs(dataRow, command, statementType, tableMapping);
+        }
+
+        protected override RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
+        {
+            return new SqlRowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
+        }
+
         public event SqlRowUpdatedEventHandler RowUpdated
         {
             add

@@ -13,9 +13,8 @@ namespace System.Net.Tests
 {
     public class HttpListenerWebSocketTests : IDisposable
     {
-        public static bool PartialMessagesSupported => PlatformDetection.ClientWebSocketPartialMessagesSupported;
-        public static bool IsNotWindows7 { get; } = !PlatformDetection.IsWindows7;
-        public static bool IsNotWindows7AndIsWindowsImplementation => IsNotWindows7 && Helpers.IsWindowsImplementation;
+        public static bool IsNotWindows7OrUapCore { get; } = !PlatformDetection.IsWindows7 && PlatformDetection.IsNotOneCoreUAP;
+        public static bool IsNotWindows7OrUapCoreAndIsWindowsImplementation { get; } = IsNotWindows7OrUapCore && Helpers.IsWindowsImplementationAndNotUap;
 
         private HttpListenerFactory Factory { get; }
         private HttpListener Listener { get; }
@@ -35,7 +34,7 @@ namespace System.Net.Tests
             Client.Dispose();
         }
 
-        [ConditionalTheory(nameof(PartialMessagesSupported), nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(WebSocketMessageType.Text, false)]
         [InlineData(WebSocketMessageType.Binary, false)]
         [InlineData(WebSocketMessageType.Text, true)]
@@ -60,24 +59,24 @@ namespace System.Net.Tests
             Assert.Equal(Text, Encoding.ASCII.GetString(receivedBytes));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task SendAsync_NoInnerBuffer_ThrowsArgumentNullException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
-            await AssertExtensions.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), WebSocketMessageType.Text, false, new CancellationToken()));
+            await Assert.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), WebSocketMessageType.Text, false, new CancellationToken()));
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(WebSocketMessageType.Close)]
         [InlineData(WebSocketMessageType.Text - 1)]
         [InlineData(WebSocketMessageType.Binary + 1)]
         public async Task SendAsync_InvalidMessageType_ThrowsArgumentNullException(WebSocketMessageType messageType)
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
-            await AssertExtensions.ThrowsAsync<ArgumentException>("messageType", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), messageType, false, new CancellationToken()));
+            await Assert.ThrowsAsync<ArgumentException>("messageType", () => context.WebSocket.SendAsync(new ArraySegment<byte>(), messageType, false, new CancellationToken()));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
         public async Task SendAsync_Disposed_ThrowsObjectDisposedException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -86,8 +85,7 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ObjectDisposedException>(() => context.WebSocket.SendAsync(new ArraySegment<byte>(new byte[10]), WebSocketMessageType.Text, false, new CancellationToken()));
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WebSocket partial send is not supported on UAP. (#22053)")]
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [InlineData(WebSocketMessageType.Text, false)]
         [InlineData(WebSocketMessageType.Binary, false)]
         [InlineData(WebSocketMessageType.Text, true)]
@@ -112,16 +110,16 @@ namespace System.Net.Tests
             Assert.Equal(Text, Encoding.ASCII.GetString(receivedBytes));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task ReceiveAsync_NoInnerBuffer_ThrowsArgumentNullException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
             await ClientConnectTask;
 
-            await AssertExtensions.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.ReceiveAsync(new ArraySegment<byte>(), new CancellationToken()));
+            await Assert.ThrowsAsync<ArgumentNullException>("buffer.Array", () => context.WebSocket.ReceiveAsync(new ArraySegment<byte>(), new CancellationToken()));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20395, TestPlatforms.AnyUnix)]
         public async Task ReceiveAsync_Disposed_ThrowsObjectDisposedException()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -139,7 +137,7 @@ namespace System.Net.Tests
             yield return new object[] { WebSocketCloseStatus.MandatoryExtension, "StatusDescription", WebSocketCloseStatus.MandatoryExtension };
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
         [MemberData(nameof(CloseStatus_Valid_TestData))]
         public async Task CloseOutputAsync_HandshakeStartedFromClient_Success(WebSocketCloseStatus status, string statusDescription, WebSocketCloseStatus expectedCloseStatus)
         {
@@ -202,7 +200,7 @@ namespace System.Net.Tests
             await context.WebSocket.CloseOutputAsync(WebSocketCloseStatus.Empty, null, new CancellationToken());
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20396, TestPlatforms.AnyUnix)]
         [MemberData(nameof(CloseStatus_Valid_TestData))]
         public async Task CloseAsync_HandshakeStartedFromClient_Success(WebSocketCloseStatus status, string statusDescription, WebSocketCloseStatus expectedCloseStatus)
         {
@@ -275,7 +273,7 @@ namespace System.Net.Tests
             yield return new object[] { (WebSocketCloseStatus)1015, null, "closeStatus" };
         }
 
-        [ConditionalTheory(nameof(IsNotWindows7))]
+        [ConditionalTheory(nameof(IsNotWindows7OrUapCore))]
         [MemberData(nameof(CloseStatus_Invalid_TestData))]
         public async Task CloseAsync_InvalidCloseStatus_ThrowsArgumentException(WebSocketCloseStatus status, string statusDescription, string paramName)
         {
@@ -285,7 +283,7 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<ArgumentException>(paramName, () => context.WebSocket.CloseOutputAsync(status, statusDescription, new CancellationToken()));
         }
 
-        [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
         public async Task CloseAsync_AfterDisposed_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -294,8 +292,7 @@ namespace System.Net.Tests
             await context.WebSocket.CloseOutputAsync(WebSocketCloseStatus.Empty, null, new CancellationToken());
             await context.WebSocket.CloseAsync(WebSocketCloseStatus.Empty, null, new CancellationToken());
         }
-
-        [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20394, TestPlatforms.AnyUnix)]
         public async Task CloseAsync_AfterAborted_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -305,7 +302,7 @@ namespace System.Net.Tests
             await context.WebSocket.CloseAsync(WebSocketCloseStatus.Empty, null, new CancellationToken());
         }
 
-        [ConditionalFact(nameof(IsNotWindows7AndIsWindowsImplementation))] // [ActiveIssue(20397, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCoreAndIsWindowsImplementation))] // [ActiveIssue(20397, TestPlatforms.AnyUnix)]
         public async Task Dispose_CallAfterDisposed_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();
@@ -319,7 +316,7 @@ namespace System.Net.Tests
             Assert.Equal(WebSocketState.Aborted, context.WebSocket.State);
         }
 
-        [ConditionalFact(nameof(IsNotWindows7))]
+        [ConditionalFact(nameof(IsNotWindows7OrUapCore))]
         public async Task Abort_CallAfterAborted_Nop()
         {
             HttpListenerWebSocketContext context = await GetWebSocketContext();

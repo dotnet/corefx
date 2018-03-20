@@ -1,0 +1,12 @@
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="RemoveUap101Content"
+          Condition="'$(KeepUAPContent)' != 'true'"
+          DependsOnTargets="GetPackageReport"
+          BeforeTargets="GenerateNuSpec">
+    <ItemGroup>
+      <PackageFile Remove="@(PackageFile)" Condition="'%(PackageFile.TargetFramework)' == 'uap10.1'" />
+      <PackageFile Remove="@(PackageFile)" Condition="$([System.String]::new('%(PackageFile.TargetPath)').Contains('/uap10.1'))" />
+      <Dependency Remove="@(Dependency)" Condition="'%(Dependency.TargetFramework)' == 'uap10.1'" />
+    </ItemGroup>
+  </Target>
+</Project>

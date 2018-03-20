@@ -56,8 +56,7 @@
       "BuildParameters": {
         "PB_BuildArguments": "-buildArch=x64 -Release -stripSymbols",
         "PB_BuildTestsArguments": "-buildArch=x64 -Release -SkipTests -Outerloop -- /p:ArchiveTests=true",
-        "PB_SyncArguments": "-p -- /p:ArchGroup=x64",
-        "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:EnableCloudTest=false /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=OSX"
+        "PB_SyncArguments": "-p -- /p:ArchGroup=x64"
       },
       "Definitions": [{
           "Name": "DotNet-CoreFx-Trusted-OSX",

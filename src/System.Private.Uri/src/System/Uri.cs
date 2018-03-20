@@ -558,10 +558,11 @@ namespace System
                         // Hence anything like x:sdsd is a relative path and be added to the baseUri Path
                         break;
                     }
-                    fixed (char* sptr = relativeStr) // relativeStr.Substring(0, i) represents the scheme
+                    string scheme = relativeStr.Substring(0, i);
+                    fixed (char* sptr = scheme)
                     {
                         UriParser syntax = null;
-                        if (CheckSchemeSyntax(sptr, (ushort)i, ref syntax) == ParsingError.None)
+                        if (CheckSchemeSyntax(sptr, (ushort)scheme.Length, ref syntax) == ParsingError.None)
                         {
                             if (baseUri.Syntax == syntax)
                             {
@@ -2110,7 +2111,7 @@ namespace System
                             _flags |= Flags.UncPath;
                             idx = i;
                         }
-                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && pUriString[i - 1] == '/' && i - idx == 3)
+                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && i - idx == 3 && pUriString[i - 1] == '/')
                         {
                             _syntax = UriParser.UnixFileUri;
                             _flags |= Flags.UnixPath | Flags.AuthorityFound;
@@ -2191,7 +2192,7 @@ namespace System
                     if (err != ParsingError.None)
                         return err;
 
-                    if (idx < (ushort)length)
+                    if (idx < length)
                     {
                         char hostTerminator = pUriString[idx];
 

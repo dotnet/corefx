@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using Xunit;
 
 namespace System.Net.Tests
 {
@@ -34,9 +35,8 @@ namespace System.Net.Tests
             _path = path ?? Guid.NewGuid().ToString("N");
             string pathComponent = string.IsNullOrEmpty(_path) ? _path : $"{_path}/";
 
-            for (int attempt = 0; attempt < MaxStartAttempts; attempt++)
+            for (int port = 1025; port <= IPEndPoint.MaxPort; port++)
             {
-                int port = GetNextPort();
                 string prefix = $"http://{hostname}:{port}/{pathComponent}";
 
                 var listener = new HttpListener();

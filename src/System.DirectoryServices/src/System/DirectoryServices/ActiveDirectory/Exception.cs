@@ -33,6 +33,8 @@ namespace System.DirectoryServices.ActiveDirectory
         public string SourceServer { get; }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryObjectNotFoundException : Exception, ISerializable
     {
         public ActiveDirectoryObjectNotFoundException(string message, Type type, string name) : base(message)
@@ -49,6 +51,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryObjectNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
+        }
+
+        public Type Type
+        {
             throw new PlatformNotSupportedException();
         }
 
@@ -56,13 +62,14 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public string Name { get; }
 
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryOperationException : Exception, ISerializable
     {
         public ActiveDirectoryOperationException(string message, Exception inner, int errorCode) : base(message, inner)
@@ -83,10 +90,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
-        public int ErrorCode { get; }
+        public int ErrorCode
+        {
+            throw new PlatformNotSupportedException();
+        }
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
@@ -94,6 +103,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryServerDownException : Exception, ISerializable
     {
         public ActiveDirectoryServerDownException(string message, Exception inner, int errorCode, string name) : base(message, inner)
@@ -115,6 +126,10 @@ namespace System.DirectoryServices.ActiveDirectory
         public ActiveDirectoryServerDownException() : base() { }
 
         protected ActiveDirectoryServerDownException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
+        public int ErrorCode
         {
             throw new PlatformNotSupportedException();
         }
@@ -142,6 +157,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryObjectExistsException : Exception
     {
         public ActiveDirectoryObjectExistsException(string message, Exception inner) : base(message, inner) { }
@@ -152,10 +169,11 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryObjectExistsException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class SyncFromAllServersOperationException : ActiveDirectoryOperationException, ISerializable
     {
         private SyncFromAllServersErrorInformation[] _errors = null;
@@ -173,7 +191,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected SyncFromAllServersOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public SyncFromAllServersErrorInformation[] ErrorInformation
@@ -197,6 +214,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ForestTrustCollisionException : ActiveDirectoryOperationException, ISerializable
     {
         public ForestTrustCollisionException(string message, Exception inner, ForestTrustRelationshipCollisionCollection collisions) : base(message, inner)
@@ -212,10 +231,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ForestTrustCollisionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
-        public ForestTrustRelationshipCollisionCollection Collisions { get; } = new ForestTrustRelationshipCollisionCollection();
+        public ForestTrustRelationshipCollisionCollection Collisions
+        {
+            throw new PlatformNotSupportedException();
+        }
         
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {

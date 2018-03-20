@@ -28,7 +28,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("")]
         public void AscW_NullOrEmpty_ThrowsArgumentException(string String)
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Strings.AscW(String));
+            Assert.Throws<ArgumentException>(null, () => Strings.AscW(String));
         }
 
         [Theory]
@@ -46,7 +46,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(65536)]
         public void ChrW_CharCodeOutOfRange_ThrowsArgumentException(int charCode)
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Strings.ChrW(charCode));
+            Assert.Throws<ArgumentException>(null, () => Strings.ChrW(charCode));
         }
     }
 }

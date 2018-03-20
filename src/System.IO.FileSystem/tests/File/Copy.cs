@@ -54,6 +54,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(19965, TestPlatforms.AnyUnix)]
         public void NonExistentPath()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());

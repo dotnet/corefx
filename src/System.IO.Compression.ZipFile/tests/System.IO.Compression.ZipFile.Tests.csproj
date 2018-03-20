@@ -33,6 +33,9 @@
     <Compile Include="$(CommonTestPath)\System\IO\Compression\ZipTestHelper.cs">
       <Link>Common\System\IO\Compression\ZipTestHelper.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="ZipFileConvenienceMethods.netcoreapp1.1.cs" />

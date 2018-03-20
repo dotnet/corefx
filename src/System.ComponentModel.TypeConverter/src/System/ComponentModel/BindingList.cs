@@ -14,7 +14,7 @@ using System.Runtime.CompilerServices;
 namespace System.ComponentModel
 {
     [Serializable]
-    [TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class BindingList<T> : Collection<T>, IBindingList, ICancelAddNew, IRaiseItemChangedEvents
     {
         private int addNewPos = -1; // Do not rename (binary serialization)
@@ -150,8 +150,18 @@ namespace System.ComponentModel
 
         public bool RaiseListChangedEvents
         {
-            get => raiseListChangedEvents;
-            set => raiseListChangedEvents = value;
+            get
+            {
+                return raiseListChangedEvents;
+            }
+
+            set
+            {
+                if (raiseListChangedEvents != value)
+                {
+                    raiseListChangedEvents = value;
+                }
+            }
         }
 
         public void ResetBindings() => FireListChanged(ListChangedType.Reset, -1);
@@ -332,8 +342,8 @@ namespace System.ComponentModel
         {
             get
             {
-                // If the user set AllowNew, return what they set.  If we have a default constructor, allowNew will be 
-                // true and we should just return true.
+                //If the user set AllowNew, return what they set.  If we have a default constructor, allowNew will be 
+                //true and we should just return true.
                 if (userSetAllowNew || allowNew)
                 {
                     return allowNew;
@@ -346,8 +356,8 @@ namespace System.ComponentModel
             {
                 bool oldAllowNewValue = AllowNew;
                 userSetAllowNew = true;
-                // Note that we don't want to set allowNew only if AllowNew didn't match value,
-                // since AllowNew can depend on onAddingNew handler
+                //Note that we don't want to set allowNew only if AllowNew didn't match value,
+                //since AllowNew can depend on onAddingNew handler
                 allowNew = value;
                 if (oldAllowNewValue != value)
                 {
@@ -360,7 +370,10 @@ namespace System.ComponentModel
 
         public bool AllowEdit
         {
-            get => allowEdit;
+            get
+            {
+                return allowEdit;
+            }
             set
             {
                 if (allowEdit != value)
@@ -375,7 +388,10 @@ namespace System.ComponentModel
 
         public bool AllowRemove
         {
-            get => allowRemove;
+            get
+            {
+                return allowRemove;
+            }
             set
             {
                 if (allowRemove != value)

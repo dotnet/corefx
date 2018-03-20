@@ -57,9 +57,8 @@ namespace System.IO.IsolatedStorage
                 Assert.Throws<IsolatedStorageException>(() => isf.DeleteFile("\0bad"));
             }
         }
-
-        [Theory MemberData(nameof(ValidStores))]
-        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
+        [Theory, MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void DeleteFile_DeletesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

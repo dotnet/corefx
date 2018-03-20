@@ -620,6 +620,11 @@ namespace System.Data.SqlClient
             }
         }
 
+        public override void EnlistTransaction(Transaction transaction)
+        {
+            throw ADP.AmbientTransactionIsNotSupported();
+        }
+
         internal void RegisterWaitingForReconnect(Task waitingTask)
         {
             if (((SqlConnectionString)ConnectionOptions).MARS)
@@ -1016,6 +1021,12 @@ namespace System.Data.SqlClient
         private bool TryOpen(TaskCompletionSource<DbConnectionInternal> retry)
         {
             SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
+
+            // Fail Fast in case an application is trying to enlist the SqlConnection in a Transaction Scope.
+            if (connectionOptions.Enlist && ADP.GetCurrentTransaction() != null)
+            {
+                throw ADP.AmbientTransactionIsNotSupported();
+            }
 
             _applyTransientFaultHandling = (retry == null && connectionOptions != null && connectionOptions.ConnectRetryCount > 0);
 

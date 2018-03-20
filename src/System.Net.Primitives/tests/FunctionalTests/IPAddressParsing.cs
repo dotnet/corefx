@@ -313,6 +313,14 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData("::%1a")] // alphanumeric scope
         [InlineData("[2001:0db8:85a3:08d3:1319:8a2e:0370:7344]:443/")] // errneous ending slash after ignored port
         [InlineData("::1234%0x12")] // invalid scope ID
+        [InlineData("e3fff:ffff:ffff:ffff:ffff:ffff:ffff:abcd")] // 1st number too long
+        [InlineData("3fff:effff:ffff:ffff:ffff:ffff:ffff:abcd")] // 2nd number too long
+        [InlineData("3fff:ffff:effff:ffff:ffff:ffff:ffff:abcd")] // 3rd number too long
+        [InlineData("3fff:ffff:ffff:effff:ffff:ffff:ffff:abcd")] // 4th number too long
+        [InlineData("3fff:ffff:ffff:ffff:effff:ffff:ffff:abcd")] // 5th number too long
+        [InlineData("3fff:ffff:ffff:ffff:ffff:effff:ffff:abcd")] // 6th number too long
+        [InlineData("3fff:ffff:ffff:ffff:ffff:ffff:effff:abcd")] // 7th number too long
+        [InlineData("3fff:ffff:ffff:ffff:ffff:ffff:ffff:eabcd")] // 8th number too long
         public void ParseIPv6_InvalidAddress_ThrowsFormatException(string invalidAddress)
         {
             ParseInvalidAddress(invalidAddress, hasInnerSocketException: true);
