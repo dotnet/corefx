@@ -96,6 +96,7 @@ namespace System.IO.Tests
                     // fail.
                     string driveFormat = new DriveInfo(GetItemPath(item)).DriveFormat;
                     Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")} on {driveFormat}");
+                    throw new Exception($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")} on {driveFormat}");
 
                     item = GetExistingItem(); // try a new file/directory
                 }
