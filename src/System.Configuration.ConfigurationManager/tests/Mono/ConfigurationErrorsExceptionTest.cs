@@ -30,8 +30,8 @@
 using System;
 using System.Configuration;
 using System.Configuration.Internal;
-using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 using Xunit;
@@ -43,25 +43,20 @@ namespace MonoTests.System.Configuration
         [Fact] // ctor ()
         public void Constructor1()
         {
-            var cc = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
-            {
+            ConfigurationErrorsException cee = new ConfigurationErrorsException();
+            Assert.NotNull(cee.BareMessage);
 
-                ConfigurationErrorsException cee = new ConfigurationErrorsException();
-                Assert.NotNull(cee.BareMessage);
-                Assert.True(cee.BareMessage.IndexOf("'" + typeof(ConfigurationErrorsException).FullName + "'") != -1, "#2:" + cee.BareMessage);
-                Assert.NotNull(cee.Data);
-                Assert.Equal(0, cee.Data.Count);
-                Assert.Null(cee.Filename);
-                Assert.Null(cee.InnerException);
-                Assert.Equal(0, cee.Line);
-                Assert.Equal(cee.BareMessage, cee.Message);
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cc;
-            }
+            // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+            // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+            // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+            Assert.True(Regex.IsMatch(cee.BareMessage, @"[\p{Pi}\p{Po}]" + Regex.Escape(typeof(ConfigurationErrorsException).FullName) + @"[\p{Pf}\p{Po}]"), "#2:" + cee.BareMessage);
+
+            Assert.NotNull(cee.Data);
+            Assert.Equal(0, cee.Data.Count);
+            Assert.Null(cee.Filename);
+            Assert.Null(cee.InnerException);
+            Assert.Equal(0, cee.Line);
+            Assert.Equal(cee.BareMessage, cee.Message);
         }
 
         [Fact] // ctor (String)

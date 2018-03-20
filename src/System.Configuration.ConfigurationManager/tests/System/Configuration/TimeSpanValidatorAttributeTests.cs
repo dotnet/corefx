@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
 
 using Xunit;
 
 namespace System.ConfigurationTests
 {
-    public class TimeSpanValidatorAttributeTests
+    public class TimeSpanValidatorAttributeTests : RemoteExecutorTestBase
     {
         [Fact]
         public void MinValueString_GetString()
@@ -116,10 +117,10 @@ namespace System.ConfigurationTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MinValueString_TooSmall()
         {
-            var cc = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
                 TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
                 attribute.MaxValueString = new TimeSpan(2, 2, 2, 2).ToString();
@@ -128,21 +129,17 @@ namespace System.ConfigurationTests
                 ArgumentOutOfRangeException expectedException =
                     new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
                 Assert.Equal(expectedException.Message, result.Message);
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cc;
-            }
+            }).Dispose();
         }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MaxValueString_TooBig()
         {
-            var cc = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
                 TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
                 attribute.MinValueString = new TimeSpan(2, 2, 2, 2).ToString();
@@ -151,11 +148,7 @@ namespace System.ConfigurationTests
                 ArgumentOutOfRangeException expectedException =
                     new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
                 Assert.Equal(expectedException.Message, result.Message);
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cc;
-            }
+            }).Dispose();
         }
     }
 }
