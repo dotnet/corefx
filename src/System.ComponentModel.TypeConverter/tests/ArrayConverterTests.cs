@@ -21,8 +21,6 @@ namespace System.ComponentModel.Tests
                         { new int[2] { 1, 2 }, "Int32[] Array", null }
                     },
                     new ArrayConverter());
-
-                return SuccessExitCode;
             }).Dispose();
         }
     }

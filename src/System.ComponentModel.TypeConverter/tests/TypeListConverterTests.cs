@@ -46,8 +46,6 @@ namespace System.ComponentModel.Tests
                         { null, "(none)", CultureInfo.InvariantCulture }
                     },
                     TypeListConverterTests.s_converter);
-
-                return SuccessExitCode;
             }).Dispose();
         }
 

@@ -205,8 +205,6 @@ namespace System.ComponentModel.Tests
 
                 ReferenceConverter remoteConverter = new ReferenceConverter(typeof(ITestInterface));
                 Assert.Equal("(none)", (string)remoteConverter.ConvertTo(null, null, null, typeof(string)));
-
-                return SuccessExitCode;
             }).Dispose();
 
             ReferenceConverter converter = new ReferenceConverter(typeof(ITestInterface));

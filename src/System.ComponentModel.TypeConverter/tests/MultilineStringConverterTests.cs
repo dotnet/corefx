@@ -21,8 +21,6 @@ namespace System.ComponentModel.Tests
                         { "any string", "(Text)", null }
                     },
                     new MultilineStringConverter());
-
-                return SuccessExitCode;
             }).Dispose();
         }
     }

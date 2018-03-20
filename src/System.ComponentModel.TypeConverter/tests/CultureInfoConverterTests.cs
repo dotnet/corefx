@@ -161,8 +161,6 @@ namespace System.ComponentModel.Tests
                 Assert.NotNull(ex.Message);
                 Assert.True(ex.Message.IndexOf(typeof(CultureInfoConverter).Name) != -1);
                 Assert.True(ex.Message.IndexOf("(null)") != -1);
-
-                return SuccessExitCode;
             }).Dispose();
         }
 

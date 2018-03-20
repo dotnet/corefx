@@ -23,8 +23,6 @@ namespace System.ComponentModel.Tests
                         { new Collection1(), "(Collection)", null }
                     },
                     CollectionConverterTests.s_converter);
-
-                return SuccessExitCode;
             }).Dispose();
         }
     }

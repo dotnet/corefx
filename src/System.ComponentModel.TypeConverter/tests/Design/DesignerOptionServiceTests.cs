@@ -273,8 +273,6 @@ namespace System.ComponentModel.Design.Tests
 
                 TypeConverter converter = TypeDescriptor.GetConverter(typeof(DesignerOptionService.DesignerOptionCollection));
                 Assert.Equal("(Collection)", converter.ConvertToString(null));
-
-                return SuccessExitCode;
             }).Dispose();
         }
 
