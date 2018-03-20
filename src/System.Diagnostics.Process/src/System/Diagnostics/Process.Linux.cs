@@ -89,7 +89,7 @@ namespace System.Diagnostics
                     var btimeEnd = text.IndexOf('\n', btimeStart);
                     if (btimeEnd > btimeStart)
                     {
-                        if (Int64.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out var bootTimeSeconds))
+                        if (Int32.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out var bootTimeSeconds))
                         {
                             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(bootTimeSeconds);
                         }
