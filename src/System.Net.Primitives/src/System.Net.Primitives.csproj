@@ -90,7 +90,7 @@
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformation.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformation.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Marvin.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
@@ -105,6 +105,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs">
+      <Link>Common\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.Alg.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.Alg.cs</Link>
@@ -203,6 +206,7 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Cryptography.Algorithms" />

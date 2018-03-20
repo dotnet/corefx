@@ -5,7 +5,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if CLR
 using Internal.Runtime.CompilerServices;
+#endif
 
 #if BIT64
 using nuint = System.UInt64;
@@ -36,10 +38,10 @@ namespace System
 
             while (ucount >= 8)
             {
-                p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)byteOffset));
                 Block(ref p0, ref p1);
 
-                p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset + 4));
+                p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset + 4)));
                 Block(ref p0, ref p1);
 
                 byteOffset += 8;
@@ -49,7 +51,7 @@ namespace System
             switch (ucount)
             {
                 case 4:
-                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset)));
                     Block(ref p0, ref p1);
                     goto case 0;
 
@@ -58,33 +60,33 @@ namespace System
                     break;
 
                 case 5:
-                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset)));
                     byteOffset += 4;
                     Block(ref p0, ref p1);
                     goto case 1;
 
                 case 1:
-                    p0 += 0x8000u | Unsafe.AddByteOffset(ref data, byteOffset);
+                    p0 += 0x8000u | Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset));
                     break;
 
                 case 6:
-                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset)));
                     byteOffset += 4;
                     Block(ref p0, ref p1);
                     goto case 2;
 
                 case 2:
-                    p0 += 0x800000u | Unsafe.ReadUnaligned<ushort>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                    p0 += 0x800000u | Unsafe.ReadUnaligned<ushort>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset)));
                     break;
 
                 case 7:
-                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, byteOffset));
+                    p0 += Unsafe.ReadUnaligned<uint>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset)));
                     byteOffset += 4;
                     Block(ref p0, ref p1);
                     goto case 3;
 
                 case 3:
-                    p0 += 0x80000000u | (((uint)(Unsafe.AddByteOffset(ref data, byteOffset + 2))) << 16)| (uint)(Unsafe.ReadUnaligned<ushort>(ref Unsafe.AddByteOffset(ref data, byteOffset)));
+                    p0 += 0x80000000u | (((uint)(Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset + 2)))) << 16)| (uint)(Unsafe.ReadUnaligned<ushort>(ref Unsafe.AddByteOffset(ref data, (IntPtr)(byteOffset))));
                     break;
 
                 default:

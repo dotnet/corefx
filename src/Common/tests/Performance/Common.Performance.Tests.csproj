@@ -5,11 +5,18 @@
     <IncludePerformanceTests>true</IncludePerformanceTests>
     <ProjectGuid>{B96198F5-9BF7-42DE-83E8-3EE39DA25F43}</ProjectGuid>
     <DisableTests Condition="'$(TargetGroup)' == 'uap' AND ('$(ArchGroup)' == 'arm' OR '$(ArchGroup)' == 'arm64')">true</DisableTests>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup Condition="'$(DisableTests)' != 'true'">
-    <Compile Include="$(CommonPath)\System\Marvin.cs">
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs">
+      <Link>Common\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
     </Compile>
     <Compile Include="Perf.Marvin.cs" />

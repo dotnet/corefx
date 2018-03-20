@@ -38,8 +38,8 @@ namespace System
                 {
                     for (int i = 0; i < iterations; i++)
                     {
-                        Marvin.ComputeHash(bytes, 123123123123UL);
-                        Marvin.ComputeHash(otherData, 555888555888UL);
+                        Marvin.ComputeHash32(bytes, 123123123123UL);
+                        Marvin.ComputeHash32(otherData, 555888555888UL);
                     }
                 }
             }
