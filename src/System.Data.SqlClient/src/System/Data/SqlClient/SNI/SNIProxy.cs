@@ -350,9 +350,9 @@ namespace System.Data.SqlClient.SNI
             {
                 hostEntry = Dns.GetHostEntry(hostNameOrAddress);
             }
-            catch
+            catch (SocketException)
             {
-                // An exception can occur while resolving the hostname. We dont care about this exception.
+                // A SocketException can occur while resolving the hostname.
                 // We will fallback on using hostname from the connection string in the finally block
             }
             finally
@@ -360,7 +360,7 @@ namespace System.Data.SqlClient.SNI
                 // If the DNS lookup failed, then resort to using the user provided hostname to construct the SPN.
                 fullyQualifiedDomainName = hostEntry?.HostName ?? hostNameOrAddress;
             }
-            string serverSpn = $"{SqlServerSpnHeader}/{fullyQualifiedDomainName}";
+            string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName;
             if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
                 serverSpn += ":" + portOrInstanceName;
