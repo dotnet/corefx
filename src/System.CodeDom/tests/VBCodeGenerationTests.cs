@@ -1402,10 +1402,10 @@ namespace System.CodeDom.Tests
         [Fact]
         public void RegionsSnippetsAndLinePragmas()
         {
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
                 CodeCompileUnit cu = new CodeCompileUnit();
                 CodeNamespace ns = new CodeNamespace("Namespace1");
 
@@ -1660,11 +1660,7 @@ namespace System.CodeDom.Tests
                           #End Region
                       End Namespace
                       #End Region");
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
-            }
+            }).Dispose();
         }
 
         [Fact]
@@ -2369,10 +2365,10 @@ namespace System.CodeDom.Tests
         [Fact]
         public void ProviderSupports()
         {
-            var cuic = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            try
+            RemoteInvoke(() =>
             {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
                 CodeDomProvider provider = GetProvider();
 
                 CodeCompileUnit cu = new CodeCompileUnit();
@@ -3190,11 +3186,7 @@ namespace System.CodeDom.Tests
                               End Sub
                           End Class
                       End Namespace");
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = cuic;
-            }
+            }).Dispose();
         }
 
         [Fact]
