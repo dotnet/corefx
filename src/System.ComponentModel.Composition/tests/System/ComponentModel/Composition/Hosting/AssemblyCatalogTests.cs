@@ -1078,5 +1078,18 @@ namespace System.ComponentModel.Composition
                 Assert.Equal(catalog.DisplayName, catalog.ToString());
             }
         }
+
+        [Fact]        
+        public void NonStaticallyReferencedAssembly()
+        {
+            string testAssembly = "System.ComponentModel.Composition.Noop.Assembly.dll";
+            var directory = TemporaryFileCopier.GetNewTemporaryDirectory();
+            Directory.CreateDirectory(directory);
+            var finalPath = Path.Combine(directory, testAssembly);
+            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
+            File.Move(sourcePath, finalPath);
+            var assemblyCatalog = new AssemblyCatalog(finalPath);
+            Assert.NotEmpty(assemblyCatalog);
+        }
     }
 }
