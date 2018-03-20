@@ -2142,7 +2142,7 @@ namespace System
                         idx += 2;
                     }
                     // There is no Authority component, save the Path index
-                    // Note: mailto is the only guy who is treated specially, should be not.
+                    // Ideally we would treat mailto like any other URI, but for historical reasons we have to separate out its host parsing.
                     else if (_syntax.NotAny(UriSyntaxFlags.MailToLikeUri))
                     {
                         // By now we know the URI has no Authority, so if the URI must be normalized, initialize it without one.
@@ -2160,7 +2160,7 @@ namespace System
                     return ParsingError.BadAuthority;
                 }
                 // There is no Authority component, save the Path index
-                // mailto is treated specially.
+                // Ideally we would treat mailto like any other URI, but for historical reasons we have to separate out its host parsing.
                 else if (_syntax.NotAny(UriSyntaxFlags.MailToLikeUri))
                 {
                     // By now we know the URI has no Authority, so if the URI must be normalized, initialize it without one.
