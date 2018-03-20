@@ -19,7 +19,7 @@ namespace System.Net.Http.Functional.Tests
 
         private static readonly NetworkCredential s_credentials = new NetworkCredential(Username, Password, Domain);
 
-        private static readonly Func<HttpClientHandler, Uri, HttpStatusCode, NetworkCredential, Task> s_createAndValidateRequest = async (handler, url, expectedStatusCode, credentials) =>
+        private static readonly Func<HttpClientHandler, Uri, HttpStatusCode, ICredentials, Task> s_createAndValidateRequest = async (handler, url, expectedStatusCode, credentials) =>
         {
             handler.Credentials = credentials;
 
@@ -87,6 +87,32 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 Task serverTask = server.AcceptConnectionPerformAuthenticationAndCloseAsync(authenticateHeader);
                 await TestHelper.WhenAllCompletedOrAnyFailed(s_createAndValidateRequest(handler, url, HttpStatusCode.OK, s_credentials), serverTask);
+            }, options);
+        }
+
+        [Theory]
+        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: NTLM\r\n", "Basic", "Negotiate")]
+        [InlineData("WWW-Authenticate: Basic realm=\"hello\"\r\nWWW-Authenticate: Digest realm=\"hello\", nonce=\"hello\", algorithm=MD5\r\nWWW-Authenticate: NTLM\r\n", "Digest", "Negotiate")]
+        public async Task HttpClientHandler_MultipleAuthenticateHeaders_PicksSupported(string authenticateHeader, string supportedAuth, string unsupportedAuth)
+        {
+            if (PlatformDetection.IsWindowsNanoServer || (IsCurlHandler && authenticateHeader.Contains("Digest")))
+            {
+                // TODO: #28065: Fix failing authentication test cases on different httpclienthandlers.
+                return;
+            }
+
+            var options = new LoopbackServer.Options { Domain = Domain, Username = Username, Password = Password };
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                handler.UseDefaultCredentials = false;
+
+                var credentials = new CredentialCache();
+                credentials.Add(url, supportedAuth, new NetworkCredential(Username, Password, Domain));
+                credentials.Add(url, unsupportedAuth, new NetworkCredential(Username, Password, Domain));
+
+                Task serverTask = server.AcceptConnectionPerformAuthenticationAndCloseAsync(authenticateHeader);
+                await TestHelper.WhenAllCompletedOrAnyFailed(s_createAndValidateRequest(handler, url, HttpStatusCode.OK, credentials), serverTask);
             }, options);
         }
 
@@ -300,7 +326,7 @@ namespace System.Net.Http.Functional.Tests
                 using (var client = new HttpClient(handler))
                 {
                     client.DefaultRequestHeaders.ConnectionClose = true; // for simplicity of not needing to know every handler's pooling policy
-                        handler.PreAuthenticate = true;
+                    handler.PreAuthenticate = true;
                     handler.Credentials = s_credentials;
                     client.DefaultRequestHeaders.ExpectContinue = false;
 
@@ -308,7 +334,7 @@ namespace System.Net.Http.Functional.Tests
                     {
                         Assert.Equal(statusCode, resp.StatusCode);
                     }
-                    Assert.Equal("hello world 2", await client.GetStringAsync(uri));
+                    Assert.Equal("hello world", await client.GetStringAsync(uri));
                 }
             },
             async server =>
@@ -316,10 +342,10 @@ namespace System.Net.Http.Functional.Tests
                 List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Unauthorized, AuthResponse);
                 Assert.All(headers, header => Assert.DoesNotContain("Authorization", header));
 
-                headers = await server.AcceptConnectionSendResponseAndCloseAsync(statusCode, content: "hello world 1");
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(statusCode);
                 Assert.Contains(headers, header => header.Contains("Authorization"));
 
-                headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.OK, content: "hello world 2");
+                headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.OK, content: "hello world");
                 Assert.Contains(headers, header => header.Contains("Authorization"));
             });
         }
