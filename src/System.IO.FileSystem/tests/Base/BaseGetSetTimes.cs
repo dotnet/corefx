@@ -16,6 +16,8 @@ namespace System.IO.Tests
         public abstract T GetExistingItem();
         public abstract T GetMissingItem();
 
+        public abstract string GetItemPath(T item);
+
         public abstract IEnumerable<TimeFunction> TimeFunctions(bool requiresRoundtripping = false);
 
         public class TimeFunction : Tuple<SetTime, GetTime, DateTimeKind>
@@ -80,8 +82,8 @@ namespace System.IO.Tests
                 {
                     DateTime time = function.Getter(item);
                     msec = time.Millisecond;
-                    if (msec != 0)
-                        break;
+                    // if (msec != 0)
+                    //    break;
 
                     // This case should only happen 1/1000 times, unless the OS/Filesystem does
                     // not support millisecond granularity.
@@ -92,7 +94,8 @@ namespace System.IO.Tests
                     // If it's the OS/Filesystem often returns 0 for the millisecond part, this may
                     // help prove it. This should only be written 1/1000 runs, unless the test is going to
                     // fail.
-                    Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")}");
+                    string driveFormat = new DriveInfo(GetItemPath(item)).DriveFormat;
+                    Console.WriteLine($"TimesIncludeMillisecondPart got a file time of {time.ToString("o")} on {driveFormat}");
 
                     item = GetExistingItem(); // try a new file/directory
                 }
