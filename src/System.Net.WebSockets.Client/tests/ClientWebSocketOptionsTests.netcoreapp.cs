@@ -104,5 +104,28 @@ namespace System.Net.WebSockets.Client.Tests
                 }), new LoopbackServer.Options { UseSsl = true, WebSocketEndpoint = true });
             }
         }
+
+        [ConditionalTheory(nameof(WebSocketsSupported))]
+        [InlineData("ws://")]
+        [InlineData("wss://")]
+        public async Task NonSecureConnect_ConnectThruProxy_CONNECTisUsed(string connectionType)
+        {
+            if (PlatformDetection.IsWindows7)
+            {
+                return; // [ActiveIssue(27846)]
+            }
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (var cws = new ClientWebSocket())
+                {
+                    cws.Options.Proxy = new WebProxy(proxyUri);
+                    try { await cws.ConnectAsync(new Uri(connectionType + Guid.NewGuid().ToString("N")), default); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                Assert.Contains("CONNECT", await connection.Reader.ReadLineAsync());
+            }));
+        }
     }
 }
