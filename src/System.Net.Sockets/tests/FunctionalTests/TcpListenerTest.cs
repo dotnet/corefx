@@ -134,7 +134,7 @@ namespace System.Net.Sockets.Tests
                 return; 
             }
 
-            // This should not thorowm e.g. default to IPv6.
+            // This should not throw e.g. default to IPv6.
             TcpListener  l = TcpListener.Create(0);
             l.Stop();
 
