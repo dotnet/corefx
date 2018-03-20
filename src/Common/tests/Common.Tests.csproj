@@ -26,7 +26,7 @@
     <Compile Include="$(CommonPath)\System\CharArrayHelpers.cs">
       <Link>Common\System\CharArrayHelpers.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Marvin.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
@@ -116,6 +116,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs">
+      <Link>Common\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
       <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
