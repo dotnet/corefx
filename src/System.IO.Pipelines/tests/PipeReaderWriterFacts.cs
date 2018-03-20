@@ -20,7 +20,7 @@ namespace System.IO.Pipelines.Tests
         public PipelineReaderWriterFacts()
         {
             _pool = new TestMemoryPool();
-            _pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
+            _pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false, pauseWriterThreshold: 0, resumeWriterThreshold: 0));
         }
 
         public void Dispose()
@@ -806,6 +806,51 @@ namespace System.IO.Pipelines.Tests
             _pipe.Writer.CancelPendingFlush();
             var task = _pipe.Writer.FlushAsync();
             Assert.True(IsTaskWithResult(task));
+        }
+
+        [Fact]
+        public async Task PipeWorks()
+        {
+            var pipe = new Pipe(new PipeOptions(_pool, readerScheduler: PipeScheduler.ThreadPool, writerScheduler: PipeScheduler.ThreadPool, useSynchronizationContext: false, pauseWriterThreshold: 0, resumeWriterThreshold: 0));
+
+            var task = Task.Run(async () =>
+            {
+                for(var i=0; i < 10000; i++)
+                {
+                    pipe.Writer.WriteEmpty(4096);
+                    await pipe.Writer.FlushAsync();
+                    pipe.Writer.WriteEmpty(0);
+                    await pipe.Writer.FlushAsync();
+                }
+                pipe.Writer.Complete();
+            });
+
+            while(true)
+            {
+                var result = await pipe.Reader.ReadAsync();
+                var count = -1;
+                for (var j = 0; j < 10; j ++)
+                {
+                    var localCount = 0;
+                    foreach(var memory in result.Buffer)
+                    {
+                        localCount ++;
+                    }
+                    if (count == -1) {
+                        count = localCount;
+                    }else
+                    {
+                        Assert.Equal(count, localCount);
+                    }
+                }
+                Console.WriteLine(result.Buffer.Length);
+                pipe.Reader.AdvanceTo(result.Buffer.End);
+                if (result.IsCompleted)
+                {
+                    break;
+                }
+            }
+
         }
 
         private bool IsTaskWithResult<T>(ValueTask<T> task)
