@@ -565,7 +565,7 @@
       },
       "BuildParameters": {
         "PB_ConfigurationGroup": "Release",
-        "PB_PublishType": "myget-blob-versions-msdl"
+        "PB_PublishType": "myget-blob-versions"
       },
       "Definitions": [{
         "Name": "DotNet-Trusted-Publish",
