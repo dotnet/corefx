@@ -111,13 +111,13 @@
 // 
 // On output there are the following routines
 //    Writing to all listeners that are NOT ETW, we have the following routines
-//       * WriteToAllListeners(ID, Guid*, COUNT, EventData*) 
-//       * WriteToAllListeners(ID, Guid*, object[])
-//       * WriteToAllListeners(NAME, Guid*, EventPayload)
+//       * WriteToAllListeners(ID, Guid*, Guid*, COUNT, EventData*)
+//       * WriteToAllListeners(ID, Guid*, Guid*, object[])
+//       * WriteToAllListeners(NAME, Guid*, Guid*, EventPayload)
 //
 //       EventPayload is the internal type that implements the IDictionary<string, object> interface
 //       The EventListeners will pass back for serialized classes for nested object, but  
-//       WriteToAllListeners(NAME, Guid*, EventPayload) unpacks this uses the fields as if they
+//       WriteToAllListeners(NAME, Guid*, Guid*, EventPayload) unpacks this uses the fields as if they
 //       were parameters to a method.  
 // 
 //       The first two are used for the WriteEvent* case, and the later is used for the Write<T> case.  
@@ -537,7 +537,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #region protected
+#region protected
         /// <summary>
         /// This is the constructor that most users will use to create their eventSource.   It takes 
         /// no parameters.  The ETW provider name and GUID of the EventSource are determined by the EventSource 
@@ -606,6 +606,13 @@ namespace System.Diagnostics.Tracing
         // typed event methods. Dynamically defined events (that use Write) hare defined on the fly and are handled elsewhere.
         private unsafe void DefineEventPipeEvents()
         {
+            // If the EventSource is set to emit all events as TraceLogging events, skip this initialization.
+            // Events will be defined when they are emitted for the first time.
+            if(SelfDescribingEvents)
+            {
+                return;
+            }
+
             Debug.Assert(m_eventData != null);
             Debug.Assert(m_provider != null);
             int cnt = m_eventData.Length;
@@ -615,101 +622,29 @@ namespace System.Diagnostics.Tracing
                 if (eventID == 0)
                     continue;
 
+                byte[] metadata = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(m_eventData[i]);
+                uint metadataLength = (metadata != null) ? (uint)metadata.Length : 0;
+
                 string eventName = m_eventData[i].Name;
                 Int64 keywords = m_eventData[i].Descriptor.Keywords;
                 uint eventVersion = m_eventData[i].Descriptor.Version;
                 uint level = m_eventData[i].Descriptor.Level;
 
-                // evnetID          : 4 bytes
-                // eventName        : (eventName.Length + 1) * 2 bytes
-                // keywords         : 8 bytes
-                // eventVersion     : 4 bytes
-                // level            : 4 bytes
-                // parameterCount   : 4 bytes
-                uint metadataLength = 24 + ((uint)eventName.Length + 1) * 2;
-
-                // Increase the metadataLength for the types of all parameters.
-                metadataLength += (uint)m_eventData[i].Parameters.Length * 4;
-
-                // Increase the metadataLength for the names of all parameters.
-                foreach (var parameter in m_eventData[i].Parameters)
-                {
-                    string parameterName = parameter.Name;
-                    metadataLength = metadataLength + ((uint)parameterName.Length + 1) * 2;
-                }
-
-                byte[] metadata = new byte[metadataLength];
-
-                // Write metadata: evnetID, eventName, keywords, eventVersion, level, parameterCount, param1 type, param1 name...
                 fixed (byte *pMetadata = metadata)
                 {
-                    uint offset = 0;
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, eventID);
-                    fixed(char *pEventName = eventName)
-                    {
-                        WriteToBuffer(pMetadata, metadataLength, ref offset, (byte *)pEventName, ((uint)eventName.Length + 1) * 2);
-                    }
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, keywords);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, eventVersion);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, level);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, (uint)m_eventData[i].Parameters.Length);
-                    foreach (var parameter in m_eventData[i].Parameters)
-                    {
-                        // Write parameter type.
-                        WriteToBuffer(pMetadata, metadataLength, ref offset, (uint)GetTypeCodeExtended(parameter.ParameterType));
-                        
-                        // Write parameter name.
-                        string parameterName = parameter.Name;
-                        fixed (char *pParameterName = parameterName)
-                        {
-                            WriteToBuffer(pMetadata, metadataLength, ref offset, (byte *)pParameterName, ((uint)parameterName.Length + 1) * 2);
-                        }
-                    }
-                    Debug.Assert(metadataLength == offset);
-                    IntPtr eventHandle = m_provider.m_eventProvider.DefineEventHandle(eventID, eventName, keywords, eventVersion, level, pMetadata, metadataLength);
-                    m_eventData[i].EventHandle = eventHandle; 
+                    IntPtr eventHandle = m_provider.m_eventProvider.DefineEventHandle(
+                        eventID,
+                        eventName,
+                        keywords,
+                        eventVersion,
+                        level,
+                        pMetadata,
+                        metadataLength);
+
+                    Debug.Assert(eventHandle != IntPtr.Zero);
+                    m_eventData[i].EventHandle = eventHandle;
                 }
             }
-        }
-
-        // Copy src to buffer and modify the offset.
-        // Note: We know the buffer size ahead of time to make sure no buffer overflow.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, byte *src, uint srcLength)
-        {
-            Debug.Assert(bufferLength >= (offset + srcLength));
-            for (int i = 0; i < srcLength; i++)
-            {
-                *(byte *)(buffer + offset + i) = *(byte *)(src + i);
-            }
-            offset += srcLength;
-        }
-
-        // Copy uint value to buffer.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, uint value)
-        {
-            Debug.Assert(bufferLength >= (offset + 4));
-            *(uint *)(buffer + offset) = value;
-            offset += 4;
-        }
-
-        // Copy long value to buffer.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, long value)
-        {
-            Debug.Assert(bufferLength >= (offset + 8));
-            *(long *)(buffer + offset) = value;
-            offset += 8;
-        }
-
-        private static TypeCode GetTypeCodeExtended(Type parameterType)
-        {
-            // Guid is not part of TypeCode, we decided to use 17 to represent it, as it's the "free slot" 
-            // see https://github.com/dotnet/coreclr/issues/16105#issuecomment-361749750 for more
-            const TypeCode GuidTypeCode = (TypeCode)17;
-
-            if (parameterType == typeof(Guid)) // Guid is not a part of TypeCode enum
-                return GuidTypeCode;
-
-            return Type.GetTypeCode(parameterType);
         }
 #endif
 
@@ -1112,7 +1047,7 @@ namespace System.Diagnostics.Tracing
             /// </summary>
             internal int Reserved { get { return m_Reserved; } set { m_Reserved = value; } }
 
-            #region private
+#region private
             /// <summary>
             /// Initializes the members of this EventData object to point at a previously-pinned
             /// tracelogging-compatible metadata blob.
@@ -1134,7 +1069,7 @@ namespace System.Diagnostics.Tracing
 #pragma warning disable 0649
             internal int m_Reserved;       // Used to pad the size to match the Win32 API
 #pragma warning restore 0649
-            #endregion
+#endregion
         }
 
         /// <summary>
@@ -1261,7 +1196,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
 
                     if (m_Dispatchers != null && m_eventData[eventId].EnabledForAnyListener)
-                        WriteToAllListeners(eventId, relatedActivityId, eventDataCount, data);
+                        WriteToAllListeners(eventId, pActivityId, relatedActivityId, eventDataCount, data);
                 }
                 catch (Exception ex)
                 {
@@ -1300,9 +1235,9 @@ namespace System.Diagnostics.Tracing
             WriteEventVarargs(eventId, &relatedActivityId, args);
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Members
+#region IDisposable Members
         /// <summary>
         /// Disposes of an EventSource.
         /// </summary>
@@ -1357,13 +1292,14 @@ namespace System.Diagnostics.Tracing
         {
             this.Dispose(false);
         }
-        #endregion
+#endregion
 
-        #region private
+#region private
 
         private unsafe void WriteEventRaw(
             string eventName,
             ref EventDescriptor eventDescriptor,
+            IntPtr eventHandle,
             Guid* activityID,
             Guid* relatedActivityID,
             int dataCount,
@@ -1376,7 +1312,7 @@ namespace System.Diagnostics.Tracing
             }
             else
             {
-                if (!m_provider.WriteEventRaw(ref eventDescriptor, activityID, relatedActivityID, dataCount, data))
+                if (!m_provider.WriteEventRaw(ref eventDescriptor, eventHandle, activityID, relatedActivityID, dataCount, data))
                     ThrowEventSourceException(eventName);
             }
 #endif // FEATURE_MANAGED_ETW
@@ -1935,13 +1871,13 @@ namespace System.Diagnostics.Tracing
                         // Maintain old behavior - object identity is preserved
                         if (AppContextSwitches.PreserveEventListnerObjectIdentity)
                         {
-                            WriteToAllListeners(eventId, childActivityID, args);
+                            WriteToAllListeners(eventId, pActivityId, childActivityID, args);
                         }
                         else
 #endif // !ES_BUILD_STANDALONE
                         {
                             object[] serializedArgs = SerializeEventArgs(eventId, args);
-                            WriteToAllListeners(eventId, childActivityID, serializedArgs);
+                            WriteToAllListeners(eventId, pActivityId, childActivityID, serializedArgs);
                         }
                     }
                 }
@@ -2012,7 +1948,7 @@ namespace System.Diagnostics.Tracing
 #endif //!ES_BUILD_PCL
         }
 
-        private unsafe void WriteToAllListeners(int eventId, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
+        private unsafe void WriteToAllListeners(int eventId, Guid* activityID, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
         {
             // We represent a byte[] as a integer denoting the length  and then a blob of bytes in the data pointer. This causes a spurious
             // warning because eventDataCount is off by one for the byte[] case since a byte[] has 2 items associated it. So we want to check
@@ -2043,14 +1979,16 @@ namespace System.Diagnostics.Tracing
             EventSource.EventData* dataPtr = data;
             for (int i = 0; i < paramCount; i++)
                 args[i] = DecodeObject(eventId, i, ref dataPtr);
-            WriteToAllListeners(eventId, childActivityID, args);
+            WriteToAllListeners(eventId, activityID, childActivityID, args);
         }
 
         // helper for writing to all EventListeners attached the current eventSource.  
-        private unsafe void WriteToAllListeners(int eventId, Guid* childActivityID, params object[] args)
+        private unsafe void WriteToAllListeners(int eventId, Guid* activityID, Guid* childActivityID, params object[] args)
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
             eventCallbackArgs.EventId = eventId;
+            if (activityID != null)
+                eventCallbackArgs.ActivityId = *activityID;
             if (childActivityID != null)
                 eventCallbackArgs.RelatedActivityId = *childActivityID;
             eventCallbackArgs.EventName = m_eventData[eventId].Name;
@@ -2730,7 +2668,7 @@ namespace System.Diagnostics.Tracing
 
             Debug.Assert(!SelfDescribingEvents);
 
-#if FEATURE_MANAGED_ETW 
+#if FEATURE_MANAGED_ETW
             fixed (byte* dataPtr = rawManifest)
             {
                 // we don't want the manifest to show up in the event log channels so we specify as keywords 
@@ -4401,7 +4339,20 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public Guid ActivityId
         {
-            get { return EventSource.CurrentThreadActivityId; }
+            get
+            {
+                Guid activityId = m_activityId;
+                if (activityId == Guid.Empty)
+                {
+                    activityId = EventSource.CurrentThreadActivityId;
+                }
+
+                return activityId;
+            }
+            internal set
+            {
+                m_activityId = value;
+            }
         }
 
         /// <summary>
@@ -4576,6 +4527,7 @@ namespace System.Diagnostics.Tracing
         private string m_eventName;
         private EventSource m_eventSource;
         private ReadOnlyCollection<string> m_payloadNames;
+        private Guid m_activityId;
         internal EventTags m_tags;
         internal EventOpcode m_opcode;
         internal EventLevel m_level;
