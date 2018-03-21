@@ -19,13 +19,13 @@ namespace System
         public static Span<T> AsSpan<T>(this T[] array, int start) => Span<T>.Create(array, start);
 
         /// <summary>
-        /// Returns a value indicating whether the specified <paramref name="other"/> occurs within the <paramref name="span"/>.
+        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
         /// <param name="span">The source span.</param>
-        /// <param name="other">The value to seek within the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
         /// </summary>
-        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
-            => (IndexOf(span, other, comparisonType) >= 0);
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => (IndexOf(span, value, comparisonType) >= 0);
 
         /// <summary>
         /// Determines whether this <paramref name="span"/> and the specified <paramref name="other"/> span have the same characters
