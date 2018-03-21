@@ -16,7 +16,7 @@ namespace System.ComponentModel.TypeConverterTests
 {
     public class IconConverterTest
     {
-        //Icon icon = null;
+        Icon icon = null;
         IconConverter icoConv = null;
         IconConverter icoConvFrmTD = null;
         string iconStr = null;
@@ -119,142 +119,35 @@ namespace System.ComponentModel.TypeConverterTests
         {
             Icon newIcon = (Icon)icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, iconBytes);
 
-            //Assert.AreEqual(icon.Height, newIcon.Height, "CF#1");
-            //Assert.AreEqual(icon.Width, newIcon.Width, "CF#1a");
+            Assert.Equal(icon.Height, newIcon.Height);
+            Assert.Equal(icon.Width, newIcon.Width);
 
-            try
-            {
-                icoConv.ConvertFrom("System.Drawing.string");
-                //Assert.Fail("CF#2: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#2");
-            }
-
-            try
-            {
-                icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.string");
-                //Assert.Fail("CF#2a: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#2a");
-            }
-
-            try
-            {
-                icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20));
-                //Assert.Fail("CF#3: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#3");
-            }
-
-            try
-            {
-                icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10));
-                //Assert.Fail("CF#4: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#4");
-            }
-
-            try
-            {
-                icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10));
-                //Assert.Fail("CF#5: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#5");
-            }
-
-            try
-            {
-                icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new object());
-                //Assert.Fail("CF#6: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#6");
-            }
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom("System.Drawing.String"));
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
+            Assert.Throws<NotSupportedException>(() => icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
 
 
             newIcon = (Icon)icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, iconBytes);
-            //Assert.AreEqual(icon.Height, newIcon.Height, "CF#1A");
-            //Assert.AreEqual(icon.Width, newIcon.Width, "CF#1Aa");
 
-            try
-            {
-                icoConvFrmTD.ConvertFrom("System.Drawing.string");
-                //Assert.Fail("CF#2A: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#2A");
-            }
+            Assert.Equal(icon.Height, newIcon.Height);
+            Assert.Equal(icon.Width, newIcon.Width);
 
-            try
-            {
-                icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.string");
-                //Assert.Fail("CF#2aA: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#2aA");
-            }
-
-            try
-            {
-                icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture,
-                           new Bitmap(20, 20));
-                //Assert.Fail("CF#3A: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#3A");
-            }
-
-            try
-            {
-                icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10));
-                //Assert.Fail("CF#4A: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#4A");
-            }
-
-            try
-            {
-                icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10));
-                //Assert.Fail("CF#5A: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#5A");
-            }
-
-            try
-            {
-                icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new object());
-                //Assert.Fail("CF#6A: must throw NotSupportedException");
-            }
-            catch (Exception e)
-            {
-                Assert.True(e is NotSupportedException, "CF#6A");
-            }
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom("System.Drawing.String"));
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
+            Assert.Throws<NotSupportedException>(() => icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
         }
 
         [Fact]
         public void TestConvertTo()
         {
-            //Assert.AreEqual(iconStr, (string)icoConv.ConvertTo(null, CultureInfo.InvariantCulture, icon, typeof(string)), "CT#1");
-
-            //Assert.AreEqual(iconStr, (string)icoConv.ConvertTo(icon, typeof(string)), "CT#1a");
+            Assert.Equal(iconStr, (string)icoConv.ConvertTo(null, CultureInfo.InvariantCulture, icon, typeof(string)));
+            Assert.Equal(iconStr, (string)icoConv.ConvertTo(icon, typeof(string)));
 
             /*byte [] newIconBytes = (byte []) icoConv.ConvertTo (null, CultureInfo.InvariantCulture,
 											icon, iconBytes.GetType ());
@@ -330,10 +223,8 @@ namespace System.ComponentModel.TypeConverterTests
 				Assert.True (e is NotSupportedException, "CT#10");
 			}*/
 
-
-            //Assert.AreEqual(iconStr, (string)icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, icon, typeof(string)), "CT#1A");
-
-            //Assert.AreEqual(iconStr, (string)icoConvFrmTD.ConvertTo(icon, typeof(string)), "CT#1aA");
+            Assert.Equal(iconStr, (string)icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, icon, typeof(string)));
+            Assert.Equal(iconStr, (string)icoConvFrmTD.ConvertTo(icon, typeof(string)));
 
             /*newIconBytes = (byte []) icoConvFrmTD.ConvertTo (null, CultureInfo.InvariantCulture,
 											icon, iconBytes.GetType ());
@@ -408,7 +299,7 @@ namespace System.ComponentModel.TypeConverterTests
 				Assert.True (e is NotSupportedException, "CT#10A");
 			}*/
 
-            //Assert.AreEqual("(none)", (string)icoConv.ConvertTo(null, typeof(string)), "CT#2");
+            Assert.Equal("(none)", (string)icoConv.ConvertTo(null, typeof(string)));
         }
     }
 }
