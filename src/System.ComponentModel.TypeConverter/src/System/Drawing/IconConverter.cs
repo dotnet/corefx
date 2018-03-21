@@ -38,27 +38,27 @@ namespace System.Drawing
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if ((value is Icon) && (destinationType == typeof(string)))
+            if (destinationType == typeof(string))
             {
-                return value.ToString();
-            }
-            else if ((value == null) && (destinationType == typeof(string)))
-            {
-                return "(none)";
+                if (value == null)
+                {
+                    return "(none)";
+                }
+                else if (value is Icon)
+                {
+                    return value.ToString();
+                }
             }
             else if (destinationType == typeof(byte[]))
             {
-                //came here means destType is byte array ;
                 using (MemoryStream ms = new MemoryStream())
                 {
                     ((Icon)value).Save(ms);
                     return ms.ToArray();
                 }
             }
-            else
-            {
-                return new NotSupportedException("IconConverter can not convert from " + value.GetType());
-            }
+
+            throw new NotSupportedException($"IconConverter can not convert from {value.GetType()}.");
         }
     }
 }
