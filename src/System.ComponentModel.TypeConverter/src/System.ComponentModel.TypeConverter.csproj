@@ -43,6 +43,7 @@
     <Compile Include="System\ComponentModel\UInt32Converter.cs" />
     <Compile Include="System\ComponentModel\UInt64Converter.cs" />
     <Compile Include="System\ComponentModel\UriTypeConverter.cs" />
+    <Compile Include="System\Drawing\FontConverter.cs" />
     <Compile Include="System\Timers\ElapsedEventArgs.cs" />
     <Compile Include="System\Timers\ElapsedEventHandler.cs" />
     <Compile Include="System\Timers\Timer.cs">
@@ -260,6 +261,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.Drawing.Common" />
     <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />
