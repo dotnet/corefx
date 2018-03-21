@@ -176,7 +176,7 @@ namespace System
 
         public static void Validate<T>(Span<byte> span, T value) where T : struct
         {
-            T read = MemoryMarshal.ReadMachineEndian<T>(span);
+            T read = MemoryMarshal.Read<T>(span);
             Assert.Equal(value, read);
             span.Clear();
         }

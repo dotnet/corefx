@@ -519,7 +519,7 @@ namespace System.Runtime.InteropServices
 #endif
         public static ref T GetReference<T>(System.ReadOnlySpan<T> span) { throw null; }
         public static ref T GetReference<T>(System.Span<T> span) { throw null; }
-        public static T ReadMachineEndian<T>(System.ReadOnlySpan<byte> source) where T : struct { throw null; }
+        public static T Read<T>(System.ReadOnlySpan<byte> source) where T : struct { throw null; }
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetArray<T>(System.ReadOnlyMemory<T> memory, out System.ArraySegment<T> segment) { throw null; }
         public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner owner)
@@ -527,9 +527,9 @@ namespace System.Runtime.InteropServices
         public static bool TryGetOwnedMemory<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner owner, out int start, out int length)
             where TOwner : System.Buffers.OwnedMemory<T> { throw null; }
         public static bool TryGetString(System.ReadOnlyMemory<char> memory, out string text, out int start, out int length) { throw null; }
-        public static bool TryReadMachineEndian<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
-        public static bool TryWriteMachineEndian<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }
-        public static void WriteMachineEndian<T>(System.Span<byte> destination, ref T value) where T : struct { }
+        public static bool TryRead<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
+        public static bool TryWrite<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }
+        public static void Write<T>(System.Span<byte> destination, ref T value) where T : struct { }
     }
 
     public static partial class SequenceMarshal

@@ -19,7 +19,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            MemoryMarshal.WriteMachineEndian(destination, ref value);
+            MemoryMarshal.Write(destination, ref value);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace System.Buffers.Binary
             {
                 value = ReverseEndianness(value);
             }
-            return MemoryMarshal.TryWriteMachineEndian(destination, ref value);
+            return MemoryMarshal.TryWrite(destination, ref value);
         }
     }
 }
