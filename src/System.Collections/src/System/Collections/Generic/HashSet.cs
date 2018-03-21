@@ -1243,6 +1243,7 @@ namespace System.Collections.Generic
                 {
                     IncreaseCapacity();
                     // this will change during resize
+                    slots = _slots;
                     bucket = hashCode % _buckets.Length;
                 }
                 index = _lastIndex;
@@ -1564,6 +1565,7 @@ namespace System.Collections.Generic
                 {
                     IncreaseCapacity();
                     // this will change during resize
+                    slots = _slots;
                     bucket = hashCode % _buckets.Length;
                 }
                 index = _lastIndex;
