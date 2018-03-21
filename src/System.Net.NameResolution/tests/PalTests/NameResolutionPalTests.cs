@@ -28,13 +28,6 @@ namespace System.Net.NameResolution.PalTests
             IPHostEntry hostEntry;
             int nativeErrorCode;
             SocketError error = NameResolutionPal.TryGetAddrInfo("localhost", out hostEntry, out nativeErrorCode);
-            if (error == SocketError.HostNotFound)
-            {
-                // On Unix, we are not guaranteed to be able to resove the local host. The ability to do so depends on the 
-                // machine configurations, which varies by distro and is often inconsistent.
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
-                return;
-            }
 
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(hostEntry);
