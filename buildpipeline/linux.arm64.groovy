@@ -23,16 +23,23 @@ simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a
         // Generate the version assets.  Do we need to even do this for non-official builds?
         sh "./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true"
     }
-
-    // TODO: Sync when runtime is available
-
-    // TODO: Build product instead of just native once dependencies are avaliable
-
+    stage ('Sync') {
+        sh "./sync.sh -p -BuildTests=false -- /p:ArchGroup=arm64"
+    }
+    // For arm64 cross builds we split the 'Build Product' build.sh command into 3 separate parts
     stage ('Build Native') {
         sh """
             export ROOTFS_DIR=/crossrootfs/arm64
-            ./build-native.sh -buildArch=arm64 -${params.CGroup} -- cross
+            ./build-native.sh -buildArch=arm64 -${params.CGroup}
         """
+    }
+    stage ('Build Managed') {
+        // Cross build builds Linux Managed components using x64 target
+        // We do not want x64 packages
+        sh "./build-managed.sh -BuildPackages=false -buildArch=x64 -${params.CGroup}"
+    }
+    stage ('Build Packages') {
+        sh "./build-packages.sh -buildArch=arm64 -${params.CGroup}"
     }
 
     // TODO: Build Tests for arm64 when possible
