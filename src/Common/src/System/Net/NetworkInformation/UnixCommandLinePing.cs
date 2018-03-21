@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Text;
+using System.Globalization;
 
 namespace System.Net.NetworkInformation
 {
@@ -88,7 +89,7 @@ namespace System.Net.NetworkInformation
             int msIndex = pingOutput.IndexOf("ms", afterTime);
             int numLength = msIndex - afterTime - 1;
             string timeSubstring = pingOutput.Substring(afterTime, numLength);
-            double parsedRtt = double.Parse(timeSubstring, System.Globalization.CultureInfo.InvariantCulture);
+            double parsedRtt = double.Parse(timeSubstring, CultureInfo.InvariantCulture);
             return (long)Math.Round(parsedRtt);
         }
     }
