@@ -222,7 +222,7 @@ namespace System.Buffers
             {
                 int memoryLength = currentSegment.Memory.Length;
 
-                // Fully contained in this segment; or at end of segment but there isn't a next one to move to
+                // Fully contained in this segment
                 if (memoryLength > count)
                     break;
 
