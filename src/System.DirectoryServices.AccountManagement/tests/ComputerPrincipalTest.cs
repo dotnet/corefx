@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using Xunit;
 
 namespace System.DirectoryServices.AccountManagement.Tests
@@ -34,8 +35,13 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [Fact]
         public void Ctor_EmptySamAccountName_ThrowsArgumentNullException()
         {
-            var context = new PrincipalContext(ContextType.Machine);
-            AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                var context = new PrincipalContext(ContextType.Machine);
+                AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
+            }).Dispose();
         }
 
         [Fact]
