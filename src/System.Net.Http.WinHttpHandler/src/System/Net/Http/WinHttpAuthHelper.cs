@@ -296,7 +296,7 @@ namespace System.Net.Http
                 Interop.WinHttp.WINHTTP_OPTION_AUTOLOGON_POLICY,
                 ref optionData))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError("WinHttpSetOption");
             }
         }
 
@@ -365,7 +365,7 @@ namespace System.Net.Http
                 password,
                 IntPtr.Zero))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError("WinHttpSetCredentials");
             }
 
             return true;
