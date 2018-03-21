@@ -43,7 +43,6 @@
     <Compile Include="System\ComponentModel\UInt32Converter.cs" />
     <Compile Include="System\ComponentModel\UInt64Converter.cs" />
     <Compile Include="System\ComponentModel\UriTypeConverter.cs" />
-    <Compile Include="System\Drawing\FontConverter.cs" />
     <Compile Include="System\Timers\ElapsedEventArgs.cs" />
     <Compile Include="System\Timers\ElapsedEventHandler.cs" />
     <Compile Include="System\Timers\Timer.cs">
@@ -96,6 +95,8 @@
       <Link>System\Drawing\ColorTable.cs</Link>
     </Compile>
     <Compile Include="System\Drawing\ColorConverter.cs" />
+    <Compile Include="System\Drawing\FontConverter.cs" />
+    <Compile Include="System\Drawing\IconConverter.cs" />
     <Compile Include="System\Drawing\PointConverter.cs" />
     <Compile Include="System\Drawing\RectangleConverter.cs" />
     <Compile Include="System\Drawing\SizeConverter.cs" />

@@ -765,6 +765,14 @@ namespace System.Drawing
             public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
         }
     }
+    public class IconConverter : System.ComponentModel.ExpandableObjectConverter
+    {
+        public IconConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+    }
     public partial class PointConverter : System.ComponentModel.TypeConverter
     {
         public PointConverter() { }
