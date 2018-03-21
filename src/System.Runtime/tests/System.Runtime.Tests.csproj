@@ -8,7 +8,7 @@
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
     <!-- Please don't delete. We need App.config for netfx -->
-    <NETFxTestRunnerAppConfig>$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
+    <NETFxTestRunnerAppConfig Condition="'$(TargetGroup)' == 'netstandard'">$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
