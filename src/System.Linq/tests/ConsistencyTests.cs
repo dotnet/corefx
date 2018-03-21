@@ -27,6 +27,11 @@ namespace System.Linq.Tests
                      nameof(Enumerable.ToArray),
                      nameof(Enumerable.AsEnumerable),
                      nameof(Enumerable.ToList),
+// should be replaced on something like #if netfx
+#if true
+                     "Append",
+                     "Prepend",
+#endif
                      "Fold",
                      "LeftJoin",
                      "ToHashSet"
