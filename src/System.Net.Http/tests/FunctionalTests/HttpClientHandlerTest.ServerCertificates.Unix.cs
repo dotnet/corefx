@@ -73,17 +73,9 @@ namespace System.Net.Http.Functional.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // Not implemented
         [InlineData(false, false, false, false, false)] // system -> ok
         [InlineData(true, true, true, true, true)]      // empty dir, empty bundle file -> fail
-        // It is enough to override the bundle, since all tested platforms don't have a default dir:
-        [InlineData(false, false, true, true, true)]    // empty bundle -> fail
-        [InlineData(false, false, true, false, true)]   // non-existing bundle -> fail
         public void HttpClientUsesSslCertEnvironmentVariables(bool setSslCertDir, bool createSslCertDir,
             bool setSslCertFile, bool createSslCertFile, bool expectedFailure)
         {
-            if (expectedFailure && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return; // [ActiveIssue(28002)]
-            }
-
             // This test sets SSL_CERT_DIR and SSL_CERT_FILE to empty/non-existing locations and then
             // checks the http request fails.
             // Some platforms will use the system default when not specifying a value, while others
