@@ -1645,6 +1645,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(value, actual);
     }
 
+    [ActiveIssue(28321)]
     [Fact]
     public static void SerializeWithDefaultValueSetToNaNTest()
     {
