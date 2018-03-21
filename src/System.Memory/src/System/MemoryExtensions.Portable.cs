@@ -55,7 +55,7 @@ namespace System
         private static bool EqualsOrdinalIgnoreCase(ReadOnlySpan<char> span, ReadOnlySpan<char> other)
         {
             Debug.Assert(span.Length == other.Length);
-            if (value.Length == 0)  // span.Length == other.Length == 0
+            if (other.Length == 0)  // span.Length == other.Length == 0
                 return true;
             return (CompareToOrdinalIgnoreCase(span, other) == 0);
         }
