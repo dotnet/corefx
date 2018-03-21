@@ -89,7 +89,7 @@ namespace System.Buffers.Text
                         return true;
                     }
 
-                case (default):
+                case default(char):
                 case 'G':
                     return TryParseDateTimeG(source, out value, out _, out bytesConsumed);
 
@@ -132,7 +132,7 @@ namespace System.Buffers.Text
                 case 'O':
                     return TryParseDateTimeOffsetO(source, out value, out bytesConsumed, out _);
 
-                case (default):
+                case default(char):
                     return TryParseDateTimeOffsetDefault(source, out value, out bytesConsumed);
 
                 case 'G':
