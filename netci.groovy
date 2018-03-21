@@ -353,6 +353,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
     ['netcoreapp'].each { targetGroup ->
         ['Debug', 'Release'].each { configurationGroup ->
             def osGroup = "Linux"
+            def archGroup = 'arm64'
             def osName = 'Ubuntu16.04'
 
             def newJobName = "${osName.toLowerCase()}_arm64_cross_${configurationGroup.toLowerCase()}"
@@ -364,7 +365,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                     shell(script)
 
                     // Tar up the appropriate bits.
-                    shell("tar -czf bin/build.tar.gz --directory=\"bin/runtime/${targetGroup}-${osGroup}-${configurationGroup}-arm64\" .")
+                    shell("tar -czf bin/build.tar.gz --directory=\"bin/Linux.${archGroup}.${configurationGroup}/native\" .")
                 }
             }
 
@@ -389,8 +390,14 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 
             // Set up triggers
             if (isPR) {
-                // We run Arm64 Debug and Linux Release as default PR builds
-                Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} arm64 ${configurationGroup} Build")
+                if (configurationGroup == "Release") {
+                    // Run Arm64 Linux Release job automatically for PR builds
+                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} arm64 ${configurationGroup} Build")
+                }
+                else {
+                    // Add Arm64 Linux Debug job hook
+                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} arm64 ${configurationGroup} Build", "(?i).*test\\W+${osName}\\W+arm64\\W+${configurationGroup}.*")
+                }
             }
             else {
                 // Set a push trigger
