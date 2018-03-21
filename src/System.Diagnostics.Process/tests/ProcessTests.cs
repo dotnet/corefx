@@ -722,8 +722,10 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
             for (int i = 0; i < 10; ++i)
             {
-                var p = Process.GetProcessById(_process.Id);
-                Assert.Equal(_process.StartTime, p.StartTime);
+                using (var p = Process.GetProcessById(_process.Id))
+                {
+                    Assert.Equal(_process.StartTime, p.StartTime);
+                }
             }
         }
 
