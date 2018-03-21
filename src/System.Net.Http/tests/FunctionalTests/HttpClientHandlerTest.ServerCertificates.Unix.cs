@@ -70,56 +70,38 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [PlatformSpecific(~TestPlatforms.OSX)] // Not implemented
-        [InlineData(false, false, false, false, false)] // system -> ok
-        [InlineData(true, true, true, true, true)]      // empty dir, empty bundle file -> fail
-        public void HttpClientUsesSslCertEnvironmentVariables(bool setSslCertDir, bool createSslCertDir,
-            bool setSslCertFile, bool createSslCertFile, bool expectedFailure)
+        public void HttpClientUsesSslCertEnvironmentVariables(bool useCurl)
         {
-            // This test sets SSL_CERT_DIR and SSL_CERT_FILE to empty/non-existing locations and then
-            // checks the http request fails.
-            // Some platforms will use the system default when not specifying a value, while others
-            // will not use those certificates. Due to these platform differences, we only check specific
-            // combinations that are expected to work the same cross-platform.
+            // We set SSL_CERT_DIR and SSL_CERT_FILE to empty locations.
+            // The HttpClient should fail to validate the server certificate.
+
             var psi = new ProcessStartInfo();
-            if (setSslCertDir)
+            string sslCertDir = GetTestFilePath();
+            Directory.CreateDirectory(sslCertDir);
+            psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
+
+            string sslCertFile = GetTestFilePath();
+            File.WriteAllText(sslCertFile, "");
+            psi.Environment.Add("SSL_CERT_FILE", sslCertFile);
+
+            if (useCurl)
             {
-                string sslCertDir = GetTestFilePath();
-                if (createSslCertDir)
-                {
-                    Directory.CreateDirectory(sslCertDir);
-                }
-                psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
+                psi.Environment.Add("DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER", "false");
             }
 
-            if (setSslCertFile)
+            RemoteInvoke(async () =>
             {
-                string sslCertFile = GetTestFilePath();
-                if (createSslCertFile)
-                {
-                    File.WriteAllText(sslCertFile, "");
-                }
-                psi.Environment.Add("SSL_CERT_FILE", sslCertFile);
-            }
-
-            RemoteInvoke(async arg =>
-            {
-                bool shouldFail = bool.Parse(arg);
                 const string Url = "https://www.microsoft.com";
 
                 using (HttpClient client = new HttpClient())
                 {
-                    if (shouldFail)
-                    {
-                        await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(Url));
-                    }
-                    else
-                    {
-                        await client.GetAsync(Url);
-                    }
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(Url));
                 }
                 return SuccessExitCode;
-            }, expectedFailure.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+            }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
     }
 }
