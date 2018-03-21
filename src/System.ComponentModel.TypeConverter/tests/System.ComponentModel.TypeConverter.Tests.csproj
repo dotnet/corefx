@@ -17,6 +17,7 @@
     <Compile Include="Drawing\ColorConverterTests.cs" />
     <Compile Include="Drawing\FontConverterTests.cs" />
     <Compile Include="Drawing\IconConverterTests.cs" />
+    <Compile Include="Drawing\ImageConverterTests.cs" />
     <Compile Include="Drawing\PointConverterTests.cs" />
     <Compile Include="Drawing\RectangleConverterTests.cs" />
     <Compile Include="Drawing\SizeConverterTests.cs" />
@@ -102,6 +103,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Resources\almogaver24bits.bmp" />
+    <EmbeddedResource Include="Resources\almogaver24bits1.bmp" />
     <EmbeddedResource Include="Resources\VisualPng.ico" />
     <EmbeddedResource Include="Resources\VisualPng1.ico" />
   </ItemGroup>

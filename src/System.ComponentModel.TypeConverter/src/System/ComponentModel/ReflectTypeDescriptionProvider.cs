@@ -129,6 +129,7 @@ namespace System.ComponentModel
             [typeof(Color)] = typeof(ColorConverter),
             [typeof(Font)] = typeof(FontConverter),
             [typeof(Icon)] = typeof(IconConverter),
+            [typeof(Image)] = typeof(ImageConverter),
             [typeof(Point)] = typeof(PointConverter),
             [typeof(Rectangle)] = typeof(RectangleConverter),
             [typeof(Size)] = typeof(SizeConverter),
