@@ -11,10 +11,10 @@ namespace System.SpanTests
         [Fact]
         public static void ZeroLengthSequenceCompareTo_Bool()
         {
-            bool[] a = new bool[3];
+            var a = new bool[3];
 
-            Span<bool> first = new Span<bool>(a, 1, 0);
-            Span<bool> second = new Span<bool>(a, 2, 0);
+            var first = new Span<bool>(a, 1, 0);
+            var second = new Span<bool>(a, 2, 0);
             int result = first.SequenceCompareTo<bool>(second);
             Assert.Equal(0, result);
         }
@@ -23,7 +23,7 @@ namespace System.SpanTests
         public static void SameSpanSequenceCompareTo_Bool()
         {
             bool[] a = { true, true, false };
-            Span<bool> span = new Span<bool>(a);
+            var span = new Span<bool>(a);
             int result = span.SequenceCompareTo<bool>(span);
             Assert.Equal(0, result);
         }
@@ -32,7 +32,7 @@ namespace System.SpanTests
         public static void SequenceCompareToArrayImplicit_Bool()
         {
             bool[] a = { true, true, false };
-            Span<bool> first = new Span<bool>(a, 0, 3);
+            var first = new Span<bool>(a, 0, 3);
             int result = first.SequenceCompareTo<bool>(a);
             Assert.Equal(0, result);
         }
@@ -44,7 +44,7 @@ namespace System.SpanTests
             bool[] dst = { false, true, true, true, false };
             var segment = new ArraySegment<bool>(dst, 1, 3);
 
-            Span<bool> first = new Span<bool>(src, 0, 3);
+            var first = new Span<bool>(src, 0, 3);
             int result = first.SequenceCompareTo<bool>(segment);
             Assert.Equal(0, result);
         }
@@ -53,8 +53,8 @@ namespace System.SpanTests
         public static void LengthMismatchSequenceCompareTo_Bool()
         {
             bool[] a = { true, true, false };
-            Span<bool> first = new Span<bool>(a, 0, 2);
-            Span<bool> second = new Span<bool>(a, 0, 3);
+            var first = new Span<bool>(a, 0, 2);
+            var second = new Span<bool>(a, 0, 3);
             int result = first.SequenceCompareTo<bool>(second);
             Assert.True(result < 0);
 
@@ -78,8 +78,8 @@ namespace System.SpanTests
             {
                 for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)
                 {
-                    bool[] first = new bool[length];
-                    bool[] second = new bool[length];
+                    var first = new bool[length];
+                    var second = new bool[length];
                     for (int i = 0; i < length; i++)
                     {
                         first[i] = second[i] = true;
@@ -87,8 +87,8 @@ namespace System.SpanTests
 
                     second[mismatchIndex] = !second[mismatchIndex];
 
-                    Span<bool> firstSpan = new Span<bool>(first);
-                    ReadOnlySpan<bool> secondSpan = new ReadOnlySpan<bool>(second);
+                    var firstSpan = new Span<bool>(first);
+                    var secondSpan = new ReadOnlySpan<bool>(second);
                     int result = firstSpan.SequenceCompareTo<bool>(secondSpan);
                     Assert.True(result > 0);
 
@@ -103,8 +103,8 @@ namespace System.SpanTests
         {
             for (int length = 1; length < 32; length++)
             {
-                bool[] first = new bool[length];
-                bool[] second = new bool[length];
+                var first = new bool[length];
+                var second = new bool[length];
 
                 for (int i = 0; i < length; i++)
                 {
@@ -112,8 +112,8 @@ namespace System.SpanTests
                     second[i] = (i % 2 == 0);
                 }
 
-                Span<bool> firstSpan = new Span<bool>(first);
-                ReadOnlySpan<bool> secondSpan = new ReadOnlySpan<bool>(second);
+                var firstSpan = new Span<bool>(first);
+                var secondSpan = new ReadOnlySpan<bool>(second);
                 int result = firstSpan.SequenceCompareTo<bool>(secondSpan);
                 Assert.True(result < 0);
 
@@ -127,20 +127,20 @@ namespace System.SpanTests
         {
             for (int length = 0; length < 100; length++)
             {
-                bool[] first = new bool[length + 2];
+                var first = new bool[length + 2];
                 first[0] = true;
                 for (int k = 1; k <= length; k++)
                     first[k] = false;
                 first[length + 1] = true;
 
-                bool[] second = new bool[length + 2];
+                var second = new bool[length + 2];
                 second[0] = false;
                 for (int k = 1; k <= length; k++)
                     second[k] = false;
                 second[length + 1] = false;
 
-                Span<bool> span1 = new Span<bool>(first, 1, length);
-                ReadOnlySpan<bool> span2 = new ReadOnlySpan<bool>(second, 1, length);
+                var span1 = new Span<bool>(first, 1, length);
+                var span2 = new ReadOnlySpan<bool>(second, 1, length);
                 int result = span1.SequenceCompareTo<bool>(span2);
                 Assert.Equal(0, result);
             }
