@@ -72,7 +72,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        [Trait("MyTrait", "MyTraitValue")]
         public static void SequenceCompareToWithSingleMismatch_Bool()
         {
             for (int length = 1; length < 32; length++)
