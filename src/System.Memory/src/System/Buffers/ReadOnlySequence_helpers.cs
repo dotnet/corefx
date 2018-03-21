@@ -224,7 +224,7 @@ namespace System.Buffers
 
                 // Fully contained in this segment
                 if (memoryLength > count)
-                    break;
+                    goto FoundSegment;
 
                 // Move to next
                 count -= memoryLength;
@@ -234,7 +234,8 @@ namespace System.Buffers
             // Hit the end of the segments but didn't reach the count
             if (currentSegment == null || (currentSegment == endObject && endPosition < count))
                 ThrowHelper.ThrowArgumentOutOfRangeException_CountOutOfRange();
-
+        
+        FoundSegment:
             return new SequencePosition(currentSegment, (int)count);
         }
 
