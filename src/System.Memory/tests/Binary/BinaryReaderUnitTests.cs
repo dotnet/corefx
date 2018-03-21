@@ -24,12 +24,12 @@ namespace System.Buffers.Binary.Tests
                 span = new Span<byte>(&value, 8);
             }
 
-            Assert.Equal<byte>(0x11, ReadMachineEndian<byte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte byteValue));
+            Assert.Equal<byte>(0x11, MemoryMarshal.ReadMachineEndian<byte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte byteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<sbyte>(0x11, ReadMachineEndian<sbyte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte sbyteValue));
+            Assert.Equal<sbyte>(0x11, MemoryMarshal.ReadMachineEndian<sbyte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte sbyteValue));
             Assert.Equal(0x11, byteValue);
 
             Assert.Equal<ushort>(0x1122, ReadUInt16BigEndian(span));
@@ -93,12 +93,12 @@ namespace System.Buffers.Binary.Tests
                 span = new ReadOnlySpan<byte>(&value, 8);
             }
 
-            Assert.Equal<byte>(0x11, ReadMachineEndian<byte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte byteValue));
+            Assert.Equal<byte>(0x11, MemoryMarshal.ReadMachineEndian<byte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte byteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<sbyte>(0x11, ReadMachineEndian<sbyte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte sbyteValue));
+            Assert.Equal<sbyte>(0x11, MemoryMarshal.ReadMachineEndian<sbyte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte sbyteValue));
             Assert.Equal(0x11, byteValue);
 
             Assert.Equal<ushort>(0x1122, ReadUInt16BigEndian(span));
@@ -155,27 +155,27 @@ namespace System.Buffers.Binary.Tests
         {
             Span<byte> span = new byte[] { 1 };
 
-            Assert.Equal<byte>(1, ReadMachineEndian<byte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte byteValue));
+            Assert.Equal<byte>(1, MemoryMarshal.ReadMachineEndian<byte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte byteValue));
             Assert.Equal(1, byteValue);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<short>(_span));
-            Assert.False(TryReadMachineEndian(span, out short shortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<int>(_span));
-            Assert.False(TryReadMachineEndian(span, out int intValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<long>(_span));
-            Assert.False(TryReadMachineEndian(span, out long longValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<short>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out short shortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<int>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out int intValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<long>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out long longValue));
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ushort>(_span));
-            Assert.False(TryReadMachineEndian(span, out ushort ushortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<uint>(_span));
-            Assert.False(TryReadMachineEndian(span, out uint uintValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ulong>(_span));
-            Assert.False(TryReadMachineEndian(span, out ulong ulongValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<ushort>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out ushort ushortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<uint>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out uint uintValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<ulong>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out ulong ulongValue));
 
             Span<byte> largeSpan = new byte[100];
-            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
-            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => MemoryMarshal.ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => MemoryMarshal.TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
         }
 
         [Fact]
@@ -183,27 +183,27 @@ namespace System.Buffers.Binary.Tests
         {
             ReadOnlySpan<byte> span = new byte[] { 1 };
 
-            Assert.Equal<byte>(1, ReadMachineEndian<byte>(span));
-            Assert.True(TryReadMachineEndian(span, out byte byteValue));
+            Assert.Equal<byte>(1, MemoryMarshal.ReadMachineEndian<byte>(span));
+            Assert.True(MemoryMarshal.TryReadMachineEndian(span, out byte byteValue));
             Assert.Equal(1, byteValue);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<short>(_span));
-            Assert.False(TryReadMachineEndian(span, out short shortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<int>(_span));
-            Assert.False(TryReadMachineEndian(span, out int intValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<long>(_span));
-            Assert.False(TryReadMachineEndian(span, out long longValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<short>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out short shortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<int>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out int intValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<long>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out long longValue));
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ushort>(_span));
-            Assert.False(TryReadMachineEndian(span, out ushort ushortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<uint>(_span));
-            Assert.False(TryReadMachineEndian(span, out uint uintValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ulong>(_span));
-            Assert.False(TryReadMachineEndian(span, out ulong ulongValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<ushort>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out ushort ushortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<uint>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out uint uintValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => MemoryMarshal.ReadMachineEndian<ulong>(_span));
+            Assert.False(MemoryMarshal.TryReadMachineEndian(span, out ulong ulongValue));
 
             ReadOnlySpan<byte> largeSpan = new byte[100];
-            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
-            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => MemoryMarshal.ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => MemoryMarshal.TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
         }
 
         [Fact]
@@ -375,7 +375,7 @@ namespace System.Buffers.Binary.Tests
 
             ReadOnlySpan<byte> readOnlySpanBE = new ReadOnlySpan<byte>(spanBE.ToArray());
 
-            TestHelpers.TestStructExplicit readStructAndReverse = ReadMachineEndian<TestHelpers.TestStructExplicit>(spanBE);
+            TestHelpers.TestStructExplicit readStructAndReverse = MemoryMarshal.ReadMachineEndian<TestHelpers.TestStructExplicit>(spanBE);
             if (BitConverter.IsLittleEndian)
             {
                 readStructAndReverse.S0 = ReverseEndianness(readStructAndReverse.S0);
@@ -408,7 +408,7 @@ namespace System.Buffers.Binary.Tests
                 UL1 = ReadUInt64BigEndian(spanBE.Slice(48))
             };
 
-            TestHelpers.TestStructExplicit readStructAndReverseFromReadOnlySpan = ReadMachineEndian<TestHelpers.TestStructExplicit>(readOnlySpanBE);
+            TestHelpers.TestStructExplicit readStructAndReverseFromReadOnlySpan = MemoryMarshal.ReadMachineEndian<TestHelpers.TestStructExplicit>(readOnlySpanBE);
             if (BitConverter.IsLittleEndian)
             {
                 readStructAndReverseFromReadOnlySpan.S0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.S0);
