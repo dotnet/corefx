@@ -115,6 +115,8 @@ namespace System.Net.WebSockets.Client.Tests
                 return; // [ActiveIssue(27846)]
             }
 
+            bool connectionAccepted = false;
+
             await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
             {
                 using (var cws = new ClientWebSocket())
@@ -125,7 +127,10 @@ namespace System.Net.WebSockets.Client.Tests
             }, server => server.AcceptConnectionAsync(async connection =>
             {
                 Assert.Contains("CONNECT", await connection.Reader.ReadLineAsync());
+                connectionAccepted = true;
             }));
+
+            Assert.True(connectionAccepted);
         }
     }
 }
