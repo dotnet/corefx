@@ -1141,5 +1141,18 @@ namespace System.Tests
         {
             Assert.Equal(expected, dateTimeOffset.ToString(format));
         }
+
+        public static IEnumerable<object[]> ToString_WithCulture_MatchesExpected_MemberData()
+        {
+            yield return new object[] { new DateTimeOffset(636572516255571994, TimeSpan.FromHours(-5)), "M", new CultureInfo("fr-FR"), "21 mars" };
+            yield return new object[] { new DateTimeOffset(636572516255571994, TimeSpan.FromHours(-5)), "Y", new CultureInfo("da-DK"), "marts 2018" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToString_WithCulture_MatchesExpected_MemberData))]
+        public static void ToString_WithCulture_MatchesExpected(DateTimeOffset dateTimeOffset, string format, CultureInfo culture, string expected)
+        {
+            Assert.Equal(expected, dateTimeOffset.ToString(format, culture));
+        }
     }
 }
