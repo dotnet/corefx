@@ -720,8 +720,11 @@ namespace System.Diagnostics.Tests
         public void ProcessStartTime_Deterministic_Across_Instances()
         {
             CreateDefaultProcess();
-            var p = Process.GetProcessById(_process.Id);
-            Assert.Equal(_process.StartTime, p.StartTime);
+            for (int i = 0; i < 10; ++i)
+            {
+                var p = Process.GetProcessById(_process.Id);
+                Assert.Equal(_process.StartTime, p.StartTime);
+            }
         }
 
         [Fact]
