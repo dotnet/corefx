@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Collections;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Security.Permissions;
 using Xunit;
 
 namespace System.ComponentModel.TypeConverterTests
@@ -22,35 +18,26 @@ namespace System.ComponentModel.TypeConverterTests
         string iconStr = null;
         byte[] iconBytes = null;
 
-        //[SetUp]
-        //public void SetUp()
-        //{
-        //    icon = new Icon(TestBitmap.getInFile("bitmaps/VisualPng.ico"));
-        //    iconStr = icon.Tostring();
+        public IconConverterTest()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-        //    icoConv = new IconConverter();
-        //    icoConvFrmTD = (IconConverter)TypeDescriptor.GetConverter(icon);
+            icon = new Icon(assembly.GetManifestResourceStream("Resources.VisualPng.ico"));
+            iconStr = icon.ToString();
 
-        //    Stream stream = new FileStream(TestBitmap.getInFile("bitmaps/VisualPng1.ico"), FileMode.Open);
-        //    int length = (int)stream.Length;
-        //    iconBytes = new byte[length];
+            icoConv = new IconConverter();
+            icoConvFrmTD = (IconConverter)TypeDescriptor.GetConverter(icon);
 
-        //    try
-        //    {
-        //        if (stream.Read(iconBytes, 0, length) != length)
-        //            Assert.Fail("SU#1: Read Failure");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Assert.Fail("SU#2 Exception thrown while reading. Exception is: " + e.Message);
-        //    }
-        //    finally
-        //    {
-        //        stream.Close();
-        //    }
-
-        //    stream.Close();
-        //}
+            using (Stream stream = assembly.GetManifestResourceStream("Resources.VisualPng1.ico"))
+            {
+                int length = (int)stream.Length;
+                iconBytes = new byte[length];
+                if (stream.Read(iconBytes, 0, length) != length)
+                {
+                    throw new InvalidOperationException("Failed to load resource image.");
+                }
+            }
+        }
 
         [Fact]
         public void TestCanConvertFrom()
