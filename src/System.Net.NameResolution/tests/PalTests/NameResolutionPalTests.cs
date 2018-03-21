@@ -28,7 +28,6 @@ namespace System.Net.NameResolution.PalTests
             IPHostEntry hostEntry;
             int nativeErrorCode;
             SocketError error = NameResolutionPal.TryGetAddrInfo("localhost", out hostEntry, out nativeErrorCode);
-
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(hostEntry);
             Assert.NotNull(hostEntry.HostName);
