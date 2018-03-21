@@ -69,11 +69,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // Not implemented
-        public void HttpClientUsesSslCertEnvironmentVariables(bool useCurl)
+        public void HttpClientUsesSslCertEnvironmentVariables()
         {
             // We set SSL_CERT_DIR and SSL_CERT_FILE to empty locations.
             // The HttpClient should fail to validate the server certificate.
@@ -87,21 +85,16 @@ namespace System.Net.Http.Functional.Tests
             File.WriteAllText(sslCertFile, "");
             psi.Environment.Add("SSL_CERT_FILE", sslCertFile);
 
-            if (useCurl)
-            {
-                psi.Environment.Add("DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER", "false");
-            }
-
-            RemoteInvoke(async () =>
+            RemoteInvoke(async useSocketsHttpHandlerString =>
             {
                 const string Url = "https://www.microsoft.com";
 
-                using (HttpClient client = new HttpClient())
+                using (var client = CreateHttpClient(useSocketsHttpHandlerString))
                 {
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(Url));
                 }
                 return SuccessExitCode;
-            }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+            }, UseSocketsHttpHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
     }
 }
