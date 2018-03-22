@@ -326,10 +326,15 @@ namespace System.Net.WebSockets
 
             int bytesTransferred = Math.Min(buffer.Count, _bufferedPayloadReceiveResult.Count);
 
+            _bufferedPayloadReceiveResult = new WebSocketReceiveResult(
+                _bufferedPayloadReceiveResult.Count - bytesTransferred,
+                _bufferedPayloadReceiveResult.MessageType,
+                _bufferedPayloadReceiveResult.EndOfMessage);
+
             receiveResult = new WebSocketReceiveResult(
                 bytesTransferred,
                 _bufferedPayloadReceiveResult.MessageType,
-                bytesTransferred == 0 && _bufferedPayloadReceiveResult.EndOfMessage,
+                _bufferedPayloadReceiveResult.Count == 0 && _bufferedPayloadReceiveResult.EndOfMessage,
                 _bufferedPayloadReceiveResult.CloseStatus,
                 _bufferedPayloadReceiveResult.CloseStatusDescription);
 
