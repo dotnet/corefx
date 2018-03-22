@@ -129,6 +129,12 @@
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.bool.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.byte.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.char.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.int.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.long.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.long.cs" />
