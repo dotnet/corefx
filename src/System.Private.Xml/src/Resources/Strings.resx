@@ -3425,15 +3425,14 @@ Usage: dotnet {0} [[--assembly:&lt;assembly name&gt;] | [&lt;assembly file locat
   </data>
   <data name="HelpType" xml:space="preserve">
     <value>     {0}       Generate code for serialization/deserialization of the
-                  specified type from the input assembly. Short form is '{1}'.</value>
+                  specified type from the input assembly.</value>
   </data>
   <data name="HelpForce" xml:space="preserve">
-    <value>     {0}       Forces overwrite of a previously generated assembly.
-                  Short form is '{1}'.</value>
+    <value>     {0}       Forces overwrite of a previously generated assembly.</value>
   </data>
   <data name="HelpProxy" xml:space="preserve">
     <value>     {0}  Generate serialization code only for proxy classes and web
-                  method parameters. Short form is '{1}'.</value>
+                  method parameters.</value>
   </data>
   <data name="HelpOut" xml:space="preserve">
     <value>     {0}        Output directory name (default: target assembly location).
