@@ -351,7 +351,7 @@ namespace System.ComponentModel.Composition
             Directory.CreateDirectory(directory);
             var finalPath = Path.Combine(directory, testAssembly);
             var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
-            File.Move(sourcePath, finalPath);
+            File.Copy(sourcePath, finalPath);
             var catalog = new DirectoryCatalog(directory, "*.dll");
             Assert.NotEmpty(catalog);
         }
