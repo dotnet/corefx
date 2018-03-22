@@ -206,7 +206,7 @@ namespace System.Net.Tests
                     await connection.SendResponseAsync();
                 });
 
-                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
+                using (var response = (HttpWebResponse) await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
