@@ -14,7 +14,7 @@ namespace System.SpanTests
             var a = new int[3];
 
             var first = new Span<int>(a, 1, 0);
-            var second = new Span<int>(a, 2, 0);
+            var second = new ReadOnlySpan<int>(a, 2, 0);
             int result = first.SequenceCompareTo<int>(second);
             Assert.Equal(0, result);
         }
