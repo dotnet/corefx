@@ -214,6 +214,7 @@ namespace System.Tests
         public static void Contains(string s, string value, StringComparison comparisonType, bool expected)
         {
             Assert.Equal(expected, s.Contains(value, comparisonType));
+            Assert.Equal(expected, s.AsSpan().Contains(value, comparisonType));
         }
 
         [Fact]
@@ -225,6 +226,7 @@ namespace System.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                 Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
+                Assert.True(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
             }, str).Dispose();
@@ -234,6 +236,7 @@ namespace System.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
                 Assert.False(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
+                Assert.False(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
             }, str).Dispose();
@@ -607,6 +610,9 @@ namespace System.Tests
         public static void IndexOf_SingleLetter(string s, char target, StringComparison stringComparison, int expected)
         {
             Assert.Equal(expected, s.IndexOf(target, stringComparison));
+            var charArray = new char[1];
+            charArray[0] = target;
+            Assert.Equal(expected, s.AsSpan().IndexOf(charArray, stringComparison));
         }
 
         [Fact]
@@ -624,11 +630,22 @@ namespace System.Tests
                 Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(19, span.IndexOf(new char[] { value }, StringComparison.CurrentCulture));
+                Assert.Equal(4, span.IndexOf(new char[] { value }, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(19, span.IndexOf(new char[] { value }, StringComparison.Ordinal));
+                Assert.Equal(19, span.IndexOf(new char[] { value }, StringComparison.OrdinalIgnoreCase));
+
                 value = '\u0131';
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
+
+                Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.CurrentCulture));
+                Assert.Equal(8, span.IndexOf(new char[] { value }, StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.Ordinal));
+                Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.OrdinalIgnoreCase));
 
                 return SuccessExitCode;
             }).Dispose();
