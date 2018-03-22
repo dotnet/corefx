@@ -22,7 +22,7 @@ namespace System.SpanTests
         [Fact]
         public static void SameSpanSequenceCompareTo_Int()
         {
-            int[] a = { 4, 5, 6 };
+            int[] a = { 851227, 28052014, 429104168 };
             var span = new ReadOnlySpan<int>(a);
             int result = span.SequenceCompareTo<int>(span);
             Assert.Equal(0, result);
@@ -31,7 +31,7 @@ namespace System.SpanTests
         [Fact]
         public static void SequenceCompareToArrayImplicit_Int()
         {
-            int[] a = { 4, 5, 6 };
+            int[] a = { 851227, 28052014, 429104168 };
             var first = new ReadOnlySpan<int>(a, 0, 3);
             int result = first.SequenceCompareTo<int>(a);
             Assert.Equal(0, result);
@@ -40,8 +40,8 @@ namespace System.SpanTests
         [Fact]
         public static void SequenceCompareToArraySegmentImplicit_Int()
         {
-            int[] src = { 1, 2, 3 };
-            int[] dst = { 5, 1, 2, 3, 10 };
+            int[] src = { 851227, 28052014, 429104168 };
+            int[] dst = { 5, 851227, 28052014, 429104168, 10 };
             var segment = new ArraySegment<int>(dst, 1, 3);
 
             var first = new ReadOnlySpan<int>(src, 0, 3);
@@ -52,7 +52,7 @@ namespace System.SpanTests
         [Fact]
         public static void LengthMismatchSequenceCompareTo_Int()
         {
-            int[] a = { 4, 5, 6 };
+            int[] a = { 851227, 28052014, 429104168 };
             var first = new ReadOnlySpan<int>(a, 0, 2);
             var second = new ReadOnlySpan<int>(a, 0, 3);
             int result = first.SequenceCompareTo<int>(second);

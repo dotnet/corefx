@@ -22,7 +22,7 @@ namespace System.SpanTests
         [Fact]
         public static void SameSpanSequenceCompareTo_Long()
         {
-            long[] a = { 4, 5, 6 };
+            long[] a = { 488238291, 52498989823, 619890289890 };
             var span = new ReadOnlySpan<long>(a);
             int result = span.SequenceCompareTo<long>(span);
             Assert.Equal(0, result);
@@ -31,7 +31,7 @@ namespace System.SpanTests
         [Fact]
         public static void SequenceCompareToArrayImplicit_Long()
         {
-            long[] a = { 4, 5, 6 };
+            long[] a = { 488238291, 52498989823, 619890289890 };
             var first = new ReadOnlySpan<long>(a, 0, 3);
             int result = first.SequenceCompareTo<long>(a);
             Assert.Equal(0, result);
@@ -40,8 +40,8 @@ namespace System.SpanTests
         [Fact]
         public static void SequenceCompareToArraySegmentImplicit_Long()
         {
-            long[] src = { 1, 2, 3 };
-            long[] dst = { 5, 1, 2, 3, 10 };
+            long[] src = { 1989089123, 234523454235, 3123213231 };
+            long[] dst = { 5, 1989089123, 234523454235, 3123213231, 10 };
             var segment = new ArraySegment<long>(dst, 1, 3);
 
             var first = new ReadOnlySpan<long>(src, 0, 3);
@@ -52,7 +52,7 @@ namespace System.SpanTests
         [Fact]
         public static void LengthMismatchSequenceCompareTo_Long()
         {
-            long[] a = { 4, 5, 6 };
+            long[] a = { 488238291, 52498989823, 619890289890 };
             var first = new ReadOnlySpan<long>(a, 0, 2);
             var second = new ReadOnlySpan<long>(a, 0, 3);
             int result = first.SequenceCompareTo<long>(second);
