@@ -53,13 +53,13 @@
   <Target Name="AddNETStandardRefs" AfterTargets="ResolveReferences"
           Condition="'$(_NETStandardTFMFolder)' != ''">
     <PropertyGroup>
-      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\$(_NETStandardTFMFolder)\ref</_NETStandardRefFolder>
+      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardPackageId.ToLower())\$(NETStandardPackageVersion)\build\$(_NETStandardTFMFolder)\ref</_NETStandardRefFolder>
     </PropertyGroup>
     <ItemGroup>
       <Reference Include="$(_NETStandardRefFolder)\*.dll">
         <Private>False</Private>
-        <NuGetPackageId>$(NETStandardLibraryPackageId)</NuGetPackageId>
-        <NuGetPackageVersion>$(NETStandardLibraryPackageVersion)</NuGetPackageVersion>
+        <NuGetPackageId>$(NETStandardPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(NETStandardPackageVersion)</NuGetPackageVersion>
       </Reference>
     </ItemGroup>
   </Target>

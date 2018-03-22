@@ -113,7 +113,7 @@
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>NETStandardLibraryPackageVersion</ElementName>
-      <PackageId>$(NETStandardLibraryPackageId)</PackageId>
+      <PackageId>$(NETStandardPackageId)</PackageId>
     </XmlUpdateStep>
 <!--
     <XmlUpdateStep Include="ProjectNTfs">
