@@ -188,6 +188,25 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
+        public async Task HttpWebRequest_SetHostHeader_ContainsPortNumber()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                string host = uri.Host + ":" + uri.Port;
+                request.Host = host;
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Skip status line.
+                    await connection.Reader.ReadLineAsync();
+                    Assert.Contains(host, await connection.Reader.ReadLineAsync());
+                });
+            });
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void MaximumResponseHeadersLength_SetNegativeTwo_ThrowsArgumentOutOfRangeException(Uri remoteServer)
         {
