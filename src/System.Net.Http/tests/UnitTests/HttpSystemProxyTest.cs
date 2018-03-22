@@ -33,7 +33,6 @@ namespace System.Net.Http.Tests
             Assert.False(HttpSystemProxy.TryCreate(out p));
 
             FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
-            WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
 
             Assert.True(HttpSystemProxy.TryCreate(out p));
             Assert.NotNull(p);
@@ -59,7 +58,6 @@ namespace System.Net.Http.Tests
         [InlineData("http://[2607:f8B0:4005:80A::200E]/", true)]
         public void HttpProxy_Local_Bypassed(string name, bool shouldBypass)
         {
-
             RemoteInvoke((url, expected) =>
             {
                 bool expectedResult = Boolean.Parse(expected);
@@ -68,7 +66,6 @@ namespace System.Net.Http.Tests
                 FakeRegistry.Reset();
                 FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
                 FakeRegistry.WinInetProxySettings.ProxyBypass = "23.23.86.44;*.foo.com;<local>;BAR.COM; ; 162*;[2002::11];[*:f8b0:4005:80a::200e]";
-                WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
 
                 Assert.True(HttpSystemProxy.TryCreate(out p));
                 Assert.NotNull(p);

@@ -13,10 +13,10 @@ namespace System.Net.Http
 {
     internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
-        private readonly Uri _proxyUri;         // URI of the system proxy if set
-        private List<Regex> _bypass;            // list of domains not to proxy
-        private bool _bypassLocal = false;      // we should bypass domain considered local
-        private List<IPAddress> _localIp;
+        private readonly Uri _proxyUri;                 // URI of the system proxy if set
+        private readonly List<Regex> _bypass;           // list of domains not to proxy
+        private readonly bool _bypassLocal = false;     // we should bypass domain considered local
+        private readonly List<IPAddress> _localIp;
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
@@ -65,7 +65,7 @@ namespace System.Net.Http
                 {
                     // Process bypass list for manual setting.
                     string[] list = proxyHelper.ProxyBypass.Split(';');
-                    _bypass = new List<Regex>();
+                    _bypass = new List<Regex>(list.Length);
 
                     foreach (string value in list)
                     {
@@ -90,7 +90,7 @@ namespace System.Net.Http
                         {
                             if (NetEventSource.IsEnabled)
                             {
-                                NetEventSource.Info(this, $"Failed to process {tmp} from bypass list.");
+                                NetEventSource.Info(this, "Failed to process " + tmp + " from bypass list.");
                             }
                         }
                     }
@@ -171,11 +171,7 @@ namespace System.Net.Http
                         // RFC1123 allows labels to start with number.
                         // Leading number may or may not be IP address.
                         // IPv6 [::1] notation. '[' is not valid character in names.
-                        try
-                        {
-                            address = IPAddress.Parse(uri.Host);
-                        }
-                        catch { };
+                        IPAddress.TryParse(uri.Host, out address);
                     }
                     if (address != null)
                     {
