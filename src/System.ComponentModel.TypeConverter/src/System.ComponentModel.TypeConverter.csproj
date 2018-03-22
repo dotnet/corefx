@@ -98,6 +98,7 @@
     <Compile Include="System\Drawing\FontConverter.cs" />
     <Compile Include="System\Drawing\IconConverter.cs" />
     <Compile Include="System\Drawing\ImageConverter.cs" />
+    <Compile Include="System\Drawing\ImageFormatConverter.cs" />
     <Compile Include="System\Drawing\PointConverter.cs" />
     <Compile Include="System\Drawing\RectangleConverter.cs" />
     <Compile Include="System\Drawing\SizeConverter.cs" />

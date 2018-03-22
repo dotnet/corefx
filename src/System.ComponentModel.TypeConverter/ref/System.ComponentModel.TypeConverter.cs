@@ -775,13 +775,23 @@ namespace System.Drawing
     }
     public class ImageConverter : System.ComponentModel.TypeConverter
     {
-        public ImageConverter()        {        }
+        public ImageConverter() { }
         public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
         public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
         public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
         public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
         public override System.ComponentModel.PropertyDescriptorCollection GetProperties(System.ComponentModel.ITypeDescriptorContext context, object value, Attribute[] attributes) { throw null; }
         public override bool GetPropertiesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+    }
+    public class ImageFormatConverter : System.ComponentModel.TypeConverter
+    {
+        public ImageFormatConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+        public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+        public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
     }
     public partial class PointConverter : System.ComponentModel.TypeConverter
     {
