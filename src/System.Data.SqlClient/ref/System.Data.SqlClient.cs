@@ -641,7 +641,7 @@ namespace System.Data.SqlClient
         protected override System.Data.IDbCommand BaseCommand { get { throw null; } set { } }
     }
     public delegate void SqlRowUpdatingEventHandler(object sender, SqlRowUpdatingEventArgs e);
-    public partial class SqlDataReader : System.Data.Common.DbDataReader, System.IDisposable, System.Data.Common.IDbColumnSchemaGenerator
+    public partial class SqlDataReader : System.Data.Common.DbDataReader, System.IDisposable
     {
         internal SqlDataReader() { }
         protected System.Data.SqlClient.SqlConnection Connection { get { throw null; } }
@@ -658,7 +658,6 @@ namespace System.Data.SqlClient
         public override long GetBytes(int i, long dataIndex, byte[] buffer, int bufferIndex, int length) { throw null; }
         public override char GetChar(int i) { throw null; }
         public override long GetChars(int i, long dataIndex, char[] buffer, int bufferIndex, int length) { throw null; }
-        public System.Collections.ObjectModel.ReadOnlyCollection<System.Data.Common.DbColumn> GetColumnSchema() { throw null; }
         public override string GetDataTypeName(int i) { throw null; }
         public override System.DateTime GetDateTime(int i) { throw null; }
         public virtual System.DateTimeOffset GetDateTimeOffset(int i) { throw null; }
