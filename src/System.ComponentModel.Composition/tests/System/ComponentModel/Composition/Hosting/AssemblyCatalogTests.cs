@@ -1087,7 +1087,7 @@ namespace System.ComponentModel.Composition
             var directory = TemporaryFileCopier.GetNewTemporaryDirectory();
             Directory.CreateDirectory(directory);
             var finalPath = Path.Combine(directory, testAssembly);
-            var sourcePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), testAssembly);
+            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
             File.Copy(sourcePath, finalPath);
             var assemblyCatalog = new AssemblyCatalog(finalPath);
             Assert.NotEmpty(assemblyCatalog);
