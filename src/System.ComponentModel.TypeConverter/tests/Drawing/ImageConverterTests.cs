@@ -22,21 +22,21 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            _image = Image.FromStream(assembly.GetManifestResourceStream("Resources.almogaver24bits.bmp"));
+            Stream testImageStream = assembly.GetManifestResourceStream("Resources.almogaver24bits.bmp");
+
+            int length = (int)testImageStream.Length;
+            _imageBytes = new byte[length];
+            if (testImageStream.Read(_imageBytes, 0, length) != length)
+            {
+                throw new InvalidOperationException("Failed to load resource image.");
+            }
+
+            testImageStream.Position = 0;
+            _image = Image.FromStream(testImageStream);
             _imageStr = _image.ToString();
 
             _imgConv = new ImageConverter();
             _imgConvFrmTD = (ImageConverter)TypeDescriptor.GetConverter(_image);
-
-            using (Stream stream = assembly.GetManifestResourceStream("Resources.almogaver24bits.bmp"))
-            {
-                int length = (int)stream.Length;
-                _imageBytes = new byte[length];
-                if (stream.Read(_imageBytes, 0, length) != length)
-                {
-                    throw new InvalidOperationException("Failed to load resource image.");
-                }
-            }
         }
 
         [Fact]

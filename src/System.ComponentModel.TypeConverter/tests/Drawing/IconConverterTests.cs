@@ -22,21 +22,21 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            _icon = new Icon(assembly.GetManifestResourceStream("Resources.VisualPng.ico"));
+            Stream testIconStream = assembly.GetManifestResourceStream("Resources.VisualPng.ico");
+
+            int length = (int)testIconStream.Length;
+            _iconBytes = new byte[length];
+            if (testIconStream.Read(_iconBytes, 0, length) != length)
+            {
+                throw new InvalidOperationException("Failed to load resource image.");
+            }
+
+            testIconStream.Position = 0;
+            _icon = new Icon(testIconStream);
             _iconStr = _icon.ToString();
 
             _icoConv = new IconConverter();
             _icoConvFrmTD = (IconConverter)TypeDescriptor.GetConverter(_icon);
-
-            using (Stream stream = assembly.GetManifestResourceStream("Resources.VisualPng1.ico"))
-            {
-                int length = (int)stream.Length;
-                _iconBytes = new byte[length];
-                if (stream.Read(_iconBytes, 0, length) != length)
-                {
-                    throw new InvalidOperationException("Failed to load resource image.");
-                }
-            }
         }
 
         [Fact]

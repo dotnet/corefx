@@ -105,9 +105,7 @@
   <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Resources\almogaver24bits.bmp" />
-    <EmbeddedResource Include="Resources\almogaver24bits1.bmp" />
     <EmbeddedResource Include="Resources\VisualPng.ico" />
-    <EmbeddedResource Include="Resources\VisualPng1.ico" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
