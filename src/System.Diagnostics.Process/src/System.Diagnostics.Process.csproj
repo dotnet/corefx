@@ -122,9 +122,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.OpenProcess.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.OpenProcess.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.EnumProcessModules.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcesses.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.EnumProcesses.cs</Link>
     </Compile>
