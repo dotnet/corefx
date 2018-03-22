@@ -201,12 +201,4 @@
   <Import Project="$(DotNetPackageVersionPropsPath)"
           Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
 
-  <!--
-    Map PackageVersion properties that don't match the Repo API naming conventions. This must be
-    defined after the DotNetPackageVersionPropsPath Import so overrides apply correctly.
-  -->
-  <PropertyGroup>
-    <!-- Backward compatibility for BuildTools usage. -->
-    <PlatformPackageVersion>$(MicrosoftNETCorePlatformsPackageVersion)</PlatformPackageVersion>
-  </PropertyGroup>
 </Project>

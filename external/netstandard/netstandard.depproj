@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="NETStandard.Library">
-      <Version>$(NETStandardLibraryPackageVersion)</Version>
+      <Version>$(NETStandardPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
 
