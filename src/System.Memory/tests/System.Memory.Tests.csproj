@@ -23,7 +23,6 @@
     <Compile Include="Span\SequenceCompareTo.int.cs" />
     <Compile Include="Span\SequenceCompareTo.char.cs" />
     <Compile Include="Span\SequenceCompareTo.long.cs" />
-    <Compile Include="Span\SequenceCompareTo.string.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
