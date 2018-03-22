@@ -182,9 +182,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtQueryInformationProcess.cs">
       <Link>Common\Interop\Windows\NtDll\Interop.NtQueryInformationProcess.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtQuerySystemInformation.cs">
-      <Link>Common\Interop\Windows\NtDll\Interop.NtQuerySystemInformation.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DuplicateHandle_SafeProcessHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DuplicateHandle.cs</Link>
     </Compile>
