@@ -131,9 +131,7 @@ extern "C" void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8
             g_preReadTermios = newTermios;
         }
 
-        // On Windows, the Return key generates '\r'. We clear ICRNL to get the same behavior on Unix.
-        // Without this we'd get '\n' which causes newlines when echoed.
-        newTermios.c_iflag &= static_cast<uint32_t>(~(IXON | IXOFF | ICRNL));
+        newTermios.c_iflag &= static_cast<uint32_t>(~(IXON | IXOFF));
         newTermios.c_lflag &= static_cast<uint32_t>(~(ECHO | ICANON | IEXTEN));
         newTermios.c_cc[VMIN] = minChars;
         newTermios.c_cc[VTIME] = decisecondsTimeout;
