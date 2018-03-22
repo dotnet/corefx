@@ -25,13 +25,13 @@
 
   <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>$(PlatformPackageVersion)</Version>
+      <Version>$(MicrosoftNETCorePlatformsPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.TestHost">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni">
       <Version>$(PackageVersion)-$(CoreFxExpectedPrerelease)</Version>

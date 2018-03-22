@@ -21,18 +21,16 @@
 
   <!-- Product dependency versions. -->
   <PropertyGroup>
-    <PlatformPackageVersion>2.1.0-preview1-25631-01</PlatformPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview1-25631-01</MicrosoftNETCorePlatformsPackageVersion>
     <CoreFxExpectedPrerelease>preview1-25801-01</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-b-uwp6-25707-02</CoreClrPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-b-uwp6-25707-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>rel-25728-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>rel-25728-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-rel-25728-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.1.0-preview1-25729-01</NETStandardPackageVersion>
-    <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
+    <NETStandardLibraryPackageVersion>2.1.0-preview1-25729-01</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25706-01</MicrosoftNETCoreAppPackageVersion>
-    <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0</SniPackageVersion>
 
     <!-- CoreFX-built SNI identity package -->
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
@@ -97,23 +95,23 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreClr">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>CoreClrPackageVersion</ElementName>
-      <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreClr">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>MicrosoftNETCoreRuntimeMicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
+      <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
+    </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>NETStandardLibraryPackageVersion</ElementName>
-      <PackageId>$(NETStandardPackageId)</PackageId>
+      <PackageId>$(NETStandardLibraryPackageId)</PackageId>
     </XmlUpdateStep>
 <!--
     <XmlUpdateStep Include="ProjectNTfs">
