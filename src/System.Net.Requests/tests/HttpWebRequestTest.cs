@@ -200,10 +200,16 @@ namespace System.Net.Tests
 
                 await server.AcceptConnectionAsync(async connection =>
                 {
-                    // Skip status line.
-                    await connection.Reader.ReadLineAsync();
+                    await connection.Reader.ReadLineAsync(); // Skip status line.
                     Assert.Contains(host, await connection.Reader.ReadLineAsync());
+
+                    await connection.SendResponseAsync();
                 });
+
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
             });
         }
 
