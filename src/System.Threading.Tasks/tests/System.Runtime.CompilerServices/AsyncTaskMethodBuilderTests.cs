@@ -5,7 +5,6 @@
 using Xunit;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ using System.Diagnostics;
 
 namespace System.Threading.Tasks.Tests
 {
-    public class AsyncTaskMethodBuilderTests : RemoteExecutorTestBase
+    public class AsyncTaskMethodBuilderTests
     {
         // Test captured sync context with successful completion (SetResult)
         [Fact]
@@ -414,111 +413,81 @@ namespace System.Threading.Tasks.Tests
         [Fact]
         public static void Tcs_ValidateFaultedTask()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
-            {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-                
-                var tcs = new TaskCompletionSource<int>();
-                try { throw new InvalidOperationException(); }
-                catch (Exception e) { tcs.SetException(e); }
-                ValidateFaultedTask(tcs.Task);
-            }).Dispose();
+            var tcs = new TaskCompletionSource<int>();
+            try { throw new InvalidOperationException(); }
+            catch (Exception e) { tcs.SetException(e); }
+            ValidateFaultedTask(tcs.Task);
         }
 
         [Fact]
         public static void TaskMethodBuilder_ValidateFaultedTask()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
-            {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-                
-                var atmb = AsyncTaskMethodBuilder.Create();
-                try { throw new InvalidOperationException(); }
-                catch (Exception e) { atmb.SetException(e); }
-                ValidateFaultedTask(atmb.Task);
-            }).Dispose();
+            var atmb = AsyncTaskMethodBuilder.Create();
+            try { throw new InvalidOperationException(); }
+            catch (Exception e) { atmb.SetException(e); }
+            ValidateFaultedTask(atmb.Task);
         }
 
         [Fact]
         public static void TaskMethodBuilderT_ValidateFaultedTask()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
-            {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-                
-                var atmbtr = AsyncTaskMethodBuilder<object>.Create();
-                try { throw new InvalidOperationException(); }
-                catch (Exception e) { atmbtr.SetException(e); }
-                ValidateFaultedTask(atmbtr.Task);
-            }).Dispose();
+            var atmbtr = AsyncTaskMethodBuilder<object>.Create();
+            try { throw new InvalidOperationException(); }
+            catch (Exception e) { atmbtr.SetException(e); }
+            ValidateFaultedTask(atmbtr.Task);
         }
 
         [Fact]
         public static void TrackedSyncContext_ValidateException()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
+            SynchronizationContext previousContext = SynchronizationContext.Current;
+            try
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-                
-                SynchronizationContext previousContext = SynchronizationContext.Current;
-                try
-                {
-                    var tosc = new TrackOperationsSynchronizationContext();
-                    SynchronizationContext.SetSynchronizationContext(tosc);
-                    var avmb = AsyncVoidMethodBuilder.Create();
-                    try { throw new InvalidOperationException(); }
-                    catch (Exception exc) { avmb.SetException(exc); }
-                    Assert.NotEmpty(tosc.PostExceptions);
-                    ValidateException(tosc.PostExceptions[0]);
-                }
-                finally
-                {
-                    SynchronizationContext.SetSynchronizationContext(previousContext);
-                }
-            }).Dispose();
+                var tosc = new TrackOperationsSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(tosc);
+                var avmb = AsyncVoidMethodBuilder.Create();
+                try { throw new InvalidOperationException(); }
+                catch (Exception exc) { avmb.SetException(exc); }
+                Assert.NotEmpty(tosc.PostExceptions);
+                ValidateException(tosc.PostExceptions[0]);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
         }
 
         // Running tasks with exceptions.
         [Fact]
         public static void FaultedTaskExceptions()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteInvoke(() =>
+            var twa1 = Task.Run(() => { throw new Exception("uh oh"); });
+            var twa2 = Task.Factory.StartNew(() => { throw new Exception("uh oh"); });
+            var tasks = new Task[]
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-                
-                var twa1 = Task.Run(() => { throw new Exception("uh oh"); });
-                var twa2 = Task.Factory.StartNew(() => { throw new Exception("uh oh"); });
-                var tasks = new Task[]
-                {
-                    Task.Run(() => { throw new Exception("uh oh"); }),
-                    Task.Factory.StartNew<int>(() => { throw new Exception("uh oh"); }),
-                    Task.WhenAll(Task.Run(() => { throw new Exception("uh oh"); }), Task.Run(() => { throw new Exception("uh oh"); })),
-                    Task.WhenAll<int>(Task.Run(new Func<int>(() => { throw new Exception("uh oh"); })), Task.Run(new Func<int>(() => { throw new Exception("uh oh"); }))),
-                    Task.WhenAny(twa1, twa2).Unwrap(),
-                    Task.WhenAny<int>(Task.Run(new Func<Task<int>>(() => { throw new Exception("uh oh"); }))).Unwrap(),
-                    Task.Factory.StartNew(() => Task.Factory.StartNew(() => { throw new Exception("uh oh"); })).Unwrap(),
-                    Task.Factory.StartNew<Task<int>>(() => Task.Factory.StartNew<int>(() => { throw new Exception("uh oh"); })).Unwrap(),
-                    Task.Run(() => Task.Run(() => { throw new Exception("uh oh"); })),
-                    Task.Run(() => Task.Run(new Func<int>(() => { throw new Exception("uh oh"); }))),
-                    Task.Run(new Func<Task>(() => { throw new Exception("uh oh"); })),
-                    Task.Run(new Func<Task<int>>(() => { throw new Exception("uh oh"); }))
-                };
+                Task.Run(() => { throw new Exception("uh oh"); }),
+                Task.Factory.StartNew<int>(() => { throw new Exception("uh oh"); }),
+                Task.WhenAll(Task.Run(() => { throw new Exception("uh oh"); }), Task.Run(() => { throw new Exception("uh oh"); })),
+                Task.WhenAll<int>(Task.Run(new Func<int>(() => { throw new Exception("uh oh"); })), Task.Run(new Func<int>(() => { throw new Exception("uh oh"); }))),
+                Task.WhenAny(twa1, twa2).Unwrap(),
+                Task.WhenAny<int>(Task.Run(new Func<Task<int>>(() => { throw new Exception("uh oh"); }))).Unwrap(),
+                Task.Factory.StartNew(() => Task.Factory.StartNew(() => { throw new Exception("uh oh"); })).Unwrap(),
+                Task.Factory.StartNew<Task<int>>(() => Task.Factory.StartNew<int>(() => { throw new Exception("uh oh"); })).Unwrap(),
+                Task.Run(() => Task.Run(() => { throw new Exception("uh oh"); })),
+                Task.Run(() => Task.Run(new Func<int>(() => { throw new Exception("uh oh"); }))),
+                Task.Run(new Func<Task>(() => { throw new Exception("uh oh"); })),
+                Task.Run(new Func<Task<int>>(() => { throw new Exception("uh oh"); }))
+            };
 
-                for (int i = 0; i < tasks.Length; i++)
-                {
-                    ValidateFaultedTask(tasks[i]);
-                }
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                ValidateFaultedTask(tasks[i]);
+            }
 
-                ((IAsyncResult)twa1).AsyncWaitHandle.WaitOne();
-                ((IAsyncResult)twa2).AsyncWaitHandle.WaitOne();
-                Exception ignored = twa1.Exception;
-                ignored = twa2.Exception;
-            }).Dispose();
+            ((IAsyncResult)twa1).AsyncWaitHandle.WaitOne();
+            ((IAsyncResult)twa2).AsyncWaitHandle.WaitOne();
+            Exception ignored = twa1.Exception;
+            ignored = twa2.Exception;
         }
 
         // Test that OCEs don't result in the unobserved event firing
