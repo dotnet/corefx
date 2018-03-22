@@ -314,12 +314,21 @@ namespace System.Diagnostics
             }
         }
 
+        internal static void CloseAllTables()
+        {
+            if (s_libraryTable != null)
+            {
+                foreach (PerformanceCounterLib library in s_libraryTable.Values)
+                    library.CloseTables();
+            }
+        }
+
         internal void CloseTables()
         {
             _nameTable = null;
             _helpTable = null;
             _categoryTable = null;
-            _customCategoryTable = null;    
+            _customCategoryTable = null;
         }
 
         internal void Close()
@@ -1185,6 +1194,7 @@ namespace System.Diagnostics
                     CreateSymbolFile(creationData);
                     RegisterFiles(IniFilePath, false);
                 }
+                CloseAllTables();
                 CloseAllLibraries();
             }
             finally
@@ -1239,6 +1249,7 @@ namespace System.Diagnostics
         {
             RegisterFiles(categoryName, true);
             DeleteRegistryEntry(categoryName);
+            CloseAllTables();
             CloseAllLibraries();
         }
     }
