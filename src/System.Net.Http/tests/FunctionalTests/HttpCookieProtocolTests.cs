@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class HttpCookieProtocolTests : HttpClientTestBase
+    public abstract class HttpCookieProtocolTests : HttpClientTestBase
     {
         private const string s_cookieName = "ABC";
         private const string s_cookieValue = "123";
@@ -316,6 +316,7 @@ namespace System.Net.Http.Functional.Tests
 
                 using (HttpClient client = new HttpClient(handler))
                 {
+                    client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
                 }
             },
@@ -448,6 +449,43 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async Task GetAsync_ReceiveInvalidSetCookieHeader_ValidCookiesAdded()
+        {
+            if (IsNetfxHandler)
+            {
+                // NetfxHandler incorrectly only processes one valid cookie 
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+
+                using (HttpClient client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(
+                        HttpStatusCode.OK,
+                        $"Set-Cookie: A=1; Path=/;Expires=asdfsadgads\r\n" +    // invalid Expires
+                        $"Set-Cookie: B=2; Path=/\r\n" + 
+                        $"Set-Cookie: C=3; Path=/\r\n",
+                        s_simpleContent);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    CookieCollection collection = handler.CookieContainer.GetCookies(url);
+                    Assert.Equal(2, collection.Count);
+
+                    // Convert to array so we can more easily process contents, since CookieCollection does not implement IEnumerable<Cookie>
+                    Cookie[] cookies = new Cookie[3];
+                    collection.CopyTo(cookies, 0);
+
+                    Assert.Contains(cookies, c => c.Name == "B" && c.Value == "2");
+                    Assert.Contains(cookies, c => c.Name == "C" && c.Value == "3");
+                }
+            });
+        }
+
+        [Fact]
         public async Task GetAsyncWithRedirect_ReceiveSetCookie_CookieSent()
         {
             const string path1 = "/foo";
@@ -461,6 +499,7 @@ namespace System.Net.Http.Functional.Tests
 
                 using (HttpClient client = new HttpClient(handler))
                 {
+                    client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
 
                     CookieCollection collection = handler.CookieContainer.GetCookies(url);

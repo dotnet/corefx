@@ -2,15 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
-using System;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Globalization;
 using System.IO.Pipes;
 using System.Threading.Tasks;
 
@@ -21,8 +13,9 @@ namespace System.ServiceProcess.Tests
         private bool _disposed;
         private Task _waitClientConnect;
         private NamedPipeServerStream _serverStream;
+        private readonly Exception _exception;
 
-        public TestService(string serviceName)
+        public TestService(string serviceName, Exception throwException = null)
         {
             this.ServiceName = serviceName;
 
@@ -34,9 +27,11 @@ namespace System.ServiceProcess.Tests
             // We cannot easily test these so disable the events
             this.CanHandleSessionChangeEvent = false;
             this.CanHandlePowerEvent = false;
+            this._exception = throwException;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
             _waitClientConnect = this._serverStream.WaitForConnectionAsync();
+            _waitClientConnect.ContinueWith((t) => WriteStreamAsync(PipeMessageByteCode.Connected));
         }
 
         protected override void OnContinue()
@@ -75,6 +70,11 @@ namespace System.ServiceProcess.Tests
         protected override void OnStart(string[] args)
         {
             base.OnStart(args);
+            if (_exception != null)
+            {
+                throw _exception;
+            }
+
             if (args.Length == 4 && args[0] == "StartWithArguments")
             {
                 Debug.Assert(args[1] == "a");
@@ -90,26 +90,25 @@ namespace System.ServiceProcess.Tests
             WriteStreamAsync(PipeMessageByteCode.Stop).Wait();
         }
 
-        private async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
+        public async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
-            Task writeCompleted;
             if (_waitClientConnect.IsCompleted)
             {
-                const int writeTimeout = 60000;
+                Task writeCompleted;
+                const int WriteTimeout = 60000;
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
                     writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
-                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
                 }
                 else
                 {
                     writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);
-                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
                 }
+                await writeCompleted.TimeoutAfter(WriteTimeout).ConfigureAwait(false);
             }
             else
             {
-                // We get here if the service is getting torn down before a client ever connected;
+                // We get here if the service is getting torn down before a client ever connected.
                 // some tests do this.
             }
         }

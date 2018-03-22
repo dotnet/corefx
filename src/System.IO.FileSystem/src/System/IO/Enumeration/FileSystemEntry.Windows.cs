@@ -67,19 +67,24 @@ namespace System.IO.Enumeration
         /// </summary>
         public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
 
+        /// <summary>
+        /// Returns true if the file has the hidden attribute.
+        /// </summary>
+        public bool IsHidden => (Attributes & FileAttributes.Hidden) != 0;
+
         public FileSystemInfo ToFileSystemInfo()
-            => FileSystemInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
+            => FileSystemInfo.Create(Path.Join(Directory, FileName), ref this);
 
         /// <summary>
         /// Returns the full path for find results, based on the initially provided path.
         /// </summary>
         public string ToSpecifiedFullPath() =>
-            PathHelpers.CombineNoChecks(OriginalRootDirectory, Directory.Slice(RootDirectory.Length), FileName);
+            Path.Join(OriginalRootDirectory, Directory.Slice(RootDirectory.Length), FileName);
 
         /// <summary>
         /// Returns the full path of the find result.
         /// </summary>
         public string ToFullPath() =>
-            PathHelpers.CombineNoChecks(Directory, FileName);
+            Path.Join(Directory, FileName);
     }
 }

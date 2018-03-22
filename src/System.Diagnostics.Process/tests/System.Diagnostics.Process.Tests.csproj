@@ -6,6 +6,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TargetsWindows</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
@@ -45,6 +49,7 @@
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+    <Compile Include="ProcessStartInfoTests.netcoreapp.cs" />
     <Compile Include="ProcessStreamReadTests.netcoreapp.cs" />
     <Compile Include="ProcessTests.netcoreapp.cs" />
   </ItemGroup>

@@ -19,12 +19,12 @@ namespace System.Threading.Channels
         /// <summary>The items in the channel.</summary>
         private readonly ConcurrentQueue<T> _items = new ConcurrentQueue<T>();
         /// <summary>Readers blocked reading from the channel.</summary>
-        private readonly Dequeue<ReaderInteractor<T>> _blockedReaders = new Dequeue<ReaderInteractor<T>>();
+        private readonly Dequeue<AsyncOperation<T>> _blockedReaders = new Dequeue<AsyncOperation<T>>();
         /// <summary>Whether to force continuations to be executed asynchronously from producer writes.</summary>
         private readonly bool _runContinuationsAsynchronously;
 
         /// <summary>Readers waiting for a notification that data is available.</summary>
-        private ReaderInteractor<bool> _waitingReaders;
+        private AsyncOperation<bool> _waitingReadersTail;
         /// <summary>Set to non-null once Complete has been called.</summary>
         private Exception _doneWriting;
 
@@ -33,7 +33,7 @@ namespace System.Threading.Channels
         {
             _runContinuationsAsynchronously = runContinuationsAsynchronously;
             _completion = new TaskCompletionSource<VoidResult>(runContinuationsAsynchronously ? TaskCreationOptions.RunContinuationsAsynchronously : TaskCreationOptions.None);
-            base.Reader = new UnboundedChannelReader(this);
+            Reader = new UnboundedChannelReader(this);
             Writer = new UnboundedChannelWriter(this);
         }
 
@@ -42,37 +42,41 @@ namespace System.Threading.Channels
         private sealed class UnboundedChannelReader : ChannelReader<T>, IDebugEnumerable<T>
         {
             internal readonly UnboundedChannel<T> _parent;
-            internal UnboundedChannelReader(UnboundedChannel<T> parent) => _parent = parent;
+            private readonly AsyncOperation<T> _readerSingleton;
+            private readonly AsyncOperation<bool> _waiterSingleton;
+
+            internal UnboundedChannelReader(UnboundedChannel<T> parent)
+            {
+                _parent = parent;
+                _readerSingleton = new AsyncOperation<T>(parent._runContinuationsAsynchronously, pooled: true);
+                _waiterSingleton = new AsyncOperation<bool>(parent._runContinuationsAsynchronously, pooled: true);
+            }
 
             public override Task Completion => _parent._completion.Task;
 
-            public override ValueTask<T> ReadAsync(CancellationToken cancellationToken) =>
-                TryRead(out T item) ?
-                    new ValueTask<T>(item) :
-                    ReadAsyncCore(cancellationToken);
-
-            private ValueTask<T> ReadAsyncCore(CancellationToken cancellationToken)
+            public override ValueTask<T> ReadAsync(CancellationToken cancellationToken)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return new ValueTask<T>(Task.FromCanceled<T>(cancellationToken));
                 }
 
+                // Dequeue an item if we can.
                 UnboundedChannel<T> parent = _parent;
+                if (parent._items.TryDequeue(out T item))
+                {
+                    CompleteIfDone(parent);
+                    return new ValueTask<T>(item);
+                }
+
                 lock (parent.SyncObj)
                 {
                     parent.AssertInvariants();
 
-                    // If there are any items, return one.
-                    if (parent._items.TryDequeue(out T item))
+                    // Try to dequeue again, now that we hold the lock.
+                    if (parent._items.TryDequeue(out item))
                     {
-                        // Dequeue an item
-                        if (parent._doneWriting != null && parent._items.IsEmpty)
-                        {
-                            // If we've now emptied the items queue and we're not getting any more, complete.
-                            ChannelUtilities.Complete(parent._completion, parent._doneWriting);
-                        }
-
+                        CompleteIfDone(parent);
                         return new ValueTask<T>(item);
                     }
 
@@ -82,10 +86,21 @@ namespace System.Threading.Channels
                         return ChannelUtilities.GetInvalidCompletionValueTask<T>(parent._doneWriting);
                     }
 
-                    // Otherwise, queue the reader.
-                    var reader = ReaderInteractor<T>.Create(parent._runContinuationsAsynchronously, cancellationToken);
+                    // If we're able to use the singleton reader, do so.
+                    if (!cancellationToken.CanBeCanceled)
+                    {
+                        AsyncOperation<T> singleton = _readerSingleton;
+                        if (singleton.TryOwnAndReset())
+                        {
+                            parent._blockedReaders.EnqueueTail(singleton);
+                            return singleton.ValueTaskOfT;
+                        }
+                    }
+
+                    // Otherwise, create and queue a reader.
+                    var reader = new AsyncOperation<T>(parent._runContinuationsAsynchronously, cancellationToken);
                     parent._blockedReaders.EnqueueTail(reader);
-                    return new ValueTask<T>(reader.Task);
+                    return reader.ValueTaskOfT;
                 }
             }
 
@@ -96,11 +111,7 @@ namespace System.Threading.Channels
                 // Dequeue an item if we can
                 if (parent._items.TryDequeue(out item))
                 {
-                    if (parent._doneWriting != null && parent._items.IsEmpty)
-                    {
-                        // If we've now emptied the items queue and we're not getting any more, complete.
-                        ChannelUtilities.Complete(parent._completion, parent._doneWriting);
-                    }
+                    CompleteIfDone(parent);
                     return true;
                 }
 
@@ -108,38 +119,62 @@ namespace System.Threading.Channels
                 return false;
             }
 
-            public override Task<bool> WaitToReadAsync(CancellationToken cancellationToken)
+            private void CompleteIfDone(UnboundedChannel<T> parent)
             {
-                return
-                    cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) :
-                    !_parent._items.IsEmpty ? ChannelUtilities.s_trueTask :
-                    WaitToReadAsyncCore(cancellationToken);
-
-                Task<bool> WaitToReadAsyncCore(CancellationToken ct)
+                if (parent._doneWriting != null && parent._items.IsEmpty)
                 {
-                    UnboundedChannel<T> parent = _parent;
+                    // If we've now emptied the items queue and we're not getting any more, complete.
+                    ChannelUtilities.Complete(parent._completion, parent._doneWriting);
+                }
+            }
 
-                    lock (parent.SyncObj)
+            public override ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return new ValueTask<bool>(Task.FromCanceled<bool>(cancellationToken));
+                }
+
+                if (!_parent._items.IsEmpty)
+                {
+                    return new ValueTask<bool>(true);
+                }
+
+                UnboundedChannel<T> parent = _parent;
+
+                lock (parent.SyncObj)
+                {
+                    parent.AssertInvariants();
+
+                    // Try again to read now that we're synchronized with writers.
+                    if (!parent._items.IsEmpty)
                     {
-                        parent.AssertInvariants();
-
-                        // Try again to read now that we're synchronized with writers.
-                        if (!parent._items.IsEmpty)
-                        {
-                            return ChannelUtilities.s_trueTask;
-                        }
-
-                        // There are no items, so if we're done writing, there's never going to be data available.
-                        if (parent._doneWriting != null)
-                        {
-                            return parent._doneWriting != ChannelUtilities.s_doneWritingSentinel ?
-                                Task.FromException<bool>(parent._doneWriting) :
-                                ChannelUtilities.s_falseTask;
-                        }
-
-                        // Queue the waiter
-                        return ChannelUtilities.GetOrCreateWaiter(ref parent._waitingReaders, parent._runContinuationsAsynchronously, ct);
+                        return new ValueTask<bool>(true);
                     }
+
+                    // There are no items, so if we're done writing, there's never going to be data available.
+                    if (parent._doneWriting != null)
+                    {
+                        return parent._doneWriting != ChannelUtilities.s_doneWritingSentinel ?
+                            new ValueTask<bool>(Task.FromException<bool>(parent._doneWriting)) :
+                            default;
+                    }
+
+                    // If we're able to use the singleton waiter, do so.
+                    if (!cancellationToken.CanBeCanceled)
+                    {
+                        AsyncOperation<bool> singleton = _waiterSingleton;
+                        if (singleton.TryOwnAndReset())
+                        {
+                            ChannelUtilities.QueueWaiter(ref parent._waitingReadersTail, singleton);
+                            return singleton.ValueTaskOfT;
+                        }
+                    }
+
+                    // Otherwise, create and queue a waiter.
+                    var waiter = new AsyncOperation<bool>(parent._runContinuationsAsynchronously, cancellationToken);
+                    ChannelUtilities.QueueWaiter(ref parent._waitingReadersTail, waiter);
+                    return waiter.ValueTaskOfT;
                 }
             }
 
@@ -190,8 +225,8 @@ namespace System.Threading.Channels
                 // At this point, _blockedReaders and _waitingReaders will not be mutated:
                 // they're only mutated by readers while holding the lock, and only if _doneWriting is null.
                 // freely manipulate _blockedReaders and _waitingReaders without any concurrency concerns.
-                ChannelUtilities.FailInteractors<ReaderInteractor<T>, T>(parent._blockedReaders, ChannelUtilities.CreateInvalidCompletionException(error));
-                ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
+                ChannelUtilities.FailOperations<AsyncOperation<T>, T>(parent._blockedReaders, ChannelUtilities.CreateInvalidCompletionException(error));
+                ChannelUtilities.WakeUpWaiters(ref parent._waitingReadersTail, result: false, error: error);
 
                 // Successfully transitioned to completed.
                 return true;
@@ -202,8 +237,8 @@ namespace System.Threading.Channels
                 UnboundedChannel<T> parent = _parent;
                 while (true)
                 {
-                    ReaderInteractor<T> blockedReader = null;
-                    ReaderInteractor<bool> waitingReaders = null;
+                    AsyncOperation<T> blockedReader = null;
+                    AsyncOperation<bool> waitingReadersTail = null;
                     lock (parent.SyncObj)
                     {
                         // If writing has already been marked as done, fail the write.
@@ -222,12 +257,12 @@ namespace System.Threading.Channels
                         if (parent._blockedReaders.IsEmpty)
                         {
                             parent._items.Enqueue(item);
-                            waitingReaders = parent._waitingReaders;
-                            if (waitingReaders == null)
+                            waitingReadersTail = parent._waitingReadersTail;
+                            if (waitingReadersTail == null)
                             {
                                 return true;
                             }
-                            parent._waitingReaders = null;
+                            parent._waitingReadersTail = null;
                         }
                         else
                         {
@@ -240,7 +275,7 @@ namespace System.Threading.Channels
                     {
                         // Complete the reader.  It's possible the reader was canceled, in which
                         // case we loop around to try everything again.
-                        if (blockedReader.Success(item))
+                        if (blockedReader.TrySetResult(item))
                         {
                             return true;
                         }
@@ -251,26 +286,26 @@ namespace System.Threading.Channels
                         // we could cause some spurious wake-ups here, if we tell a waiter there's
                         // something available but all data has already been removed.  It's a benign
                         // race condition, though, as consumers already need to account for such things.
-                        waitingReaders.Success(item: true);
+                        ChannelUtilities.WakeUpWaiters(ref waitingReadersTail, result: true);
                         return true;
                     }
                 }
             }
 
-            public override Task<bool> WaitToWriteAsync(CancellationToken cancellationToken)
+            public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken)
             {
                 Exception doneWriting = _parent._doneWriting;
                 return
-                    cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) :
-                    doneWriting == null ? ChannelUtilities.s_trueTask : // unbounded writing can always be done if we haven't completed
-                    doneWriting != ChannelUtilities.s_doneWritingSentinel ? Task.FromException<bool>(doneWriting) :
-                    ChannelUtilities.s_falseTask;
+                    cancellationToken.IsCancellationRequested ? new ValueTask<bool>(Task.FromCanceled<bool>(cancellationToken)) :
+                    doneWriting == null ? new ValueTask<bool>(true) : // unbounded writing can always be done if we haven't completed
+                    doneWriting != ChannelUtilities.s_doneWritingSentinel ? new ValueTask<bool>(Task.FromException<bool>(doneWriting)) :
+                    default;
             }
 
-            public override Task WriteAsync(T item, CancellationToken cancellationToken) =>
-                cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
-                TryWrite(item) ? ChannelUtilities.s_trueTask :
-                Task.FromException(ChannelUtilities.CreateInvalidCompletionException(_parent._doneWriting));
+            public override ValueTask WriteAsync(T item, CancellationToken cancellationToken) =>
+                cancellationToken.IsCancellationRequested ? new ValueTask(Task.FromCanceled(cancellationToken)) :
+                TryWrite(item) ? default :
+                new ValueTask(Task.FromException(ChannelUtilities.CreateInvalidCompletionException(_parent._doneWriting)));
 
             /// <summary>Gets the number of items in the channel. This should only be used by the debugger.</summary>
             private int ItemsCountForDebugger => _parent._items.Count;
@@ -293,11 +328,11 @@ namespace System.Threading.Channels
                 if (_runContinuationsAsynchronously)
                 {
                     Debug.Assert(_blockedReaders.IsEmpty, "There's data available, so there shouldn't be any blocked readers.");
-                    Debug.Assert(_waitingReaders == null, "There's data available, so there shouldn't be any waiting readers.");
+                    Debug.Assert(_waitingReadersTail == null, "There's data available, so there shouldn't be any waiting readers.");
                 }
                 Debug.Assert(!_completion.Task.IsCompleted, "We still have data available, so shouldn't be completed.");
             }
-            if ((!_blockedReaders.IsEmpty || _waitingReaders != null) && _runContinuationsAsynchronously)
+            if ((!_blockedReaders.IsEmpty || _waitingReadersTail != null) && _runContinuationsAsynchronously)
             {
                 Debug.Assert(_items.IsEmpty, "There are blocked/waiting readers, so there shouldn't be any data available.");
             }

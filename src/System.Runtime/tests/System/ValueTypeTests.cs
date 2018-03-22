@@ -28,6 +28,7 @@ namespace System.Tests
             obj2.value2 = -0.0;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -43,6 +44,7 @@ namespace System.Tests
             obj2.value2 = -0.0;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -57,6 +59,7 @@ namespace System.Tests
             obj2.value2 = -double.NaN;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -72,6 +75,7 @@ namespace System.Tests
             obj2.value2 = -double.NaN;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -86,6 +90,7 @@ namespace System.Tests
             obj2.value2.value2 = -0.0;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -101,6 +106,7 @@ namespace System.Tests
             obj2.value2.value2 = -0.0;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -115,6 +121,7 @@ namespace System.Tests
             obj2.value2.value2 = -double.NaN;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -130,9 +137,11 @@ namespace System.Tests
             obj2.value2.value2 = -double.NaN;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void StructWithFloatFieldNotTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
@@ -144,6 +153,7 @@ namespace System.Tests
             obj2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -159,9 +169,11 @@ namespace System.Tests
             obj2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void StructWithFloatFieldNotTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldNotTightlyPacked obj1 = new StructWithFloatFieldNotTightlyPacked();
@@ -173,6 +185,7 @@ namespace System.Tests
             obj2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -188,9 +201,11 @@ namespace System.Tests
             obj2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void StructWithNestedFloatFieldNotTightlyPackedZeroCompareTest()
         {
             StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
@@ -202,6 +217,7 @@ namespace System.Tests
             obj2.value2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -217,9 +233,11 @@ namespace System.Tests
             obj2.value2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void StructWithNestedFloatFieldNotTightlyPackedNaNCompareTest()
         {
             StructWithFloatFieldNestedNotTightlyPacked obj1 = new StructWithFloatFieldNestedNotTightlyPacked();
@@ -231,6 +249,7 @@ namespace System.Tests
             obj2.value2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -246,6 +265,7 @@ namespace System.Tests
             obj2.value2.value2 = 1;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -260,6 +280,7 @@ namespace System.Tests
             obj2.value2.value = 2;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -275,6 +296,7 @@ namespace System.Tests
             obj2.value2.value = 2;
 
             Assert.False(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         [Fact]
@@ -289,6 +311,7 @@ namespace System.Tests
             obj2.value2 = -0.0;
 
             Assert.True(obj1.Equals(obj2));
+            Assert.Equal(obj1.GetHashCode(), obj2.GetHashCode());
         }
 
         public struct S

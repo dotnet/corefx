@@ -95,6 +95,7 @@
     <Compile Include="System\NullableTests.cs" />
     <Compile Include="System\NullReferenceExceptionTests.cs" />
     <Compile Include="System\ObjectTests.cs" />
+    <Compile Include="System\PseudoCustomAttributeTests.cs" />
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="System\Reflection\TypeTests.GetMember.cs" />
     <Compile Include="System\Runtime\MemoryFailPointTests.cs" />
     <Compile Include="System\Runtime\NgenServicingAttributesTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\AttributesTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBoxTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.cs" />

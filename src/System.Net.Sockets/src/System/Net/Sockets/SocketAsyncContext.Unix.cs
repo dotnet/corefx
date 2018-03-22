@@ -208,11 +208,6 @@ namespace System.Net.Sockets
                 Volatile.Write(ref _state, (int)State.Waiting);
             }
 
-            public void DoCallback()
-            {
-                InvokeCallback();
-            }
-
             public bool TryCancel()
             {
                 Trace("Enter");
@@ -267,8 +262,11 @@ namespace System.Net.Sockets
 #if DEBUG
                     Debug.Assert(Interlocked.CompareExchange(ref _callbackQueued, 1, 0) == 0, $"Unexpected _callbackQueued: {_callbackQueued}");
 #endif
-
-                    ThreadPool.QueueUserWorkItem(o => ((AsyncOperation)o).InvokeCallback(), this);
+                    // We've marked the operation as canceled, and so should invoke the callback, but
+                    // we can't pool the object, as ProcessQueue may still have a reference to it, due to
+                    // using a pattern whereby it takes the lock to grab an item, but then releases the lock
+                    // to do further processing on the item that's still in the list.
+                    ThreadPool.QueueUserWorkItem(o => ((AsyncOperation)o).InvokeCallback(allowPooling: false), this);
                 }
 
                 Trace("Exit");
@@ -289,7 +287,7 @@ namespace System.Net.Sockets
 
             protected abstract bool DoTryComplete(SocketAsyncContext context);
 
-            protected abstract void InvokeCallback();
+            public abstract void InvokeCallback(bool allowPooling);
 
             [Conditional("SOCKETASYNCCONTEXT_TRACE")]
             public void Trace(string message, [CallerMemberName] string memberName = null)
@@ -332,7 +330,7 @@ namespace System.Net.Sockets
                 set => CallbackOrEvent = value;
             }
 
-            protected override void InvokeCallback() =>
+            public override void InvokeCallback(bool allowPooling) =>
                 ((Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent)(BytesTransferred, SocketAddress, SocketAddressLen, SocketFlags.None, ErrorCode);
         }
 
@@ -348,7 +346,7 @@ namespace System.Net.Sockets
                 return SocketPal.TryCompleteSendTo(context._socket, Buffer.Span, null, ref bufferIndex, ref Offset, ref Count, Flags, SocketAddress, SocketAddressLen, ref BytesTransferred, out ErrorCode);
             }
 
-            protected override void InvokeCallback()
+            public override void InvokeCallback(bool allowPooling)
             {
                 var cb = (Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent;
                 int bt = BytesTransferred;
@@ -356,7 +354,10 @@ namespace System.Net.Sockets
                 int sal = SocketAddressLen;
                 SocketError ec = ErrorCode;
 
-                AssociatedContext.ReturnOperation(this);
+                if (allowPooling)
+                {
+                    AssociatedContext.ReturnOperation(this);
+                }
 
                 cb(bt, sa, sal, SocketFlags.None, ec);
             }
@@ -374,7 +375,7 @@ namespace System.Net.Sockets
                 return SocketPal.TryCompleteSendTo(context._socket, default(ReadOnlySpan<byte>), Buffers, ref BufferIndex, ref Offset, ref Count, Flags, SocketAddress, SocketAddressLen, ref BytesTransferred, out ErrorCode);
             }
 
-            protected override void InvokeCallback()
+            public override void InvokeCallback(bool allowPooling)
             {
                 var cb = (Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent;
                 int bt = BytesTransferred;
@@ -382,7 +383,10 @@ namespace System.Net.Sockets
                 int sal = SocketAddressLen;
                 SocketError ec = ErrorCode;
 
-                AssociatedContext.ReturnOperation(this);
+                if (allowPooling)
+                {
+                    AssociatedContext.ReturnOperation(this);
+                }
 
                 cb(bt, sa, sal, SocketFlags.None, ec);
             }
@@ -416,7 +420,7 @@ namespace System.Net.Sockets
                 set => CallbackOrEvent = value;
             }
 
-            protected override void InvokeCallback() =>
+            public override void InvokeCallback(bool allowPooling) =>
                 ((Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent)(
                     BytesTransferred, SocketAddress, SocketAddressLen, ReceivedFlags, ErrorCode);
         }
@@ -427,10 +431,24 @@ namespace System.Net.Sockets
 
             public BufferMemoryReceiveOperation(SocketAsyncContext context) : base(context) { }
 
-            protected override bool DoTryComplete(SocketAsyncContext context) =>
-                SocketPal.TryCompleteReceiveFrom(context._socket, Buffer.Span, null, Flags, SocketAddress, ref SocketAddressLen, out BytesTransferred, out ReceivedFlags, out ErrorCode);
+            protected override bool DoTryComplete(SocketAsyncContext context)
+            {
+                // Zero byte read is performed to know when data is available.
+                // We don't have to call receive, our caller is interested in the event.
+                if (Buffer.Length == 0 && Flags == SocketFlags.None && SocketAddress == null)
+                {
+                    BytesTransferred = 0;
+                    ReceivedFlags = SocketFlags.None;
+                    ErrorCode = SocketError.Success;
+                    return true;
+                }
+                else
+                {
+                    return SocketPal.TryCompleteReceiveFrom(context._socket, Buffer.Span, null, Flags, SocketAddress, ref SocketAddressLen, out BytesTransferred, out ReceivedFlags, out ErrorCode);
+                }
+            }
 
-            protected override void InvokeCallback()
+            public override void InvokeCallback(bool allowPooling)
             {
                 var cb = (Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent;
                 int bt = BytesTransferred;
@@ -439,7 +457,10 @@ namespace System.Net.Sockets
                 SocketFlags rf = ReceivedFlags;
                 SocketError ec = ErrorCode;
 
-                AssociatedContext.ReturnOperation(this);
+                if (allowPooling)
+                {
+                    AssociatedContext.ReturnOperation(this);
+                }
 
                 cb(bt, sa, sal, rf, ec);
             }
@@ -454,7 +475,7 @@ namespace System.Net.Sockets
             protected override bool DoTryComplete(SocketAsyncContext context) =>
                 SocketPal.TryCompleteReceiveFrom(context._socket, default(Span<byte>), Buffers, Flags, SocketAddress, ref SocketAddressLen, out BytesTransferred, out ReceivedFlags, out ErrorCode);
 
-            protected override void InvokeCallback()
+            public override void InvokeCallback(bool allowPooling)
             {
                 var cb = (Action<int, byte[], int, SocketFlags, SocketError>)CallbackOrEvent;
                 int bt = BytesTransferred;
@@ -463,7 +484,10 @@ namespace System.Net.Sockets
                 SocketFlags rf = ReceivedFlags;
                 SocketError ec = ErrorCode;
 
-                AssociatedContext.ReturnOperation(this);
+                if (allowPooling)
+                {
+                    AssociatedContext.ReturnOperation(this);
+                }
 
                 cb(bt, sa, sal, rf, ec);
             }
@@ -504,7 +528,7 @@ namespace System.Net.Sockets
             protected override bool DoTryComplete(SocketAsyncContext context) =>
                 SocketPal.TryCompleteReceiveMessageFrom(context._socket, Buffer.Span, Buffers, Flags, SocketAddress, ref SocketAddressLen, IsIPv4, IsIPv6, out BytesTransferred, out ReceivedFlags, out IPPacketInformation, out ErrorCode);
 
-            protected override void InvokeCallback() =>
+            public override void InvokeCallback(bool allowPooling) =>
                 ((Action<int, byte[], int, SocketFlags, IPPacketInformation, SocketError>)CallbackOrEvent)(
                     BytesTransferred, SocketAddress, SocketAddressLen, ReceivedFlags, IPPacketInformation, ErrorCode);
         }
@@ -530,7 +554,7 @@ namespace System.Net.Sockets
                 return completed;
             }
 
-            protected override void InvokeCallback()
+            public override void InvokeCallback(bool allowPooling)
             {
                 var cb = (Action<IntPtr, byte[], int, SocketError>)CallbackOrEvent;
                 IntPtr fd = AcceptedFileDescriptor;
@@ -538,7 +562,10 @@ namespace System.Net.Sockets
                 int sal = SocketAddressLen;
                 SocketError ec = ErrorCode;
 
-                AssociatedContext.ReturnOperation(this);
+                if (allowPooling)
+                {
+                    AssociatedContext.ReturnOperation(this);
+                }
 
                 cb(fd, sa, sal, ec);
             }
@@ -562,7 +589,7 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            protected override void InvokeCallback() =>
+            public override void InvokeCallback(bool allowPooling) =>
                 ((Action<SocketError>)CallbackOrEvent)(ErrorCode);
         }
 
@@ -582,7 +609,7 @@ namespace System.Net.Sockets
                 set => CallbackOrEvent = value;
             }
 
-            protected override void InvokeCallback() =>
+            public override void InvokeCallback(bool allowPooling) =>
                 ((Action<long, SocketError>)CallbackOrEvent)(BytesTransferred, ErrorCode);
 
             protected override bool DoTryComplete(SocketAsyncContext context) =>
@@ -944,7 +971,10 @@ namespace System.Net.Sockets
                         ThreadPool.QueueUserWorkItem(s_processingCallback, context);
                     }
 
-                    op.DoCallback();
+                    // At this point, the operation has completed and it's no longer
+                    // in the queue / no one else has a reference to it.  We can invoke
+                    // the callback and let it pool the object if appropriate.
+                    op.InvokeCallback(allowPooling: true);
                 }
                 else
                 {
@@ -1013,10 +1043,7 @@ namespace System.Net.Sockets
 
         private void Register()
         {
-            // Note, on OSX, this is not always true because in certain cases, 
-            // the socket can already be in non-blocking mode even though we didn't set that ourselves.
-            // TODO: Track down exactly why this is
-            // Debug.Assert(_nonBlockingSet);
+            Debug.Assert(_nonBlockingSet);
             lock (_registerLock)
             {
                 if (!_registered)

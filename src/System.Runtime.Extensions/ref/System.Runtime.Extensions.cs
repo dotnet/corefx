@@ -933,6 +933,7 @@ namespace System
         public static System.StringComparer FromComparison(System.StringComparison comparisonType) { throw null; }
         public abstract int Compare(string x, string y);
         public static System.StringComparer Create(System.Globalization.CultureInfo culture, bool ignoreCase) { throw null; }
+        public static System.StringComparer Create(System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) { throw null; }
         public new bool Equals(object x, object y) { throw null; }
         public abstract bool Equals(string x, string y);
         public int GetHashCode(object obj) { throw null; }
@@ -1209,6 +1210,7 @@ namespace System.IO
         public static string GetFileNameWithoutExtension(string path) { throw null; }
         public static ReadOnlySpan<char> GetFileNameWithoutExtension(ReadOnlySpan<char> path) { throw null; }
         public static string GetFullPath(string path) { throw null; }
+        public static string GetFullPath(string path, string basePath) { throw null; }
         public static char[] GetInvalidFileNameChars() { throw null; }
         public static char[] GetInvalidPathChars() { throw null; }
         public static string GetPathRoot(string path) { throw null; }
@@ -1223,6 +1225,10 @@ namespace System.IO
         public static bool IsPathFullyQualified(string path) { throw null; }
         public static bool IsPathFullyQualified(ReadOnlySpan<char> path) { throw null; }
         public static string GetRelativePath(string relativeTo, string path) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten) { throw null; }
     }
 
     public partial class BinaryReader : System.IDisposable
@@ -1380,7 +1386,7 @@ namespace System.IO
         public override void Write(byte[] buffer, int offset, int count) { }
         public override void Write(System.ReadOnlySpan<byte> source) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
         public virtual void WriteTo(System.IO.Stream stream) { }
     }

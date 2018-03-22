@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Threading;
 
 namespace System.IO.Pipelines
 {
@@ -11,6 +12,12 @@ namespace System.IO.Pipelines
     /// </summary>
     public class PipeOptions
     {
+        private const int DefaultMinimumSegmentSize = 2048;
+
+        private const int DefaultResumeWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize / 2;
+
+        private const int DefaultPauseWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize;
+
         /// <summary>
         /// Default instance of <see cref="PipeOptions"/>
         /// </summary>
@@ -23,9 +30,10 @@ namespace System.IO.Pipelines
             MemoryPool<byte> pool = null,
             PipeScheduler readerScheduler = null,
             PipeScheduler writerScheduler = null,
-            long pauseWriterThreshold = 0,
-            long resumeWriterThreshold = 0,
-            int minimumSegmentSize = 2048)
+            long pauseWriterThreshold = DefaultPauseWriterThreshold,
+            long resumeWriterThreshold = DefaultResumeWriterThreshold,
+            int minimumSegmentSize = DefaultMinimumSegmentSize,
+            bool useSynchronizationContext = true)
         {
             if (pauseWriterThreshold < 0)
             {
@@ -43,7 +51,14 @@ namespace System.IO.Pipelines
             PauseWriterThreshold = pauseWriterThreshold;
             ResumeWriterThreshold = resumeWriterThreshold;
             MinimumSegmentSize = minimumSegmentSize;
+            UseSynchronizationContext = useSynchronizationContext;
         }
+
+        /// <summary>
+        /// Gets a value that determines if asynchronous callbacks should be executed on the <see cref="SynchronizationContext" /> they were captured on.
+        /// This takes precedence over the schedulers specified in <see cref="ReaderScheduler"/> and <see cref="WriterScheduler"/>.
+        /// </summary>
+        public bool UseSynchronizationContext { get; }
 
         /// <summary>
         /// Gets amount of bytes in <see cref="Pipe"/> when <see cref="PipeWriter.FlushAsync"/> starts blocking

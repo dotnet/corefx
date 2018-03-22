@@ -39,6 +39,7 @@
         Microsoft.VisualBasic;
         Microsoft.Win32.Registry;
         System.IO.FileSystem.AccessControl;
+        System.IO.Pipes.AccessControl;
         System.Private.DataContractSerialization;
         System.Private.Uri;
         System.Private.Xml;
@@ -48,6 +49,12 @@
         System.Security.Cryptography.OpenSsl;
         System.Security.Principal.Windows;
       </Value>
+    </ValidatePackageSuppression>
+    <!-- Permit missing Inbox since this used to be a shim and it is now OOB -->
+    <ValidatePackageSuppression Include="PermitMissingInbox">
+        <Value>
+            System.ComponentModel.Composition;
+        </Value>
     </ValidatePackageSuppression>
   </ItemGroup>
 
