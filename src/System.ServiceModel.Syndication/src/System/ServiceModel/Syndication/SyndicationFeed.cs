@@ -2,22 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Xml;
-using System.Runtime.Serialization;
 using System.Globalization;
-using System.Xml.Serialization;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Xml;
 
 namespace System.ServiceModel.Syndication
 {
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationFeed : IExtensibleSyndicationObject
     {
+        private static readonly HashSet<string> s_acceptedDays = new HashSet<string>(
+            new string[] { "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" },
+            StringComparer.OrdinalIgnoreCase
+        );        
+
         private Collection<SyndicationPerson> _authors;
         private Uri _baseUri;
         private Collection<SyndicationCategory> _categories;
@@ -33,6 +33,13 @@ namespace System.ServiceModel.Syndication
         private DateTimeOffset _lastUpdatedTime;
         private Collection<SyndicationLink> _links;
         private TextSyndicationContent _title;
+
+        // optional RSS tags
+        private SyndicationLink _documentation;
+        private TimeSpan? _timeToLive;
+        private Collection<int> _skipHours;
+        private Collection<string> _skipDays;
+        private SyndicationTextInput _textInput;
 
         public SyndicationFeed()
             : this((IEnumerable<SyndicationItem>)null)
@@ -265,6 +272,273 @@ namespace System.ServiceModel.Syndication
             set { _title = value; }
         }
 
+        internal SyndicationLink InternalDocumentation => _documentation;
+
+        public SyndicationLink Documentation
+        {
+            get
+            {
+                if (_documentation == null)
+                {
+                    _documentation = TryReadDocumentationFromExtension(ElementExtensions);
+                }
+
+                return _documentation;
+            }
+            set
+            {
+                _documentation = value;
+            }
+        }
+
+        internal TimeSpan? InternalTimeToLive => _timeToLive;
+
+        public TimeSpan? TimeToLive
+        {
+            get
+            {
+                if (!_timeToLive.HasValue)
+                {
+                    _timeToLive = TryReadTimeToLiveFromExtension(ElementExtensions);
+                }
+
+                return _timeToLive;
+            }
+            set
+            {
+                if (value.HasValue && (value.Value.Milliseconds != 0 || value.Value.Seconds != 0 || value.Value.TotalMinutes < 0))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value.Value, SR.InvalidTimeToLiveValue);
+                }
+
+                _timeToLive = value;
+            }
+        }
+
+        internal Collection<int> InternalSkipHours => _skipHours;
+
+        public Collection<int> SkipHours
+        {
+            get
+            {
+                if (_skipHours == null)
+                {
+                    var skipHours = new Collection<int>();
+                    TryReadSkipHoursFromExtension(ElementExtensions, skipHours);
+                    _skipHours = skipHours;
+                }
+
+                return _skipHours;
+            }
+        }
+
+        internal Collection<string> InternalSkipDays => _skipDays;
+
+        public Collection<string> SkipDays
+        {
+            get
+            {
+                if (_skipDays == null)
+                {
+                    var skipDays = new Collection<string>();
+                    TryReadSkipDaysFromExtension(ElementExtensions, skipDays);
+                    _skipDays = skipDays;
+                }
+
+                return _skipDays;
+            }
+        }
+
+        internal SyndicationTextInput InternalTextInput => _textInput;
+
+        public SyndicationTextInput TextInput
+        {
+            get
+            {
+                if (_textInput == null)
+                {
+                    _textInput = TryReadTextInputFromExtension(ElementExtensions);
+                }
+
+                return _textInput;
+            }
+            set
+            {
+                _textInput = value;
+            }
+        }
+
+        private SyndicationLink TryReadDocumentationFromExtension(SyndicationElementExtensionCollection elementExtensions)
+        {
+            SyndicationElementExtension documentationElement = elementExtensions
+                                      .Where(e => e.OuterName == Rss20Constants.DocumentationTag && e.OuterNamespace == Rss20Constants.Rss20Namespace)
+                                      .FirstOrDefault();
+
+            if (documentationElement == null)
+                return null;
+
+            using (XmlReader reader = documentationElement.GetReader())
+            {
+                SyndicationLink documentation = Rss20FeedFormatter.ReadAlternateLink(reader, BaseUri, SyndicationFeedFormatter.DefaultUriParser, preserveAttributeExtensions: true);
+                return documentation;
+            }
+        }
+
+        private TimeSpan? TryReadTimeToLiveFromExtension(SyndicationElementExtensionCollection elementExtensions)
+        {
+            SyndicationElementExtension timeToLiveElement = elementExtensions
+                                      .FirstOrDefault(e => e.OuterName == Rss20Constants.TimeToLiveTag && e.OuterNamespace == Rss20Constants.Rss20Namespace);
+
+            if (timeToLiveElement == null)
+                return null;
+
+            using (XmlReader reader = timeToLiveElement.GetReader())
+            {
+                string value = reader.ReadElementString();
+                if (int.TryParse(value, out int timeToLive))
+                {
+                    if (timeToLive >= 0)
+                    {
+                        return TimeSpan.FromMinutes(timeToLive);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        private void TryReadSkipHoursFromExtension(SyndicationElementExtensionCollection elementExtensions, Collection<int> skipHours)
+        {
+            SyndicationElementExtension skipHoursElement = elementExtensions
+                                      .Where(e => e.OuterName == Rss20Constants.SkipHoursTag && e.OuterNamespace == Rss20Constants.Rss20Namespace)
+                                      .FirstOrDefault();
+
+            if (skipHoursElement == null)
+                return;
+
+            using (XmlReader reader = skipHoursElement.GetReader())
+            {
+                reader.ReadStartElement();
+
+                while (reader.IsStartElement())
+                {
+                    if (reader.LocalName == Rss20Constants.HourTag)
+                    {
+                        string value = reader.ReadElementString();
+                        int hour;
+                        bool parsed = int.TryParse(value, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out hour);
+
+                        if (!parsed || (hour < 0 || hour > 23))
+                        {
+                            throw new FormatException(string.Format(SR.InvalidSkipHourValue, value));
+                        }
+
+                        skipHours.Add(hour);
+                    }
+                    else
+                    {
+                        reader.Skip();
+                    }
+                }
+            }
+        }
+
+        private void TryReadSkipDaysFromExtension(SyndicationElementExtensionCollection elementExtensions, Collection<string> skipDays)
+        {
+            SyndicationElementExtension skipDaysElement = elementExtensions
+                                      .Where(e => e.OuterName == Rss20Constants.SkipDaysTag && e.OuterNamespace == Rss20Constants.Rss20Namespace)
+                                      .FirstOrDefault();
+
+            if (skipDaysElement == null)
+                return;
+
+            using (XmlReader reader = skipDaysElement.GetReader())
+            {
+                reader.ReadStartElement();
+
+                while (reader.IsStartElement())
+                {
+                    if (reader.LocalName == Rss20Constants.DayTag)
+                    {
+                        string day = reader.ReadElementString();
+
+                        //Check if the day is actually an accepted day.
+                        if (IsValidDay(day))
+                        {
+                            skipDays.Add(day);
+                        }
+                    }
+                    else
+                    {
+                        reader.Skip();
+                    }
+                }
+
+                reader.ReadEndElement();
+            }
+        }
+
+        private static bool IsValidDay(string day) => s_acceptedDays.Contains(day);
+
+        private SyndicationTextInput TryReadTextInputFromExtension(SyndicationElementExtensionCollection elementExtensions)
+        {
+            SyndicationElementExtension textInputElement = elementExtensions
+                                      .Where(e => e.OuterName == Rss20Constants.TextInputTag && e.OuterNamespace == Rss20Constants.Rss20Namespace)
+                                      .FirstOrDefault();
+
+            if (textInputElement == null)
+                return null;
+
+            var textInput = new SyndicationTextInput();
+            using (XmlReader reader = textInputElement.GetReader())
+            {
+                reader.ReadStartElement();
+                while (reader.IsStartElement())
+                {
+                    string name = reader.LocalName;
+                    string value = reader.ReadElementString();
+
+                    switch (name)
+                    {
+                        case Rss20Constants.DescriptionTag:
+                            textInput.Description = value;
+                            break;
+
+                        case Rss20Constants.TitleTag:
+                            textInput.Title = value;
+                            break;
+
+                        case Rss20Constants.LinkTag:
+                            textInput.Link = new SyndicationLink(new Uri(value, UriKind.RelativeOrAbsolute));
+                            break;
+
+                        case Rss20Constants.NameTag:
+                            textInput.Name = value;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                reader.ReadEndElement();
+            }
+
+            return IsValidTextInput(textInput) ? textInput : null;
+        }
+
+        private static bool IsValidTextInput(SyndicationTextInput textInput)
+        {
+            //All textInput items are required, we check if all items were instantiated.
+            return textInput.Description != null && textInput.Title != null && textInput.Name != null && textInput.Link != null;
+        }
+
         public static SyndicationFeed Load(XmlReader reader)
         {
             return Load<SyndicationFeed>(reader);
@@ -359,7 +633,33 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
+            _extensions.WriteElementExtensions(writer, ShouldSkipWritingElements);
+        }
+
+        private bool ShouldSkipWritingElements(string localName, string ns)
+        {
+            if (ns == Rss20Constants.Rss20Namespace)
+            {
+                switch (localName)
+                {
+                    case Rss20Constants.DocumentationTag:
+                        return InternalDocumentation != null;
+
+                    case Rss20Constants.TimeToLiveTag:
+                        return InternalTimeToLive != null;
+
+                    case Rss20Constants.TextInputTag:
+                        return InternalTextInput != null;
+
+                    case Rss20Constants.SkipHoursTag:
+                        return InternalSkipHours != null;
+
+                    case Rss20Constants.SkipDaysTag:
+                        return InternalSkipDays != null;
+                }
+            }
+
+            return false;
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)

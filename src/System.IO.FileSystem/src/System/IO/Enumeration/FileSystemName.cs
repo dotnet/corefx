@@ -28,13 +28,13 @@ namespace System.IO.Enumeration
         /// Change '*' and '?' to '&lt;', '&gt;' and '"' to match Win32 behavior. For compatibility, Windows
         /// changes some wildcards to provide a closer match to historical DOS 8.3 filename matching.
         /// </summary>
-        public static string TranslateDosExpression(string expression)
+        public static string TranslateWin32Expression(string expression)
         {
             if (string.IsNullOrEmpty(expression) || expression == "*" || expression == "*.*")
                 return "*";
 
             bool modified = false;
-            Span<char> stackSpace = stackalloc char[expression.Length];
+            Span<char> stackSpace = stackalloc char[32];
             ValueStringBuilder sb = new ValueStringBuilder(stackSpace);
             int length = expression.Length;
             for (int i = 0; i < length; i++)
@@ -44,7 +44,7 @@ namespace System.IO.Enumeration
                 {
                     case '.':
                         modified = true;
-                        if (i > 1 && i == length - 1 && expression[i - 1] == '*')
+                        if (i >= 1 && i == length - 1 && expression[i - 1] == '*')
                         {
                             sb[sb.Length - 1] = '<'; // DOS_STAR (ends in *.)
                         }
@@ -82,9 +82,9 @@ namespace System.IO.Enumeration
         /// of RtlIsNameInExpression, which defines the rules for matching DOS wildcards ('*', '?', '&lt;', '&gt;', '"').
         /// 
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
-        /// using <see cref="TranslateDosExpression(string)"/>
+        /// using <see cref="TranslateWin32Expression(string)"/>
         /// </remarks>
-        public static bool MatchesDosExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchesWin32Expression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
         }
@@ -96,6 +96,62 @@ namespace System.IO.Enumeration
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: false);
         }
+
+        // Matching routine description
+        // ============================
+        // (copied from native impl)
+        //
+        // This routine compares a Dbcs name and an expression and tells the caller
+        // if the name is in the language defined by the expression.  The input name
+        // cannot contain wildcards, while the expression may contain wildcards.
+        //
+        // Expression wild cards are evaluated as shown in the nondeterministic
+        // finite automatons below.  Note that ~* and ~? are DOS_STAR and DOS_QM.
+        //
+        //        ~* is DOS_STAR, ~? is DOS_QM, and ~. is DOS_DOT
+        //
+        //                                  S
+        //                               <-----<
+        //                            X  |     |  e       Y
+        //        X * Y ==       (0)----->-(1)->-----(2)-----(3)
+        //
+        //                                 S-.
+        //                               <-----<
+        //                            X  |     |  e       Y
+        //        X ~* Y ==      (0)----->-(1)->-----(2)-----(3)
+        //
+        //                           X     S     S     Y
+        //        X ?? Y ==      (0)---(1)---(2)---(3)---(4)
+        //
+        //                           X     .        .      Y
+        //        X ~.~. Y ==    (0)---(1)----(2)------(3)---(4)
+        //                              |      |________|
+        //                              |           ^   |
+        //                              |_______________|
+        //                                 ^EOF or .^
+        //
+        //                           X     S-.     S-.     Y
+        //        X ~?~? Y ==    (0)---(1)-----(2)-----(3)---(4)
+        //                              |      |________|
+        //                              |           ^   |
+        //                              |_______________|
+        //                                 ^EOF or .^
+        //
+        //    where S is any single character
+        //          S-. is any single character except the final .
+        //          e is a null character transition
+        //          EOF is the end of the name string
+        //
+        //   In words:
+        //
+        //       * matches 0 or more characters.
+        //       ? matches exactly 1 character.
+        //       DOS_STAR matches 0 or more characters until encountering and matching
+        //           the final . in the name.
+        //       DOS_QM matches any single character, or upon encountering a period or
+        //           end of name string, advances the expression to the end of the
+        //           set of contiguous DOS_QMs.
+        //       DOS_DOT matches either a . or zero characters beyond name string.
 
         private static bool MatchPattern(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
         {
@@ -123,7 +179,7 @@ namespace System.IO.Enumeration
                         return false;
 
                     // See if we end with the expression
-                    return name.EndsWithOrdinal(expressionEnd, ignoreCase);
+                    return name.EndsWith(expressionEnd, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                 }
             }
 
@@ -141,7 +197,7 @@ namespace System.IO.Enumeration
             Span<int> temp = stackalloc int[0];
             Span<int> currentMatches = stackalloc int[16];
             Span<int> priorMatches = stackalloc int[16];
-            priorMatches.Clear();
+            priorMatches[0] = 0;
 
             int maxState = expression.Length * 2;
             int currentState;

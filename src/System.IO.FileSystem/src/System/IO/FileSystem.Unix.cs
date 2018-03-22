@@ -101,7 +101,8 @@ namespace System.IO
                 if (errorInfo.Error == Interop.Error.EXDEV ||      // rename fails across devices / mount points
                     errorInfo.Error == Interop.Error.EPERM ||      // permissions might not allow creating hard links even if a copy would work
                     errorInfo.Error == Interop.Error.EOPNOTSUPP || // links aren't supported by the source file system
-                    errorInfo.Error == Interop.Error.EMLINK)       // too many hard links to the source file
+                    errorInfo.Error == Interop.Error.EMLINK ||     // too many hard links to the source file
+                    errorInfo.Error == Interop.Error.ENOSYS)       // the file system doesn't support link
                 {
                     CopyFile(sourceFullPath, destFullPath, overwrite: false);
                 }
@@ -160,7 +161,7 @@ namespace System.IO
 
                         // Input allows trailing separators in order to match Windows behavior
                         // Unix does not accept trailing separators, so must be trimmed
-                        if (!FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath),
+                        if (!FileExists(PathInternal.TrimEndingDirectorySeparator(fullPath),
                             Interop.Sys.FileTypes.S_IFREG, out fileExistsError) &&
                             fileExistsError.Error == Interop.Error.ENOENT)
                         {
@@ -183,7 +184,7 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathHelpers.EndsInDirectorySeparator(fullPath))
+            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath))
             {
                 length--;
             }
@@ -290,11 +291,11 @@ namespace System.IO
                 // This surfaces as a IOException, if we let it go beyond here it would
                 // give DirectoryNotFound.
 
-                if (PathHelpers.EndsInDirectorySeparator(sourceFullPath))
+                if (PathInternal.EndsInDirectorySeparator(sourceFullPath))
                     throw new IOException(SR.Format(SR.IO_PathNotFound_Path, sourceFullPath));
 
                 // ... but it doesn't care if the destination has a trailing separator.
-                destFullPath = PathHelpers.TrimEndingDirectorySeparator(destFullPath);
+                destFullPath = PathInternal.TrimEndingDirectorySeparator(destFullPath);
             }
 
             if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
@@ -413,7 +414,7 @@ namespace System.IO
 
             // Input allows trailing separators in order to match Windows behavior
             // Unix does not accept trailing separators, so must be trimmed
-            return FileExists(PathHelpers.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
+            return FileExists(PathInternal.TrimEndingDirectorySeparator(fullPath), Interop.Sys.FileTypes.S_IFREG, out ignored);
         }
 
         private static bool FileExists(string fullPath, int fileType, out Interop.ErrorInfo errorInfo)

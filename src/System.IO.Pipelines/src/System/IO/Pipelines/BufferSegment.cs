@@ -7,10 +7,10 @@ using System.Diagnostics;
 
 namespace System.IO.Pipelines
 {
-    internal sealed class BufferSegment : IMemoryList<byte>
+    internal sealed class BufferSegment : ReadOnlySequenceSegment<byte>
     {
         private OwnedMemory<byte> _ownedMemory;
-
+        private BufferSegment _next;
         private int _end;
 
         /// <summary>
@@ -43,12 +43,15 @@ namespace System.IO.Pipelines
         /// working memory. The "active" memory is grown when bytes are copied in, End is increased, and Next is assigned. The "active"
         /// memory is shrunk when bytes are consumed, Start is increased, and blocks are returned to the pool.
         /// </summary>
-        public BufferSegment NextSegment { get; set; }
-
-        /// <summary>
-        /// Combined length of all segments before this
-        /// </summary>
-        public long RunningIndex { get; private set; }
+        public BufferSegment NextSegment
+        {
+            get => _next;
+            set
+            {
+                _next = value;
+                Next = value;
+            }
+        }
 
         public void SetMemory(OwnedMemory<byte> buffer)
         {
@@ -58,7 +61,6 @@ namespace System.IO.Pipelines
         public void SetMemory(OwnedMemory<byte> ownedMemory, int start, int end, bool readOnly = false)
         {
             _ownedMemory = ownedMemory;
-            _ownedMemory.Retain();
 
             AvailableMemory = _ownedMemory.Memory;
 
@@ -76,13 +78,11 @@ namespace System.IO.Pipelines
             AvailableMemory = default;
         }
 
+        internal OwnedMemory<byte> OwnedMemory => _ownedMemory;
+
         public Memory<byte> AvailableMemory { get; private set; }
 
-        public Memory<byte> Memory { get; private set; }
-
         public int Length => End - Start;
-
-        public IMemoryList<byte> Next => NextSegment;
 
         /// <summary>
         /// If true, data should not be written into the backing block after the End offset. Data between start and end should never be modified

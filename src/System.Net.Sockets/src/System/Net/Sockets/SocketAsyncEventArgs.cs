@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Net.Sockets
@@ -70,6 +71,7 @@ namespace System.Net.Sockets
         internal Internals.SocketAddress _socketAddress;
 
         // Misc state variables.
+        private readonly bool _flowExecutionContext;
         private ExecutionContext _context;
         private static readonly ContextCallback s_executionCallback = ExecutionCallback;
         private Socket _currentSocket;
@@ -84,8 +86,18 @@ namespace System.Net.Sockets
 
         private MultipleConnectAsync _multipleConnect;
 
-        public SocketAsyncEventArgs()
+        public SocketAsyncEventArgs() : this(flowExecutionContext: true)
         {
+        }
+
+        /// <summary>Initialize the SocketAsyncEventArgs</summary>
+        /// <param name="flowExecutionContext">
+        /// Whether to capture and flow ExecutionContext. ExecutionContext flow should only
+        /// be disabled if it's going to be handled by higher layers.
+        /// </param>
+        internal SocketAsyncEventArgs(bool flowExecutionContext)
+        {
+            _flowExecutionContext = flowExecutionContext;
             InitializeInternals();
         }
 
@@ -106,7 +118,7 @@ namespace System.Net.Sockets
             {
                 if (_bufferIsExplicitArray)
                 {
-                    bool success = _buffer.TryGetArray(out ArraySegment<byte> arraySegment);
+                    bool success = MemoryMarshal.TryGetArray(_buffer, out ArraySegment<byte> arraySegment);
                     Debug.Assert(success);
                     return arraySegment.Array;
                 }
@@ -519,8 +531,8 @@ namespace System.Net.Sockets
                 _context = null;
             }
 
-            // Capture execution context if none already.
-            if (_context == null)
+            // Capture execution context if necessary.
+            if (_flowExecutionContext && _context == null)
             {
                 _context = ExecutionContext.Capture();
             }

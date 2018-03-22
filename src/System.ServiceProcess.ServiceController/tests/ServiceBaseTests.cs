@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
-using System;
 using System.Diagnostics;
-using System.Security.Principal;
 using Xunit;
-using System.Threading.Tasks;
 
 /// <summary>
 /// NOTE: All tests checking the output file should always call Stop before checking because Stop will flush the file to disk.
@@ -43,11 +39,11 @@ namespace System.ServiceProcess.Tests
             Assert.True(testServiceController.CanShutdown);
         }
 
-        //[Fact]
+        // [Fact]
         // To cleanup lingering Test Services uncomment the Fact attribute and run the following command
-        //   msbuild /t:rebuildandtest /p:XunitMethodName=System.ServiceProcess.Tests.ServiceBaseTests.Cleanup
+        //   msbuild /t:rebuildandtest /p:XunitMethodName=System.ServiceProcess.Tests.ServiceBaseTests.Cleanup /p:OuterLoop=true
         // Remember to comment out the Fact again before running tests otherwise it will cleanup tests running in parallel
-        // and casue them to fail.
+        // and cause them to fail.
         public void Cleanup()
         {
             string currentService = "";
@@ -77,9 +73,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -89,9 +83,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
-            var controller = new ServiceController(_testService.TestServiceName);
-            _testService.Client.Connect(connectionTimeout);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.Stop();
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetByte());
@@ -101,7 +93,9 @@ namespace System.ServiceProcess.Tests
             _testService.Client = null;
             _testService.Client.Connect();
 
-            Assert.Equal((int)PipeMessageByteCode.Start, _testService.GetByte());
+            // There is no definite order between start and connected when tests are running on multiple threads.
+            // In this case we dont care much about the order, so we are just checking whether the appropiate bytes have been sent.
+            Assert.Equal((int)(PipeMessageByteCode.Connected | PipeMessageByteCode.Start), _testService.GetByte() | _testService.GetByte());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
@@ -112,9 +106,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -128,9 +120,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.Pause();
             Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetByte());
@@ -148,9 +138,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.ExecuteCommand(128);
             Assert.Equal(128, _testService.GetByte());
@@ -163,9 +151,7 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
-            _testService.Client.Connect(connectionTimeout);
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
+            ServiceController controller = ConnectToServer();
 
             controller.Continue();
             controller.WaitForStatus(ServiceControllerStatus.Running);
@@ -221,8 +207,19 @@ namespace System.ServiceProcess.Tests
             string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();
             TestServiceProvider _testService = new TestServiceProvider(serviceName);
             _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
             _testService.DeleteTestServices();
+        }
+
+        private ServiceController ConnectToServer()
+        {
+            _testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
+
+            ServiceController controller = new ServiceController(_testService.TestServiceName);
+            AssertExpectedProperties(controller);
+            return controller;
         }
 
         public void Dispose()

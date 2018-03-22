@@ -18,8 +18,8 @@ namespace System
     /// Memory represents a contiguous region of arbitrary memory similar to <see cref="Span{T}"/>.
     /// Unlike <see cref="Span{T}"/>, it is not a byref-like type.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
+    [DebuggerDisplay("{ToString(),raw}")]
     public readonly struct Memory<T>
     {
         // NOTE: With the current implementation, Memory<T> and ReadOnlyMemory<T> must have the same layout,
@@ -56,6 +56,26 @@ namespace System
             _object = array;
             _index = 0;
             _length = array.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Memory(T[] array, int start)
+        {
+            if (array == null)
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException();
+                this = default;
+                return; // returns default
+            }
+            if (default(T) == null && array.GetType() != typeof(T[]))
+                ThrowHelper.ThrowArrayTypeMismatchException();
+            if ((uint)start > (uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            _object = array;
+            _index = start;
+            _length = array.Length - start;
         }
 
         /// <summary>
@@ -117,16 +137,13 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Memory{T}"/>
         /// </summary>
-        public static implicit operator Memory<T>(ArraySegment<T> arraySegment) => new Memory<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        public static implicit operator Memory<T>(ArraySegment<T> segment) => new Memory<T>(segment.Array, segment.Offset, segment.Count);
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="Memory{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
         /// </summary>
         public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) =>
             Unsafe.As<Memory<T>, ReadOnlyMemory<T>>(ref memory);
-
-        //Debugger Display = {T[length]}
-        private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
 
         /// <summary>
         /// Returns an empty <see cref="Memory{T}"/>
@@ -142,6 +159,19 @@ namespace System
         /// Returns true if Length is 0.
         /// </summary>
         public bool IsEmpty => _length == 0;
+
+        /// <summary>
+        /// For <see cref="Memory{Char}"/>, returns a new instance of string that represents the characters pointed to by the memory.
+        /// Otherwise, returns a <see cref="string"/> with the name of the type and the number of elements.
+        /// </summary>
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char))
+            {
+                return (_object is string str) ? str.Substring(_index, _length) : Span.ToString();
+            }
+            return string.Format("System.Memory<{0}>[{1}]", typeof(T).Name, _length);
+        }
 
         /// <summary>
         /// Forms a slice out of the given memory, beginning at 'start'.
@@ -287,30 +317,6 @@ namespace System
                 }
             }
             return memoryHandle;
-        }
-
-        /// <summary>
-        /// Get an array segment from the underlying memory.
-        /// If unable to get the array segment, return false with a default array segment.
-        /// </summary>
-        public bool TryGetArray(out ArraySegment<T> arraySegment)
-        {
-            if (_index < 0)
-            {
-                if (((OwnedMemory<T>)_object).TryGetArray(out var segment))
-                {
-                    arraySegment = new ArraySegment<T>(segment.Array, segment.Offset + (_index & RemoveOwnedFlagBitMask), _length);
-                    return true;
-                }
-            }
-            else if (_object is T[] arr)
-            {
-                arraySegment = new ArraySegment<T>(arr, _index, _length);
-                return true;
-            }
-
-            arraySegment = default(ArraySegment<T>);
-            return false;
         }
 
         /// <summary>

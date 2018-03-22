@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Interlocked = System.Threading.Interlocked;
 
 #if ES_BUILD_STANDALONE
@@ -41,6 +42,10 @@ namespace System.Diagnostics.Tracing
         internal readonly int identity;
         internal readonly byte[] nameMetadata;
 
+#if FEATURE_PERFTRACING
+        private readonly object eventHandleCreationLock = new object();
+#endif
+
         public NameInfo(string name, EventTags tags, int typeMetadataSize)
         {
             this.name = name;
@@ -75,5 +80,47 @@ namespace System.Diagnostics.Tracing
             }
             return result;
         }
+
+#if FEATURE_PERFTRACING
+        public IntPtr GetOrCreateEventHandle(EventProvider provider, ConcurrentDictionary<int, IntPtr> eventHandleMap, EventDescriptor descriptor, TraceLoggingEventTypes eventTypes)
+        {
+            IntPtr eventHandle = IntPtr.Zero;
+            if(!eventHandleMap.TryGetValue(descriptor.EventId, out eventHandle))
+            {
+                lock (eventHandleCreationLock)
+                {
+                    if (!eventHandleMap.TryGetValue(descriptor.EventId, out eventHandle))
+                    {
+                        byte[] metadataBlob = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(
+                            descriptor.EventId,
+                            name,
+                            (EventKeywords)descriptor.Keywords,
+                            (EventLevel)descriptor.Level,
+                            descriptor.Version,
+                            eventTypes);
+                        uint metadataLength = (metadataBlob != null) ? (uint)metadataBlob.Length : 0;
+
+                        unsafe
+                        {
+                            fixed (byte* pMetadataBlob = metadataBlob)
+                            {
+                                // Define the event.
+                                eventHandle = provider.m_eventProvider.DefineEventHandle(
+                                    (uint)descriptor.EventId,
+                                    name,
+                                    descriptor.Keywords,
+                                    descriptor.Version,
+                                    descriptor.Level,
+                                    pMetadataBlob,
+                                    metadataLength);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return eventHandle;
+        }
+#endif
     }
 }

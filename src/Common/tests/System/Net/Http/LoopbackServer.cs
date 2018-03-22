@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -73,7 +74,7 @@ namespace System.Net.Test.Common
             return CreateServerAsync(server => funcAsync(server, server.Uri), options);
         }
 
-        public static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc)
+        public static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<LoopbackServer, Task> serverFunc, Options options = null)
         {
             return CreateServerAsync(async server =>
             {
@@ -81,7 +82,7 @@ namespace System.Net.Test.Common
                 Task serverTask = serverFunc(server);
 
                 await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
-            });
+            }, options);
         }
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
@@ -261,6 +262,28 @@ namespace System.Net.Test.Common
             "\r\n" +
             content;
 
+        public static string GetSingleChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+            $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+            "Transfer-Encoding: chunked\r\n" +
+            additionalHeaders +
+            "\r\n" +
+            (string.IsNullOrEmpty(content) ? "" :
+                $"{content.Length:X}\r\n" +
+                $"{content}\r\n") +
+            $"0\r\n" +
+            $"\r\n";
+
+        public static string GetBytePerChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+            $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+            "Transfer-Encoding: chunked\r\n" +
+            additionalHeaders +
+            "\r\n" +
+            (string.IsNullOrEmpty(content) ? "" : string.Concat(content.Select(c => $"1\r\n{c}\r\n"))) + 
+            $"0\r\n" +
+            $"\r\n";
+
         public class Options
         {
             public IPAddress Address { get; set; } = IPAddress.Loopback;
@@ -320,6 +343,11 @@ namespace System.Net.Test.Common
                 while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
                 {
                     lines.Add(line);
+                }
+
+                if (line == null)
+                {
+                    throw new Exception("Unexpected EOF trying to read request header");
                 }
 
                 return lines;

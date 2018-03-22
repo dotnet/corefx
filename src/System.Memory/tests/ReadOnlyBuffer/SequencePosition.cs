@@ -19,7 +19,7 @@ namespace System.Memory.Tests
             Assert.True(position.Equals(position2));
             Assert.True(position.Equals((object)position2));
             Assert.False(position != position2);
-            Assert.Equal(position.GetHashCode(),position2.GetHashCode());
+            Assert.Equal(position.GetHashCode(), position2.GetHashCode());
         }
 
         [Fact]
@@ -32,15 +32,7 @@ namespace System.Memory.Tests
             Assert.True(position.Equals(position2));
             Assert.True(position.Equals((object)position2));
             Assert.False(position != position2);
-            Assert.Equal(position.GetHashCode(),position2.GetHashCode());
-        }
-
-        [Fact]
-        public void ToStringIsCorrect()
-        {
-            Assert.Equal("System.Object[2]", new SequencePosition(new object(), 2).ToString());
-            Assert.Equal("2", new SequencePosition(null, 2).ToString());
-            Assert.Equal("(default)", new SequencePosition().ToString());
+            Assert.Equal(position.GetHashCode(), position2.GetHashCode());
         }
     }
 }

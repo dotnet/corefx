@@ -237,7 +237,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/Tools/msbuild.sh $(PB_DockerVolumeName)/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(PB_CloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "arguments": "run $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/Tools/msbuild.sh $(PB_DockerVolumeName)/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(PB_CloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -398,6 +398,10 @@
       "value": "$(Build.BuildNumber)",
       "allowOverride": true
     },
+    "ProductBuildId": {
+      "value": "",
+      "allowOverride": true
+    },
     "PB_BuildArguments": {
       "value": "-buildArch=x64 -Release -stripSymbols",
       "allowOverride": true
@@ -413,6 +417,10 @@
       "value": "dotnetbuildoutput"
     },
     "PB_CloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
+    "HelixApiAccessKey": {
       "value": null,
       "isSecret": true
     },
@@ -511,7 +519,7 @@
   ],
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
   "jobAuthorizationScope": "projectCollection",
-  "jobTimeoutInMinutes": 60,
+  "jobTimeoutInMinutes": 90,
   "jobCancelTimeoutInMinutes": 5,
   "repository": {
     "properties": {

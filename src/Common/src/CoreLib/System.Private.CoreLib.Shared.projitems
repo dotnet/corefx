@@ -94,6 +94,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Configuration\Assemblies\AssemblyHashAlgorithm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Configuration\Assemblies\AssemblyVersionCompatibility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Convert.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Convert.Base64.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\CurrentSystemTimeZone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DataMisalignedException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\DateTime.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\DaylightTime.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\DigitShapes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\EastAsianLunisolarCalendar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\GlobalizationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\GregorianCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\GregorianCalendarHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\GregorianCalendarTypes.cs" />
@@ -199,7 +201,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\InvalidTimeZoneException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\BinaryWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\DirectoryNotFoundException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\IO\DriveNotFoundException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\EncodingCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\EndOfStreamException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\Error.cs" />
@@ -234,12 +235,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Int64.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IntPtr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Lazy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Marvin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Math.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MathF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MarshalByRefObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MemberAccessException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Memory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MemoryDebugView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\MemoryExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\MemoryExtensions.Fast.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MethodAccessException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MidpointRounding.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\MissingMethodException.cs" />
@@ -444,7 +448,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\OutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\PreserveSigAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\SafeBuffer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\StringBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\StructLayoutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\UnmanagedFunctionPointerAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Runtime\InteropServices\UnmanagedType.cs" />
@@ -486,10 +489,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Span.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Span.Fast.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\SpanDebugView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\Span.NonGeneric.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.BinarySearch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.Byte.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\SpanHelpers.T.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\String.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\String.Manipulation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\String.Searching.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\StringSpanHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\StackOverflowException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\StringComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\StringComparison.cs" />
@@ -545,6 +551,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\TaskToApm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\TaskSchedulerException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\ValueTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Threading\Tasks\Sources\IValueTaskSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ThreadAbortException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ThreadPriority.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Threading\ThreadStart.cs" />
@@ -681,6 +688,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.Globalization.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.LockFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.MAX_PATH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.MultiByteToWideChar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.OutputDebugString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.ReadFile_SafeHandle_IntPtr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.ReadFile_SafeHandle_NativeOverlapped.cs" />
@@ -696,6 +704,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Normaliz\Interop.Idna.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Normaliz\Interop.Normalization.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Kernel32\Interop.TimeZone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\Ole32\Interop.CoCreateGuid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\OleAut32\Interop.SysAllocStringLen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\OleAut32\Interop.SysFreeString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interop\Windows\OleAut32\Interop.SysStringLen.cs" />
@@ -703,6 +712,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CalendarData.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CompareInfo.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CultureData.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\HijriCalendar.Win32.cs" Condition="'$(EnableWinRT)' != 'true' and '$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\HijriCalendar.WinRT.cs" Condition="'$(EnableWinRT)' == 'true'" />
@@ -711,12 +721,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\JapaneseCalendar.WinRT.cs" Condition="'$(EnableWinRT)' == 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\Normalization.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\TextInfo.Windows.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Guid.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStreamCompletionSource.Win32.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\Path.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathHelper.Windows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathInternal.Windows.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)System\IO\PathInternal.Windows.StringBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\DisableMediaInsertionPrompt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Security\SafeBSTRHandle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Security\SecureString.Windows.cs" />
@@ -784,6 +794,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Diagnostics\Debug.Unix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CalendarData.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CompareInfo.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\CultureData.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\HijriCalendar.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\IdnMapping.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
@@ -791,6 +802,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\LocaleData.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\Normalization.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\Globalization\TextInfo.Unix.cs" Condition="'$(EnableDummyGlobalizationImplementation)' != 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)System\Guid.Unix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.OSX.cs" Condition="'$(TargetsOSX)' == 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Linux.cs" Condition="'$(TargetsOSX)' != 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)System\IO\FileStream.Unix.cs" />
