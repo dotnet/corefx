@@ -9,48 +9,6 @@ namespace System.SpanTests
     public static partial class SpanTests
     {
         [Fact]
-        public static void ZeroLengthSequenceCompareTo()
-        {
-            int[] a = new int[3];
-
-            Span<int> first = new Span<int>(a, 1, 0);
-            Span<int> second = new Span<int>(a, 2, 0);
-            int result = first.SequenceCompareTo(second);
-            Assert.Equal(0, result);
-        }
-
-        [Fact]
-        public static void SameSpanSequenceCompareTo()
-        {
-            int[] a = { 4, 5, 6 };
-            Span<int> span = new Span<int>(a);
-            int result = span.SequenceCompareTo(span);
-            Assert.Equal(0, result);
-        }
-
-        [Fact]
-        public static void LengthMismatchSequenceCompareTo()
-        {
-            int[] a = { 4, 5, 6 };
-            Span<int> first = new Span<int>(a, 0, 2);
-            Span<int> second = new Span<int>(a, 0, 3);
-            int result = first.SequenceCompareTo(second);
-            Assert.True(result < 0);
-
-            result = second.SequenceCompareTo(first);
-            Assert.True(result > 0);
-
-            // one sequence is empty
-            first = new Span<int>(a, 1, 0);
-
-            result = first.SequenceCompareTo(second);
-            Assert.True(result < 0);
-
-            result = second.SequenceCompareTo(first);
-            Assert.True(result > 0);
-        }
-
-        [Fact]
         public static void OnSequenceCompareToOfEqualSpansMakeSureEveryElementIsCompared()
         {
             for (int length = 0; length < 100; length++)
