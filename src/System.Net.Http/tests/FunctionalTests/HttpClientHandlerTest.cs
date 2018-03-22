@@ -2989,7 +2989,8 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public async Task ProxyAuth_Digest_Succeeds()
         {
-            if (IsCurlHandler) {
+            if (IsCurlHandler)
+            {
                 // Issue #27870 curl HttpHandler can only do basic auth to proxy
                 return;
             }
@@ -3018,7 +3019,7 @@ namespace System.Net.Http.Functional.Tests
 
                     await TestHelper.WhenAllCompletedOrAnyFailedWithTimeout(TestHelper.PassingTestTimeoutMilliseconds, responseTask);
                     HttpResponseMessage response = responseTask.Result;
-                    Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
             }, options);
 
