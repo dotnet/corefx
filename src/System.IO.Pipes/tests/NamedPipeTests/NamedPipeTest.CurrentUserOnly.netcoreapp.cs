@@ -116,5 +116,37 @@ namespace System.IO.Pipes.Tests
 
             Task.WaitAll(tasks.ToArray());
         }
+
+        [Fact]
+        public static void CreateMultipleConcurrentServers_ConnectMultipleClients()
+        {
+            var pipeServers = new NamedPipeServerStream[5];
+            var pipeClients = new NamedPipeClientStream[pipeServers.Length];
+
+            try
+            {
+                string pipeName = GetUniquePipeName();
+                for (var i = 0; i < pipeServers.Length; i++)
+                {
+                    pipeServers[i] = new NamedPipeServerStream(
+                        pipeName,
+                        PipeDirection.InOut,
+                        NamedPipeServerStream.MaxAllowedServerInstances,
+                        PipeTransmissionMode.Byte,
+                        PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly | PipeOptions.WriteThrough);
+
+                    pipeClients[i] = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+                    pipeClients[i].Connect(15_000);
+                }
+            }
+            finally
+            {
+                for (var i = 0; i < pipeServers.Length; i++)
+                {
+                    pipeServers[i]?.Dispose();
+                    pipeClients[i]?.Dispose();
+                }
+            }
+        }
     }
 }
