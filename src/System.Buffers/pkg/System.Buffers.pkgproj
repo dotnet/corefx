@@ -2,8 +2,11 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
+    <HarvestIncludePath Include="ref\netstandard1.1;ref\netstandard2.0">
+      <SupportedFramework>netcore45;netcoreapp1.0;wpa81;$(AllXamarinFrameworks)</SupportedFramework>
+    </HarvestIncludePath>
     <ProjectReference Include="..\ref\System.Buffers.csproj">
-      <SupportedFramework>net45;netcore45;netcoreapp1.0;wpa81;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>net45</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Buffers.csproj" />
 
@@ -13,7 +16,6 @@
 
     <InboxOnTargetFramework Include="netcoreapp2.0" />
     <InboxOnTargetFramework Include="uap10.0.16299" />
-    <InboxOnTargetFramework Include="uap10.0.16300" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
