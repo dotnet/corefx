@@ -20,6 +20,13 @@ namespace System.Tests
             Assert.Same(string.Empty, new string(new ReadOnlySpan<char>(new char[length], offset, 0)));
         }
 
+        [Fact]
+        public static unsafe void Ctor_CharSpan_Empty()
+        {
+            Assert.Same(string.Empty, new string((ReadOnlySpan<char>)null));
+            Assert.Same(string.Empty, new string(ReadOnlySpan<char>.Empty));
+        }
+
         [Theory]
         [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, 0, 8, "abcdefgh")]
         [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0', 'i', 'j', 'k' }, 0, 12, "abcdefgh\0ijk")]
