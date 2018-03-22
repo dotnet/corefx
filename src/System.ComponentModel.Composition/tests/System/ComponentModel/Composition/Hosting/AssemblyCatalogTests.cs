@@ -1079,8 +1079,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]               
-        [Trait("MyTrait","MyTrait")]
+        [Fact]                       
         public void NonStaticallyReferencedAssembly()
         {
             string testAssembly = "System.ComponentModel.Composition.Noop.Assembly.dll";
