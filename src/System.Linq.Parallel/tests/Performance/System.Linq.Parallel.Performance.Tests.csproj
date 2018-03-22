@@ -30,6 +30,7 @@
     <Compile Include="..\Helpers\UnorderedSources.cs">
       <Link>Helpers\UnorderedSources.cs</Link>
     </Compile>
+    <Compile Include="QueryOperators\Perf.GroupBy.cs" />
     <Compile Include="QueryOperators\Perf.GroupJoin.cs" />
     <Compile Include="QueryOperators\Perf.Join.cs" />
   </ItemGroup>
