@@ -59,11 +59,11 @@ namespace System.IO.Tests
         }
 
         [Benchmark]
-        [InlineData(10)]
-        [InlineData(100)]
-        [InlineData(1000)]
+        [InlineData(10, 1000)]
+        [InlineData(100, 100)]
+        [InlineData(1000, 10)]
         [OuterLoop("Takes a lot of time to finish")]
-        public void RecursiveCreateDirectory(int depth)
+        public void RecursiveCreateDirectory(int depth, int times)
         {
             if (!PlatformDetection.IsWindows && depth == 1000)
                 return;
@@ -82,7 +82,7 @@ namespace System.IO.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < times; i++)
                     {
                         Directory.CreateDirectory(rootDirectory + @"\" + i + path);
                     }
@@ -93,11 +93,11 @@ namespace System.IO.Tests
         }
 
         [Benchmark]
-        [InlineData(10)]
-        [InlineData(100)]
-        [InlineData(1000)]
+        [InlineData(10, 1000)]
+        [InlineData(100, 100)]
+        [InlineData(1000, 10)]
         [OuterLoop("Takes a lot of time to finish")]
-        public void RecursiveDeleteDirectory(int depth)
+        public void RecursiveDeleteDirectory(int depth, int times)
         {
             if (!PlatformDetection.IsWindows && depth == 1000)
                 return;
@@ -115,14 +115,14 @@ namespace System.IO.Tests
             foreach (var iteration in Benchmark.Iterations)
             {
                 // Setup For each Iteration
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < times; i++)
                 {
                     Directory.CreateDirectory(rootDirectory + Path.DirectorySeparatorChar + i + path);
                 }
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < times; i++)
                     {
                         Directory.Delete(rootDirectory + Path.DirectorySeparatorChar + i, recursive: true);
                     }
