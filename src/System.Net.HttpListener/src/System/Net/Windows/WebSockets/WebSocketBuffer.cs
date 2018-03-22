@@ -326,7 +326,7 @@ namespace System.Net.WebSockets
 
             int bytesTransferred = Math.Min(buffer.Count, _bufferedPayloadReceiveResult.Count);
 
-            _bufferedPayloadReceiveResult.Count = _bufferedPayloadReceiveResult.Count - bytesTransferred;
+            _bufferedPayloadReceiveResult.Count -= bytesTransferred;
 
             receiveResult = new WebSocketReceiveResult(
                 bytesTransferred,
