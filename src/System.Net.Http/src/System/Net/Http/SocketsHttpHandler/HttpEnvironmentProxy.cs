@@ -184,7 +184,7 @@ namespace System.Net.Http
             }
             string user = null;
             string password = null;
-            int port = 80;
+            UInt16 port = 80;
             string host = null;
 
             // Check if there is authentication part with user and possibly password.
@@ -224,12 +224,8 @@ namespace System.Net.Http
             }
             else
             {
-                try
-                {
-                    host = value.Substring(0, separatorIndex);
-                    port = Convert.ToInt32(value.Substring(separatorIndex + 1));
-                }
-                catch
+                host = value.Substring(0, separatorIndex);
+                if (!UInt16.TryParse(value.Substring(separatorIndex + 1), out port))
                 {
                     return null;
                 }
