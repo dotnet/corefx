@@ -774,7 +774,7 @@ namespace System.Diagnostics
                         threadInfo._threadWaitReason = NtProcessManager.GetThreadWaitReason((int)ti.WaitReason);
 
                         processInfo._threadInfoList.Add(threadInfo);
-                        currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemProcessInformation));
+                        currentPtr = (IntPtr)((long)currentPtr + sizeof(SystemThreadInformation));
                         i++;
                     }
                 }
