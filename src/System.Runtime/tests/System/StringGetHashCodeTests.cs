@@ -18,6 +18,7 @@ namespace System.Tests
         /// </summary>
         [Theory]
         [MemberData(nameof(GetHashCode_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetHashCodeWithStringComparer_UseSameStringInTwoProcesses_ReturnsDifferentHashCodes(int getHashCodeIndex)
         {
             Func<string, string, int> method = (parentHash, i) => { return int.Parse(parentHash) != s_GetHashCodes[int.Parse(i)]() ? SuccessExitCode : -1; };
