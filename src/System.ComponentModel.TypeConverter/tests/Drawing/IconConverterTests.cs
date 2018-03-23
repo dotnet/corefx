@@ -42,63 +42,63 @@ namespace System.ComponentModel.TypeConverterTests
         [Fact]
         public void TestCanConvertFrom()
         {
-            Assert.True(_icoConv.CanConvertFrom(typeof(byte[])), "CCF#1");
-            Assert.True(_icoConv.CanConvertFrom(null, typeof(byte[])), "CCF#1a");
-            Assert.True(_icoConv.CanConvertFrom(null, _iconBytes.GetType()), "CCF#1b");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(string)), "CCF#2");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(Rectangle)), "CCF#3");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(Point)), "CCF#4");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(PointF)), "CCF#5");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(Size)), "CCF#6");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(SizeF)), "CCF#7");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(object)), "CCF#8");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(int)), "CCF#9");
-            Assert.True(!_icoConv.CanConvertFrom(null, typeof(Metafile)), "CCF#10");
+            Assert.True(_icoConv.CanConvertFrom(typeof(byte[])), "byte[] (no context)");
+            Assert.True(_icoConv.CanConvertFrom(null, typeof(byte[])), "byte[]");
+            Assert.True(_icoConv.CanConvertFrom(null, _iconBytes.GetType()), "_iconBytes.GetType()");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(string)), "string");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(Rectangle)), "Rectangle");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(Point)), "Point");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(PointF)), "PointF");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(Size)), "Size");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(SizeF)), "SizeF");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(object)), "object");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(int)), "int");
+            Assert.False(_icoConv.CanConvertFrom(null, typeof(Metafile)), "Metafile");
 
-            Assert.True(_icoConvFrmTD.CanConvertFrom(typeof(byte[])), "CCF#1A");
-            Assert.True(_icoConvFrmTD.CanConvertFrom(null, typeof(byte[])), "CCF#1aA");
-            Assert.True(_icoConvFrmTD.CanConvertFrom(null, _iconBytes.GetType()), "CCF#1bA");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(string)), "CCF#2A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(Rectangle)), "CCF#3A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(Point)), "CCF#4A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(PointF)), "CCF#5A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(Size)), "CCF#6A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(SizeF)), "CCF#7A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(object)), "CCF#8A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(int)), "CCF#9A");
-            Assert.True(!_icoConvFrmTD.CanConvertFrom(null, typeof(Metafile)), "CCF#10A");
+            Assert.True(_icoConvFrmTD.CanConvertFrom(typeof(byte[])), "TD byte[] (no context)");
+            Assert.True(_icoConvFrmTD.CanConvertFrom(null, typeof(byte[])), "TD byte[]");
+            Assert.True(_icoConvFrmTD.CanConvertFrom(null, _iconBytes.GetType()), "TD _iconBytes.GetType()");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(string)), "TD string");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(Rectangle)), "TD Rectangle");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(Point)), "TD Point");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(PointF)), "TD PointF");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(Size)), "TD Size");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(SizeF)), "TD SizeF");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(object)), "TD object");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(int)), "TD int");
+            Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(Metafile)), "TD Metafile");
         }
 
         [Fact]
         public void TestCanConvertTo()
         {
-            Assert.True(_icoConv.CanConvertTo(typeof(string)), "CCT#1");
-            Assert.True(_icoConv.CanConvertTo(null, typeof(string)), "CCT#1a");
-            Assert.True(_icoConv.CanConvertTo(null, _iconStr.GetType()), "CCT#1b");
-            Assert.True(_icoConv.CanConvertTo(typeof(byte[])), "CCT#2");
-            Assert.True(_icoConv.CanConvertTo(null, typeof(byte[])), "CCT#2a");
-            Assert.True(_icoConv.CanConvertTo(null, _iconBytes.GetType()), "CCT#2b");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(Rectangle)), "CCT#3");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(Point)), "CCT#4");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(PointF)), "CCT#5");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(Size)), "CCT#6");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(SizeF)), "CCT#7");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(object)), "CCT#8");
-            Assert.True(!_icoConv.CanConvertTo(null, typeof(int)), "CCT#9");
+            Assert.True(_icoConv.CanConvertTo(typeof(string)), "string (no context)");
+            Assert.True(_icoConv.CanConvertTo(null, typeof(string)), "string");
+            Assert.True(_icoConv.CanConvertTo(null, _iconStr.GetType()), "_iconStr.GetType()");
+            Assert.True(_icoConv.CanConvertTo(typeof(byte[])), "byte[] (no context)");
+            Assert.True(_icoConv.CanConvertTo(null, typeof(byte[])), "byte[]");
+            Assert.True(_icoConv.CanConvertTo(null, _iconBytes.GetType()), "_iconBytes.GetType()");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(Rectangle)), "Rectangle");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(Point)), "Point");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(PointF)), "PointF");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(Size)), "Size");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(SizeF)), "SizeF");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(object)), "object");
+            Assert.False(_icoConv.CanConvertTo(null, typeof(int)), "int");
 
-            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(string)), "CCT#1A");
-            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(string)), "CCT#1aA");
-            Assert.True(_icoConvFrmTD.CanConvertTo(null, _iconStr.GetType()), "CCT#1bA");
-            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(byte[])), "CCT#2A");
-            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(byte[])), "CCT#2aA");
-            Assert.True(_icoConvFrmTD.CanConvertTo(null, _iconBytes.GetType()), "CCT#2bA");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(Rectangle)), "CCT#3A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(Point)), "CCT#4A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(PointF)), "CCT#5A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(Size)), "CCT#6A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(SizeF)), "CCT#7A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(object)), "CCT#8A");
-            Assert.True(!_icoConvFrmTD.CanConvertTo(null, typeof(int)), "CCT#9A");
+            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(string)), "TD string (no context)");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(string)), "TD string");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, _iconStr.GetType()), "TD _iconStr.GetType()");
+            Assert.True(_icoConvFrmTD.CanConvertTo(typeof(byte[])), "TD byte[] (no context)");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, typeof(byte[])), "TD byte[]");
+            Assert.True(_icoConvFrmTD.CanConvertTo(null, _iconBytes.GetType()), "TD _iconBytes.GetType()");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(Rectangle)), "TD Rectangle");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(Point)), "TD Point");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(PointF)), "TD PointF");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(Size)), "TD Size");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(SizeF)), "TD SizeF");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(object)), "TD object");
+            Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(int)), "TD int");
         }
 
         [Fact]

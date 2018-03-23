@@ -29,37 +29,37 @@ namespace System.ComponentModel.TypeConverterTests
         [Fact]
         public void TestCanConvertFrom()
         {
-            Assert.True(_imgFmtConv.CanConvertFrom(typeof(string)), "CCF#1");
-            Assert.True(_imgFmtConv.CanConvertFrom(null, typeof(string)), "CCF#1a");
-            Assert.True(!_imgFmtConv.CanConvertFrom(null, typeof(ImageFormat)), "CCF#2");
-            Assert.True(!_imgFmtConv.CanConvertFrom(null, typeof(Guid)), "CCF#3");
-            Assert.True(!_imgFmtConv.CanConvertFrom(null, typeof(object)), "CCF#4");
-            Assert.True(!_imgFmtConv.CanConvertFrom(null, typeof(int)), "CCF#5");
+            Assert.True(_imgFmtConv.CanConvertFrom(typeof(string)), "string (no context)");
+            Assert.True(_imgFmtConv.CanConvertFrom(null, typeof(string)), "string");
+            Assert.False(_imgFmtConv.CanConvertFrom(null, typeof(ImageFormat)), "ImageFormat");
+            Assert.False(_imgFmtConv.CanConvertFrom(null, typeof(Guid)), "Guid");
+            Assert.False(_imgFmtConv.CanConvertFrom(null, typeof(object)), "object");
+            Assert.False(_imgFmtConv.CanConvertFrom(null, typeof(int)), "int");
 
-            Assert.True(_imgFmtConvFrmTD.CanConvertFrom(typeof(string)), "CCF#1A");
-            Assert.True(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(string)), "CCF#1aA");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertFrom(null, typeof(ImageFormat)), "CCF#2A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertFrom(null, typeof(Guid)), "CCF#3A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertFrom(null, typeof(object)), "CCF#4A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertFrom(null, typeof(int)), "CCF#5A");
+            Assert.True(_imgFmtConvFrmTD.CanConvertFrom(typeof(string)), "TD string (no context)");
+            Assert.True(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(string)), "TD string");
+            Assert.False(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(ImageFormat)), "TD ImageFormat");
+            Assert.False(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(Guid)), "TD Guid");
+            Assert.False(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(object)), "TD object");
+            Assert.False(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(int)), "TD int");
         }
 
         [Fact]
         public void TestCanConvertTo()
         {
-            Assert.True(_imgFmtConv.CanConvertTo(typeof(string)), "CCT#1");
-            Assert.True(_imgFmtConv.CanConvertTo(null, typeof(string)), "CCT#1a");
-            Assert.True(!_imgFmtConv.CanConvertTo(null, typeof(ImageFormat)), "CCT#2");
-            Assert.True(!_imgFmtConv.CanConvertTo(null, typeof(Guid)), "CCT#3");
-            Assert.True(!_imgFmtConv.CanConvertTo(null, typeof(object)), "CCT#4");
-            Assert.True(!_imgFmtConv.CanConvertTo(null, typeof(int)), "CCT#5");
+            Assert.True(_imgFmtConv.CanConvertTo(typeof(string)), "string (no context)");
+            Assert.True(_imgFmtConv.CanConvertTo(null, typeof(string)), "string");
+            Assert.False(_imgFmtConv.CanConvertTo(null, typeof(ImageFormat)), "ImageFormat");
+            Assert.False(_imgFmtConv.CanConvertTo(null, typeof(Guid)), "Guid");
+            Assert.False(_imgFmtConv.CanConvertTo(null, typeof(object)), "object");
+            Assert.False(_imgFmtConv.CanConvertTo(null, typeof(int)), "int");
 
-            Assert.True(_imgFmtConvFrmTD.CanConvertTo(typeof(string)), "CCT#1A");
-            Assert.True(_imgFmtConvFrmTD.CanConvertTo(null, typeof(string)), "CCT#1aA");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertTo(null, typeof(ImageFormat)), "CCT#2A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertTo(null, typeof(Guid)), "CCT#3A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertTo(null, typeof(object)), "CCT#4A");
-            Assert.True(!_imgFmtConvFrmTD.CanConvertTo(null, typeof(int)), "CCT#5A");
+            Assert.True(_imgFmtConvFrmTD.CanConvertTo(typeof(string)), "TD string (no context)");
+            Assert.True(_imgFmtConvFrmTD.CanConvertTo(null, typeof(string)), "TD string");
+            Assert.False(_imgFmtConvFrmTD.CanConvertTo(null, typeof(ImageFormat)), "TD ImageFormat");
+            Assert.False(_imgFmtConvFrmTD.CanConvertTo(null, typeof(Guid)), "TD Guid");
+            Assert.False(_imgFmtConvFrmTD.CanConvertTo(null, typeof(object)), "TD object");
+            Assert.False(_imgFmtConvFrmTD.CanConvertTo(null, typeof(int)), "TD int");
         }
 
         [Fact]
