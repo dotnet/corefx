@@ -123,12 +123,32 @@ namespace System.Diagnostics
                 {
                     lock (s_processWaitStates)
                     {
+                        DateTime exitTime = default;
                         // We are referencing an existing process.
                         // This may be a child process, so we check s_childProcessWaitStates too.
-                        if (!s_childProcessWaitStates.TryGetValue(processId, out pws) &&
-                            !s_processWaitStates.TryGetValue(processId, out pws))
+                        if (s_childProcessWaitStates.TryGetValue(processId, out pws))
                         {
-                            pws = new ProcessWaitState(processId, isChild: false);
+                            // child process
+                        }
+                        else if (s_processWaitStates.TryGetValue(processId, out pws))
+                        {
+                            // This is best effort for dealing with recycled pids for non-child processes.
+                            // As long as we haven't observed process exit, it's safe to share the ProcessWaitState.
+                            // Once we've observed the exit, we'll create a new ProcessWaitState just in case
+                            // this may be a recycled pid.
+                            // If it wasn't, that ProcessWaitState will observe too that the process has exited.
+                            // We pass the ExitTime so it can be the same, but we'll clear it when we see there
+                            // is a live process with that pid.
+                            if (pws.GetExited(out _, refresh: false))
+                            {
+                                s_processWaitStates.Remove(processId);
+                                exitTime = pws.ExitTime;
+                                pws = null;
+                            }
+                        }
+                        if (pws == null)
+                        {
+                            pws = new ProcessWaitState(processId, isChild: false, exitTime);
                             s_processWaitStates.Add(processId, pws);
                         }
                         pws._outstandingRefCount++;
@@ -199,11 +219,12 @@ namespace System.Diagnostics
 
         /// <summary>Initialize the wait state object.</summary>
         /// <param name="processId">The associated process' ID.</param>
-        private ProcessWaitState(int processId, bool isChild)
+        private ProcessWaitState(int processId, bool isChild, DateTime exitTime = default)
         {
             Debug.Assert(processId >= 0);
             _processId = processId;
             _isChild = isChild;
+            _exitTime = exitTime;
         }
 
         /// <summary>Releases managed resources used by the ProcessWaitState.</summary>
@@ -227,7 +248,10 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
 
             _exited = true;
-            _exitTime = DateTime.Now;
+            if (_exitTime == default)
+            {
+                _exitTime = DateTime.Now;
+            }
             _exitedEvent?.Set();
         }
 
@@ -322,6 +346,7 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
             if (!_isChild)
             {
+                bool exited;
                 // We won't be able to get an exit code, but we'll at least be able to determine if the process is
                 // still running.
                 int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
@@ -330,7 +355,7 @@ namespace System.Diagnostics
                     // Process is still running.  This could also be a defunct process that has completed
                     // its work but still has an entry in the processes table due to its parent not yet
                     // having waited on it to clean it up.
-                    return;
+                    exited = false;
                 }
                 else // error from kill
                 {
@@ -338,18 +363,27 @@ namespace System.Diagnostics
                     if (errno == Interop.Error.ESRCH)
                     {
                         // Couldn't find the process; assume it's exited
-                        SetExited();
-                        return;
+                        exited = true;
                     }
                     else if (errno == Interop.Error.EPERM)
                     {
                         // Don't have permissions to the process; assume it's alive
-                        return;
+                        exited = false;
                     }
-                    else Debug.Fail("Unexpected errno value from kill");
+                    else
+                    {
+                        Debug.Fail("Unexpected errno value from kill");
+                        exited = true;
+                    }
                 }
-
-                SetExited();
+                if (exited)
+                {
+                    SetExited();
+                }
+                else
+                {
+                    _exitTime = default;
+                }
             }
         }
 
