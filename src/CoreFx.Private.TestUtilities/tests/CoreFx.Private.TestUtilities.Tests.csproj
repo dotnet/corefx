@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssertExtensionTests.cs" />
+    <Compile Include="RemoteInvokeHandleTests.cs" />
     <Compile Include="TheoryExtensionTests.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

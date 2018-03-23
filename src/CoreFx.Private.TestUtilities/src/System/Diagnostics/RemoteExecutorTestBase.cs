@@ -186,15 +186,24 @@ namespace System.Diagnostics
         /// <summary>A cleanup handle to the Process created for the remote invocation.</summary>
         public sealed class RemoteInvokeHandle : IDisposable
         {
-            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options, string assemblyName = null, string className = null, string methodName = null)
+            private const int DefaultExitCode = 0;
+            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options, int exitCode, string assemblyName = null, string className = null, string methodName = null)
             {
                 Process = process;
                 Options = options;
+                if (!PlatformDetection.IsUap && exitCode != DefaultExitCode)
+                {
+                    throw new PlatformNotSupportedException(SR.PlatformNotSupported_ExitCode);
+                }
                 AssemblyName = assemblyName;
                 ClassName = className;
                 MethodName = methodName;
             }
 
+            public RemoteInvokeHandle(Process process, RemoteInvokeOptions option, string assemblyName = null, string className = null, string methodName = null)
+                : this(process, option, DefaultExitCode, assemblyName, className, methodName) { }
+            
+            public int ExitCode { get; private set; }
             public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
             public string AssemblyName { get; private set; }

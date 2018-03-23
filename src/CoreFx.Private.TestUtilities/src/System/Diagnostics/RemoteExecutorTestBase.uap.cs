@@ -68,9 +68,8 @@ namespace System.Diagnostics
                 int res = (int)response.Message["Results"];
                 Assert.True(!options.CheckExitCode || res == options.ExpectedExitCode, (string)response.Message["Log"] + Environment.NewLine + $"Returned Error code: {res}");
             }
-
             // RemoteInvokeHandle is not really needed in the UAP scenario but we use it just to have consistent interface as non UAP
-            return new RemoteInvokeHandle(null, options, null, null, null);
+            return new RemoteInvokeHandle(null, options, res, null, null, null);
         }
     }
 }

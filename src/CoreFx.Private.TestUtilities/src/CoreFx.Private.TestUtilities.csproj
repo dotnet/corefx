@@ -64,6 +64,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Process" />
     <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <Reference Include="System.Runtime.InteropServices" />
     <ReferenceFromRuntime Include="xunit.core" />
