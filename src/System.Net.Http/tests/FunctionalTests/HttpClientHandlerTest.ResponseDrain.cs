@@ -198,6 +198,7 @@ namespace System.Net.Http.Functional.Tests
 
         // Similar to above, these are semi-extreme cases where the response should never drain for any handler.
 
+        [ActiveIssue(28423)]
         [OuterLoop]
         [Theory]
         [InlineData(2000000, 0, ContentMode.ContentLength)]
