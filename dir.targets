@@ -38,6 +38,7 @@
       <PackageFileRefPath Condition="'$(IsNETCoreAppRef)' == 'true'">$(NETCoreAppPackageRefPath)</PackageFileRefPath>
       <PackageFileRuntimePath>$(NETCoreAppPackageRuntimePath)</PackageFileRuntimePath>
       <RuntimePath Condition="'$(BinPlaceNETCoreAppPackage)' == 'true'">$(NETCoreAppPackageRuntimePath)\..\runtime</RuntimePath>
+      <RefPath Condition="'$(BinPlaceNETCoreAppPackage)' == 'true' AND '$(IsNETCoreAppRef)' == 'true'">$(RefRootPath)microsoft.netcore.app</RefPath>
       <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
       <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
     </BinPlaceConfiguration>
@@ -74,6 +75,10 @@
     <!-- some libraries that produce packages will remain targeting netcoreapp2.0 -->
     <BinPlaceConfiguration Condition="'$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp2.0">
       <RefPath>$(RefRootPath)netcoreapp2.0/</RefPath>
+    </BinPlaceConfiguration>
+    <!-- some libraries that produce packages will remain targeting uap10.0.16299 -->
+    <BinPlaceConfiguration Condition="'$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true'" Include="uap10.0.16299">
+      <RefPath>$(RefRootPath)uap10.0.16299/</RefPath>
     </BinPlaceConfiguration>
     <!-- for BuildAllConfigurations make sure all refpaths are created.  -->
     <_TargetGroupsWithIsAot Condition="'$(BuildAllConfigurations)' == 'true'" Include="@(TargetGroups)">
@@ -122,7 +127,7 @@
 
     <PropertyGroup>
       <_GenAPICmd>$(DotnetToolCommand) $(_GenApiExePath)</_GenAPICmd>
-      <_GenAPICmd>$(_GenAPICmd) -assembly:$(TargetPath)</_GenAPICmd>
+      <_GenAPICmd>$(_GenAPICmd) -assembly:@(IntermediateAssembly)</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) -libPath:$(RefPath)</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) -out:$(_RefSourceFileOutputPath)</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) -excludeAttributesList:$(_ExcludeAPIList)</_GenAPICmd>

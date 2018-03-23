@@ -167,8 +167,8 @@
     <Compile Include="$(CommonPath)\System\Text\EncodingHelper.Windows.cs">
       <Link>Common\System\IO\EncodingHelper.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Unix -->
@@ -275,6 +275,7 @@
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
@@ -282,6 +283,7 @@
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="Microsoft.Win32.Primitives" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

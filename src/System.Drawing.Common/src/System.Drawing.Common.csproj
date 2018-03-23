@@ -6,11 +6,10 @@
     <ProjectGuid>{191B3618-FECD-4ABD-9D6B-5AC90DC33621}</ProjectGuid>
     <DefineConstants>$(DefineConstants);DRAWING_NAMESPACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- TODO: RE-ENABLE THIS -->
-    <EnablePInvokeAnalyzer>false</EnablePInvokeAnalyzer>
     <WarningsNotAsErrors>CS0618</WarningsNotAsErrors>
-    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS</DefineConstants>
+    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;FEATURE_SYSTEM_EVENTS</DefineConstants>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);CORECLR;NETCORE</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants);netcoreapp20</DefineConstants>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
@@ -36,10 +35,12 @@
     <Compile Include="System\Drawing\ColorTranslator.cs" />
     <Compile Include="System\Drawing\ContentAlignment.cs" />
     <Compile Include="System\Drawing\IDeviceContext.cs" />
-    <Compile Include="System\Drawing\Image.cs" />
     <Compile Include="System\Drawing\GdiplusNative.cs" />
     <Compile Include="System\Drawing\Graphics.cs" />
     <Compile Include="System\Drawing\GraphicsUnit.cs" />
+    <Compile Include="System\Drawing\Icon.NotSerializable.cs" />
+    <Compile Include="System\Drawing\Image.NotSerializable.cs" />
+    <Compile Include="System\Drawing\Image.cs" />
     <Compile Include="System\Drawing\ImageType.cs" />
     <Compile Include="System\Drawing\Pen.cs" />
     <Compile Include="System\Drawing\Pens.cs" />
@@ -51,7 +52,6 @@
     <Compile Include="System\Drawing\Printing\PrinterUnit.cs" />
     <Compile Include="System\Drawing\Printing\PreviewPageInfo.cs" />
     <Compile Include="System\Drawing\Printing\PrintEventHandler.cs" />
-    <Compile Include="System\Drawing\Printing\PrintingPermissionLevel.cs" />
     <Compile Include="System\Drawing\Printing\PrintAction.cs" />
     <Compile Include="System\Drawing\Printing\PrintPageEventHandler.cs" />
     <Compile Include="System\Drawing\Printing\QueryPageSettingsEventArgs.cs" />
@@ -133,7 +133,9 @@
     <Compile Include="System\Drawing\Internal\GPPOINTF.cs" />
     <Compile Include="System\Drawing\Internal\GPRECT.cs" />
     <Compile Include="System\Drawing\Internal\GPRECTF.cs" />
+    <Compile Include="System\Drawing\Internal\ISystemEventTracker.cs" />
     <Compile Include="System\Drawing\Brush.cs" />
+    <Compile Include="System\Drawing\Font.NotSerializable.cs" />
     <Compile Include="System\Drawing\FontFamily.cs" />
     <Compile Include="System\Drawing\SolidBrush.cs" />
     <Compile Include="System\Drawing\SystemBrushes.cs" />
@@ -212,14 +214,11 @@
     <Compile Include="System\Drawing\Drawing2D\CustomLineCap.Windows.cs" />
     <Compile Include="System\Drawing\Drawing2D\GraphicsPath.Windows.cs" />
     <Compile Include="System\Drawing\Font.Windows.cs" />
-    <Compile Include="System\Drawing\Font.NotSerializable.cs" />
     <Compile Include="System\Drawing\GdiplusNative.Windows.cs" />
     <Compile Include="System\Drawing\Graphics.Windows.cs" />
     <Compile Include="System\Drawing\GraphicsContext.cs" />
     <Compile Include="System\Drawing\Icon.Windows.cs" />
-    <Compile Include="System\Drawing\Icon.NotSerializable.cs" />
     <Compile Include="System\Drawing\Image.Windows.cs" />
-    <Compile Include="System\Drawing\Image.NotSerializable.cs" />
     <Compile Include="System\Drawing\ImageAnimator.Windows.cs" />
     <Compile Include="System\Drawing\ImageInfo.cs" />
     <Compile Include="System\Drawing\Imaging\BitmapData.Windows.cs" />
@@ -227,6 +226,7 @@
     <Compile Include="System\Drawing\Imaging\MetafileHeader.Windows.cs" />
     <Compile Include="System\Drawing\Imaging\MetaHeader.Windows.cs" />
     <Compile Include="System\Drawing\Internal\GPStream.cs" />
+    <Compile Include="System\Drawing\Internal\SystemColorTracker.cs" />
     <Compile Include="System\Drawing\LocalAppContextSwitches.cs" />
     <Compile Include="System\Drawing\Pen.Windows.cs" />
     <Compile Include="System\Drawing\Printing\DefaultPrintController.cs" />
@@ -293,7 +293,6 @@
     <!-- Unix-specific -->
     <Compile Include="System\Drawing\Graphics.Unix.cs" />
     <Compile Include="System\Drawing\Icon.Unix.cs" />
-    <Compile Include="System\Drawing\Icon.NotSerializable.cs" />
     <Compile Include="System\Drawing\SystemFonts.Unix.cs" />
     <Compile Include="System\Drawing\Imaging\BitmapData.Unix.cs" />
     <Compile Include="System\Drawing\Imaging\Metafile.Unix.cs" />
@@ -351,6 +350,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Condition="'$(TargetsWindows)' == 'true'" Include="Microsoft.Win32.SystemEvents" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Collections.Specialized" />

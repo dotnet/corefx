@@ -40,7 +40,7 @@ namespace System.Runtime.ExceptionServices.Tests
         [ActiveIssue("https://github.com/dotnet/corefx/issues/21123", TargetFrameworkMonikers.Uap)]
         public static void ProcessExit_Called()
         {
-            using (RemoteInvokeHandle handle = RemoteInvoke(() => { CauseAVInNative(); return SuccessExitCode; }))
+            using (RemoteInvokeHandle handle = RemoteInvoke(() => { CauseAVInNative(); return SuccessExitCode; }, new RemoteInvokeOptions { CheckExitCode = false }))
             {
                 Process p = handle.Process;
                 p.WaitForExit();

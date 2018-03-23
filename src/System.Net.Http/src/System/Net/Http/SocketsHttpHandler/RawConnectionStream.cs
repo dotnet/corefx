@@ -66,45 +66,7 @@ namespace System.Net.Http
             public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
             {
                 ValidateCopyToArgs(this, destination, bufferSize);
-                return
-                    cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) :
-                    _connection != null ? CopyToAsyncCore(destination, bufferSize, cancellationToken) :
-                    Task.CompletedTask; // null if response body fully consumed
-            }
 
-            private async Task CopyToAsyncCore(Stream destination, int bufferSize, CancellationToken cancellationToken)
-            {
-                Task copyTask = _connection.CopyToAsync(destination);
-                if (!copyTask.IsCompletedSuccessfully)
-                {
-                    CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
-                    try
-                    {
-                        await copyTask.ConfigureAwait(false);
-                    }
-                    catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
-                    {
-                        throw CreateOperationCanceledException(exc, cancellationToken);
-                    }
-                    finally
-                    {
-                        ctr.Dispose();
-                    }
-
-                    // If cancellation is requested and tears down the connection, it could cause the copy
-                    // to end early but think it ended successfully. So we prioritize cancellation in this
-                    // race condition, and if we find after the copy has completed that cancellation has
-                    // been requested, we assume the copy completed due to cancellation and throw.
-                    cancellationToken.ThrowIfCancellationRequested();
-                }
-
-                // We cannot reuse this connection, so close it.
-                _connection.Dispose();
-                _connection = null;
-            }
-
-            public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
-            {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return Task.FromCanceled(cancellationToken);
@@ -112,18 +74,73 @@ namespace System.Net.Http
 
                 if (_connection == null)
                 {
-                    return Task.FromException(new IOException(SR.net_http_io_write));
+                    // null if response body fully consumed
+                    return Task.CompletedTask;
+                }
+
+                Task copyTask = _connection.CopyToUntilEofAsync(destination, bufferSize, cancellationToken);
+                if (copyTask.IsCompletedSuccessfully)
+                {
+                    Finish();
+                    return Task.CompletedTask;
+                }
+
+                return CompleteCopyToAsync(copyTask, cancellationToken);
+            }
+
+            private async Task CompleteCopyToAsync(Task copyTask, CancellationToken cancellationToken)
+            {
+                CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
+                try
+                {
+                    await copyTask.ConfigureAwait(false);
+                }
+                catch (Exception exc) when (ShouldWrapInOperationCanceledException(exc, cancellationToken))
+                {
+                    throw CreateOperationCanceledException(exc, cancellationToken);
+                }
+                finally
+                {
+                    ctr.Dispose();
+                }
+
+                // If cancellation is requested and tears down the connection, it could cause the copy
+                // to end early but think it ended successfully. So we prioritize cancellation in this
+                // race condition, and if we find after the copy has completed that cancellation has
+                // been requested, we assume the copy completed due to cancellation and throw.
+                cancellationToken.ThrowIfCancellationRequested();
+
+                Finish();
+            }
+
+            private void Finish()
+            {
+                // We cannot reuse this connection, so close it.
+                _connection.Dispose();
+                _connection = null;
+            }
+
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return new ValueTask(Task.FromCanceled(cancellationToken));
+                }
+
+                if (_connection == null)
+                {
+                    return new ValueTask(Task.FromException(new IOException(SR.net_http_io_write)));
                 }
 
                 if (source.Length == 0)
                 {
-                    return Task.CompletedTask;
+                    return default;
                 }
 
-                Task writeTask = _connection.WriteWithoutBufferingAsync(source);
+                ValueTask writeTask = _connection.WriteWithoutBufferingAsync(source);
                 return writeTask.IsCompleted ?
                     writeTask :
-                    WaitWithConnectionCancellationAsync(writeTask, cancellationToken);
+                    new ValueTask(WaitWithConnectionCancellationAsync(writeTask, cancellationToken));
             }
 
             public override Task FlushAsync(CancellationToken cancellationToken)
@@ -138,13 +155,13 @@ namespace System.Net.Http
                     return Task.CompletedTask;
                 }
 
-                Task flushTask = _connection.FlushAsync();
+                ValueTask flushTask = _connection.FlushAsync();
                 return flushTask.IsCompleted ?
-                    flushTask :
+                    flushTask.AsTask() :
                     WaitWithConnectionCancellationAsync(flushTask, cancellationToken);
             }
 
-            private async Task WaitWithConnectionCancellationAsync(Task task, CancellationToken cancellationToken)
+            private async Task WaitWithConnectionCancellationAsync(ValueTask task, CancellationToken cancellationToken)
             {
                 CancellationTokenRegistration ctr = _connection.RegisterCancellation(cancellationToken);
                 try

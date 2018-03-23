@@ -31,7 +31,7 @@ namespace System.Net.WebSockets
             WebSocketHandle.CheckPlatformSupport();
 
             _state = (int)InternalState.Created;
-            _options = new ClientWebSocketOptions();
+            _options = new ClientWebSocketOptions() { Proxy = DefaultWebProxy.Instance };
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
@@ -165,7 +165,7 @@ namespace System.Net.WebSockets
             return _innerWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
         }
 
-        public override Task SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+        public override ValueTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
         {
             ThrowIfNotConnected();
             return _innerWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
@@ -235,6 +235,15 @@ namespace System.Net.WebSockets
             {
                 throw new InvalidOperationException(SR.net_WebSockets_NotConnected);
             }
+        }
+
+        /// <summary>Used as a sentinel to indicate that ClientWebSocket should use the system's default proxy.</summary>
+        internal sealed class DefaultWebProxy : IWebProxy
+        {
+            public static DefaultWebProxy Instance { get; } = new DefaultWebProxy();
+            public ICredentials Credentials { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+            public Uri GetProxy(Uri destination) => throw new NotSupportedException();
+            public bool IsBypassed(Uri host) => throw new NotSupportedException();
         }
     }
 }

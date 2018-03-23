@@ -19,6 +19,7 @@ namespace System.Net.Http
         private readonly SocketsHttpHandler _socketsHttpHandler;
         private readonly DiagnosticsHandler _diagnosticsHandler;
         private bool _useProxy;
+        private ClientCertificateOption _clientCertificateOptions;
 
         public HttpClientHandler() : this(UseSocketsHttpHandler) { }
 
@@ -28,6 +29,8 @@ namespace System.Net.Http
             {
                 _socketsHttpHandler = new SocketsHttpHandler();
                 _diagnosticsHandler = new DiagnosticsHandler(_socketsHttpHandler);
+                ClientCertificateOptions = ClientCertificateOption.Manual;
+
             }
             else
             {
@@ -188,10 +191,12 @@ namespace System.Net.Http
         {
             // WinHttpHandler doesn't have a separate UseDefaultCredentials property.  There
             // is just a ServerCredentials property.  So, we need to map the behavior.
+            // Do the same for SocketsHttpHandler.Credentials.
             //
             // This property only affect .ServerCredentials and not .DefaultProxyCredentials.
 
-            get => _winHttpHandler != null ? _winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials : false;
+            get => _winHttpHandler != null ? _winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials :
+                    _socketsHttpHandler.Credentials == CredentialCache.DefaultCredentials;
             set
             {
                 if (_winHttpHandler != null)
@@ -206,6 +211,21 @@ namespace System.Net.Http
                         {
                             // Only clear out the ServerCredentials property if it was a DefaultCredentials.
                             _winHttpHandler.ServerCredentials = null;
+                        }
+                    }
+                }
+                else
+                {
+                    if (value)
+                    {
+                        _socketsHttpHandler.Credentials = CredentialCache.DefaultCredentials;
+                    }
+                    else
+                    {
+                        if (_socketsHttpHandler.Credentials == CredentialCache.DefaultCredentials)
+                        {
+                            // Only clear out the Credentials property if it was a DefaultCredentials.
+                            _socketsHttpHandler.Credentials = null;
                         }
                     }
                 }
@@ -302,9 +322,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    return _socketsHttpHandler.SslOptions.LocalCertificateSelectionCallback != null ?
-                        ClientCertificateOption.Automatic :
-                        ClientCertificateOption.Manual;
+                    return _clientCertificateOptions;
                 }
             }
             set
@@ -319,11 +337,13 @@ namespace System.Net.Http
                     {
                         case ClientCertificateOption.Manual:
                             ThrowForModifiedManagedSslOptionsIfStarted();
-                            _socketsHttpHandler.SslOptions.LocalCertificateSelectionCallback = null;
+                            _clientCertificateOptions = value;
+                            _socketsHttpHandler.SslOptions.LocalCertificateSelectionCallback = (sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers) => CertificateHelper.GetEligibleClientCertificate(ClientCertificates);
                             break;
 
                         case ClientCertificateOption.Automatic:
                             ThrowForModifiedManagedSslOptionsIfStarted();
+                            _clientCertificateOptions = value;
                             _socketsHttpHandler.SslOptions.LocalCertificateSelectionCallback = (sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers) => CertificateHelper.GetEligibleClientCertificate();
                             break;
 

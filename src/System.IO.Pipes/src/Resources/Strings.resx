@@ -120,11 +120,17 @@
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non negative number is required.</value>
   </data>
+  <data name="ArgumentOutOfRange_NeedValidPipeAccessRights" xml:space="preserve">
+    <value>Invalid PipeAccessRights value.</value>
+  </data>
   <data name="Argument_InvalidOffLen" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
   <data name="Argument_NeedNonemptyPipeName" xml:space="preserve">
     <value>pipeName cannot be an empty string.</value>
+  </data>
+  <data name="Argument_NonContainerInvalidAnyFlag" xml:space="preserve">
+    <value>This flag may not be set on a pipe.</value>
   </data>
   <data name="Argument_EmptyServerName" xml:space="preserve">
     <value>serverName cannot be an empty string.  Use \\\".\\\" for current machine.</value>
@@ -201,6 +207,9 @@
   <data name="IO_FileExists_Name" xml:space="preserve">
     <value>The file '{0}' already exists.</value>
   </data>
+  <data name="IO_IO_PipeBroken" xml:space="preserve">
+    <value>Pipe is broken.</value>
+  </data>
   <data name="IO_OperationAborted" xml:space="preserve">
     <value>IO operation was aborted unexpectedly.</value>
   </data>
@@ -258,8 +267,8 @@
   <data name="PlatformNotSupported_RemotePipes" xml:space="preserve">
     <value>Access to remote named pipes is not supported on this platform.</value>
   </data>
-  <data name="PlatformNotSupproted_InvalidNameChars" xml:space="preserve">
-    <value>The name of a pipe on this platform must only include characters valid in file names.</value>
+  <data name="PlatformNotSupported_InvalidPipeNameChars" xml:space="preserve">
+    <value>The name of a pipe on this platform must be a valid file name or a valid absolute path to a file name.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
     <value>Cannot access a closed Stream.</value>
@@ -272,5 +281,11 @@
   </data>
   <data name="IO_PathTooLong_Path" xml:space="preserve">
     <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+  </data>
+  <data name="UnauthorizedAccess_NotOwnedByCurrentUser" xml:space="preserve">
+    <value>Could not connect to the pipe because it was not owned by the current user.</value>
+  </data>
+  <data name="UnauthorizedAccess_ClientIsNotCurrentUser" xml:space="preserve">
+    <value>Client connection (user id {0}) was refused because it was not owned by the current user (id {1}).</value>
   </data>
 </root>

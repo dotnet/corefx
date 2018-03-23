@@ -205,8 +205,10 @@ namespace System.Tests
         [InlineData((double)789, (double)-789, false)]
         [InlineData((double)789, (double)0, false)]
         [InlineData(double.NaN, double.NaN, true)]
+        [InlineData(double.NaN, -double.NaN, true)]
         [InlineData((double)789, (float)789, false)]
         [InlineData((double)789, "789", false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void Equals(double d1, object value, bool expected)
         {
             if (value is double d2)

@@ -35,7 +35,7 @@ namespace System.Net.WebSockets
 
         public virtual async ValueTask<ValueWebSocketReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
-            if (buffer.TryGetArray(out ArraySegment<byte> arraySegment))
+            if (MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> arraySegment))
             {
                 WebSocketReceiveResult r = await ReceiveAsync(arraySegment, cancellationToken).ConfigureAwait(false);
                 return new ValueWebSocketReceiveResult(r.Count, r.MessageType, r.EndOfMessage);
@@ -56,10 +56,10 @@ namespace System.Net.WebSockets
             }
         }
 
-        public virtual Task SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) =>
-            MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> arraySegment) ?
+        public virtual ValueTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) =>
+            new ValueTask(MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> arraySegment) ?
                 SendAsync(arraySegment, messageType, endOfMessage, cancellationToken) :
-                SendWithArrayPoolAsync(buffer, messageType, endOfMessage, cancellationToken);
+                SendWithArrayPoolAsync(buffer, messageType, endOfMessage, cancellationToken));
 
         private async Task SendWithArrayPoolAsync(
             ReadOnlyMemory<byte> buffer,

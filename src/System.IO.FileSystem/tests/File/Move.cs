@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -44,17 +45,26 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
-        public void PathWithIllegalCharacters(string invalidPath)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void PathWithIllegalCharacters_Desktop(string invalidPath)
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
 
-            // Under legacy normalization we kick \\?\ paths back as invalid with ArgumentException
-            // New style we don't prevalidate \\?\ at all
-            if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
-                Assert.Throws<IOException>(() => Move(testFile.FullName, invalidPath));
-            else
+            Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void PathWithIllegalCharacters_Core(string invalidPath)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            testFile.Create().Dispose();
+
+            if (invalidPath.Contains('\0'.ToString()))
                 Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+            else
+                Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, invalidPath));
         }
 
         [Fact]
@@ -225,23 +235,53 @@ namespace System.IO.Tests
 
         [Theory, MemberData(nameof(PathsWithInvalidColons))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Versions of netfx older than 4.6.2 throw an ArgumentException instead of NotSupportedException. Until all of our machines run netfx against the actual latest version, these will fail.")]
-        public void WindowsPathWithIllegalColons(string invalidPath)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsPathWithIllegalColons_Desktop(string invalidPath)
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
             testFile.Create().Dispose();
-            Assert.Throws<NotSupportedException>(() => Move(testFile.FullName, invalidPath));
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+            }
+            else
+            {
+                Assert.Throws<NotSupportedException>(() => Move(testFile.FullName, invalidPath));
+            }
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidColons))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsPathWithIllegalColons_Core(string invalidPath)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            testFile.Create().Dispose();
+            Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, testFile.DirectoryName + Path.DirectorySeparatorChar + invalidPath));
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Wild characters in path throw ArgumentException
-        public void WindowsWildCharacterPath()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsWildCharacterPath_Desktop()
         {
             Assert.Throws<ArgumentException>(() => Move("*", GetTestFilePath()));
             Assert.Throws<ArgumentException>(() => Move(GetTestFilePath(), "*"));
             Assert.Throws<ArgumentException>(() => Move(GetTestFilePath(), "Test*t"));
             Assert.Throws<ArgumentException>(() => Move(GetTestFilePath(), "*Test"));
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsWildCharacterPath_Core()
+        {
+            Assert.Throws<FileNotFoundException>(() => Move(Path.Combine(TestDirectory, "*"), GetTestFilePath()));
+            Assert.Throws<FileNotFoundException>(() => Move(GetTestFilePath(), Path.Combine(TestDirectory, "*")));
+            Assert.Throws<FileNotFoundException>(() => Move(GetTestFilePath(), Path.Combine(TestDirectory, "Test*t")));
+            Assert.Throws<FileNotFoundException>(() => Move(GetTestFilePath(), Path.Combine(TestDirectory, "*Test")));
+        }
+
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Wild characters in path are allowed
@@ -268,9 +308,29 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            MemberData(nameof(WhiteSpace))]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace in path throws ArgumentException
-        public void WindowsWhitespacePath(string whitespace)
+            MemberData(nameof(ControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlPath_Desktop(string whitespace)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            Assert.Throws<ArgumentException>(() => Move(testFile.FullName, whitespace));
+        }
+
+        [Theory,
+            MemberData(nameof(ControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsControlPath_Core(string whitespace)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, Path.Combine(TestDirectory, whitespace)));
+        }
+
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WindowsSimpleWhitespacePath(string whitespace)
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
             Assert.Throws<ArgumentException>(() => Move(testFile.FullName, whitespace));
@@ -289,6 +349,29 @@ namespace System.IO.Tests
 
         }
 
+        [Theory,
+            InlineData("", ":bar"),
+            InlineData("", ":bar:$DATA"),
+            InlineData("::$DATA", ":bar"),
+            InlineData("::$DATA", ":bar:$DATA")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsAlternateDataStreamMove(string defaultStream, string alternateStream)
+        {
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            string testFile = Path.Combine(testDirectory.FullName, GetTestFileName());
+            string testFileDefaultStream = testFile + defaultStream;
+            string testFileAlternateStream = testFile + alternateStream;
+
+            // Cannot move into an alternate stream
+            File.WriteAllText(testFileDefaultStream, "Foo");
+            Assert.Throws<IOException>(() => Move(testFileDefaultStream, testFileAlternateStream));
+
+            // Cannot move out of an alternate stream
+            File.WriteAllText(testFileAlternateStream, "Bar");
+            string testFile2 = Path.Combine(testDirectory.FullName, GetTestFileName());
+            Assert.Throws<IOException>(() => Move(testFileAlternateStream, testFile2));
+        }
         #endregion
     }
 }

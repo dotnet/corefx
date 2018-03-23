@@ -126,8 +126,14 @@
   <data name="Argument_InvalidValue" xml:space="preserve">
     <value>Value was invalid.</value>
   </data>
+  <data name="Cryptography_ArgECDHKeySizeMismatch" xml:space="preserve">
+    <value>The keys from both parties must be the same size to generate a secret agreement.</value>
+  </data>
   <data name="Cryptography_CSP_NoPrivateKey" xml:space="preserve">
     <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
+  </data>
+  <data name="Cryptography_Encryption_MessageTooLong" xml:space="preserve">
+    <value>The message exceeds the maximum allowable length for the chosen options ({0}).</value>
   </data>
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
@@ -168,11 +174,26 @@
   <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
     <value>Cannot open an invalid handle.</value>
   </data>
+  <data name="Cryptography_Padding_DecDataTooBig" xml:space="preserve">
+    <value>The data to be decrypted exceeds the maximum for this modulus of {0} bytes.</value>
+  </data>
+  <data name="Cryptography_TlsRequires64ByteSeed" xml:space="preserve">
+    <value>The TLS key derivation function requires a seed value of exactly 64 bytes.</value>
+  </data>
   <data name="Cryptography_UnknownHashAlgorithm" xml:space="preserve">
     <value>'{0}' is not a known hash algorithm.</value>
   </data>
   <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
     <value>The string contains a character not in the 7 bit ASCII character set.</value>
+  </data>
+  <data name="Cryptography_KeyTooSmall" xml:space="preserve">
+    <value>The key is too small for the requested operation.</value>
+  </data>
+  <data name="Cryptography_OAEP_Decryption_Failed" xml:space="preserve">
+    <value>Error occurred while decoding OAEP padding.</value>
+  </data>
+  <data name="Cryptography_SignHash_WrongSize" xml:space="preserve">
+    <value>The provided hash value is not the expected size for the specified hash algorithm.</value>
   </data>
   <data name="PlatformNotSupported_CryptographyOpenSSL" xml:space="preserve">
     <value>OpenSSL is not supported on this platform.</value>

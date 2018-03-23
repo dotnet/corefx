@@ -23,7 +23,7 @@ namespace System
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
     [DebuggerTypeProxy(typeof(SpanDebugView<>))]
-    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [DebuggerDisplay("{ToString(),raw}")]
     [NonVersionable]
     public readonly ref partial struct Span<T>
     {
@@ -162,11 +162,11 @@ namespace System
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                Span.ClearWithReferences(ref Unsafe.As<T, IntPtr>(ref _pointer.Value), (nuint)_length * (nuint)(Unsafe.SizeOf<T>() / sizeof(nuint)));
+                SpanHelpers.ClearWithReferences(ref Unsafe.As<T, IntPtr>(ref _pointer.Value), (nuint)_length * (nuint)(Unsafe.SizeOf<T>() / sizeof(nuint)));
             }
             else
             {
-                Span.ClearWithoutReferences(ref Unsafe.As<T, byte>(ref _pointer.Value), (nuint)_length * (nuint)Unsafe.SizeOf<T>());
+                SpanHelpers.ClearWithoutReferences(ref Unsafe.As<T, byte>(ref _pointer.Value), (nuint)_length * (nuint)Unsafe.SizeOf<T>());
             }
         }
 

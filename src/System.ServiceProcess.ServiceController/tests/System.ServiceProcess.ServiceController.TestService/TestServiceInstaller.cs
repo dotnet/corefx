@@ -4,7 +4,6 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Threading;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -113,7 +112,8 @@ namespace System.ServiceProcess.Tests
                     if (svc.Status != ServiceControllerStatus.Running)
                     {
                         svc.Start();
-                        svc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
+                        if (!ServiceName.StartsWith("PropagateExceptionFromOnStart"))
+                            svc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
                     }
                 }
             }
@@ -164,7 +164,13 @@ namespace System.ServiceProcess.Tests
                         return;
                     }
 
-                    svc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                    // var sw = Stopwatch.StartNew();
+                    svc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(120));
+                    // sw.Stop();
+                    // if (sw.Elapsed > TimeSpan.FromSeconds(30))
+                    // {
+                    //    Console.WriteLine($"Took unexpectedly long to stop a service: {sw.Elapsed.TotalSeconds}");
+                    // }
                 }
             }
         }
