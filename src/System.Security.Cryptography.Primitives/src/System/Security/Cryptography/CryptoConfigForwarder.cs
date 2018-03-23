@@ -8,24 +8,24 @@ namespace System.Security.Cryptography
 {
     internal static class CryptoConfigForwarder
     {
-        private static readonly Func<string, object> s_createFromName;
+        private static readonly Func<string, object> s_createFromName = BindCreateFromName();
 
-        static CryptoConfigForwarder()
+        private static Func<string, object> BindCreateFromName()
         {
             const string CryptoConfigTypeName =
                 "System.Security.Cryptography.CryptoConfig, System.Security.Cryptography.Algorithms";
 
             const string CreateFromNameMethodName = "CreateFromName";
 
-            Type t = Type.GetType(CryptoConfigTypeName, true);
+            Type t = Type.GetType(CryptoConfigTypeName, throwOnError: true);
             MethodInfo createFromName = t.GetMethod(CreateFromNameMethodName, new[] { typeof(string) });
 
             if (createFromName == null)
             {
-                throw new MissingMethodException(CryptoConfigTypeName, CreateFromNameMethodName);
+                throw new MissingMethodException(t.FullName, CreateFromNameMethodName);
             }
 
-            s_createFromName = (Func<string, object>)createFromName.CreateDelegate(typeof(Func<string, object>));
+            return (Func<string, object>)createFromName.CreateDelegate(typeof(Func<string, object>));
         }
 
         internal static object CreateFromName(string name) => s_createFromName(name);
