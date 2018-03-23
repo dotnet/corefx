@@ -489,7 +489,7 @@ namespace System.Security.AccessControl
                 FileSystemAccessRule fsrule = rules[i] as FileSystemAccessRule;
 
                 if ((fsrule != null) && (fsrule.FileSystemRights == rule.FileSystemRights)
-                    && (fsrule.IdentityReference.Translate(typeof(SecurityIdentifier)) == rule.IdentityReference.Translate(typeof(SecurityIdentifier)))
+                    && (fsrule.IdentityReference == rule.IdentityReference)
                     && (fsrule.AccessControlType == rule.AccessControlType))
                 {
                     return base.RemoveAccessRule(rule);
@@ -535,7 +535,7 @@ namespace System.Security.AccessControl
                 FileSystemAccessRule fsrule = rules[i] as FileSystemAccessRule;
 
                 if ((fsrule != null) && (fsrule.FileSystemRights == rule.FileSystemRights)
-                    && (fsrule.IdentityReference.Translate(typeof(SecurityIdentifier)) == rule.IdentityReference.Translate(typeof(SecurityIdentifier)))
+                    && (fsrule.IdentityReference == rule.IdentityReference)
                     && (fsrule.AccessControlType == rule.AccessControlType))
                 {
                     base.RemoveAccessRuleSpecific(rule);
