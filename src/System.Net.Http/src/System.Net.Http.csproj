@@ -43,6 +43,7 @@
     <Compile Include="System\Net\Http\DelegatingHandler.cs" />
     <Compile Include="System\Net\Http\FormUrlEncodedContent.cs" />
     <Compile Include="System\Net\Http\HttpClient.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.cs" />
     <Compile Include="System\Net\Http\HttpCompletionOption.cs" />
     <Compile Include="System\Net\Http\HttpContent.cs" />
     <Compile Include="System\Net\Http\HttpMessageHandler.cs" />
@@ -205,6 +206,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.Unix.cs" />
     <Compile Include="System\Net\Http\Unix\CurlHandler.cs" />
     <Compile Include="System\Net\Http\Unix\CurlHandler.EasyRequest.cs" />
@@ -405,6 +407,8 @@
     <Compile Include="uap\System\Net\cookieexception.cs" />
     <Compile Include="uap\System\Net\CookieHelper.cs" />
     <Compile Include="uap\System\Net\HttpHandlerToFilter.cs" />
+    <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
+    <Compile Include="uap\System\Net\HttpClientHandler.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
