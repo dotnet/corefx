@@ -9,6 +9,7 @@
     <BuildConfigurations>
       $(PackageConfigurations)
       uap-Windows_NT;
+      netcoreapp-Linux;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
