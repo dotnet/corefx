@@ -1,8 +1,0 @@
-Compat issues with assembly System.Memory:
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.AsBytes<T>(System.ReadOnlySpan<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.AsBytes<T>(System.Span<T>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.Read<T>(System.ReadOnlySpan<System.Byte>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.TryRead<T>(System.ReadOnlySpan<System.Byte>, T)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.TryWrite<T>(System.Span<System.Byte>, T)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.InteropServices.MemoryMarshal.Write<T>(System.Span<System.Byte>, T)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 6
