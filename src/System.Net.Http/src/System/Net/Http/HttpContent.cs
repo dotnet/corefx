@@ -731,10 +731,10 @@ namespace System.Net.Http
                 return base.WriteAsync(buffer, offset, count, cancellationToken);
             }
 
-            public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
             {
-                CheckSize(source.Length);
-                return base.WriteAsync(source, cancellationToken);
+                CheckSize(buffer.Length);
+                return base.WriteAsync(buffer, cancellationToken);
             }
 
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -748,22 +748,22 @@ namespace System.Net.Http
                 base.EndWrite(asyncResult);
             }
 
-            public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+            public override Task CopyToAsync(Stream buffer, int bufferSize, CancellationToken cancellationToken)
             {
                 ArraySegment<byte> buffer;
                 if (TryGetBuffer(out buffer))
                 {
-                    StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+                    StreamHelpers.ValidateCopyToArgs(this, buffer, bufferSize);
 
                     long pos = Position;
                     long length = Length;
                     Position = length;
 
                     long bytesToWrite = length - pos;
-                    return destination.WriteAsync(buffer.Array, (int)(buffer.Offset + pos), (int)bytesToWrite, cancellationToken);
+                    return buffer.WriteAsync(buffer.Array, (int)(buffer.Offset + pos), (int)bytesToWrite, cancellationToken);
                 }
 
-                return base.CopyToAsync(destination, bufferSize, cancellationToken);
+                return base.CopyToAsync(buffer, bufferSize, cancellationToken);
             }
 
             private void CheckSize(int countToAdd)
@@ -869,11 +869,11 @@ namespace System.Net.Http
                 _length += count;
             }
 
-            public override void Write(ReadOnlySpan<byte> source)
+            public override void Write(ReadOnlySpan<byte> buffer)
             {
-                EnsureCapacity(_length + source.Length);
-                source.CopyTo(new Span<byte>(_buffer, _length, source.Length));
-                _length += source.Length;
+                EnsureCapacity(_length + buffer.Length);
+                buffer.CopyTo(new Span<byte>(_buffer, _length, buffer.Length));
+                _length += buffer.Length;
             }
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -882,9 +882,9 @@ namespace System.Net.Http
                 return Task.CompletedTask;
             }
 
-            public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
             {
-                Write(source.Span);
+                Write(buffer.Span);
                 return default;
             }
 
