@@ -12,15 +12,14 @@ namespace System.Diagnostics
     // Overview
     // --------
     // We have a few constraints we're working under here:
-    // - waitpid is used on Unix to get the exit status (including exit code) of a child process, but the first call
-    //   to it after the child has completed will reap the child removing the chance of subsequent calls getting status.
+    // - waitid is used on Unix to get the exit status (including exit code) of a child process, but once a child
+    //   process is reaped, it is no longer possible to get the status.
     // - The Process design allows for multiple independent Process objects to be handed out, and each of those
     //   objects may be used concurrently with each other, even if they refer to the same underlying process.
     //   Same with ProcessWaitHandle objects.  This is based on the Windows design where anyone with a handle to the
     //   process can retrieve completion information about that process.
-    // - There is no good Unix equivalent to a process handle nor to being able to asynchronously be notified
-    //   of a process' exit (without more intrusive mechanisms like ptrace), which means such support
-    //   needs to be layered on top of waitpid.
+    // - There is no good Unix equivalent to asynchronously be notified of a non-child process' exit, which means such
+    //   support needs to be layered on top of kill.
     // 
     // As a result, we have the following scheme:
     // - We maintain a static/shared table that maps process ID to ProcessWaitState objects.
@@ -37,17 +36,10 @@ namespace System.Diagnostics
     //   the wait state object uses its own lock to protect the per-process state.  This includes
     //   caching exit / exit code / exit time information so that a Process object for a process that's already
     //   had waitpid called for it can get at its exit information.
-    //
-    // A negative ramification of this is that if a process exits, but there are outstanding wait handles 
-    // handed out (and rooted, so they can't be GC'd), and then a new process is created and the pid is recycled, 
-    // new calls to get that process's wait state will get the old process's wait state.  However, pid recycling
-    // will be a more general issue, since pids are the only identifier we have to a process, so if a Process
-    // object is created for a particular pid, then that process goes away and a new one comes in with the same pid,
-    // our Process object will silently switch to referring to the new pid.  Unix systems typically have a simple
-    // policy for pid recycling, which is that they start at a low value, increment up to a system maximum (e.g.
-    // 32768), and then wrap around and start reusing value that aren't currently in use.  On Linux, 
-    // proc/sys/kernel/pid_max defines the max pid value.  Given the conditions that would be required for this
-    // to happen, it's possible but unlikely.
+    // - When we detect a recycled pid, we remove that ProcessWaitState from the table and replace it with a new one
+    //   that represents the new process. For child processes we know a pid is recycled when we see the pid of a new
+    //   child is already in the table. For non-child processes, we assume that a pid may be recycled as soon as
+    //   we've observed it has exited.
 
     /// <summary>Exit information and waiting capabilities for a process.</summary>
     internal sealed class ProcessWaitState : IDisposable
