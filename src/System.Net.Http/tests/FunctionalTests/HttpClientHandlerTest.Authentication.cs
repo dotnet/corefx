@@ -132,6 +132,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static IEnumerable<object[]> Authentication_TestData()
         {
+            yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic realm=\"testrealm1\", basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic realm=\"testrealm1\", digest realm=\"testrealm1\", nonce=\"testnonce\"", true };
             yield return new object[] { "Basic, digest realm=\"testrealm1\", nonce=\"testnonce\"", true };
