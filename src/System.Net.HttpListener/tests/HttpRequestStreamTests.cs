@@ -19,8 +19,8 @@ namespace System.Net.Tests
         private HttpListenerFactory _factory;
         private HttpListener _listener;
         private GetContextHelper _helper;
-        private static int s_timeout = 60 * 1000;
-        readonly ITestOutputHelper _output;
+        private const int TimeoutMilliseconds = 60*1000;
+        private readonly ITestOutputHelper _output;
 
         public HttpRequestStreamTests(ITestOutputHelper output)
         {
@@ -37,14 +37,14 @@ namespace System.Net.Tests
         }
 
         // Try to read 'length' bytes from stream or fail after timeout.
-        private async Task<int> GetBytesAsync(Func<byte[], int, int, Task<int>> cb, byte[] array, int offset, int length)
+        private async Task<int> ReadLengthAsync(Stream stream, byte[] array, int offset, int length)
         {
             int remaining = length;
             int readLength;
 
             do
             {
-                readLength = await TaskTimeoutExtensions.TimeoutAfter(cb(array, offset, remaining), s_timeout);
+                readLength = await TaskTimeoutExtensions.TimeoutAfter(stream.ReadAsync(array, offset, remaining), TimeoutMilliseconds);
                 if (readLength <= 0)
                 {
                     break;
@@ -62,15 +62,15 @@ namespace System.Net.Tests
             return length - remaining;
         }
 
-        // Synchronous version of GetBytesAsync above.
-        private int GetBytes(Func<byte[], int, int, int> cb, byte[] array, int offset, int length)
+        // Synchronous version of ReadLengthAsync above.
+        private int ReadLength(Stream stream, byte[] array, int offset, int length)
         {
             int remaining = length;
             int readLength;
 
             do
             {
-                readLength = cb(array, offset, remaining);
+                readLength = stream.Read(array, offset, remaining);
                 if (readLength <= 0)
                 {
                     break;
@@ -116,7 +116,7 @@ namespace System.Net.Tests
                 }
 
                 byte[] buffer = new byte[expected.Length];
-                int bytesRead = await GetBytesAsync(context.Request.InputStream.ReadAsync, buffer, 0, expected.Length);
+                int bytesRead = await ReadLengthAsync(context.Request.InputStream, buffer, 0, expected.Length);
                 Assert.Equal(expected.Length, bytesRead);
                 Assert.Equal(expected, buffer);
 
@@ -163,7 +163,7 @@ namespace System.Net.Tests
 
                 // Add padding at beginning and end to test for correct offset/size handling
                 byte[] buffer = new byte[pad + expected.Length + pad];
-                int bytesRead = await GetBytesAsync(context.Request.InputStream.ReadAsync, buffer, pad, expected.Length);
+                int bytesRead = await ReadLengthAsync(context.Request.InputStream, buffer, pad, expected.Length);
                 Assert.Equal(expected.Length, bytesRead);
                 Assert.Equal(expected, buffer.Skip(pad).Take(bytesRead));
 
@@ -206,7 +206,7 @@ namespace System.Net.Tests
                 }
 
                 byte[] buffer = new byte[expected.Length];
-                int bytesRead = GetBytes(context.Request.InputStream.Read, buffer, 0, buffer.Length);
+                int bytesRead = ReadLength(context.Request.InputStream, buffer, 0, buffer.Length);
                 Assert.Equal(expected.Length, bytesRead);
                 Assert.Equal(expected, buffer);
 
@@ -319,7 +319,7 @@ namespace System.Net.Tests
                 HttpListenerContext context = await contextTask;
 
                 byte[] buffer = new byte[expected.Length + 5];
-                int bytesRead = await GetBytesAsync(context.Request.InputStream.ReadAsync, buffer, 0, buffer.Length);
+                int bytesRead = await ReadLengthAsync(context.Request.InputStream, buffer, 0, buffer.Length);
                 Assert.Equal(expected.Length, bytesRead);
                 Assert.Equal(expected.Concat(new byte[5]), buffer);
 
@@ -345,7 +345,7 @@ namespace System.Net.Tests
                 HttpListenerContext context = await contextTask;
 
                 byte[] buffer = new byte[expected.Length + 5];
-                int bytesRead = GetBytes(context.Request.InputStream.Read, buffer, 0, buffer.Length);
+                int bytesRead = ReadLength(context.Request.InputStream, buffer, 0, buffer.Length);
                 Assert.Equal(expected.Length, bytesRead);
                 Assert.Equal(expected.Concat(new byte[5]), buffer);
 
@@ -371,7 +371,7 @@ namespace System.Net.Tests
                 HttpListenerContext context = await contextTask;
 
                 byte[] buffer = new byte[expected.Length - 5];
-                int bytesRead = await GetBytesAsync(context.Request.InputStream.ReadAsync, buffer, 0, buffer.Length);
+                int bytesRead = await ReadLengthAsync(context.Request.InputStream, buffer, 0, buffer.Length);
                 Assert.Equal(buffer.Length, bytesRead);
 
                 context.Response.Close();
