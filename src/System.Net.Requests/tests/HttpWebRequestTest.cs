@@ -200,10 +200,8 @@ namespace System.Net.Tests
 
                 await server.AcceptConnectionAsync(async connection =>
                 {
-                    await connection.Reader.ReadLineAsync(); // Skip status line.
-                    Assert.Contains(host, await connection.Reader.ReadLineAsync());
-
-                    await connection.SendResponseAsync();
+                    List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                    Assert.Contains($"Host: {host}", headers);
                 });
 
                 using (var response = (HttpWebResponse) await getResponse)
