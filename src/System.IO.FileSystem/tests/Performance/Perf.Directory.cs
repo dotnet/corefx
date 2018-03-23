@@ -76,10 +76,14 @@ namespace System.IO.Tests
             {
                 var data = new TheoryData<int, int>();
                 data.Add(10, 100);
-                data.Add(100, 10);
 
-                if (PlatformDetection.IsWindows)
-                    data.Add(1000, 1);
+                // Length of the path can be atmost 260 characters on netfx.
+                if (PlatformDetection.IsNetCore)
+                {
+                    data.Add(100, 10);
+                    if (PlatformDetection.IsWindows && PlatformDetection.IsNetCore)
+                        data.Add(1000, 1);
+                }
 
                 return data;
             }
