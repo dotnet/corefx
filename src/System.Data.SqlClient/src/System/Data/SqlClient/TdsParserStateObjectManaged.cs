@@ -132,10 +132,6 @@ namespace System.Data.SqlClient.SNI
             {
                 throw ADP.ClosedConnectionError();
             }
-            if (isMarsOn)
-            {
-                IncrementPendingCallbacks();
-            }
             SNIPacket packet = null;
             error = SNIProxy.Singleton.ReadSyncOverAsync(handle, out packet, timeoutRemaining);
             return packet;
