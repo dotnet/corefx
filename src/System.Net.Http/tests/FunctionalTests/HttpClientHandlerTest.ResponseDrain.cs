@@ -198,7 +198,6 @@ namespace System.Net.Http.Functional.Tests
 
         // Similar to above, these are semi-extreme cases where the response should never drain for any handler.
 
-        [ActiveIssue(28423)]
         [OuterLoop]
         [Theory]
         [InlineData(2000000, 0, ContentMode.ContentLength)]
@@ -209,6 +208,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(4000000, 1000000, ContentMode.BytePerChunk)]
         public async Task GetAsyncWithMaxConnections_DisposeBeforeReadingToEnd_KillsConnection(int totalSize, int readSize, ContentMode mode)
         {
+            if (IsWinHttpHandler)
+            {
+                // [ActiveIssue(28424)]
+                return;
+            }
+
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
