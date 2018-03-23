@@ -1037,7 +1037,7 @@ namespace System.Net
             }
         }
 
-        internal IDictionaryEnumerator GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
             lock (SyncRoot)
             {

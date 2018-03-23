@@ -57,7 +57,7 @@ namespace System.ComponentModel
 
         protected Win32Exception(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            nativeErrorCode = info.GetInt32(nameof(NativeErrorCode));
+            NativeErrorCode = info.GetInt32(nameof(NativeErrorCode));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
