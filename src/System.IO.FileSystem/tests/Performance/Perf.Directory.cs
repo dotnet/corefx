@@ -60,10 +60,10 @@ namespace System.IO.Tests
 
         public string GetTestDeepFilePath(int depth)
         {
+            string directory = Path.DirectorySeparatorChar + "a";
             StringBuilder sb = new StringBuilder(depth*2);
             for (int i = 0; i < depth; i++)
             {
-                string directory = Path.DirectorySeparatorChar + "a";
                 sb.Append(directory);
             }
 
