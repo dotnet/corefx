@@ -339,7 +339,7 @@ namespace Microsoft.XmlSerializer.Generator
         private bool ArgumentMatch(string arg, string formal)
         {
             // Full name format, eg: --assembly
-            if (arg.Length <= 1 || arg[0] != '-' || arg[1] != '-' )
+            if (arg.Length < 3 || arg[0] != '-' || arg[1] != '-' )
             {
                 return false;
             }
@@ -350,7 +350,7 @@ namespace Microsoft.XmlSerializer.Generator
         public bool ShortNameArgumentMatch(string arg, string shortName)
         {
             // Short name format, eg: -a 
-            if (arg[0] != '-')
+            if (arg.Length < 2 || arg[0] != '-')
             {
                 return false;
             }
@@ -412,16 +412,16 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHelp()
         {
             Console.Out.WriteLine(SR.Format(SR.HelpDescription));
-            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name.Substring(7)));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name.Substring("dotnet-".Length)));
             Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "--assembly:", "-a:"));
-            Console.Out.WriteLine(SR.Format(SR.HelpType, "--type:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "-a", "--assembly"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "--type"));
             Console.Out.WriteLine(SR.Format(SR.HelpProxy, "--proxytypes"));
             Console.Out.WriteLine(SR.Format(SR.HelpForce, "--force"));
-            Console.Out.WriteLine(SR.Format(SR.HelpOut, "--out:", "-o:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "-o", "--out"));
 
             Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "--help", "-h"));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "-h", "--help"));
         }
 
         private static string FormatMessage(bool parsableerrors, bool warning, string message)
