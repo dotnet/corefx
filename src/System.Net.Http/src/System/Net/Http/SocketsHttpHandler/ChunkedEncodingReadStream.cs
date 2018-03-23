@@ -86,7 +86,7 @@ namespace System.Net.Http
                             _chunkBytesRemaining >= (ulong)_connection.ReadBufferSize)
                         {
                             // As an optimization, we skip going through the connection's read buffer if both
-                            // the remaining chunk data and the buffer buffer are both at least as large
+                            // the remaining chunk data and the buffer are both at least as large
                             // as the connection buffer.  That avoids an unnecessary copy while still reading
                             // the maximum amount we'd otherwise read at a time.
                             Debug.Assert(_connection.RemainingBuffer.Length == 0);
