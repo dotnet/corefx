@@ -54,10 +54,17 @@ namespace System.Drawing
             }
             else if (destinationType == typeof(byte[]))
             {
-                using (MemoryStream ms = new MemoryStream())
+                if (value == null)
                 {
-                    ((Image)value).Save(ms, ((Image)value).RawFormat);
-                    return ms.ToArray();
+                    return Array.Empty<byte>();
+                }
+                else
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        ((Image)value).Save(ms, ((Image)value).RawFormat);
+                        return ms.ToArray();
+                    }
                 }
             }
 
