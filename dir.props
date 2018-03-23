@@ -11,7 +11,7 @@
 
   <!-- Define vNext UAP Moniker -->
   <PropertyGroup>
-    <UAPvNextVersion>10.0.15138</UAPvNextVersion>
+    <UAPvNextVersion>10.0.16300</UAPvNextVersion>
     <UAPvNextTFMFull>UAP,Version=v$(UAPvNextVersion)</UAPvNextTFMFull>
     <UAPvNextTFM>uap$(UAPvNextVersion)</UAPvNextTFM>
   </PropertyGroup>
@@ -77,11 +77,11 @@
        -->
   <PropertyGroup>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
-      $(OverridePackageSource);
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
+      $(OverridePackageSource);
       $(RestoreSources)
     </RestoreSources>
   </PropertyGroup>
@@ -148,8 +148,8 @@
 
     <_packageRID/>
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</_packageRID>
+    <_packageRID Condition="$(TargetGroup.StartsWith('uap'))">win10-$(ArchGroup)</_packageRID>
+    <_packageRID Condition="$(TargetGroup.EndsWith('aot'))">win10-$(ArchGroup)-aot</_packageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(_packageRID)</PackageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(RuntimeOS)-$(ArchGroup)</PackageRID>
   </PropertyGroup>
@@ -229,6 +229,11 @@
     <LangVersion>latest</LangVersion> <!-- default to allowing all language features -->
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsReferenceAssembly)' == 'true'">
+    <!-- disable warnings about unused fields -->
+    <NoWarn>$(NoWarn);0169;0649</NoWarn>
   </PropertyGroup>
 
   <!-- Set up some common paths -->

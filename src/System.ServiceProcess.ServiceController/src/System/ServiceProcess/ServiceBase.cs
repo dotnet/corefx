@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
@@ -29,12 +30,14 @@ namespace System.ServiceProcess
         private ServiceMainCallback _mainCallback;
         private IntPtr _handleName;
         private ManualResetEvent _startCompletedSignal;
+        private ExceptionDispatchInfo _startFailedException;
         private int _acceptedCommands;
         private string _serviceName;
         private bool _nameFrozen;          // set to true once we've started running and ServiceName can't be changed any more.
         private bool _commandPropsFrozen;  // set to true once we've use the Can... properties.
         private bool _disposed;
         private bool _initialized;
+        private EventLog _eventLog;
 
         /// <devdoc>
         ///    <para>
@@ -50,6 +53,7 @@ namespace System.ServiceProcess
         {
             _acceptedCommands = AcceptOptions.ACCEPT_STOP;
             ServiceName = "";
+            AutoLog = true;
         }
 
         /// <devdoc>
@@ -74,6 +78,12 @@ namespace System.ServiceProcess
                 SetServiceStatus(_statusHandle, pStatus);
             }
         }
+
+        /// <devdoc>
+        /// Indicates whether to report Start, Stop, Pause, and Continue commands in the event
+        /// </devdoc>
+        [DefaultValue(true)]
+        public bool AutoLog { get; set; }
 
         /// <devdoc>
         /// The termination code for the service.  Set this to a non-zero value before
@@ -222,6 +232,24 @@ namespace System.ServiceProcess
                 {
                     _acceptedCommands &= ~AcceptOptions.ACCEPT_STOP;
                 }
+            }
+        }
+
+        /// <devdoc>
+        /// can be used to write notification of service command calls, such as Start and Stop, to the Application event log. This property is read-only.
+        /// </devdoc>
+        [Browsable (false), DesignerSerializationVisibility (DesignerSerializationVisibility.Hidden)]
+        public virtual EventLog EventLog 
+        {
+            get 
+            {
+                if (_eventLog == null)
+                {
+                    _eventLog = new EventLog("Application");
+                    _eventLog.Source = ServiceName;
+                }
+
+                return _eventLog;
             }
         }
 
@@ -594,7 +622,21 @@ namespace System.ServiceProcess
 
             // While the service is running, this function will never return. It will return when the service
             // is stopped.
+            // After it returns, SCM might terminate the process at any time
+            // (so subsequent code is not guaranteed to run).
             bool res = StartServiceCtrlDispatcher(entriesPointer);
+
+            foreach (ServiceBase service in services)
+            {
+                if (service._startFailedException != null)
+                {
+                    // Propagate exceptions throw during OnStart.
+                    // Note that this same exception is also thrown from ServiceMainCallback
+                    // (so SCM can see it as well).
+                    service._startFailedException.Throw();
+                }
+            }
+
             string errorMessage = "";
 
             if (!res)
@@ -804,6 +846,12 @@ namespace System.ServiceProcess
             {
                 WriteLogEntry(SR.Format(SR.StartFailed, e.ToString()), true);
                 _status.currentState = ServiceControlStatus.STATE_STOPPED;
+
+                // We capture the exception so that it can be propagated
+                // from ServiceBase.Run.
+                // We also use the presence of this exception to inform SCM
+                // that the service failed to start successfully.
+                _startFailedException = ExceptionDispatchInfo.Capture(e);
             }
             _startCompletedSignal.Set();
         }
@@ -875,8 +923,20 @@ namespace System.ServiceProcess
                 // since NT will terminate this thread right after this function
                 // finishes.
                 _startCompletedSignal = new ManualResetEvent(false);
+                _startFailedException = null;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(this.ServiceQueuedMainCallback), args);
                 _startCompletedSignal.WaitOne();
+
+                if (_startFailedException != null)
+                {
+                    // Inform SCM that the service could not be started successfully.
+                    // (Unless the service has already provided another failure exit code)
+                    if (_status.win32ExitCode == 0)
+                    {
+                        _status.win32ExitCode = ServiceControlStatus.ERROR_EXCEPTION_IN_SERVICE;
+                    }
+                }
+
                 statusOK = SetServiceStatus(_statusHandle, pStatus);
                 if (!statusOK)
                 {
@@ -889,10 +949,18 @@ namespace System.ServiceProcess
 
         private void WriteLogEntry(string message, bool error = false)
         {
-            // Used to write to EventLog but for now just logging to debug output stream
-            // might want to plumb other logging in the future.
-
-            Debug.WriteLine((error ? "Error: " : "") + message);
+            // EventLog failures shouldn't affect the service operation
+            try 
+            {
+                if (AutoLog)
+                {
+                    EventLog.WriteEntry(message); 
+                }
+            }
+            catch  
+            {
+                // Do nothing.  Not having the event log is bad, but not starting the service as a result is worse.
+            }        
         }
     }
 }

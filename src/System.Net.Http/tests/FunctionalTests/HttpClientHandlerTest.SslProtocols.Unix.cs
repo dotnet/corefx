@@ -14,20 +14,14 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientHandler_SslProtocols_Test
+    public abstract partial class HttpClientHandler_SslProtocols_Test
     {
         private bool BackendSupportsSslConfiguration =>
-            UseManagedHandler ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
+            UseSocketsHttpHandler ||
+            (Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) ?? false);
 
         private bool SSLv3DisabledByDefault =>
             BackendSupportsSslConfiguration ||
-            Version.Parse(CurlVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetVersionDescription")]
-        private static extern string CurlVersionDescription();
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
+            Version.Parse(Interop.Http.GetVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
     }
 }

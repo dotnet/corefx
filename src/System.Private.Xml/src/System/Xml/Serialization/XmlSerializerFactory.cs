@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     using System.Reflection;
     using System.Collections;
@@ -25,11 +21,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlSerializerFactory
-#else
     public class XmlSerializerFactory
-#endif
     {
         private static TempAssemblyCache s_cache = new TempAssemblyCache();
 
@@ -48,7 +40,7 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public XmlSerializer CreateSerializer(Type type, XmlRootAttribute root)
         {
-            return CreateSerializer(type, null, new Type[0], root, null, null);
+            return CreateSerializer(type, null, Array.Empty<Type>(), root, null, null);
         }
 
         /// <include file='doc\XmlSerializerFactory.uex' path='docs/doc[@for="XmlSerializerFactory.CreateSerializer3"]/*' />
@@ -66,7 +58,7 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public XmlSerializer CreateSerializer(Type type, XmlAttributeOverrides overrides)
         {
-            return CreateSerializer(type, overrides, new Type[0], null, null, null);
+            return CreateSerializer(type, overrides, Array.Empty<Type>(), null, null, null);
         }
 
         /// <include file='doc\XmlSerializerFactory.uex' path='docs/doc[@for="XmlSerializerFactory.CreateSerializer5"]/*' />

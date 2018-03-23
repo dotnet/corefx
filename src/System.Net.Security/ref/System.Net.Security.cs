@@ -124,11 +124,13 @@ namespace System.Net.Security
     }
     public readonly partial struct SslApplicationProtocol : IEquatable<SslApplicationProtocol>
     {
+        private readonly object _dummy;
+
         public static readonly SslApplicationProtocol Http2;
         public static readonly SslApplicationProtocol Http11;
 
-        public SslApplicationProtocol(byte[] protocol) { }
-        public SslApplicationProtocol(string protocol) { }
+        public SslApplicationProtocol(byte[] protocol) { throw null; }
+        public SslApplicationProtocol(string protocol) { throw null; }
 
         public ReadOnlyMemory<byte> Protocol { get { throw null; } }
 
@@ -184,7 +186,7 @@ namespace System.Net.Security
         public virtual System.Threading.Tasks.Task AuthenticateAsServerAsync(System.Security.Cryptography.X509Certificates.X509Certificate serverCertificate) { throw null; }
         public virtual System.Threading.Tasks.Task AuthenticateAsServerAsync(System.Security.Cryptography.X509Certificates.X509Certificate serverCertificate, bool clientCertificateRequired, System.Security.Authentication.SslProtocols enabledSslProtocols, bool checkCertificateRevocation) { throw null; }
         public virtual System.Threading.Tasks.Task AuthenticateAsServerAsync(System.Security.Cryptography.X509Certificates.X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation) { throw null; }
-        public Task AuthenticateAsServerAsync(SslServerAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken) { throw null; }
+        public Task AuthenticateAsServerAsync(SslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken) { throw null; }
         public virtual System.IAsyncResult BeginAuthenticateAsClient(string targetHost, System.AsyncCallback asyncCallback, object asyncState) { throw null; }
         public virtual System.IAsyncResult BeginAuthenticateAsClient(string targetHost, System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates, System.Security.Authentication.SslProtocols enabledSslProtocols, bool checkCertificateRevocation, System.AsyncCallback asyncCallback, object asyncState) { throw null; }
         public virtual System.IAsyncResult BeginAuthenticateAsClient(string targetHost, System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates, bool checkCertificateRevocation, System.AsyncCallback asyncCallback, object asyncState) { throw null; }

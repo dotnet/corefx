@@ -5,7 +5,6 @@
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +20,7 @@ namespace System.IO.Pipes
         private bool _canRead;
         private bool _canWrite;
         private bool _isAsync;
+        private bool _isCurrentUserOnly;
         private bool _isMessageComplete;
         private bool _isFromExistingHandle;
         private bool _isHandleExposed;
@@ -278,7 +278,7 @@ namespace System.IO.Pipes
             return WriteAsyncCore(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken);
         }
 
-        public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!_isAsync)
             {
@@ -292,17 +292,17 @@ namespace System.IO.Pipes
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<int>(cancellationToken);
+                return new ValueTask(Task.FromCanceled<int>(cancellationToken));
             }
 
             CheckWriteOperations();
 
             if (source.Length == 0)
             {
-                return Task.CompletedTask;
+                return default;
             }
 
-            return WriteAsyncCore(source, cancellationToken);
+            return new ValueTask(WriteAsyncCore(source, cancellationToken));
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -497,7 +497,6 @@ namespace System.IO.Pipes
 
         public override bool CanRead
         {
-            [Pure]
             get
             {
                 return _canRead;
@@ -506,7 +505,6 @@ namespace System.IO.Pipes
 
         public override bool CanWrite
         {
-            [Pure]
             get
             {
                 return _canWrite;
@@ -515,7 +513,6 @@ namespace System.IO.Pipes
 
         public override bool CanSeek
         {
-            [Pure]
             get
             {
                 return false;
@@ -632,6 +629,18 @@ namespace System.IO.Pipes
             set
             {
                 _state = value;
+            }
+        }
+
+        internal bool IsCurrentUserOnly
+        {
+            get
+            {
+                return _isCurrentUserOnly;
+            }
+            set
+            {
+                _isCurrentUserOnly = value;
             }
         }
     }

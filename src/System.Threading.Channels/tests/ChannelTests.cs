@@ -50,9 +50,6 @@ namespace System.Threading.Channels.Tests
             Assert.NotNull(Channel.CreateBounded<int>(1));
             Assert.NotNull(Channel.CreateBounded<int>(new BoundedChannelOptions(1)));
 
-            Assert.NotNull(Channel.CreateUnbuffered<int>());
-            Assert.NotNull(Channel.CreateUnbuffered<int>(new UnbufferedChannelOptions()));
-
             Assert.NotNull(Channel.CreateUnbounded<int>());
             Assert.NotNull(Channel.CreateUnbounded<int>(new UnboundedChannelOptions()));
         }
@@ -61,7 +58,6 @@ namespace System.Threading.Channels.Tests
         public void Create_NullOptions_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentNullException>("options", () => Channel.CreateUnbounded<int>(null));
-            AssertExtensions.Throws<ArgumentNullException>("options", () => Channel.CreateUnbuffered<int>(null));
             AssertExtensions.Throws<ArgumentNullException>("options", () => Channel.CreateBounded<int>(null));
         }
 
@@ -96,7 +92,7 @@ namespace System.Threading.Channels.Tests
         {
             var c = new TestChannelWriter<int>(10);
             Assert.False(c.TryComplete());
-            Assert.Equal(TaskStatus.Canceled, c.WriteAsync(42, new CancellationToken(true)).Status);
+            Assert.Equal(TaskStatus.Canceled, c.WriteAsync(42, new CancellationToken(true)).AsTask().Status);
 
             int count = 0;
             try
@@ -121,9 +117,9 @@ namespace System.Threading.Channels.Tests
         public async Task DefaultWriteAsync_CatchesTryWriteExceptions()
         {
             var w = new TryWriteThrowingWriter<int>();
-            Task t = w.WriteAsync(42);
-            Assert.Equal(TaskStatus.Faulted, t.Status);
-            await Assert.ThrowsAsync<FormatException>(() => t);
+            ValueTask t = w.WriteAsync(42);
+            Assert.True(t.IsFaulted);
+            await Assert.ThrowsAsync<FormatException>(async () => await t);
         }
 
         [Fact]
@@ -133,6 +129,72 @@ namespace System.Threading.Channels.Tests
             Task<int> t = r.ReadAsync().AsTask();
             Assert.Equal(TaskStatus.Faulted, t.Status);
             await Assert.ThrowsAsync<FieldAccessException>(() => t);
+        }
+
+        [Fact]
+        public async void TestBaseClassReadAsync()
+        {
+            WrapperChannel<int> channel = new WrapperChannel<int>(10);
+            ChannelReader<int> reader = channel.Reader;
+            ChannelWriter<int> writer = channel.Writer;
+
+            // 1- do it through synchronous TryRead()
+            writer.TryWrite(50);
+            Assert.Equal(50, await reader.ReadAsync());
+
+            // 2- do it through async
+            ValueTask<int> readTask = reader.ReadAsync();
+            writer.TryWrite(100);
+            Assert.Equal(100, await readTask);
+
+            // 3- use cancellation token
+            CancellationToken ct = new CancellationToken(true); // cancelled token
+            await Assert.ThrowsAsync<TaskCanceledException>(() => reader.ReadAsync(ct).AsTask());
+
+            // 4- throw during reading
+            readTask = reader.ReadAsync();
+            ((WrapperChannelReader<int>)reader).ForceThrowing = true;
+            writer.TryWrite(200);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => readTask.AsTask());
+
+            // 5- close the channel while waiting reading
+            ((WrapperChannelReader<int>)reader).ForceThrowing = false;
+            Assert.Equal(200, await reader.ReadAsync());
+            readTask = reader.ReadAsync();
+            channel.Writer.TryComplete();
+            await Assert.ThrowsAsync<ChannelClosedException>(() => readTask.AsTask());
+        }
+
+        // This reader doesn't override ReadAsync to force using the base class ReadAsync method
+        private sealed class WrapperChannelReader<T> : ChannelReader<T>
+        {
+            private ChannelReader<T> _reader;
+            internal bool ForceThrowing { get; set; }
+
+            public WrapperChannelReader(Channel<T> channel) {_reader = channel.Reader; }
+
+            public override bool TryRead(out T item)
+            {
+                if (ForceThrowing)
+                    throw new InvalidOperationException();
+
+                return _reader.TryRead(out item);
+            }
+
+            public override ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken)
+            {
+                return _reader.WaitToReadAsync(cancellationToken);
+            }
+        }
+
+        public class WrapperChannel<T> : Channel<T>
+        {
+            public WrapperChannel(int capacity)
+            {
+                Channel<T> channel = Channel.CreateBounded<T>(capacity);
+                Writer = channel.Writer;
+                Reader = new WrapperChannelReader<T>(channel);
+            }
         }
 
         private sealed class TestChannelWriter<T> : ChannelWriter<T>
@@ -145,10 +207,10 @@ namespace System.Threading.Channels.Tests
 
             public override bool TryWrite(T item) => _rand.Next(0, 2) == 0 && _count++ < _max; // succeed if we're under our limit, and add random failures
 
-            public override Task<bool> WaitToWriteAsync(CancellationToken cancellationToken) =>
-                _count >= _max ? Task.FromResult(false) :
-                _rand.Next(0, 2) == 0 ? Task.Delay(1).ContinueWith(_ => true) : // randomly introduce delays
-                Task.FromResult(true);
+            public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken) =>
+                _count >= _max ? new ValueTask<bool>(Task.FromResult(false)) :
+                _rand.Next(0, 2) == 0 ? new ValueTask<bool>(Task.Delay(1).ContinueWith(_ => true)) : // randomly introduce delays
+                new ValueTask<bool>(Task.FromResult(true));
         }
 
         private sealed class TestChannelReader<T> : ChannelReader<T>
@@ -184,22 +246,22 @@ namespace System.Threading.Channels.Tests
                 return true;
             }
 
-            public override Task<bool> WaitToReadAsync(CancellationToken cancellationToken) =>
+            public override ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken) => new ValueTask<bool>(
                 _closed ? Task.FromResult(false) :
                 _rand.Next(0, 2) == 0 ? Task.Delay(1).ContinueWith(_ => true) : // randomly introduce delays
-                Task.FromResult(true);
+                Task.FromResult(true));
         }
 
         private sealed class TryWriteThrowingWriter<T> : ChannelWriter<T>
         {
             public override bool TryWrite(T item) => throw new FormatException();
-            public override Task<bool> WaitToWriteAsync(CancellationToken cancellationToken = default) => throw new InvalidDataException();
+            public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default) => throw new InvalidDataException();
         }
 
         private sealed class TryReadThrowingReader<T> : ChannelReader<T>
         {
             public override bool TryRead(out T item) => throw new FieldAccessException();
-            public override Task<bool> WaitToReadAsync(CancellationToken cancellationToken = default) => throw new DriveNotFoundException();
+            public override ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default) => throw new DriveNotFoundException();
         }
 
         private sealed class CanReadFalseStream : MemoryStream

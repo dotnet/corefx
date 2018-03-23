@@ -9,12 +9,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(VERSION_FILE_PATH "${CMAKE_BINARY_DIR}/../../version.c")
 
-add_compile_options(-Weverything)
 add_compile_options(-Wno-format-nonliteral)
 add_compile_options(-Wno-missing-prototypes)
 add_compile_options(-Wno-disabled-macro-expansion)
 add_compile_options(-Wno-c++98-compat)
-add_compile_options(-Wno-c++98-compat-pedantic)
 add_compile_options(-Wno-padded)
 add_compile_options(-Wno-empty-translation-unit)
 add_compile_options(-Wno-old-style-cast)
@@ -23,12 +21,11 @@ add_compile_options(-Wno-typedef-redefinition)
 add_compile_options(-Wno-unused-local-typedef)
 add_compile_options(-Wno-c99-extensions)
 add_compile_options(-Wno-c11-extensions)
-add_compile_options(-Werror)
 add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-g)
-
+add_compile_options(-Werror)
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
     add_compile_options(-Wno-unreachable-code)
 endif ()
@@ -151,6 +148,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL SunOS)
     set(CLR_CMAKE_PLATFORM_UNIX 1)
 endif(CMAKE_SYSTEM_NAME STREQUAL SunOS)
 
+# CLR_ADDITIONAL_LINKER_FLAGS - used for passing additional arguments to linker
+# CLR_ADDITIONAL_COMPILER_OPTIONS - used for passing additional arguments to compiler
+#
+# For example:
+#       ./build-native.sh cmakeargs -DCLR_ADDITIONAL_COMPILER_OPTIONS=<...> cmakeargs -DCLR_ADDITIONAL_LINKER_FLAGS=<...>
+#
+if(CLR_CMAKE_PLATFORM_UNIX)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CLR_ADDITIONAL_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CLR_ADDITIONAL_LINKER_FLAGS}" )
+    add_compile_options(${CLR_ADDITIONAL_COMPILER_OPTIONS})
+endif(CLR_CMAKE_PLATFORM_UNIX)
+
 if (NOT WIN32)
     if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
         # Ensure that dsymutil and strip are present
@@ -247,6 +256,13 @@ endfunction()
 include(configure.cmake)
 
 add_subdirectory(System.IO.Compression.Native)
+
+add_compile_options(-Weverything)
+add_compile_options(-Wno-c++98-compat-pedantic)
+if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
+    add_compile_options(-Wno-zero-as-null-pointer-constant)
+endif()
+
 add_subdirectory(System.Native)
 add_subdirectory(System.Net.Http.Native)
 add_subdirectory(System.Net.Security.Native)

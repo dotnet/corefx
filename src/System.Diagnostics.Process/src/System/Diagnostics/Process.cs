@@ -3,11 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Threading;
 
@@ -66,6 +65,8 @@ namespace System.Diagnostics
         private bool _disposed;
 
         private static object s_createProcessLock = new object();
+
+        private bool _standardInputAccessed;
 
         private StreamReadMode _outputStreamReadMode;
         private StreamReadMode _errorStreamReadMode;
@@ -691,6 +692,7 @@ namespace System.Diagnostics
                     throw new InvalidOperationException(SR.CantGetStandardIn);
                 }
 
+                _standardInputAccessed = true;
                 return _standardInput;
             }
         }
@@ -846,18 +848,45 @@ namespace System.Diagnostics
                 _machineName = ".";
                 _raisedOnExited = false;
 
-                //Don't call close on the Readers and writers
-                //since they might be referenced by somebody else while the 
-                //process is still alive but this method called.
-                _standardOutput = null;
-                _standardInput = null;
-                _standardError = null;
+                // Only call close on the streams if the user cannot have a reference on them.
+                // If they are referenced it is the user's responsibility to dispose of them.
+                try 
+                {
+                    if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
+                    {
+                        if (_outputStreamReadMode == StreamReadMode.AsyncMode)
+                        {
+                            _output.CancelOperation();
+                        }
+                        _standardOutput.Close();
+                    }
 
-                _output = null;
-                _error = null;
+                    if (_standardError != null && (_errorStreamReadMode == StreamReadMode.AsyncMode || _errorStreamReadMode == StreamReadMode.Undefined))
+                    {
+                        if (_errorStreamReadMode == StreamReadMode.AsyncMode)
+                        {
+                            _error.CancelOperation();
+                        }
+                        _standardError.Close();
+                    }
 
-                CloseCore();
-                Refresh();
+                    if (_standardInput != null && !_standardInputAccessed)
+                    {
+                        _standardInput.Close();
+                    }
+                }
+                finally 
+                {
+                    _standardOutput = null;
+                    _standardInput = null;
+                    _standardError = null;
+
+                    _output = null;
+                    _error = null;
+
+                    CloseCore();
+                    Refresh();
+                }
             }
         }
 
@@ -1156,6 +1185,10 @@ namespace System.Diagnostics
             {
                 throw new InvalidOperationException(SR.FileNameMissing);
             }
+            if (startInfo.StandardInputEncoding != null && !startInfo.RedirectStandardInput)
+            {
+                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
+            }
             if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
             {
                 throw new InvalidOperationException(SR.StandardOutputEncodingNotAllowed);
@@ -1163,6 +1196,10 @@ namespace System.Diagnostics
             if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
             {
                 throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
+            }
+            if (!string.IsNullOrEmpty(startInfo.Arguments) && startInfo.ArgumentList.Count > 0)
+            {
+                throw new InvalidOperationException(SR.ArgumentAndArgumentListInitialized);
             }
 
             //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            
@@ -1430,6 +1467,17 @@ namespace System.Diagnostics
             {
                 DataReceivedEventArgs e = new DataReceivedEventArgs(data);
                 errorDataReceived(this, e); // Call back to user informing data is available.
+            }
+        }
+
+        private static void AppendArguments(StringBuilder stringBuilder, Collection<string> argumentList)
+        {
+            if (argumentList.Count > 0)
+            {
+                foreach (string argument in argumentList)
+                {
+                    PasteArguments.AppendArgument(stringBuilder, argument);
+                }
             }
         }
 

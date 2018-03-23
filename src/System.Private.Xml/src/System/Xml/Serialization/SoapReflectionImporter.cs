@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     using System.Reflection;
     using System;
@@ -23,11 +19,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class SoapReflectionImporter
-#else
     public class SoapReflectionImporter
-#endif
     {
         private TypeScope _typeScope;
         private SoapAttributeOverrides _attributeOverrides;
@@ -274,7 +266,7 @@ namespace System.Xml.Serialization
             StructMapping mapping = new StructMapping();
             mapping.IsSoap = true;
             mapping.TypeDesc = typeDesc;
-            mapping.Members = new MemberMapping[0];
+            mapping.Members = Array.Empty<MemberMapping>();
             mapping.IncludeInSchema = false;
             mapping.TypeName = Soap.UrType;
             mapping.Namespace = XmlSchema.Namespace;
@@ -747,7 +739,7 @@ namespace System.Xml.Serialization
                 attribute.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(accessorType), (a.SoapAttribute == null ? String.Empty : a.SoapAttribute.DataType), limiter);
                 attribute.Default = GetDefaultValue(model.FieldTypeDesc, a);
                 accessor.Attribute = attribute;
-                accessor.Elements = new ElementAccessor[0];
+                accessor.Elements = Array.Empty<ElementAccessor>();
             }
             else
             {

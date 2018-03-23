@@ -14,21 +14,12 @@ namespace System.Net
     [EventSource(Name = "Microsoft-System-Net-Security", LocalizationResources = "FxResources.System.Net.Security.SR")]
     internal sealed partial class NetEventSource
     {
-        private const int EnumerateSecurityPackagesId = NextAvailableEventId;
-        private const int SspiPackageNotFoundId = EnumerateSecurityPackagesId + 1;
-        private const int AcquireDefaultCredentialId = SspiPackageNotFoundId + 1;
-        private const int AcquireCredentialsHandleId = AcquireDefaultCredentialId + 1;
-        private const int SecureChannelCtorId = AcquireCredentialsHandleId + 1;
+        private const int SecureChannelCtorId = NextAvailableEventId;
         private const int LocatingPrivateKeyId = SecureChannelCtorId + 1;
         private const int CertIsType2Id = LocatingPrivateKeyId + 1;
         private const int FoundCertInStoreId = CertIsType2Id + 1;
         private const int NotFoundCertInStoreId = FoundCertInStoreId + 1;
-        private const int InitializeSecurityContextId = NotFoundCertInStoreId + 1;
-        private const int SecurityContextInputBufferId = InitializeSecurityContextId + 1;
-        private const int SecurityContextInputBuffersId = SecurityContextInputBufferId + 1;
-        private const int AcceptSecuritContextId = SecurityContextInputBuffersId + 1;
-        private const int OperationReturnedSomethingId = AcceptSecuritContextId + 1;
-        private const int RemoteCertificateId = OperationReturnedSomethingId + 1;
+        private const int RemoteCertificateId = NotFoundCertInStoreId + 1;
         private const int CertificateFromDelegateId = RemoteCertificateId + 1;
         private const int NoDelegateNoClientCertId = CertificateFromDelegateId + 1;
         private const int NoDelegateButClientCertId = NoDelegateNoClientCertId + 1;
@@ -343,29 +334,46 @@ namespace System.Net
                     const int NumEventDatas = 8;
                     var descrs = stackalloc EventData[NumEventDatas];
 
-                    descrs[0].DataPointer = (IntPtr)(arg1Ptr);
-                    descrs[0].Size = (arg1.Length + 1) * sizeof(char);
-
-                    descrs[1].DataPointer = (IntPtr)(&arg2);
-                    descrs[1].Size = sizeof(int);
-
-                    descrs[2].DataPointer = (IntPtr)(&arg3);
-                    descrs[2].Size = sizeof(int);
-
-                    descrs[3].DataPointer = (IntPtr)(&arg4);
-                    descrs[3].Size = sizeof(int);
-
-                    descrs[4].DataPointer = (IntPtr)(&arg5);
-                    descrs[4].Size = sizeof(int);
-
-                    descrs[5].DataPointer = (IntPtr)(&arg6);
-                    descrs[5].Size = sizeof(int);
-
-                    descrs[6].DataPointer = (IntPtr)(&arg7);
-                    descrs[6].Size = sizeof(int);
-
-                    descrs[7].DataPointer = (IntPtr)(&arg8);
-                    descrs[7].Size = sizeof(int);
+                    descrs[0] = new EventData
+                    {
+                        DataPointer = (IntPtr)(arg1Ptr),
+                        Size = (arg1.Length + 1) * sizeof(char)
+                    };
+                    descrs[1] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg2),
+                        Size = sizeof(int)
+                    };
+                    descrs[2] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg3),
+                        Size = sizeof(int)
+                    };
+                    descrs[3] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg4),
+                        Size = sizeof(int)
+                    };
+                    descrs[4] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg5),
+                        Size = sizeof(int)
+                    };
+                    descrs[5] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg6),
+                        Size = sizeof(int)
+                    };
+                    descrs[6] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg7),
+                        Size = sizeof(int)
+                    };
+                    descrs[7] = new EventData
+                    {
+                        DataPointer = (IntPtr)(&arg8),
+                        Size = sizeof(int)
+                    };
 
                     WriteEventCore(eventId, NumEventDatas, descrs);
                 }

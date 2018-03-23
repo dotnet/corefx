@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
@@ -36,7 +38,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(stringIntRange, "2");
             yield return new TestCase(stringIntRange, 3);
             yield return new TestCase(stringIntRange, "3");
-            
+
             RangeAttribute stringDoubleRange = new RangeAttribute(typeof(double), (1.0).ToString("F1"), (3.0).ToString("F1"));
             yield return new TestCase(stringDoubleRange, null);
             yield return new TestCase(stringDoubleRange, string.Empty);
@@ -85,14 +87,675 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(stringDoubleRange, new IConvertibleImplementor() { DoubleThrow = new NotSupportedException() });
         }
 
+        public static IEnumerable<object[]> DotDecimalRanges()
+        {
+            yield return new object[] {typeof(decimal), "1.0", "3.0"};
+            yield return new object[] {typeof(double), "1.0", "3.0"};
+        }
+
+        public static IEnumerable<object[]> CommaDecimalRanges()
+        {
+            yield return new object[] { typeof(decimal), "1,0", "3,0" };
+            yield return new object[] { typeof(double), "1,0", "3,0" };
+        }
+
+        public static IEnumerable<object[]> DotDecimalValidValues()
+        {
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "1.0" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "3.0" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "2.9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "2.9999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "1.0" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "3.0" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "2.9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "2.99999999999999" };
+        }
+
+        public static IEnumerable<object[]> CommaDecimalValidValues()
+        {
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "1,0" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "3,0" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "2,9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "2,9999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "1,0" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "3,0" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "2,99999999999999" };
+        }
+
+        public static IEnumerable<object[]> DotDecimalInvalidValues()
+        {
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "9.0" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "0.1" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "3.9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", "3.9999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "9.0" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "0.1" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "3.9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1.0", "3.0", "3.99999999999999" };
+        }
+
+        public static IEnumerable<object[]> CommaDecimalInvalidValues()
+        {
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "9,0" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "0,1" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "3,9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", "3,9999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "9,0" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "0,1" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "3,9999999999999999999999999999999999999999999" };
+            yield return new object[] { typeof(double), "1,0", "3,0", "3,99999999999999" };
+        }
+
+        public static IEnumerable<object[]> DotDecimalNonStringValidValues()
+        {
+            yield return new object[] { typeof(decimal), "1.0", "3.0", 1.0m };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", 3.0m };
+            yield return new object[] { typeof(decimal), "1.0", "3.0", 2.9999999999999999999999999999m };
+            yield return new object[] { typeof(double), "1.0", "3.0", 1.0 };
+            yield return new object[] { typeof(double), "1.0", "3.0", 3.0 };
+            yield return new object[] { typeof(double), "1.0", "3.0", 2.99999999999999 };
+        }
+
+        public static IEnumerable<object[]> CommaDecimalNonStringValidValues()
+        {
+            yield return new object[] { typeof(decimal), "1,0", "3,0", 1.0m };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", 3.0m };
+            yield return new object[] { typeof(decimal), "1,0", "3,0", 2.9999999999999999999999999999m };
+            yield return new object[] { typeof(double), "1,0", "3,0", 1.0 };
+            yield return new object[] { typeof(double), "1,0", "3,0", 3.0 };
+            yield return new object[] { typeof(double), "1,0", "3,0", 2.99999999999999 };
+        }
+
+        private class TempCulture : IDisposable
+        {
+            private CultureInfo _original;
+
+            public TempCulture(string culture)
+            {
+                Thread currentThread = Thread.CurrentThread;
+                _original = currentThread.CurrentCulture;
+                currentThread.CurrentCulture = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
+            }
+
+            public void Dispose()
+            {
+                Thread.CurrentThread.CurrentCulture = _original;
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void ParseDotSeparatorExtremaInCommaSeparatorCultures(Type type, string min, string max)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(null));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void ParseDotSeparatorInvariantExtremaInCommaSeparatorCultures(Type type, string min, string max)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(null));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(null));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void ParseCommaSeparatorExtremaInCommaSeparatorCultures(Type type, string min, string max)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(null));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void ParseCommaSeparatorInvariantExtremaInCommaSeparatorCultures(Type type, string min, string max)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(null));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndValues(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndValuesInvariantParse(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndValuesInvariantConvert(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndValuesInvariantBoth(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndNonStringValues(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndNonStringValuesInvariantParse(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndNonStringValuesInvariantConvert(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndNonStringValuesInvariantBoth(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndNonStringValues(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndNonStringValuesInvariantParse(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndNonStringValuesInvariantConvert(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true
+                    }.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndNonStringValuesInvariantBoth(Type type, string min, string max, object value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndInvalidValues(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.False(new RangeAttribute(type, min, max).IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndInvalidValuesInvariantParse(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.False(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndInvalidValuesInvariantConvert(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.False(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void DotDecimalExtremaAndInvalidValuesInvariantBoth(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                Assert.False(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.False(
+                    new RangeAttribute(type, min, max)
+                    {
+                        ConvertValueInInvariantCulture = true,
+                        ParseLimitsInInvariantCulture = true
+                    }.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndValues(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.True(new RangeAttribute(type, min, max).IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndValuesInvariantParse(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndValuesInvariantConvert(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndValuesInvariantBoth(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndInvalidValues(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max);
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                Assert.False(new RangeAttribute(type, min, max).IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndInvalidValuesInvariantParse(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndInvalidValuesInvariantConvert(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
+        public static void CommaDecimalExtremaAndInvalidValuesInvariantBoth(Type type, string min, string max, string value)
+        {
+            using (new TempCulture("en-US"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+
+            using (new TempCulture("fr-FR"))
+            {
+                RangeAttribute range = new RangeAttribute(type, min, max)
+                {
+                    ConvertValueInInvariantCulture = true,
+                    ParseLimitsInInvariantCulture = true
+                };
+                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+            }
+        }
+
         [Theory]
         [InlineData(typeof(int), "1", "3")]
         [InlineData(typeof(double), "1", "3")]
         public static void Validate_CantConvertValueToTargetType_ThrowsException(Type type, string minimum, string maximum)
         {
             var attribute = new RangeAttribute(type, minimum, maximum);
-            Assert.Throws<Exception>(() => attribute.Validate("abc", new ValidationContext(new object())));
-            Assert.Throws<Exception>(() => attribute.IsValid("abc"));
+            AssertExtensions.Throws<ArgumentException, Exception>(() => attribute.Validate("abc", new ValidationContext(new object())));
+            AssertExtensions.Throws<ArgumentException, Exception>(() => attribute.IsValid("abc"));
         }
 
         [Fact]
@@ -168,7 +831,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         public static void Validate_MinimumOrMaximumCantBeConvertedToIntegralType_ThrowsException(Type type, string minimum, string maximum)
         {
             RangeAttribute attribute = new RangeAttribute(type, minimum, maximum);
-            Assert.Throws<Exception>(() => attribute.Validate("Any", new ValidationContext(new object())));
+            AssertExtensions.Throws<ArgumentException, Exception>(() => attribute.Validate("Any", new ValidationContext(new object())));
         }
 
         [Theory]

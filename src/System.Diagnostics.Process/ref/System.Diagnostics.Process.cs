@@ -158,6 +158,7 @@ namespace System.Diagnostics
         public ProcessStartInfo(string fileName) { }
         public ProcessStartInfo(string fileName, string arguments) { }
         public string Arguments { get { throw null; } set { } }
+        public System.Collections.ObjectModel.Collection<string> ArgumentList { get { throw null; } }
         public bool CreateNoWindow { get { throw null; } set { } }
         public string Domain { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute(null)]
@@ -170,6 +171,7 @@ namespace System.Diagnostics
         public bool RedirectStandardInput { get { throw null; } set { } }
         public bool RedirectStandardOutput { get { throw null; } set { } }
         public System.Text.Encoding StandardErrorEncoding { get { throw null; } set { } }
+        public System.Text.Encoding StandardInputEncoding { get { throw null; } set { } }
         public System.Text.Encoding StandardOutputEncoding { get { throw null; } set { } }
         public string UserName { get { throw null; } set { } }
         public bool UseShellExecute { get { throw null; } set { } }

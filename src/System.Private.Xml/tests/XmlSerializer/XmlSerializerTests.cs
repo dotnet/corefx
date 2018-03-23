@@ -477,15 +477,15 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void XML_TypeWithXmlSchemaFormAttribute()
     {
         var value = new TypeWithXmlSchemaFormAttribute() { NoneSchemaFormListProperty = new List<string> { "abc" }, QualifiedSchemaFormListProperty = new List<bool> { true }, UnqualifiedSchemaFormListProperty = new List<int> { 1 } };
-        var acutal = SerializeAndDeserialize<TypeWithXmlSchemaFormAttribute>(value,
+        var actual = SerializeAndDeserialize<TypeWithXmlSchemaFormAttribute>(value,
 @"<?xml version=""1.0""?><TypeWithXmlSchemaFormAttribute xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><UnqualifiedSchemaFormListProperty><int>1</int></UnqualifiedSchemaFormListProperty><NoneSchemaFormListProperty><NoneParameter>abc</NoneParameter></NoneSchemaFormListProperty><QualifiedSchemaFormListProperty><QualifiedParameter>true</QualifiedParameter></QualifiedSchemaFormListProperty></TypeWithXmlSchemaFormAttribute>");
 
-        Assert.StrictEqual(value.NoneSchemaFormListProperty.Count, acutal.NoneSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.NoneSchemaFormListProperty[0], acutal.NoneSchemaFormListProperty[0]);
-        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty.Count, acutal.UnqualifiedSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty[0], acutal.UnqualifiedSchemaFormListProperty[0]);
-        Assert.StrictEqual(value.QualifiedSchemaFormListProperty.Count, acutal.QualifiedSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.QualifiedSchemaFormListProperty[0], acutal.QualifiedSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.NoneSchemaFormListProperty.Count, actual.NoneSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.NoneSchemaFormListProperty[0], actual.NoneSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty.Count, actual.UnqualifiedSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty[0], actual.UnqualifiedSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.QualifiedSchemaFormListProperty.Count, actual.QualifiedSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.QualifiedSchemaFormListProperty[0], actual.QualifiedSchemaFormListProperty[0]);
     }
 
     [Fact]
@@ -1611,6 +1611,15 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
+    {
+        var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?><RootElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" IntValue=""120"" />");
+        Assert.StrictEqual(value.IntValue, actual.IntValue);
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";

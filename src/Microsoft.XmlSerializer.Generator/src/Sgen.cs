@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Xml.Serialization;
 
 namespace Microsoft.XmlSerializer.Generator
 {
@@ -231,23 +232,37 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 Type type = types[i];
 
-                if (type != null)
+                try
                 {
-                    bool isObsolete = false;
-                    object[] obsoleteAttributes = type.GetCustomAttributes(typeof(ObsoleteAttribute), false);
-                    foreach (object attribute in obsoleteAttributes)
+                    if (type != null)
                     {
-                        if (((ObsoleteAttribute)attribute).IsError)
+                        bool isObsolete = false;
+                        object[] obsoleteAttributes = type.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+                        foreach (object attribute in obsoleteAttributes)
                         {
-                            isObsolete = true;
-                            break;
+                            if (((ObsoleteAttribute)attribute).IsError)
+                            {
+                                isObsolete = true;
+                                break;
+                            }
+                        }
+
+                        if (isObsolete)
+                        {
+                            continue;
                         }
                     }
-
-                    if (isObsolete)
+                }
+                //Ignore the FileNotFoundException when call GetCustomAttributes e.g. if the type uses the attributes defined in a different assembly
+                catch (FileNotFoundException e)
+                {
+                    if (warnings)
                     {
-                        continue;
+                        Console.Out.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.InfoIgnoreType, type.FullName)));
+                        WriteWarning(e, parsableerrors);
                     }
+
+                    continue;
                 }
 
                 if (!proxyOnly)
@@ -263,7 +278,7 @@ namespace Microsoft.XmlSerializer.Generator
 
                 bool gac = assembly.GlobalAssemblyCache;
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
-                string serializerName = XmlSerializer.GetXmlSerializerAssemblyName(serializableTypes[0], null);
+                string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
 
                 if (!force)
@@ -294,7 +309,15 @@ namespace Microsoft.XmlSerializer.Generator
 
                     using (FileStream fs = File.Create(codePath))
                     {
-                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
+                        MethodInfo method = typeof(System.Xml.Serialization.XmlSerializer).GetMethod("GenerateSerializer", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                        if (method == null)
+                        {
+                            Console.Error.WriteLine(FormatMessage(parsableerrors: false, warning: false, message: SR.GenerateSerializerNotFound));
+                        }
+                        else
+                        { 
+                            success = (bool)method.Invoke(null, new object[] { serializableTypes, allMappings, fs });
+                        }
                     }
                 }
                 catch (UnauthorizedAccessException)
@@ -366,22 +389,6 @@ namespace Microsoft.XmlSerializer.Generator
             }
             if (xmlTypeMapping != null)
             {
-                if (xmlTypeMapping.Mapping != null && xmlTypeMapping.Mapping is StructMapping)
-                {
-                    foreach (MemberMapping memberMapping in ((StructMapping)xmlTypeMapping.Mapping).Members)
-                    {
-                        MemberInfo memberInfo = memberMapping.MemberInfo;
-                        if (memberInfo != null && memberInfo.MemberType == MemberTypes.Property)
-                        {
-                            PropertyInfo propertyInfo = memberInfo as PropertyInfo;
-                            if (propertyInfo != null && (propertyInfo.SetMethod == null || !propertyInfo.SetMethod.IsPublic))
-                            {
-                                return;
-                            }
-                        }
-                    }
-                }
-
                 xmlTypeMapping = importer.ImportTypeMapping(type);
                 mappings.Add(xmlTypeMapping);
                 importedTypes.Add(type);
@@ -454,6 +461,25 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 WriteWarning(e.InnerException, parsableerrors);
             }
+        }
+
+        private static string GetXmlSerializerAssemblyName(Type type)
+        {
+            return GetXmlSerializerAssemblyName(type, null);
+        }
+
+        private static string GetXmlSerializerAssemblyName(Type type, string defaultNamespace)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            return GetTempAssemblyName(type.Assembly.GetName(), defaultNamespace);
+        }
+
+        private static string GetTempAssemblyName(AssemblyName parent, string ns)
+        {
+            return parent.Name + ".XmlSerializers" + (ns == null || ns.Length == 0 ? "" : "." + ns.GetHashCode());
         }
     }
 }

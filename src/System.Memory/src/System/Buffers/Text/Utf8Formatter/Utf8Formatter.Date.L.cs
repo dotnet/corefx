@@ -2,13 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-#if !netstandard
-using Internal.Runtime.CompilerServices;
-#endif
-
 namespace System.Buffers.Text
 {
     public static partial class Utf8Formatter
@@ -19,49 +12,54 @@ namespace System.Buffers.Text
         //   -----------------------------
         //   tue, 03 jan 2017 08:08:05 gmt
         //
-        private static bool TryFormatDateTimeL(DateTime value, Span<byte> buffer, out int bytesWritten)
+        private static bool TryFormatDateTimeL(DateTime value, Span<byte> destination, out int bytesWritten)
         {
-            bytesWritten = 29;
-            if (buffer.Length < bytesWritten)
+            // Writing the check in this fashion elides all bounds checks on 'buffer'
+            // for the remainder of the method.
+            if ((uint)28 >= (uint)destination.Length)
             {
                 bytesWritten = 0;
                 return false;
             }
 
-            ref byte utf8Bytes = ref MemoryMarshal.GetReference(buffer);
+            var dayAbbrev = DayAbbreviationsLowercase[(int)value.DayOfWeek];
 
-            byte[] dayAbbrev = DayAbbreviationsLowercase[(int)value.DayOfWeek];
-            Unsafe.Add(ref utf8Bytes, 0) = dayAbbrev[0];
-            Unsafe.Add(ref utf8Bytes, 1) = dayAbbrev[1];
-            Unsafe.Add(ref utf8Bytes, 2) = dayAbbrev[2];
-            Unsafe.Add(ref utf8Bytes, 3) = Utf8Constants.Comma;
-            Unsafe.Add(ref utf8Bytes, 4) = Utf8Constants.Space;
+            destination[0] = (byte)dayAbbrev;
+            dayAbbrev >>= 8;
+            destination[1] = (byte)dayAbbrev;
+            dayAbbrev >>= 8;
+            destination[2] = (byte)dayAbbrev;
+            destination[3] = Utf8Constants.Comma;
+            destination[4] = Utf8Constants.Space;
 
-            FormattingHelpers.WriteDigits(value.Day, 2, ref utf8Bytes, 5);
-            Unsafe.Add(ref utf8Bytes, 7) = (byte)' ';
+            FormattingHelpers.WriteTwoDecimalDigits((uint)value.Day, destination, 5);
+            destination[7] = Utf8Constants.Space;
 
-            byte[] monthAbbrev = MonthAbbreviationsLowercase[value.Month - 1];
-            Unsafe.Add(ref utf8Bytes, 8) = monthAbbrev[0];
-            Unsafe.Add(ref utf8Bytes, 9) = monthAbbrev[1];
-            Unsafe.Add(ref utf8Bytes, 10) = monthAbbrev[2];
-            Unsafe.Add(ref utf8Bytes, 11) = Utf8Constants.Space;
+            var monthAbbrev = MonthAbbreviationsLowercase[value.Month - 1];
+            destination[8] = (byte)monthAbbrev;
+            monthAbbrev >>= 8;
+            destination[9] = (byte)monthAbbrev;
+            monthAbbrev >>= 8;
+            destination[10] = (byte)monthAbbrev;
+            destination[11] = Utf8Constants.Space;
 
-            FormattingHelpers.WriteDigits(value.Year, 4, ref utf8Bytes, 12);
-            Unsafe.Add(ref utf8Bytes, 16) = Utf8Constants.Space;
+            FormattingHelpers.WriteFourDecimalDigits((uint)value.Year, destination, 12);
+            destination[16] = Utf8Constants.Space;
 
-            FormattingHelpers.WriteDigits(value.Hour, 2, ref utf8Bytes, 17);
-            Unsafe.Add(ref utf8Bytes, 19) = Utf8Constants.Colon;
+            FormattingHelpers.WriteTwoDecimalDigits((uint)value.Hour, destination, 17);
+            destination[19] = Utf8Constants.Colon;
 
-            FormattingHelpers.WriteDigits(value.Minute, 2, ref utf8Bytes, 20);
-            Unsafe.Add(ref utf8Bytes, 22) = Utf8Constants.Colon;
+            FormattingHelpers.WriteTwoDecimalDigits((uint)value.Minute, destination, 20);
+            destination[22] = Utf8Constants.Colon;
 
-            FormattingHelpers.WriteDigits(value.Second, 2, ref utf8Bytes, 23);
-            Unsafe.Add(ref utf8Bytes, 25) = Utf8Constants.Space;
+            FormattingHelpers.WriteTwoDecimalDigits((uint)value.Second, destination, 23);
+            destination[25] = Utf8Constants.Space;
 
-            Unsafe.Add(ref utf8Bytes, 26) = GMT1Lowercase;
-            Unsafe.Add(ref utf8Bytes, 27) = GMT2Lowercase;
-            Unsafe.Add(ref utf8Bytes, 28) = GMT3Lowercase;
+            destination[26] = GMT1Lowercase;
+            destination[27] = GMT2Lowercase;
+            destination[28] = GMT3Lowercase;
 
+            bytesWritten = 29;
             return true;
         }
     }

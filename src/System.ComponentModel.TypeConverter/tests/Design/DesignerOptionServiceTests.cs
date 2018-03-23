@@ -4,12 +4,14 @@
 
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Xunit;
 
 namespace System.ComponentModel.Design.Tests
 {
-    public class DesignerOptionServiceTests
+    public class DesignerOptionServiceTests : RemoteExecutorTestBase
     {
         [Fact]
         public void CreateOptionCollection_CreateMultipleTimes_ReturnsExpected()
@@ -180,13 +182,14 @@ namespace System.ComponentModel.Design.Tests
         }
 
         [Fact]
-        public void Properties_GetBeforeAddingChild_ReturnsEmpty()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Properties_GetBeforeAddingChild_ReturnsNonEmpty()
         {
             var service = new TestDesignerOptionService();
             Assert.Empty(service.Options.Properties);
 
             DesignerOptionService.DesignerOptionCollection options = service.DoCreateOptionCollection(service.Options, "name", "value");
-            Assert.Empty(service.Options.Properties);
+            Assert.NotEmpty(service.Options.Properties);
         }
 
         [Fact]
@@ -265,8 +268,13 @@ namespace System.ComponentModel.Design.Tests
         [Fact]
         public void DesignerOptionConverter_ConvertToString_ReturnsExpected()
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(DesignerOptionService.DesignerOptionCollection));
-            Assert.Equal("(Collection)", converter.ConvertToString(null));
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(DesignerOptionService.DesignerOptionCollection));
+                Assert.Equal("(Collection)", converter.ConvertToString(null));
+            }).Dispose();
         }
 
         [Fact]

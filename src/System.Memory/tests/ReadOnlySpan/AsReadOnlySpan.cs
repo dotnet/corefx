@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.SpanTests
@@ -38,7 +40,9 @@ namespace System.SpanTests
         public static void NullArrayAsReadOnlySpan()
         {
             int[] a = null;
-            Assert.Throws<ArgumentNullException>(() => a.AsReadOnlySpan().DontBox());
+            ReadOnlySpan<int> span = a.AsReadOnlySpan();
+            span.Validate();
+            Assert.True(span == default);
         }
 
         [Fact]
@@ -46,7 +50,7 @@ namespace System.SpanTests
         {
             int[] empty = Array.Empty<int>();
             ReadOnlySpan<int> span = empty.AsReadOnlySpan();
-            span.Validate();
+            span.ValidateNonNullEmpty();
         }
 
         [Fact]
@@ -86,19 +90,19 @@ namespace System.SpanTests
             int[] empty = Array.Empty<int>();
             ArraySegment<int> emptySegment = new ArraySegment<int>(empty);
             ReadOnlySpan<int> span = emptySegment.AsReadOnlySpan();
-            span.Validate();
+            span.ValidateNonNullEmpty();
 
             int[] a = { 19, -17 };
             ArraySegment<int> segmentInt = new ArraySegment<int>(a, 1, 0);
             ReadOnlySpan<int> spanInt = segmentInt.AsReadOnlySpan();
-            spanInt.Validate();
+            spanInt.ValidateNonNullEmpty();
         }
 
         [Fact]
         public static void StringAsReadOnlySpanNullary()
         {
             string s = "Hello";
-            ReadOnlySpan<char> span = s.AsReadOnlySpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             char[] expected = s.ToCharArray();
             span.Validate(expected);
         }
@@ -107,16 +111,39 @@ namespace System.SpanTests
         public static void StringAsReadOnlySpanEmptyString()
         {
             string s = "";
-            ReadOnlySpan<char> span = s.AsReadOnlySpan();
-            char[] expected = s.ToCharArray();
-            span.Validate(expected);
+            ReadOnlySpan<char> span = s.AsSpan();
+            span.ValidateNonNullEmpty();
         }
 
         [Fact]
         public static void StringAsReadOnlySpanNullChecked()
         {
             string s = null;
-            Assert.Throws<ArgumentNullException>(() => s.AsReadOnlySpan().DontBox());
+            ReadOnlySpan<char> span = s.AsSpan();
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0);
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0, 0);
+            span.Validate();
+            Assert.True(span == default);
+        }
+
+        [Fact]
+        public static void StringAsReadOnlySpanNullNonZeroStartAndLength()
+        {
+            string str = null;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1).DontBox());
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(0, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 0).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1, -1).DontBox());
         }
 
         [Fact]
@@ -134,6 +161,51 @@ namespace System.SpanTests
             ReadOnlySpan<int> readOnlySpan = span.AsReadOnlySpan();
 
             readOnlySpan.Validate(a);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.StringSliceTestData), MemberType = typeof(TestHelpers))]
+        public static unsafe void AsReadOnlySpan_PointerAndLength(string text, int start, int length)
+        {
+            ReadOnlySpan<char> span;
+            if (start == -1)
+            {
+                start = 0;
+                length = text.Length;
+                span = text.AsSpan();
+            }
+            else if (length == -1)
+            {
+                length = text.Length - start;
+                span = text.AsSpan(start);
+            }
+            else
+            {
+                span = text.AsSpan(start, length);
+            }
+
+            Assert.Equal(length, span.Length);
+
+            fixed (char* pText = text)
+            {
+                char* expected = pText + start;
+                void* actual = Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
+                Assert.Equal((IntPtr)expected, (IntPtr)actual);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.StringSlice2ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
+        public static unsafe void AsReadOnlySpan_2Arg_OutOfRange(string text, int start)
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start).DontBox());
+        }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.StringSlice3ArgTestOutOfRangeData), MemberType = typeof(TestHelpers))]
+        public static unsafe void AsReadOnlySpan_3Arg_OutOfRange(string text, int start, int length)
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start, length).DontBox());
         }
     }
 }

@@ -2,20 +2,42 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security;
+using System.Diagnostics;
+using System.IO.Enumeration;
 
 namespace System.IO
 {
-    partial class FileSystemInfo : IFileSystemObject
+    partial class FileSystemInfo
     {
         // Cache the file/directory information
         private Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA _data;
 
         // Cache any error retrieving the file/directory information
         // We use this field in conjunction with the Refresh method which should never throw.
-        // If we succeed we store a zero, on failure we store the HResult so that we can
+        // If we succeed we store a zero, on failure we store the error code so that we can
         // throw an appropriate error when attempting to access the cached info.
         private int _dataInitialized = -1;
+
+        protected FileSystemInfo()
+        {
+        }
+
+        internal static unsafe FileSystemInfo Create(string fullPath, ref FileSystemEntry findData)
+        {
+            FileSystemInfo info = findData.IsDirectory
+                ? (FileSystemInfo) new DirectoryInfo(fullPath, fileName: new string(findData.FileName), isNormalized: true)
+                : new FileInfo(fullPath, fileName: new string(findData.FileName), isNormalized: true);
+
+            Debug.Assert(!PathInternal.IsPartiallyQualified(fullPath), $"'{fullPath}' should be fully qualified when constructed from directory enumeration");
+
+            info.Init(findData._info);
+            return info;
+        }
+
+        internal void Invalidate()
+        {
+            _dataInitialized = -1;
+        }
 
         internal unsafe void Init(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info)
         {
@@ -28,7 +50,7 @@ namespace System.IO
             _dataInitialized = 0;
         }
 
-        FileAttributes IFileSystemObject.Attributes
+        public FileAttributes Attributes
         {
             get
             {
@@ -37,12 +59,12 @@ namespace System.IO
             }
             set
             {
-                FileSystem.Current.SetAttributes(FullPath, value);
+                FileSystem.SetAttributes(FullPath, value);
                 _dataInitialized = -1;
             }
         }
 
-        bool IFileSystemObject.Exists
+        internal bool ExistsCore
         {
             get
             {
@@ -59,7 +81,7 @@ namespace System.IO
             }
         }
 
-        DateTimeOffset IFileSystemObject.CreationTime
+        internal DateTimeOffset CreationTimeCore
         {
             get
             {
@@ -68,12 +90,12 @@ namespace System.IO
             }
             set
             {
-                FileSystem.Current.SetCreationTime(FullPath, value, this is DirectoryInfo);
+                FileSystem.SetCreationTime(FullPath, value, this is DirectoryInfo);
                 _dataInitialized = -1;
             }
         }
 
-        DateTimeOffset IFileSystemObject.LastAccessTime
+        internal DateTimeOffset LastAccessTimeCore
         {
             get
             {
@@ -82,12 +104,12 @@ namespace System.IO
             }
             set
             {
-                FileSystem.Current.SetLastAccessTime(FullPath, value, (this is DirectoryInfo));
+                FileSystem.SetLastAccessTime(FullPath, value, (this is DirectoryInfo));
                 _dataInitialized = -1;
             }
         }
 
-        DateTimeOffset IFileSystemObject.LastWriteTime
+        internal DateTimeOffset LastWriteTimeCore
         {
             get
             {
@@ -96,12 +118,12 @@ namespace System.IO
             }
             set
             {
-                FileSystem.Current.SetLastWriteTime(FullPath, value, (this is DirectoryInfo));
+                FileSystem.SetLastWriteTime(FullPath, value, (this is DirectoryInfo));
                 _dataInitialized = -1;
             }
         }
 
-        long IFileSystemObject.Length
+        internal long LengthCore
         {
             get
             {
@@ -122,11 +144,16 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(_dataInitialized, FullPath);
         }
 
-        void IFileSystemObject.Refresh()
+        public void Refresh()
         {
             // This should not throw, instead we store the result so that we can throw it
             // when someone actually accesses a property
-            _dataInitialized = Win32FileSystem.FillAttributeInfo(FullPath, ref _data, returnErrorOnNotFound: false);
+            _dataInitialized = FileSystem.FillAttributeInfo(FullPath, ref _data, returnErrorOnNotFound: false);
         }
+
+        // If we're opened around a enumerated path that ends in a period or space we need to be able to
+        // act on the path normally (open streams/writers/etc.)
+        internal string NormalizedPath
+            => PathInternal.EndsWithPeriodOrSpace(FullPath) ? PathInternal.EnsureExtendedPrefix(FullPath) : FullPath;
     }
 }

@@ -32,10 +32,6 @@
 // Validate that our Signals enum values are correct for the platform
 static_assert(PAL_SIGKILL == SIGKILL, "");
 
-// Validate that our WaitPidOptions enum values are correct for the platform
-static_assert(PAL_WNOHANG == WNOHANG, "");
-static_assert(PAL_WUNTRACED == WUNTRACED, "");
-
 // Validate that our SysLogPriority values are correct for the platform
 static_assert(PAL_LOG_EMERG == LOG_EMERG, "");
 static_assert(PAL_LOG_ALERT == LOG_ALERT, "");
@@ -151,6 +147,9 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t redirectStdin,
                                       int32_t redirectStdout,
                                       int32_t redirectStderr,
+                                      int32_t setCredentials,
+                                      uint32_t userId,
+                                      uint32_t groupId,
                                       int32_t* childPid,
                                       int32_t* stdinFd,
                                       int32_t* stdoutFd,
@@ -170,7 +169,7 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0)
+    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0 || (setCredentials & ~1) != 0)
     {
         assert(false && "Boolean redirect* inputs must be 0 or 1.");
         errno = EINVAL;
@@ -233,6 +232,14 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
             ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
         }
 
+        if (setCredentials)
+        {
+            if (setgid(groupId) == -1 || setuid(userId) == -1)
+            {
+                ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+            }
+        }
+
         // Change to the designated working directory, if one was specified
         if (nullptr != cwd)
         {
@@ -289,6 +296,13 @@ done:
         CloseIfOpen(stdinFds[WRITE_END_OF_PIPE]);
         CloseIfOpen(stdoutFds[READ_END_OF_PIPE]);
         CloseIfOpen(stderrFds[READ_END_OF_PIPE]);
+
+        // Reap child
+        if (processId > 0)
+        {
+            int status;
+            waitpid(processId, &status, 0);
+        }
 
         *stdinFd = -1;
         *stdoutFd = -1;
@@ -431,33 +445,36 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
     syslog(static_cast<int>(priority), message, arg1);
 }
 
-extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions options)
+extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable)
 {
-    assert(status != nullptr);
+    assert(exitCode != nullptr);
 
+    siginfo_t siginfo;
     int32_t result;
-    while (CheckInterrupted(result = waitpid(pid, status, static_cast<int>(options))));
+    idtype_t idtype = pid == -1 ? P_ALL : P_PID;
+    int options = WEXITED | WNOHANG;
+    if (keepWaitable != 0)
+    {
+        options |= WNOWAIT;
+    }
+    while (CheckInterrupted(result = waitid(idtype, static_cast<id_t>(pid), &siginfo, options)));
+    if (idtype == P_ALL && result == -1 && errno == ECHILD)
+    {
+        result = 0;
+    }
+    else if (result == 0 && siginfo.si_signo == SIGCHLD)
+    {
+        if (siginfo.si_code == CLD_EXITED)
+        {
+            *exitCode = siginfo.si_status;
+        }
+        else
+        {
+            *exitCode = 128 + siginfo.si_status;
+        }
+        result = siginfo.si_pid;
+    }
     return result;
-}
-
-extern "C" int32_t SystemNative_WExitStatus(int32_t status)
-{
-    return WEXITSTATUS(status);
-}
-
-extern "C" int32_t SystemNative_WIfExited(int32_t status)
-{
-    return WIFEXITED(status);
-}
-
-extern "C" int32_t SystemNative_WIfSignaled(int32_t status)
-{
-    return WIFSIGNALED(status);
-}
-
-extern "C" int32_t SystemNative_WTermSig(int32_t status)
-{
-    return WTERMSIG(status);
 }
 
 extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)

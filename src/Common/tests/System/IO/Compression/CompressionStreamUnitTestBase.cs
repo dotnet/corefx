@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,16 +13,13 @@ namespace System.IO.Compression
     public abstract class CompressionStreamUnitTestBase : CompressionStreamTestBase
     {
         [Fact]
-        public async Task FlushAsync_DuringWriteAsync()
+        public virtual void FlushAsync_DuringWriteAsync()
         {
             if (FlushNoOps)
                 return;
-            byte[] buffer = null;
-            string testFilePath = UncompressedTestFile();
-            using (var origStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
-            {
-                buffer = origStream.ToArray();
-            }
+            byte[] buffer = new byte[100000];
+            Random rand = new Random();
+            rand.NextBytes(buffer);
 
             using (var writeStream = new ManualSyncMemoryStream(false))
             using (var compressor = CreateStream(writeStream, CompressionMode.Compress))
@@ -32,14 +27,20 @@ namespace System.IO.Compression
                 Task task = null;
                 try
                 {
+                    // Write needs to be big enough to trigger a write to the underlying base stream so the WriteAsync call doesn't immediately complete.
                     task = compressor.WriteAsync(buffer, 0, buffer.Length);
+                    while (task.IsCompleted)
+                    {
+                        rand.NextBytes(buffer);
+                        task = compressor.WriteAsync(buffer, 0, buffer.Length);
+                    }
                     Assert.Throws<InvalidOperationException>(() => { compressor.FlushAsync(); }); // "overlapping flushes"
                 }
                 finally
                 {
                     // Unblock Async operations
                     writeStream.manualResetEvent.Set();
-                    // The original WriteAsync should be able to complete, though it may not have been enough input to trigger a write to the base stream
+                    // The original WriteAsync should be able to complete
                     Assert.True(task.Wait(10 * 500), "Original WriteAsync Task did not complete in time");
                     Assert.True(writeStream.WriteHit, "BaseStream Write function was not called");
                 }
@@ -119,14 +120,11 @@ namespace System.IO.Compression
         }
 
         [Fact]
-        public async Task WriteAsync_DuringWriteAsync()
+        public virtual void WriteAsync_DuringWriteAsync()
         {
-            byte[] buffer = null;
-            string testFilePath = UncompressedTestFile();
-            using (var origStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
-            {
-                buffer = origStream.ToArray();
-            }
+            byte[] buffer = new byte[100000];
+            Random rand = new Random();
+            rand.NextBytes(buffer);
 
             using (var writeStream = new ManualSyncMemoryStream(false))
             using (var compressor = CreateStream(writeStream, CompressionMode.Compress))
@@ -134,17 +132,22 @@ namespace System.IO.Compression
                 Task task = null;
                 try
                 {
-                    task = compressor.WriteAsync(buffer, 0, buffer.Length);    // write needs to be bigger than the internal write buffer
+                    // Write needs to be big enough to trigger a write to the underlying base stream so the WriteAsync call doesn't immediately complete.
+                    task = compressor.WriteAsync(buffer, 0, buffer.Length);
+                    while (task.IsCompleted)
+                    {
+                        rand.NextBytes(buffer);
+                        task = compressor.WriteAsync(buffer, 0, buffer.Length);
+                    }
                     Assert.Throws<InvalidOperationException>(() => { compressor.WriteAsync(buffer, 32, 32); }); // "overlapping write"
                 }
                 finally
                 {
                     // Unblock Async operations
                     writeStream.manualResetEvent.Set();
-                    // The original WriteAsync should be able to complete, though it may not have been enough input to trigger a write to the base stream
+                    // The original WriteAsync should be able to complete
                     Assert.True(task.Wait(10 * 500), "Original WriteAsync Task did not complete in time");
-                    if (writeStream.Length > 0)
-                        Assert.True(writeStream.WriteHit, "BaseStream Write function was not called");
+                    Assert.True(writeStream.WriteHit, "BaseStream Write function was not called");
                 }
             }
         }
@@ -171,41 +174,6 @@ namespace System.IO.Compression
                     Assert.True(task.Wait(10 * 500), "The original ReadAsync should be able to complete");
                     Assert.True(readStream.ReadHit, "BaseStream ReadAsync should have been called");
                 }
-            }
-        }
-
-        [Fact]
-        public virtual async Task Dispose_WithUnfinishedWriteAsync()
-        {
-            byte[] uncompressedBytes = null;
-            string uncompressedPath = UncompressedTestFile();
-            using (var uncompressedStream = await LocalMemoryStream.readAppFileAsync(uncompressedPath))
-            {
-                uncompressedBytes = uncompressedStream.ToArray();
-            }
-
-            using (var writeStream = new ManualSyncMemoryStream(false))
-            {
-                var compressor = CreateStream(writeStream, CompressionMode.Compress, true);
-                compressor.Write(uncompressedBytes, 0, uncompressedBytes.Length);
-                int writesBeingFlushed = 2;
-                Task task = compressor.WriteAsync(uncompressedBytes, 0, uncompressedBytes.Length);    // write needs to be bigger than the internal write buffer
-                while (!writeStream.WriteHit && task.IsCompleted)
-                {
-                    task = compressor.WriteAsync(uncompressedBytes, 0, uncompressedBytes.Length);
-                    writesBeingFlushed++;
-                }
-
-                // WriteAsync will be blocked on writing the output to the underlying stream. Calling Dispose will trigger a Finish call with unwritten output
-                // still available.
-                Assert.InRange(writeStream.Length, 0, uncompressedBytes.Length);
-                compressor.Dispose();
-                Assert.InRange(writeStream.Length, 0, uncompressedBytes.Length * writesBeingFlushed);
-                Assert.False(task.IsCompleted);
-                writeStream.manualResetEvent.Set();
-                // WriteAsync call will return to the compression stream's WriteAsync which will attempt to 
-                // access members of the now disposed stream. 
-                Assert.Throws<AggregateException>(() => task.Wait(1000)); 
             }
         }
 
@@ -1129,7 +1097,7 @@ namespace System.IO.Compression
         [Theory]
         [OuterLoop]
         [InlineData(true)]
-        [InlineData(true)]
+        [InlineData(false)]
         public async Task CopyTo_Roundtrip_OutputMatchesInput(bool useAsync)
         {
             var rand = new Random();
@@ -1365,7 +1333,7 @@ namespace System.IO.Compression
             return await base.ReadAsync(destination, cancellationToken);
         }
 
-        public override async Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        public override async ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             WriteHit = true;
 

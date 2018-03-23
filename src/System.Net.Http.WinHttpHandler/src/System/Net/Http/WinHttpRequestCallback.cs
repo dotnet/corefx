@@ -110,8 +110,19 @@ namespace System.Net.Http
             }
             catch (Exception ex)
             {
-                Interop.WinHttp.WinHttpCloseHandle(handle);
                 state.SavedException = ex;
+                if (state.RequestHandle != null)
+                {
+                    // Since we got a fatal error processing the request callback,
+                    // we need to close the WinHttp request handle in order to
+                    // abort the currently executing WinHttp async operation.
+                    //
+                    // We must always call Dispose() against the SafeWinHttpHandle
+                    // wrapper and never close directly the raw WinHttp handle.
+                    // The SafeWinHttpHandle wrapper is thread-safe and guarantees
+                    // calling the underlying WinHttpCloseHandle() function only once.
+                    state.RequestHandle.Dispose();
+                }
             }
         }
 
@@ -214,6 +225,10 @@ namespace System.Net.Http
             {
                 state.ServerCredentials = null;
             }
+
+            // Similarly, we need to clear any Auth headers that were added to the request manually or
+            // through the default headers.
+            ResetAuthRequestHeaders(state);
         }
         
         private static void OnRequestSendingRequest(WinHttpRequestState state)
@@ -256,7 +271,7 @@ namespace System.Net.Http
                         return;
                     }
 
-                    throw WinHttpException.CreateExceptionUsingError(lastError);
+                    throw WinHttpException.CreateExceptionUsingError(lastError, "WINHTTP_CALLBACK_STATUS_SENDING_REQUEST/WinHttpQueryOption");
                 }
 
                 // Get any additional certificates sent from the remote server during the TLS/SSL handshake.
@@ -291,7 +306,7 @@ namespace System.Net.Http
                 catch (Exception ex)
                 {
                     throw WinHttpException.CreateExceptionUsingError(
-                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE, ex);
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE, "X509Chain.Build", ex);
                 }
                 finally
                 {
@@ -306,7 +321,7 @@ namespace System.Net.Http
                 if (!result)
                 {
                     throw WinHttpException.CreateExceptionUsingError(
-                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE);
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE, "ServerCertificateValidationCallback");
                 }
             }
         }
@@ -317,11 +332,7 @@ namespace System.Net.Http
             
             Debug.Assert(state != null, "OnRequestError: state is null");
 
-            Debug.Assert((unchecked((int)asyncResult.dwError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
-                unchecked((int)asyncResult.dwError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
-                $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)asyncResult.dwError)}, WinHttp API: {unchecked((uint)asyncResult.dwResult.ToInt32())}");
-
-            Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
+            Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError), "WINHTTP_CALLBACK_STATUS_REQUEST_ERROR");
 
             switch (unchecked((uint)asyncResult.dwResult.ToInt32()))
             {
@@ -406,6 +417,26 @@ namespace System.Net.Http
                         "OnRequestError: Result (" + asyncResult.dwResult + ") is not expected.",
                         "Error code: " + asyncResult.dwError + " (" + innerException.Message + ")");
                     break;
+            }
+        }
+
+        private static void ResetAuthRequestHeaders(WinHttpRequestState state)
+        {
+            const string AuthHeaderNameWithColon = "Authorization:";
+            SafeWinHttpHandle requestHandle = state.RequestHandle;
+            
+            // Clear auth headers.
+            if (!Interop.WinHttp.WinHttpAddRequestHeaders(
+                requestHandle,
+                AuthHeaderNameWithColon,
+                (uint)AuthHeaderNameWithColon.Length,
+                Interop.WinHttp.WINHTTP_ADDREQ_FLAG_REPLACE))
+            {
+                int lastError = Marshal.GetLastWin32Error();
+                if (lastError != Interop.WinHttp.ERROR_WINHTTP_HEADER_NOT_FOUND)
+                {
+                    throw WinHttpException.CreateExceptionUsingError(lastError, "WINHTTP_CALLBACK_STATUS_REDIRECT/WinHttpAddRequestHeaders");
+                }
             }
         }
     }

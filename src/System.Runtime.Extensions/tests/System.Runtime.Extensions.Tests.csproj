@@ -22,6 +22,9 @@
     <Compile Include="System\ApplicationIdTests.cs" />
     <Compile Include="System\Convert.cs" />
     <Compile Include="System\EnvironmentTests.cs" />
+    <Compile Include="System\IO\PathTests.cs" />
+    <Compile Include="System\IO\PathTests_Windows_NetFX.cs" />
+    <Compile Include="System\IO\PathTests_Windows.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
     <Compile Include="System\AppDomainTests.cs" />
@@ -30,9 +33,16 @@
     </Compile>
     <Compile Include="System\Reflection\AssemblyNameProxyTests.cs" />
     <Compile Include="System\MarshalByRefObjectTest.cs" />
+    <Compile Include="TestHelpers.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
     <Compile Include="System\Random.netcoreapp.cs" />
+    <Compile Include="System\IO\Path.IsPathFullyQualified.netcoreapp.cs" />
+    <Compile Include="System\IO\PathTestsBase.netcoreapp.cs" />
+    <Compile Include="System\IO\PathTests_Windows.netcoreapp.cs" />
+    <Compile Include="System\IO\PathTests.netcoreapp.cs" />
+    <Compile Include="System\IO\PathTests_Unix.cs" />
+    <Compile Include="System\IO\PathTests_Join.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netstandard'">
     <Compile Include="System\BitConverterSpan.cs" />
@@ -52,9 +62,9 @@
     <Compile Include="System\Environment.UserName.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\Environment.MachineName.cs" />
-    <Compile Include="System\IO\Path.Combine.cs" />
+    <Compile Include="System\IO\PathTests_Combine.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
-    <Compile Include="System\IO\PathTests.cs" />
+    <Compile Include="System\IO\PathTestsBase.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
     <Compile Include="System\BitConverter.cs" />
     <Compile Include="System\Convert.BoxedObjectCheck.cs" />
@@ -102,6 +112,9 @@
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
+      <Link>Common\System\Security\Cryptography\ByteUtils.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
@@ -124,6 +137,9 @@
       <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
       <Name>TestApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -9,6 +9,8 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
     <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -19,6 +21,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="..\..\Common\src\System\PasteArguments.cs">
+      <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
     <Compile Include="System\AppDomain.cs" />
     <Compile Include="System\AppDomainUnloadedException.cs" />
     <Compile Include="System\ApplicationId.cs" />
@@ -29,18 +34,12 @@
     <Compile Include="System\Environment.cs" />
     <Compile Include="System\Environment.SpecialFolder.cs" />
     <Compile Include="System\Environment.SpecialFolderOption.cs" />
-    <Compile Include="System\Globalization\Extensions.cs" />
     <Compile Include="System\LoaderOptimization.cs" />
     <Compile Include="System\LoaderOptimizationAttribute.cs" />
     <Compile Include="System\OperatingSystem.cs" />
     <Compile Include="System\PlatformID.cs" />
-    <Compile Include="System\IO\EncodingCache.cs" />
-    <Compile Include="System\IO\StreamReader.cs" />
-    <Compile Include="System\IO\StreamWriter.cs" />
     <Compile Include="System\IO\StringReader.cs" />
     <Compile Include="System\IO\StringWriter.cs" />
-    <Compile Include="System\IO\TextReader.cs" />
-    <Compile Include="System\IO\TextWriter.cs" />
     <Compile Include="System\IO\BufferedStream.cs" />
     <Compile Include="System\IO\InvalidDataException.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
@@ -54,7 +53,6 @@
     <Compile Include="System\Runtime\Versioning\VersioningHelper.cs" />
     <Compile Include="System\StringNormalizationExtensions.cs" />
     <Compile Include="System\Collections\ArrayList.cs" />
-    <Compile Include="System\Collections\Comparer.cs" />
     <Compile Include="System\Collections\Hashtable.cs" />
     <Compile Include="$(CommonPath)\System\Collections\CompatibleComparer.cs">
       <Link>Common\System\Collections\CompatibleComparer.cs</Link>
@@ -81,11 +79,11 @@
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
-      <Link>Common\System\IO\PathInternal.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\HResults.cs">
       <Link>Common\System\HResults.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
+      <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
@@ -102,17 +100,23 @@
   </ItemGroup>
   <!-- WINDOWS: Shared CoreCLR and .NET Native -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
+      <Link>Common\System\PasteArguments.Windows.cs</Link>
+    </Compile>
     <Compile Include="System\Environment.Windows.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Windows.cs" />
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOLEAN.cs">
+      <Link>Common\Interop\Windows\Interop.BOOLEAN.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LookupAccountNameW.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.LookupAccountNameW.cs</Link>
@@ -137,9 +141,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLogicalDrive.cs">
       <Link>Common\Interop\Windows\Interop.GetLogicalDrive.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLongPathName.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetLongPathName.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetSystemDirectoryW.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetSystemDirectoryW.cs</Link>
@@ -171,8 +172,20 @@
     <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Win32.cs">
       <Link>Common\System\IO\DriveInfoInternal.Win32.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
-      <Link>Common\System\IO\PathInternal.Windows.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathHelper.Windows.cs">
+      <Link>CoreLib\System\IO\PathHelper.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.cs">
+      <Link>CoreLib\System\IO\PathInternal.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
+      <Link>CoreLib\System\IO\PathInternal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetLongPathNameW.cs">
+      <Link>CoreLib\Interop\Windows\Kernel32\Interop.GetLongPathNameW.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetFullPathNameW.cs">
+      <Link>CoreLib\Interop\Windows\Kernel32\Interop.GetFullPathNameW.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- UNIX -->
@@ -240,14 +253,14 @@
     <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Unix.cs">
       <Link>Common\System\IO\DriveInfoInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
-      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
+      <Link>Common\System\PasteArguments.Unix.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

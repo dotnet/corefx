@@ -46,6 +46,15 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void MemoryFromEmptyArrayRetainWithPinning()
+        {
+            ReadOnlyMemory<int> memory = new int[0];
+            MemoryHandle handle = memory.Retain(pin: true);
+            Assert.True(handle.HasPointer);
+            handle.Dispose();
+        }
+
+        [Fact]
         public static void MemoryRetainWithPinningAndSlice()
         {
             int[] array = { 1, 2, 3, 4, 5 };

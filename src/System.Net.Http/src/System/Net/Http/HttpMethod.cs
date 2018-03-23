@@ -18,9 +18,8 @@ namespace System.Net.Http
         private static readonly HttpMethod s_headMethod = new HttpMethod("HEAD");
         private static readonly HttpMethod s_optionsMethod = new HttpMethod("OPTIONS");
         private static readonly HttpMethod s_traceMethod = new HttpMethod("TRACE");
-
-        // Don't expose CONNECT as static property, since it's used by the transport to connect to a proxy.
-        // CONNECT is not used by users directly.
+        private static readonly HttpMethod s_patchMethod = new HttpMethod("PATCH");
+        private static readonly HttpMethod s_connectMethod = new HttpMethod("CONNECT");
 
         public static HttpMethod Get
         {
@@ -55,6 +54,19 @@ namespace System.Net.Http
         public static HttpMethod Trace
         {
             get { return s_traceMethod; }
+        }
+
+        public static HttpMethod Patch
+        {
+            get { return s_patchMethod; }
+        }
+
+        // Don't expose CONNECT as static property, since it's used by the transport to connect to a proxy.
+        // CONNECT is not used by users directly.
+
+        internal static HttpMethod Connect
+        {
+            get { return s_connectMethod; }
         }
 
         public string Method

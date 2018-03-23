@@ -39,17 +39,23 @@
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
       <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
+      <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
+      <Link>Common\System\ThreadCultureChange.cs</Link>
+    </Compile>
     <Compile Include="AbortTest.cs" />
     <Compile Include="CancelTest.cs" />
     <Compile Include="ClientWebSocketOptionsTests.cs" />
-    <Compile Include="ClientWebSocketOptionsTests.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
-    <Compile Include="ClientWebSocketOptionsTests.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="ClientWebSocketOptionsTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="ClientWebSocketTestBase.cs" />
     <Compile Include="ClientWebSocketUnitTest.cs" />
     <Compile Include="CloseTest.cs" />
     <Compile Include="ConnectTest.cs" />
     <Compile Include="LoggingTest.cs" />
     <Compile Include="KeepAliveTest.cs" />
+    <Compile Include="LoopbackHelper.cs" />
     <Compile Include="ResourceHelper.cs" />
     <Compile Include="SendReceiveTest.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="SendReceiveTest.cs" />

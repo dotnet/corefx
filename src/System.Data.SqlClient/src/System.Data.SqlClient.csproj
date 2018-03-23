@@ -55,6 +55,9 @@
     <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
       <Link>System\Data\Common\AdapterUtil.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.Drivers.cs">
+      <Link>System\Data\Common\AdapterUtil.Drivers.cs</Link>
+    </Compile>
     <Compile Include="System\Data\Common\AdapterUtil.SqlClient.cs" />
     <Compile Include="System\Data\Common\SR.cs" />
     <Compile Include="System\Data\Common\DbConnectionOptions.cs" />
@@ -77,18 +80,35 @@
     <Compile Include="$(CommonPath)\System\Data\Common\NameValuePair.cs">
       <Link>System\Data\Common\NameValuePair.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionInternal.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionInternal.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\TimeoutTimer.cs">
+      <Link>Common\System\Data\ProviderBase\TimeoutTimer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
+      <Link>Common\System\Data\ProviderBase\DbReferenceCollection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbMetaDataFactory.cs">
+      <Link>Common\System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionClosed.cs">
+      <Link>Common\System\Data\ProviderBase\DbConnectionClosed.cs</Link>
+    </Compile>
     <Compile Include="System\Data\ProviderBase\DbConnectionClosed.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionInternal.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPool.cs" />
-    <Compile Include="System\Data\ProviderBase\DbConnectionPoolGroup.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
-    <Compile Include="System\Data\ProviderBase\DbMetaDataFactory.cs" />
-    <Compile Include="System\Data\ProviderBase\DbReferenceCollection.cs" />
-    <Compile Include="System\Data\ProviderBase\TimeoutTimer.cs" />
     <Compile Include="System\Data\Sql\IBinarySerialize.cs" />
     <Compile Include="System\Data\Sql\InvalidUdtException.cs" />
     <Compile Include="System\Data\Sql\SqlFunctionAttribute.cs" />
@@ -198,6 +218,7 @@
     <Compile Include="System\Data\SqlClient\SNI\SSRP.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectManaged.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Common.cs" />
+    <Compile Include="System\Data\SqlClient\SqlCredential.cs" />
   </ItemGroup>
   <!-- Manage the SNI toggle for Windows netstandard and UWP -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' == 'true'">
@@ -420,6 +441,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.ComponentModel" />

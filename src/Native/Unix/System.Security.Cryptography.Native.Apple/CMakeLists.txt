@@ -12,6 +12,7 @@ set(NATIVECRYPTO_SOURCES
     pal_digest.cpp
     pal_ecc.cpp
     pal_hmac.cpp
+    pal_keyagree.cpp
     pal_keychain.cpp
     pal_random.cpp
     pal_rsa.cpp
@@ -50,3 +51,4 @@ target_link_libraries(System.Security.Cryptography.Native.Apple
 )
 
 install_library_and_symbols (System.Security.Cryptography.Native.Apple)
+install (TARGETS System.Security.Cryptography.Native.Apple-Static DESTINATION .)

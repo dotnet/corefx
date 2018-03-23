@@ -29,10 +29,10 @@ namespace System.Threading.Channels
         /// A <see cref="Task{Boolean}"/> that will complete with a <c>true</c> result when data is available to read
         /// or with a <c>false</c> result when no further data will ever be available to be read.
         /// </returns>
-        public abstract Task<bool> WaitToReadAsync(CancellationToken cancellationToken = default);
+        public abstract ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default);
 
-        /// <summary>Asynchronously reads an item from the channel.</summary>		
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the read operation.</param>		
+        /// <summary>Asynchronously reads an item from the channel.</summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the read operation.</param>
         /// <returns>A <see cref="ValueTask{TResult}"/> that represents the asynchronous read operation.</returns>
         public virtual ValueTask<T> ReadAsync(CancellationToken cancellationToken = default)
         {
@@ -57,24 +57,17 @@ namespace System.Threading.Channels
 
             async ValueTask<T> ReadAsyncCore(CancellationToken ct)
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    if (!await WaitToReadAsync(ct).ConfigureAwait(false))
                     {
-                        if (!await WaitToReadAsync(ct))
-                        {
-                            throw new ChannelClosedException();
-                        }
-
-                        if (TryRead(out T item))
-                        {
-                            return item;
-                        }
+                        throw new ChannelClosedException();
                     }
-                }
-                catch (Exception exc) when (!(exc is ChannelClosedException || exc is OperationCanceledException))
-                {
-                    throw new ChannelClosedException(exc);
+
+                    if (TryRead(out T item))
+                    {
+                        return item;
+                    }
                 }
             }
         }

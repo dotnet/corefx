@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 using static System.Buffers.Binary.BinaryPrimitives;
+using System.Text;
 
 namespace System
 {
@@ -28,6 +30,14 @@ namespace System
 
             T ignore;
             AssertThrows<IndexOutOfRangeException, T>(span, (_span) => ignore = _span[expected.Length]);
+        }
+
+        public static unsafe void ValidateNonNullEmpty<T>(this Span<T> span)
+        {
+            Assert.True(span.IsEmpty);
+
+            // Validate that empty Span is not normalized to null
+            Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
         }
 
         public delegate void AssertThrowsAction<T>(Span<T> span);
@@ -84,6 +94,14 @@ namespace System
 
             T ignore;
             AssertThrows<IndexOutOfRangeException, T>(span, (_span) => ignore = _span[expected.Length]);
+        }
+
+        public static unsafe void ValidateNonNullEmpty<T>(this ReadOnlySpan<T> span)
+        {
+            Assert.True(span.IsEmpty);
+
+            // Validate that empty Span is not normalized to null
+            Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
         }
 
         public delegate void AssertThrowsActionReadOnly<T>(ReadOnlySpan<T> span);
@@ -221,6 +239,17 @@ namespace System
             return spanLE;
         }
 
+        public static string BuildString(int length, int seed)
+        {
+            Random rnd = new Random(seed);
+            var builder = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                builder.Append((char)rnd.Next(65, 91));
+            }
+            return builder.ToString();
+        }
+
         [StructLayout(LayoutKind.Explicit)]
         public struct TestStructExplicit
         {
@@ -281,6 +310,80 @@ namespace System
         public static void DoNotIgnore<T>(T value, int consumed)
         {
         }
+
+        //
+        // { text, start, length } triplets. A "-1" in start or length means "test the overload that doesn't have that parameter."
+        //
+        public static IEnumerable<object[]> StringSliceTestData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1, -1 };
+                    for (int start = 0; start <= text.Length; start++)
+                    {
+                        yield return new object[] { text, start, -1 };
+
+                        for (int length = 0; length <= text.Length - start; length++)
+                        {
+                            yield return new object[] { text, start, length };
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> StringSlice2ArgTestOutOfRangeData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1 };
+                    yield return new object[] { text, int.MinValue };
+
+                    yield return new object[] { text, text.Length + 1 };
+                    yield return new object[] { text, int.MaxValue };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> StringSlice3ArgTestOutOfRangeData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1, 0 };
+                    yield return new object[] { text, int.MinValue, 0 };
+
+                    yield return new object[] { text, text.Length + 1, 0 };
+                    yield return new object[] { text, int.MaxValue, 0 };
+
+                    yield return new object[] { text, 0, -1 };
+                    yield return new object[] { text, 0, int.MinValue };
+
+                    yield return new object[] { text, 0, text.Length + 1 };
+                    yield return new object[] { text, 0, int.MaxValue };
+
+                    yield return new object[] { text, 1, text.Length };
+                    yield return new object[] { text, 1, int.MaxValue };
+
+                    yield return new object[] { text, text.Length - 1, 2 };
+                    yield return new object[] { text, text.Length - 1, int.MaxValue };
+
+                    yield return new object[] { text, text.Length, 1 };
+                    yield return new object[] { text, text.Length, int.MaxValue };
+                }
+            }
+        }
+
+        // @todo: https://github.com/dotnet/corefx/issues/26894 - these emulate MemoryExtension apis that we removed. Clean up the callsites and remove this class.
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this Span<T> span) => span;
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) => new ReadOnlySpan<T>(array);
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> segment) => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
+        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) => memory;
     }
 }
 

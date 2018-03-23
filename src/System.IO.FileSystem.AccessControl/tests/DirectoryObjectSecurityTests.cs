@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information
 
 using System.DirectoryServices;
 using System.Security.Principal;
@@ -491,6 +492,23 @@ namespace System.Security.AccessControl
 
             Assert.False(existingRules.Contains(customAccessRuleReadWrite));
             Assert.False(existingRules.Contains(customAccessRuleSynchronize));
+        }
+
+        [Fact]        
+        public void RemoveAccessRuleAll_AccessControlType_Deny_ThrowException()
+        {
+            var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
+            var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
+
+            var objectTypeGuid = Guid.NewGuid();
+            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var customAccessRuleReadWrite = new CustomAccessRule(
+                identityReference, ReadWriteAccessMask, true, InheritanceFlags.ObjectInherit,
+                PropagationFlags.InheritOnly, objectTypeGuid, Guid.NewGuid(), AccessControlType.Deny
+                );
+
+            customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
+            AssertExtensions.Throws<InvalidOperationException, SystemException>(() => customObjectSecurity.RemoveAccessRuleAll(customAccessRuleReadWrite));
         }
 
         [Fact]

@@ -3,6 +3,30 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Run AgentTools/Begin.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\Begin.ps1\") {\n     \"Begin.ps1 script found. Executing...\"\n     cd $(AgentToolsPath)\n     & $(AgentToolsPath)\\Begin.ps1\n} else {\n   \"Begin.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Delete 'corefx'",
@@ -18,7 +42,7 @@
         "scriptName": "",
         "arguments": "-path $(build.SourcesDirectory)\\corefx",
         "workingFolder": "",
-        "inlineScript": "param($path)\n\nif (Test-Path $path){\n    Stop-Process -processname msbuild -ErrorAction Ignore -Verbose\n    Stop-Process -processname dotnet -ErrorAction Ignore -Verbose\n    Stop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n",
+        "inlineScript": "param($path)\nif ($path -and (Test-Path $path)){\nStop-Process -processname msbuild -ErrorAction Ignore -Verbose\nStop-Process -processname dotnet -ErrorAction Ignore -Verbose\nStop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n$emptyFolder = (New-Item -ItemType Directory (Join-Path -Path $env:TEMP -ChildPath ([System.IO.Path]::GetRandomFileName()))).FullName\nrobocopy $emptyFolder $path /purge\nRemove-Item -Recurse -Force $path,$emptyFolder \nexit 0\n}",
         "failOnStandardError": "true"
       }
     },
@@ -80,7 +104,8 @@
         "signType": "real",
         "zipSources": "false",
         "version": "",
-        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -181,31 +206,6 @@
         "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Index symbol sources",
-      "timeoutInMinutes": 0,
-      "refName": "Task11",
-      "task": {
-        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SymbolsPath": "",
-        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
-        "SymbolsFolder": "",
-        "SkipIndexing": "false",
-        "TreatNotIndexedAsWarning": "false",
-        "SymbolsMaximumWaitTime": "",
-        "SymbolsProduct": "",
-        "SymbolsVersion": "",
-        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -320,6 +320,30 @@
         "logProjectEvents": "false",
         "createLogFile": "false"
       }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Run AgentTools/End.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\End.ps1\") {\n     \"End.ps1 script found. Executing...\"\n     cd $(AgentToolsPath)\n     & $(AgentToolsPath)\\End.ps1\n} else {\n   \"End.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
     }
   ],
   "options": [
@@ -433,6 +457,13 @@
     },
     "PACKAGEVERSIONPROPSURL": {
       "value": "$(PB_PackageVersionPropsUrl)"
+    },
+    "PB_AssetRootUrl": {
+      "value": ""
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "demands": [
@@ -481,11 +512,17 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 36,
-    "name": "DotNet-Build",
+    "_links": {
+      "self": {
+        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330"
+      }
+    },
+    "id": 330,
+    "name": "DotNetCore-Build",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330",
     "pool": {
-      "id": 39,
-      "name": "DotNet-Build"
+      "id": 97,
+      "name": "DotNetCore-Build"
     }
   },
   "id": 5308,

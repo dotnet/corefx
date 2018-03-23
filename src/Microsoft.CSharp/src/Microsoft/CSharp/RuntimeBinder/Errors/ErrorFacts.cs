@@ -44,9 +44,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_ValueCantBeNull:
                     codeStr = SR.ValueCantBeNull;
                     break;
-                case ErrorCode.ERR_WrongNestedThis:
-                    codeStr = SR.WrongNestedThis;
-                    break;
                 case ErrorCode.ERR_NoSuchMember:
                     codeStr = SR.NoSuchMember;
                     break;
@@ -173,23 +170,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadDelArgTypes:
                     codeStr = SR.BadDelArgTypes;
                     break;
-                case ErrorCode.ERR_ReturnNotLValue:
-                    codeStr = SR.ReturnNotLValue;
-                    break;
-                case ErrorCode.ERR_AssgReadonly2:
-                    codeStr = SR.AssgReadonly2;
-                    break;
-                case ErrorCode.ERR_AssgReadonlyStatic2:
-                    codeStr = SR.AssgReadonlyStatic2;
-                    break;
                 case ErrorCode.ERR_BadCtorArgCount:
                     codeStr = SR.BadCtorArgCount;
                     break;
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;
-                    break;
-                case ErrorCode.ERR_NamedArgumentSpecificationBeforeFixedArgument:
-                    codeStr = SR.NamedArgumentSpecificationBeforeFixedArgument;
                     break;
                 case ErrorCode.ERR_BadNamedArgument:
                     codeStr = SR.BadNamedArgument;
@@ -203,6 +188,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NamedArgumentUsedInPositional:
                     codeStr = SR.NamedArgumentUsedInPositional;
                     break;
+                case ErrorCode.ERR_BadNonTrailingNamedArgument:
+                    codeStr = SR.BadNonTrailingNamedArgument;
+                    break;
+
                 default:
                     // means missing resources match the code entry
                     Debug.Assert(false, "Missing resources for the error " + code.ToString());

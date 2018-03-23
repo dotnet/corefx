@@ -12,10 +12,10 @@
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
     <IncludeDefaultReferences>false</IncludeDefaultReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
@@ -130,6 +130,7 @@
     <Compile Include="Dynamic\BindingRestrictionsTests.cs" />
     <Compile Include="Dynamic\CallInfoTests.cs" />
     <Compile Include="Dynamic\CallSiteBinderDefaultBehaviourTests.cs" />
+    <Compile Include="Dynamic\CallSiteCachingTests.cs" />
     <Compile Include="Dynamic\CallSiteTests.cs" />
     <Compile Include="Dynamic\ConvertBinderTests.cs" />
     <Compile Include="Dynamic\DynamicAttributeTests.cs" />

@@ -7,6 +7,7 @@
 #include "pal_io.h"
 #include "pal_safecrt.h"
 #include "pal_utilities.h"
+#include <fcntl.h>
 
 #include <stdlib.h>
 #include <limits.h>
@@ -42,6 +43,10 @@
 #include <sys/sendfile.h>
 #elif HAVE_SENDFILE_6
 #include <sys/uio.h>
+#endif
+#if !HAVE_IN_PKTINFO
+#include <net/if.h>
+#include <ifaddrs.h>
 #endif
 
 #if HAVE_KQUEUE
@@ -119,12 +124,6 @@ enum
 #else
     LINGER_OPTION_NAME = SO_LINGER,
 #endif
-};
-
-enum
-{
-    HOST_ENTRY_HANDLE_ADDRINFO = 1,
-    HOST_ENTRY_HANDLE_HOSTENT = 2,
 };
 
 enum
@@ -236,9 +235,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, struct HostEntr
 
     entry->CanonicalName = NULL;
     entry->Aliases = NULL;
-    entry->AddressListHandle = (void*)info;
-    entry->IPAddressCount = 0;
-    entry->HandleType = HOST_ENTRY_HANDLE_ADDRINFO;
+    entry->AddressListHandle = info;
+    entry->IPAddressCount = 0;    
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
@@ -256,325 +254,6 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, struct HostEntr
     }
 
     return GetAddrInfoErrorFlags_EAI_SUCCESS;
-}
-
-static int ConvertGetHostErrorPlatformToPal(int error)
-{
-    switch (error)
-    {
-        case HOST_NOT_FOUND:
-            return GetHostErrorCodes_HOST_NOT_FOUND;
-
-        case TRY_AGAIN:
-            return GetHostErrorCodes_TRY_AGAIN;
-
-        case NO_RECOVERY:
-            return GetHostErrorCodes_NO_RECOVERY;
-
-        case NO_DATA:
-            return GetHostErrorCodes_NO_DATA;
-
-        default:
-            assert_err(0, "Unknown gethostbyname/gethostbyaddr error code", error);
-            return GetHostErrorCodes_HOST_NOT_FOUND;
-    }
-}
-
-static void ConvertHostEntPlatformToPal(struct HostEntry* hostEntry, struct hostent* entry)
-{
-    hostEntry->CanonicalName = (uint8_t*)entry->h_name;
-    hostEntry->Aliases = (uint8_t**)entry->h_aliases;
-    hostEntry->AddressListHandle = (void*)entry;
-    hostEntry->IPAddressCount = 0;
-    hostEntry->HandleType = HOST_ENTRY_HANDLE_HOSTENT;
-
-    for (int i = 0; entry->h_addr_list[i] != NULL; i++)
-    {
-        hostEntry->IPAddressCount++;
-    }
-}
-
-#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
-#if !HAVE_GETHOSTBYNAME_R
-static int copy_hostent(struct hostent* from, struct hostent* to,
-                        char* buffer, size_t buflen)
-{
-    // FIXME: the implementation done for this function in https://github.com/dotnet/corefx/commit/6a99b74
-    //        requires testing when managed assemblies are built and tested on NetBSD. Until that time,
-    //        return an error code.
-    (void)from;   // unused arg
-    (void)to;     // unused arg
-    (void)buffer; // unused arg
-    (void)buflen; // unused arg
-    return ENOSYS;
-}
-
-/*
-Note: we're assuming that all access to these functions are going through these shims on the platforms, which do not provide
-      thread-safe functions to get host name or address. If that is not the case (which is very likely) race condition is
-      possible, for instance; if other libs (such as libcurl) call gethostby[name/addr] simultaneously.
-*/
-static pthread_mutex_t lock_hostbyx_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static int gethostbyname_r(char const* hostname, struct hostent* result,
-                           char* buffer, size_t buflen, struct hostent** entry, int* error)
-{
-    assert(hostname != NULL);
-    assert(result != NULL);
-    assert(buffer != NULL);
-    assert(entry != NULL);
-    assert(error != NULL);
-
-    if (hostname == NULL || entry == NULL || error == NULL || buffer == NULL || result == NULL)
-    {
-        if (error != NULL)
-        {
-            *error = GetHostErrorCodes_BAD_ARG;
-        }
-
-        return GetHostErrorCodes_BAD_ARG;
-    }
-
-    pthread_mutex_lock(&lock_hostbyx_mutex);
-
-    *entry = gethostbyname(hostname);
-    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
-    {
-        *error = h_errno;
-        *entry = NULL;
-    }
-    else
-    {
-        h_errno = copy_hostent(*entry, result, buffer, buflen);
-        *entry = (h_errno == 0) ? result : NULL;
-    }
-
-    pthread_mutex_unlock(&lock_hostbyx_mutex);
-
-    return h_errno;
-}
-
-static int gethostbyaddr_r(const uint8_t* addr, const socklen_t len, int type, struct hostent* result,
-                           char* buffer, size_t buflen, struct hostent** entry, int* error)
-{
-    assert(addr != NULL);
-    assert(result != NULL);
-    assert(buffer != NULL);
-    assert(entry != NULL);
-    assert(error != NULL);
-
-    if (addr == NULL || entry == NULL || buffer == NULL || result == NULL)
-    {
-        if (error != NULL)
-        {
-            *error = GetHostErrorCodes_BAD_ARG;
-        }
-
-        return GetHostErrorCodes_BAD_ARG;
-    }
-
-    pthread_mutex_lock(&lock_hostbyx_mutex);
-
-    *entry = gethostbyaddr((const char*)addr, (unsigned int)len, type);
-    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
-    {
-        *error = h_errno;
-        *entry = NULL;
-    }
-    else
-    {
-        h_errno = copy_hostent(*entry, result, buffer, buflen);
-        *entry = (h_errno == 0) ? result : NULL;
-    }
-
-    pthread_mutex_unlock(&lock_hostbyx_mutex);
-
-    return h_errno;
-}
-#undef HAVE_GETHOSTBYNAME_R
-#undef HAVE_GETHOSTBYADDR_R
-#define HAVE_GETHOSTBYNAME_R 1
-#define HAVE_GETHOSTBYADDR_R 1
-#endif /* !HAVE_GETHOSTBYNAME_R */
-
-#if HAVE_GETHOSTBYNAME_R
-static int GetHostByNameHelper(const uint8_t* hostname, struct hostent** entry)
-{
-    assert(hostname != NULL);
-    assert(entry != NULL);
-
-    size_t scratchLen = 512;
-
-    for (;;)
-    {
-        size_t bufferSize;
-        uint8_t* buffer;
-        if (!add_s(sizeof(struct hostent), scratchLen, &bufferSize) ||
-            (buffer = (uint8_t*)malloc(bufferSize)) == NULL)
-        {
-            return GetHostErrorCodes_NO_MEM;
-        }
-
-        struct hostent* result = (struct hostent*)buffer;
-        char* scratch = (char*)&buffer[sizeof(struct hostent)];
-
-        int getHostErrno = 0;
-        int err = gethostbyname_r((const char*)hostname, result, scratch, scratchLen, entry, &getHostErrno);
-        if (!err && *entry != NULL)
-        {
-            assert(*entry == result);
-            return 0;
-        }
-        else if (err == ERANGE)
-        {
-            free(buffer);
-            size_t tmpScratchLen;
-            if (!multiply_s(scratchLen, (size_t)2, &tmpScratchLen))
-            {
-                *entry = NULL;
-                return GetHostErrorCodes_NO_MEM;
-            }
-            scratchLen = tmpScratchLen;
-        }
-        else
-        {
-            free(buffer);
-            *entry = NULL;
-            return getHostErrno ? getHostErrno : HOST_NOT_FOUND;
-        }
-    }
-}
-#endif /* HAVE_GETHOSTBYNAME_R */
-#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR */
-
-int32_t SystemNative_GetHostByName(const uint8_t* hostname, struct HostEntry* entry)
-{
-    if (hostname == NULL || entry == NULL)
-    {
-        return GetHostErrorCodes_BAD_ARG;
-    }
-
-    struct hostent* hostEntry = NULL;
-    int error = 0;
-
-#if HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
-    hostEntry = gethostbyname((const char*)hostname);
-    error = h_errno;
-#elif HAVE_GETHOSTBYNAME_R
-    error = GetHostByNameHelper(hostname, &hostEntry);
-#else
-#error Platform does not provide thread-safe gethostbyname
-#endif
-
-    if (hostEntry == NULL)
-    {
-        return ConvertGetHostErrorPlatformToPal(error);
-    }
-
-    ConvertHostEntPlatformToPal(entry, hostEntry);
-    return Error_SUCCESS;
-}
-
-#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R
-static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int type, struct hostent** entry)
-{
-    assert(addr != NULL);
-    assert(addrLen >= 0);
-    assert(entry != NULL);
-
-    size_t scratchLen = 512;
-
-    for (;;)
-    {
-        size_t bufferSize;
-        uint8_t* buffer;
-        if (!add_s(sizeof(struct hostent), scratchLen, &bufferSize) ||
-            (buffer = (uint8_t*)malloc(bufferSize)) == NULL)
-        {
-            return GetHostErrorCodes_NO_MEM;
-        }
-
-        struct hostent* result = (struct hostent*)buffer;
-        char* scratch = (char*)&buffer[sizeof(struct hostent)];
-
-        int getHostErrno = 0;
-        int err = gethostbyaddr_r(addr, addrLen, type, result, scratch, scratchLen, entry, &getHostErrno);
-        if (!err && *entry != NULL)
-        {
-            assert(*entry == result);
-            return 0;
-        }
-        else if (err == ERANGE)
-        {
-            free(buffer);
-            size_t tmpScratchLen;
-            if (!multiply_s(scratchLen, (size_t)2, &tmpScratchLen))
-            {
-                *entry = NULL;
-                return GetHostErrorCodes_NO_MEM;
-            }
-            scratchLen = tmpScratchLen;
-        }
-        else
-        {
-            free(buffer);
-            *entry = NULL;
-            return getHostErrno ? getHostErrno : HOST_NOT_FOUND;
-        }
-    }
-}
-#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R */
-
-int32_t SystemNative_GetHostByAddress(const struct IPAddress* address, struct HostEntry* entry)
-{
-    if (address == NULL || entry == NULL)
-    {
-        return GetHostErrorCodes_BAD_ARG;
-    }
-
-    uint8_t* addr = NULL;
-    socklen_t addrLen = 0;
-    int type = AF_UNSPEC;
-
-    struct in_addr inAddr;
-    memset(&inAddr, 0, sizeof(struct in_addr));
-    struct in6_addr in6Addr;
-    memset(&in6Addr, 0, sizeof(struct in6_addr));
-
-    if (!address->IsIPv6)
-    {
-        ConvertByteArrayToInAddr(&inAddr, address->Address, NUM_BYTES_IN_IPV4_ADDRESS);
-        addr = (uint8_t*)&inAddr;
-        addrLen = sizeof(inAddr);
-        type = AF_INET;
-    }
-    else
-    {
-        ConvertByteArrayToIn6Addr(&in6Addr, address->Address, NUM_BYTES_IN_IPV6_ADDRESS);
-        addr = (uint8_t*)&in6Addr;
-        addrLen = sizeof(in6Addr);
-        type = AF_INET6;
-    }
-
-    struct hostent* hostEntry = NULL;
-    int error = 0;
-
-#if HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
-    hostEntry = gethostbyaddr(addr, addrLen, type);
-    error = h_errno;
-#elif HAVE_GETHOSTBYADDR_R
-    error = GetHostByAddrHelper(addr, addrLen, type, &hostEntry);
-#else
-#error Platform does not provide thread-safe gethostbyname
-#endif
-
-    if (hostEntry == NULL)
-    {
-        return ConvertGetHostErrorPlatformToPal(error);
-    }
-
-    ConvertHostEntPlatformToPal(entry, hostEntry);
-    return Error_SUCCESS;
 }
 
 static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** info, struct IPAddress* endPoint)
@@ -617,90 +296,21 @@ static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** info, struct IPAdd
     return GetAddrInfoErrorFlags_EAI_NOMORE;
 }
 
-static int32_t GetNextIPAddressFromHostEnt(struct hostent** hostEntry, struct IPAddress* address)
-{
-    assert(hostEntry != NULL);
-    assert(address != NULL);
-
-    struct hostent* entry = *hostEntry;
-    if (*entry->h_addr_list == NULL)
-    {
-        return GetAddrInfoErrorFlags_EAI_NOMORE;
-    }
-
-    switch (entry->h_addrtype)
-    {
-        case AF_INET:
-        {
-            struct in_addr* inAddr = (struct in_addr*)entry->h_addr_list[0];
-
-            ConvertInAddrToByteArray(address->Address, NUM_BYTES_IN_IPV4_ADDRESS, inAddr);
-            address->IsIPv6 = 0;
-            break;
-        }
-
-        case AF_INET6:
-        {
-            struct in6_addr* in6Addr = (struct in6_addr*)entry->h_addr_list[0];
-
-            ConvertIn6AddrToByteArray(address->Address, NUM_BYTES_IN_IPV6_ADDRESS, in6Addr);
-            address->IsIPv6 = 1;
-            address->ScopeId = 0;
-            break;
-        }
-
-        default:
-            return GetAddrInfoErrorFlags_EAI_NOMORE;
-    }
-
-    entry->h_addr_list = &entry->h_addr_list[1];
-    return GetAddrInfoErrorFlags_EAI_SUCCESS;
-}
-
-int32_t SystemNative_GetNextIPAddress(const struct HostEntry* hostEntry, void** addressListHandle, struct IPAddress* endPoint)
+int32_t SystemNative_GetNextIPAddress(const struct HostEntry* hostEntry, struct addrinfo** addressListHandle, struct IPAddress* endPoint)
 {
     if (hostEntry == NULL || addressListHandle == NULL || endPoint == NULL)
     {
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
-
-    switch (hostEntry->HandleType)
-    {
-        case HOST_ENTRY_HANDLE_ADDRINFO:
-            return GetNextIPAddressFromAddrInfo((struct addrinfo**)addressListHandle, endPoint);
-
-        case HOST_ENTRY_HANDLE_HOSTENT:
-            return GetNextIPAddressFromHostEnt((struct hostent**)addressListHandle, endPoint);
-
-        default:
-            return GetAddrInfoErrorFlags_EAI_BADARG;
-    }
+    
+    return GetNextIPAddressFromAddrInfo(addressListHandle, endPoint);    
 }
 
 void SystemNative_FreeHostEntry(struct HostEntry* entry)
 {
     if (entry != NULL)
-    {
-        switch (entry->HandleType)
-        {
-            case HOST_ENTRY_HANDLE_ADDRINFO:
-            {
-                struct addrinfo* ai = (struct addrinfo*)entry->AddressListHandle;
-                freeaddrinfo(ai);
-                break;
-            }
-
-            case HOST_ENTRY_HANDLE_HOSTENT:
-            {
-#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
-                free(entry->AddressListHandle);
-#endif
-                break;
-            }
-
-            default:
-                break;
-        }
+    {                
+        freeaddrinfo(entry->AddressListHandle);                        
     }
 }
 
@@ -1173,11 +783,23 @@ static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, struct I
 #if HAVE_IN_PKTINFO
     packetInfo->InterfaceIndex = (int32_t)pktinfo->ipi_ifindex;
 #else
-    // TODO (#7855): Figure out how to get interface index with in_addr.
-    // One option is http://www.unix.com/man-page/freebsd/3/if_nametoindex
-    // which requires interface name to be known.
-    // Meanwhile:
     packetInfo->InterfaceIndex = 0;
+
+    struct ifaddrs* addrs;
+    if (getifaddrs(&addrs) == 0)
+    {
+        struct ifaddrs* addrs_head = addrs;
+        while (addrs != NULL)
+        {
+            if (addrs->ifa_addr->sa_family == AF_INET && ((struct sockaddr_in*)addrs->ifa_addr)->sin_addr.s_addr == pktinfo->ipi_addr.s_addr)
+            {
+                packetInfo->InterfaceIndex = (int32_t)if_nametoindex(addrs->ifa_name);
+                break;
+            }
+            addrs = addrs->ifa_next;
+        }
+        freeifaddrs(addrs_head);
+    }
 #endif
 
     return 1;
@@ -1207,13 +829,12 @@ struct cmsghdr* GET_CMSG_NXTHDR(struct msghdr* mhdr, struct cmsghdr* cmsg)
 #ifndef __GLIBC__
 // Tracking issue: #6312
 // In musl-libc, CMSG_NXTHDR typecasts char* to struct cmsghdr* which causes
-// clang to throw cast-align warning. This is to suppress the warning
+// clang to throw sign-compare warning. This is to suppress the warning
 // inline.
 // There is also a problem in the CMSG_NXTHDR macro in musl-libc.
 // It compares signed and unsigned value and clang warns about that.
 // So we suppress the warning inline too.
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-align"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #endif
     return CMSG_NXTHDR(mhdr, cmsg);
@@ -1273,7 +894,7 @@ static int8_t GetMulticastOptionName(int32_t multicastOption, int8_t isIPv6, int
             return true;
 
         case MulticastOption_MULTICAST_IF:
-            *optionName = IP_MULTICAST_IF;
+            *optionName = isIPv6 ? IPV6_MULTICAST_IF : IP_MULTICAST_IF;
             return true;
 
         default:
@@ -1372,7 +993,7 @@ int32_t SystemNative_GetIPv6MulticastOption(intptr_t socket, int32_t multicastOp
 
     struct ipv6_mreq opt;
     socklen_t len = sizeof(opt);
-    int err = getsockopt(fd, IPPROTO_IP, optionName, &opt, &len);
+    int err = getsockopt(fd, IPPROTO_IPV6, optionName, &opt, &len);
     if (err != 0)
     {
         return SystemNative_ConvertErrorPlatformToPal(errno);
@@ -1410,7 +1031,7 @@ int32_t SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t multicastOp
 
     ConvertByteArrayToIn6Addr(&opt.ipv6mr_multiaddr, &option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS);
 
-    int err = setsockopt(fd, IPPROTO_IP, optionName, &opt, sizeof(opt));
+    int err = setsockopt(fd, IPPROTO_IPV6, optionName, &opt, sizeof(opt));
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
@@ -1650,6 +1271,29 @@ int32_t SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* so
     while ((accepted = accept4(fd, (struct sockaddr*)socketAddress, &addrLen, SOCK_CLOEXEC)) < 0 && errno == EINTR);
 #else
     while ((accepted = accept(fd, (struct sockaddr*)socketAddress, &addrLen)) < 0 && errno == EINTR);
+#if defined(FD_CLOEXEC)
+    // macOS does not have accept4 but it can set _CLOEXEC on descriptor.
+    // Unlike accept4 it is not atomic and the fd can leak child process.
+    if ((accepted != -1) && fcntl(accepted, F_SETFD, FD_CLOEXEC) != 0)
+    {
+        // Preserve and return errno from fcntl. close() may reset errno to OK.
+        int oldErrno = errno;
+        close(accepted);
+        accepted = -1;
+        errno = oldErrno;
+    }
+#endif
+#endif
+#if !defined(__linux__)
+    // On macOS and FreeBSD new socket inherits flags from accepting fd.
+    // Our socket code expects new socket to be in blocking mode by default.
+    if ((accepted != -1) && SystemNative_FcntlSetIsNonBlocking(accepted, 0) != 0)
+    {
+        int oldErrno = errno;
+        close(accepted);
+        accepted = -1;
+        errno = oldErrno;
+    }
 #endif
     if (accepted == -1)
     {
@@ -1985,6 +1629,10 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
                 case SocketOptionName_SO_IP_PKTINFO:
                     *optName = IPV6_RECVPKTINFO;
+                    return true;
+
+                case SocketOptionName_SO_IP_MULTICAST_IF:
+                    *optName = IPV6_MULTICAST_IF;
                     return true;
 
                 default:
@@ -2798,7 +2446,7 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
         return SystemNative_ConvertErrorPlatformToPal(errno);
     }
 
-#else    
+#else
     // If we ever need to run on a platform that doesn't have sendfile,
     // we can implement this with a simple read/send loop.  For now,
     // we just mark it as not supported.

@@ -753,10 +753,14 @@ namespace System
         public static sbyte Abs(sbyte value) { throw null; }
         public static float Abs(float value) { throw null; }
         public static double Acos(double d) { throw null; }
+        public static double Acosh(double d) { throw null; }
         public static double Asin(double d) { throw null; }
+        public static double Asinh(double d) { throw null; }
         public static double Atan(double d) { throw null; }
         public static double Atan2(double y, double x) { throw null; }
+        public static double Atanh(double d) { throw null; }
         public static long BigMul(int a, int b) { throw null; }
+        public static double Cbrt(double d) { throw null; }
         public static decimal Ceiling(decimal d) { throw null; }
         public static double Ceiling(double a) { throw null; }
         public static byte Clamp(byte value, byte min, byte max) { throw null; }
@@ -844,9 +848,13 @@ namespace System
     {
         public static float Abs(float x) { throw null; }
         public static float Acos(float x) { throw null; }
+        public static float Acosh(float x) { throw null; }
         public static float Asin(float x) { throw null; }
+        public static float Asinh(float x) { throw null; }
         public static float Atan(float x) { throw null; }
+        public static float Atanh(float x) { throw null; }
         public static float Atan2(float y, float x) { throw null; }
+        public static float Cbrt(float x) { throw null; }
         public static float Ceiling(float x) { throw null; }
         public static float Cos(float x) { throw null; }
         public static float Cosh(float x) { throw null; }
@@ -925,6 +933,7 @@ namespace System
         public static System.StringComparer FromComparison(System.StringComparison comparisonType) { throw null; }
         public abstract int Compare(string x, string y);
         public static System.StringComparer Create(System.Globalization.CultureInfo culture, bool ignoreCase) { throw null; }
+        public static System.StringComparer Create(System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) { throw null; }
         public new bool Equals(object x, object y) { throw null; }
         public abstract bool Equals(string x, string y);
         public int GetHashCode(object obj) { throw null; }
@@ -1193,20 +1202,33 @@ namespace System.IO
         public static string Combine(string path1, string path2, string path3, string path4) { throw null; }
         public static string Combine(params string[] paths) { throw null; }
         public static string GetDirectoryName(string path) { throw null; }
+        public static ReadOnlySpan<char> GetDirectoryName(ReadOnlySpan<char> path) { throw null; }
         public static string GetExtension(string path) { throw null; }
+        public static ReadOnlySpan<char> GetExtension(ReadOnlySpan<char> path) { throw null; }
         public static string GetFileName(string path) { throw null; }
+        public static ReadOnlySpan<char> GetFileName(ReadOnlySpan<char> path) { throw null; }
         public static string GetFileNameWithoutExtension(string path) { throw null; }
+        public static ReadOnlySpan<char> GetFileNameWithoutExtension(ReadOnlySpan<char> path) { throw null; }
         public static string GetFullPath(string path) { throw null; }
+        public static string GetFullPath(string path, string basePath) { throw null; }
         public static char[] GetInvalidFileNameChars() { throw null; }
         public static char[] GetInvalidPathChars() { throw null; }
         public static string GetPathRoot(string path) { throw null; }
+        public static ReadOnlySpan<char> GetPathRoot(ReadOnlySpan<char> path) { throw null; }
         public static string GetRandomFileName() { throw null; }
         public static string GetTempFileName() { throw null; }
         public static string GetTempPath() { throw null; }
         public static bool HasExtension(string path) { throw null; }
+        public static bool HasExtension(ReadOnlySpan<char> path) { throw null; }
         public static bool IsPathRooted(string path) { throw null; }
+        public static bool IsPathRooted(ReadOnlySpan<char> path) { throw null; }
         public static bool IsPathFullyQualified(string path) { throw null; }
+        public static bool IsPathFullyQualified(ReadOnlySpan<char> path) { throw null; }
         public static string GetRelativePath(string relativeTo, string path) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2) { throw null; }
+        public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten) { throw null; }
     }
 
     public partial class BinaryReader : System.IDisposable
@@ -1364,7 +1386,7 @@ namespace System.IO
         public override void Write(byte[] buffer, int offset, int count) { }
         public override void Write(System.ReadOnlySpan<byte> source) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
         public virtual void WriteTo(System.IO.Stream stream) { }
     }

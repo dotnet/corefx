@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     using System.Reflection;
     using System.Collections;
@@ -28,19 +24,13 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal struct XmlDeserializationEvents
-#else
     public struct XmlDeserializationEvents
-#endif
     {
         private XmlNodeEventHandler _onUnknownNode;
         private XmlAttributeEventHandler _onUnknownAttribute;
         private XmlElementEventHandler _onUnknownElement;
         private UnreferencedObjectEventHandler _onUnreferencedObject;
-#if !XMLSERIALIZERGENERATOR
         internal object sender;
-#endif
 
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlDeserializationEvents.OnUnknownNode"]/*' />
         public XmlNodeEventHandler OnUnknownNode
@@ -101,11 +91,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal abstract class XmlSerializerImplementation
-#else
     public abstract class XmlSerializerImplementation
-#endif
     {
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.Reader"]/*' />
         public virtual XmlSerializationReader Reader { get { throw new NotSupportedException(); } }
@@ -143,11 +129,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlSerializer
-#else
     public class XmlSerializer
-#endif
     {
 #if FEATURE_SERIALIZATION_UAPAOT
         public static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
@@ -177,6 +159,7 @@ namespace System.Xml.Serialization
         internal string DefaultNamespace = null;
 #endif
         private Type _rootType;
+        private bool _isReflectionBasedSerializer = false;
 
         private static TempAssemblyCache s_cache = new TempAssemblyCache();
         private static volatile XmlSerializerNamespaces s_defaultNamespaces;
@@ -387,7 +370,6 @@ namespace System.Xml.Serialization
             return new TempAssembly(new XmlMapping[] { xmlMapping }, new Type[] { type }, defaultNamespace, location);
         }
 
-#if !XMLSERIALIZERGENERATOR
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializer.Serialize"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
@@ -466,7 +448,7 @@ namespace System.Xml.Serialization
                     }
                     SerializePrimitive(xmlWriter, o, namespaces);
                 }
-                else if (ShouldUseReflectionBasedSerialization(_mapping))
+                else if (ShouldUseReflectionBasedSerialization(_mapping) || _isReflectionBasedSerializer)
                 {
                     SerializeUsingReflection(xmlWriter, o, namespaces, encodingStyle, id);
                 }
@@ -606,7 +588,7 @@ namespace System.Xml.Serialization
                     }
                     return DeserializePrimitive(xmlReader, events);
                 }
-                else if (ShouldUseReflectionBasedSerialization(_mapping))
+                else if (ShouldUseReflectionBasedSerialization(_mapping) || _isReflectionBasedSerializer)
                 {
                     return DeserializeUsingReflection(xmlReader, encodingStyle, events);
                 }
@@ -684,7 +666,6 @@ namespace System.Xml.Serialization
             var reader = new ReflectionXmlSerializationReader(mapping, xmlReader, events, encodingStyle);
             return reader.ReadObject();
         }
-#endif
 
         private static bool ShouldUseReflectionBasedSerialization(XmlMapping mapping)
         {
@@ -764,6 +745,13 @@ namespace System.Xml.Serialization
             TempAssembly tempAssembly = null;
             if (assembly == null)
             {
+                if (Mode == SerializationMode.PreGenOnly)
+                {
+                    AssemblyName name = type.Assembly.GetName();
+                    string serializerName = Compiler.GetTempAssemblyName(name, null);
+                    throw new FileLoadException(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
+                }
+
                 if (XmlMapping.IsShallow(mappings))
                 {
                     return Array.Empty<XmlSerializer>();
@@ -810,12 +798,13 @@ namespace System.Xml.Serialization
                 serializers[i] = new XmlSerializer();
                 serializers[i]._rootType = type;
                 serializers[i]._mapping = mappings[i];
+                serializers[i]._isReflectionBasedSerializer = true;
             }
 
             return serializers;
         }
 
-#if XMLSERIALIZERGENERATOR
+#if !FEATURE_SERIALIZATION_UAPAOT
         [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         [ResourceExposure(ResourceScope.None)]
         public static bool GenerateSerializer(Type[] types, XmlMapping[] mappings, Stream stream)
@@ -1074,7 +1063,6 @@ namespace System.Xml.Serialization
             return mapping;
         }
 
-#if !XMLSERIALIZERGENERATOR
         private void SerializePrimitive(XmlWriter xmlWriter, object o, XmlSerializerNamespaces namespaces)
         {
             XmlSerializationPrimitiveWriter writer = new XmlSerializationPrimitiveWriter();
@@ -1231,7 +1219,6 @@ namespace System.Xml.Serialization
             return o;
         }
 
-#endif
         private class XmlSerializerMappingKey
         {
             public XmlMapping Mapping;

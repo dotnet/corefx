@@ -3,6 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <IncludePerformanceTests>true</IncludePerformanceTests>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{18482C55-6B57-41E8-BBC4-383B9E2C7AA2}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
@@ -14,6 +15,8 @@
     <Compile Include="Perf.Span.Clear.cs" />
     <Compile Include="Perf.Span.Fill.cs" />
     <Compile Include="Perf.Span.IndexOf.cs" />
+    <Compile Include="Perf.Span.IndexOfAny.cs" />
+    <Compile Include="Perf.Span.SequenceCompareTo.cs" />
     <Compile Include="Perf.Span.StartsWith.cs" />
     <Compile Include="Perf.MemorySlice.cs" />
     <Compile Include="Perf.Utf8Formatter.cs" />

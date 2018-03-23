@@ -21,6 +21,8 @@
     <Compile Include="DisposedSocketTests.cs" />
     <Compile Include="DnsEndPointTest.cs" />
     <Compile Include="DualModeSocketTest.cs" />
+    <Compile Include="ExecutionContextFlowTest.cs" />
+    <Compile Include="ExecutionContextFlowTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
     <Compile Include="IPPacketInformationTest.cs" />
     <Compile Include="LingerStateTest.cs" />
     <Compile Include="LoggingTest.cs" />
@@ -48,7 +50,6 @@
     <Compile Include="SocketOptionNameTest.cs" />
     <Compile Include="MulticastOptionTest.cs" />
     <Compile Include="UdpClientTest.cs" />
-    <Compile Include="UnixDomainSocketTest.cs" />
     <Compile Include="UnixDomainSocketTest.netcoreapp.cs" Condition="'$(TargetGroup)' != 'netstandard'" />
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
@@ -118,6 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

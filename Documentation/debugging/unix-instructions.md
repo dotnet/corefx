@@ -6,9 +6,18 @@ CoreFX can be debugged on unix using both lldb and visual studio code
 ## Using lldb and SOS
 
 - Run the test using msbuild at least once with `/t:BuildAndTest`.
-- Install version 3.9 of lldb and launch lldb with dotnet as the process and arguments matching the arguments used when running the test through msbuild.
+- [Install version 3.9 of lldb](https://github.com/dotnet/coreclr/blob/master/Documentation/building/debugging-instructions.md#debugging-core-dumps-with-lldb) and launch lldb with dotnet as the process and arguments matching the arguments used when running the test through msbuild. 
 - Load the sos plugin using `plugin load libsosplugin.so`.
 - Type `soshelp` to get help. You can now use all sos commands like `bpmd`.
+
+You may need to supply a path to load SOS. It can be found next to libcoreclr.so. For example:
+```
+(lldb) plugin load libsosplugin.so
+error: no such file
+(lldb) image list libcoreclr.so
+[  0] ..... /home/dan/dotnet/shared/Microsoft.NETCoreApp/2.0.4/libcoreclr.so
+(lldb) plugin load /home/dan/dotnet/shared/Microsoft.NETCoreApp/2.0.4/libcoreclr.so
+```
 
 ## Debugging core dumps with lldb
 
@@ -56,13 +65,16 @@ lldb-3.9 -O "settings set target.exec-search-paths /home/parallels/Downloads/Sys
 
 - Install [Visual Studio Code](https://code.visualstudio.com/)
 - Install the [C# Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp)
-- Open the folder containing the source you want to debug in VS Code
+- Open the folder containing the source you want to debug in VS Code - i.e., if you are debugging a test failure in System.Net.Sockets, open `corefx/src/System.Net.Sockets`
 - Open the debug window: `ctrl-shift-D` or click on the button on the left
 - Click the gear button at the top to create a launch configuration, select `.NET Core` from the selection dropdown
 - In the `.NET Core Launch (console)` configuration do the following
   - delete the `preLaunchTask` property
-  - set `program` to the full path to corerun in the test directory
-  - set `cwd` to the test directory
+  - set `program` to the full path to `dotnet` in the bin directory.
+    - something like `corefx/bin/testhost/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+  - set `cwd` to the test bin directory.
+    - using the System.Net.Sockets example, it should be something like `corefx/bin/tests/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `args` to the command line arguments to pass to the test
     - something like: `[ "xunit.console.netcore.exe", "<test>.dll", "-notrait", .... ]`
+    - to run a specific test, you can append something like: `[ "method", "System.Net.Sockets.Tests.{ClassName}.{TestMethodName}", ...]`
 - Set a breakpoint and launch the debugger, inspecting variables and call stacks will now work

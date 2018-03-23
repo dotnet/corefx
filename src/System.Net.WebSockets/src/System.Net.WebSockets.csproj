@@ -5,13 +5,14 @@
     <ProjectGuid>{B0C83201-EC32-4E8D-9DE4-EEF41E052DA1}</ProjectGuid>
     <AssemblyName>System.Net.WebSockets</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\Net\WebSockets\ManagedWebSocket.cs" />
+    <Compile Include="System\Net\WebSockets\ManagedWebSocket.netcoreapp.cs" />
     <Compile Include="System\Net\WebSockets\ValueWebSocketReceiveResult.cs" />
     <Compile Include="System\Net\WebSockets\WebSocket.cs" />
     <Compile Include="System\Net\WebSockets\WebSocketCloseStatus.cs" />
@@ -23,6 +24,9 @@
     <Compile Include="System\Net\WebSockets\WebSocketState.cs" />
     <Compile Include="$(CommonPath)\System\Net\WebSockets\WebSocketValidate.cs">
       <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\WebSockets\ManagedWebSocket.cs">
+      <Link>Common\System\Net\WebSockets\ManagedWebSocket.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,6 @@
 using Microsoft.Win32.SafeHandles;
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -81,7 +80,6 @@ namespace System.Net.NetworkInformation
 
         internal static NetworkInterface[] GetNetworkInterfaces()
         {
-            Contract.Ensures(Contract.Result<NetworkInterface[]>() != null);
             AddressFamily family = AddressFamily.Unspecified;
             uint bufferSize = 0;
             SafeLocalAllocHandle buffer = null;
@@ -125,7 +123,7 @@ namespace System.Net.NetworkInformation
             // If we don't have any interfaces detected, return empty.
             if (result == Interop.IpHlpApi.ERROR_NO_DATA || result == Interop.IpHlpApi.ERROR_INVALID_PARAMETER)
             {
-                return new SystemNetworkInterface[0];
+                return Array.Empty<SystemNetworkInterface>();
             }
 
             // Otherwise we throw on an error.

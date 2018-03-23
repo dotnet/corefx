@@ -12,7 +12,7 @@ namespace System.Text.RegularExpressions
         private TimeSpan _matchTimeout;
 
         public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic)
-            : this(pattern, options, name, fullnamespace, ispublic, Regex.DefaultMatchTimeout)
+            : this(pattern, options, name, fullnamespace, ispublic, Regex.s_defaultMatchTimeout)
         {
         }
 
@@ -60,10 +60,7 @@ namespace System.Text.RegularExpressions
         public string Namespace
         {
             get => _nspace;
-            set
-            {
-                _nspace = value ?? throw new ArgumentNullException(nameof(Namespace));
-            }
+            set => _nspace = value ?? throw new ArgumentNullException(nameof(Namespace));
         }
 
         public RegexOptions Options { get; set; }

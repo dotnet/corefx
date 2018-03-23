@@ -4,12 +4,12 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class ExprField : ExprWithType, IExprWithObject
+    internal sealed class ExprField : ExprWithType
     {
-        public ExprField(CType type, Expr optionalObject, FieldWithType field, bool isLValue)
+        public ExprField(CType type, Expr optionalObject, FieldWithType field)
             : base(ExpressionKind.Field, type)
         {
-            Flags = isLValue ? EXPRFLAG.EXF_LVALUE : 0;
+            Flags = field.Field().isReadOnly ? 0 : EXPRFLAG.EXF_LVALUE;
             OptionalObject = optionalObject;
             FieldWithType = field;
         }

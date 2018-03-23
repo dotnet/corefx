@@ -251,7 +251,6 @@ namespace System.Threading.Tests
 
         [Theory]
         [MemberData(nameof(SignalAndWait_MemberData))]
-        [PlatformSpecific(TestPlatforms.Windows)] // other platforms don't support SignalAndWait
         private static void SignalAndWait(
             WaitHandle toSignal,
             AutoResetEvent toWaitOn,
@@ -296,7 +295,6 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // other platforms don't support SignalAndWait
         public static void SignalAndWait_InvalidArgs()
         {
             var toSignal = new ManualResetEvent(false);
@@ -318,17 +316,6 @@ namespace System.Threading.Tests
             Assert.False(toSignal.WaitOne(0));
             Assert.Throws<ObjectDisposedException>(() => WaitHandle.SignalAndWait(toSignal, invalidWh));
             Assert.False(toSignal.WaitOne(0));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix doesn't support SignalAndWait
-        public static void SignalAndWait_PlatformNotSupported()
-        {
-            var toSignal = new ManualResetEvent(false);
-            var toWaitOn = new ManualResetEvent(true);
-            Assert.Throws<PlatformNotSupportedException>(() => WaitHandle.SignalAndWait(toSignal, toWaitOn));
-            Assert.Throws<PlatformNotSupportedException>(() => WaitHandle.SignalAndWait(toSignal, toWaitOn, 0, false));
-            Assert.Throws<PlatformNotSupportedException>(() => WaitHandle.SignalAndWait(toSignal, toWaitOn, TimeSpan.Zero, false));
         }
 
         [Fact]

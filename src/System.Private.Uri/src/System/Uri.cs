@@ -1409,14 +1409,12 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(character));
             }
 
-            unsafe
+            return string.Create(3, character, (Span<char> chars, char c) =>
             {
-                char* chars = stackalloc char[3];
                 chars[0] = '%';
-                chars[1] = UriHelper.s_hexUpperChars[(character & 0xf0) >> 4];
-                chars[2] = UriHelper.s_hexUpperChars[character & 0xf];
-                return new string(chars, 0, 3);
-            }
+                chars[1] = UriHelper.s_hexUpperChars[(c & 0xf0) >> 4];
+                chars[2] = UriHelper.s_hexUpperChars[c & 0xf];
+            });
         }
 
         //
@@ -2021,7 +2019,7 @@ namespace System
                                         ((_flags & Flags.HasUnicode) != 0) &&
                                         ((_flags & Flags.HostUnicodeNormalized) == 0)) ? _originalUnicodeString : _string))
             {
-                // Cut trailing spaces in m_String
+                // Cut trailing spaces in _string
                 if (length > idx && UriHelper.IsLWS(pUriString[length - 1]))
                 {
                     --length;
@@ -2143,10 +2141,16 @@ namespace System
                         _flags |= Flags.AuthorityFound;
                         idx += 2;
                     }
+                    // There is no Authority component, save the Path index
+                    // Ideally we would treat mailto like any other URI, but for historical reasons we have to separate out its host parsing.
                     else if (_syntax.NotAny(UriSyntaxFlags.MailToLikeUri))
                     {
-                        // There is no Authority component, save the Path index
-                        // Note: mailto is the only guy who is treated specially, should be not.
+                        // By now we know the URI has no Authority, so if the URI must be normalized, initialize it without one.
+                        if (_iriParsing && (_flags & Flags.HasUnicode) != 0 && (_flags & Flags.HostUnicodeNormalized) == 0)
+                        {
+                            _string = _string.Substring(0, idx);
+                        }
+                        // Since there is no Authority, the path index is just the end of the scheme.
                         _flags |= ((Flags)idx | Flags.UnknownHostType);
                         return ParsingError.None;
                     }
@@ -2155,10 +2159,16 @@ namespace System
                 {
                     return ParsingError.BadAuthority;
                 }
+                // There is no Authority component, save the Path index
+                // Ideally we would treat mailto like any other URI, but for historical reasons we have to separate out its host parsing.
                 else if (_syntax.NotAny(UriSyntaxFlags.MailToLikeUri))
                 {
-                    // There is no Authority component, save the Path index
-                    // mailto is treated specially.
+                    // By now we know the URI has no Authority, so if the URI must be normalized, initialize it without one.
+                    if (_iriParsing && (_flags & Flags.HasUnicode) != 0 && (_flags & Flags.HostUnicodeNormalized) == 0)
+                    {
+                        _string = _string.Substring(0, idx);
+                    }
+                    // Since there is no Authority, the path index is just the end of the scheme.
                     _flags |= ((Flags)idx | Flags.UnknownHostType);
                     return ParsingError.None;
                 }
@@ -3365,12 +3375,6 @@ namespace System
                     {
                         _string = _syntax.SchemeName + SchemeDelimiter;
                     }
-                }
-                
-                // If host is absent, uri is abnormal and relative as in RFC 3986 section 5.4.2
-                if (_info.Offset.Host == _info.Offset.Path)
-                {
-                    _string = _syntax.SchemeName + ":";
                 }
 
                 _info.Offset.Path = (ushort)_string.Length;

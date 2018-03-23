@@ -26,7 +26,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void ConvertFrom_WithContext_Negative()
         {
-            Assert.Throws<Exception>(
+            AssertExtensions.Throws<ArgumentException, Exception>(
                 () => UInt16ConverterTests.s_converter.ConvertFrom(TypeConverterTests.s_context, null, "-8"));
         }
 
@@ -40,6 +40,13 @@ namespace System.ComponentModel.Tests
                     { (UInt16)3, (Single)3.0, null }
                 },
                 UInt16ConverterTests.s_converter);
+        }
+
+        [Fact]
+        public static void ConvertFrom_InvalidValue_ExceptionMessageContainsTypeName()
+        {
+            Exception e = Assert.ThrowsAny<Exception>(() => s_converter.ConvertFrom("badvalue"));
+            Assert.Contains(typeof(ushort).Name, e.Message);
         }
     }
 }

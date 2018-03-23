@@ -661,7 +661,7 @@ namespace System.Net.Http
                 (uint)requestHeadersBuffer.Length,
                 Interop.WinHttp.WINHTTP_ADDREQ_FLAG_ADD))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpAddRequestHeaders));
             }
         }
 
@@ -728,7 +728,7 @@ namespace System.Net.Http
                             WinHttpTraceHelper.Trace("WinHttpHandler.EnsureSessionHandleExists: error={0}", lastError);
                             if (lastError != Interop.WinHttp.ERROR_INVALID_PARAMETER)
                             {
-                                ThrowOnInvalidHandle(sessionHandle);
+                                ThrowOnInvalidHandle(sessionHandle, nameof(Interop.WinHttp.WinHttpOpen));
                             }
 
                             // We must be running on a platform earlier than Win8.1/Win2K12R2 which doesn't support
@@ -741,7 +741,7 @@ namespace System.Net.Http
                                 _proxyHelper.ManualSettingsOnly ? _proxyHelper.Proxy : Interop.WinHttp.WINHTTP_NO_PROXY_NAME,
                                 _proxyHelper.ManualSettingsOnly ? _proxyHelper.ProxyBypass : Interop.WinHttp.WINHTTP_NO_PROXY_BYPASS,
                                 (int)Interop.WinHttp.WINHTTP_FLAG_ASYNC);
-                            ThrowOnInvalidHandle(sessionHandle);
+                            ThrowOnInvalidHandle(sessionHandle, nameof(Interop.WinHttp.WinHttpOpen));
                         }
 
                         uint optionAssuredNonBlockingTrue = 1; // TRUE
@@ -757,7 +757,7 @@ namespace System.Net.Http
                             int lastError = Marshal.GetLastWin32Error();
                             if (lastError != Interop.WinHttp.ERROR_WINHTTP_INVALID_OPTION)
                             {
-                                throw WinHttpException.CreateExceptionUsingError(lastError);
+                                throw WinHttpException.CreateExceptionUsingError(lastError, nameof(Interop.WinHttp.WinHttpSetOption));
                             }
                         }
 
@@ -788,7 +788,7 @@ namespace System.Net.Http
                     state.RequestMessage.RequestUri.Host,
                     (ushort)state.RequestMessage.RequestUri.Port,
                     0);
-                ThrowOnInvalidHandle(connectHandle);
+                ThrowOnInvalidHandle(connectHandle, nameof(Interop.WinHttp.WinHttpConnect));
                 connectHandle.SetParentHandle(_sessionHandle);
 
                 // Try to use the requested version if a known/supported version was explicitly requested.
@@ -821,7 +821,7 @@ namespace System.Net.Http
                     Interop.WinHttp.WINHTTP_NO_REFERER,
                     Interop.WinHttp.WINHTTP_DEFAULT_ACCEPT_TYPES,
                     flags);
-                ThrowOnInvalidHandle(state.RequestHandle);
+                ThrowOnInvalidHandle(state.RequestHandle, nameof(Interop.WinHttp.WinHttpOpenRequest));
                 state.RequestHandle.SetParentHandle(connectHandle);
 
                 // Set callback function.
@@ -888,6 +888,16 @@ namespace System.Net.Http
 
                 HttpResponseMessage responseMessage = WinHttpResponseParser.CreateResponseMessage(state, _doManualDecompressionCheck);
                 state.Tcs.TrySetResult(responseMessage);
+
+                // HttpStatusCode cast is needed for 308 Moved Permenantly, which we support but is not included in NetStandard status codes.
+                if (WinHttpTraceHelper.IsTraceEnabled() &&
+                    ((responseMessage.StatusCode >= HttpStatusCode.MultipleChoices && responseMessage.StatusCode <= HttpStatusCode.SeeOther) ||
+                     (responseMessage.StatusCode >= HttpStatusCode.RedirectKeepVerb && responseMessage.StatusCode <= (HttpStatusCode)308)) &&
+                    state.RequestMessage.RequestUri.Scheme == Uri.UriSchemeHttps && responseMessage.Headers.Location?.Scheme == Uri.UriSchemeHttp)
+                {
+                    WinHttpTraceHelper.Trace("WinHttpHandler.SendAsync: Insecure https to http redirect from {0} to {1} blocked.",
+                        state.RequestMessage.RequestUri.ToString(), responseMessage.Headers.Location.ToString());
+                }
             }
             catch (Exception ex)
             {
@@ -947,7 +957,7 @@ namespace System.Net.Http
                 (int)_sendTimeout.TotalMilliseconds,
                 (int)_receiveHeadersTimeout.TotalMilliseconds))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetTimeouts));
             }
         }
 
@@ -1204,7 +1214,7 @@ namespace System.Net.Http
                 option,
                 ref optionData))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetOption));
             }
         }
 
@@ -1217,7 +1227,7 @@ namespace System.Net.Http
                 optionData,
                 (uint)optionData.Length))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetOption));
             }
         }
 
@@ -1234,7 +1244,7 @@ namespace System.Net.Http
                 optionData,
                 optionSize))
             {
-                WinHttpException.ThrowExceptionUsingLastError();
+                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetOption));
             }
         }
 
@@ -1304,18 +1314,18 @@ namespace System.Net.Http
                 int lastError = Marshal.GetLastWin32Error();
                 if (lastError != Interop.WinHttp.ERROR_INVALID_HANDLE) // Ignore error if handle was already closed.
                 {
-                    throw WinHttpException.CreateExceptionUsingError(lastError);
+                    throw WinHttpException.CreateExceptionUsingError(lastError, nameof(Interop.WinHttp.WinHttpSetStatusCallback));
                 }
             }
         }
 
-        private void ThrowOnInvalidHandle(SafeWinHttpHandle handle)
+        private void ThrowOnInvalidHandle(SafeWinHttpHandle handle, string nameOfCalledFunction)
         {
             if (handle.IsInvalid)
             {
                 int lastError = Marshal.GetLastWin32Error();
                 WinHttpTraceHelper.Trace("WinHttpHandler.ThrowOnInvalidHandle: error={0}", lastError);
-                throw WinHttpException.CreateExceptionUsingError(lastError);
+                throw WinHttpException.CreateExceptionUsingError(lastError, nameOfCalledFunction);
             }
         }
 
@@ -1333,16 +1343,13 @@ namespace System.Net.Http
                     0,
                     state.ToIntPtr()))
                 {
-                    int lastError = Marshal.GetLastWin32Error();
-                    Debug.Assert((unchecked((int)lastError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
-                        unchecked((int)lastError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
-                        $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)lastError)}");
-
-                    // Dispose (which will unpin) the state object. Since this failed, WinHTTP won't associate
-                    // our context value (state object) to the request handle. And thus we won't get HANDLE_CLOSING
-                    // notifications which would normally cause the state object to be unpinned and disposed.
+                    // WinHTTP doesn't always associate our context value (state object) to the request handle.
+                    // And thus we might not get a HANDLE_CLOSING notification which would normally cause the
+                    // state object to be unpinned and disposed. So, we manually dispose the request handle and
+                    // state object here.
+                    state.RequestHandle.Dispose();
                     state.Dispose();
-                    throw WinHttpException.CreateExceptionUsingError(lastError);
+                    WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSendRequest));
                 }
             }
 
@@ -1366,7 +1373,7 @@ namespace System.Net.Http
             {
                 if (!Interop.WinHttp.WinHttpReceiveResponse(state.RequestHandle, IntPtr.Zero))
                 {
-                    throw WinHttpException.CreateExceptionUsingLastError();
+                    throw WinHttpException.CreateExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpReceiveResponse));
                 }
             }
 

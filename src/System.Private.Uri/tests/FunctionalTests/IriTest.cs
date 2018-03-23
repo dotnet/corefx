@@ -64,30 +64,34 @@ namespace System.PrivateUri.Tests
         public void Iri_Uri_SchemaParsing_ShouldNotThrowArgumentOutOfRange()
         {
             string root = "viewcode://./codeschema_class?";
-            string uriDataFra = root + Uri.EscapeDataString("Type=\u00E9");
+            string uriDataFra = root + "Type=" + Uri.EscapeDataString("\u00E9");
 
             Uri u1 = new Uri(uriDataFra);
 
-            // TODO #8330 : Normalization should produce the same result for escaped/unescaped URIs.
-            // Assert.Equal(root + "Type=%C3%A9", u1.AbsoluteUri);
-
-            Assert.NotEqual(root + "Type=%C3%A9", u1.AbsoluteUri);
+            Assert.Equal(root + "Type=%C3%A9", u1.AbsoluteUri);
         }
 
         [Fact]
-        public void Iri_IncorrectNormalization()
+        public void Iri_ReservedCharacters_NotNormalized()
         {
             Uri u1 = new Uri(@"http://test.com/%2c");
             Uri u2 = new Uri(@"http://test.com/,");
 
-            // TODO #8330 : Normalization should produce the same result for escaped/unescaped URIs.
-            //Assert.Equal(
-            //    u1.ToString(),
-            //    u2.ToString());
-
             Assert.NotEqual(
                 u1.ToString(),
                 u2.ToString());
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void Iri_UnknownSchemeWithoutAuthority_DoesNormalize()
+        {
+            string[] paths = { "\u00E8", "%C3%A8" };
+            foreach (string path in paths)
+            {
+                Uri noAuthority = new Uri("scheme:" + path);
+                Assert.Equal("scheme:\u00E8", noAuthority.ToString());
+            }
         }
 
         [Fact]
@@ -535,6 +539,33 @@ namespace System.PrivateUri.Tests
 
             Assert.Equal(authority, fileTwoSlashes.Authority); // Two slashes must be followed by an authority
             Assert.Equal(authority, fileFourSlashes.Authority); // More than three slashes looks like a UNC share
+        }
+
+        [Theory]
+        [InlineData(@"c:/path/with/unicode/ö/test.xml")]
+        [InlineData(@"file://c:/path/with/unicode/ö/test.xml")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void Iri_WindowsPathWithUnicode_DoesRemoveScheme(string uriString)
+        {
+            var uri = new Uri(uriString);
+            Assert.False(uri.LocalPath.StartsWith("file:"));
+        }
+
+        [Theory]
+        [InlineData("http:%C3%A8")]
+        [InlineData("http:\u00E8")]
+        [InlineData("%C3%A8")]
+        [InlineData("\u00E8")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void Iri_RelativeUriCreation_ShouldNotNormalize(string uriString)
+        {
+            Uri href;
+            Uri hrefAbsolute;
+            Uri baseIri = new Uri("http://www.contoso.com");
+
+            Assert.True(Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out href));
+            Assert.True(Uri.TryCreate(baseIri, href, out hrefAbsolute));
+            Assert.Equal("http://www.contoso.com/%C3%A8", hrefAbsolute.AbsoluteUri);
         }
     }
 }

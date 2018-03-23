@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace Microsoft.Win32.SafeHandles
 {
     public abstract partial class SafeNCryptHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
@@ -197,9 +196,9 @@ namespace System.Security.Cryptography
         None = 0,
         Signing = 2,
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct CngProperty : System.IEquatable<System.Security.Cryptography.CngProperty>
     {
+        private object _dummy;
         public CngProperty(string name, byte[] value, System.Security.Cryptography.CngPropertyOptions options) { throw null; }
         public string Name { get { throw null; } }
         public System.Security.Cryptography.CngPropertyOptions Options { get { throw null; } }
@@ -266,7 +265,7 @@ namespace System.Security.Cryptography
         public override string SignatureAlgorithm { get { throw null; } }
         protected override void Dispose(bool disposing) { }
         public override System.Security.Cryptography.DSAParameters ExportParameters(bool includePrivateParameters) { throw null; }
-#if FEATURE_HASHDATA // uap and netcoreapp specific
+#if FEATURE_DSA_HASHDATA
         protected override byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected override byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
 #endif

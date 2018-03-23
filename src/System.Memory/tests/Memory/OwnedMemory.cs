@@ -86,6 +86,52 @@ namespace System.MemoryTests
             owner.Dispose();
             Assert.True(owner.IsDisposed);
         }
+        
+        [Fact]
+        public static void OwnedMemoryPinEmptyArray()
+        {
+            int[] a = {};
+            OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
+            MemoryHandle handle = owner.Pin();
+            Assert.True(handle.HasPointer);
+        }
+
+        [Fact]
+        public static void OwnedMemoryPinArray()
+        {
+            int[] array = { 1, 2, 3, 4, 5 };
+            OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
+            MemoryHandle handle = owner.Pin();
+            Assert.True(handle.HasPointer);
+            unsafe
+            {
+                int* pointer = (int*)handle.Pointer;
+
+                GC.Collect();
+
+                for (int i = 0; i < owner.Memory.Length; i++)
+                {
+                    Assert.Equal(array[i], pointer[i]);
+                }
+            }
+            handle.Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop framework doesn't support large arrays by default.")]
+        public static void OwnedMemoryPinLargeArray()
+        {
+            // Early-out: we can only run this test on 64-bit platforms.
+            if (IntPtr.Size == 4)
+            {
+                return;
+            }
+
+            int[] array = new int[0x2000_0000]; // will produce array with total byte length > 2 GB
+            OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
+            Assert.Throws<ArgumentOutOfRangeException>(() => owner.Pin(int.MinValue));
+        }
 
         [Fact]
         public static void MemoryFromOwnedMemoryAfterDispose()
