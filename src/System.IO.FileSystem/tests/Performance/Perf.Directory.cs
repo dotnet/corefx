@@ -63,7 +63,7 @@ namespace System.IO.Tests
             StringBuilder sb = new StringBuilder(5000);
             for (int i = 0; i < depth; i++)
             {
-                sb.Append(@"\a");
+                sb.Append(Path.DirectorySeparatorChar + "a");
             }
 
             return sb.ToString();
