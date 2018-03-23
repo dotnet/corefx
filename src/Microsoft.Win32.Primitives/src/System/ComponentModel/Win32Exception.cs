@@ -55,6 +55,11 @@ namespace System.ComponentModel
             NativeErrorCode = Marshal.GetLastWin32Error();
         }
 
+        protected Win32Exception(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            nativeErrorCode = info.GetInt32(nameof(NativeErrorCode));
+        }
+
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

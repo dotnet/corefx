@@ -240,5 +240,23 @@ namespace System.Drawing
         ///    </para>
         /// </summary>
         public override string ToString() => "{Width=" + width.ToString() + ", Height=" + height.ToString() + "}";
+
+        /// <summary>
+        /// Multiplies <see cref="Size"/> by an <see cref="int"/> producing <see cref="Size"/>.
+        /// </summary>
+        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="multiplier">Multiplier of type <see cref='int'>.</param>
+        /// <returns>Product of type <see cref="Size"/>.</returns>
+        private static Size Multiply(Size size, int multiplier) =>
+            new Size(unchecked(size.width * multiplier), unchecked(size.height * multiplier));
+
+        /// <summary>
+        /// Multiplies <see cref="Size"/> by a <see cref="float"/> producing <see cref="SizeF"/>.
+        /// </summary>
+        /// <param name="size">Multiplicand of type <see cref="Size"/>.</param>
+        /// <param name="multiplier">Multiplier of type <see cref="float"/>.</param>
+        /// <returns>Product of type SizeF.</returns>
+        private static SizeF Multiply(Size size, float multiplier) =>
+            new SizeF(size.width * multiplier, size.height * multiplier);
     }
 }

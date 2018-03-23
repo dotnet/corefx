@@ -31,6 +31,11 @@ namespace System.Security.AccessControl
             _privilegeName = privilege;
         }
 
+        private PrivilegeNotHeldException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            _privilegeName = info.GetString(nameof(PrivilegeName));
+        }
+
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

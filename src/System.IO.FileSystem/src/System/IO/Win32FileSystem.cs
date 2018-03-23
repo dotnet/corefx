@@ -225,22 +225,7 @@ namespace System.IO
 
             using (new DisableMediaInsertionPrompt())
             {
-                Interop.Kernel32.WIN32_FIND_DATA findData;
-                findData = new Interop.Kernel32.WIN32_FIND_DATA();
-
-                // Remove trailing slash since this can cause grief to FindFirstFile. You will get an invalid argument error
-                String tempPath = path.TrimEnd(PathHelpers.DirectorySeparatorChars);
-
-                // For removable media drives, normally the OS will pop up a dialog requesting insertion
-                // of the relevant media (CD, floppy, memory card, etc.). We don't want this prompt so we
-                // set SEM_FAILCRITICALERRORS to suppress it.
-                //
-                // Note that said dialog only shows once the relevant filesystem has been loaded, which
-                // does not happen until actual media is accessed at least once since booting.
-
-                uint oldMode;
-                bool success = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out oldMode);
-                try
+                if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
                     errorCode = Marshal.GetLastWin32Error();
                     if (errorCode == Interop.Errors.ERROR_ACCESS_DENIED)
@@ -250,9 +235,10 @@ namespace System.IO
                         // FindFirstFile, however, will. Historically we always gave back attributes
                         // for marked-for-deletion files.
 
-                            if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
-                                errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND ||
-                                errorCode == Interop.Errors.ERROR_NOT_READY)  // Removable media not inserted
+                        var findData = new Interop.Kernel32.WIN32_FIND_DATA();
+                        using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(path, ref findData))
+                        {
+                            if (handle.IsInvalid)
                             {
                                 errorCode = Marshal.GetLastWin32Error();
                             }

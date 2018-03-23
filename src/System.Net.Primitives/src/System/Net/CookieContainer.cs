@@ -995,20 +995,22 @@ namespace System.Net
         // adding any mutable fields to it would result in breaks.
         private readonly SortedList m_list = SortedList.Synchronized(new SortedList(PathListComparer.StaticInstance)); // Do not rename (binary serialization)
 
-        public int Count => m_list.Count;
+        internal int Count => m_list.Count;
 
-        internal ICollection Values
+        internal int GetCookiesCount()
         {
-            get
+            int count = 0;
+            lock (SyncRoot)
             {
                 foreach (CookieCollection cc in m_list.Values)
                 {
                     count += cc.Count;
                 }
             }
+            return count;
         }
 
-        public ICollection Values
+        internal ICollection Values
         {
             get
             {
@@ -1016,7 +1018,7 @@ namespace System.Net
             }
         }
 
-        public object this[string s]
+        internal object this[string s]
         {
             get
             {
@@ -1035,7 +1037,7 @@ namespace System.Net
             }
         }
 
-        public IEnumerator GetEnumerator()
+        internal IDictionaryEnumerator GetEnumerator()
         {
             lock (SyncRoot)
             {
@@ -1043,10 +1045,9 @@ namespace System.Net
             }
         }
 
-        public object SyncRoot => m_list.SyncRoot;
+        internal object SyncRoot => m_list.SyncRoot;
 
         [Serializable]
-        [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         private sealed class PathListComparer : IComparer
         {
             internal static readonly PathListComparer StaticInstance = new PathListComparer();
