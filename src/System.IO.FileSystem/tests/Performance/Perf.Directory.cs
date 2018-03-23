@@ -59,9 +59,9 @@ namespace System.IO.Tests
         }
 
         [Benchmark]
-        [InlineData(10, 1000)]
-        [InlineData(100, 100)]
-        [InlineData(1000, 10)]
+        [InlineData(10, 100)]
+        [InlineData(100, 10)]
+        [InlineData(1000, 1)]
         [OuterLoop("Takes a lot of time to finish")]
         public void RecursiveCreateDirectory(int depth, int times)
         {
@@ -93,9 +93,9 @@ namespace System.IO.Tests
         }
 
         [Benchmark]
-        [InlineData(10, 1000)]
-        [InlineData(100, 100)]
-        [InlineData(1000, 10)]
+        [InlineData(10, 100)]
+        [InlineData(100, 10)]
+        [InlineData(1000, 1)]
         [OuterLoop("Takes a lot of time to finish")]
         public void RecursiveDeleteDirectory(int depth, int times)
         {
