@@ -1386,7 +1386,7 @@ namespace System.Configuration
 }
 namespace System.Configuration.Internal
 {
-    public partial class DelegatingConfigHost : System.Configuration.Internal.IInternalConfigHost, System.Configuration.Internal.IInternalConfigHostPaths
+    public partial class DelegatingConfigHost : System.Configuration.Internal.IInternalConfigHost
     {
         protected DelegatingConfigHost() { }
         protected System.Configuration.Internal.IInternalConfigHost Host { get { throw null; } set { } }
@@ -1522,13 +1522,6 @@ namespace System.Configuration.Internal
         void VerifyDefinitionAllowed(string configPath, System.Configuration.ConfigurationAllowDefinition allowDefinition, System.Configuration.ConfigurationAllowExeDefinition allowExeDefinition, System.Configuration.Internal.IConfigErrorInfo errorInfo);
         void WriteCompleted(string streamName, bool success, object writeContext);
         void WriteCompleted(string streamName, bool success, object writeContext, bool assertPermissions);
-    }
-    internal interface IInternalConfigHostPaths
-    {
-        void RefreshConfigPaths();
-        bool HasLocalConfig { get; }
-        bool HasRoamingConfig { get; }
-        bool IsAppConfigHttp { get; }
     }
     public partial interface IInternalConfigRecord
     {
