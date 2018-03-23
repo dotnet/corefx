@@ -185,13 +185,13 @@ namespace System.Security.AccessControl
                 );
 
             customObjectSecurity.AddAuditRule(customAuditRuleReadWrite);
-            customObjectSecurity.RemoveAuditRuleSpecific(customAuditRuleWrite);
-
-            AuthorizationRuleCollection ruleCollection =
-                customObjectSecurity
-               .GetAuditRules(true, true, typeof(System.Security.Principal.NTAccount));
-
+            AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAuditRules(true, true, typeof(System.Security.Principal.NTAccount));
             List<CustomAuditRule> existingRules = ruleCollection.Cast<CustomAuditRule>().ToList();
+            Assert.True(existingRules.Contains(customAuditRuleReadWrite));
+
+            customObjectSecurity.RemoveAuditRuleSpecific(customAuditRuleWrite);
+            ruleCollection = customObjectSecurity.GetAuditRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAuditRule>().ToList();
             Assert.True(existingRules.Contains(customAuditRuleReadWrite));
         }
 
@@ -233,7 +233,7 @@ namespace System.Security.AccessControl
                 existingRules.Any(
                     x => x.AccessMaskValue == ReadAccessMask &&
                     x.AuditFlags == AuditFlags.Success &&
-                    x.IdentityReference == identity
+                    x.IdentityReference.Translate(typeof(SecurityIdentifier)) == identity.Translate(typeof(SecurityIdentifier))
                     )
                 );
         }
@@ -350,7 +350,7 @@ namespace System.Security.AccessControl
 
             Assert.True(
                 existingRules.Any(
-                    x => x.IdentityReference == identityReference &&
+                    x => x.IdentityReference.Translate(typeof(SecurityIdentifier)) == identityReference.Translate(typeof(SecurityIdentifier)) &&
                     x.AccessControlType == customAccessRuleReadWrite.AccessControlType &&
                     x.AccessMaskValue == ReadAccessMask
                     ));
@@ -387,7 +387,7 @@ namespace System.Security.AccessControl
 
             Assert.True(
                  existingRules.Any(
-                        x => x.IdentityReference == identityReference &&
+                        x => x.IdentityReference.Translate(typeof(SecurityIdentifier)) == identityReference.Translate(typeof(SecurityIdentifier)) &&
                         x.AccessControlType == AccessControlType.Deny &&
                         x.AccessMaskValue == ReadAttributeAccessMask
                     ));
@@ -574,14 +574,19 @@ namespace System.Security.AccessControl
                 );
 
             customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
-            customObjectSecurity.AddAccessRule(customAccessRuleNetworkService);
-            customObjectSecurity.ResetAccessRule(customAccessRuleRead);
-
-            AuthorizationRuleCollection ruleCollection =
-              customObjectSecurity
-             .GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
-
+            AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
             List<CustomAccessRule> existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
+            Assert.True(existingRules.Contains(customAccessRuleReadWrite));
+
+            customObjectSecurity.AddAccessRule(customAccessRuleNetworkService);
+            ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
+            Assert.True(existingRules.Contains(customAccessRuleReadWrite));
+            Assert.True(existingRules.Contains(customAccessRuleNetworkService));
+
+            customObjectSecurity.ResetAccessRule(customAccessRuleRead);
+            ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
             Assert.False(existingRules.Contains(customAccessRuleReadWrite));
             Assert.False(existingRules.Contains(customAccessRuleNetworkService));
             Assert.True(existingRules.Contains(customAccessRuleRead));
@@ -611,14 +616,19 @@ namespace System.Security.AccessControl
                 );
 
             customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
-            customObjectSecurity.AddAccessRule(customAccessRuleNetworkService);
-            customObjectSecurity.ResetAccessRule(customAccessRuleWrite);
-
-            AuthorizationRuleCollection ruleCollection =
-              customObjectSecurity
-             .GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
-
+            AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
             List<CustomAccessRule> existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
+            Assert.True(existingRules.Contains(customAccessRuleReadWrite));
+
+            customObjectSecurity.AddAccessRule(customAccessRuleNetworkService);
+            ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
+            Assert.True(existingRules.Contains(customAccessRuleReadWrite));
+            Assert.True(existingRules.Contains(customAccessRuleNetworkService));
+
+            customObjectSecurity.ResetAccessRule(customAccessRuleWrite);
+            ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
             Assert.False(existingRules.Contains(customAccessRuleReadWrite));
             Assert.False(existingRules.Contains(customAccessRuleNetworkService));
             Assert.True(existingRules.Contains(customAccessRuleWrite));
@@ -680,14 +690,13 @@ namespace System.Security.AccessControl
                 );
 
             customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
-            customObjectSecurity.SetAccessRule(customAccessRuleRead);
-
-            AuthorizationRuleCollection ruleCollection =
-              customObjectSecurity
-             .GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
-
+            AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
             List<CustomAccessRule> existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
+            Assert.True(existingRules.Contains(customAccessRuleReadWrite));
 
+            customObjectSecurity.SetAccessRule(customAccessRuleRead);
+            ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+            existingRules = ruleCollection.Cast<CustomAccessRule>().ToList();
             Assert.False(existingRules.Contains(customAccessRuleReadWrite));
             Assert.True(existingRules.Contains(customAccessRuleRead));
         }
@@ -868,7 +877,7 @@ namespace System.Security.AccessControl
 
             private bool IsEqual(CustomAuditRule auditRule)
             {
-                return IdentityReference.Equals(auditRule.IdentityReference)
+                return IdentityReference.Translate(typeof(SecurityIdentifier)).Equals(auditRule.IdentityReference.Translate(typeof(SecurityIdentifier)))
                     && AccessMask.Equals(auditRule.AccessMask)
                     && AuditFlags.Equals(auditRule.AuditFlags)
                     && InheritanceFlags.Equals(auditRule.InheritanceFlags)
@@ -877,7 +886,7 @@ namespace System.Security.AccessControl
 
             public override int GetHashCode()
             {
-                return IdentityReference.GetHashCode() ^
+                return IdentityReference.Translate(typeof(SecurityIdentifier)).GetHashCode() ^
                        AccessMask.GetHashCode() ^
                        AuditFlags.GetHashCode() ^
                        InheritanceFlags.GetHashCode() ^
@@ -925,7 +934,7 @@ namespace System.Security.AccessControl
 
             private bool IsEqual(CustomAccessRule accessRule)
             {
-                return IdentityReference.Equals(accessRule.IdentityReference)
+                return IdentityReference.Translate(typeof(SecurityIdentifier)).Equals(accessRule.IdentityReference.Translate(typeof(SecurityIdentifier)))
                     && AccessMask.Equals(accessRule.AccessMask)
                     && AccessControlType.Equals(accessRule.AccessControlType)
                     && InheritanceFlags.Equals(accessRule.InheritanceFlags)
@@ -934,7 +943,7 @@ namespace System.Security.AccessControl
 
             public override int GetHashCode()
             {
-                return IdentityReference.GetHashCode() ^
+                return IdentityReference.Translate(typeof(SecurityIdentifier)).GetHashCode() ^
                        AccessMask.GetHashCode() ^
                        AccessControlType.GetHashCode() ^
                        InheritanceFlags.GetHashCode() ^
