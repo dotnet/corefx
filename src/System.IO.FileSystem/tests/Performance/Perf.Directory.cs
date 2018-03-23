@@ -58,25 +58,22 @@ namespace System.IO.Tests
             Directory.Delete(testFile);
         }
 
-        [Benchmark]
-        [InlineData(10, 100)]
-        [InlineData(100, 10)]
-        [InlineData(1000, 1)]
-        [OuterLoop("Takes a lot of time to finish")]
-        public void RecursiveCreateDirectory(int depth, int times)
+        public string GetTestDeepFilePath(int depth)
         {
-            if (!PlatformDetection.IsWindows && depth == 1000)
-                return;
-            
-            // Setup
-            string rootDirectory = GetTestFilePath();
             StringBuilder sb = new StringBuilder(5000);
             for (int i = 0; i < depth; i++)
             {
                 sb.Append(@"\a");
             }
 
-            string path = sb.ToString();
+            return sb.ToString();
+        }
+
+        public void RecursiveCreateDirectory(int depth, int times)
+        {
+            // Setup
+            string rootDirectory = GetTestFilePath();
+            string path = GetTestDeepFilePath(depth);
 
             foreach (var iteration in Benchmark.Iterations)
             {
@@ -84,7 +81,7 @@ namespace System.IO.Tests
                 {
                     for (int i = 0; i < times; i++)
                     {
-                        Directory.CreateDirectory(rootDirectory + @"\" + i + path);
+                        Directory.CreateDirectory(rootDirectory + Path.DirectorySeparatorChar + i + path);
                     }
                 }
                 // TearDown For each iteration
@@ -95,22 +92,27 @@ namespace System.IO.Tests
         [Benchmark]
         [InlineData(10, 100)]
         [InlineData(100, 10)]
-        [InlineData(1000, 1)]
         [OuterLoop("Takes a lot of time to finish")]
-        public void RecursiveDeleteDirectory(int depth, int times)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void RecursiveCreateDirectoryTest(int depth, int times)
         {
-            if (!PlatformDetection.IsWindows && depth == 1000)
-                return;
+            RecursiveCreateDirectory(depth, times);
+        }
 
+        [Benchmark]
+        [OuterLoop("Takes a lot of time to finish")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void RecursiveCreateDirectoryLargeDepthTest()
+        {
+            RecursiveCreateDirectory(1000, 1);
+        }
+
+        public void RecursiveDelete(int depth, int times)
+        {
             // Setup
             string rootDirectory = GetTestFilePath();
-            StringBuilder sb = new StringBuilder(5000);
-            for (int i = 0; i < depth; i++)
-            {
-                sb.Append(@"\a");
-            }
-
-            string path = sb.ToString();
+            string path = GetTestDeepFilePath(depth);
 
             foreach (var iteration in Benchmark.Iterations)
             {
@@ -130,6 +132,25 @@ namespace System.IO.Tests
             }
             // TearDown
             Directory.Delete(rootDirectory, recursive: true);
+        }
+
+        [Benchmark]
+        [InlineData(10, 100)]
+        [InlineData(100, 10)]
+        [OuterLoop("Takes a lot of time to finish")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void RecursiveDeleteDirectoryTest(int depth, int times)
+        {
+            RecursiveDelete(depth, times);
+        }
+
+        [Benchmark]
+        [OuterLoop("Takes a lot of time to finish")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void RecursiveDeleteDirectoryLargeDepthTest()
+        {
+            RecursiveDelete(1000, 1);
         }
     }
 }
