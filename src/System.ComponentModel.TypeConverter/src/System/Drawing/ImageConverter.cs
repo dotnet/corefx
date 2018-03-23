@@ -8,9 +8,6 @@ using System.IO;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Summary description for ImageConverter.
-    /// </summary>
     public class ImageConverter : TypeConverter
     {
         public ImageConverter()
@@ -48,7 +45,7 @@ namespace System.Drawing
             {
                 if (value == null)
                 {
-                    return "(none)";
+                    return SR.none;
                 }
                 else if (value is Image)
                 {
@@ -64,7 +61,7 @@ namespace System.Drawing
                 }
             }
 
-            throw new NotSupportedException($"ImageConverter can not convert from type {value.GetType()}.");
+            throw GetConvertFromException(value);
         }
 
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)

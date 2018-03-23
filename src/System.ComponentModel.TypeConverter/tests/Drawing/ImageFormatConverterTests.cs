@@ -84,9 +84,9 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, 10));
         }
 
-        private ImageFormat ShortName(string s)
+        private ImageFormat ShortName(string imgFormatValue)
         {
-            return (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, s);
+            return (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, imgFormatValue);
         }
 
         [Fact]
@@ -104,24 +104,24 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(ImageFormat.Wmf, ShortName("Wmf"));
         }
 
-        private void LongName(ImageFormat f, string s)
+        private void LongName(ImageFormat iformat)
         {
-            Assert.Equal(f, (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, f.ToString()));
+            Assert.Equal(iformat, (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, iformat.ToString()));
         }
 
         [Fact]
         public void ConvertFrom_LongName()
         {
-            LongName(ImageFormat.Bmp, "Bmp");
-            LongName(ImageFormat.Emf, "Emf");
-            LongName(ImageFormat.Exif, "Exif");
-            LongName(ImageFormat.Gif, "Gif");
-            LongName(ImageFormat.Tiff, "Tiff");
-            LongName(ImageFormat.Png, "Png");
-            LongName(ImageFormat.MemoryBmp, "MemoryBmp");
-            LongName(ImageFormat.Icon, "Icon");
-            LongName(ImageFormat.Jpeg, "Jpeg");
-            LongName(ImageFormat.Wmf, "Wmf");
+            LongName(ImageFormat.Bmp);
+            LongName(ImageFormat.Emf);
+            LongName(ImageFormat.Exif);
+            LongName(ImageFormat.Gif);
+            LongName(ImageFormat.Tiff);
+            LongName(ImageFormat.Png);
+            LongName(ImageFormat.MemoryBmp);
+            LongName(ImageFormat.Icon);
+            LongName(ImageFormat.Jpeg);
+            LongName(ImageFormat.Wmf);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(_imgFmtConv.GetStandardValuesSupported(null), "GetStandardValuesSupported(null)");
         }
 
-        private void CheckStandardValues(string msg, ICollection c)
+        private void CheckStandardValues(ICollection values)
         {
             bool memorybmp = false;
             bool bmp = false;
@@ -165,7 +165,7 @@ namespace System.ComponentModel.TypeConverterTests
             bool exif = false;
             bool icon = false;
 
-            foreach (ImageFormat iformat in c)
+            foreach (ImageFormat iformat in values)
             {
                 switch (iformat.Guid.ToString())
                 {
@@ -218,8 +218,8 @@ namespace System.ComponentModel.TypeConverterTests
         [Fact]
         public void GetStandardValues()
         {
-            CheckStandardValues("(empty)", _imgFmtConv.GetStandardValues());
-            CheckStandardValues("(null)", _imgFmtConv.GetStandardValues(null));
+            CheckStandardValues(_imgFmtConv.GetStandardValues());
+            CheckStandardValues(_imgFmtConv.GetStandardValues(null));
         }
     }
 }

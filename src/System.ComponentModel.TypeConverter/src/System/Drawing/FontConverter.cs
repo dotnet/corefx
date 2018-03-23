@@ -150,7 +150,7 @@ namespace System.Drawing
             {   // We have a size
                 for (int i = 0; i < fields[1].Length; i++)
                 {
-                    if (Char.IsLetter(fields[1][i]))
+                    if (char.IsLetter(fields[1][i]))
                     {
                         f_size = (float)TypeDescriptor.GetConverter(typeof(float)).ConvertFromString(context, culture, fields[1].Substring(0, i));
                         units = fields[1].Substring(i);
@@ -341,11 +341,11 @@ namespace System.Drawing
 
         public sealed class FontNameConverter : TypeConverter, IDisposable
         {
-            FontFamily[] fonts;
+            FontFamily[] _fonts;
 
             public FontNameConverter()
             {
-                fonts = FontFamily.Families;
+                _fonts = FontFamily.Families;
             }
 
             void IDisposable.Dispose()
@@ -370,11 +370,11 @@ namespace System.Drawing
 
             public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
             {
-                string[] values = new string[fonts.Length];
-                for (int i = fonts.Length; i > 0;)
+                string[] values = new string[_fonts.Length];
+                for (int i = _fonts.Length; i > 0;)
                 {
                     i--;
-                    values[i] = fonts[i].Name;
+                    values[i] = _fonts[i].Name;
                 }
 
                 return new TypeConverter.StandardValuesCollection(values);

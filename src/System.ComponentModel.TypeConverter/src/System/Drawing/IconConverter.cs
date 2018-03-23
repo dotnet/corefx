@@ -42,7 +42,7 @@ namespace System.Drawing
             {
                 if (value == null)
                 {
-                    return "(none)";
+                    return SR.none;
                 }
                 else if (value is Icon)
                 {
@@ -58,7 +58,7 @@ namespace System.Drawing
                 }
             }
 
-            throw new NotSupportedException($"IconConverter can not convert from {value.GetType()}.");
+            throw GetConvertFromException(value);
         }
     }
 }
