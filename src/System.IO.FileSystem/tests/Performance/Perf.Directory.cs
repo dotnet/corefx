@@ -61,7 +61,7 @@ namespace System.IO.Tests
         public string GetTestDeepFilePath(int depth)
         {
             string directory = Path.DirectorySeparatorChar + "a";
-            StringBuilder sb = new StringBuilder(depth*2);
+            StringBuilder sb = new StringBuilder(depth * 2);
             for (int i = 0; i < depth; i++)
             {
                 sb.Append(directory);
@@ -81,7 +81,7 @@ namespace System.IO.Tests
                 if (PlatformDetection.IsNetCore)
                 {
                     data.Add(100, 10);
-                    if (PlatformDetection.IsWindows && PlatformDetection.IsNetCore)
+                    if (PlatformDetection.IsWindows)
                         data.Add(1000, 1);
                 }
 
