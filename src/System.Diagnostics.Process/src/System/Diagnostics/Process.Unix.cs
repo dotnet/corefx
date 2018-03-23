@@ -241,6 +241,11 @@ namespace System.Diagnostics
 
         partial void ThrowIfExited(bool refresh)
         {
+            if (_waitStateHolder == null && !refresh)
+            {
+                return;
+            }
+
             if (GetWaitState().GetExited(out _, refresh))
             {
                 throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
