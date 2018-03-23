@@ -302,7 +302,7 @@ namespace System.Diagnostics
             {
                 if (_modules == null)
                 {
-                    EnsureState(State.HaveId | State.IsLocal);
+                    EnsureState(State.HaveNonExitedId | State.IsLocal);
                     _modules = ProcessManager.GetModules(_processId);
                 }
                 return _modules;
@@ -890,6 +890,10 @@ namespace System.Diagnostics
             }
         }
 
+        // Checks if the process hasn't exited on Unix systems.
+        // This is used to detect recycled child PIDs.
+        partial void ThrowIfExited(bool refresh);
+
         /// <devdoc>
         ///     Helper method for checking preconditions when accessing properties.
         /// </devdoc>
@@ -914,6 +918,10 @@ namespace System.Diagnostics
                         throw new InvalidOperationException(SR.ProcessIdRequired);
                     }
                 }
+                if ((state & State.HaveNonExitedId) == State.HaveNonExitedId)
+                {
+                    ThrowIfExited(refresh: false);
+                }
             }
 
             if ((state & State.IsLocal) != (State)0 && _isRemoteMachine)
@@ -925,7 +933,10 @@ namespace System.Diagnostics
             {
                 if (_processInfo == null)
                 {
-                    if ((state & State.HaveId) == (State)0) EnsureState(State.HaveId);
+                    if ((state & State.HaveNonExitedId) != State.HaveNonExitedId)
+                    {
+                        EnsureState(State.HaveNonExitedId);
+                    }
                     _processInfo = ProcessManager.GetProcessInfo(_processId, _machineName);
                     if (_processInfo == null)
                     {
@@ -1497,6 +1508,7 @@ namespace System.Diagnostics
         {
             HaveId = 0x1,
             IsLocal = 0x2,
+            HaveNonExitedId = HaveId | 0x4,
             HaveProcessInfo = 0x8,
             Exited = 0x10,
             Associated = 0x20,

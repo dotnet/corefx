@@ -280,11 +280,11 @@ namespace System.Diagnostics
             get
             {
                 int? ignored;
-                return GetExited(out ignored);
+                return GetExited(out ignored, refresh: true);
             }
         }
 
-        internal bool GetExited(out int? exitCode)
+        internal bool GetExited(out int? exitCode, bool refresh)
         {
             lock (_gate)
             {
@@ -303,9 +303,12 @@ namespace System.Diagnostics
                     return false;
                 }
 
-                // We don't know if we've exited, but no one else is currently
-                // checking, so check.
-                CheckForNonChildExit();
+                if (refresh)
+                {
+                    // We don't know if we've exited, but no one else is currently
+                    // checking, so check.
+                    CheckForNonChildExit();
+                }
 
                 // We now have an up-to-date snapshot for whether we've exited,
                 // and if we have, what the exit code is (if we were able to find out).
