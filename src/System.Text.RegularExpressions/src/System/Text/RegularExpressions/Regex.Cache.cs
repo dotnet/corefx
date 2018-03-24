@@ -43,7 +43,6 @@ namespace System.Text.RegularExpressions
                         CachedCodeEntry last = s_livecode_last;
                         if (s_livecode_count >= CacheDictionarySwitchLimit)
                         {
-                            SysDebug.Assert(s_livecode.ContainsKey(last.Key));
                             s_livecode.Remove(last.Key);
                         }
 
