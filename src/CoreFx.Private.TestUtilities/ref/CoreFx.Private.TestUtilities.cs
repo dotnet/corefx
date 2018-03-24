@@ -146,10 +146,10 @@ namespace System.Diagnostics
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
             public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
+            public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.RemoteInvokeOptions Options { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public void Dispose() { }
-            public int UapExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         }
     }
     public sealed partial class RemoteInvokeOptions

@@ -194,7 +194,28 @@ namespace System.Diagnostics
                 ClassName = className;
                 MethodName = methodName;
             }
-            
+
+            private int _exitCode;
+            public int ExitCode
+            {
+                get
+                {
+                    if (!PlatformDetection.IsUap)
+                    {
+                        Process.WaitForExit();
+                        return Process.ExitCode;
+                    }
+                    return _exitCode;
+                }
+                internal set
+                {
+                    if (!PlatformDetection.IsUap)
+                    {
+                        throw new PlatformNotSupportedException("ExitCode property can only be set in UWP");
+                    }
+                    _exitCode = value;
+                }
+            }
             public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
             public string AssemblyName { get; private set; }
@@ -292,28 +313,6 @@ namespace System.Diagnostics
                 }
 
                 _runAsSudo = value;
-            }
-        }
-
-        private int _uapExitCode;
-        private const string PlatformNotSupported_ExitCode = "UapExitCode property can only be used in UWP";
-        public int UapExitCode
-        {
-            get
-            {
-                if (!PlatformDetection.IsUap)
-                {
-                    throw new PlatformNotSupportedException(PlatformNotSupported_ExitCode);
-                }
-                return _uapExitCode;
-            }
-            internal set
-            {
-                if (!PlatformDetection.IsUap)
-                {
-                    throw new PlatformNotSupportedException(PlatformNotSupported_ExitCode);
-                }
-                _uapExitCode = value;
             }
         }
     }

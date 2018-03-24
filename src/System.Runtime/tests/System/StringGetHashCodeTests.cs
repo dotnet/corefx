@@ -28,16 +28,7 @@ namespace System.Tests
                 // very small chance the child and parent hashcode are the same. To further reduce chance of collision we try up to 3 times
                 using (RemoteInvokeHandle handle = RemoteInvoke(method, parentHashCode.ToString(), getHashCodeIndex.ToString(), new RemoteInvokeOptions { CheckExitCode = false }))
                 {
-                    if (PlatformDetection.IsUap)
-                    {
-                        exitCode = handle.UapExitCode;
-                    }
-                    else
-                    {
-                        Process p = handle.Process;
-                        p.WaitForExit();
-                        exitCode = p.ExitCode;
-                    }
+                    exitCode = handle.ExitCode;
                     retry++;
                 }
             } while (exitCode != SuccessExitCode && retry < 3);

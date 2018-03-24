@@ -71,7 +71,7 @@ namespace System.Diagnostics
             }
             // RemoteInvokeHandle is not really needed in the UAP scenario but we use it just to have consistent interface as non UAP
             var handle = new RemoteInvokeHandle(null, options, null, null, null);
-            handle.UapExitCode = exitCode;
+            handle.ExitCode = exitCode;
             return handle;
         }
     }
