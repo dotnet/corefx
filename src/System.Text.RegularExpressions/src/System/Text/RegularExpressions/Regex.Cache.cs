@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using SysDebug = System.Diagnostics.Debug;  // as Regex.Debug
+using System.Collections.Generic;
+using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Text.RegularExpressions
 {
@@ -17,7 +17,7 @@ namespace System.Text.RegularExpressions
         internal static readonly Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
          // linked list for MRU and for small cache
         internal static int s_livecode_count = 0;
-        private const int CacheDictionarySwitchLimit = 11;
+        private const int CacheDictionarySwitchLimit = 10;
         internal static CachedCodeEntry s_livecode_first = null;
         internal static CachedCodeEntry s_livecode_last = null;
         internal static int s_cacheSize = 15;
@@ -141,6 +141,7 @@ namespace System.Text.RegularExpressions
 
         private void FillCacheDictionary()
         {
+            s_livecode.Clear();
             CachedCodeEntry next = s_livecode_first;
             while (next != null)
             {
