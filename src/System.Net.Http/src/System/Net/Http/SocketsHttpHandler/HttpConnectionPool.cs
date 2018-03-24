@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -85,6 +86,13 @@ namespace System.Net.Http
                     Debug.Assert(proxyUri != null);
                     break;
 
+                case HttpConnectionKind.ProxyTunnel:
+                    Debug.Assert(host != null);
+                    Debug.Assert(port != 0);
+                    Debug.Assert(sslHostName == null);
+                    Debug.Assert(proxyUri != null);
+                    break;
+
                 case HttpConnectionKind.SslProxyTunnel:
                     Debug.Assert(host != null);
                     Debug.Assert(port != 0);
@@ -120,6 +128,12 @@ namespace System.Net.Http
                 _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
                 Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
             }
+            
+            // Set up for PreAuthenticate.  Access to this cache is guarded by a lock on the cache itself.
+            if (_poolManager.Settings._preAuthenticate)
+            {
+                PreAuthCredentials = new CredentialCache();
+            }
         }
 
         private static SslClientAuthenticationOptions ConstructSslOptions(HttpConnectionPoolManager poolManager, string sslHostName)
@@ -139,6 +153,7 @@ namespace System.Net.Http
         public Uri ProxyUri => _proxyUri;
         public ICredentials ProxyCredentials => _poolManager.ProxyCredentials;
         public byte[] HostHeaderValueBytes => _hostHeaderValueBytes;
+        public CredentialCache PreAuthCredentials { get; }
 
         /// <summary>Object used to synchronize access to state in the pool.</summary>
         private object SyncObj => _idleConnections;
@@ -162,12 +177,12 @@ namespace System.Net.Http
                 {
                     CachedConnection cachedConnection = list[list.Count - 1];
                     HttpConnection conn = cachedConnection._connection;
-                    Debug.Assert(!conn.IsNewConnection);
 
                     list.RemoveAt(list.Count - 1);
-                    if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                    if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
+                        !conn.EnsureReadAheadAndPollRead())
                     {
-                        // We found a valid collection.  Return it.
+                        // We found a valid connection.  Return it.
                         if (NetEventSource.IsEnabled) conn.Trace("Found usable connection in pool.");
                         return new ValueTask<(HttpConnection, HttpResponseMessage)>((conn, null));
                     }
@@ -300,19 +315,21 @@ namespace System.Net.Http
 
             try
             {
+                Socket socket = null;
                 Stream stream = null;
                 switch (_kind)
                 {
                     case HttpConnectionKind.Http:
                     case HttpConnectionKind.Https:
                     case HttpConnectionKind.ProxyConnect:
-                        stream = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
+                        (socket, stream) = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case HttpConnectionKind.Proxy:
-                        stream = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
+                        (socket, stream) = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
                         break;
 
+                    case HttpConnectionKind.ProxyTunnel:
                     case HttpConnectionKind.SslProxyTunnel:
                         HttpResponseMessage response;
                         (stream, response) = await EstablishProxyTunnel(cancellationToken).ConfigureAwait(false);
@@ -334,8 +351,8 @@ namespace System.Net.Http
                 }
 
                 HttpConnection connection = _maxConnections == int.MaxValue ?
-                    new HttpConnection(this, stream, transportContext) :
-                    new HttpConnectionWithFinalizer(this, stream, transportContext); // finalizer needed to signal the pool when a connection is dropped
+                    new HttpConnection(this, socket, stream, transportContext) :
+                    new HttpConnectionWithFinalizer(this, socket, stream, transportContext); // finalizer needed to signal the pool when a connection is dropped
                 return (connection, null);
             }
             finally
@@ -577,7 +594,7 @@ namespace System.Net.Http
 
                 // If there's someone waiting for a connection, simply
                 // transfer this one to them rather than pooling it.
-                if (_waitersTail != null)
+                if (_waitersTail != null && !connection.EnsureReadAheadAndPollRead())
                 {
                     ConnectionWaiter waiter = DequeueWaiter();
                     waiter._cancellationTokenRegistration.Dispose();
@@ -648,7 +665,7 @@ namespace System.Net.Http
 
                 // Find the first item which needs to be removed.
                 int freeIndex = 0;
-                while (freeIndex < list.Count && list[freeIndex].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                while (freeIndex < list.Count && list[freeIndex].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
                 {
                     freeIndex++;
                 }
@@ -666,7 +683,7 @@ namespace System.Net.Http
                     {
                         // Look for the first item to be kept.  Along the way, any
                         // that shouldn't be kept are disposed of.
-                        while (current < list.Count && !list[current].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                        while (current < list.Count && !list[current].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
                         {
                             toDispose.Add(list[current]._connection);
                             current++;
@@ -769,7 +786,8 @@ namespace System.Net.Http
             public bool IsUsable(
                 DateTimeOffset now,
                 TimeSpan pooledConnectionLifetime,
-                TimeSpan pooledConnectionIdleTimeout)
+                TimeSpan pooledConnectionIdleTimeout,
+                bool poll = false)
             {
                 // Validate that the connection hasn't been idle in the pool for longer than is allowed.
                 if ((pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) && (now - _returnedTime > pooledConnectionIdleTimeout))
@@ -786,7 +804,7 @@ namespace System.Net.Http
                 }
 
                 // Validate that the connection hasn't received any stray data while in the pool.
-                if (_connection.ReadAheadCompleted)
+                if (poll && _connection.PollRead())
                 {
                     if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Unexpected data received.");
                     return false;

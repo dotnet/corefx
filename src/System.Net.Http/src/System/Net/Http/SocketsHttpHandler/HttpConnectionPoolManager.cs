@@ -5,6 +5,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,12 +31,7 @@ namespace System.Net.Http
     internal sealed class HttpConnectionPoolManager : IDisposable
     {
         /// <summary>How frequently an operation should be initiated to clean out old pools and connections in those pools.</summary>
-        private const int CleanPoolTimeoutMilliseconds =
-#if DEBUG
-            1_000;
-#else
-            30_000;
-#endif
+        private readonly TimeSpan _cleanPoolTimeout;
         /// <summary>The pools, indexed by endpoint.</summary>
         private readonly ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool> _pools;
         /// <summary>Timer used to initiate cleaning of the pools.</summary>
@@ -63,7 +59,21 @@ namespace System.Net.Http
             _settings = settings;
             _maxConnectionsPerServer = settings._maxConnectionsPerServer;
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
+
             // Start out with the timer not running, since we have no pools.
+            // When it does run, run it with a frequency based on the idle timeout.
+            if (settings._pooledConnectionIdleTimeout == Timeout.InfiniteTimeSpan)
+            {
+                const int DefaultScavengeSeconds = 30;
+                _cleanPoolTimeout = TimeSpan.FromSeconds(DefaultScavengeSeconds);
+            }
+            else
+            {
+                const int ScavengesPerIdle = 4;
+                const int MinScavengeSeconds = 1;
+                TimeSpan timerPeriod = settings._pooledConnectionIdleTimeout / ScavengesPerIdle;
+                _cleanPoolTimeout = timerPeriod.TotalSeconds >= MinScavengeSeconds ? timerPeriod : TimeSpan.FromSeconds(MinScavengeSeconds);
+            }
 
             // Figure out proxy stuff.
             if (settings._useProxy)
@@ -157,10 +167,18 @@ namespace System.Net.Http
                 Debug.Assert(HttpUtilities.IsSupportedNonSecureScheme(proxyUri.Scheme));
                 if (sslHostName == null)
                 {
-                    // Standard HTTP proxy usage for non-secure requests
-                    // The destination host and port are ignored here, since these connections
-                    // will be shared across any requests that use the proxy.
-                    return new HttpConnectionKey(HttpConnectionKind.Proxy, null, 0, null, proxyUri);
+                    if (HttpUtilities.IsNonSecureWebSocketScheme(uri.Scheme))
+                    {
+                        // Non-secure websocket connection through proxy to the destination.
+                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, uri.IdnHost, uri.Port, null, proxyUri);
+                    }
+                    else
+                    {
+                        // Standard HTTP proxy usage for non-secure requests
+                        // The destination host and port are ignored here, since these connections
+                        // will be shared across any requests that use the proxy.
+                        return new HttpConnectionKey(HttpConnectionKind.Proxy, null, 0, null, proxyUri);
+                    }
                 }
                 else
                 {
@@ -194,12 +212,14 @@ namespace System.Net.Http
                     {
                         if (!_timerIsRunning)
                         {
-                            _cleaningTimer.Change(CleanPoolTimeoutMilliseconds, CleanPoolTimeoutMilliseconds);
+                            _cleaningTimer.Change(_cleanPoolTimeout, _cleanPoolTimeout);
                             _timerIsRunning = true;
                         }
                     }
                     break;
                 }
+
+                pool.Dispose();
             }
 
             return pool.SendAsync(request, doRequestAuth, cancellationToken);
@@ -207,14 +227,14 @@ namespace System.Net.Http
 
         public Task<HttpResponseMessage> SendProxyConnectAsync(HttpRequestMessage request, Uri proxyUri, CancellationToken cancellationToken)
         {
-            return SendAsyncCore(request, proxyUri, false, true, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth:false, isProxyConnect:true, cancellationToken);
         }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
         {
             if (_proxy == null)
             {
-                return SendAsyncCore(request, null, doRequestAuth, false, cancellationToken);
+                return SendAsyncCore(request, null, doRequestAuth, isProxyConnect:false, cancellationToken);
             }
 
             // Do proxy lookup.
@@ -237,7 +257,7 @@ namespace System.Net.Http
                 throw new NotSupportedException(SR.net_http_invalid_proxy_scheme);
             }
 
-            return SendAsyncCore(request, proxyUri, doRequestAuth, false, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect:false, cancellationToken);
         }
 
         /// <summary>Disposes of the pools, disposing of each individual pool.</summary>

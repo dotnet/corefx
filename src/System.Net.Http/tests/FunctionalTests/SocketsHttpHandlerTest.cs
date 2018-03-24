@@ -433,7 +433,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.ConnectTimeout = TimeSpan.FromSeconds(1);
 
                     var sw = Stopwatch.StartNew();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() =>
+                    await Assert.ThrowsAsync<TaskCanceledException>(() =>
                         invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get,
                             new UriBuilder(uri) { Scheme = "https" }.ToString()), default));
                     sw.Stop();
@@ -559,7 +559,7 @@ namespace System.Net.Http.Functional.Tests
         public static IEnumerable<object[]> Authentication_SocketsHttpHandler_TestData()
         {
             // These test cases pass on SocketsHttpHandler, fail everywhere else.
-            // TODO: #27113: Fix failing authentication test cases on different httpclienthandlers.
+            // TODO: #28065: Investigate failing authentication test cases on WinHttpHandler & CurlHandler.
             yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic something digest something", true };
             yield return new object[] { "Digest ", false };

@@ -188,6 +188,29 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
+        public async Task HttpWebRequest_SetHostHeader_ContainsPortNumber()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                string host = uri.Host + ":" + uri.Port;
+                request.Host = host;
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                    Assert.Contains($"Host: {host}", headers);
+                });
+
+                using (var response = (HttpWebResponse) await getResponse)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            });
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void MaximumResponseHeadersLength_SetNegativeTwo_ThrowsArgumentOutOfRangeException(Uri remoteServer)
         {
@@ -1045,7 +1068,6 @@ namespace System.Net.Tests
             response.Dispose();
         }
 
-        [ActiveIssue(27906)]
         [OuterLoop] // fails on networks with DNS servers that provide a dummy page for invalid addresses
         [Fact]
         public async Task GetResponseAsync_ServerNameNotInDns_ThrowsWebException()
