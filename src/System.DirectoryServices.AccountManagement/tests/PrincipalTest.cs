@@ -32,10 +32,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
         }
 
-        public void Dispose()
-        {
-            DomainContext?.Dispose();
-        }
+        public void Dispose() => DomainContext?.Dispose();
 
         [Fact]
         public void AddExistingPrincipal()
