@@ -23,7 +23,6 @@ namespace System.Xml
         {
             if (uri.Scheme == "file")
             {
-                Console.WriteLine("===> [" + uri.LocalPath + "]");
                 return new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1);
             }
             else

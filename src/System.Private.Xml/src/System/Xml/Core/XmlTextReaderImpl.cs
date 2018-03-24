@@ -582,11 +582,7 @@ namespace System.Xml
             : this(settings.GetXmlResolver(), settings, context)
         {
             Uri baseUri = uriResolver.ResolveUri(null, uriStr);
-            Console.WriteLine("====> uriStr:[" + uriStr + "]");
-            Console.WriteLine($"====> baseUri.Scheme:[{baseUri.Scheme}] baseUri.LocalPath:[{baseUri.LocalPath}]");
             string baseUriStr = baseUri.ToString();
-            Console.WriteLine("====> baseUriStr:[" + baseUriStr + "]");
-
 
             // get BaseUri from XmlParserContext
             if (context != null)
