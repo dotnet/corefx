@@ -41,8 +41,9 @@ namespace System.Text.RegularExpressions
                     while (s_livecode_count > s_cacheSize)
                     {
                         CachedCodeEntry last = s_livecode_last;
-                        if (s_cacheSize >= CacheDictionarySwitchLimit)
+                        if (s_livecode_count >= CacheDictionarySwitchLimit)
                         {
+                            SysDebug.Assert(s_livecode.ContainsKey(last.Key));
                             s_livecode.Remove(last.Key);
                         }
 

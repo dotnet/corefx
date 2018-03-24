@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -94,6 +95,30 @@ namespace System.Text.RegularExpressions.Tests
                 CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.Multiline));
                 Assert.True(GetCachedItemsNum() == 3);
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public void Ctor_Cache_Uses_dictionary_linked_list_switch_does_not_throw()
+        {
+            // assume the limit is less than the cache size so we cross it two times:
+            RemoteInvoke(() =>
+            {
+                int original = Regex.CacheSize;
+                Regex.CacheSize = 0;
+                for (int i = 0; i < original; i++)
+                {
+                    Regex.CacheSize++;
+                    Assert.True(Regex.IsMatch(i.ToString(), i.ToString()));
+                    Assert.True(GetCachedItemsNum() == i + 1);
+                }
+                for (int i = 0; i < original; i++)
+                {
+                    Regex.CacheSize--; 
+                    Assert.True(GetCachedItemsNum() == Regex.CacheSize);
+                }
+
                 return SuccessExitCode;
             }).Dispose();
         }
