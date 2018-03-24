@@ -35,13 +35,8 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [Fact]
         public void Ctor_EmptySamAccountName_ThrowsArgumentNullException()
         {
-            RemoteInvoke(() =>
-            {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-
-                var context = new PrincipalContext(ContextType.Machine);
-                AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
-            }).Dispose();
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName", "Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
         }
 
         [Fact]

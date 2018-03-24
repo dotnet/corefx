@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Security.Principal;
 using Xunit;
 
 namespace System.DirectoryServices.AccountManagement.Tests
 {
-    public abstract class PrincipalTest : RemoteExecutorTestBase
+    public abstract class PrincipalTest : IDisposable
     {
         public PrincipalContext DomainContext { get; private set; }
 
@@ -33,10 +32,9 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-                DomainContext?.Dispose();
+            DomainContext?.Dispose();
         }
 
         [Fact]
