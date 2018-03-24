@@ -30,14 +30,13 @@ namespace System.Tests
                 {
                     if (PlatformDetection.IsUap)
                     {
-                        exitCode = handle.ExitCode;
+                        exitCode = handle.UapExitCode;
                     }
                     else
                     {
                         Process p = handle.Process;
                         p.WaitForExit();
                         exitCode = p.ExitCode;
-                        Assert.Equal(p.ExitCode, handle.ExitCode);
                     }
                     retry++;
                 }

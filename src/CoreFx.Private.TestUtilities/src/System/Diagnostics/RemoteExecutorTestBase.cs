@@ -186,24 +186,15 @@ namespace System.Diagnostics
         /// <summary>A cleanup handle to the Process created for the remote invocation.</summary>
         public sealed class RemoteInvokeHandle : IDisposable
         {
-            private const int DefaultExitCode = 0;
-            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options, int exitCode, string assemblyName = null, string className = null, string methodName = null)
+            public RemoteInvokeHandle(Process process, RemoteInvokeOptions options, string assemblyName = null, string className = null, string methodName = null)
             {
                 Process = process;
                 Options = options;
-                if (!PlatformDetection.IsUap && exitCode != DefaultExitCode)
-                {
-                    throw new PlatformNotSupportedException(SR.PlatformNotSupported_ExitCode);
-                }
                 AssemblyName = assemblyName;
                 ClassName = className;
                 MethodName = methodName;
             }
-
-            public RemoteInvokeHandle(Process process, RemoteInvokeOptions option, string assemblyName = null, string className = null, string methodName = null)
-                : this(process, option, DefaultExitCode, assemblyName, className, methodName) { }
             
-            public int ExitCode { get; private set; }
             public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
             public string AssemblyName { get; private set; }
@@ -301,6 +292,28 @@ namespace System.Diagnostics
                 }
 
                 _runAsSudo = value;
+            }
+        }
+
+        private int _uapExitCode;
+        private const string PlatformNotSupported_ExitCode = "UapExitCode property can only be used in UWP";
+        public int UapExitCode
+        {
+            get
+            {
+                if (!PlatformDetection.IsUap)
+                {
+                    throw new PlatformNotSupportedException(PlatformNotSupported_ExitCode);
+                }
+                return _uapExitCode;
+            }
+            internal set
+            {
+                if (!PlatformDetection.IsUap)
+                {
+                    throw new PlatformNotSupportedException(PlatformNotSupported_ExitCode);
+                }
+                _uapExitCode = value;
             }
         }
     }
