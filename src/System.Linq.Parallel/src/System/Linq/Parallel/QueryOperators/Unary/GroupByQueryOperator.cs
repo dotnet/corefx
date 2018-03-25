@@ -795,23 +795,8 @@ namespace System.Linq.Parallel
             Debug.Assert(_values != null);
             Debug.Assert(_orderKeys != null);
 
-            // Create a map of key-value pair.
-            // We can't use a dictionary since the keys are not necessarily unique
-            List<KeyValuePair<TOrderKey, TElement>> sortedValues = new List<KeyValuePair<TOrderKey, TElement>>();
-            for (int i = 0; i < _orderKeys.InternalArray.Length; i++)
-            {
-                sortedValues.Add(new KeyValuePair<TOrderKey, TElement>(_orderKeys.InternalArray[i], _values.InternalArray[i]));
-            }
+            Array.Sort(_orderKeys.InternalArray, _values.InternalArray, 0, _values.Count, _orderComparer);
 
-            // Sort the values by using the _orderComparer wrapped in a Tuple comparer
-            sortedValues.Sort(0, _values.Count, _wrappedComparer);
-
-            // Unpack the values from the list back into the 2 separate arrays
-            for (int i = 0; i < _values.InternalArray.Length; i++)
-            {
-                _orderKeys.InternalArray[i] = sortedValues[i].Key;
-                _values.InternalArray[i] = sortedValues[i].Value;
-            }
 #if DEBUG
             _orderKeys = null; // Any future calls to Add() or DoneAdding() will fail
 #endif
