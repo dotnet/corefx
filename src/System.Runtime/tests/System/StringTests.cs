@@ -2696,37 +2696,19 @@ namespace System.Tests
             Assert.Equal(expected, destination.ToString());
         }
 
-        [Fact]
-        public static void ToUpper_TurkishI_TurkishCulture()
+        [Theory]
+        [InlineData("H\u0069 World", "H\u0130 WORLD")]
+        [InlineData("H\u0130 World", "H\u0130 WORLD")]
+        [InlineData("H\u0131 World", "H\u0049 WORLD")]
+        public static void ToUpper_TurkishI_TurkishCulture(string s, string expected)
         {
             RemoteInvoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
-                string s = "H\u0069 World";
-                string expected = "H\u0130 WORLD";
-
                 Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
                 
                 Span<char> destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                s = "H\u0130 World";
-                expected = "H\u0130 WORLD";
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-
-                destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                s = "H\u0131 World";
-                expected = "H\u0049 WORLD";
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-
-                destination = new char[s.Length];
                 Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToString());
 
@@ -2734,37 +2716,19 @@ namespace System.Tests
             }).Dispose();
         }
 
-        [Fact]
-        public static void ToUpper_TurkishI_EnglishUSCulture()
+        [Theory]
+        [InlineData("H\u0069 World", "H\u0049 WORLD")]
+        [InlineData("H\u0130 World", "H\u0130 WORLD")]
+        [InlineData("H\u0131 World", "H\u0049 WORLD")]
+        public static void ToUpper_TurkishI_EnglishUSCulture(string s, string expected)
         {
             RemoteInvoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
-                string s = "H\u0069 World";
-                string expected = "H\u0049 WORLD";
-
                 Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
 
                 Span<char> destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                s = "H\u0130 World";
-                expected = "H\u0130 WORLD";
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-
-                destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                s = "H\u0131 World";
-                expected = "H\u0049 WORLD";
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-                
-                destination = new char[s.Length];
                 Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToString());
 
@@ -2772,31 +2736,19 @@ namespace System.Tests
             }).Dispose();
         }
 
-        [Fact]
-        public static void ToUpper_TurkishI_InvariantCulture()
+        [Theory]
+        [InlineData("H\u0069 World", "H\u0049 WORLD")]
+        [InlineData("H\u0130 World", "H\u0130 WORLD")]
+        [InlineData("H\u0131 World", "H\u0131 WORLD")]
+        public static void ToUpper_TurkishI_InvariantCulture(string s, string expected)
         {
             RemoteInvoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-                string s = "H\u0069 World";
-                string expected = "H\u0049 WORLD";
-
                 Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
 
                 Span<char> destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-
-                destination = new char[s.Length];
-                Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToString());
-
-                Assert.True(s.ToUpper().Equals(expected, StringComparison.Ordinal));
-
-                destination = new char[s.Length];
                 Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToString());
 
