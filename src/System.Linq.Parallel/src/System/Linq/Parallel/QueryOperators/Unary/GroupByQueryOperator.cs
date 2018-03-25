@@ -728,7 +728,6 @@ namespace System.Linq.Parallel
         private GrowingArray<TElement> _values; // Values in this group
         private GrowingArray<TOrderKey> _orderKeys; // Order keys that correspond to the values
         private IComparer<TOrderKey> _orderComparer; // Comparer for order keys
-        private KeyAndValuesComparer _wrappedComparer; // Comparer that wraps the _orderComparer used for sorting key/value pairs
 
         /// <summary>
         /// Constructs a new grouping
@@ -741,7 +740,6 @@ namespace System.Linq.Parallel
             _values = new GrowingArray<TElement>();
             _orderKeys = new GrowingArray<TOrderKey>();
             _orderComparer = orderComparer;
-            _wrappedComparer = new KeyAndValuesComparer(_orderComparer);
         }
 
         /// <summary>
@@ -800,19 +798,6 @@ namespace System.Linq.Parallel
 #if DEBUG
             _orderKeys = null; // Any future calls to Add() or DoneAdding() will fail
 #endif
-        }
-
-        private class KeyAndValuesComparer : IComparer<KeyValuePair<TOrderKey, TElement>>
-        {
-            private IComparer<TOrderKey> myComparer;
-            public KeyAndValuesComparer(IComparer<TOrderKey> comparer)
-            {
-                myComparer = comparer;
-            }
-            public int Compare(KeyValuePair<TOrderKey, TElement> x, KeyValuePair<TOrderKey, TElement> y)
-            {
-                return myComparer.Compare(x.Key, y.Key);
-            }
         }
     }
 }
