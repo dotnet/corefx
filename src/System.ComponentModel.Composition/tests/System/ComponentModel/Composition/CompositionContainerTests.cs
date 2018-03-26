@@ -3027,28 +3027,18 @@ namespace System.ComponentModel.Composition
         public void TestExportedValueUsingWhereClause_ExportSuccessful()
         {
             CompositionContainer container = new CompositionContainer(new AssemblyCatalog(typeof(AssemblyCatalogTestsReflectionContext).Assembly));
-            IMefCollection<DerivedClass, BaseClass> i = container.GetExportedValue<IMefCollection<DerivedClass, BaseClass>>("UsingWhereClause");
-            Assert.NotNull(i);
+            IMefCollection<DerivedClass, BaseClass> actualValue = container.GetExportedValue<IMefCollection<DerivedClass, BaseClass>>("UsingWhereClause");
+            Assert.NotNull(actualValue);
+            Assert.IsType<MefCollection<DerivedClass, BaseClass>>(actualValue);
         }
 
+        public interface IMefCollection { }
         public interface IMefCollection<TC, TP> : IList<TC>, IMefCollection where TC : TP { }
         public class BaseClass { }
         public class DerivedClass : BaseClass { }
 
-        public interface IMefCollection
-        {
-            void WriteTypeNameOfSecondParam();
-        }
-
         [Export("UsingWhereClause", typeof(IMefCollection<,>))]
-        public class MefCollection<TC, TP> : ObservableCollection<TC>, IMefCollection<TC, TP> where TC : TP
-        {
-            public void WriteTypeNameOfSecondParam()
-            {
-                Console.WriteLine("TC Type: " + typeof(TC).ToString());
-                Console.WriteLine("TP Type: " + typeof(TP).ToString());
-            }
-        }
+        public class MefCollection<TC, TP> : ObservableCollection<TC>, IMefCollection<TC, TP> where TC : TP { }
 
         public class ExportsMutableProperty
         {
