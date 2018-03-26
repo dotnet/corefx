@@ -10,6 +10,7 @@
       $(PackageConfigurations);
       uap10.0.16299;
       uap;
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
