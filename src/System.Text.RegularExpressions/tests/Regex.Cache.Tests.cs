@@ -1,16 +1,11 @@
-﻿using System.Collections;
-using System.Data;
-using System.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.Caching;
-using System.Threading;
 using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
 {
-    public class Regex_Cache_Tests : RemoteExecutorTestBase
+    public class RegexCacheTests : RemoteExecutorTestBase
     {
         [Theory]
         [InlineData(0)]
@@ -110,7 +105,7 @@ namespace System.Text.RegularExpressions.Tests
                 int original = Regex.CacheSize;
                 Regex.CacheSize = 0;
                 Fill(original);
-                const int limit = 10; 
+                const int limit = 10;
                 Regex.CacheSize = limit - 1;
                 Regex.CacheSize = 0;
                 Fill(original);
@@ -129,7 +124,7 @@ namespace System.Text.RegularExpressions.Tests
                 {
                     for (int i = 0; i < original; i++)
                     {
-                        Regex.CacheSize--; 
+                        Regex.CacheSize--;
                         Assert.True(GetCachedItemsNum() == Regex.CacheSize);
                     }
                 }
@@ -140,7 +135,7 @@ namespace System.Text.RegularExpressions.Tests
         private int GetCachedItemsNum()
         {
             Type type = typeof(Regex);
-            FieldInfo info = type.GetField("s_livecode_count", BindingFlags.NonPublic | BindingFlags.Static);
+            FieldInfo info = type.GetField("s_cacheCount", BindingFlags.NonPublic | BindingFlags.Static);
             var count = (int) info.GetValue(null);
             return count;
         }

@@ -12,15 +12,16 @@ namespace System.Text.RegularExpressions
 {
     public partial class Regex
     {
+        private const int CacheDictionarySwitchLimit = 10;
+
+        private static int s_cacheSize = 15;
         // the cache of code and factories that are currently loaded:
         // Dictionary for large cache
-        internal static readonly Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
+        private static readonly Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_cache = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>(s_cacheSize);
          // linked list for MRU and for small cache
-        internal static int s_livecode_count = 0;
-        private const int CacheDictionarySwitchLimit = 10;
-        internal static CachedCodeEntry s_livecode_first = null;
-        internal static CachedCodeEntry s_livecode_last = null;
-        internal static int s_cacheSize = 15;
+        private static int s_cacheCount = 0;
+        private static CachedCodeEntry s_cacheFirst;
+        private static CachedCodeEntry s_cacheLast;
 
         public static int CacheSize
         {
@@ -33,34 +34,34 @@ namespace System.Text.RegularExpressions
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                lock (s_livecode)
+                lock (s_cache)
                 {
                     s_cacheSize = value;  // not to allow other thread to change it while we use cache
-                    while (s_livecode_count > s_cacheSize)
+                    while (s_cacheCount > s_cacheSize)
                     {
-                        CachedCodeEntry last = s_livecode_last;
-                        if (s_livecode_count >= CacheDictionarySwitchLimit)
+                        CachedCodeEntry last = s_cacheLast;
+                        if (s_cacheCount >= CacheDictionarySwitchLimit)
                         {
-                            SysDebug.Assert(s_livecode.ContainsKey(last.Key));
-                            s_livecode.Remove(last.Key);
+                            SysDebug.Assert(s_cache.ContainsKey(last.Key));
+                            s_cache.Remove(last.Key);
                         }
 
                         // update linked list:
-                        s_livecode_last = last.Next;
+                        s_cacheLast = last.Next;
                         if (last.Next != null)
                         {
-                            SysDebug.Assert(s_livecode_first != null);
-                            SysDebug.Assert(s_livecode_first != last);
+                            SysDebug.Assert(s_cacheFirst != null);
+                            SysDebug.Assert(s_cacheFirst != last);
                             SysDebug.Assert(last.Next.Previous == last);
                             last.Next.Previous = null;
                         }
                         else // last one removed
                         {
-                            SysDebug.Assert(s_livecode_first == last);
-                            s_livecode_first = null;
+                            SysDebug.Assert(s_cacheFirst == last);
+                            s_cacheFirst = null;
                         }
 
-                        s_livecode_count--;
+                        s_cacheCount--;
                     }
                 }
             }
@@ -73,7 +74,7 @@ namespace System.Text.RegularExpressions
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
             // to avoid lock:
-            CachedCodeEntry first = s_livecode_first;
+            CachedCodeEntry first = s_cacheFirst;
             if (first?.Key == key)
                 return first;
             if (s_cacheSize == 0)
@@ -84,7 +85,7 @@ namespace System.Text.RegularExpressions
 
         private CachedCodeEntry GetCachedCodeEntryInternal(CachedCodeEntryKey key, bool isToAdd)
         {
-            lock (s_livecode)
+            lock (s_cache)
             {
                 // first look for it in the cache and move it to the head
                 CachedCodeEntry entry = LookupCachedAndPromote(key);
@@ -93,44 +94,44 @@ namespace System.Text.RegularExpressions
                 {
                     entry = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
                     // put first in linked list:
-                    if (s_livecode_first != null)
+                    if (s_cacheFirst != null)
                     {
-                        SysDebug.Assert(s_livecode_first.Next == null);
-                        s_livecode_first.Next = entry;
-                        entry.Previous = s_livecode_first;
+                        SysDebug.Assert(s_cacheFirst.Next == null);
+                        s_cacheFirst.Next = entry;
+                        entry.Previous = s_cacheFirst;
                     }
-                    s_livecode_first = entry;
+                    s_cacheFirst = entry;
 
-                    s_livecode_count++;
-                    if (s_livecode_count >= CacheDictionarySwitchLimit)
+                    s_cacheCount++;
+                    if (s_cacheCount >= CacheDictionarySwitchLimit)
                     {
-                        if (s_livecode_count == CacheDictionarySwitchLimit)
+                        if (s_cacheCount == CacheDictionarySwitchLimit)
                             FillCacheDictionary();
                         else
-                            s_livecode.Add(key, entry);
-                        SysDebug.Assert(s_livecode_count == s_livecode.Count);
+                            s_cache.Add(key, entry);
+                        SysDebug.Assert(s_cacheCount == s_cache.Count);
                     }
 
                     // update last in linked list:
-                    if (s_livecode_last == null)
+                    if (s_cacheLast == null)
                     {
-                        s_livecode_last = entry;
+                        s_cacheLast = entry;
                     }
-                    else if (s_livecode_count > s_cacheSize) // remove last
+                    else if (s_cacheCount > s_cacheSize) // remove last
                     {
-                        CachedCodeEntry last = s_livecode_last;
-                        if (s_livecode_count >= CacheDictionarySwitchLimit)
+                        CachedCodeEntry last = s_cacheLast;
+                        if (s_cacheCount >= CacheDictionarySwitchLimit)
                         {
-                            SysDebug.Assert(s_livecode[last.Key] == s_livecode_last);
-                            s_livecode.Remove(last.Key);
+                            SysDebug.Assert(s_cache[last.Key] == s_cacheLast);
+                            s_cache.Remove(last.Key);
                         }
 
                         SysDebug.Assert(last.Previous == null);
                         SysDebug.Assert(last.Next != null);
                         SysDebug.Assert(last.Next.Previous == last);
                         last.Next.Previous = null;
-                        s_livecode_last = last.Next;
-                        s_livecode_count--;
+                        s_cacheLast = last.Next;
+                        s_cacheCount--;
                     }
 
                 }
@@ -140,11 +141,11 @@ namespace System.Text.RegularExpressions
 
         private void FillCacheDictionary()
         {
-            s_livecode.Clear();
-            CachedCodeEntry next = s_livecode_first;
+            s_cache.Clear();
+            CachedCodeEntry next = s_cacheFirst;
             while (next != null)
             {
-                s_livecode.Add(next.Key, next);
+                s_cache.Add(next.Key, next);
                 next = next.Previous;
             }
         }
@@ -152,14 +153,14 @@ namespace System.Text.RegularExpressions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryGetCacheValue(CachedCodeEntryKey key, out CachedCodeEntry entry)
         {
-            if (s_livecode_count >= CacheDictionarySwitchLimit)
+            if (s_cacheCount >= CacheDictionarySwitchLimit)
             {
-                SysDebug.Assert((s_livecode_first != null && s_livecode_last != null && s_livecode.Count > 0) || 
-                                (s_livecode_first == null && s_livecode_last == null && s_livecode.Count == 0), 
+                SysDebug.Assert((s_cacheFirst != null && s_cacheLast != null && s_cache.Count > 0) || 
+                                (s_cacheFirst == null && s_cacheLast == null && s_cache.Count == 0), 
                                 "Linked list and Dict should be synchronized");
-                return s_livecode.TryGetValue(key, out entry);
+                return s_cache.TryGetValue(key, out entry);
             }
-            entry = s_livecode_first?.Previous; // first already checked
+            entry = s_cacheFirst?.Previous; // first already checked
             while (entry != null)
             {
                 if (entry.Key == key)
@@ -172,23 +173,23 @@ namespace System.Text.RegularExpressions
 
         private static CachedCodeEntry LookupCachedAndPromote(CachedCodeEntryKey key)
         {
-            SysDebug.Assert(Monitor.IsEntered(s_livecode));
-            if (s_livecode_first?.Key == key) // again check this as could have been promoted by other thread
-                return s_livecode_first;
+            SysDebug.Assert(Monitor.IsEntered(s_cache));
+            if (s_cacheFirst?.Key == key) // again check this as could have been promoted by other thread
+                return s_cacheFirst;
             
             if (TryGetCacheValue(key, out var entry))
             {
                 // promote:
-                SysDebug.Assert(s_livecode_first != entry, "key should not get s_livecode_first");
-                SysDebug.Assert(s_livecode_first != null, "as Dict has at least one");
-                SysDebug.Assert(s_livecode_first.Next == null);
-                SysDebug.Assert(s_livecode_first.Previous != null);
+                SysDebug.Assert(s_cacheFirst != entry, "key should not get s_livecode_first");
+                SysDebug.Assert(s_cacheFirst != null, "as Dict has at least one");
+                SysDebug.Assert(s_cacheFirst.Next == null);
+                SysDebug.Assert(s_cacheFirst.Previous != null);
                 SysDebug.Assert(entry.Next != null, "not first so Next should exist");
                 SysDebug.Assert(entry.Next.Previous == entry);
-                if (s_livecode_last == entry)
+                if (s_cacheLast == entry)
                 {
                     SysDebug.Assert(entry.Previous == null, "last");
-                    s_livecode_last = entry.Next;
+                    s_cacheLast = entry.Next;
                 }
                 else
                 {
@@ -198,10 +199,10 @@ namespace System.Text.RegularExpressions
                 }
                 entry.Next.Previous = entry.Previous;
 
-                s_livecode_first.Next = entry;
-                entry.Previous = s_livecode_first;
+                s_cacheFirst.Next = entry;
+                entry.Previous = s_cacheFirst;
                 entry.Next = null;
-                s_livecode_first = entry;
+                s_cacheFirst = entry;
             }
             return entry;
         }
@@ -217,6 +218,9 @@ namespace System.Text.RegularExpressions
 
             public CachedCodeEntryKey(RegexOptions options, string cultureKey, string pattern)
             {
+                SysDebug.Assert(cultureKey != null, "Culture must be provided");
+                SysDebug.Assert(pattern != null, "Pattern must be provided");
+
                 _options = options;
                 _cultureKey = cultureKey;
                 _pattern = pattern;
@@ -273,11 +277,9 @@ namespace System.Text.RegularExpressions
                 Key = key;
                 Capnames = capnames;
                 Capslist = capslist;
-
                 Code = code;
                 Caps = caps;
                 Capsize = capsize;
-
                 Runnerref = runner;
                 ReplRef = replref;
             }

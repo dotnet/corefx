@@ -1,4 +1,9 @@
-﻿using Microsoft.Xunit.Performance;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.Xunit.Performance;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -7,9 +12,10 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class Perf_Regex_Cache
     {
-        private static volatile bool s_IsMatch;
+        private const int MaxConcurrency = 4;
+        private static volatile bool s_isMatch;
 
-        public string[] CreateRegexps(int total, int unique)
+        public string[] CreatePatterns(int total, int unique)
         {
             var regexps = new string[total];
             // create: 
@@ -18,14 +24,14 @@ namespace System.Text.RegularExpressions.Tests
                 for (; i < unique; i++)
                 {
                     // "(0+)" "(1+)" ..  "(9+)(9+)(8+)" ..
-                    var re = new StringBuilder();
+                    var sb = new StringBuilder();
                     foreach (var c in i.ToString())
-                        re.Append("(" + c + "+)");
-                    regexps[i] = re.ToString();
+                        sb.Append("(" + c + "+)");
+                    regexps[i] = sb.ToString();
                 }
-
                 for (; i < total; i++) regexps[i] = regexps[i % unique];
             }
+
             // shuffle:
             const int someSeed = 101;  // seed for reproducability
             var random = new Random(someSeed);
@@ -51,16 +57,15 @@ namespace System.Text.RegularExpressions.Tests
         public void IsMatch(int total, int unique, int cacheSize)
         {
             var cacheSizeOld = Regex.CacheSize;
-            string[] regexps = CreateRegexps(total, unique);
+            string[] regexps = CreatePatterns(total, unique);
+
             try
             {
                 Regex.CacheSize = 0; // clean up cache
                 Regex.CacheSize = cacheSize;
-                foreach (var iteration in Benchmark.Iterations)
+                foreach (BenchmarkIteration iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                    {
                         RunTest(0, total, regexps);
-                    }
             }
             finally
             {
@@ -68,10 +73,10 @@ namespace System.Text.RegularExpressions.Tests
             }
         }
 
-        void RunTest(int start, int total, string[] regexps)
+        private void RunTest(int start, int total, string[] regexps)
         {
             for (var i = 0; i < total; i++)
-                s_IsMatch = Regex.IsMatch("0123456789", regexps[(start + i)%total]);
+                s_isMatch = Regex.IsMatch("0123456789", regexps[(start + i) % total]);
         }
 
         [Benchmark]
@@ -82,23 +87,24 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData(40_000, 1_600, 15)]    // default size, to compare when cache used
         [InlineData(40_000, 1_600, 800)]    // larger size, to test cache is not O(n)
         [InlineData(40_000, 1_600, 3_200)]  // larger size, to test cache always hit
-        public void IsMatch_Multithreading(int total, int unique, int cacheSize)
+        public async Task IsMatch_Multithreading(int total, int unique, int cacheSize)
         {
-            var cacheSizeOld = Regex.CacheSize;
-            string[] regexps = CreateRegexps(total, unique);
+            int cacheSizeOld = Regex.CacheSize;
+            string[] regexps = CreatePatterns(total, unique);
+
             try
             {
                 Regex.CacheSize = 0; // clean up cache
                 Regex.CacheSize = cacheSize;
-                foreach (var iteration in Benchmark.Iterations)
+                foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
                     {
-                        int threads = 4;
-                        var tasks = Enumerable.Range(0, threads)
-                            .Select(i => Task.Run(() => RunTest((int)(i*total/threads), total, regexps)))
-                            .ToArray();
-                        Task.WaitAll(tasks);
+                        IEnumerable<Task> tasks = Enumerable.Range(0, MaxConcurrency)
+                            .Select(i => Task.Run(() => RunTest(i * total / MaxConcurrency, total, regexps)));
+                        await Task.WhenAll(tasks);
                     }
+                }
             }
             finally
             {

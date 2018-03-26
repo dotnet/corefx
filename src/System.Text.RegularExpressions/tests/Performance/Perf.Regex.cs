@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using Xunit;
 using Microsoft.Xunit.Performance;
 
 namespace System.Text.RegularExpressions.Tests
@@ -23,15 +22,17 @@ namespace System.Text.RegularExpressions.Tests
             try
             {
                 Regex.CacheSize = 0; // disable cache to get clearer results
-                foreach (var iteration in Benchmark.Iterations)
+                foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+                {
                     using (iteration.StartMeasurement())
                     {
                         for (int i = 0; i < InnerIterations; i++)
                         {
-                            foreach(var test in Match_TestData())
+                            foreach (var test in Match_TestData())
                                 Regex.Match((string)test[1], (string)test[0], (RegexOptions)test[2]);
                         }
                     }
+                }
             }
             finally
             {
