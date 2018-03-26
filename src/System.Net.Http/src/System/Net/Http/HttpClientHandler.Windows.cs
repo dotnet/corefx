@@ -18,9 +18,9 @@ namespace System.Net.Http
     public partial class HttpClientHandler : HttpMessageHandler
     {
         private readonly WinHttpHandler _winHttpHandler;
-        private readonly ManagedHandler _managedHandler;
         private readonly DiagnosticsHandler _diagnosticsHandler;
         private bool _useProxy;
+        private volatile bool _disposed;
 
         public HttpClientHandler()
         {
@@ -54,7 +54,9 @@ namespace System.Net.Http
             if (disposing && !_disposed)
             {
                 _disposed = true;
-                ((HttpMessageHandler)_winHttpHandler ?? _managedHandler).Dispose();
+
+                // Release WinHttp session handle.
+                _winHttpHandler.Dispose();
             }
 
             base.Dispose(disposing);
@@ -66,130 +68,52 @@ namespace System.Net.Http
 
         public bool UseCookies
         {
-            get => _winHttpHandler != null ? _winHttpHandler.CookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer : _managedHandler.UseCookies;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.CookieUsePolicy = value ? CookieUsePolicy.UseSpecifiedCookieContainer : CookieUsePolicy.IgnoreCookies;
-                }
-                else
-                {
-                    _managedHandler.UseCookies = value;
-                }
-            }
+            get { return (_winHttpHandler.CookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer); }
+            set { _winHttpHandler.CookieUsePolicy = value ? CookieUsePolicy.UseSpecifiedCookieContainer : CookieUsePolicy.IgnoreCookies; }
         }
+
 
         public CookieContainer CookieContainer
         {
-            get => _winHttpHandler != null ? _winHttpHandler.CookieContainer : _managedHandler.CookieContainer;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.CookieContainer = value;
-                }
-                else
-                {
-                    _managedHandler.CookieContainer = value;
-                }
-            }
+            get { return _winHttpHandler.CookieContainer; }
+            set { _winHttpHandler.CookieContainer = value; }
         }
+
 
         public ClientCertificateOption ClientCertificateOptions
         {
-            get => _winHttpHandler != null ? _winHttpHandler.ClientCertificateOption : _managedHandler.ClientCertificateOptions;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.ClientCertificateOption = value;
-                }
-                else
-                {
-                    _managedHandler.ClientCertificateOptions = value;
-                }
-            }
+            get { return _winHttpHandler.ClientCertificateOption; }
+            set { _winHttpHandler.ClientCertificateOption = value; }
         }
 
         public DecompressionMethods AutomaticDecompression
         {
-            get => _winHttpHandler != null ? _winHttpHandler.AutomaticDecompression : _managedHandler.AutomaticDecompression;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.AutomaticDecompression = value;
-                }
-                else
-                {
-                    _managedHandler.AutomaticDecompression = value;
-                }
-            }
+            get { return _winHttpHandler.AutomaticDecompression; }
+            set { _winHttpHandler.AutomaticDecompression = value; }
         }
 
         public bool UseProxy
         {
-            get => _winHttpHandler != null ? _useProxy : _managedHandler.UseProxy;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _useProxy = value;
-                }
-                else
-                {
-                    _managedHandler.UseProxy = value;
-                }
-            }
+            get { return _useProxy; }
+            set { _useProxy = value; }
         }
 
         public IWebProxy Proxy
         {
-            get => _winHttpHandler != null ? _winHttpHandler.Proxy : _managedHandler.Proxy;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.Proxy = value;
-                }
-                else
-                {
-                    _managedHandler.Proxy = value;
-                }
-            }
+            get { return _winHttpHandler.Proxy; }
+            set { _winHttpHandler.Proxy = value; }
         }
 
         public ICredentials DefaultProxyCredentials
         {
-            get => _winHttpHandler != null ? _winHttpHandler.DefaultProxyCredentials : _managedHandler.DefaultProxyCredentials;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.DefaultProxyCredentials = value;
-                }
-                else
-                {
-                    _managedHandler.DefaultProxyCredentials = value;
-                }
-            }
+            get { return _winHttpHandler.DefaultProxyCredentials; }
+            set { _winHttpHandler.DefaultProxyCredentials = value; }
         }
 
         public bool PreAuthenticate
         {
-            get => _winHttpHandler != null ? _winHttpHandler.PreAuthenticate : _managedHandler.PreAuthenticate;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.PreAuthenticate = value;
-                }
-                else
-                {
-                    _managedHandler.PreAuthenticate = value;
-                }
-            }
+            get { return _winHttpHandler.PreAuthenticate; }
+            set { _winHttpHandler.PreAuthenticate = value; }
         }
 
         public bool UseDefaultCredentials
@@ -199,210 +123,124 @@ namespace System.Net.Http
             //
             // This property only affect .ServerCredentials and not .DefaultProxyCredentials.
 
-            get => _winHttpHandler != null ? _winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials : _managedHandler.UseDefaultCredentials;
+            get { return (_winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials); }
+
             set
             {
-                if (_winHttpHandler != null)
+                if (value)
                 {
-                    if (value)
-                    {
-                        _winHttpHandler.ServerCredentials = CredentialCache.DefaultCredentials;
-                    }
-                    else
-                    {
-                        if (_winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials)
-                        {
-                            // Only clear out the ServerCredentials property if it was a DefaultCredentials.
-                            _winHttpHandler.ServerCredentials = null;
-                        }
-                    }
+                    _winHttpHandler.ServerCredentials = CredentialCache.DefaultCredentials;
                 }
                 else
                 {
-                    _managedHandler.UseDefaultCredentials = value;
+                    if (_winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials)
+                    {
+                        // Only clear out the ServerCredentials property if it was a DefaultCredentials.
+                        _winHttpHandler.ServerCredentials = null;
+                    }
                 }
             }
         }
 
         public ICredentials Credentials
         {
-            get => _winHttpHandler != null ? _winHttpHandler.ServerCredentials : _managedHandler.Credentials;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.ServerCredentials = value;
-                }
-                else
-                {
-                    _managedHandler.Credentials = value;
-                }
-            }
+            get { return _winHttpHandler.ServerCredentials; }
+            set { _winHttpHandler.ServerCredentials = value; }
         }
 
         public bool AllowAutoRedirect
         {
-            get => _winHttpHandler != null ? _winHttpHandler.AutomaticRedirection : _managedHandler.AllowAutoRedirect;
+            get
+            {
+                return _winHttpHandler.AutomaticRedirection;
+            }
             set
             {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.AutomaticRedirection = value;
-                }
-                else
-                {
-                    _managedHandler.AllowAutoRedirect = value;
-                }
+                _winHttpHandler.AutomaticRedirection = value;
             }
         }
 
         public int MaxAutomaticRedirections
         {
-            get => _winHttpHandler != null ? _winHttpHandler.MaxAutomaticRedirections : _managedHandler.MaxAutomaticRedirections;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.MaxAutomaticRedirections = value;
-                }
-                else
-                {
-                    _managedHandler.MaxAutomaticRedirections = value;
-                }
-            }
+            get { return _winHttpHandler.MaxAutomaticRedirections; }
+            set { _winHttpHandler.MaxAutomaticRedirections = value; }
         }
 
         public int MaxConnectionsPerServer
         {
-            get => _winHttpHandler != null ? _winHttpHandler.MaxConnectionsPerServer : _managedHandler.MaxConnectionsPerServer;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.MaxConnectionsPerServer = value;
-                }
-                else
-                {
-                    _managedHandler.MaxConnectionsPerServer = value;
-                }
-            }
+            get { return _winHttpHandler.MaxConnectionsPerServer; }
+            set { _winHttpHandler.MaxConnectionsPerServer = value; }
         }
 
         public int MaxResponseHeadersLength
         {
-            get => _winHttpHandler != null ? _winHttpHandler.MaxResponseHeadersLength : _managedHandler.MaxResponseHeadersLength;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.MaxResponseHeadersLength = value;
-                }
-                else
-                {
-                    _managedHandler.MaxResponseHeadersLength = value;
-                }
-            }
+            get { return _winHttpHandler.MaxResponseHeadersLength; }
+            set { _winHttpHandler.MaxResponseHeadersLength = value; }
         }
 
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get; } = delegate { return true; };
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
-            get => _winHttpHandler != null ? _winHttpHandler.ServerCertificateValidationCallback : _managedHandler.ServerCertificateCustomValidationCallback;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.ServerCertificateValidationCallback = value;
-                }
-                else
-                {
-                    _managedHandler.ServerCertificateCustomValidationCallback = value;
-                }
-            }
+            get { return _winHttpHandler.ServerCertificateValidationCallback; }
+            set { _winHttpHandler.ServerCertificateValidationCallback = value; }
         }
 
         public bool CheckCertificateRevocationList
         {
-            get => _winHttpHandler != null ? _winHttpHandler.CheckCertificateRevocationList : _managedHandler.CheckCertificateRevocationList;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.CheckCertificateRevocationList = value;
-                }
-                else
-                {
-                    _managedHandler.CheckCertificateRevocationList = value;
-                }
-            }
+            get { return _winHttpHandler.CheckCertificateRevocationList; }
+            set { _winHttpHandler.CheckCertificateRevocationList = value; }
         }
 
         public SslProtocols SslProtocols
         {
-            get => _winHttpHandler != null ? _winHttpHandler.SslProtocols : _managedHandler.SslProtocols;
-            set
-            {
-                if (_winHttpHandler != null)
-                {
-                    _winHttpHandler.SslProtocols = value;
-                }
-                else
-                {
-                    _managedHandler.SslProtocols = value;
-                }
-            }
+            get { return _winHttpHandler.SslProtocols; }
+            set { _winHttpHandler.SslProtocols = value; }
         }
 
-        public IDictionary<String, object> Properties => _winHttpHandler != null ?
-            _winHttpHandler.Properties :
-            _managedHandler.Properties;
+        public IDictionary<String, object> Properties
+        {
+            get { return _winHttpHandler.Properties; }
+        }
         
 
         protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            if (_winHttpHandler != null)
-            {
-                // Get current value of WindowsProxyUsePolicy.  Only call its WinHttpHandler
-                // property setter if the value needs to change.
-                var oldProxyUsePolicy = _winHttpHandler.WindowsProxyUsePolicy;
+            // Get current value of WindowsProxyUsePolicy.  Only call its WinHttpHandler
+            // property setter if the value needs to change.
+            var oldProxyUsePolicy = _winHttpHandler.WindowsProxyUsePolicy;
 
-                if (_useProxy)
+            if (_useProxy)
+            {
+                if (_winHttpHandler.Proxy == null)
                 {
-                    if (_winHttpHandler.Proxy == null)
+                    if (oldProxyUsePolicy != WindowsProxyUsePolicy.UseWinInetProxy)
                     {
-                        if (oldProxyUsePolicy != WindowsProxyUsePolicy.UseWinInetProxy)
-                        {
-                            _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
-                        }
-                    }
-                    else
-                    {
-                        if (oldProxyUsePolicy != WindowsProxyUsePolicy.UseCustomProxy)
-                        {
-                            _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
-                        }
+                        _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
                     }
                 }
                 else
                 {
-                    if (oldProxyUsePolicy != WindowsProxyUsePolicy.DoNotUseProxy)
+                    if (oldProxyUsePolicy != WindowsProxyUsePolicy.UseCustomProxy)
                     {
-                        _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.DoNotUseProxy;
+                        _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
                     }
                 }
-
-                return DiagnosticsHandler.IsEnabled() ?
-                    _diagnosticsHandler.SendAsync(request, cancellationToken) :
-                    _winHttpHandler.SendAsync(request, cancellationToken);
             }
             else
             {
-                return DiagnosticsHandler.IsEnabled() ?
-                    _diagnosticsHandler.SendAsync(request, cancellationToken) :
-                    _managedHandler.SendAsync(request, cancellationToken);
+                if (oldProxyUsePolicy != WindowsProxyUsePolicy.DoNotUseProxy)
+                {
+                    _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.DoNotUseProxy;
+                }
             }
+
+            if (DiagnosticsHandler.IsEnabled())
+            {
+                return _diagnosticsPipeline.SendAsync(request, cancellationToken);
+            }
+            return _winHttpHandler.SendAsync(request, cancellationToken);
         }
     }
 }
