@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Xml.Tests
@@ -16,7 +15,8 @@ namespace System.Xml.Tests
         public void Resolving_RelativeBase_Throws()
         {
             var resolver = new XmlUrlResolver();
-            Assert.Throws<NotSupportedException>(() => resolver.ResolveUri(new Uri(",", UriKind.Relative), "test.xml"));
+            Assert.Throws<NotSupportedException>(() => resolver.ResolveUri(
+                new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar, UriKind.Relative), "test.xml"));
         }
 
         [Theory]
@@ -30,29 +30,48 @@ namespace System.Xml.Tests
             Assert.True(resolvedUri.LocalPath.EndsWith(path.Replace('/', Path.DirectorySeparatorChar)));
         }
 
+        [Theory]
+        [MemberData(nameof(XmlFileTargets))]
+        public void Resolving_OnlyWithBaseUri_Ok(string basePath)
+        {
+            var baseUri = new Uri(Path.GetFullPath(basePath));
+            var resolver = new XmlUrlResolver();
+            Uri resolvedUri = resolver.ResolveUri(baseUri, string.Empty);
+
+            Assert.Equal(Path.GetFullPath(Path.Combine(basePath)), resolvedUri.LocalPath);
+        }
+
         public static IEnumerable<object[]> GetBaseUriAndPath()
         {
-            var currDirWithDirSeparator = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
+            // Base URI as null is the default for internal Xml operation.
+            var baseUris = new List<Uri> { null };
 
-            var baseUris = new Uri[]
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                new Uri(currDirWithDirSeparator, UriKind.Absolute),
-                new Uri(currDirWithDirSeparator, UriKind.RelativeOrAbsolute),
-                null
-            };
+                // The case below does not work on Unix, the '#' ends up treated as a fragment and the path is cut there.
+                var currDirWithDirSeparator = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
+                baseUris.Add(new Uri(currDirWithDirSeparator, UriKind.Absolute));
+                baseUris.Add(new Uri(string.Empty, UriKind.RelativeOrAbsolute));
+            }
 
             foreach (Uri baseUri in baseUris)
             {
-                yield return new object[] { baseUri, "f#/t/ë/test.xml" };
-                yield return new object[] { baseUri, "/f#/t/ë/t#st.xml" };
-                yield return new object[] { baseUri, "/f#/ã/ë/tëst.xml" };
-                yield return new object[] { baseUri, "u/t/c/test.xml" };
-                yield return new object[] { baseUri, "u/t/c/t#st.xml" };
-                yield return new object[] { baseUri, "/u/t/c/tëst.xml" };
-                yield return new object[] { baseUri, "test.xml" };
-                yield return new object[] { baseUri, "t#st.xml" };
-                yield return new object[] { baseUri, "tëst.xml" };
+                foreach (object[] targetFile in XmlFileTargets)
+                    yield return new object[] { baseUri, targetFile[0] };
             }
         }
+
+        public static IEnumerable<object[]> XmlFileTargets => new object[][]
+        {
+            new object[] { "f#/t/ë/test.xml" },
+            new object[] { "/f#/t/ë/t#st.xml" },
+            new object[] { "/f#/ã/ë/tëst.xml" },
+            new object[] { "u/t/c/test.xml" },
+            new object[] { "u/t/c/t#st.xml" },
+            new object[] { "/u/t/c/tëst.xml" },
+            new object[] { "test.xml" },
+            new object[] { "t#st.xml" },
+            new object[] { "tëst.xml" }
+        };
     }
 }
