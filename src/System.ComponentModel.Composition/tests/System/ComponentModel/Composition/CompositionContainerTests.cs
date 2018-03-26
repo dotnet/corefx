@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
@@ -3020,6 +3021,33 @@ namespace System.ComponentModel.Composition
             exporter.Property = "Value1";
             // Exported value should have been cached and so it shouldn't change
             Assert.Null(container.GetExportedValue<string>("Property"));
+        }
+
+        [Fact]
+        public void TestExportedValueUsingWhereClause_ExportSuccessful()
+        {
+            CompositionContainer container = new CompositionContainer(new AssemblyCatalog(typeof(AssemblyCatalogTestsReflectionContext).Assembly));
+            IMefCollection<DerivedClass, BaseClass> i = container.GetExportedValue<IMefCollection<DerivedClass, BaseClass>>("UsingWhereClause");
+            Assert.NotNull(i);
+        }
+
+        public interface IMefCollection<TC, TP> : IList<TC>, IMefCollection where TC : TP { }
+        public class BaseClass { }
+        public class DerivedClass : BaseClass { }
+
+        public interface IMefCollection
+        {
+            void WriteTypeNameOfSecondParam();
+        }
+
+        [Export("UsingWhereClause", typeof(IMefCollection<,>))]
+        public class MefCollection<TC, TP> : ObservableCollection<TC>, IMefCollection<TC, TP> where TC : TP
+        {
+            public void WriteTypeNameOfSecondParam()
+            {
+                Console.WriteLine("TC Type: " + typeof(TC).ToString());
+                Console.WriteLine("TP Type: " + typeof(TP).ToString());
+            }
         }
 
         public class ExportsMutableProperty
