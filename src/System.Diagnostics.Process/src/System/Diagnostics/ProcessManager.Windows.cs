@@ -120,6 +120,12 @@ namespace System.Diagnostics
             return !string.Equals(Interop.Kernel32.GetComputerName(), baseName, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static IntPtr GetMainWindowHandle(int processId) 
+        {
+            MainWindowFinder finder = new MainWindowFinder();
+            return finder.FindMainWindow(processId);
+        }
+
         // -----------------------------
         // ---- PAL layer ends here ----
         // -----------------------------
@@ -215,7 +221,7 @@ namespace System.Diagnostics
     ///     information.  Module information is obtained using PSAPI.
     /// </devdoc>
     /// <internalonly/>
-    internal static partial class NtProcessManager
+    internal static class NtProcessManager
     {
         private const int ProcessPerfCounterId = 230;
         private const int ThreadPerfCounterId = 232;
@@ -468,7 +474,6 @@ namespace System.Diagnostics
             }
         }
 
-
         private static void HandleError()
         {
             int lastError = Marshal.GetLastWin32Error();
@@ -487,7 +492,14 @@ namespace System.Diagnostics
 
         public static int GetProcessIdFromHandle(SafeProcessHandle processHandle)
         {
-            return Interop.Kernel32.GetProcessId(processHandle);
+            Interop.NtDll.NtProcessBasicInfo info = new Interop.NtDll.NtProcessBasicInfo();
+            int status = Interop.NtDll.NtQueryInformationProcess(processHandle, Interop.NtDll.NtQueryProcessBasicInfo, info, (int)Marshal.SizeOf(info), null);
+            if (status != 0)
+            {
+                throw new InvalidOperationException(SR.CantGetProcessId, new Win32Exception(status));
+            }
+            // We should change the signature of this function and ID property in process class.
+            return info.UniqueProcessId.ToInt32();
         }
 
         public static ProcessInfo[] GetProcessInfos(string machineName, bool isRemoteMachine)
@@ -822,7 +834,7 @@ namespace System.Diagnostics
     }
 
 
-    internal static partial class NtProcessInfoHelper
+    internal static class NtProcessInfoHelper
     {
         private static int GetNewBufferSize(int existingBufferSize, int requiredSize)
         {
@@ -917,13 +929,16 @@ namespace System.Diagnostics
 
             return processInfos;
         }
-        
+
         // Use a smaller buffer size on debug to ensure we hit the retry path.
 #if DEBUG
         private const int DefaultCachedBufferSize = 1024;
 #else
         private const int DefaultCachedBufferSize = 128 * 1024;
 #endif
+
+        // Cache a single buffer for use in GetProcessInfos().
+        private static long[] CachedBuffer;
 
         static ProcessInfo[] GetProcessInfos(IntPtr dataPtr)
         {
@@ -1067,52 +1082,105 @@ namespace System.Diagnostics
 
         // native struct defined in ntexapi.h
         [StructLayout(LayoutKind.Sequential)]
-        internal unsafe struct SystemProcessInformation
+        internal class SystemProcessInformation
         {
             internal uint NextEntryOffset;
             internal uint NumberOfThreads;
-            private fixed byte Reserved1[48];
-            internal Interop.UNICODE_STRING ImageName;
+            private long _SpareLi1;
+            private long _SpareLi2;
+            private long _SpareLi3;
+            private long _CreateTime;
+            private long _UserTime;
+            private long _KernelTime;
+
+            internal ushort NameLength;   // UNICODE_STRING   
+            internal ushort MaximumNameLength;
+            internal IntPtr NamePtr;     // This will point into the data block returned by NtQuerySystemInformation
+
             internal int BasePriority;
             internal IntPtr UniqueProcessId;
-            private UIntPtr Reserved2;
+            internal IntPtr InheritedFromUniqueProcessId;
             internal uint HandleCount;
             internal uint SessionId;
-            private UIntPtr Reserved3;
+            internal UIntPtr PageDirectoryBase;
             internal UIntPtr PeakVirtualSize;  // SIZE_T
             internal UIntPtr VirtualSize;
-            private uint Reserved4;
-            internal UIntPtr PeakWorkingSetSize;  // SIZE_T
-            internal UIntPtr WorkingSetSize;  // SIZE_T
-            private UIntPtr Reserved5;
-            internal UIntPtr QuotaPagedPoolUsage;  // SIZE_T
-            private UIntPtr Reserved6;
-            internal UIntPtr QuotaNonPagedPoolUsage;  // SIZE_T
-            internal UIntPtr PagefileUsage;  // SIZE_T
-            internal UIntPtr PeakPagefileUsage;  // SIZE_T
-            internal UIntPtr PrivatePageCount;  // SIZE_T
-            private fixed long Reserved7[6];
+            internal uint PageFaultCount;
+
+            internal UIntPtr PeakWorkingSetSize;
+            internal UIntPtr WorkingSetSize;
+            internal UIntPtr QuotaPeakPagedPoolUsage;
+            internal UIntPtr QuotaPagedPoolUsage;
+            internal UIntPtr QuotaPeakNonPagedPoolUsage;
+            internal UIntPtr QuotaNonPagedPoolUsage;
+            internal UIntPtr PagefileUsage;
+            internal UIntPtr PeakPagefileUsage;
+            internal UIntPtr PrivatePageCount;
+
+            private long _ReadOperationCount;
+            private long _WriteOperationCount;
+            private long _OtherOperationCount;
+            private long _ReadTransferCount;
+            private long _WriteTransferCount;
+            private long _OtherTransferCount;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal unsafe struct SystemThreadInformation
+        internal class SystemThreadInformation
         {
-            private fixed long Reserved1[3];
-            private uint Reserved2;
+            private long _KernelTime;
+            private long _UserTime;
+            private long _CreateTime;
+
+            private uint _WaitTime;
             internal IntPtr StartAddress;
-            internal CLIENT_ID ClientId;
+            internal IntPtr UniqueProcess;
+            internal IntPtr UniqueThread;
             internal int Priority;
             internal int BasePriority;
-            private uint Reserved3;
+            internal uint ContextSwitches;
             internal uint ThreadState;
             internal uint WaitReason;
         }
+    }
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct CLIENT_ID
+    internal sealed class MainWindowFinder 
+    {
+        private const int GW_OWNER = 4;
+        private IntPtr _bestHandle;
+        private int _processId;
+ 
+        public IntPtr FindMainWindow(int processId)
         {
-            internal IntPtr UniqueProcess;
-            internal IntPtr UniqueThread;
+            _bestHandle = (IntPtr)0;
+            _processId = processId;
+            
+            Interop.User32.EnumThreadWindowsCallback callback = new Interop.User32.EnumThreadWindowsCallback(EnumWindowsCallback);
+            Interop.User32.EnumWindows(callback, IntPtr.Zero);
+ 
+            GC.KeepAlive(callback);
+            return _bestHandle;
+        }
+ 
+        private bool IsMainWindow(IntPtr handle) 
+        {           
+            if (Interop.User32.GetWindow(handle, GW_OWNER) != (IntPtr)0 || !Interop.User32.IsWindowVisible(handle))
+                return false;
+            
+            return true;
+        }
+ 
+        private bool EnumWindowsCallback(IntPtr handle, IntPtr extraParameter) {
+            int processId;
+            Interop.User32.GetWindowThreadProcessId(handle, out processId);
+
+            if (processId == _processId) {
+                if (IsMainWindow(handle)) {
+                    _bestHandle = handle;
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
