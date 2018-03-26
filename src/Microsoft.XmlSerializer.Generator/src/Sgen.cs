@@ -58,11 +58,8 @@ namespace Microsoft.XmlSerializer.Generator
                     else if (ArgumentMatch(arg, "out") || ShortNameArgumentMatch(arg, "o"))
                     {
                         if (codePath != null || ++i >= args.Length)
-                        {
-                            if (arg.Length == "-o".Length)
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "-o", arg));
-                            else
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "--out", arg));
+                        {                         
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
                         else
                         {
@@ -73,7 +70,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         if (++i >= args.Length)
                         {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "--type", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
                         else
                         {
@@ -88,10 +85,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         if (assembly != null || ++i >= args.Length)
                         {
-                            if (arg.Length == "-a".Length)
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "-a", arg));
-                            else
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
                         else
                         {
@@ -124,7 +118,7 @@ namespace Microsoft.XmlSerializer.Generator
                         {
                             if (assembly != null)
                             {
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                             }
 
                             assembly = arg;
