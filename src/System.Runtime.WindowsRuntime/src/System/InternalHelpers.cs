@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading.Tasks;
-using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace System.Runtime.WindowsRuntime.Internal
 {
@@ -31,12 +30,7 @@ namespace System.Runtime.WindowsRuntime.Internal
 
         internal static void SetErrorCode(this Exception ex, int code)
         {
-            // Stub, until COM interop guys fix the exception logic
-        }
-
-        internal static void TryDeregister(this CancellationTokenRegistration ctr)
-        {
-            //nothing to do for projectN
+            InteropExtensions.SetExceptionErrorCode(ex, code);
         }
     }
 
