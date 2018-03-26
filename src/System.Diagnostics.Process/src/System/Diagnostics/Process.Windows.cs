@@ -421,29 +421,6 @@ namespace System.Diagnostics
             return idle;
         }
 
-        private bool CloseMainWindowCore()
-        {
-            const int GWL_STYLE = -16; // Retrieves the window styles.
-            const int WS_DISABLED = 0x08000000; // WindowStyle disabled. A disabled window cannot receive input from the user.
-            const int WM_CLOSE = 0x0010; // WindowMessage close.
-
-            IntPtr mainWindowHandle = MainWindowHandle;
-            if (mainWindowHandle == (IntPtr)0)
-            {
-                return false;
-            }
-
-            int style = Interop.User32.GetWindowLong(mainWindowHandle, GWL_STYLE);
-            if ((style & WS_DISABLED) != 0)
-            {
-                return false;
-            }
-
-            Interop.User32.PostMessage(mainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-            return true;
-        }
-
-
         /// <summary>Sets one or both of the minimum and maximum working set limits.</summary>
         /// <param name="newMin">The new minimum working set limit, or null not to change it.</param>
         /// <param name="newMax">The new maximum working set limit, or null not to change it.</param>

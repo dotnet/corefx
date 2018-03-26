@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
@@ -11,6 +12,11 @@ namespace System.Diagnostics
 {
     public partial class Process : IDisposable
     {
+
+        private bool _haveMainWindow;
+        private IntPtr _mainWindowHandle;
+        private string _mainWindowTitle;
+
         private bool StartCore(ProcessStartInfo startInfo)
         {
             return startInfo.UseShellExecute
@@ -178,6 +184,71 @@ namespace System.Diagnostics
             }
 
             public int ErrorCode { get; private set; }
+        }
+
+        public string MainWindowTitle
+        {
+            get
+            {
+                if (_mainWindowTitle == null)
+                {
+                    _mainWindowTitle = GetMainWindowTitle();
+                }
+
+                return _mainWindowTitle;
+            }
+        }
+
+        public bool CloseMainWindow()
+        {
+            return CloseMainWindowCore();
+        }
+
+        public bool WaitForInputIdle()
+        {
+            return WaitForInputIdle(int.MaxValue);
+        }
+
+        public bool WaitForInputIdle(int milliseconds)
+        {
+            return WaitForInputIdleCore(milliseconds);
+        }
+
+        public IntPtr MainWindowHandle
+        {
+            get
+            {
+                if (!_haveMainWindow)
+                {
+                    EnsureState(State.IsLocal | State.HaveId);
+                    _mainWindowHandle = ProcessManager.GetMainWindowHandle(_processId);
+
+                    _haveMainWindow = true;
+                }
+                return _mainWindowHandle;
+            }
+        }
+
+        private bool CloseMainWindowCore()
+        {
+            const int GWL_STYLE = -16; // Retrieves the window styles.
+            const int WS_DISABLED = 0x08000000; // WindowStyle disabled. A disabled window cannot receive input from the user.
+            const int WM_CLOSE = 0x0010; // WindowMessage close.
+
+            IntPtr mainWindowHandle = MainWindowHandle;
+            if (mainWindowHandle == (IntPtr)0)
+            {
+                return false;
+            }
+
+            int style = Interop.User32.GetWindowLong(mainWindowHandle, GWL_STYLE);
+            if ((style & WS_DISABLED) != 0)
+            {
+                return false;
+            }
+
+            Interop.User32.PostMessage(mainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            return true;
         }
     }
 }

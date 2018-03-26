@@ -65,10 +65,6 @@ namespace System.Diagnostics
         private StreamReader _standardError;
         private bool _disposed;
 
-        private bool _haveMainWindow;
-        private IntPtr _mainWindowHandle;
-        private string _mainWindowTitle;
-
         private static object s_createProcessLock = new object();
 
         private StreamReadMode _outputStreamReadMode;
@@ -806,49 +802,6 @@ namespace System.Diagnostics
                     Close();
                 }
                 _disposed = true;
-            }
-        }
-
-        public string MainWindowTitle
-        {
-            get
-            {
-                if (_mainWindowTitle == null)
-                {
-                    _mainWindowTitle = GetMainWindowTitle();
-                }
-
-                return _mainWindowTitle;
-            }
-        }
-
-        public bool CloseMainWindow()
-        {
-            return CloseMainWindowCore();
-        }
-
-        public bool WaitForInputIdle()
-        {
-            return WaitForInputIdle(int.MaxValue);
-        }
-
-        public bool WaitForInputIdle(int milliseconds)
-        {
-            return WaitForInputIdleCore(milliseconds);
-        }
-
-        public IntPtr MainWindowHandle
-        {
-            get
-            {
-                if (!_haveMainWindow)
-                {
-                    EnsureState(State.IsLocal | State.HaveId);
-                    _mainWindowHandle = ProcessManager.GetMainWindowHandle(_processId);
-
-                    _haveMainWindow = true;
-                }
-                return _mainWindowHandle;
             }
         }
 
