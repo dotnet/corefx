@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
@@ -24,13 +24,17 @@ namespace System.Net.Security
         {
             // Is SSL 3 handshake? SSL 2 does not support extensions - skipping as well
             if (sslPlainText.Length < 5 || sslPlainText[0] != 0x16)
+            {
                 return null;
+            }
 
             ushort handshakeLength = ReadUint16(sslPlainText.Slice(3));
             ReadOnlySpan<byte> sslHandshake = sslPlainText.Slice(5);
 
             if (handshakeLength != sslHandshake.Length)
+            {
                 return null;
+            }
 
             return GetSniFromSslHandshake(sslHandshake);
         }
@@ -44,13 +48,17 @@ namespace System.Net.Security
         {
             // If not client hello then skip
             if (sslHandshake.Length < 4 || sslHandshake[0] != 0x01)
+            {
                 return null;
+            }
 
             int clientHelloLength = ReadUint24(sslHandshake.Slice(1));
             ReadOnlySpan<byte> clientHello = sslHandshake.Slice(4);
 
             if (clientHello.Length != clientHelloLength)
+            {
                 return null;
+            }
 
             return GetSniFromClientHello(clientHello);
         }
@@ -80,19 +88,25 @@ namespace System.Net.Security
 
             // is invalid structure or no extensions?
             if (p.IsEmpty)
+            {
                 return null;
+            }
 
             ushort extensionListLength = ReadUint16(p);
             p = SkipBytes(p, 2);
 
             if (extensionListLength != p.Length)
+            {
                 return null;
+            }
 
             while (!p.IsEmpty)
             {
                 string sni = GetSniFromExtension(p, out p);
                 if (sni != null)
+                {
                     return sni;
+                }
             }
 
             return null;
@@ -185,22 +199,22 @@ namespace System.Net.Security
             return Encoding.UTF8.GetString(hostName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ushort ReadUint16(ReadOnlySpan<byte> bytes)
         {
             return (ushort)((bytes[0] << 8) | bytes[1]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int ReadUint24(ReadOnlySpan<byte> bytes)
         {
             return (bytes[0] << 16) | (bytes[1] << 8) | bytes[2];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ReadOnlySpan<byte> SkipBytes(ReadOnlySpan<byte> bytes, int numberOfBytesToSkip)
         {
-            if (numberOfBytesToSkip < bytes.Length)
-                return bytes.Slice(numberOfBytesToSkip);
-            else
-                return ReadOnlySpan<byte>.Empty;
+            return (numberOfBytesToSkip < bytes.Length) ? bytes.Slice(numberOfBytesToSkip) : ReadOnlySpan<byte>.Empty;
         }
 
         // Opaque type is of structure:
@@ -211,7 +225,9 @@ namespace System.Net.Security
         private static ReadOnlySpan<byte> SkipOpaqueType1(ReadOnlySpan<byte> bytes)
         {
             if (bytes.Length < 1)
+            {
                 return ReadOnlySpan<byte>.Empty;
+            }
 
             byte length = bytes[0];
             int totalBytes = 1 + length;
@@ -222,7 +238,9 @@ namespace System.Net.Security
         private static ReadOnlySpan<byte> SkipOpaqueType2(ReadOnlySpan<byte> bytes)
         {
             if (bytes.Length < 2)
+            {
                 return ReadOnlySpan<byte>.Empty;
+            }
 
             ushort length = ReadUint16(bytes);
             int totalBytes = 2 + length;
