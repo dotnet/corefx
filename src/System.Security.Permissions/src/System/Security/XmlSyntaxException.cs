@@ -15,5 +15,6 @@ namespace System.Security
         public XmlSyntaxException(int lineNumber, string message) { }
         public XmlSyntaxException(string message) { }
         public XmlSyntaxException(string message, Exception inner) { }
+        private XmlSyntaxException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }
