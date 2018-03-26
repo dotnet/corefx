@@ -144,6 +144,7 @@ namespace System.Tests
         private static void VerifyCallStack(
             Stack<(string CallerMemberName, string SourceFilePath, int SourceLineNumber)> expectedCallStack, string reportedCallStack)
         {
+            Console.WriteLine("* ExceptionTests - reported call stack:\n{0}", reportedCallStack);
             const string FrameParserRegex = @"\s+at\s.+\.(?<memberName>[^(]+)\([^)]*\)\sin\s(?<filePath>.*)\:line\s(?<lineNumber>[\d]+)";
 
             using (var sr = new StringReader(reportedCallStack))
