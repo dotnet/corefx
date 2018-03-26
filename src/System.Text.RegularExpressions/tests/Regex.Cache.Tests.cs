@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -97,6 +98,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // different cache structure
         public void Ctor_Cache_Uses_dictionary_linked_list_switch_does_not_throw()
         {
             // assume the limit is less than the cache size so we cross it two times:
@@ -134,10 +136,21 @@ namespace System.Text.RegularExpressions.Tests
 
         private int GetCachedItemsNum()
         {
-            Type type = typeof(Regex);
-            FieldInfo info = type.GetField("s_cacheCount", BindingFlags.NonPublic | BindingFlags.Static);
-            var count = (int) info.GetValue(null);
-            return count;
+            // On .NET Framework we have a different cache structure.
+            if (PlatformDetection.IsFullFramework)
+            {
+                object linkedList = typeof(Regex)
+                    .GetField("livecode", BindingFlags.NonPublic | BindingFlags.Static)
+                    .GetValue(null);
+                return (int)linkedList.GetType()
+                    .GetProperty("Count", BindingFlags.Public | BindingFlags.Instance)
+                    .GetValue(linkedList);
+            }
+
+            string cacheFieldName = PlatformDetection.IsFullFramework ? "cacheSize" : "s_cacheCount";
+            return (int)typeof(Regex)
+                .GetField(cacheFieldName, BindingFlags.NonPublic | BindingFlags.Static)
+                .GetValue(null);
         }
     }
 }
