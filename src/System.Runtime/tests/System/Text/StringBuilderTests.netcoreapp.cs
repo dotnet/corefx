@@ -182,6 +182,26 @@ namespace System.Text.Tests
             Assert.InRange(builder.Capacity, 1, Math.Max(initialCapacity, oldLength * 1.2));
         }
 
+        [Fact]
+        public static void Clear_StringBuilderHasTwoChunks_OneChunkIsEmpty_ClearReducesCapacity()
+        {
+            var sb = new StringBuilder(string.Empty);
+            int initialCapacity = sb.Capacity;
+            for (int i = 0; i < initialCapacity; i++)
+            {
+                sb.Append('a');
+            }
+            sb.Insert(0, 'a');
+            while (sb.Length > 1)
+            {
+                sb.Remove(1, 1);
+            }
+            int oldCapacity = sb.Capacity;
+            sb.Clear();
+            Assert.Equal(oldCapacity - 1, sb.Capacity);
+            Assert.Equal(initialCapacity, sb.Capacity);
+        }
+
         [Theory]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0' }, 5, new char[] { 'H', 'e', 'l', 'l', 'o' })]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0' }, 4, new char[] { 'H', 'e', 'l', 'l' })]
