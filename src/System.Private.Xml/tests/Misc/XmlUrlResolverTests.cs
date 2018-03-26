@@ -38,7 +38,7 @@ namespace System.Xml.Tests
             var resolver = new XmlUrlResolver();
             Uri resolvedUri = resolver.ResolveUri(baseUri, string.Empty);
 
-            Assert.Equal(Path.GetFullPath(Path.Combine(basePath)), resolvedUri.LocalPath);
+            Assert.Equal(Path.GetFullPath(basePath), resolvedUri.LocalPath);
         }
 
         public static IEnumerable<object[]> GetBaseUriAndPath()
@@ -63,15 +63,15 @@ namespace System.Xml.Tests
 
         public static IEnumerable<object[]> XmlFileTargets => new object[][]
         {
-            new object[] { "f#/t/ë/test.xml" },
-            new object[] { "/f#/t/ë/t#st.xml" },
-            new object[] { "/f#/ã/ë/tëst.xml" },
+            new object[] { "f#/t/\u00eb/test.xml" },
+            new object[] { "/f#/t/\u00eb/t#st.xml" },
+            new object[] { "/f#/\u00e3/\u00eb/t\u00ebst.xml" },
             new object[] { "u/t/c/test.xml" },
             new object[] { "u/t/c/t#st.xml" },
-            new object[] { "/u/t/c/tëst.xml" },
+            new object[] { "/u/t/c/t\u00ebst.xml" },
             new object[] { "test.xml" },
             new object[] { "t#st.xml" },
-            new object[] { "tëst.xml" }
+            new object[] { "t\u00ebst.xml" }
         };
     }
 }
