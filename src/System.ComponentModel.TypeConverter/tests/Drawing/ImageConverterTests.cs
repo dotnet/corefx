@@ -39,7 +39,7 @@ namespace System.ComponentModel.TypeConverterTests
             _imgConvFrmTD = (ImageConverter)TypeDescriptor.GetConverter(_image);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertFrom()
         {
             Assert.True(_imgConv.CanConvertFrom(typeof(byte[])), "CCF#1");
@@ -69,7 +69,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(!_imgConvFrmTD.CanConvertFrom(null, typeof(Metafile)), "CCF#10A");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertTo()
         {
             Assert.True(_imgConv.CanConvertTo(typeof(string)), "CCT#1");
@@ -101,7 +101,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(!_imgConvFrmTD.CanConvertTo(null, typeof(int)), "CCT#9A");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom()
         {
             Image newImage = (Image)_imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, _imageBytes);
@@ -117,79 +117,79 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(_image.Width, newImage.Width);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_BadString()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom("System.Drawing.String"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_BadString_WithCulture()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_Bitmap()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_Point()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_SizeF()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_Object()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_BadString()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom("System.Drawing.String"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_BadString_Culture()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_Bitmap()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_Point()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_SizeF()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertFrom_Object()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo()
         {
             Assert.Equal(_imageStr, (string)_imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(string)));
@@ -198,7 +198,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(_imageStr, (string)_imgConvFrmTD.ConvertTo(_image, typeof(string)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_ByteArray()
         {
             byte[] newImageBytes = (byte[])_imgConv.ConvertTo(null, CultureInfo.InvariantCulture,
@@ -220,110 +220,110 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(_imageBytes.Length, newImageBytes.Length);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Rectangle()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Rectangle)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Image()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, _image.GetType()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Size()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Size)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Bitmap()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Bitmap)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Point()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Point)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Metafile()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Metafile)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Object()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(object)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_Int()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(int)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Rectangle()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Rectangle)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Image()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, _image.GetType()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Size()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Size)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Bitmap()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Bitmap)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Point()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Point)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Metafile()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Metafile)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Object()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(object)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TypeDescriptor_ConvertTo_Int()
         {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(int)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestGetPropertiesSupported()
         {
             Assert.True(_imgConv.GetPropertiesSupported(), "GPS#1");
             Assert.True(_imgConv.GetPropertiesSupported(null), "GPS#2");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestGetProperties()
         {
             int basecount = 1;

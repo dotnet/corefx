@@ -26,7 +26,7 @@ namespace System.ComponentModel.TypeConverterTests
             _imgFmtConvFrmTD = (ImageFormatConverter)TypeDescriptor.GetConverter(_imageFmt);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertFrom()
         {
             Assert.True(_imgFmtConv.CanConvertFrom(typeof(string)), "string (no context)");
@@ -44,7 +44,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.False(_imgFmtConvFrmTD.CanConvertFrom(null, typeof(int)), "TD int");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertTo()
         {
             Assert.True(_imgFmtConv.CanConvertTo(typeof(string)), "string (no context)");
@@ -62,7 +62,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.False(_imgFmtConvFrmTD.CanConvertTo(null, typeof(int)), "TD int");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestConvertFrom()
         {
             Assert.Equal(_imageFmt, (ImageFormat)_imgFmtConv.ConvertFrom(null, CultureInfo.InvariantCulture, ImageFormat.Bmp.ToString()));
@@ -89,7 +89,7 @@ namespace System.ComponentModel.TypeConverterTests
             return (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, imgFormatValue);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_ShortName()
         {
             Assert.Equal(ImageFormat.Bmp, ShortName("Bmp"));
@@ -109,7 +109,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(iformat, (ImageFormat)_imgFmtConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, iformat.ToString()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertFrom_LongName()
         {
             LongName(ImageFormat.Bmp);
@@ -124,7 +124,7 @@ namespace System.ComponentModel.TypeConverterTests
             LongName(ImageFormat.Wmf);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestConvertTo()
         {
             Assert.Equal(_imageFmtStr, (string)_imgFmtConv.ConvertTo(null, CultureInfo.InvariantCulture, _imageFmt, typeof(string)));
@@ -145,7 +145,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _imgFmtConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _imageFmt, typeof(int)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void GetStandardValuesSupported()
         {
             Assert.True(_imgFmtConv.GetStandardValuesSupported(), "GetStandardValuesSupported()");
@@ -215,7 +215,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.True(icon, "Icon");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void GetStandardValues()
         {
             CheckStandardValues(_imgFmtConv.GetStandardValues());

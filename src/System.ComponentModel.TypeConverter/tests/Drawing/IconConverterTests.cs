@@ -39,7 +39,7 @@ namespace System.ComponentModel.TypeConverterTests
             _icoConvFrmTD = (IconConverter)TypeDescriptor.GetConverter(_icon);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertFrom()
         {
             Assert.True(_icoConv.CanConvertFrom(typeof(byte[])), "byte[] (no context)");
@@ -69,7 +69,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.False(_icoConvFrmTD.CanConvertFrom(null, typeof(Metafile)), "TD Metafile");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestCanConvertTo()
         {
             Assert.True(_icoConv.CanConvertTo(typeof(string)), "string (no context)");
@@ -101,7 +101,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.False(_icoConvFrmTD.CanConvertTo(null, typeof(int)), "TD int");
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestConvertFrom()
         {
             Icon newIcon = (Icon)_icoConv.ConvertFrom(null, CultureInfo.InvariantCulture, _iconBytes);
@@ -130,7 +130,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestConvertTo()
         {
             Assert.Equal(_iconStr, (string)_icoConv.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(string)));
