@@ -13,9 +13,9 @@ namespace System.Text.RegularExpressions.Tests
     public class Perf_Regex_Cache
     {
         private const int MaxConcurrency = 4;
-        private static volatile bool s_isMatch;
+        private volatile bool _isMatch;
 
-        public string[] CreatePatterns(int total, int unique)
+        private static string[] CreatePatterns(int total, int unique)
         {
             var regexps = new string[total];
             // create: 
@@ -57,7 +57,7 @@ namespace System.Text.RegularExpressions.Tests
         public void IsMatch(int total, int unique, int cacheSize)
         {
             var cacheSizeOld = Regex.CacheSize;
-            string[] regexps = CreatePatterns(total, unique);
+            string[] patterns = CreatePatterns(total, unique);
 
             try
             {
@@ -65,7 +65,7 @@ namespace System.Text.RegularExpressions.Tests
                 Regex.CacheSize = cacheSize;
                 foreach (BenchmarkIteration iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        RunTest(0, total, regexps);
+                        RunTest(0, total, patterns);
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace System.Text.RegularExpressions.Tests
         private void RunTest(int start, int total, string[] regexps)
         {
             for (var i = 0; i < total; i++)
-                s_isMatch = Regex.IsMatch("0123456789", regexps[(start + i) % total]);
+                _isMatch = Regex.IsMatch("0123456789", regexps[start + i]);
         }
 
         [Benchmark]
@@ -90,7 +90,7 @@ namespace System.Text.RegularExpressions.Tests
         public async Task IsMatch_Multithreading(int total, int unique, int cacheSize)
         {
             int cacheSizeOld = Regex.CacheSize;
-            string[] regexps = CreatePatterns(total, unique);
+            string[] patterns = CreatePatterns(total, unique);
 
             try
             {
@@ -100,8 +100,15 @@ namespace System.Text.RegularExpressions.Tests
                 {
                     using (iteration.StartMeasurement())
                     {
-                        IEnumerable<Task> tasks = Enumerable.Range(0, MaxConcurrency)
-                            .Select(i => Task.Run(() => RunTest(i * total / MaxConcurrency, total, regexps)));
+                        int sliceLength = total / MaxConcurrency;
+                        var tasks = new Task[MaxConcurrency];
+
+                        for (int i = 0; i < MaxConcurrency; i++)
+                        {
+                            int start = i * sliceLength;
+                            tasks[i] = Task.Run(() => RunTest(start, sliceLength, patterns));
+                        }
+
                         await Task.WhenAll(tasks);
                     }
                 }
