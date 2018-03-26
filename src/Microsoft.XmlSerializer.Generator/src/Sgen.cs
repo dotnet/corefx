@@ -503,13 +503,12 @@ namespace Microsoft.XmlSerializer.Generator
             var referencelist = new List<string>();
             if (value.Length > 0)
             {
-                string[] entries = value.Split(new char[] { ';' });
-                for (int i = 0; i < entries.Length; i++)
+                foreach(var entry in value.Split(';'))
                 {
-                    string entry = entries[i].Trim();
-                    if (string.IsNullOrEmpty(entry))
+                    string trimentry = entry.Trim();
+                    if (string.IsNullOrEmpty(trimentry))
                         continue;
-                    referencelist.Add(entry);
+                    referencelist.Add(trimentry);
                 }
             }
 
@@ -534,7 +533,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             try
             {
-                if (string.IsNullOrEmpty(s_references) || string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Count() == 0)
+                if (string.IsNullOrEmpty(s_references) || string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Length == 0)
                 {
                     return null;
                 }
