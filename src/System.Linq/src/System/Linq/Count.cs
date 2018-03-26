@@ -20,6 +20,11 @@ namespace System.Linq
             {
                 return collectionoft.Count;
             }
+            
+            if (source is IReadOnlyCollection<TSource> rocollectionoft)
+            {
+                return rocollectionoft.Count;
+            }
 
             if (source is IIListProvider<TSource> listProv)
             {
