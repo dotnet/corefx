@@ -149,6 +149,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetProcessAffinityMask.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetProcessAffinityMask.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetProcessId.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.GetProcessId.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetThreadPriorityBoost.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetThreadPriorityBoost.cs</Link>
     </Compile>

@@ -24,37 +24,29 @@ namespace System.Net.Http
 
         public HttpClientHandler()
         {
-            if (UseManagedHandler)
-            {
-                _managedHandler = new ManagedHandler();
-                _diagnosticsHandler = new DiagnosticsHandler(_managedHandler);
-            }
-            else
-            {
-                _winHttpHandler = new WinHttpHandler();
-                _diagnosticsHandler = new DiagnosticsHandler(_winHttpHandler);
+            _winHttpHandler = new WinHttpHandler();
+            _diagnosticsHandler = new DiagnosticsHandler(_winHttpHandler);
 
-                // Adjust defaults to match current .NET Desktop HttpClientHandler (based on HWR stack).
-                AllowAutoRedirect = true;
-                AutomaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
-                UseProxy = true;
-                UseCookies = true;
-                CookieContainer = new CookieContainer();
-                _winHttpHandler.DefaultProxyCredentials = null;
-                _winHttpHandler.ServerCredentials = null;
+            // Adjust defaults to match current .NET Desktop HttpClientHandler (based on HWR stack).
+            AllowAutoRedirect = true;
+            AutomaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
+            UseProxy = true;
+            UseCookies = true;
+            CookieContainer = new CookieContainer();
+            _winHttpHandler.DefaultProxyCredentials = null;
+            _winHttpHandler.ServerCredentials = null;
 
-                // The existing .NET Desktop HttpClientHandler based on the HWR stack uses only WinINet registry
-                // settings for the proxy.  This also includes supporting the "Automatic Detect a proxy" using
-                // WPAD protocol and PAC file. So, for app-compat, we will do the same for the default proxy setting.
-                _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
-                _winHttpHandler.Proxy = null;
+            // The existing .NET Desktop HttpClientHandler based on the HWR stack uses only WinINet registry
+            // settings for the proxy.  This also includes supporting the "Automatic Detect a proxy" using
+            // WPAD protocol and PAC file. So, for app-compat, we will do the same for the default proxy setting.
+            _winHttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
+            _winHttpHandler.Proxy = null;
 
-                // Since the granular WinHttpHandler timeout properties are not exposed via the HttpClientHandler API,
-                // we need to set them to infinite and allow the HttpClient.Timeout property to have precedence.
-                _winHttpHandler.ReceiveHeadersTimeout = Timeout.InfiniteTimeSpan;
-                _winHttpHandler.ReceiveDataTimeout = Timeout.InfiniteTimeSpan;
-                _winHttpHandler.SendTimeout = Timeout.InfiniteTimeSpan;
-            }
+            // Since the granular WinHttpHandler timeout properties are not exposed via the HttpClientHandler API,
+            // we need to set them to infinite and allow the HttpClient.Timeout property to have precedence.
+            _winHttpHandler.ReceiveHeadersTimeout = Timeout.InfiniteTimeSpan;
+            _winHttpHandler.ReceiveDataTimeout = Timeout.InfiniteTimeSpan;
+            _winHttpHandler.SendTimeout = Timeout.InfiniteTimeSpan;
         }
 
         protected override void Dispose(bool disposing)

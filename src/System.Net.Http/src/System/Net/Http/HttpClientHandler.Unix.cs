@@ -20,16 +20,8 @@ namespace System.Net.Http
 
         public HttpClientHandler()
         {
-            if (UseManagedHandler)
-            {
-                _managedHandler = new ManagedHandler();
-                _diagnosticsHandler = new DiagnosticsHandler(_managedHandler);
-            }
-            else
-            {
-                _curlHandler = new CurlHandler();
-                _diagnosticsHandler = new DiagnosticsHandler(_curlHandler);
-            }
+            _curlHandler = new CurlHandler();
+            _diagnosticsHandler = new DiagnosticsHandler(_curlHandler);
         }
 
         protected override void Dispose(bool disposing)
