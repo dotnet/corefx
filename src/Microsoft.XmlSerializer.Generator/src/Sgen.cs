@@ -22,6 +22,7 @@ namespace Microsoft.XmlSerializer.Generator
         }
 
         private static string s_references = string.Empty;
+        private static Dictionary<string, string> s_referencedic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private int Run(string[] args)
         {
@@ -122,6 +123,10 @@ namespace Microsoft.XmlSerializer.Generator
                     else if (ArgumentMatch(arg, "reference"))
                     {
                         s_references = value;
+                        if (!string.IsNullOrEmpty(s_references))
+                        {
+                            ParseReferences();
+                        }
                     }
                     else
                     {
@@ -498,12 +503,12 @@ namespace Microsoft.XmlSerializer.Generator
             return parent.Name + ".XmlSerializers" + (ns == null || ns.Length == 0 ? "" : "." + ns.GetHashCode());
         }
 
-        private static void ParseReferences(string value, Dictionary<string, string> dictionary)
+        private static void ParseReferences()
         {
             var referencelist = new List<string>();
-            if (value.Length > 0)
+            if (s_references.Length > 0)
             {
-                foreach(var entry in value.Split(';'))
+                foreach(var entry in s_references.Split(';'))
                 {
                     string trimentry = entry.Trim();
                     if (string.IsNullOrEmpty(trimentry))
@@ -521,7 +526,7 @@ namespace Microsoft.XmlSerializer.Generator
                         string filename = Path.GetFileNameWithoutExtension(reference);
                         if (!string.IsNullOrEmpty(filename))
                         {
-                            dictionary.Add(filename, reference);
+                            s_referencedic.Add(filename, reference);
                         }
                     }
                 }
@@ -533,7 +538,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             try
             {
-                if (string.IsNullOrEmpty(s_references) || string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Length == 0)
+                if (string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Length == 0)
                 {
                     return null;
                 }
@@ -544,12 +549,9 @@ namespace Microsoft.XmlSerializer.Generator
                     return null;
                 }
 
-                Dictionary<string, string> referencedic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                ParseReferences(s_references, referencedic);
-
-                if(referencedic.ContainsKey(assemblyname))
+                if(s_referencedic.ContainsKey(assemblyname))
                 {
-                    string reference = referencedic[assemblyname];
+                    string reference = s_referencedic[assemblyname];
                     if (!string.IsNullOrEmpty(reference))
                     {
                         if (File.Exists(reference))
