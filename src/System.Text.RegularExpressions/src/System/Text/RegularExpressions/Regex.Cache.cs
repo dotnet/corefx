@@ -150,7 +150,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] // Unprofitable inline - JIT overly pessimistic
         private static bool TryGetCacheValue(CachedCodeEntryKey key, out CachedCodeEntry entry)
         {
             if (s_cacheCount >= CacheDictionarySwitchLimit)
@@ -160,6 +160,12 @@ namespace System.Text.RegularExpressions
                                 "Linked list and Dict should be synchronized");
                 return s_cache.TryGetValue(key, out entry);
             }
+
+            return TryGetCacheValueSmall(key, out entry);
+        }
+
+        private static bool TryGetCacheValueSmall(CachedCodeEntryKey key, out CachedCodeEntry entry)
+        {
             entry = s_cacheFirst?.Previous; // first already checked
             while (entry != null)
             {
@@ -177,7 +183,7 @@ namespace System.Text.RegularExpressions
             if (s_cacheFirst?.Key == key) // again check this as could have been promoted by other thread
                 return s_cacheFirst;
             
-            if (TryGetCacheValue(key, out var entry))
+            if (TryGetCacheValue(key, out CachedCodeEntry entry))
             {
                 // promote:
                 SysDebug.Assert(s_cacheFirst != entry, "key should not get s_livecode_first");
@@ -204,6 +210,7 @@ namespace System.Text.RegularExpressions
                 entry.Next = null;
                 s_cacheFirst = entry;
             }
+
             return entry;
         }
 
