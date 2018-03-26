@@ -236,10 +236,6 @@ namespace System.Net.Http
                 }
             }
 
-            if (DiagnosticsHandler.IsEnabled())
-            {
-                return _diagnosticsPipeline.SendAsync(request, cancellationToken);
-            }
             return _winHttpHandler.SendAsync(request, cancellationToken);
         }
     }
