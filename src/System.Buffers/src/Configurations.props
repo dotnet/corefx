@@ -9,8 +9,6 @@
       $(PackageConfigurations);
       netcoreapp-Windows_NT;
       netcoreapp-Unix;
-      uap10.0.16299-Windows_NT;
-      uap10.0.16299aot-Windows_NT;
       uap-Windows_NT;
       uapaot-Windows_NT;
     </BuildConfigurations>
