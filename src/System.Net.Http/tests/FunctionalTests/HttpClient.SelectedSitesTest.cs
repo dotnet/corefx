@@ -13,9 +13,6 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClient_SelectedSites_Test : HttpClientTestBase
     {
-        private readonly static object s_httpClientLock = new object();
-        private static HttpClient s_httpClient;
-
         [Theory]
         [OuterLoop]
         [Trait("SelectedSites", "true")]
@@ -26,46 +23,35 @@ namespace System.Net.Http.Functional.Tests
             if (!UseSocketsHttpHandler)
                 return;
 
-            await VisitSite(site);
-        }
-
-        [Theory]
-        [OuterLoop]
-        [Trait("SelectedSites", "true")]
-        [MemberData(nameof(GetSelectedSites))]
-        public async Task RetrieveSite_SharedHttpClient_Succeeds(string site)
-        {
-            // Not doing this in bulk for platform handlers.
-            if (!UseSocketsHttpHandler)
-                return;
-
-            // Xunit creates an instance of the test class per test run so perform the double-lock to ensure that
-            // all sites share the same httpClient. In principle there is no worry about not disposing it.
-            // ATTENTION: This only works as intended because we are running this test only for SocketsHttpHandler.
-            if (s_httpClient == null)
+            int remainingAttempts = 2;
+            while (remainingAttempts-- > 0)
             {
-                lock (s_httpClientLock)
+                try
                 {
-                    if (s_httpClient == null)
-                        s_httpClient = CreateHttpClientForSiteVisit();
+                    await VisitSite(site);
+                    return;
+                }
+                catch
+                {
+                    if (remainingAttempts < 1)
+                        throw;
+                    await Task.Delay(1500);
                 }
             }
 
-            await VisitSiteWithClient(site, s_httpClient);
+            throw new Exception("Not expected to reach here");
         }
 
         [Theory]
         [OuterLoop]
         [Trait("SiteInvestigation", "true")]
-        [InlineData("https://www.macys.com")]
-        [InlineData("https://www.bestbuy.com")]
-
+        [InlineData("http://microsoft.com")]
         public async Task RetrieveSite_Debug_Helper(string site)
         {
             await VisitSite(site);
         }
 
-        public static IEnumerable<object[]> GetSelectedSites()
+        public static IEnumerable<string[]> GetSelectedSites()
         {
             const string resourceName = "SelectedSitesTest.txt";
             Assembly assembly = typeof(HttpClient_SelectedSites_Test).Assembly;
@@ -122,10 +108,19 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClient httpClient = new HttpClient(CreateHttpClientHandler(UseSocketsHttpHandler));
 
-            // User-Agent added since some sites only give proper responses with it present.
+            // Some extra headers since some sites only give proper responses when they are present.
             httpClient.DefaultRequestHeaders.Add(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36");
+            httpClient.DefaultRequestHeaders.Add(
+                "Accept-Language",
+                "en-US,en;q=0.9");
+            httpClient.DefaultRequestHeaders.Add(
+                "Accept-Encoding",
+                "gzip, deflate, br");
+            httpClient.DefaultRequestHeaders.Add(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 
             return httpClient;
         }
