@@ -1,8 +1,10 @@
 ﻿using System.Collections;
+using System.Data;
 using System.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.Caching;
 using System.Threading;
 using Xunit;
 
@@ -107,18 +109,30 @@ namespace System.Text.RegularExpressions.Tests
             {
                 int original = Regex.CacheSize;
                 Regex.CacheSize = 0;
-                for (int i = 0; i < original; i++)
-                {
-                    Regex.CacheSize++;
-                    Assert.True(Regex.IsMatch(i.ToString(), i.ToString()));
-                    Assert.True(GetCachedItemsNum() == i + 1);
-                }
-                for (int i = 0; i < original; i++)
-                {
-                    Regex.CacheSize--; 
-                    Assert.True(GetCachedItemsNum() == Regex.CacheSize);
-                }
+                Fill(original);
+                const int limit = 10; 
+                Regex.CacheSize = limit - 1;
+                Regex.CacheSize = 0;
+                Fill(original);
+                Remove(original);
 
+                void Fill(int n)
+                {
+                    for (int i = 0; i < n; i++)
+                    {
+                        Regex.CacheSize++;
+                        Assert.True(Regex.IsMatch(i.ToString(), i.ToString()));
+                        Assert.True(GetCachedItemsNum() == i + 1);
+                    }
+                }
+                void Remove(int n)
+                {
+                    for (int i = 0; i < original; i++)
+                    {
+                        Regex.CacheSize--; 
+                        Assert.True(GetCachedItemsNum() == Regex.CacheSize);
+                    }
+                }
                 return SuccessExitCode;
             }).Dispose();
         }

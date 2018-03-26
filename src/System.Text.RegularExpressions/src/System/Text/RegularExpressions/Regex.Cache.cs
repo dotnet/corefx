@@ -36,13 +36,12 @@ namespace System.Text.RegularExpressions
                 lock (s_livecode)
                 {
                     s_cacheSize = value;  // not to allow other thread to change it while we use cache
-                    if (s_cacheSize < CacheDictionarySwitchLimit)
-                        s_livecode.Clear();
                     while (s_livecode_count > s_cacheSize)
                     {
                         CachedCodeEntry last = s_livecode_last;
                         if (s_livecode_count >= CacheDictionarySwitchLimit)
                         {
+                            SysDebug.Assert(s_livecode.ContainsKey(last.Key));
                             s_livecode.Remove(last.Key);
                         }
 
@@ -179,6 +178,7 @@ namespace System.Text.RegularExpressions
             
             if (TryGetCacheValue(key, out var entry))
             {
+                // promote:
                 SysDebug.Assert(s_livecode_first != entry, "key should not get s_livecode_first");
                 SysDebug.Assert(s_livecode_first != null, "as Dict has at least one");
                 SysDebug.Assert(s_livecode_first.Next == null);
