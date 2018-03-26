@@ -191,6 +191,11 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
@@ -299,6 +304,11 @@ namespace System
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
                     span.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
