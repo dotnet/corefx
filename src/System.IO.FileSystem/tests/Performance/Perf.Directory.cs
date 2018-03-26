@@ -70,17 +70,18 @@ namespace System.IO.Tests
             return sb.ToString();
         }
 
-        public static TheoryData<int ,int> RecursiveDepthData
+        public static TheoryData<int, int> RecursiveDepthData
         {
             get
             {
                 var data = new TheoryData<int, int>();
                 data.Add(10, 100);
 
-                // Length of the path can be atmost 260 characters on netfx.
+                // Length of the path can be Atmost 260 characters on netfx.
                 if (PlatformDetection.IsNetCore)
                 {
                     data.Add(100, 10);
+                    // Length of the path can be Atmost 4096 characters on Unix. 
                     if (PlatformDetection.IsWindows)
                         data.Add(1000, 1);
                 }
@@ -92,7 +93,6 @@ namespace System.IO.Tests
         [Benchmark]
         [MemberData(nameof(RecursiveDepthData))]
         [OuterLoop("Takes a lot of time to finish")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RecursiveCreateDirectoryTest(int depth, int times)
         {
             // Setup
@@ -116,7 +116,6 @@ namespace System.IO.Tests
         [Benchmark]
         [MemberData(nameof(RecursiveDepthData))]
         [OuterLoop("Takes a lot of time to finish")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RecursiveDeleteDirectoryTest(int depth, int times)
         {
             // Setup
