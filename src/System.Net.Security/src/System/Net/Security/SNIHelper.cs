@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -9,6 +10,8 @@ namespace System.Net.Security
 {
     internal class SNIHelper
     {
+        private static IdnMapping s_idnMapping = CreateIdnMapping();
+
         public static string GetServerName(byte[] clientHello)
         {
             return GetSniFromSslPlainText(clientHello);
@@ -196,7 +199,13 @@ namespace System.Net.Security
             ushort hostNameLength = ReadUint16(hostNameStruct);
             ReadOnlySpan<byte> hostName = hostNameStruct.Slice(2);
 
-            return Encoding.UTF8.GetString(hostName);
+            return DecodeString(hostName);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string DecodeString(ReadOnlySpan<byte> bytes)
+        {
+            return s_idnMapping.GetUnicode(Encoding.UTF8.GetString(bytes));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -246,6 +255,15 @@ namespace System.Net.Security
             int totalBytes = 2 + length;
 
             return SkipBytes(bytes, totalBytes);
+        }
+
+        private static IdnMapping CreateIdnMapping()
+        {
+            return new IdnMapping()
+            {
+                // Per spec "AllowUnassigned flag MUST be set". See comment above GetSniFromServerNameList for more details.
+                AllowUnassigned = true
+            };
         }
     }
 }
