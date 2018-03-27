@@ -57,7 +57,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out") || ShortNameArgumentMatch(arg, "o"))
                     {
-                        if (codePath != null || ++i >= args.Length)
+                        if( ++i >= args.Length || codePath != null )
                         {                         
                             errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
@@ -83,7 +83,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "assembly") || ShortNameArgumentMatch(arg, "a"))
                     {
-                        if (assembly != null || ++i >= args.Length)
+                        if ( ++i >= args.Length || assembly != null)
                         {
                             errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
