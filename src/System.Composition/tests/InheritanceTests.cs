@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Composition.UnitTests;
 using System.Linq;
 using System.Text;
@@ -56,6 +57,51 @@ namespace System.Composition.Lightweight.UnitTests
             ExportingDerived derivedExport;
             Assert.True(cc.TryGetExport(out derivedExport));
         }
+
+        [Fact]
+        public void GetExport_WithoutWhereClause_ExportSuccessful()
+        {
+            CompositionContext container = CreateContainer(
+                typeof(IMefCollection),
+                typeof(IMefCollection<,>),
+                typeof(BaseClass),
+                typeof(DerivedClass),
+                typeof(MefCollection<,>)
+                );
+            IMefCollection<DerivedClass, BaseClass> actualValue;
+            Assert.True(container.TryGetExport(out actualValue));
+            Assert.NotNull(actualValue);
+            Assert.IsType<MefCollection<DerivedClass, BaseClass>>(actualValue);
+        }
+
+        [Fact]
+        [ActiveIssue(23607)]
+        public void GetExport_WithWhereClause_ExportSuccessful()
+        {
+            CompositionContext container = CreateContainer(
+                typeof(IMefCollection),
+                typeof(IWhereMefCollection<,>),
+                typeof(BaseClass),
+                typeof(DerivedClass),
+                typeof(WhereMefCollection<,>)
+                );
+            IWhereMefCollection<DerivedClass, BaseClass> actualValue;
+            Assert.True(container.TryGetExport(out actualValue));
+            Assert.NotNull(actualValue);
+            Assert.IsType<WhereMefCollection<DerivedClass, BaseClass>>(actualValue);
+        }
+
+        public class BaseClass { }
+        public class DerivedClass : BaseClass { }
+        public interface IMefCollection { }
+        public interface IMefCollection<TC, TP> : IList<TC>, IMefCollection /*where TC : TP*/ { }
+        public interface IWhereMefCollection<TC, TP> : IList<TC>, IMefCollection where TC : TP { }
+
+        [Export(typeof(IMefCollection<,>))]
+        public class MefCollection<TC, TP> : ObservableCollection<TC>, IMefCollection<TC, TP> /*where TC : TP*/ { }
+
+        [Export(typeof(IWhereMefCollection<,>))]
+        public class WhereMefCollection<TC, TP> : ObservableCollection<TC>, IWhereMefCollection<TC, TP> where TC : TP { }
 
         public class Exporter
         {
