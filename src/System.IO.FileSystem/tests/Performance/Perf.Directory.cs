@@ -77,11 +77,11 @@ namespace System.IO.Tests
                 var data = new TheoryData<int, int>();
                 data.Add(10, 100);
 
-                // Length of the path can be Atmost 260 characters on netfx.
-                if (PlatformDetection.IsNetCore)
+                // Length of the path can be 260 characters on netfx.
+                if (AreAllLongPathsAvailable)
                 {
                     data.Add(100, 10);
-                    // Length of the path can be Atmost 4096 characters on Unix. 
+                    // Most Unix distributions have a maximum path length of 1024 characters (1024 UTF-8 bytes). 
                     if (PlatformDetection.IsWindows)
                         data.Add(1000, 1);
                 }
