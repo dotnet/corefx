@@ -4,7 +4,7 @@
     <PackageConfigurations>
       netstandard;
       netstandard1.1;
-	    net45;
+      net45;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
