@@ -19,7 +19,7 @@ namespace System.Net.Security.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class SslStreamSNITest
+    public class SslStreamSniTest
     {
         private static IEnumerable<object[]> HostNameData()
         {
@@ -66,7 +66,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void SslStream_UnknownHostName_Fails()
+        public void SslStream_NoSniFromClient_CallbackReturnsNull()
         {
             WithVirtualConnection((server, client) =>
             {

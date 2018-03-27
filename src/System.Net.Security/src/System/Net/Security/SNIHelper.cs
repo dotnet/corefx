@@ -8,7 +8,7 @@ using System.Text;
 
 namespace System.Net.Security
 {
-    internal class SNIHelper
+    internal class SniHelper
     {
         private static IdnMapping s_idnMapping = CreateIdnMapping();
 
@@ -31,7 +31,7 @@ namespace System.Net.Security
                 return null;
             }
 
-            ushort handshakeLength = ReadUint16(sslPlainText.Slice(3));
+            int handshakeLength = ReadUint16(sslPlainText.Slice(3));
             ReadOnlySpan<byte> sslHandshake = sslPlainText.Slice(5);
 
             if (handshakeLength != sslHandshake.Length)
@@ -95,7 +95,7 @@ namespace System.Net.Security
                 return null;
             }
 
-            ushort extensionListLength = ReadUint16(p);
+            int extensionListLength = ReadUint16(p);
             p = SkipBytes(p, 2);
 
             if (extensionListLength != p.Length)
@@ -127,7 +127,7 @@ namespace System.Net.Security
                 return null;
             }
 
-            ushort extensionType = ReadUint16(extension);
+            int extensionType = ReadUint16(extension);
             ReadOnlySpan<byte> extensionData = extension.Slice(2);
 
             if (extensionType == 0x00)
@@ -169,7 +169,7 @@ namespace System.Net.Security
                 return null;
             }
 
-            ushort serverNameListLength = ReadUint16(serverNameListExtension);
+            int serverNameListLength = ReadUint16(serverNameListExtension);
             ReadOnlySpan<byte> serverNameList = serverNameListExtension.Slice(2);
 
             if (serverNameListLength > serverNameList.Length)
@@ -196,7 +196,7 @@ namespace System.Net.Security
                 return null;
             }
 
-            ushort hostNameLength = ReadUint16(hostNameStruct);
+            int hostNameLength = ReadUint16(hostNameStruct);
             ReadOnlySpan<byte> hostName = hostNameStruct.Slice(2);
 
             return DecodeString(hostName);
@@ -218,9 +218,9 @@ namespace System.Net.Security
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ushort ReadUint16(ReadOnlySpan<byte> bytes)
+        private static int ReadUint16(ReadOnlySpan<byte> bytes)
         {
-            return (ushort)((bytes[0] << 8) | bytes[1]);
+            return (bytes[0] << 8) | bytes[1];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,7 +238,7 @@ namespace System.Net.Security
         // Opaque type is of structure:
         //   - length (minimum number of bytes to hold the max value)
         //   - data (length bytes)
-        // We will only use opaque bytes which are of max size: 255 (length = 1) or 2^16-1 (length = 2).
+        // We will only use opaque types which are of max size: 255 (length = 1) or 2^16-1 (length = 2).
         // We will call them SkipOpaqueType`length`
         private static ReadOnlySpan<byte> SkipOpaqueType1(ReadOnlySpan<byte> bytes)
         {
@@ -260,7 +260,7 @@ namespace System.Net.Security
                 return ReadOnlySpan<byte>.Empty;
             }
 
-            ushort length = ReadUint16(bytes);
+            int length = ReadUint16(bytes);
             int totalBytes = 2 + length;
 
             return SkipBytes(bytes, totalBytes);

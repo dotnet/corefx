@@ -634,9 +634,13 @@ namespace System.Net.Security
 
             if (_sslAuthenticationOptions.ServerCertSelectionDelegate != null)
             {
-                string serverIdentity = SNIHelper.GetServerName(clientHello);
+                string serverIdentity = SniHelper.GetServerName(clientHello);
                 localCertificate = _sslAuthenticationOptions.ServerCertSelectionDelegate(serverIdentity);
 
+                if (localCertificate == null)
+                {
+                    throw new AuthenticationException(SR.net_ssl_io_no_server_cert);
+                }
             }
             // This probably never gets called as this is a client options delegate
             else if (_sslAuthenticationOptions.CertSelectionDelegate != null)

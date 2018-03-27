@@ -10,7 +10,6 @@ using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
