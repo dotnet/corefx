@@ -61,13 +61,7 @@ namespace System.Composition.Lightweight.UnitTests
         [Fact]
         public void GetExport_WithoutWhereClause_ExportSuccessful()
         {
-            CompositionContext container = CreateContainer(
-                typeof(IMefCollection),
-                typeof(IMefCollection<,>),
-                typeof(BaseClass),
-                typeof(DerivedClass),
-                typeof(MefCollection<,>)
-                );
+            CompositionContext container = CreateContainer(typeof(MefCollection<,>));
             IMefCollection<DerivedClass, BaseClass> actualValue;
             Assert.True(container.TryGetExport(out actualValue));
             Assert.NotNull(actualValue);
@@ -78,13 +72,7 @@ namespace System.Composition.Lightweight.UnitTests
         [ActiveIssue(23607)]
         public void GetExport_WithWhereClause_ExportSuccessful()
         {
-            CompositionContext container = CreateContainer(
-                typeof(IMefCollection),
-                typeof(IWhereMefCollection<,>),
-                typeof(BaseClass),
-                typeof(DerivedClass),
-                typeof(WhereMefCollection<,>)
-                );
+            CompositionContext container = CreateContainer(typeof(WhereMefCollection<,>));
             IWhereMefCollection<DerivedClass, BaseClass> actualValue;
             Assert.True(container.TryGetExport(out actualValue));
             Assert.NotNull(actualValue);
