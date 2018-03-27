@@ -25,7 +25,8 @@ namespace System.Net.Security.Tests
         {
             yield return new object[] { "a" };
             yield return new object[] { "test" };
-            yield return new object[] { new string('a', 100) };
+            // max allowed hostname length is 63
+            yield return new object[] { new string('a', 63) };
         }
 
         [Theory]
@@ -82,9 +83,9 @@ namespace System.Net.Security.Tests
                 };
 
                 var cts = new CancellationTokenSource();
-                Assert.ThrowsAsync<NotSupportedException>(async () => {
-                    await server.AuthenticateAsServerAsync(options, cts.Token);
-                }).Wait();
+                Assert.Throws<NotSupportedException>(WithAggregateExceptionUnwrapping(() =>
+                    server.AuthenticateAsServerAsync(options, cts.Token).Wait()
+                ));
 
                 // to break connection so that client is not waiting
                 server.Dispose();
@@ -97,6 +98,20 @@ namespace System.Net.Security.Tests
             {
                 return true;
             });
+        }
+
+        private static Action WithAggregateExceptionUnwrapping(Action a)
+        {
+            return () => {
+                try
+                {
+                    a();
+                }
+                catch (AggregateException e)
+                {
+                    throw e.InnerException;
+                }
+            };
         }
 
         private static SslServerAuthenticationOptions DefaultServerOptions()
