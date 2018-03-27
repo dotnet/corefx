@@ -37,7 +37,7 @@
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
     <!-- add specific native builds / pkgproj's here to include in servicing builds -->
     <Project Include="Native\pkg\**\*.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+      <AdditionalProperties>$(AdditionalProperties);SkipCreatePackageOnMissingFiles=true</AdditionalProperties>
       <BuildAllOSGroups>true</BuildAllOSGroups>
     </Project>
   </ItemGroup>
