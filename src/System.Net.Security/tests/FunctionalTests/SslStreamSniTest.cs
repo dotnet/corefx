@@ -84,7 +84,7 @@ namespace System.Net.Security.Tests
                 };
 
                 var cts = new CancellationTokenSource();
-                Assert.Throws<NotSupportedException>(WithAggregateExceptionUnwrapping(() =>
+                Assert.Throws<AuthenticationException>(WithAggregateExceptionUnwrapping(() =>
                     server.AuthenticateAsServerAsync(options, cts.Token).Wait()
                 ));
 
