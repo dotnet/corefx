@@ -8,12 +8,18 @@ namespace System.Memory.Tests
 {
     internal class BufferSegment<T> : ReadOnlySequenceSegment<T>
     {
-        public BufferSegment(Memory<T> memory)
+        public BufferSegment(ReadOnlyMemory<T> memory)
         {
             Memory = memory;
         }
 
-        public BufferSegment<T> Append(Memory<T> memory)
+        public BufferSegment(ReadOnlyMemory<T> memory, long runningIndex)
+        {
+            Memory = memory;
+            RunningIndex = runningIndex;
+        }
+
+        public BufferSegment<T> Append(ReadOnlyMemory<T> memory)
         {
             var segment = new BufferSegment<T>(memory)
             {

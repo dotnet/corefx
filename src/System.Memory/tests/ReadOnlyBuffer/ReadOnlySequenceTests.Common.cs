@@ -13,73 +13,83 @@ namespace System.Memory.Tests
 {
     public class CommonReadOnlySequenceTests
     {
-        [Fact]
-        public void SegmentStartIsConsideredInBoundsCheck()
+        #region region Position
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 100)]
+        [InlineData(-100)]
+        public void SegmentStartIsConsideredInBoundsCheck(long startIndex)
         {
-            // 0               50           100    0             50             100
+            // 0               50           100    0             50             100 
             // [                ##############] -> [##############                ]
             //                         ^c1            ^c2
-            var bufferSegment1 = new BufferSegment<byte>(new byte[49]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[50]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
+            var bufferSegment2 = bufferSegment1.Append(new byte[100]);
 
-            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 50, bufferSegment2, 50);
 
-            SequencePosition c1 = buffer.GetPosition(25); // segment 1 index 75
-            SequencePosition c2 = buffer.GetPosition(55); // segment 2 index 5
+            var c1 = buffer.GetPosition(25); // segment 1 index 75
+            var c2 = buffer.GetPosition(55); // segment 2 index 5
+            Assert.Equal(5, c2.GetInteger());
+            Assert.Equal(bufferSegment2, c2.GetObject());
+            Assert.Equal(c2, buffer.GetPosition(55, buffer.Start));
 
-            ReadOnlySequence<byte> sliced = buffer.Slice(c1, c2);
+            var sliced = buffer.Slice(c1, c2);
             Assert.Equal(30, sliced.Length);
 
-            c1 = buffer.GetPosition(25, buffer.Start); // segment 1 index 75
-            c2 = buffer.GetPosition(55, buffer.Start); // segment 2 index 5
-
-            sliced = buffer.Slice(c1, c2);
-            Assert.Equal(30, sliced.Length);
+            Assert.Equal(c1, buffer.GetPosition(25, buffer.Start)); // segment 1 index 75
+            Assert.Equal(c2, buffer.GetPosition(55, buffer.Start)); // segment 2 index 5
         }
 
-        [Fact]
-        public void GetPositionPrefersNextSegment()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 25)]
+        [InlineData(-25)]
+        public void GetPositionPrefersNextSegment(long startIndex)
         {
-            BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[50]);
+            BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[50], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
             SequencePosition c1 = buffer.GetPosition(50);
-
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
 
             c1 = buffer.GetPosition(50, buffer.Start);
-
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
         }
 
-        [Fact]
-        public void GetPositionDoesNotCrossOutsideBuffer()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 100)]
+        [InlineData(-100)]
+        public void GetPositionDoesNotCrossOutsideBuffer(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 100);
 
             SequencePosition c1 = buffer.GetPosition(200);
-
             Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
 
             c1 = buffer.GetPosition(200, buffer.Start);
-
             Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
         }
 
-        [Fact]
-        public void CheckEndReachableDoesNotCrossPastEnd()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 200)]
+        [InlineData(-200)]
+        public void CheckEndReachableDoesNotCrossPastEnd(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[100]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
@@ -87,7 +97,6 @@ namespace System.Memory.Tests
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
 
             SequencePosition c1 = buffer.GetPosition(200);
-
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment3, c1.GetObject());
 
@@ -95,7 +104,6 @@ namespace System.Memory.Tests
             Assert.Equal(200, seq.Length);
 
             c1 = buffer.GetPosition(200, buffer.Start);
-
             Assert.Equal(0, c1.GetInteger());
             Assert.Equal(bufferSegment3, c1.GetObject());
 
@@ -103,10 +111,17 @@ namespace System.Memory.Tests
             Assert.Equal(200, seq.Length);
         }
 
-        [Fact]
-        public void CanGetFirst()
+        #endregion
+
+        #region First
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 250)]
+        [InlineData(-250)]
+        public void CanGetFirst(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[100]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[200]);
@@ -141,10 +156,17 @@ namespace System.Memory.Tests
             Assert.Equal(0, buffer.First.Length);
         }
 
-        [Fact]
-        public void SeekSkipsEmptySegments()
+        #endregion
+
+        #region EmptySegments
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 100)]
+        [InlineData(-100)]
+        public void SeekSkipsEmptySegments(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
@@ -162,10 +184,14 @@ namespace System.Memory.Tests
             Assert.Equal(bufferSegment4, c1.GetObject());
         }
 
-        [Fact]
-        public void TryGetReturnsEmptySegments()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue)]
+        [InlineData(long.MinValue)]
+        [InlineData(-1)]
+        public void TryGetReturnsEmptySegments(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[0]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[0], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[0]);
@@ -182,10 +208,71 @@ namespace System.Memory.Tests
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
-        [Fact]
-        public void TryGetStopsAtEnd()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void SeekEmptySkipDoesNotCrossPastEnd(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
+
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+
+            SequencePosition c1 = buffer.GetPosition(100);
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(100, buffer.Start);
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            // Go out of bounds for segment
+            Assert.Throws<ArgumentOutOfRangeException>("offset", () => buffer.GetPosition(150, buffer.Start));
+            Assert.Throws<ArgumentOutOfRangeException>("offset", () => buffer.GetPosition(250, buffer.Start));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void SeekEmptySkipDoesNotCrossPastEndWithExtraChainedBlocks(long startIndex)
+        {
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
+            BufferSegment<byte> bufferSegment5 = bufferSegment4.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment6 = bufferSegment5.Append(new byte[100]);
+
+            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+
+            SequencePosition c1 = buffer.GetPosition(100);
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            c1 = buffer.GetPosition(100, buffer.Start);
+            Assert.Equal(0, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
+
+            // Go out of bounds for segment
+            Assert.Throws<ArgumentOutOfRangeException>("offset", () => c1 = buffer.GetPosition(150, buffer.Start));
+            Assert.Throws<ArgumentOutOfRangeException>("offset", () => c1 = buffer.GetPosition(250, buffer.Start));
+        }
+
+        #endregion
+
+        #region TryGet
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 150)]
+        [InlineData(-150)]
+        public void TryGetStopsAtEnd(long startIndex)
+        {
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[100]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
@@ -203,10 +290,13 @@ namespace System.Memory.Tests
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
-        [Fact]
-        public void TryGetStopsAtEndWhenEndIsLastByteOfFull()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void TryGetStopsAtEndWhenEndIsLastByteOfFull(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment1, 100);
@@ -217,10 +307,13 @@ namespace System.Memory.Tests
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
-        [Fact]
-        public void TryGetStopsAtEndWhenEndIsFirstByteOfFull()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-100)]
+        public void TryGetStopsAtEndWhenEndIsFirstByteOfFull(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
@@ -233,10 +326,13 @@ namespace System.Memory.Tests
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
-        [Fact]
-        public void TryGetStopsAtEndWhenEndIsFirstByteOfEmpty()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void TryGetStopsAtEndWhenEndIsFirstByteOfEmpty(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
@@ -249,10 +345,17 @@ namespace System.Memory.Tests
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
-        [Fact]
-        public void EnumerableStopsAtEndWhenEndIsLastByteOfFull()
+        #endregion
+
+        #region Enumerable
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void EnumerableStopsAtEndWhenEndIsLastByteOfFull(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment1, 100);
@@ -267,10 +370,13 @@ namespace System.Memory.Tests
             Assert.Equal(new [] { 100 }, sizes);
         }
 
-        [Fact]
-        public void EnumerableStopsAtEndWhenEndIsFirstByteOfFull()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void EnumerableStopsAtEndWhenEndIsFirstByteOfFull(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
@@ -285,10 +391,13 @@ namespace System.Memory.Tests
             Assert.Equal(new [] { 100, 0 }, sizes);
         }
 
-        [Fact]
-        public void EnumerableStopsAtEndWhenEndIsFirstByteOfEmpty()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 50)]
+        [InlineData(-50)]
+        public void EnumerableStopsAtEndWhenEndIsFirstByteOfEmpty(long startIndex)
         {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
+            var bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
             var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
@@ -303,73 +412,61 @@ namespace System.Memory.Tests
             Assert.Equal(new [] { 100, 0 }, sizes);
         }
 
-        [Fact]
-        public void SeekEmptySkipDoesNotCrossPastEnd()
-        {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
+        #endregion
 
-            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
-
-            SequencePosition c1 = buffer.GetPosition(100);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(100, buffer.Start);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            // Go out of bounds for segment
-            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(150, buffer.Start));
-            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(250, buffer.Start));
-        }
-
-        [Fact]
-        public void SeekEmptySkipDoesNotCrossPastEndWithExtraChainedBlocks()
-        {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
-            BufferSegment<byte> bufferSegment5 = bufferSegment4.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment6 = bufferSegment5.Append(new byte[100]);
-
-            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
-
-            SequencePosition c1 = buffer.GetPosition(100);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(100, buffer.Start);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            // Go out of bounds for segment
-            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(150, buffer.Start));
-            Assert.Throws<ArgumentOutOfRangeException>(() => c1 = buffer.GetPosition(250, buffer.Start));
-        }
-
-        [Fact]
-        public void Create_WorksWithArray()
-        {
-            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 });
-            Assert.Equal(buffer.ToArray(), new byte[] { 1, 2, 3, 4, 5 });
-        }
+        #region Empty
 
         [Fact]
         public void Empty_ReturnsLengthZeroBuffer()
         {
             var buffer = ReadOnlySequence<byte>.Empty;
             Assert.Equal(0, buffer.Length);
-            Assert.Equal(true, buffer.IsSingleSegment);
+            Assert.True(buffer.IsEmpty);
+            Assert.True(buffer.IsSingleSegment);
             Assert.Equal(0, buffer.First.Length);
         }
+
+        [Fact]
+        public void Empty_SliceToEmpty()
+        {
+            var buffer = ReadOnlySequence<byte>.Empty;
+            Assert.Equal(buffer, buffer.Slice(0, 0));
+            Assert.Equal(buffer, buffer.Slice(0, buffer.End));
+            Assert.Equal(buffer, buffer.Slice(0));
+            Assert.Equal(buffer, buffer.Slice(0L, 0L));
+            Assert.Equal(buffer, buffer.Slice(0L, buffer.End));
+            Assert.Equal(buffer, buffer.Slice(buffer.Start));
+            Assert.Equal(buffer, buffer.Slice(buffer.Start, 0));
+            Assert.Equal(buffer, buffer.Slice(buffer.Start, 0L));
+            Assert.Equal(buffer, buffer.Slice(buffer.Start, buffer.End));
+        }
+
+        [Fact]
+        public void Empty_SliceNegativeStart()
+        {
+            var buffer = ReadOnlySequence<byte>.Empty;
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1, buffer.End));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1L, 0L));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1L, -1L));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => buffer.Slice(-1L, buffer.End));
+        }
+
+        [Fact]
+        public void Empty_SliceNegativeLength()
+        {
+            var buffer = ReadOnlySequence<byte>.Empty;
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => buffer.Slice(0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => buffer.Slice(0L, -1L));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => buffer.Slice(buffer.Start, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => buffer.Slice(buffer.Start, -1L));
+        }
+
+        #endregion
+
+        #region Constructor 
 
         [Fact]
         public void Ctor_Array_Offset()
@@ -388,11 +485,11 @@ namespace System.Memory.Tests
         [Fact]
         public void Ctor_Array_ValidatesArguments()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 6, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 4, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, -4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 4, -2));
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySequence<byte>((byte[])null, 4, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 6, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 4, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, -4, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 4, -2));
+            Assert.Throws<ArgumentNullException>("array", () => new ReadOnlySequence<byte>((byte[])null, 4, 2));
         }
 
         [Fact]
@@ -415,11 +512,11 @@ namespace System.Memory.Tests
         public void Ctor_OwnedMemory_ValidatesArguments()
         {
             var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 6, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 4, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, -4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 4, -2));
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySequence<byte>((CustomMemoryForTest<byte>)null, 4, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => new ReadOnlySequence<byte>(ownedMemory, 6, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(ownedMemory, 4, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => new ReadOnlySequence<byte>(ownedMemory, -4, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(ownedMemory, 4, -2));
+            Assert.Throws<ArgumentNullException>("ownedMemory", () => new ReadOnlySequence<byte>((CustomMemoryForTest<byte>)null, 4, 2));
         }
 
         [Fact]
@@ -430,23 +527,37 @@ namespace System.Memory.Tests
             Assert.Equal(new byte[] { 3, 4, 5 }, buffer.ToArray());
         }
 
-        [Fact]
-        public void Ctor_ReadOnlySequenceSegment_ValidatesArguments()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 5)]
+        [InlineData(-5)]
+        public void Ctor_ReadOnlySequenceSegment_ValidatesArguments(long startIndex)
         {
-            var segment = new BufferSegment<byte>(new byte[] { 1, 2, 3, 4, 5 });
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, 6, segment, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, 0, segment, 6));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, 3, segment, 0));
+            var segment = new BufferSegment<byte>(new byte[] { 1, 2, 3, 4, 5 }, startIndex);
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new ReadOnlySequence<byte>(segment, 6, segment, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => new ReadOnlySequence<byte>(segment, 0, segment, 6));
+            Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => new ReadOnlySequence<byte>(segment, 3, segment, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, -5, segment, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(segment, 0, segment, -5));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => new ReadOnlySequence<byte>(segment, -5, segment, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => new ReadOnlySequence<byte>(segment, 0, segment, -5));
 
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySequence<byte>(null, 5, segment, 0));
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySequence<byte>(segment, 5, null, 0));
+            Assert.Throws<ArgumentNullException>("startSegment", () => new ReadOnlySequence<byte>(null, 5, segment, 0));
+            Assert.Throws<ArgumentNullException>("endSegment", () => new ReadOnlySequence<byte>(segment, 5, null, 0));
+
+            var segment2 = segment.Append(new byte[] {1, 2, 3, 4, 5});
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(segment2, 0, segment, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(segment2, 0, segment, 5));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(segment2, 5, segment, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new ReadOnlySequence<byte>(segment2, 5, segment, 5));
         }
 
-        [Fact]
-        public void HelloWorldAcrossTwoBlocks()
+        #endregion
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(long.MaxValue - 4096)]
+        [InlineData(-4096)]
+        public void HelloWorldAcrossTwoBlocks(long startIndex)
         {
             //     block 1       ->    block2
             // [padding..hello]  ->  [  world   ]
@@ -456,7 +567,7 @@ namespace System.Memory.Tests
             byte[] firstBytes = Enumerable.Repeat((byte)'a', blockSize - 5).Concat(bytes.Take(5)).ToArray();
             byte[] secondBytes = bytes.Skip(5).Concat(Enumerable.Repeat((byte)'a', blockSize - (bytes.Length - 5))).ToArray();
 
-            BufferSegment<byte> firstSegement = new BufferSegment<byte>(firstBytes);
+            BufferSegment<byte> firstSegement = new BufferSegment<byte>(firstBytes, startIndex);
             BufferSegment<byte> secondSegement = firstSegement.Append(secondBytes);
 
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(firstSegement, 0, secondSegement, bytes.Length - 5);

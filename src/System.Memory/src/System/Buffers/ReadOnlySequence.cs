@@ -80,7 +80,8 @@ namespace System.Buffers
                 endSegment == null ||
                 (uint)startSegment.Memory.Length < (uint)startIndex ||
                 (uint)endSegment.Memory.Length < (uint)endIndex ||
-                (startSegment == endSegment && endIndex < startIndex))
+                (startSegment == endSegment && endIndex < startIndex) ||
+                endSegment.RunningIndex - startSegment.RunningIndex < 0)
                 ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
 
             _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
@@ -183,6 +184,9 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(long start, long length)
         {
+            if (start < 0 || length < 0)
+                ThrowHelper.ThrowArgumentValidationException(start);
+
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
@@ -195,6 +199,8 @@ namespace System.Buffers
         /// <param name="end">The end (inclusive) of the slice</param>
         public ReadOnlySequence<T> Slice(long start, SequencePosition end)
         {
+            if (start < 0)
+                ThrowHelper.ThrowArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -214,6 +220,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, long length)
         {
+            if (length < 0)
+                ThrowHelper.ThrowArgumentValidationException(0);
             BoundsCheck(start, _sequenceEnd);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
@@ -227,6 +235,9 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(int start, int length)
         {
+            if (start < 0 || length < 0)
+                ThrowHelper.ThrowArgumentValidationException(start);
+
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
@@ -239,6 +250,8 @@ namespace System.Buffers
         /// <param name="end">The end (inclusive) of the slice</param>
         public ReadOnlySequence<T> Slice(int start, SequencePosition end)
         {
+            if (start < 0)
+                ThrowHelper.ThrowArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -258,6 +271,8 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, int length)
         {
+            if (length < 0)
+                ThrowHelper.ThrowArgumentValidationException(0);
             BoundsCheck(start, _sequenceEnd);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
@@ -294,10 +309,10 @@ namespace System.Buffers
         /// <param name="start">The start index at which to begin this slice.</param>
         public ReadOnlySequence<T> Slice(long start)
         {
+            if (start < 0)
+                ThrowHelper.ThrowArgumentValidationException(start);
             if (start == 0)
-            {
                 return this;
-            }
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             return SliceImpl(begin, _sequenceEnd);
@@ -322,7 +337,7 @@ namespace System.Buffers
         public SequencePosition GetPosition(long offset, SequencePosition origin)
         {
             if (offset < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
             return Seek(origin, _sequenceEnd, offset);
         }
