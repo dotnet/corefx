@@ -40,10 +40,10 @@ namespace System.Reflection.Metadata.Ecma335
 
                 if (isShortBranch && unchecked((sbyte)distance) != distance)
                 {
-                    // We could potentially implement algortihm that automatically fixes up the branch instructions as well to accomodate bigger distances,
-                    // however an optimal algorithm would be rather complex (something like: calculate topological ordering of crossing branch instructions 
-                    // and then use fixed point to eliminate cycles). If the caller doesn't care about optimal IL size they can use long branches whenever the 
-                    // distance is unknown upfront. If they do they probably already implement more sophisticad algorithm for IL layout optimization already. 
+                    // We could potentially implement algorithm that automatically fixes up branch instructions to accomodate for bigger distances (short vs long),
+                    // however an optimal algorithm would be rather complex (something like: calculate topological ordering of crossing branch instructions
+                    // and then use fixed point to eliminate cycles). If the caller doesn't care about optimal IL size they can use long branches whenever the
+                    // distance is unknown upfront. If they do they probably implement more sophisticated algorithm for IL layout optimization already.
                     throw new InvalidOperationException(SR.Format(SR.DistanceBetweenInstructionAndLabelTooBig, branchOpCode, branchILOffset, distance));
                 }
 
