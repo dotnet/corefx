@@ -88,7 +88,7 @@ namespace System.Net.Http.Functional.Tests
                     case HttpStatusCode.Redirect:
                     case HttpStatusCode.OK:
                         if (response.Content.Headers.ContentLength > 0)
-                            Assert.True((await response.Content.ReadAsByteArrayAsync()).Length > 0);
+                            Assert.Equal(response.Content.Headers.ContentLength.Value, (await response.Content.ReadAsByteArrayAsync()).Length);
                         break;
                     case HttpStatusCode.BadGateway:
                     case HttpStatusCode.Forbidden:
