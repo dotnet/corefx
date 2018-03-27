@@ -276,6 +276,7 @@ namespace System.ComponentModel.Tests
             new Tuple<Type, Type> (typeof(ClassIBase), typeof(IBaseConverter)),
             new Tuple<Type, Type> (typeof(ClassIDerived), typeof(IBaseConverter)),
             new Tuple<Type, Type> (typeof(Uri), typeof(UriTypeConverter)),
+            new Tuple<Type, Type> (typeof(Version), typeof(VersionConverter)),
             new Tuple<Type, Type> (typeof(CultureInfo), typeof(CultureInfoConverter))
         };
     }
