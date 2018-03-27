@@ -205,7 +205,16 @@ namespace System.Net.Security
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string DecodeString(ReadOnlySpan<byte> bytes)
         {
-            return s_idnMapping.GetUnicode(Encoding.UTF8.GetString(bytes));
+            string idnEncodedString = Encoding.UTF8.GetString(bytes);
+            try
+            {
+                return s_idnMapping.GetUnicode(idnEncodedString);
+            }
+            catch (ArgumentException)
+            {
+                // client has not done IDN mapping
+                return idnEncodedString;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
