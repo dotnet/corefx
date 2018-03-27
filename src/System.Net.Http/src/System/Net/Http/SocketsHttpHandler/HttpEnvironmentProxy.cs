@@ -182,6 +182,7 @@ namespace System.Net.Http
             {
                 value = value.Substring(7);
             }
+
             string user = null;
             string password = null;
             UInt16 port = 80;
@@ -193,6 +194,7 @@ namespace System.Net.Http
             if (separatorIndex != -1)
             {
                 string auth = value.Substring(0, separatorIndex);
+
                 // The User and password may or may not be URL encoded.
                 // Curl seems to accept both. To match that,
                 // we do opportunistic decode and we use original string if it fails.
@@ -238,10 +240,12 @@ namespace System.Net.Http
                 {
                     ub.UserName = Uri.EscapeDataString(user);
                 }
+
                 if (password != null)
                 {
                     ub.Password = Uri.EscapeDataString(password);
                 }
+
                 return ub.Uri;
             }
             catch { };
