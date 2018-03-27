@@ -46,6 +46,30 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void MemoryFromEmptyArrayRetainWithPinning()
+        {
+            Memory<int> memory = new int[0];
+            MemoryHandle handle = memory.Retain(pin: true);
+            Assert.True(handle.HasPointer);
+            handle.Dispose();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void DefaultMemoryRetain(bool pin)
+        {
+            Memory<int> memory = default;
+            MemoryHandle handle = memory.Retain(pin: pin);
+            Assert.False(handle.HasPointer);
+            unsafe
+            {
+                Assert.True(handle.Pointer == null);
+            }
+            handle.Dispose();
+        }
+
+        [Fact]
         public static void MemoryRetainWithPinningAndSlice()
         {
             int[] array = { 1, 2, 3, 4, 5 };
@@ -111,15 +135,6 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void MemoryFromEmptyArrayRetainWithPinning()
-        {
-            Memory<int> memory = new int[0];
-            MemoryHandle handle = memory.Retain(pin: true);
-            Assert.True(handle.HasPointer);
-            handle.Dispose();
-        }
-
-        [Fact]
         public static void OwnedMemoryRetainWithPinningAndSlice()
         {
             int[] array = { 1, 2, 3, 4, 5 };
@@ -143,21 +158,6 @@ namespace System.MemoryTests
                 {
                     Assert.Equal(array[i + 1], span[i]);
                 }
-            }
-            handle.Dispose();
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public static void DefaultMemoryRetain(bool pin)
-        {
-            Memory<int> memory = default;
-            MemoryHandle handle = memory.Retain(pin: pin);
-            Assert.False(handle.HasPointer);
-            unsafe
-            {
-                Assert.True(handle.Pointer == null);
             }
             handle.Dispose();
         }
