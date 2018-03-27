@@ -317,22 +317,11 @@ namespace System.IO.Pipelines.Tests
             // AsTask is important here, it validates that we are calling completion callback
             // and not only setting IsCompleted flag
             var task = Pipe.Reader.ReadAsync().AsTask();
-            bool threwException = false;
 
-            try
-            {
-                await Pipe.Writer.FlushAsync(cancellationTokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                threwException = true;
-            }
-            finally
-            {
-                Pipe.Writer.Complete();
-            }
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await Pipe.Writer.FlushAsync(cancellationTokenSource.Token));
 
-            Assert.True(threwException);
+            Pipe.Writer.Complete();
+
             Assert.True(task.IsCompleted);
             Assert.True(task.Result.IsCompleted);
         }
