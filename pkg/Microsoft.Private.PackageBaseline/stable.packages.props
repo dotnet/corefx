@@ -1488,5 +1488,11 @@
     <StablePackage Include="System.Xml.ReaderWriter">
       <Version>4.0.12</Version>
     </StablePackage>
+
+    <!-- Servicing 1.0.11 wave -->
+    <StablePackage Include="System.Console">
+      <Version>4.0.1</Version>
+    </StablePackage>
+
   </ItemGroup>
 </Project>
