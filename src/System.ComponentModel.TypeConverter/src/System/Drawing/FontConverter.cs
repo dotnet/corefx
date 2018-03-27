@@ -14,10 +14,6 @@ namespace System.Drawing
 {
     public class FontConverter : TypeConverter
     {
-        public FontConverter()
-        {
-        }
-
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             if (sourceType == typeof(string))
@@ -157,33 +153,35 @@ namespace System.Drawing
                         break;
                     }
                 }
-                if (units == "display")
+                switch (units)
                 {
-                    f_unit = GraphicsUnit.Display;
-                }
-                else if (units == "doc")
-                {
-                    f_unit = GraphicsUnit.Document;
-                }
-                else if (units == "pt")
-                {
-                    f_unit = GraphicsUnit.Point;
-                }
-                else if (units == "in")
-                {
-                    f_unit = GraphicsUnit.Inch;
-                }
-                else if (units == "mm")
-                {
-                    f_unit = GraphicsUnit.Millimeter;
-                }
-                else if (units == "px")
-                {
-                    f_unit = GraphicsUnit.Pixel;
-                }
-                else if (units == "world")
-                {
-                    f_unit = GraphicsUnit.World;
+                    case "display":
+                        f_unit = GraphicsUnit.Display;
+                        break;
+
+                    case "doc":
+                        f_unit = GraphicsUnit.Document;
+                        break;
+
+                    case "pt":
+                        f_unit = GraphicsUnit.Point;
+                        break;
+
+                    case "in":
+                        f_unit = GraphicsUnit.Inch;
+                        break;
+
+                    case "mm":
+                        f_unit = GraphicsUnit.Millimeter;
+                        break;
+
+                    case "px":
+                        f_unit = GraphicsUnit.Pixel;
+                        break;
+
+                    case "world":
+                        f_unit = GraphicsUnit.World;
+                        break;
                 }
             }
 

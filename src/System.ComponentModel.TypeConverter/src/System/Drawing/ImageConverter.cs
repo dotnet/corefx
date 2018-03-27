@@ -10,10 +10,6 @@ namespace System.Drawing
 {
     public class ImageConverter : TypeConverter
     {
-        public ImageConverter()
-        {
-        }
-
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             return (sourceType == typeof(byte[]));

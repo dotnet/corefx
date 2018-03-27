@@ -10,10 +10,6 @@ namespace System.Drawing
 {
     public class IconConverter : ExpandableObjectConverter
     {
-        public IconConverter()
-        {
-        }
-
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             return (sourceType == typeof(byte[]));
