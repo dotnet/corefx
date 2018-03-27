@@ -3026,7 +3026,13 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void TestExportedValueUsingWhereClause_ExportSuccessful()
         {
-            CompositionContainer container = new CompositionContainer(new AssemblyCatalog(typeof(AssemblyCatalogTestsReflectionContext).Assembly));
+            CompositionContainer container = new CompositionContainer(new TypeCatalog(
+                typeof(IMefCollection),
+                typeof(IMefCollection<,>),
+                typeof(BaseClass),
+                typeof(DerivedClass),
+                typeof(MefCollection<,>)
+                ));
             IMefCollection<DerivedClass, BaseClass> actualValue = container.GetExportedValue<IMefCollection<DerivedClass, BaseClass>>("UsingWhereClause");
             Assert.NotNull(actualValue);
             Assert.IsType<MefCollection<DerivedClass, BaseClass>>(actualValue);
