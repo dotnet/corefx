@@ -42,7 +42,6 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 
 | Area                                                                                          | Owners / experts | Description |
 |-----------------------------------------------------------------------------------------------|------------------|-------------|
-| [area-Benchmarks](https://github.com/dotnet/corefx/labels/area-Benchmarks)                    | [@brianrob](https://github.com/brianrob), [@valenis](https://github.com/valenis) | Performance benchmarks not specific to other areas yet |
 | [area-Infrastructure](https://github.com/dotnet/corefx/labels/area-Infrastructure)            | [@weshaggard](https://github.com/weshaggard), [@ericstj](https://github.com/ericstj) | Covers:<ul><li>Packaging</li><li>Build and test infra for CoreFX repo</li><li>VS integration</li></ul><br/> |
 | [area-Meta](https://github.com/dotnet/corefx/labels/area-Meta)                                | [@tarekgh](https://github.com/tarekgh) | Issues without clear association to any specific API/contract, e.g. <ul><li>new contract proposals</li><li>cross-cutting code/test pattern changes (e.g. FxCop failures)</li><li>project-wide docs</li></ul><br/> |
 | [area-Serialization](https://github.com/dotnet/corefx/labels/area-Serialization)              | [@huanwu](https://github.com/huanwu), [@zhenlan](https://github.com/zhenlan) | Packages:<ul><li>System.Runtime.Serialization.Xml</li><li>System.Runtime.Serialization.Json</li><li>System.Private.DataContractSerialization</li><li>System.Xml.XmlSerializer</li></ul> Excluded:<ul><li>System.Runtime.Serialization.Formatters</li></ul> |
@@ -97,7 +96,8 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Text.Encodings.Web](https://github.com/dotnet/corefx/labels/area-System.Text.Encodings.Web)     | **[@GrabYourPitchforks](https://github.com/GrabYourPitchforks)**, [@krwq](https://github.com/krwq), [@tarekgh](https://github.com/tarekgh) |  |
 | [System.Text.RegularExpressions](https://github.com/dotnet/corefx/labels/area-System.Text.RegularExpressions) | [@ViktorHofer](https://github.com/ViktorHofer) |  |
 | [System.Threading](https://github.com/dotnet/corefx/labels/area-System.Threading)             | **[@kouvel](https://github.com/kouvel)**|  |
-| [System.Threading.Channels](https://github.com/dotnet/corefx/labels/area-System.Threading.Channels)             | **[@tarekgh](https://github.com/tarekgh)**|  |
+| [System.Threading.Channels](https://github.com/dotnet/corefx/labels/area-System.Threading.Channels)   | **[@tarekgh](https://github.com/tarekgh)**|  |
+| [System.Threading.Tasks](https://github.com/dotnet/corefx/labels/area-System.Threading.Tasks) | **[@tarekgh](https://github.com/tarekgh)**|  |
 | [System.Transactions](https://github.com/dotnet/corefx/labels/area-System.Transactions)       | [@jimcarley](https://github.com/jimcarley), [@qizhanMS](https://github.com/qizhanMS), [@dmetzgar](https://github.com/dmetzgar) |  |
 | [System.Xml](https://github.com/dotnet/corefx/labels/area-System.Xml)                         | **[@krwq](https://github.com/krwq)**, [@pjanotti](https://github.com/pjanotti) |  |
 | **Microsoft contract assemblies** | | |
