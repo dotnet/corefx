@@ -15,6 +15,18 @@ namespace System.Collections.Tests
     {
         internal class Driver<T>
         {
+            public Func<T[], IEnumerable<T>>[] CollectionGenerators { get; }
+
+            public Driver()
+            {
+                CollectionGenerators = new Func<T[], IEnumerable<T>>[]
+                {
+                    ConstructTestList,
+                    ConstructTestEnumerable,
+                    ConstructLazyTestEnumerable,
+                };
+            }
+
             #region Insert
 
             public void BasicInsert(T[] items, T item, int index, int repeat)
@@ -186,16 +198,6 @@ namespace System.Collections.Tests
             public IEnumerable<T> ConstructTestList(T[] items)
             {
                 return items.ToList();
-            }
-
-            public Func<T[], IEnumerable<T>>[] GetCollectionGenerators()
-            {
-                return new Func<T[], IEnumerable<T>>[]
-                {
-                    ConstructTestList,
-                    ConstructTestEnumerable,
-                    ConstructLazyTestEnumerable,
-                };
             }
 
             #endregion
@@ -786,7 +788,7 @@ namespace System.Collections.Tests
                 intArr2[i] = i + 100;
             }
 
-            foreach (Func<int[], IEnumerable<int>> collectionGenerator in IntDriver.GetCollectionGenerators())
+            foreach (Func<int[], IEnumerable<int>> collectionGenerator in IntDriver.CollectionGenerators)
             {
                 IntDriver.InsertRangeIEnumerable(new int[0], intArr1, 0, 1, collectionGenerator);
                 IntDriver.InsertRangeIEnumerable(intArr1, intArr2, 0, 1, collectionGenerator);
@@ -804,7 +806,7 @@ namespace System.Collections.Tests
             for (int i = 0; i < 10; i++)
                 stringArr2[i] = "SomeTestString" + (i + 100).ToString();
 
-            foreach (Func<string[], IEnumerable<string>> collectionGenerator in StringDriver.GetCollectionGenerators())
+            foreach (Func<string[], IEnumerable<string>> collectionGenerator in StringDriver.CollectionGenerators)
             {
                 StringDriver.InsertRangeIEnumerable(new string[0], stringArr1, 0, 1, collectionGenerator);
                 StringDriver.InsertRangeIEnumerable(stringArr1, stringArr2, 0, 1, collectionGenerator);
