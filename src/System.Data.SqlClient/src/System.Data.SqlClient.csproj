@@ -491,25 +491,19 @@
       <LogicalName>System.Data.SqlClient.SqlMetaData.xml</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-
   <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsWindows)' == 'true'">
-    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
-  </ItemGroup>
-  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Data.Common" />
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.Xml.ReaderWriter" />
     <Reference Include="System.Runtime.InteropServices" />
-  </ItemGroup>
-  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Transactions.Local" />
     <Reference Include="System.Collections.NonGeneric" />
   </ItemGroup>
-  
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' AND '$(TargetsWindows)' == 'true'">
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <Import Project=".\GenerateThisAssemblyCs.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />
 </Project>
