@@ -653,7 +653,8 @@
     "runtime.unix.System.Console": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
@@ -709,7 +710,8 @@
     "runtime.win.System.Console": {
       "StableVersions": [
         "4.0.0",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
       "BaselineVersion": "4.3.0"
     },
