@@ -41,7 +41,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            // Digest authentication does not work with domain credentials on CurlHandler. This is blocked by bugs in LibCurl.
+            // Digest authentication does not work with domain credentials on CurlHandler. This is blocked by the behavior of LibCurl.
             NetworkCredential credentials = (IsCurlHandler && authenticateHeader.ToLowerInvariant().Contains("digest")) ?
                 s_credentialsNoDomain :
                 s_credentials;
