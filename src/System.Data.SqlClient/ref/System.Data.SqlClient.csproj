@@ -19,6 +19,9 @@
     <Compile Include="System.Data.SqlClient.cs" />
     <Compile Include="System.Data.SqlClient.Manual.cs" />
   </ItemGroup>
+  <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System.Data.SqlClient.NetCoreApp.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
