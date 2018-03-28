@@ -229,7 +229,7 @@ namespace System.IO.Pipelines
             if (_writingHead == null)
             {
                 // Nothing written to commit
-                return false;
+                return true;
             }
 
             if (_readHead == null)
@@ -258,7 +258,7 @@ namespace System.IO.Pipelines
             _writingHead = null;
             _currentWriteLength = 0;
 
-            return bytesWritten > 0;
+            return bytesWritten == 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -299,13 +299,13 @@ namespace System.IO.Pipelines
             ValueTask<FlushResult> result;
             lock (_sync)
             {
-                var bytesWritten = CommitUnsynchronized();
+                var wasEmpty = CommitUnsynchronized();
 
                 // AttachToken before completing reader awaiter in case cancellationToken is already completed
                 cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
 
                 // Complete reader only if new data was pushed into the pipe
-                if (bytesWritten)
+                if (!wasEmpty)
                 {
                     _readerAwaitable.Complete(out completionData);
                 }
@@ -315,7 +315,7 @@ namespace System.IO.Pipelines
                 }
 
                 // I couldn't find a way for flush to induce backpressure deadlock
-                // if it always adds new data to pipe and wakes up ther reader but assert anyway
+                // if it always adds new data to pipe and wakes up the reader but assert anyway
                 Debug.Assert(_writerAwaitable.IsCompleted || _readerAwaitable.IsCompleted);
 
                 // If the writer is completed (which it will be most of the time) the return a completed ValueTask
