@@ -76,40 +76,42 @@ namespace System.Net.Tests
                 foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
                 {
                     var formatted = date.ToString(format);
-                    // Should be date.LocalDateTime, but current implementation ignores offsets...
-                    var expected = new DateTimeOffset(date.DateTime, TimeSpan.Zero).LocalDateTime;
+                    var expected = date.LocalDateTime;
                     yield return new object[] { formatted, expected };
                     yield return new object[] { formatted.ToLowerInvariant(), expected };
                 }
             }
+        }
+
+        public static IEnumerable<object[]> Dates_Invalid_Data()
+        {
+            yield return new object[] { "not a valid date here" };
+            yield return new object[] { "Sun, 31 Nov 1234567890 33:77:80 GMT" };
 
             // Should be Sunday...
-            var dayOfWeekMismatch = new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
-            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 GMT", dayOfWeekMismatch };
-            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 UTC", dayOfWeekMismatch };
-            yield return new object[] { "Sat, 25 Mar 2018 21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 GMT", dayOfWeekMismatch };
-            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 UTC", dayOfWeekMismatch };
-            yield return new object[] { "Saturday, 25-Mar-18 21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Sat Mar 25 21:33:01 2018", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-
-            var dayOfWeekAndMonthInvalid = new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
-            yield return new object[] { "Sue, 25 Not 2018 16:33:01 GMT", dayOfWeekAndMonthInvalid };
-            yield return new object[] { "Sue, 25 Not 2018 16:33:01 UTC", dayOfWeekAndMonthInvalid };
-            yield return new object[] { "Sue, 25 Not 2018 21:33:01+05:00", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Surprise, 25-Not-18 16:33:01 GMT", dayOfWeekAndMonthInvalid };
-            yield return new object[] { "Surprise, 25-Not-18 16:33:01 UTC", dayOfWeekAndMonthInvalid };
-            yield return new object[] { "Surprise, 25-Not-18 21:33:01+05:00", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Sue Not 25 21:33:01 2018", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-
-            var strangeSeparators = new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
-            yield return new object[] { "Sun?!25<Mar]2018&16^33(01$GMT", strangeSeparators };
-            yield return new object[] { "Sun$@25^Mar%2018|16-33)01~UTC", strangeSeparators };
-            yield return new object[] { "Sun`;25%Mar{2018=21=33*01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Sunday<>25#Mar!18_16,33@01\tGMT", strangeSeparators };
-            yield return new object[] { "Sunday}{25\\Mar\"18'16?33^01-UTC", strangeSeparators };
-            yield return new object[] { "Sunday$%25.Mar-18=21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
-            yield return new object[] { "Sun+Mar,25/21?33[01{2018", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 GMT" };
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 UTC" };
+            yield return new object[] { "Sat, 25 Mar 2018 21:33:01+05:00" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 GMT" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 UTC" };
+            yield return new object[] { "Saturday, 25-Mar-18 21:33:01+05:00" };
+            yield return new object[] { "Sat Mar 25 21:33:01 2018" };
+            // Invalid day-of-week/month values
+            yield return new object[] { "Sue, 25 Not 2018 16:33:01 GMT" };
+            yield return new object[] { "Sue, 25 Not 2018 16:33:01 UTC" };
+            yield return new object[] { "Sue, 25 Not 2018 21:33:01+05:00" };
+            yield return new object[] { "Surprise, 25-Not-18 16:33:01 GMT" };
+            yield return new object[] { "Surprise, 25-Not-18 16:33:01 UTC" };
+            yield return new object[] { "Surprise, 25-Not-18 21:33:01+05:00" };
+            yield return new object[] { "Sue Not 25 21:33:01 2018" };
+            // Strange separators
+            yield return new object[] { "Sun?!25<Mar]2018&16^33(01$GMT" };
+            yield return new object[] { "Sun$@25^Mar%2018|16-33)01~UTC" };
+            yield return new object[] { "Sun`;25%Mar{2018=21=33*01+05:00" };
+            yield return new object[] { "Sunday<>25#Mar!18_16,33@01\tGMT" };
+            yield return new object[] { "Sunday}{25\\Mar\"18'16?33^01-UTC" };
+            yield return new object[] { "Sunday$%25.Mar-18=21:33:01+05:00" };
+            yield return new object[] { "Sun+Mar,25/21?33[01{2018" };
         }
 
         public HttpWebRequestTest(ITestOutputHelper output)
@@ -757,8 +759,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [InlineData("not a valid date here")]
-        [InlineData("Sun, 31 Nov 1234567890 33:77:80 GMT")]
+        [MemberData(nameof(Dates_Invalid_Data))]
         public void IfModifiedSince_InvalidValue(string invalid)
         {
             HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
@@ -800,8 +801,7 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [InlineData("not a valid date here")]
-        [InlineData("Sun, 31 Nov 1234567890 33:77:80 GMT")]
+        [MemberData(nameof(Dates_Invalid_Data))]
         public void Date_InvalidValue(string invalid)
         {
             HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
