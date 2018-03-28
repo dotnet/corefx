@@ -38,25 +38,25 @@ namespace System.Drawing
             else if (strFormat[0] == '[')
             {
                 // case #2, this is probably a long format (guid)
-                if (strFormat.Equals(ImageFormat.Bmp.ToString()))
+                if (strFormat.Equals(ImageFormat.Bmp.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Bmp;
-                else if (strFormat.Equals(ImageFormat.Emf.ToString()))
+                else if (strFormat.Equals(ImageFormat.Emf.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Emf;
-                else if (strFormat.Equals(ImageFormat.Exif.ToString()))
+                else if (strFormat.Equals(ImageFormat.Exif.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Exif;
-                else if (strFormat.Equals(ImageFormat.Gif.ToString()))
+                else if (strFormat.Equals(ImageFormat.Gif.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Gif;
-                else if (strFormat.Equals(ImageFormat.Icon.ToString()))
+                else if (strFormat.Equals(ImageFormat.Icon.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Icon;
-                else if (strFormat.Equals(ImageFormat.Jpeg.ToString()))
+                else if (strFormat.Equals(ImageFormat.Jpeg.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Jpeg;
-                else if (strFormat.Equals(ImageFormat.MemoryBmp.ToString()))
+                else if (strFormat.Equals(ImageFormat.MemoryBmp.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.MemoryBmp;
-                else if (strFormat.Equals(ImageFormat.Png.ToString()))
+                else if (strFormat.Equals(ImageFormat.Png.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Png;
-                else if (strFormat.Equals(ImageFormat.Tiff.ToString()))
+                else if (strFormat.Equals(ImageFormat.Tiff.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Tiff;
-                else if (strFormat.Equals(ImageFormat.Wmf.ToString()))
+                else if (strFormat.Equals(ImageFormat.Wmf.ToString(), StringComparison.OrdinalIgnoreCase))
                     return ImageFormat.Wmf;
             }
             else
