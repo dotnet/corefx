@@ -20,7 +20,7 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MinPort = 0x00000000;
+        public const int MinPort = UInt16.MinValue;
 
         /// <devdoc>
         ///    <para>
@@ -28,7 +28,7 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MaxPort = 0x0000FFFF;
+        public const int MaxPort = UInt16.MaxValue;
 
         private IPAddress _address;
         private int _port;
