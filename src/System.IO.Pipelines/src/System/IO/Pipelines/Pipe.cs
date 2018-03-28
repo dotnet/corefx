@@ -314,9 +314,9 @@ namespace System.IO.Pipelines
                     completionData = default;
                 }
 
-                //// I could find a way for flush to induce backpressure deadlock
-                //// if it always adds new data to pipe and wakes up ther reader
-                //Debug.Assert(!_writerAwaitable.IsCompleted && !_readerAwaitable.IsCompleted);
+                // I couldn't find a way for flush to induce backpressure deadlock
+                // if it always adds new data to pipe and wakes up ther reader but assert anyway
+                Debug.Assert(_writerAwaitable.IsCompleted || _readerAwaitable.IsCompleted);
 
                 // If the writer is completed (which it will be most of the time) the return a completed ValueTask
                 if (_writerAwaitable.IsCompleted)
