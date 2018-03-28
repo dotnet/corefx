@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Composition.Hosting;
 using System.Composition.Hosting.Core;
 using System.Composition.Runtime;
