@@ -3273,7 +3273,7 @@ namespace System
         public static bool operator !=(System.UIntPtr value1, System.UIntPtr value2) { throw null; }
         public static System.UIntPtr operator -(System.UIntPtr pointer, int offset) { throw null; }
         public static System.UIntPtr Subtract(System.UIntPtr pointer, int offset) { throw null; }
-        bool System.IEquatable<System.UIntPtr>.Equals(System.UIntPtr value) { throw null; }
+        bool System.IEquatable<System.UIntPtr>.Equals(System.UIntPtr other) { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public unsafe void* ToPointer() { throw null; }
         public override string ToString() { throw null; }
