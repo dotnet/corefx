@@ -9,7 +9,6 @@ namespace System.MemoryTests
 {
     public static partial class ReadOnlyMemoryTests
     {
-
         [Fact]
         public static void MemoryPin()
         {

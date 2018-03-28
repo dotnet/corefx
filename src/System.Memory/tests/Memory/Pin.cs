@@ -9,7 +9,6 @@ namespace System.MemoryTests
 {
     public static partial class MemoryTests
     {
-
         [Fact]
         public static void MemoryPin()
         {
