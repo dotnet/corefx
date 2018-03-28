@@ -31,7 +31,7 @@ namespace System.Net
         public const int MaxPort = UInt16.MaxValue;
 
         private IPAddress _address;
-        private int _port;
+        private UInt16 _port;
 
         internal const int AnyPort = MinPort;
 
@@ -58,7 +58,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = port;
+            _port = Convert.ToUInt16(port);
             _address = new IPAddress(address);
         }
 
@@ -77,7 +77,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = port;
+            _port = Convert.ToUInt16(port);
             _address = address;
         }
 
@@ -107,7 +107,7 @@ namespace System.Net
         {
             get
             {
-                return _port;
+                return Convert.ToInt32(_port);
             }
             set
             {
@@ -115,7 +115,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                _port = value;
+                _port = Convert.ToUInt16(value);
             }
         }
 
