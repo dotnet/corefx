@@ -2,15 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,15 +16,6 @@ namespace System.Net.Security.Tests
 
     public class SslStreamSniTest
     {
-        private static IEnumerable<object[]> HostNameData()
-        {
-            yield return new object[] { "a" };
-            yield return new object[] { "test" };
-            // max allowed hostname length is 63
-            yield return new object[] { new string('a', 63) };
-            yield return new object[] { "\u017C\u00F3\u0142\u0107 g\u0119\u015Bl\u0105 ja\u017A\u0144. \u7EA2\u70E7. \u7167\u308A\u713C\u304D" };
-        }
-
         [Theory]
         [MemberData(nameof(HostNameData))]
         public void SslStream_ClientSendsSNIServerReceives_Ok(string hostName)
@@ -135,6 +121,15 @@ namespace System.Net.Security.Tests
             {
                 serverClientConnection(server, client);
             }
+        }
+
+        private static IEnumerable<object[]> HostNameData()
+        {
+            yield return new object[] { "a" };
+            yield return new object[] { "test" };
+            // max allowed hostname length is 63
+            yield return new object[] { new string('a', 63) };
+            yield return new object[] { "\u017C\u00F3\u0142\u0107 g\u0119\u015Bl\u0105 ja\u017A\u0144. \u7EA2\u70E7. \u7167\u308A\u713C\u304D" };
         }
     }
 }

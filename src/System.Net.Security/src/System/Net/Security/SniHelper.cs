@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -84,7 +85,7 @@ namespace System.Net.Security
             p = SkipOpaqueType1(p);
 
             // Skip cipher suites
-            p = SkipOpaqueType2(p);
+            p = SkipOpaqueType2(p, out _);
 
             // Skip compression methods
             p = SkipOpaqueType1(p);
@@ -103,27 +104,41 @@ namespace System.Net.Security
                 return null;
             }
 
+            string ret = null;
             while (!p.IsEmpty)
             {
-                string sni = GetSniFromExtension(p, out p);
+                bool invalid;
+                string sni = GetSniFromExtension(p, out p, out invalid);
+                if (invalid)
+                {
+                    return null;
+                }
+
+                if (ret != null && sni != null)
+                {
+                    Debug.Assert(false, "More than 1 name found.");
+                    return null;
+                }
+
                 if (sni != null)
                 {
-                    return sni;
+                    ret = sni;
                 }
             }
 
-            return null;
+            return ret;
         }
 
         // 2.3. https://www.ietf.org/rfc/rfc3546.txt
         // Extension structure:
         //   - ExtensionType extension_type (2 bytes) => 0x00 is server_name
         //   - opaque extension_data
-        private static string GetSniFromExtension(ReadOnlySpan<byte> extension, out ReadOnlySpan<byte> remainingBytes)
+        private static string GetSniFromExtension(ReadOnlySpan<byte> extension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
             if (extension.Length < 2)
             {
                 remainingBytes = ReadOnlySpan<byte>.Empty;
+                invalid = true;
                 return null;
             }
 
@@ -132,11 +147,11 @@ namespace System.Net.Security
 
             if (extensionType == 0x00)
             {
-                return GetSniFromServerNameList(extensionData, out remainingBytes);
+                return GetSniFromServerNameList(extensionData, out remainingBytes, out invalid);
             }
             else
             {
-                remainingBytes = SkipOpaqueType2(extensionData);
+                remainingBytes = SkipOpaqueType2(extensionData, out invalid);
                 return null;
             }
         }
@@ -161,11 +176,12 @@ namespace System.Net.Security
         //   the server only needs to match the HostName against names containing
         //   exclusively ASCII characters, it MUST compare ASCII names case-
         //   insensitively.
-        private static string GetSniFromServerNameList(ReadOnlySpan<byte> serverNameListExtension, out ReadOnlySpan<byte> remainingBytes)
+        private static string GetSniFromServerNameList(ReadOnlySpan<byte> serverNameListExtension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
             if (serverNameListExtension.Length < 2)
             {
                 remainingBytes = ReadOnlySpan<byte>.Empty;
+                invalid = true;
                 return null;
             }
 
@@ -175,6 +191,7 @@ namespace System.Net.Security
             if (serverNameListLength > serverNameList.Length)
             {
                 remainingBytes = ReadOnlySpan<byte>.Empty;
+                invalid = true;
                 return null;
             }
 
@@ -183,6 +200,7 @@ namespace System.Net.Security
 
             if (serverName.Length < 3)
             {
+                invalid = true;
                 return null;
             }
 
@@ -193,12 +211,19 @@ namespace System.Net.Security
 
             if (hostNameStructLength != hostNameStruct.Length || hostNameType != 0x00)
             {
+                invalid = true;
                 return null;
             }
 
             int hostNameLength = ReadUint16(hostNameStruct);
             ReadOnlySpan<byte> hostName = hostNameStruct.Slice(2);
+            if (hostNameLength != hostName.Length)
+            {
+                invalid = true;
+                return null;
+            }
 
+            invalid = false;
             return DecodeString(hostName);
         }
 
@@ -253,17 +278,26 @@ namespace System.Net.Security
             return SkipBytes(bytes, totalBytes);
         }
 
-        private static ReadOnlySpan<byte> SkipOpaqueType2(ReadOnlySpan<byte> bytes)
+        private static ReadOnlySpan<byte> SkipOpaqueType2(ReadOnlySpan<byte> bytes, out bool invalid)
         {
             if (bytes.Length < 2)
             {
+                invalid = true;
                 return ReadOnlySpan<byte>.Empty;
             }
 
             int length = ReadUint16(bytes);
             int totalBytes = 2 + length;
 
-            return SkipBytes(bytes, totalBytes);
+            invalid = bytes.Length < totalBytes;
+            if (invalid)
+            {
+                return ReadOnlySpan<byte>.Empty;
+            }
+            else
+            {
+                return bytes.Slice(totalBytes);
+            }
         }
 
         private static IdnMapping CreateIdnMapping()
