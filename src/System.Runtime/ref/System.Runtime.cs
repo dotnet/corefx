@@ -3729,7 +3729,7 @@ namespace System.Buffers
         public abstract System.Buffers.MemoryHandle Pin(int byteOffset = 0);
         public abstract bool Release();
         public abstract void Retain();
-        protected internal abstract bool TryGetArray(out System.ArraySegment<T> arraySegment);
+        protected internal abstract bool TryGetArray(out System.ArraySegment<T> segment);
     }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
