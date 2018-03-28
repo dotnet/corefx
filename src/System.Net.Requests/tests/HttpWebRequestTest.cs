@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Test.Common;
@@ -26,6 +27,90 @@ namespace System.Net.Tests
         private readonly ITestOutputHelper _output;
 
         public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.Http.EchoServers;
+
+        public static IEnumerable<object[]> Dates_ReadValue_Data()
+        {
+            var zero_formats = new[]
+            {
+                // RFC1123
+                "R",
+                // RFC1123 - UTC
+                "ddd, dd MMM yyyy HH:mm:ss UTC",
+                // RFC850
+                "dddd, dd-MMM-yy HH:mm:ss G\\MT",
+                // RFC850 - UTC
+                "dddd, dd-MMM-yy HH:mm:ss UTC",
+                // ANSI
+                "ddd MMM d HH:mm:ss yyyy",
+            };
+
+            var offset_formats = new[]
+            {
+                // RFC1123 - Offset
+                "ddd, dd MMM yyyy HH:mm:sszzz",
+                // RFC850 - Offset
+                "dddd, dd-MMM-yy HH:mm:sszzz",
+            };
+
+            var dates = new[]
+            {
+                new DateTimeOffset(2018, 1, 1, 12, 1, 14, TimeSpan.Zero),
+                new DateTimeOffset(2018, 1, 3, 15, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2015, 5, 6, 20, 45, 38, TimeSpan.Zero),
+            };
+
+            foreach (var date in dates)
+            {
+                var expected = date.LocalDateTime;
+
+                foreach (var format in zero_formats.Concat(offset_formats))
+                {
+                    var formatted = date.ToString(format);
+                    yield return new object[] { formatted, expected };
+                    yield return new object[] { formatted.ToLowerInvariant(), expected };
+                }
+            }
+
+            foreach (var format in offset_formats)
+            {
+                foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
+                {
+                    var formatted = date.ToString(format);
+                    // Should be date.LocalDateTime, but current implementation ignores offsets...
+                    var expected = new DateTimeOffset(date.DateTime, TimeSpan.Zero).LocalDateTime;
+                    yield return new object[] { formatted, expected };
+                    yield return new object[] { formatted.ToLowerInvariant(), expected };
+                }
+            }
+
+            // Should be Sunday...
+            var dayOfWeekMismatch = new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 GMT", dayOfWeekMismatch };
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 UTC", dayOfWeekMismatch };
+            yield return new object[] { "Sat, 25 Mar 2018 21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 GMT", dayOfWeekMismatch };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 UTC", dayOfWeekMismatch };
+            yield return new object[] { "Saturday, 25-Mar-18 21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Sat Mar 25 21:33:01 2018", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+
+            var dayOfWeekAndMonthInvalid = new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
+            yield return new object[] { "Sue, 25 Not 2018 16:33:01 GMT", dayOfWeekAndMonthInvalid };
+            yield return new object[] { "Sue, 25 Not 2018 16:33:01 UTC", dayOfWeekAndMonthInvalid };
+            yield return new object[] { "Sue, 25 Not 2018 21:33:01+05:00", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Surprise, 25-Not-18 16:33:01 GMT", dayOfWeekAndMonthInvalid };
+            yield return new object[] { "Surprise, 25-Not-18 16:33:01 UTC", dayOfWeekAndMonthInvalid };
+            yield return new object[] { "Surprise, 25-Not-18 21:33:01+05:00", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Sue Not 25 21:33:01 2018", new DateTimeOffset(2018, 11, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+
+            var strangeSeparators = new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(5)).LocalDateTime;
+            yield return new object[] { "Sun?!25<Mar]2018&16^33(01$GMT", strangeSeparators };
+            yield return new object[] { "Sun$@25^Mar%2018|16-33)01~UTC", strangeSeparators };
+            yield return new object[] { "Sun`;25%Mar{2018=21=33*01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Sunday<>25#Mar!18_16,33@01\tGMT", strangeSeparators };
+            yield return new object[] { "Sunday}{25\\Mar\"18'16?33^01-UTC", strangeSeparators };
+            yield return new object[] { "Sunday$%25.Mar-18=21:33:01+05:00", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+            yield return new object[] { "Sun+Mar,25/21?33[01{2018", new DateTimeOffset(2018, 3, 25, 21, 33, 1, TimeSpan.FromHours(0)).LocalDateTime };
+        }
 
         public HttpWebRequestTest(ITestOutputHelper output)
         {
@@ -204,7 +289,7 @@ namespace System.Net.Tests
                     Assert.Contains($"Host: {host}", headers);
                 });
 
-                using (var response = (HttpWebResponse) await getResponse)
+                using (var response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -661,6 +746,35 @@ namespace System.Net.Tests
             Assert.Equal(ifModifiedSince, request.IfModifiedSince);
         }
 
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        public void IfModifiedSince_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, raw);
+
+            Assert.Equal(expected, request.IfModifiedSince);
+        }
+
+        [Theory]
+        [InlineData("not a valid date here")]
+        [InlineData("Sun, 31 Nov 1234567890 33:77:80 GMT")]
+        public void IfModifiedSince_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.IfModifiedSince);
+        }
+
+        [Fact]
+        public void IfModifiedSince_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.IfModifiedSince);
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void Date_SetMinDateAfterValidDate_ValuesMatch(Uri remoteServer)
         {
@@ -673,6 +787,35 @@ namespace System.Net.Tests
             DateTime date = DateTime.MinValue;
             request.Date = date;
             Assert.Equal(date, request.Date);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        public void Date_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, raw);
+
+            Assert.Equal(expected, request.Date);
+        }
+
+        [Theory]
+        [InlineData("not a valid date here")]
+        [InlineData("Sun, 31 Nov 1234567890 33:77:80 GMT")]
+        public void Date_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.Date);
+        }
+
+        [Fact]
+        public void Date_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.Date);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -770,7 +913,7 @@ namespace System.Net.Tests
                 Task<WebResponse> getResponse = request.GetResponseAsync();
                 Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
-                using (HttpWebResponse response = (HttpWebResponse) await getResponse)
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -1057,8 +1200,8 @@ namespace System.Net.Tests
                 Assert.True(strContent.Contains(RequestBody));
             }
         }
-        
-        [Theory] 
+
+        [Theory]
         [MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
         {
@@ -1386,11 +1529,11 @@ namespace System.Net.Tests
                 BinaryFormatter formatter = new BinaryFormatter();
                 var hwr = HttpWebRequest.CreateHttp("http://localhost");
 
-                // .NET Framework throws 
+                // .NET Framework throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.WebRequest+WebProxyWrapper' in Assembly 'System, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
-                // While .NET Core throws 
+                // While .NET Core throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.HttpWebRequest' in Assembly 'System.Net.Requests, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
