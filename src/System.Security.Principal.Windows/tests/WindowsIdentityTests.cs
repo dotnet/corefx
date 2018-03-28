@@ -120,25 +120,6 @@ public class WindowsIdentityTests
         }
     }
 
-    [Fact]
-    public static void CheckWindows8PlusClaims()
-    {
-        int minClaims = 1;
-
-        if (PlatformDetection.IsWindows7)
-        {
-            minClaims = 0;
-        }
-
-        using (WindowsIdentity id = WindowsIdentity.GetCurrent())
-        {
-            Assert.InRange(
-                id.Claims.Count(c => c.Properties.ContainsKey(ClaimTypes.WindowsUserClaim)),
-                minClaims,
-                int.MaxValue);
-        }
-    }
-
     private static void CheckDispose(WindowsIdentity identity, bool anonymous = false)
     {
         Assert.False(identity.AccessToken.IsClosed);
