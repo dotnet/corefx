@@ -44,7 +44,7 @@ namespace System.Security.Principal
         private List<Claim> _deviceClaims;
         private List<Claim> _userClaims;
 
-        private static readonly Lazy<bool> s_hasWindows8Properties = new Lazy<bool>(CheckForWindows8Properties);
+        private static bool s_ignoreWindows8Properties;
 
         //
         // Constructors.
@@ -782,7 +782,7 @@ namespace System.Security.Principal
         }
 
 
-        private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass)
+        private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass, bool nullOnInvalidParam=false)
         {
             SafeLocalAllocHandle safeLocalAllocHandle = SafeLocalAllocHandle.InvalidHandle;
             uint dwLength = (uint)sizeof(uint);
@@ -815,6 +815,15 @@ namespace System.Security.Principal
                     break;
                 case Interop.Errors.ERROR_INVALID_HANDLE:
                     throw new ArgumentException(SR.Argument_InvalidImpersonationToken);
+                case Interop.Errors.ERROR_INVALID_PARAMETER:
+                    if (nullOnInvalidParam)
+                    {
+                        safeLocalAllocHandle.Dispose();
+                        return null;
+                    }
+
+                    // Throw the exception.
+                    goto default;
                 default:
                     throw new SecurityException(new Win32Exception(dwErrorCode).Message);
             }
@@ -944,9 +953,9 @@ namespace System.Security.Principal
                         // group sids
                         AddGroupSidClaims(_userClaims);
 
-                        if (s_hasWindows8Properties.Value)
+                        if (!s_ignoreWindows8Properties)
                         {
-                            // Device group sids
+                            // Device group sids (may cause s_ignoreWindows8Properties to be set to true, so must be first in this block)
                             AddDeviceGroupSidClaims(_deviceClaims, TokenInformationClass.TokenDeviceGroups);
 
                             // User token claims
@@ -1080,7 +1089,14 @@ namespace System.Security.Principal
             {
                 // Retrieve all group sids
 
-                safeAllocHandle = GetTokenInformation(_safeTokenHandle, tokenInformationClass);
+                safeAllocHandle = GetTokenInformation(_safeTokenHandle, tokenInformationClass, nullOnInvalidParam: true);
+
+                if (safeAllocHandle == null)
+                {
+                    s_ignoreWindows8Properties = true;
+                    return;
+                }
+
                 int count = Marshal.ReadInt32(safeAllocHandle.DangerousGetHandle());
                 IntPtr pSidAndAttributes = new IntPtr((long)safeAllocHandle.DangerousGetHandle() + (long)Marshal.OffsetOf(typeof(Interop.TOKEN_GROUPS), "Groups"));
                 string claimType = null;
@@ -1188,9 +1204,7 @@ namespace System.Security.Principal
                             {
                                 Claim c = new Claim(
                                     windowsClaim.Name,
-                                    ((ulong)boolValues[item] == 0
-                                        ? Convert.ToString(false, CultureInfo.InvariantCulture)
-                                        : Convert.ToString(true, CultureInfo.InvariantCulture)),
+                                    ((ulong)boolValues[item] != 0).ToString(),
                                     ClaimValueTypes.Boolean,
                                     _issuerName,
                                     _issuerName,
@@ -1200,19 +1214,6 @@ namespace System.Security.Principal
                                 instanceClaims.Add(c);
                             }
                             break;
-
-
-                            // These claim types are defined in the structure found in winnt.h, but I haven't received confirmation (may  2011) that they are supported and are not enabled.
-
-                            //case Interop.ClaimSecurityAttributeType.CLAIM_SECURITY_ATTRIBUTE_TYPE_FQBN:
-                            //    break;
-
-                            //case Interop.ClaimSecurityAttributeType.CLAIM_SECURITY_ATTRIBUTE_TYPE_SID:
-                            //    break;
-
-                            //case Interop.ClaimSecurityAttributeType.CLAIM_SECURITY_ATTRIBUTE_TYPE_OCTET_STRING:
-                            //    break;
-
                     }
 
                     offset += Marshal.SizeOf(windowsClaim);
@@ -1221,35 +1222,6 @@ namespace System.Security.Principal
             finally
             {
                 safeAllocHandle.Close();
-            }
-        }
-
-        private static bool CheckForWindows8Properties()
-        {
-            using (WindowsIdentity tmp = GetCurrent(TokenAccessLevels.Read))
-            using (SafeLocalAllocHandle safeLocalAllocHandle = new SafeLocalAllocHandle(IntPtr.Zero))
-            {
-                uint dwLength = (uint)sizeof(uint);
-                bool result = Interop.Advapi32.GetTokenInformation(
-                    tmp.AccessToken,
-                    (uint)TokenInformationClass.TokenDeviceClaimAttributes,
-                    safeLocalAllocHandle,
-                    0,
-                    out dwLength);
-
-                Debug.Assert(result == false);
-                int dwErrorCode = Marshal.GetLastWin32Error();
-
-                switch (dwErrorCode)
-                {
-                    case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
-                        return true;
-                    case Interop.Errors.ERROR_INVALID_PARAMETER:
-                        return false;
-                    default:
-                        Debug.Fail($"Unexpected return code: {dwErrorCode:X8}");
-                        return false;
-                }
             }
         }
     }
