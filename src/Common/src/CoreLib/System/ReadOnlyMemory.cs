@@ -182,7 +182,7 @@ namespace System
             {
                 if (_index < 0)
                 {
-                    return ((OwnedMemory<T>)_object).Span.Slice(_index & RemoveOwnedFlagBitMask, _length);
+                    return ((OwnedMemory<T>)_object).GetSpan().Slice(_index & RemoveOwnedFlagBitMask, _length);
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {

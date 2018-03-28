@@ -234,32 +234,6 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void RefCounting()
-        {
-            using (OwnedMemory<int> block = MemoryPool<int>.Shared.Rent(42))
-            {
-                block.Retain();
-                block.Retain();
-                block.Retain();
-
-                bool moreToGo;
-                moreToGo = block.Release();
-                Assert.True(moreToGo);
-
-                moreToGo = block.Release();
-                Assert.True(moreToGo);
-
-                moreToGo = block.Release();
-                Assert.True(moreToGo);
-
-                moreToGo = block.Release();
-                Assert.False(moreToGo);
-
-                Assert.Throws<ObjectDisposedException>(() => block.Release());
-            }
-        }
-
-        [Fact]
         public static void IsDisposed()
         {
             OwnedMemory<int> block = MemoryPool<int>.Shared.Rent(42);

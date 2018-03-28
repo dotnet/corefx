@@ -18,9 +18,14 @@ namespace System.Buffers
         public abstract int Length { get; }
 
         /// <summary>
-        /// Returns a span wrapping the underlying memory.
+        /// [Obsolete, use GetSpan()] Returns a span wrapping the underlying memory.
         /// </summary>
         public abstract Span<T> Span { get; }
+
+        /// <summary>
+        /// Returns a span wrapping the underlying memory.
+        /// </summary>
+        public abstract Span<T> GetSpan();
 
         /// <summary>
         /// Returns a Memory<typeparamref name="T"/> if the underlying memory has not been freed.
@@ -82,14 +87,14 @@ namespace System.Buffers
         public abstract bool IsDisposed { get; }
 
         /// <summary>
-        /// Implements IRetainable. Prevent accidental disposal of the memory.
+        /// [Obsolete] Prevent accidental disposal of the memory.
         /// </summary>
         public abstract void Retain();
 
         /// <summary>
         /// Implements IRetainable. The memory can now be diposed.
         /// </summary>
-        public abstract bool Release();
+        public abstract void Release();
 
     }
 }

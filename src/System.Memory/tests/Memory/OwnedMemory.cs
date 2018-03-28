@@ -93,7 +93,7 @@ namespace System.MemoryTests
             int[] a = {};
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
             MemoryHandle handle = owner.Pin();
-            Assert.True(handle.HasPointer);
+            Assert.True(handle.Pointer != null);
         }
 
         [Fact]
@@ -102,10 +102,10 @@ namespace System.MemoryTests
             int[] array = { 1, 2, 3, 4, 5 };
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
             MemoryHandle handle = owner.Pin();
-            Assert.True(handle.HasPointer);
             unsafe
             {
                 int* pointer = (int*)handle.Pointer;
+                Assert.True(pointer != null);
 
                 GC.Collect();
 
@@ -140,27 +140,6 @@ namespace System.MemoryTests
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
             owner.Dispose();
             Assert.Throws<ObjectDisposedException>(() => owner.Memory);
-        }
-
-        [Fact]
-        public static void DisposeOwnedMemoryAfterRetain()
-        {
-            int[] a = { 91, 92, -93, 94 };
-            OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
-            owner.Retain();
-            Assert.Throws<InvalidOperationException>(() => owner.Dispose());
-            owner.Release();
-        }
-
-        [Fact]
-        public static void DisposeOwnedMemoryAfterRetainAndRelease()
-        {
-            int[] a = { 91, 92, -93, 94 };
-            OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
-            owner.Retain();
-            owner.Release();
-            owner.Dispose();
-            Assert.True(owner.IsDisposed);
         }
     }
 

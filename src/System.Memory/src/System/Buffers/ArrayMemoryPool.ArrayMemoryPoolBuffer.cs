@@ -42,6 +42,14 @@ namespace System.Buffers
                     return _array;
                 }
             }
+            
+            public sealed override Span<T> GetSpan()
+            {
+                if (IsDisposed)
+                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    
+                return _array;
+            }
 
             protected sealed override void Dispose(bool disposing)
             {
@@ -104,7 +112,7 @@ namespace System.Buffers
                 }
             }
 
-            public sealed override bool Release()
+            public sealed override void Release()
             {
                 while (true)
                 {
@@ -116,9 +124,8 @@ namespace System.Buffers
                         if (currentCount == 1)
                         {
                             Dispose();
-                            return false;
                         }
-                        return true;
+                        break;
                     }
                 }
             }

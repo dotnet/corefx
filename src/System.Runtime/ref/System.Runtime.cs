@@ -3704,15 +3704,13 @@ namespace System.Buffers
 {
     public partial interface IRetainable
     {
-        bool Release();
-        void Retain();
+        void Release();
     }
     public partial struct MemoryHandle : System.IDisposable
     {
         private object _dummy;
         [System.CLSCompliantAttribute(false)]
         public unsafe MemoryHandle(System.Buffers.IRetainable retainable, void* pointer = null, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle)) { throw null; }
-        public bool HasPointer { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
         public unsafe void* Pointer { get { throw null; } }
         public void Dispose() { }
@@ -3727,8 +3725,9 @@ namespace System.Buffers
         public abstract System.Span<T> Span { get; }
         public void Dispose() { }
         protected abstract void Dispose(bool disposing);
+        public abstract System.Span<T> GetSpan();
         public abstract System.Buffers.MemoryHandle Pin(int byteOffset = 0);
-        public abstract bool Release();
+        public abstract void Release();
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out System.ArraySegment<T> segment);
     }

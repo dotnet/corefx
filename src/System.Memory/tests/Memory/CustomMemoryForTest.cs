@@ -47,6 +47,13 @@ namespace System.MemoryTests
             }
         }
 
+        public override Span<T> GetSpan()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
+            return new Span<T>(_array, _offset, _length);
+        }
+
         public override MemoryHandle Pin(int byteOffset = 0)
         {
             unsafe
@@ -101,7 +108,7 @@ namespace System.MemoryTests
             Interlocked.Increment(ref _referenceCount);
         }
 
-        public override bool Release()
+        public override void Release()
         {
             int newRefCount = Interlocked.Decrement(ref _referenceCount);
 
@@ -111,9 +118,7 @@ namespace System.MemoryTests
             if (newRefCount == 0)
             {
                 _noReferencesCalledCount++;
-                return false;
             }
-            return true;
         }
     }
 }

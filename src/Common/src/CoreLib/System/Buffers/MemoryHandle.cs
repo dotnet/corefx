@@ -37,11 +37,6 @@ namespace System.Buffers
         public void* Pointer => _pointer;
 
         /// <summary>
-        /// Returns false if the pointer to memory is null.
-        /// </summary>
-        public bool HasPointer => _pointer != null;
-
-        /// <summary>
         /// Frees the pinned handle and releases IRetainable.
         /// </summary>
        public void Dispose()
