@@ -1493,6 +1493,12 @@
     <StablePackage Include="System.Console">
       <Version>4.0.1</Version>
     </StablePackage>
+    <StablePackage Include="runtime.unix.System.Console">
+      <Version>4.0.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win.System.Console">
+      <Version>4.0.1</Version>
+    </StablePackage>
 
   </ItemGroup>
 </Project>
