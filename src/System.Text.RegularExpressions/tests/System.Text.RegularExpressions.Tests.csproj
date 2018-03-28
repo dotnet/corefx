@@ -38,6 +38,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Compile Include="RegexParserTests.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="CaptureCollectionTests2.cs" />
     <Compile Include="GroupCollectionTests2.cs" />
     <Compile Include="MatchCollectionTests2.cs" />
@@ -47,6 +50,11 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <TargetingPackExclusions Include="System.Text.RegularExpressions" />
+    <ReferenceFromRuntime Include="System.Text.RegularExpressions" />
   </ItemGroup>
   <!-- Automatically added by VS -->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

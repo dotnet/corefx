@@ -57,7 +57,7 @@ namespace RegexTestNamespace
 
     internal class RegexFactoryTestClass : RegexRunnerFactory
     {
-        protected override RegexRunner CreateInstance()
+        protected internal override RegexRunner CreateInstance()
         {
             return new RegexRunnerTestClass();
         }
