@@ -12,17 +12,9 @@ namespace System.Drawing
 {
     public class ImageFormatConverter : TypeConverter
     {
-        public ImageFormatConverter()
-        {
-        }
-
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if (sourceType == typeof(string))
-            {
-                return true;
-            }
-            return base.CanConvertFrom(context, sourceType);
+            return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -37,7 +29,7 @@ namespace System.Drawing
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             // we must be able to convert from short names and long names
-            string strFormat = (value as string);
+            string strFormat = value as string;
             if (strFormat == null)
             {
                 // case #1, this is not a string
@@ -158,9 +150,6 @@ namespace System.Drawing
             });
         }
 
-        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
     }
 }

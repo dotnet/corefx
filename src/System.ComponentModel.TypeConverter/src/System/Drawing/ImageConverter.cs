@@ -17,22 +17,13 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if ((destinationType == typeof(byte[])) || (destinationType == typeof(string)))
-            {
-                return true;
-            }
-            return false;
+            return destinationType == typeof(byte[]) || destinationType == typeof(string);
         }
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             byte[] bytes = value as byte[];
-            if (bytes == null)
-            {
-                return base.ConvertFrom(context, culture, value);
-            }
-
-            return Image.FromStream(new MemoryStream(bytes));
+            return bytes == null ? base.ConvertFrom(context, culture, value) : Image.FromStream(new MemoryStream(bytes));
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -72,9 +63,6 @@ namespace System.Drawing
             return TypeDescriptor.GetProperties(typeof(Image), attributes);
         }
 
-        public override bool GetPropertiesSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
     }
 }

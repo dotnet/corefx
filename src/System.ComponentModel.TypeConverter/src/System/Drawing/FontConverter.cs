@@ -16,11 +16,7 @@ namespace System.Drawing
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if (sourceType == typeof(string))
-            {
-                return true;
-            }
-            return base.CanConvertFrom(context, sourceType);
+            return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -248,29 +244,25 @@ namespace System.Drawing
 
             if ((value = propertyValues["Bold"]) != null)
             {
-                bool bold = (bool)value;
-                if (bold == true)
+                if ((bool)value == true)
                     style |= FontStyle.Bold;
             }
 
             if ((value = propertyValues["Italic"]) != null)
             {
-                bool italic = (bool)value;
-                if (italic == true)
+                if ((bool)value == true)
                     style |= FontStyle.Italic;
             }
 
             if ((value = propertyValues["Strikeout"]) != null)
             {
-                bool strike = (bool)value;
-                if (strike == true)
+                if ((bool)value == true)
                     style |= FontStyle.Strikeout;
             }
 
             if ((value = propertyValues["Underline"]) != null)
             {
-                bool underline = (bool)value;
-                if (underline == true)
+                if ((bool)value == true)
                     style |= FontStyle.Underline;
             }
 
@@ -281,12 +273,11 @@ namespace System.Drawing
             }
             else
             {
-                name = name.ToLower();
                 FontCollection collection = new InstalledFontCollection();
                 FontFamily[] installedFontList = collection.Families;
                 foreach (FontFamily font in installedFontList)
                 {
-                    if (name == font.Name.ToLower())
+                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         fontFamily = font;
                         break;
@@ -300,7 +291,7 @@ namespace System.Drawing
                     FontFamily[] privateFontList = collection.Families;
                     foreach (FontFamily font in privateFontList)
                     {
-                        if (name == font.Name.ToLower())
+                        if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             fontFamily = font;
                             break;
@@ -316,26 +307,17 @@ namespace System.Drawing
             return new Font(fontFamily, size, style, unit, charSet, vertical);
         }
 
-        public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetCreateInstanceSupported(ITypeDescriptorContext context) => true;
 
         public override PropertyDescriptorCollection GetProperties(
             ITypeDescriptorContext context,
             object value,
             Attribute[] attributes)
         {
-            if (value is Font)
-                return TypeDescriptor.GetProperties(value, attributes);
-
-            return base.GetProperties(context, value, attributes);
+            return value is Font ? TypeDescriptor.GetProperties(value, attributes) : base.GetProperties(context, value, attributes);
         }
 
-        public override bool GetPropertiesSupported(ITypeDescriptorContext context)
-        {
-            return true;
-        }
+        public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
 
         public sealed class FontNameConverter : TypeConverter, IDisposable
         {
@@ -352,18 +334,12 @@ namespace System.Drawing
 
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
-                if (sourceType == typeof(string))
-                    return true;
-
-                return base.CanConvertFrom(context, sourceType);
+                return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
             }
 
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
-                if (value is string)
-                    return value;
-
-                return base.ConvertFrom(context, culture, value);
+                return value is string ? value : base.ConvertFrom(context, culture, value);
             }
 
             public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
@@ -378,17 +354,11 @@ namespace System.Drawing
                 return new TypeConverter.StandardValuesCollection(values);
             }
 
-            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
-            {
-                // We allow other values other than those in the font list.
-                return false;
-            }
+            // We allow other values other than those in the font list.
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) => false;
 
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-            {
-                // Yes, we support picking an element from the list.
-                return true;
-            }
+            // Yes, we support picking an element from the list.
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
         }
 
         public class FontUnitConverter : EnumConverter
