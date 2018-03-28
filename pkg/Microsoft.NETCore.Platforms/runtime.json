@@ -2,26 +2,26 @@
   "runtimes": {
     "alpine": {
       "#import": [
-        "unix"
+        "linux-musl"
       ]
     },
     "alpine-corert": {
       "#import": [
         "alpine",
-        "unix-corert"
+        "linux-musl-corert"
       ]
     },
     "alpine-x64": {
       "#import": [
         "alpine",
-        "unix-x64"
+        "linux-musl-x64"
       ]
     },
     "alpine-x64-corert": {
       "#import": [
         "alpine-corert",
         "alpine-x64",
-        "unix-x64-corert"
+        "linux-musl-x64-corert"
       ]
     },
     "alpine.3.6": {
@@ -49,37 +49,66 @@
         "alpine-x64-corert"
       ]
     },
+    "alpine.3.7": {
+      "#import": [
+        "alpine.3.6"
+      ]
+    },
+    "alpine.3.7-corert": {
+      "#import": [
+        "alpine.3.7",
+        "alpine.3.6-corert"
+      ]
+    },
+    "alpine.3.7-x64": {
+      "#import": [
+        "alpine.3.7",
+        "alpine.3.6-x64"
+      ]
+    },
+    "alpine.3.7-x64-corert": {
+      "#import": [
+        "alpine.3.7-corert",
+        "alpine.3.7-x64",
+        "alpine.3.7",
+        "alpine.3.6-x64-corert"
+      ]
+    },
     "android": {
       "#import": [
-        "any"
+        "unix"
       ]
     },
     "android-arm": {
       "#import": [
-        "android"
+        "android",
+        "unix-arm"
       ]
     },
     "android-arm-corert": {
       "#import": [
         "android-corert",
-        "android-arm"
+        "android-arm",
+        "unix-arm-corert"
       ]
     },
     "android-arm64": {
       "#import": [
-        "android"
+        "android",
+        "unix-arm64"
       ]
     },
     "android-arm64-corert": {
       "#import": [
         "android-corert",
-        "android-arm64"
+        "android-arm64",
+        "unix-arm64-corert"
       ]
     },
     "android-corert": {
       "#import": [
         "android",
-        "corert"
+        "unix-corert"
       ]
     },
     "android.21": {
@@ -675,6 +704,82 @@
       "#import": [
         "linux",
         "unix-corert"
+      ]
+    },
+    "linux-musl": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "linux-musl-arm": {
+      "#import": [
+        "linux-musl",
+        "unix-arm"
+      ]
+    },
+    "linux-musl-arm-corert": {
+      "#import": [
+        "linux-musl-corert",
+        "linux-musl-arm",
+        "unix-arm-corert"
+      ]
+    },
+    "linux-musl-arm64": {
+      "#import": [
+        "linux-musl",
+        "unix-arm64"
+      ]
+    },
+    "linux-musl-arm64-corert": {
+      "#import": [
+        "linux-musl-corert",
+        "linux-musl-arm64",
+        "unix-arm64-corert"
+      ]
+    },
+    "linux-musl-armel": {
+      "#import": [
+        "linux-musl",
+        "unix-armel"
+      ]
+    },
+    "linux-musl-armel-corert": {
+      "#import": [
+        "linux-musl-corert",
+        "linux-musl-armel",
+        "unix-armel-corert"
+      ]
+    },
+    "linux-musl-corert": {
+      "#import": [
+        "linux-musl",
+        "unix-corert"
+      ]
+    },
+    "linux-musl-x64": {
+      "#import": [
+        "linux-musl",
+        "unix-x64"
+      ]
+    },
+    "linux-musl-x64-corert": {
+      "#import": [
+        "linux-musl-corert",
+        "linux-musl-x64",
+        "unix-x64-corert"
+      ]
+    },
+    "linux-musl-x86": {
+      "#import": [
+        "linux-musl",
+        "unix-x86"
+      ]
+    },
+    "linux-musl-x86-corert": {
+      "#import": [
+        "linux-musl-corert",
+        "linux-musl-x86",
+        "unix-x86-corert"
       ]
     },
     "linux-x64": {

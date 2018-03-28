@@ -1,6 +1,7 @@
 {
   "alpine": [
     "alpine",
+    "linux-musl",
     "unix",
     "any",
     "base"
@@ -8,6 +9,8 @@
   "alpine-corert": [
     "alpine-corert",
     "alpine",
+    "linux-musl-corert",
+    "linux-musl",
     "unix-corert",
     "unix",
     "corert",
@@ -17,6 +20,8 @@
   "alpine-x64": [
     "alpine-x64",
     "alpine",
+    "linux-musl-x64",
+    "linux-musl",
     "unix-x64",
     "unix",
     "any",
@@ -26,8 +31,12 @@
     "alpine-x64-corert",
     "alpine-corert",
     "alpine-x64",
-    "unix-x64-corert",
+    "linux-musl-x64-corert",
     "alpine",
+    "linux-musl-corert",
+    "linux-musl-x64",
+    "unix-x64-corert",
+    "linux-musl",
     "unix-corert",
     "unix-x64",
     "unix",
@@ -38,6 +47,7 @@
   "alpine.3.6": [
     "alpine.3.6",
     "alpine",
+    "linux-musl",
     "unix",
     "any",
     "base"
@@ -47,6 +57,8 @@
     "alpine.3.6",
     "alpine-corert",
     "alpine",
+    "linux-musl-corert",
+    "linux-musl",
     "unix-corert",
     "unix",
     "corert",
@@ -58,6 +70,8 @@
     "alpine.3.6",
     "alpine-x64",
     "alpine",
+    "linux-musl-x64",
+    "linux-musl",
     "unix-x64",
     "unix",
     "any",
@@ -72,6 +86,73 @@
     "alpine-corert",
     "alpine-x64",
     "alpine",
+    "linux-musl-x64-corert",
+    "linux-musl-corert",
+    "linux-musl-x64",
+    "linux-musl",
+    "unix-x64-corert",
+    "unix-corert",
+    "unix-x64",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "alpine.3.7": [
+    "alpine.3.7",
+    "alpine.3.6",
+    "alpine",
+    "linux-musl",
+    "unix",
+    "any",
+    "base"
+  ],
+  "alpine.3.7-corert": [
+    "alpine.3.7-corert",
+    "alpine.3.7",
+    "alpine.3.6-corert",
+    "alpine.3.6",
+    "alpine-corert",
+    "alpine",
+    "linux-musl-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "alpine.3.7-x64": [
+    "alpine.3.7-x64",
+    "alpine.3.7",
+    "alpine.3.6-x64",
+    "alpine.3.6",
+    "alpine-x64",
+    "alpine",
+    "linux-musl-x64",
+    "linux-musl",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "alpine.3.7-x64-corert": [
+    "alpine.3.7-x64-corert",
+    "alpine.3.7-corert",
+    "alpine.3.7-x64",
+    "alpine.3.7",
+    "alpine.3.6-x64-corert",
+    "alpine.3.6-corert",
+    "alpine.3.6-x64",
+    "alpine.3.6",
+    "alpine-x64-corert",
+    "alpine-corert",
+    "alpine-x64",
+    "alpine",
+    "linux-musl-x64-corert",
+    "linux-musl-corert",
+    "linux-musl-x64",
+    "linux-musl",
     "unix-x64-corert",
     "unix-corert",
     "unix-x64",
@@ -82,12 +163,15 @@
   ],
   "android": [
     "android",
+    "unix",
     "any",
     "base"
   ],
   "android-arm": [
     "android-arm",
     "android",
+    "unix-arm",
+    "unix",
     "any",
     "base"
   ],
@@ -95,7 +179,11 @@
     "android-arm-corert",
     "android-corert",
     "android-arm",
+    "unix-arm-corert",
     "android",
+    "unix-corert",
+    "unix-arm",
+    "unix",
     "corert",
     "any",
     "base"
@@ -103,6 +191,8 @@
   "android-arm64": [
     "android-arm64",
     "android",
+    "unix-arm64",
+    "unix",
     "any",
     "base"
   ],
@@ -110,7 +200,11 @@
     "android-arm64-corert",
     "android-corert",
     "android-arm64",
+    "unix-arm64-corert",
     "android",
+    "unix-corert",
+    "unix-arm64",
+    "unix",
     "corert",
     "any",
     "base"
@@ -118,6 +212,8 @@
   "android-corert": [
     "android-corert",
     "android",
+    "unix-corert",
+    "unix",
     "corert",
     "any",
     "base"
@@ -125,6 +221,7 @@
   "android.21": [
     "android.21",
     "android",
+    "unix",
     "any",
     "base"
   ],
@@ -133,6 +230,8 @@
     "android.21",
     "android-arm",
     "android",
+    "unix-arm",
+    "unix",
     "any",
     "base"
   ],
@@ -145,6 +244,10 @@
     "android-corert",
     "android-arm",
     "android",
+    "unix-arm-corert",
+    "unix-corert",
+    "unix-arm",
+    "unix",
     "corert",
     "any",
     "base"
@@ -154,6 +257,8 @@
     "android.21",
     "android-arm64",
     "android",
+    "unix-arm64",
+    "unix",
     "any",
     "base"
   ],
@@ -166,6 +271,10 @@
     "android-corert",
     "android-arm64",
     "android",
+    "unix-arm64-corert",
+    "unix-corert",
+    "unix-arm64",
+    "unix",
     "corert",
     "any",
     "base"
@@ -175,6 +284,8 @@
     "android.21",
     "android-corert",
     "android",
+    "unix-corert",
+    "unix",
     "corert",
     "any",
     "base"
@@ -1333,6 +1444,126 @@
     "linux-corert",
     "linux",
     "unix-corert",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl": [
+    "linux-musl",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-arm": [
+    "linux-musl-arm",
+    "linux-musl",
+    "unix-arm",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-arm-corert": [
+    "linux-musl-arm-corert",
+    "linux-musl-corert",
+    "linux-musl-arm",
+    "unix-arm-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix-arm",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl-arm64": [
+    "linux-musl-arm64",
+    "linux-musl",
+    "unix-arm64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-arm64-corert": [
+    "linux-musl-arm64-corert",
+    "linux-musl-corert",
+    "linux-musl-arm64",
+    "unix-arm64-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix-arm64",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl-armel": [
+    "linux-musl-armel",
+    "linux-musl",
+    "unix-armel",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-armel-corert": [
+    "linux-musl-armel-corert",
+    "linux-musl-corert",
+    "linux-musl-armel",
+    "unix-armel-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix-armel",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl-corert": [
+    "linux-musl-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl-x64": [
+    "linux-musl-x64",
+    "linux-musl",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-x64-corert": [
+    "linux-musl-x64-corert",
+    "linux-musl-corert",
+    "linux-musl-x64",
+    "unix-x64-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix-x64",
+    "unix",
+    "corert",
+    "any",
+    "base"
+  ],
+  "linux-musl-x86": [
+    "linux-musl-x86",
+    "linux-musl",
+    "unix-x86",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-musl-x86-corert": [
+    "linux-musl-x86-corert",
+    "linux-musl-corert",
+    "linux-musl-x86",
+    "unix-x86-corert",
+    "linux-musl",
+    "unix-corert",
+    "unix-x86",
     "unix",
     "corert",
     "any",
