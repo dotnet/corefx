@@ -381,7 +381,7 @@ namespace System.Buffers
             // We take high order bits of two indexes index and move them
             // to a first and second position to convert to BufferType
             // Masking with 2 is required to only keep the second bit of Start.GetInteger()
-            sequenceType = Start.GetObject() == null ? SequenceType.Empty : (SequenceType)((((uint)Start.GetInteger() >> 30) & 2) | (uint)End.GetInteger() >> 31);
+            sequenceType = (SequenceType)((((uint)Start.GetInteger() >> 30) & 2) | (uint)End.GetInteger() >> 31);
         }
 
         /// <summary>
