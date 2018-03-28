@@ -958,11 +958,14 @@ namespace System.Security.Principal
                             // Device group sids (may cause s_ignoreWindows8Properties to be set to true, so must be first in this block)
                             AddDeviceGroupSidClaims(_deviceClaims, TokenInformationClass.TokenDeviceGroups);
 
-                            // User token claims
-                            AddTokenClaims(_userClaims, TokenInformationClass.TokenUserClaimAttributes, ClaimTypes.WindowsUserClaim);
+                            if (!s_ignoreWindows8Properties)
+                            {
+                                // User token claims
+                                AddTokenClaims(_userClaims, TokenInformationClass.TokenUserClaimAttributes, ClaimTypes.WindowsUserClaim);
 
-                            // Device token claims
-                            AddTokenClaims(_deviceClaims, TokenInformationClass.TokenDeviceClaimAttributes, ClaimTypes.WindowsDeviceClaim);
+                                // Device token claims
+                                AddTokenClaims(_deviceClaims, TokenInformationClass.TokenDeviceClaimAttributes, ClaimTypes.WindowsDeviceClaim);
+                            }
                         }
 
                         _claimsInitialized = true;
@@ -1128,7 +1131,7 @@ namespace System.Security.Principal
             }
             finally
             {
-                safeAllocHandle.Close();
+                safeAllocHandle?.Close();
             }
         }
 
