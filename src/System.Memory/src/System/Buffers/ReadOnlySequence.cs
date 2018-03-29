@@ -211,12 +211,6 @@ namespace System.Buffers
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
-            object beginObject = begin.GetObject();
-            object endObject = end.GetObject();
-            if (beginObject != endObject)
-            {
-                CheckEndReachable(beginObject, endObject);
-            }
             return SliceImpl(begin, end);
         }
 
@@ -262,12 +256,6 @@ namespace System.Buffers
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
-            object beginObject = begin.GetObject();
-            object endObject = end.GetObject();
-            if (beginObject != endObject)
-            {
-                CheckEndReachable(beginObject, endObject);
-            }
             return SliceImpl(begin, end);
         }
 

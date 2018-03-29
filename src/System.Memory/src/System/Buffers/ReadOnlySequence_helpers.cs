@@ -139,27 +139,6 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
-        private static void CheckEndReachable(object startSegment, object endSegment)
-        {
-            Debug.Assert(startSegment != null);
-            Debug.Assert(startSegment is ReadOnlySequenceSegment<T>);
-            Debug.Assert(endSegment != null);
-
-            var current = Unsafe.As<ReadOnlySequenceSegment<T>>(startSegment);
-
-            while (current.Next != null)
-            {
-                current = current.Next;
-                if (current == endSegment)
-                {
-                    // Found end
-                    return;
-                }
-            }
-
-            ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
