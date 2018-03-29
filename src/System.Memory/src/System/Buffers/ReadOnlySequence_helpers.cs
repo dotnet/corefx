@@ -17,13 +17,13 @@ namespace System.Buffers
         private bool TryGetBuffer(in SequencePosition start, in SequencePosition end, out ReadOnlyMemory<T> data, out SequencePosition next)
         {
             next = default;
-            var startObject = start.GetObject();
+            object startObject = start.GetObject();
             if (startObject == null)
             {
                 data = default;
                 return false;
             }
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out var type, out var startIndex, out var endIndex);
+            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
             if (type == SequenceType.MultiSegment)
             {
@@ -56,17 +56,17 @@ namespace System.Buffers
 
                     data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
                 }
-                else if (type == SequenceType.OwnedMemory)
-                {
-                    Debug.Assert(startObject is OwnedMemory<T>);
-
-                    data = (Unsafe.As<OwnedMemory<T>>(startObject)).Memory;
-                }
-                else
+                else if (typeof(T) == typeof(char)  && type == SequenceType.String)
                 {
                     Debug.Assert(startObject is string);
 
                     data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
+                }
+                else // if (type == SequenceType.OwnedMemory)
+                {
+                    Debug.Assert(startObject is OwnedMemory<T>);
+
+                    data = (Unsafe.As<OwnedMemory<T>>(startObject)).Memory;
                 }
             }
 
@@ -296,7 +296,8 @@ namespace System.Buffers
                 memory = default;
                 return false;
             }
-            else if (type == SequenceType.Array)
+
+            if (type == SequenceType.Array)
             {
                 Debug.Assert(startObject is T[]);
 
