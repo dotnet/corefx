@@ -572,6 +572,10 @@ namespace System.Net.Http.Functional.Tests
             // These are legal as per the the RFC, so authenticating is the expected behavior. See #28521 for details.
             yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic something digest something", true };
+            yield return new object[] { "Digest realm=\"api@example.org\", qop=\"auth\", algorithm=MD5-sess, nonce=\"5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK\", " +
+                    "opaque=\"HRPCssKJSGjCrkzDg8OhwpzCiGPChXYjwrI2QmXDnsOS\", charset=UTF-8, userhash=true", true };
+            yield return new object[] { "dIgEsT realm=\"api@example.org\", qop=\"auth\", algorithm=MD5-sess, nonce=\"5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK\", " +
+                    "opaque=\"HRPCssKJSGjCrkzDg8OhwpzCiGPChXYjwrI2QmXDnsOS\", charset=UTF-8, userhash=true", true };
 
             // These cases fail on WinHttpHandler because of a behavior in WinHttp that causes requests to be duplicated
             // when the digest header has certain parameters. See #28522 for details.
