@@ -614,7 +614,7 @@ namespace System.Xml.Tests
             try
             {
                 string tempPath = Path.GetTempPath();
-                string testFile = Path.Combine(tempPath, "xmlResolver_document_function.xml");
+                string testFile = Path.Combine(tempPath, GetType().Name + "_" + Path.GetRandomFileName());
                 if (File.Exists(testFile))
                 {
                     File.SetAttributes(testFile, FileAttributes.Normal);
@@ -2527,7 +2527,7 @@ namespace System.Xml.Tests
             try
             {
                 string tempPath = Path.GetTempPath();
-                string testFile = Path.Combine(tempPath, "xmlResolver_document_function.xml");
+                string testFile = Path.Combine(tempPath, GetType().Name + "_" + Path.GetRandomFileName());
                 if (File.Exists(testFile))
                 {
                     File.SetAttributes(testFile, FileAttributes.Normal);
