@@ -92,9 +92,13 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [ActiveIssue(25640, TestPlatforms.Windows)] // TODO It should be enabled for SocketsHttpHandler on all platforms
         public async Task ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return; // The default proxy is resolved via WinINet on Windows.
+            }
+
             const string ExpectedUsername = "rightusername";
             const string ExpectedPassword = "rightpassword";
             LoopbackServer.Options options = new LoopbackServer.Options { IsProxy = true, Username = ExpectedUsername, Password = ExpectedPassword };
