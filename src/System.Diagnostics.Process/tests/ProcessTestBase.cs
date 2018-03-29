@@ -73,6 +73,18 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
+        protected Process CreateProcess(Func<string, int> method, string arg, ProcessStartInfo psi)
+        {
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { StartInfo = psi, Start = false }))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
+            AddProcessForDispose(p);
+            return p;
+        }
+
         protected void StartSleepKillWait(Process p)
         {
             p.Start();

@@ -343,28 +343,29 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestWorkingDirectoryProperty()
+        public void TestWorkingDirectoryPropertyInChildProcess()
         {
             CreateDefaultProcess();
 
             // check defaults
             Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
 
-            Process p = CreateProcessLong();
-            p.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            ProcessStartInfo psi = new ProcessStartInfo();
+            string sourcePath = Directory.GetCurrentDirectory();
 
-            try
-            {
-                p.Start();
-                Assert.Equal(Directory.GetCurrentDirectory(), p.StartInfo.WorkingDirectory);
-            }
-            finally
-            {
-                if (!p.HasExited)
-                    p.Kill();
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                File.Copy(newPath, newPath.Replace(sourcePath, TestDirectory), true);
 
-                Assert.True(p.WaitForExit(WaitInMS));
-            }
+            psi.WorkingDirectory = TestDirectory;
+            Process p = CreateProcess((workingDirectory) =>
+            {
+                Assert.Equal(Directory.GetCurrentDirectory(), workingDirectory);
+                return SuccessExitCode;
+            }, psi.WorkingDirectory, psi);
+
+            p.Start();
+            p.WaitForExit(WaitInMS);
+            Assert.Equal(42, p.ExitCode);
         }
 
         [ActiveIssue(12696)]
