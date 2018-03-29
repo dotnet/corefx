@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers.Binary;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -15,6 +14,7 @@ namespace System.Net.Security
         private const int UInt24Size = 3;
         private const int RandomSize = 32;
         private static IdnMapping s_idnMapping = CreateIdnMapping();
+        private static Encoding s_encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         public static string GetServerName(byte[] clientHello)
         {
@@ -136,7 +136,6 @@ namespace System.Net.Security
 
                 if (ret != null && sni != null)
                 {
-                    Debug.Assert(false, "More than 1 name found.");
                     return null;
                 }
 
@@ -231,6 +230,7 @@ namespace System.Net.Security
                 return null;
             }
 
+            // Following can underflow but it is ok due to equality check below
             int hostNameStructLength = BinaryPrimitives.ReadUInt16BigEndian(serverName) - sizeof(NameType);
             NameType nameType = (NameType)serverName[NameTypeOffset];
             ReadOnlySpan<byte> hostNameStruct = serverName.Slice(HostNameStructOffset);
@@ -281,7 +281,16 @@ namespace System.Net.Security
             //   exclusively ASCII characters, it MUST compare ASCII names case-
             //   insensitively.
 
-            string idnEncodedString = Encoding.UTF8.GetString(bytes);
+            string idnEncodedString;
+            try
+            {
+                idnEncodedString = s_encoding.GetString(bytes);
+            }
+            catch (DecoderFallbackException)
+            {
+                return null;
+            }
+
             try
             {
                 return s_idnMapping.GetUnicode(idnEncodedString);
