@@ -1,5 +1,5 @@
 #
-# netstandard dll has been shipped with IDbColumnSchemaGenerator inherited and SqlDataReader.GetColumnScheme() implemented and in source, but not exposed in ref contract.
+# netstandard dll has been shipped with IDbColumnSchemaGenerator inherited and SqlDataReader.GetColumnScheme() implemented in source, but not exposed in ref contract.
 # Removing SqlDataReader.GetColumnScheme() from netstandard implementation potentially breaks existing customer source code
 # that utilizes SqlDataReader.GetColumnScheme() indirectly by casting SqlDataReader to IDbColumnSchemaGenerator type.
 # In order to prevent it, the API needs to be kept in public, and following 2 error message should be remaining in this baseline file.
