@@ -2,15 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System.Net.Security
 {
     internal class SniHelper
     {
+        private const int ProtocolVersionSize = 2;
+        private const int UInt24Size = 3;
+        private const int RandomSize = 32;
         private static IdnMapping s_idnMapping = CreateIdnMapping();
 
         public static string GetServerName(byte[] clientHello)
@@ -18,22 +21,24 @@ namespace System.Net.Security
             return GetSniFromSslPlainText(clientHello);
         }
 
-        // https://tools.ietf.org/html/rfc6101#section-5.2.1
-        // SSLPlainText structure:
-        //   - ContentType (1 byte) => 0x16 is handshake
-        //   - ProtocolVersion version (2 bytes)
-        //   - uint16 length
-        //   - opaque fragment[SSLPlaintext.length]
         private static string GetSniFromSslPlainText(ReadOnlySpan<byte> sslPlainText)
         {
-            // Is SSL 3 handshake? SSL 2 does not support extensions - skipping as well
-            if (sslPlainText.Length < 5 || sslPlainText[0] != 0x16)
+            // https://tools.ietf.org/html/rfc6101#section-5.2.1
+            const int ContentTypeOffset = 0;
+            const int ProtocolVersionOffset = ContentTypeOffset + sizeof(ContentType);
+            const int LengthOffset = ProtocolVersionOffset + ProtocolVersionSize;
+            const int HandshakeOffset = LengthOffset + sizeof(ushort);
+
+            // SSL v2's ContentType has 0x80 bit set.
+            // We do not care about SSL v2 here because it does not support client hello extensions
+            if (sslPlainText.Length < HandshakeOffset || (ContentType)sslPlainText[ContentTypeOffset] != ContentType.Handshake)
             {
                 return null;
             }
 
-            int handshakeLength = ReadUint16(sslPlainText.Slice(3));
-            ReadOnlySpan<byte> sslHandshake = sslPlainText.Slice(5);
+            // Skip ContentType and ProtocolVersion
+            int handshakeLength = BinaryPrimitives.ReadUInt16BigEndian(sslPlainText.Slice(LengthOffset));
+            ReadOnlySpan<byte> sslHandshake = sslPlainText.Slice(HandshakeOffset);
 
             if (handshakeLength != sslHandshake.Length)
             {
@@ -43,21 +48,20 @@ namespace System.Net.Security
             return GetSniFromSslHandshake(sslHandshake);
         }
 
-        // https://tools.ietf.org/html/rfc6101#section-5.6
-        // Handshake structure:
-        //   - HandshakeType msg_type (1 bytes) => 0x01 is client_hello
-        //   - uint24 length
-        //   - <msg_type> body
         private static string GetSniFromSslHandshake(ReadOnlySpan<byte> sslHandshake)
         {
-            // If not client hello then skip
-            if (sslHandshake.Length < 4 || sslHandshake[0] != 0x01)
+            // https://tools.ietf.org/html/rfc6101#section-5.6
+            const int HandshakeTypeOffset = 0;
+            const int ClientHelloLengthOffset = HandshakeTypeOffset + sizeof(HandshakeType);
+            const int ClientHelloOffset = ClientHelloLengthOffset + UInt24Size;
+
+            if (sslHandshake.Length < ClientHelloOffset || (HandshakeType)sslHandshake[HandshakeTypeOffset] != HandshakeType.ClientHello)
             {
                 return null;
             }
 
-            int clientHelloLength = ReadUint24(sslHandshake.Slice(1));
-            ReadOnlySpan<byte> clientHello = sslHandshake.Slice(4);
+            int clientHelloLength = ReadUInt24BigEndian(sslHandshake.Slice(ClientHelloLengthOffset));
+            ReadOnlySpan<byte> clientHello = sslHandshake.Slice(ClientHelloOffset);
 
             if (clientHello.Length != clientHelloLength)
             {
@@ -67,27 +71,20 @@ namespace System.Net.Security
             return GetSniFromClientHello(clientHello);
         }
 
-        // 5.6.1.2. https://tools.ietf.org/html/rfc6101#section-5.6.1 - describes basic structure
-        // 2.1. https://www.ietf.org/rfc/rfc3546.txt - describes extended structure
-        // ClientHello structure:
-        //   - ProtocolVersion client_version (2 bytes)
-        //   - Random random (32 bytes => 4 bytes GMT unix timestamp + 28 bytes of random bytes)
-        //   - SessionID session_id (opaque type of max size 32 => size fits in 1 byte)
-        //   - CipherSuite cipher_suites (opaque type of max size 2^16-1 => size fits in 2 bytes)
-        //   - CompressionMethod compression_methods (opaque type of max size 2^8-1 => size fits in 1 byte)
-        //   - Extension client_hello_extension_list (opaque type of max size 2^16-1 => size fits in 2 bytes)
         private static string GetSniFromClientHello(ReadOnlySpan<byte> clientHello)
         {
-            // Skip ProtocolVersion and Random
-            ReadOnlySpan<byte> p = SkipBytes(clientHello, 34);
+            // Basic structure: https://tools.ietf.org/html/rfc6101#section-5.6.1.2
+            // Extended structure: https://tools.ietf.org/html/rfc3546#section-2.1
 
-            // Skip SessionID
+            ReadOnlySpan<byte> p = SkipBytes(clientHello, ProtocolVersionSize + RandomSize);
+
+            // Skip SessionID (max size 32 => size fits in 1 byte)
             p = SkipOpaqueType1(p);
 
-            // Skip cipher suites
+            // Skip cipher suites (max size 2^16-1 => size fits in 2 bytes)
             p = SkipOpaqueType2(p, out _);
 
-            // Skip compression methods
+            // Skip compression methods (max size 2^8-1 => size fits in 1 byte)
             p = SkipOpaqueType1(p);
 
             // is invalid structure or no extensions?
@@ -96,8 +93,9 @@ namespace System.Net.Security
                 return null;
             }
 
-            int extensionListLength = ReadUint16(p);
-            p = SkipBytes(p, 2);
+            // client_hello_extension_list (max size 2^16-1 => size fits in 2 bytes)
+            int extensionListLength = BinaryPrimitives.ReadUInt16BigEndian(p);
+            p = SkipBytes(p, sizeof(ushort));
 
             if (extensionListLength != p.Length)
             {
@@ -129,23 +127,22 @@ namespace System.Net.Security
             return ret;
         }
 
-        // 2.3. https://www.ietf.org/rfc/rfc3546.txt
-        // Extension structure:
-        //   - ExtensionType extension_type (2 bytes) => 0x00 is server_name
-        //   - opaque extension_data
         private static string GetSniFromExtension(ReadOnlySpan<byte> extension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
-            if (extension.Length < 2)
+            // https://tools.ietf.org/html/rfc3546#section-2.3
+            const int ExtensionDataOffset = sizeof(ExtensionType);
+
+            if (extension.Length < ExtensionDataOffset)
             {
                 remainingBytes = ReadOnlySpan<byte>.Empty;
                 invalid = true;
                 return null;
             }
 
-            int extensionType = ReadUint16(extension);
-            ReadOnlySpan<byte> extensionData = extension.Slice(2);
+            ExtensionType extensionType = (ExtensionType)BinaryPrimitives.ReadUInt16BigEndian(extension);
+            ReadOnlySpan<byte> extensionData = extension.Slice(ExtensionDataOffset);
 
-            if (extensionType == 0x00)
+            if (extensionType == ExtensionType.ServerName)
             {
                 return GetSniFromServerNameList(extensionData, out remainingBytes, out invalid);
             }
@@ -156,37 +153,20 @@ namespace System.Net.Security
             }
         }
 
-        // 3.1. https://www.ietf.org/rfc/rfc3546.txt
-        // ServerNameList structure:
-        //   - ServerName server_name_list<1..2^16-1>
-        // ServerName structure:
-        //   - NameType name_type (1 byte) => 0x00 is host_name
-        //   - opaque HostName
-        // Per spec:
-        //   If the hostname labels contain only US-ASCII characters, then the
-        //   client MUST ensure that labels are separated only by the byte 0x2E,
-        //   representing the dot character U+002E (requirement 1 in section 3.1
-        //   of [IDNA] notwithstanding). If the server needs to match the HostName
-        //   against names that contain non-US-ASCII characters, it MUST perform
-        //   the conversion operation described in section 4 of [IDNA], treating
-        //   the HostName as a "query string" (i.e. the AllowUnassigned flag MUST
-        //   be set). Note that IDNA allows labels to be separated by any of the
-        //   Unicode characters U+002E, U+3002, U+FF0E, and U+FF61, therefore
-        //   servers MUST accept any of these characters as a label separator.  If
-        //   the server only needs to match the HostName against names containing
-        //   exclusively ASCII characters, it MUST compare ASCII names case-
-        //   insensitively.
         private static string GetSniFromServerNameList(ReadOnlySpan<byte> serverNameListExtension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
-            if (serverNameListExtension.Length < 2)
+            // https://tools.ietf.org/html/rfc3546#section-3.1
+            const int ServerNameListOffset = sizeof(ushort);
+
+            if (serverNameListExtension.Length < ServerNameListOffset)
             {
                 remainingBytes = ReadOnlySpan<byte>.Empty;
                 invalid = true;
                 return null;
             }
 
-            int serverNameListLength = ReadUint16(serverNameListExtension);
-            ReadOnlySpan<byte> serverNameList = serverNameListExtension.Slice(2);
+            int serverNameListLength = BinaryPrimitives.ReadUInt16BigEndian(serverNameListExtension);
+            ReadOnlySpan<byte> serverNameList = serverNameListExtension.Slice(ServerNameListOffset);
 
             if (serverNameListLength > serverNameList.Length)
             {
@@ -198,25 +178,43 @@ namespace System.Net.Security
             remainingBytes = serverNameList.Slice(serverNameListLength);
             ReadOnlySpan<byte> serverName = serverNameList.Slice(0, serverNameListLength);
 
-            if (serverName.Length < 3)
+            return GetSniFromServerName(serverName, out invalid);
+        }
+
+        private static string GetSniFromServerName(ReadOnlySpan<byte> serverName, out bool invalid)
+        {
+            // https://tools.ietf.org/html/rfc3546#section-3.1
+            const int ServerNameLengthOffset = 0;
+            const int NameTypeOffset = ServerNameLengthOffset + sizeof(ushort);
+            const int HostNameStructOffset = NameTypeOffset + sizeof(NameType);
+
+            if (serverName.Length < HostNameStructOffset)
             {
                 invalid = true;
                 return null;
             }
 
-            // -1 for hostNameType
-            int hostNameStructLength = ReadUint16(serverName) - 1;
-            byte hostNameType = serverName[2];
-            ReadOnlySpan<byte> hostNameStruct = serverName.Slice(3);
+            int hostNameStructLength = BinaryPrimitives.ReadUInt16BigEndian(serverName) - sizeof(NameType);
+            NameType nameType = (NameType)serverName[NameTypeOffset];
+            ReadOnlySpan<byte> hostNameStruct = serverName.Slice(HostNameStructOffset);
 
-            if (hostNameStructLength != hostNameStruct.Length || hostNameType != 0x00)
+            if (hostNameStructLength != hostNameStruct.Length || nameType != NameType.HostName)
             {
                 invalid = true;
                 return null;
             }
 
-            int hostNameLength = ReadUint16(hostNameStruct);
-            ReadOnlySpan<byte> hostName = hostNameStruct.Slice(2);
+            return GetSniFromHostNameStruct(hostNameStruct, out invalid);
+        }
+
+        private static string GetSniFromHostNameStruct(ReadOnlySpan<byte> hostNameStruct, out bool invalid)
+        {
+            // https://tools.ietf.org/html/rfc3546#section-3.1
+            const int HostNameLengthOffset = 0;
+            const int HostNameOffset = HostNameLengthOffset + sizeof(ushort);
+
+            int hostNameLength = BinaryPrimitives.ReadUInt16BigEndian(hostNameStruct);
+            ReadOnlySpan<byte> hostName = hostNameStruct.Slice(HostNameOffset);
             if (hostNameLength != hostName.Length)
             {
                 invalid = true;
@@ -227,9 +225,24 @@ namespace System.Net.Security
             return DecodeString(hostName);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string DecodeString(ReadOnlySpan<byte> bytes)
         {
+            // https://tools.ietf.org/html/rfc3546#section-3.1
+            // Per spec:
+            //   If the hostname labels contain only US-ASCII characters, then the
+            //   client MUST ensure that labels are separated only by the byte 0x2E,
+            //   representing the dot character U+002E (requirement 1 in section 3.1
+            //   of [IDNA] notwithstanding). If the server needs to match the HostName
+            //   against names that contain non-US-ASCII characters, it MUST perform
+            //   the conversion operation described in section 4 of [IDNA], treating
+            //   the HostName as a "query string" (i.e. the AllowUnassigned flag MUST
+            //   be set). Note that IDNA allows labels to be separated by any of the
+            //   Unicode characters U+002E, U+3002, U+FF0E, and U+FF61, therefore
+            //   servers MUST accept any of these characters as a label separator.  If
+            //   the server only needs to match the HostName against names containing
+            //   exclusively ASCII characters, it MUST compare ASCII names case-
+            //   insensitively.
+
             string idnEncodedString = Encoding.UTF8.GetString(bytes);
             try
             {
@@ -242,19 +255,11 @@ namespace System.Net.Security
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int ReadUint16(ReadOnlySpan<byte> bytes)
-        {
-            return (bytes[0] << 8) | bytes[1];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int ReadUint24(ReadOnlySpan<byte> bytes)
+        private static int ReadUInt24BigEndian(ReadOnlySpan<byte> bytes)
         {
             return (bytes[0] << 16) | (bytes[1] << 8) | bytes[2];
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ReadOnlySpan<byte> SkipBytes(ReadOnlySpan<byte> bytes, int numberOfBytesToSkip)
         {
             return (numberOfBytesToSkip < bytes.Length) ? bytes.Slice(numberOfBytesToSkip) : ReadOnlySpan<byte>.Empty;
@@ -286,7 +291,7 @@ namespace System.Net.Security
                 return ReadOnlySpan<byte>.Empty;
             }
 
-            int length = ReadUint16(bytes);
+            int length = BinaryPrimitives.ReadUInt16BigEndian(bytes);
             int totalBytes = 2 + length;
 
             invalid = bytes.Length < totalBytes;
@@ -307,6 +312,26 @@ namespace System.Net.Security
                 // Per spec "AllowUnassigned flag MUST be set". See comment above GetSniFromServerNameList for more details.
                 AllowUnassigned = true
             };
+        }
+
+        private enum ContentType : byte
+        {
+            Handshake = 0x16
+        }
+
+        private enum HandshakeType : byte
+        {
+            ClientHello = 0x01
+        }
+
+        private enum ExtensionType : ushort
+        {
+            ServerName = 0x00
+        }
+
+        private enum NameType : byte
+        {
+            HostName = 0x00
         }
     }
 }
