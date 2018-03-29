@@ -21,7 +21,7 @@
     </RuntimeGroup>
 
     <RuntimeGroup Include="android">
-      <Parent>unix</Parent>
+      <Parent>linux</Parent>
       <Architectures>arm;arm64</Architectures>
       <Versions>21</Versions>
     </RuntimeGroup>

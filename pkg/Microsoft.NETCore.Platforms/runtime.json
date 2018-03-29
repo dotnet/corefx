@@ -76,39 +76,39 @@
     },
     "android": {
       "#import": [
-        "unix"
+        "linux"
       ]
     },
     "android-arm": {
       "#import": [
         "android",
-        "unix-arm"
+        "linux-arm"
       ]
     },
     "android-arm-corert": {
       "#import": [
         "android-corert",
         "android-arm",
-        "unix-arm-corert"
+        "linux-arm-corert"
       ]
     },
     "android-arm64": {
       "#import": [
         "android",
-        "unix-arm64"
+        "linux-arm64"
       ]
     },
     "android-arm64-corert": {
       "#import": [
         "android-corert",
         "android-arm64",
-        "unix-arm64-corert"
+        "linux-arm64-corert"
       ]
     },
     "android-corert": {
       "#import": [
         "android",
-        "unix-corert"
+        "linux-corert"
       ]
     },
     "android.21": {
