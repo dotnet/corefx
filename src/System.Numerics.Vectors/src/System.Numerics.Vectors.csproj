@@ -66,12 +66,21 @@
       <Link>System\MathF.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
+  
+  <!-- Optimize Quaternion as Vector4 for netcoreapp -->
+  <!-- Jit issue for other runtimes https://github.com/dotnet/coreclr/issues/15237 -->
+  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' == 'true'">
+    <Compile Include="System\Numerics\Quaternion.netcoreapp.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsTargetingNetFx)' != 'true' AND '$(IsTargetingNetCoreApp)' != 'true'">
+    <Compile Include="System\Numerics\Quaternion.cs" />
+  </ItemGroup>
+  
   <!-- Portable version only -->
   <ItemGroup Condition="'$(IsTargetingNetFx)' != 'true'">
     <Compile Include="System\Numerics\Matrix3x2.cs" />
     <Compile Include="System\Numerics\Matrix4x4.cs" />
     <Compile Include="System\Numerics\Plane.cs" />
-    <Compile Include="System\Numerics\Quaternion.cs" />
     <Compile Include="System\Numerics\Vector2.cs" />
     <Compile Include="System\Numerics\Vector2_Intrinsics.cs" />
     <Compile Include="System\Numerics\Vector3.cs" />
