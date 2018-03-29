@@ -231,7 +231,7 @@ check_c_source_compiles(
     int main()
     {
         char buffer[1];
-        char* c = strerror_r(0, buffer, 0);
+        char c = *strerror_r(0, buffer, 0);
         return 0;
     }
     "
