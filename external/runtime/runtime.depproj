@@ -70,7 +70,13 @@
           SkipUnchangedFiles="true"
           UseHardlinksIfPossible="true" />
 
-    <Exec Command="chmod +x $(TestHostRootPath)dotnet" Condition="'$(RunningOnUnix)' == 'true'"/>
+    <Message Importance="High" Condition="!Exists('@(DotnetExe)')"
+      Text="Didn't find dotnet in references. DotnetExe='@(DotnetExe)', ReferenceCopyLocalPaths='@(ReferenceCopyLocalPaths)" />
+
+    <Message Importance="High" Condition="!Exists('$(TestHostRootPath)dotnet')"
+      Text="No test host copied to TestHostRootPath='$(TestHostRootPath)'" />
+
+    <Exec Command="chmod +x $(TestHostRootPath)dotnet" Condition="Exists('$(TestHostRootPath)dotnet') and '$(RunningOnUnix)' == 'true'"/>
   </Target>
 
   <Target Name="OverrideRuntime"
