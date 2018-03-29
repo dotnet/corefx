@@ -98,7 +98,7 @@ namespace System.Buffers
                     goto IsSingleSegment;
 
                 // End of segment. Move to start of next.
-                return SeekMultiSegment(startSegment.Next, startIndex, endObject, endIndex, offset - currentLength);
+                return SeekMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength);
             }
 
             Debug.Assert(startObject == end.GetObject());
@@ -112,13 +112,14 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static SequencePosition SeekMultiSegment(ReadOnlySequenceSegment<T> currentSegment, int startIndex, object endObject, int endPosition, long offset)
+        private static SequencePosition SeekMultiSegment(ReadOnlySequenceSegment<T> currentSegment, object endObject, int endPosition, long offset)
         {
-            Debug.Assert(currentSegment != null);
             Debug.Assert(offset >= 0);
 
-            while (currentSegment != null && currentSegment != endObject)
+            while (currentSegment != endObject)
             {
+                Debug.Assert(currentSegment != null);
+
                 int memoryLength = currentSegment.Memory.Length;
 
                 // Fully contained in this segment
@@ -131,7 +132,7 @@ namespace System.Buffers
             }
 
             // Hit the end of the segments but didn't reach the count
-            if (currentSegment == null || (currentSegment == endObject && endPosition < offset))
+            if (endPosition < offset)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
         
         FoundSegment:
