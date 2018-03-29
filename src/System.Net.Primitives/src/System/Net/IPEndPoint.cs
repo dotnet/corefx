@@ -35,9 +35,6 @@ namespace System.Net
 
         internal const int AnyPort = MinPort;
 
-        internal static readonly IPEndPoint Any = new IPEndPoint(IPAddress.Any, AnyPort);
-        internal static readonly IPEndPoint IPv6Any = new IPEndPoint(IPAddress.IPv6Any, AnyPort);
-
         public override AddressFamily AddressFamily
         {
             get
