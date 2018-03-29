@@ -9,30 +9,29 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</CoreFxCurrentRef>
-    <CoreClrCurrentRef>3a037b925fac2dfab6ca2f587099b45bb8413f5f</CoreClrCurrentRef>
+    <CoreFxCurrentRef>9bd62fa21bf4815effc5aa1906e32d4680a16a57</CoreFxCurrentRef>
+    <CoreClrCurrentRef>5cce8ebd18593f26147fcd04eb7183ae7fb87358</CoreClrCurrentRef>
     <CoreSetupCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</CoreSetupCurrentRef>
     <ExternalCurrentRef>1fe3c36279b702b526ca9441412d441f1b6a4821</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>62bbc1ed21d32925454339e1bb0a17590029c9d4</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>d55da128c5ce03e979a3c2e3f5ecd91da24e259c</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
     <StandardCurrentRef>40697681be31dff83b6c3b75a6de0d3adbc790a7</StandardCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <PlatformPackageVersion>2.1.0-preview1-25631-01</PlatformPackageVersion>
-    <CoreFxExpectedPrerelease>preview1-25801-01</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-b-uwp6-25707-02</CoreClrPackageVersion>
+    <CoreFxExpectedPrerelease>preview1-26307-01</CoreFxExpectedPrerelease>
+    <CoreClrPackageVersion>2.1.0-b-uwp6-26309-01</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>rel-25728-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>rel-25728-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-25728-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>rel-26323-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>rel-26323-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-rel-26323-00</ProjectNTfsTestILCPackageVersion>
     <NETStandardPackageVersion>2.1.0-preview1-25729-01</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25706-01</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0</SniPackageVersion>
+    <SniPackageVersion>4.4.0-preview2-25312-01</SniPackageVersion>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
@@ -47,7 +46,7 @@
   <PropertyGroup>
     <BaseDotNetBuildInfo>build-info/dotnet/</BaseDotNetBuildInfo>
     <DependencyBranch>master</DependencyBranch>
-    <Uwp6ReleaseDependencyBranch>release/uwp6.0</Uwp6ReleaseDependencyBranch>
+    <Uwp6ReleaseDependencyBranch>release/uwp6.1</Uwp6ReleaseDependencyBranch>
     <CurrentRefXmlPath>$(MSBuildThisFileFullPath)</CurrentRefXmlPath>
   </PropertyGroup>
 
@@ -61,7 +60,7 @@
       <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="CoreSetup">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(Uwp6ReleaseDependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/release/uwp6.0</BuildInfoPath>
       <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="External">
@@ -93,11 +92,6 @@
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>CoreFxExpectedPrerelease</ElementName>
       <BuildInfoName>CoreFx</BuildInfoName>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreFx">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
-      <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
