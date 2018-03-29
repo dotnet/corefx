@@ -36,7 +36,7 @@ namespace System.Net.Mail.Tests
             {
                 if (_tempFolder == null)
                 {
-                    _tempFolder = Path.Combine(Path.GetTempPath(), GetType().FullName, Guid.NewGuid().ToString());
+                    _tempFolder = Path.Combine(Path.GetTempPath(), GetType().Name + "_" + Path.GetRandomFileName());
                     if (Directory.Exists(_tempFolder))
                         Directory.Delete(_tempFolder, true);
 
