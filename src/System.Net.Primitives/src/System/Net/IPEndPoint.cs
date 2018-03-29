@@ -20,7 +20,7 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MinPort = UInt16.MinValue;
+        public const int MinPort = ushort.MinValue;
 
         /// <devdoc>
         ///    <para>
@@ -28,10 +28,10 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MaxPort = UInt16.MaxValue;
+        public const int MaxPort = ushort.MaxValue;
 
         private IPAddress _address;
-        private UInt16 _port;
+        private ushort _port;
 
         internal const int AnyPort = MinPort;
 
@@ -58,7 +58,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = Convert.ToUInt16(port);
+            _port = (ushort) port;
             _address = new IPAddress(address);
         }
 
@@ -77,7 +77,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = Convert.ToUInt16(port);
+            _port = (ushort) port;
             _address = address;
         }
 
@@ -107,7 +107,7 @@ namespace System.Net
         {
             get
             {
-                return Convert.ToInt32(_port);
+                return (int) _port;
             }
             set
             {
@@ -115,7 +115,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                _port = Convert.ToUInt16(value);
+                _port = (ushort) value;
             }
         }
 
