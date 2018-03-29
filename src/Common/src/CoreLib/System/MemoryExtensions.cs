@@ -113,6 +113,7 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the characters are removed.</param>
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
+        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
             return span.TrimStart(trimChars).TrimEnd(trimChars);
@@ -124,8 +125,14 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the characters are removed.</param>
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
+        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
+            if (trimChars.IsEmpty)
+            {
+                return span.TrimStart();
+            }
+
             int start = 0;
             for (; start < span.Length; start++)
             {
@@ -147,8 +154,14 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the characters are removed.</param>
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
+        /// <remarks>If <paramref name="trimChars"/> is empty, white-space characters are removed instead.</remarks>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
+            if (trimChars.IsEmpty)
+            {
+                return span.TrimEnd();
+            }
+
             int end = span.Length - 1;
             for (; end >= 0; end--)
             {
@@ -190,6 +203,11 @@ namespace System
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
                     span.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
@@ -283,6 +301,13 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
                     other.Length);
 
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.SequenceCompareTo(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(other)),
+                    other.Length);
+
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
         }
 
@@ -299,6 +324,11 @@ namespace System
                 return SpanHelpers.IndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
                     span.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
@@ -634,6 +664,13 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(other)),
+                    other.Length);
+
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.SequenceCompareTo(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(other)),
                     other.Length);
 
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
