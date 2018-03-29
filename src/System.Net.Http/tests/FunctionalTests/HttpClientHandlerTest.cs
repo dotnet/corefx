@@ -471,11 +471,12 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
-        public async Task GetAsync_IPv6AddressInHostHeader_CorrectlyFormatted()
+        [Theory]
+        [InlineData("http://", "[::1234]")]
+        [InlineData("http://", "[::1234]:8080")]
+        public async Task GetAsync_IPv6AddressInHostHeader_CorrectlyFormatted(string scheme, string host)
         {
-            string host = "[::1234]:8080";
-            string ipv6Address = "http://" + host;
+            string ipv6Address = scheme + host;
             bool connectionAccepted = false;
 
             await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
