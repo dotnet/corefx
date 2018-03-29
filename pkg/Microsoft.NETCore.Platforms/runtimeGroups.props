@@ -10,7 +10,7 @@
       <Architectures>x64;x86;arm;armel;arm64</Architectures>
     </RuntimeGroup>
     <RuntimeGroup Include="linux-musl">
-      <Parent>unix</Parent>
+      <Parent>linux</Parent>
       <Architectures>x64;x86;arm;armel;arm64</Architectures>
     </RuntimeGroup>
 

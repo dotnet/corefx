@@ -708,78 +708,78 @@
     },
     "linux-musl": {
       "#import": [
-        "unix"
+        "linux"
       ]
     },
     "linux-musl-arm": {
       "#import": [
         "linux-musl",
-        "unix-arm"
+        "linux-arm"
       ]
     },
     "linux-musl-arm-corert": {
       "#import": [
         "linux-musl-corert",
         "linux-musl-arm",
-        "unix-arm-corert"
+        "linux-arm-corert"
       ]
     },
     "linux-musl-arm64": {
       "#import": [
         "linux-musl",
-        "unix-arm64"
+        "linux-arm64"
       ]
     },
     "linux-musl-arm64-corert": {
       "#import": [
         "linux-musl-corert",
         "linux-musl-arm64",
-        "unix-arm64-corert"
+        "linux-arm64-corert"
       ]
     },
     "linux-musl-armel": {
       "#import": [
         "linux-musl",
-        "unix-armel"
+        "linux-armel"
       ]
     },
     "linux-musl-armel-corert": {
       "#import": [
         "linux-musl-corert",
         "linux-musl-armel",
-        "unix-armel-corert"
+        "linux-armel-corert"
       ]
     },
     "linux-musl-corert": {
       "#import": [
         "linux-musl",
-        "unix-corert"
+        "linux-corert"
       ]
     },
     "linux-musl-x64": {
       "#import": [
         "linux-musl",
-        "unix-x64"
+        "linux-x64"
       ]
     },
     "linux-musl-x64-corert": {
       "#import": [
         "linux-musl-corert",
         "linux-musl-x64",
-        "unix-x64-corert"
+        "linux-x64-corert"
       ]
     },
     "linux-musl-x86": {
       "#import": [
         "linux-musl",
-        "unix-x86"
+        "linux-x86"
       ]
     },
     "linux-musl-x86-corert": {
       "#import": [
         "linux-musl-corert",
         "linux-musl-x86",
-        "unix-x86-corert"
+        "linux-x86-corert"
       ]
     },
     "linux-x64": {
