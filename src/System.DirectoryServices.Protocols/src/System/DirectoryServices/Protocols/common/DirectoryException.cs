@@ -45,19 +45,19 @@ namespace System.DirectoryServices.Protocols
 
         public DirectoryOperationException(string message, Exception inner) : base(message, inner) { }
 
-        public DirectoryOperationException(DirectoryResponse response) : base(SR.DefaultOperationsError)
+        public DirectoryOperationException(DirectoryResponse response) : base(String.Format(CultureInfo.CurrentCulture, SR.DefaultOperationsError))
         {
-            Response = response;
+            this.response = response;
         }
 
         public DirectoryOperationException(DirectoryResponse response, string message) : base(message)
         {
-            Response = response;
+            this.response = response;
         }
 
         public DirectoryOperationException(DirectoryResponse response, string message, Exception inner) : base(message, inner)
         {
-            Response = response;
+            this.response = response;
         }
 
         public DirectoryResponse Response

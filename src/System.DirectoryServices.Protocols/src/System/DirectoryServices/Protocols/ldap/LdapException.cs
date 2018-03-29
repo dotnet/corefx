@@ -79,28 +79,42 @@ namespace System.DirectoryServices.Protocols
 
         public LdapException(string message, Exception inner) : base(message, inner) { }
 
-        public LdapException(int errorCode) : base(SR.DefaultLdapError)
+        public LdapException(int errorCode) : base(String.Format(CultureInfo.CurrentCulture, SR.DefaultLdapError))
         {
-            ErrorCode = errorCode;
+            _errorCode = errorCode;
         }
 
         public LdapException(int errorCode, string message) : base(message)
         {
-            ErrorCode = errorCode;
+            _errorCode = errorCode;
         }
 
         public LdapException(int errorCode, string message, string serverErrorMessage) : base(message)
         {
-            ErrorCode = errorCode;
-            ServerErrorMessage = serverErrorMessage;
+            _errorCode = errorCode;
+            _serverErrorMessage = serverErrorMessage;
         }
 
         public LdapException(int errorCode, string message, Exception inner) : base(message, inner)
         {
-            ErrorCode = errorCode;
+            _errorCode = errorCode;
         }
 
-        public int ErrorCode { get; }
+        public int ErrorCode
+        {
+            get
+            {
+                return _errorCode;
+            }
+        }
+
+        public string ServerErrorMessage
+        {
+            get
+            {
+                return _serverErrorMessage;
+            }
+        }
 
         public PartialResultsCollection PartialResults
         {

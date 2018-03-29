@@ -907,7 +907,6 @@ namespace Microsoft.SqlServer.Server
                                         scale,
                                         System.Globalization.CultureInfo.CurrentCulture.LCID,
                                         SmiMetaData.GetDefaultForType(colDbType).CompareOptions,
-                                        null,   // no support for UDTs from SchemaTable
                                         false,  // no support for multi-valued columns in a TVP yet
                                         null,   // no support for structured columns yet
                                         null,   // no support for structured columns yet
