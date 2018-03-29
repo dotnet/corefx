@@ -24,6 +24,12 @@ namespace System.Net.Security
         private static string GetSniFromSslPlainText(ReadOnlySpan<byte> sslPlainText)
         {
             // https://tools.ietf.org/html/rfc6101#section-5.2.1
+            // struct {
+            //     ContentType type; // enum with max value 255
+            //     ProtocolVersion version; // 2x uint8
+            //     uint16 length;
+            //     opaque fragment[SSLPlaintext.length];
+            // } SSLPlaintext;
             const int ContentTypeOffset = 0;
             const int ProtocolVersionOffset = ContentTypeOffset + sizeof(ContentType);
             const int LengthOffset = ProtocolVersionOffset + ProtocolVersionSize;
@@ -51,6 +57,15 @@ namespace System.Net.Security
         private static string GetSniFromSslHandshake(ReadOnlySpan<byte> sslHandshake)
         {
             // https://tools.ietf.org/html/rfc6101#section-5.6
+            // struct {
+            //     HandshakeType msg_type;    /* handshake type */
+            //     uint24 length;             /* bytes in message */
+            //     select (HandshakeType) {
+            //         ...
+            //         case client_hello: ClientHello;
+            //         ...
+            //     } body;
+            // } Handshake;
             const int HandshakeTypeOffset = 0;
             const int ClientHelloLengthOffset = HandshakeTypeOffset + sizeof(HandshakeType);
             const int ClientHelloOffset = ClientHelloLengthOffset + UInt24Size;
@@ -75,7 +90,14 @@ namespace System.Net.Security
         {
             // Basic structure: https://tools.ietf.org/html/rfc6101#section-5.6.1.2
             // Extended structure: https://tools.ietf.org/html/rfc3546#section-2.1
-
+            // struct {
+            //     ProtocolVersion client_version; // 2x uint8
+            //     Random random; // 32 bytes
+            //     SessionID session_id; // opaque type
+            //     CipherSuite cipher_suites<2..2^16-1>; // opaque type
+            //     CompressionMethod compression_methods<1..2^8-1>; // opaque type
+            //     Extension client_hello_extension_list<0..2^16-1>;
+            // } ClientHello;
             ReadOnlySpan<byte> p = SkipBytes(clientHello, ProtocolVersionSize + RandomSize);
 
             // Skip SessionID (max size 32 => size fits in 1 byte)
@@ -130,6 +152,10 @@ namespace System.Net.Security
         private static string GetSniFromExtension(ReadOnlySpan<byte> extension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
             // https://tools.ietf.org/html/rfc3546#section-2.3
+            // struct {
+            //     ExtensionType extension_type;
+            //     opaque extension_data<0..2^16-1>;
+            // } Extension;
             const int ExtensionDataOffset = sizeof(ExtensionType);
 
             if (extension.Length < ExtensionDataOffset)
@@ -156,6 +182,10 @@ namespace System.Net.Security
         private static string GetSniFromServerNameList(ReadOnlySpan<byte> serverNameListExtension, out ReadOnlySpan<byte> remainingBytes, out bool invalid)
         {
             // https://tools.ietf.org/html/rfc3546#section-3.1
+            // struct {
+            //     ServerName server_name_list<1..2^16-1>
+            // } ServerNameList;
+            // ServerNameList is an opaque type (length of sufficient size for max data length is prepended)
             const int ServerNameListOffset = sizeof(ushort);
 
             if (serverNameListExtension.Length < ServerNameListOffset)
@@ -184,6 +214,13 @@ namespace System.Net.Security
         private static string GetSniFromServerName(ReadOnlySpan<byte> serverName, out bool invalid)
         {
             // https://tools.ietf.org/html/rfc3546#section-3.1
+            // struct {
+            //     NameType name_type;
+            //     select (name_type) {
+            //         case host_name: HostName;
+            //     } name;
+            // } ServerName;
+            // ServerName is an opaque type (length of sufficient size for max data length is prepended)
             const int ServerNameLengthOffset = 0;
             const int NameTypeOffset = ServerNameLengthOffset + sizeof(ushort);
             const int HostNameStructOffset = NameTypeOffset + sizeof(NameType);
@@ -210,6 +247,7 @@ namespace System.Net.Security
         private static string GetSniFromHostNameStruct(ReadOnlySpan<byte> hostNameStruct, out bool invalid)
         {
             // https://tools.ietf.org/html/rfc3546#section-3.1
+            // HostName is an opaque type (length of sufficient size for max data length is prepended)
             const int HostNameLengthOffset = 0;
             const int HostNameOffset = HostNameLengthOffset + sizeof(ushort);
 
