@@ -13,8 +13,8 @@ namespace System.Net.Security
         private const int ProtocolVersionSize = 2;
         private const int UInt24Size = 3;
         private const int RandomSize = 32;
-        private static IdnMapping s_idnMapping = CreateIdnMapping();
-        private static Encoding s_encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+        private readonly static IdnMapping s_idnMapping = CreateIdnMapping();
+        private readonly static Encoding s_encoding = CreateEncoding();
 
         public static string GetServerName(byte[] clientHello)
         {
@@ -361,6 +361,11 @@ namespace System.Net.Security
                 // Per spec "AllowUnassigned flag MUST be set". See comment above GetSniFromServerNameList for more details.
                 AllowUnassigned = true
             };
+        }
+
+        private static Encoding CreateEncoding()
+        {
+            return Encoding.GetEncoding("utf-8", new EncoderExceptionFallback(), new DecoderExceptionFallback());
         }
 
         private enum ContentType : byte

@@ -419,7 +419,6 @@
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Principal" />
     <Reference Include="System.Security.Principal.Windows" />
-    <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.ThreadPool" />
