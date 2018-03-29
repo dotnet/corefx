@@ -51,7 +51,7 @@ namespace System.Buffers
         {
             get
             {
-                TryGetBuffer(_sequenceStart, _sequenceEnd, out var data, out var _);
+                TryGetBuffer(_sequenceStart, _sequenceEnd, out ReadOnlyMemory<T> data, out _);
                 return data;
             }
         }
@@ -86,13 +86,70 @@ namespace System.Buffers
             if (startSegment == null ||
                 endSegment == null ||
                 (uint)startSegment.Memory.Length < (uint)startIndex ||
-                (uint)endSegment.Memory.Length < (uint)endIndex ||
-                (startSegment == endSegment && endIndex < startIndex) ||
-                endSegment.RunningIndex - startSegment.RunningIndex < 0)
+                (uint)endSegment.Memory.Length < (uint)endIndex)
+            {
                 ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
+            }
 
-            _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
-            _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
+            long longLength = endSegment.RunningIndex - startSegment.RunningIndex;
+            long longLength2 = longLength - startIndex + endIndex;
+            if (longLength < 0 || longLength2 < 0)
+                ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
+            if (longLength2 == 0)
+                goto Empty;
+
+            if (startIndex == 0)
+            {
+                // Truncate empty segments
+                while (startSegment != endSegment)
+                {
+                    Debug.Assert(startSegment.Next != null);
+                    if (startSegment.Next.RunningIndex != startSegment.RunningIndex)
+                        break;
+                    startSegment = startSegment.Next;
+                }
+            }
+
+            if (startSegment != endSegment)
+            {
+                _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
+                _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
+                return;
+            }
+
+            ReadOnlyMemory<T> memory = startSegment.Memory;
+            if (MemoryMarshal.TryGetOwnedMemory(memory, out OwnedMemory<T> ownedMemory, out int index, out int _))
+            {
+                _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index + startIndex));
+                _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(index + endIndex));
+            }
+            else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
+            {
+                T[] array = segment.Array;
+                int offset = segment.Offset;
+                _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(offset + startIndex));
+                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(offset + endIndex));
+            }
+            else if (typeof(T) == typeof(char))
+            {
+                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out _))
+                    ThrowHelper.ThrowInvalidOperationException();
+
+                _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start + startIndex));
+                _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + endIndex));
+            }
+            else
+            {
+                // Should never be reached
+                ThrowHelper.ThrowInvalidOperationException();
+                goto Empty;
+            }
+            return;
+
+        Empty:
+            T[] emptyArray = Array.Empty<T>();
+            _sequenceStart = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceStart(0));
+            _sequenceEnd = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceEnd(0));
         }
 
         /// <summary>
@@ -117,6 +174,12 @@ namespace System.Buffers
                 (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentValidationException(array, start);
 
+            if (length == 0)
+            {
+                array = Array.Empty<T>();
+                start = 0;
+            }
+
             _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
             _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + length));
         }
@@ -129,11 +192,17 @@ namespace System.Buffers
         {
             if (MemoryMarshal.TryGetOwnedMemory(memory, out OwnedMemory<T> ownedMemory, out int index, out int length))
             {
+                if (length == 0)
+                    goto Empty;
+
                 _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index));
                 _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(length));
             }
             else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
+                if (segment.Count == 0)
+                    goto Empty;
+
                 T[] array = segment.Array;
                 int start = segment.Offset;
                 _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
@@ -144,6 +213,9 @@ namespace System.Buffers
                 if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out length))
                     ThrowHelper.ThrowInvalidOperationException();
 
+                if (length == 0)
+                    goto Empty;
+
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
                 _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + length));
             }
@@ -151,9 +223,14 @@ namespace System.Buffers
             {
                 // Should never be reached
                 ThrowHelper.ThrowInvalidOperationException();
-                _sequenceStart = default;
-                _sequenceEnd = default;
+                goto Empty;
             }
+            return;
+
+         Empty:
+            T[] emptyArray = Array.Empty<T>();
+            _sequenceStart = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceStart(0));
+            _sequenceEnd = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceEnd(0));
         }
 
         /// <summary>
@@ -165,8 +242,17 @@ namespace System.Buffers
             if (ownedMemory == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
 
-            _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(0));
-            _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(ownedMemory.Length));
+            if (ownedMemory.Length > 0)
+            {
+                _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(0));
+                _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(ownedMemory.Length));
+            }
+            else
+            {
+                T[] emptyArray = Array.Empty<T>();
+                _sequenceStart = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceStart(0));
+                _sequenceEnd = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceEnd(0));
+            }
         }
 
         /// <summary>
@@ -180,8 +266,17 @@ namespace System.Buffers
                 (uint)length > (uint)(ownedMemory.Length - start))
                 ThrowHelper.ThrowArgumentValidationException(ownedMemory, start);
 
-            _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(start));
-            _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(start + length));
+            if (length > 0)
+            {
+                _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(start));
+                _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(start + length));
+            }
+            else
+            {
+                T[] emptyArray = Array.Empty<T>();
+                _sequenceStart = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceStart(0));
+                _sequenceEnd = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceEnd(0));
+            }
         }
 
         /// <summary>
@@ -195,7 +290,7 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentValidationException(start);
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-            SequencePosition end = Seek(begin, _sequenceEnd, length);
+            SequencePosition end = SeekFirst(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -225,7 +320,7 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentValidationException(0);
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = Seek(start, _sequenceEnd, length);
+            SequencePosition end = SeekFirst(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 
@@ -240,7 +335,7 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentValidationException(start);
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-            SequencePosition end = Seek(begin, _sequenceEnd, length);
+            SequencePosition end = SeekFirst(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -270,7 +365,7 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentValidationException(0);
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = Seek(start, _sequenceEnd, length);
+            SequencePosition end = SeekFirst(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 

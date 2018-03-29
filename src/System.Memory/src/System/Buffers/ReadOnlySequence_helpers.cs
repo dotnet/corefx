@@ -140,6 +140,67 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SequencePosition SeekFirst(in SequencePosition start, in SequencePosition end, long offset)
+        {
+            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
+
+            object startObject = start.GetObject();
+            object endObject;
+
+            if (type == SequenceType.MultiSegment && startObject != (endObject = end.GetObject()))
+            {
+                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
+                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+
+                int currentLength = startSegment.Memory.Length - startIndex;
+                
+                // Position in start segment, defer to single segment seek
+                if (currentLength >= offset)
+                    goto IsSingleSegment;
+
+                // End of segment. Move to start of next.
+                return SeekFirstMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength);
+            }
+
+            Debug.Assert(startObject == end.GetObject());
+
+            if (endIndex - startIndex < offset)
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+
+            // Single segment Seek
+            IsSingleSegment:
+            return new SequencePosition(startObject, startIndex + (int)offset);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static SequencePosition SeekFirstMultiSegment(ReadOnlySequenceSegment<T> currentSegment, object endObject, int endPosition, long offset)
+        {
+            Debug.Assert(offset >= 0);
+
+            while (currentSegment != endObject)
+            {
+                Debug.Assert(currentSegment != null);
+
+                int memoryLength = currentSegment.Memory.Length;
+
+                // Fully contained in this segment
+                if (memoryLength >= offset)
+                    goto FoundSegment;
+
+                // Move to next
+                offset -= memoryLength;
+                currentSegment = currentSegment.Next;
+            }
+
+            // Hit the end of the segments but didn't reach the count
+            if (endPosition < offset)
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+        
+            FoundSegment:
+            return new SequencePosition(currentSegment, (int)offset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);

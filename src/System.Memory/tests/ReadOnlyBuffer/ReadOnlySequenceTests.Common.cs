@@ -198,15 +198,23 @@ namespace System.Memory.Tests
 
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment3, 0);
 
-            ReadOnlyMemory<byte> memory;
             SequencePosition start = buffer.Start;
-            Assert.True(buffer.TryGet(ref start, out memory));
+            ReadOnlyMemory<byte> memory;
+
+            Assert.True(buffer.TryGet(ref start, out memory, false));
             Assert.Equal(0, memory.Length);
-            Assert.True(buffer.TryGet(ref start, out memory));
+            Assert.True(buffer.TryGet(ref start, out memory, true));
             Assert.Equal(0, memory.Length);
-            Assert.True(buffer.TryGet(ref start, out memory));
+
+            Assert.False(buffer.TryGet(ref start, out memory, false));
             Assert.Equal(0, memory.Length);
-            Assert.False(buffer.TryGet(ref start, out memory));
+            Assert.False(buffer.TryGet(ref start, out memory, true));
+            Assert.Equal(0, memory.Length);
+
+            Assert.False(buffer.TryGet(ref start, out memory, false));
+            Assert.Equal(0, memory.Length);
+            Assert.False(buffer.TryGet(ref start, out memory, true));
+            Assert.Equal(0, memory.Length);
         }
 
         [Theory]
