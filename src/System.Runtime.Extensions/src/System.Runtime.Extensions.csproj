@@ -18,6 +18,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\..\Common\src\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
@@ -82,6 +84,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Collections\HashHelpers.cs">
+      <Link>Common\System\Collections\HashHelpers.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">

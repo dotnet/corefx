@@ -1590,7 +1590,7 @@ namespace System
         public static bool operator !=(System.IntPtr value1, System.IntPtr value2) { throw null; }
         public static System.IntPtr operator -(System.IntPtr pointer, int offset) { throw null; }
         public static System.IntPtr Subtract(System.IntPtr pointer, int offset) { throw null; }
-        bool System.IEquatable<System.IntPtr>.Equals(System.IntPtr value) { throw null; }
+        bool System.IEquatable<System.IntPtr>.Equals(System.IntPtr other) { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public int ToInt32() { throw null; }
         public long ToInt64() { throw null; }
@@ -1697,13 +1697,15 @@ namespace System
         public override bool Equals(object obj) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
-        public static implicit operator System.Memory<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.Memory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (System.Memory<T> memory) { throw null; }
         public static implicit operator System.Memory<T> (T[] array) { throw null; }
+        public System.Buffers.MemoryHandle Pin() { throw null; }
         public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
         public System.Memory<T> Slice(int start) { throw null; }
         public System.Memory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
     }
     public partial class MethodAccessException : System.MemberAccessException
@@ -1944,13 +1946,14 @@ namespace System
         public bool Equals(System.ReadOnlyMemory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
-        public override string ToString() { throw null; }
-        public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
+        public System.Buffers.MemoryHandle Pin() { throw null; }
         public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
     }
     public readonly ref partial struct ReadOnlySpan<T>
@@ -1972,14 +1975,14 @@ namespace System
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         public override int GetHashCode() { throw null; }
-        public override string ToString() { throw null; }
         public static bool operator ==(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
-        public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (T[] array) { throw null; }
         public static bool operator !=(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
         public ref partial struct Enumerator
         {
@@ -2172,15 +2175,15 @@ namespace System
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         public override int GetHashCode() { throw null; }
-        public override string ToString() { throw null; }
         public static bool operator ==(System.Span<T> left, System.Span<T> right) { throw null; }
-        public static implicit operator System.Span<T> (System.ArraySegment<T> arraySegment) { throw null; }
+        public static implicit operator System.Span<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (System.Span<T> span) { throw null; }
         public static implicit operator System.Span<T> (T[] array) { throw null; }
         public static bool operator !=(System.Span<T> left, System.Span<T> right) { throw null; }
         public System.Span<T> Slice(int start) { throw null; }
         public System.Span<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
+        public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
         public ref partial struct Enumerator
         {
@@ -3273,7 +3276,7 @@ namespace System
         public static bool operator !=(System.UIntPtr value1, System.UIntPtr value2) { throw null; }
         public static System.UIntPtr operator -(System.UIntPtr pointer, int offset) { throw null; }
         public static System.UIntPtr Subtract(System.UIntPtr pointer, int offset) { throw null; }
-        bool System.IEquatable<System.UIntPtr>.Equals(System.UIntPtr value) { throw null; }
+        bool System.IEquatable<System.UIntPtr>.Equals(System.UIntPtr other) { throw null; }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public unsafe void* ToPointer() { throw null; }
         public override string ToString() { throw null; }
@@ -3710,7 +3713,7 @@ namespace System.Buffers
     {
         private object _dummy;
         [System.CLSCompliantAttribute(false)]
-        public unsafe MemoryHandle(System.Buffers.IRetainable owner, void* pointer = null, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle)) { throw null; }
+        public unsafe MemoryHandle(System.Buffers.IRetainable retainable, void* pointer = null, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle)) { throw null; }
         public bool HasPointer { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
         public unsafe void* Pointer { get { throw null; } }
@@ -3729,7 +3732,7 @@ namespace System.Buffers
         public abstract System.Buffers.MemoryHandle Pin(int byteOffset = 0);
         public abstract bool Release();
         public abstract void Retain();
-        protected internal abstract bool TryGetArray(out System.ArraySegment<T> arraySegment);
+        protected internal abstract bool TryGetArray(out System.ArraySegment<T> segment);
     }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
@@ -5124,19 +5127,19 @@ namespace System.IO
         [System.ObsoleteAttribute("Do not call or override this method.")]
         protected virtual void ObjectInvariant() { }
         public abstract int Read(byte[] buffer, int offset, int count);
-        public virtual int Read(System.Span<byte> destination) { throw null; }
+        public virtual int Read(System.Span<byte> buffer) { throw null; }
         public System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public virtual System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public virtual System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual int ReadByte() { throw null; }
         public abstract long Seek(long offset, System.IO.SeekOrigin origin);
         public abstract void SetLength(long value);
         public static System.IO.Stream Synchronized(System.IO.Stream stream) { throw null; }
         public abstract void Write(byte[] buffer, int offset, int count);
-        public virtual void Write(System.ReadOnlySpan<byte> source) { }
+        public virtual void Write(System.ReadOnlySpan<byte> buffer) { }
         public System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public virtual System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public virtual System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual void WriteByte(byte value) { }
     }
 }
@@ -7559,7 +7562,7 @@ namespace System.Text
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
         public int EnsureCapacity(int capacity) { throw null; }
-        public bool Equals(System.ReadOnlySpan<char> value) { throw null; }
+        public bool Equals(System.ReadOnlySpan<char> span) { throw null; }
         public bool Equals(System.Text.StringBuilder sb) { throw null; }
         public System.Text.StringBuilder Insert(int index, bool value) { throw null; }
         public System.Text.StringBuilder Insert(int index, byte value) { throw null; }
