@@ -21,17 +21,18 @@
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
+    <PlatformPackageVersion>2.0.1</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>preview1-26307-01</CoreFxExpectedPrerelease>
     <CoreClrPackageVersion>2.1.0-b-uwp6-26309-01</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25627-00</ExternalExpectedPrerelease>
     <ProjectNTfsExpectedPrerelease>rel-26323-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>rel-26323-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-rel-26323-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.1.0-preview1-25729-01</NETStandardPackageVersion>
+    <NETStandardPackageVersion>2.0.1</NETStandardPackageVersion>
     <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
     <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25706-01</MicrosoftNETCoreAppPackageVersion>
     <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0-preview2-25312-01</SniPackageVersion>
+    <SniPackageVersion>4.4.0</SniPackageVersion>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
