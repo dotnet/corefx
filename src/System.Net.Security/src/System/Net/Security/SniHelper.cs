@@ -272,27 +272,29 @@ namespace System.Net.Security
         // We will call them SkipOpaqueType`length`
         private static ReadOnlySpan<byte> SkipOpaqueType1(ReadOnlySpan<byte> bytes)
         {
-            if (bytes.Length < 1)
+            const int OpaqueTypeLengthSize = sizeof(byte);
+            if (bytes.Length < OpaqueTypeLengthSize)
             {
                 return ReadOnlySpan<byte>.Empty;
             }
 
             byte length = bytes[0];
-            int totalBytes = 1 + length;
+            int totalBytes = OpaqueTypeLengthSize + length;
 
             return SkipBytes(bytes, totalBytes);
         }
 
         private static ReadOnlySpan<byte> SkipOpaqueType2(ReadOnlySpan<byte> bytes, out bool invalid)
         {
-            if (bytes.Length < 2)
+            const int OpaqueTypeLengthSize = sizeof(ushort);
+            if (bytes.Length < OpaqueTypeLengthSize)
             {
                 invalid = true;
                 return ReadOnlySpan<byte>.Empty;
             }
 
-            int length = BinaryPrimitives.ReadUInt16BigEndian(bytes);
-            int totalBytes = 2 + length;
+            ushort length = BinaryPrimitives.ReadUInt16BigEndian(bytes);
+            int totalBytes = OpaqueTypeLengthSize + length;
 
             invalid = bytes.Length < totalBytes;
             if (invalid)
