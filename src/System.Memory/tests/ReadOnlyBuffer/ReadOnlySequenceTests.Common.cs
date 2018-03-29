@@ -336,7 +336,7 @@ namespace System.Memory.Tests
         [InlineData(-50)]
         public void TryGetStopsAtEndWhenEndIsFirstByteOfEmpty(long startIndex)
         {
-            new BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
+            BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
             BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
@@ -641,7 +641,7 @@ namespace System.Memory.Tests
         public void Ctor_OwnedMemory_Offset()
         {
             CustomMemoryForTest<byte> ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            new ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(ownedMemory, 2, 3);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(ownedMemory, 2, 3);
             Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
         }
 

@@ -47,7 +47,14 @@ namespace System.Buffers
         /// <summary>
         /// Gets <see cref="ReadOnlyMemory{T}"/> from the first segment.
         /// </summary>
-        public ReadOnlyMemory<T> First => GetFirstBuffer(_sequenceStart, _sequenceEnd);
+        public ReadOnlyMemory<T> First
+        {
+            get
+            {
+                TryGetBuffer(_sequenceStart, _sequenceEnd, out var data, out var _);
+                return data;
+            }
+        }
 
         /// <summary>
         /// A position to the start of the <see cref="ReadOnlySequence{T}"/>.
