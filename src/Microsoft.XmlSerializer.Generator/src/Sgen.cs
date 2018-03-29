@@ -122,11 +122,19 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "reference"))
                     {
-                        s_references = value;
-                        if (!string.IsNullOrEmpty(s_references))
+                        i++;
+                        if (i >= args.Length)
                         {
-                            ParseReferences();
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
+                        else
+                        {
+                            s_references = args[i];
+                            if (!string.IsNullOrEmpty(s_references))
+                            {
+                                ParseReferences();
+                            }
+                        }                        
                     }
                     else
                     {
