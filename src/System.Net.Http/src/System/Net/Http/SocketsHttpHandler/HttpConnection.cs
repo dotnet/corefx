@@ -269,7 +269,8 @@ namespace System.Net.Http
             else
             {
                 Debug.Assert(_pool.UsingProxy);
-                await WriteAsciiStringAsync(uri.IdnHost).ConfigureAwait(false);
+                await WriteAsciiStringAsync(uri.HostNameType == UriHostNameType.IPv6 ?
+                    "[" + uri.IdnHost + "]" : uri.IdnHost).ConfigureAwait(false);
 
                 if (!uri.IsDefaultPort)
                 {

@@ -471,6 +471,31 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task GetAsync_IPv6AddressInHostHeader_CorrectlyFormatted()
+        {
+            string host = "[::1234]:8080";
+            string ipv6Address = "http://" + host;
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(ipv6Address); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"Host: {host}", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(CompressedServers))]
         public async Task GetAsync_SetAutomaticDecompression_HeadersRemoved(Uri server)
