@@ -20,16 +20,10 @@ namespace System.ComponentModel.TypeConverterTests
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ExTestConvertFrom()
+        public void ExTestConvertFrom_ThrowsNotSupportedException()
         {
             FontConverter.FontNameConverter converter = new FontConverter.FontNameConverter();
             Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(null));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ExTestConvertFrom2()
-        {
-            FontConverter.FontNameConverter converter = new FontConverter.FontNameConverter();
             Assert.Throws<NotSupportedException>(() => converter.ConvertFrom(1));
         }
     }

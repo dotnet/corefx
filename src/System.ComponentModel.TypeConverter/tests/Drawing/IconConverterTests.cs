@@ -22,7 +22,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            Stream testIconStream = assembly.GetManifestResourceStream("Resources.VisualPng.ico");
+            Stream testIconStream = assembly.GetManifestResourceStream("Resources.TestIcon.ico");
 
             int length = (int)testIconStream.Length;
             _iconBytes = new byte[length];
@@ -159,7 +159,7 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(_iconBytes, newIconBytes);
 
             newIconBytes = (byte[])_icoConvFrmTD.ConvertTo(_icon, _iconBytes.GetType());
-            Assert.Equal(_iconBytes.Length, newIconBytes.Length);
+            Assert.Equal(_iconBytes, newIconBytes);
 
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, typeof(Rectangle)));
             Assert.Throws<NotSupportedException>(() => _icoConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _icon, _icon.GetType()));

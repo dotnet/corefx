@@ -22,7 +22,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            Stream testImageStream = assembly.GetManifestResourceStream("Resources.almogaver24bits.bmp");
+            Stream testImageStream = assembly.GetManifestResourceStream("Resources.TestImage.bmp");
 
             int length = (int)testImageStream.Length;
             _imageBytes = new byte[length];
@@ -118,79 +118,25 @@ namespace System.ComponentModel.TypeConverterTests
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_BadString()
+        public void ConvertFrom_ThrowsNotSupportedException()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom("System.Drawing.String"));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_BadString_WithCulture()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_Bitmap()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_Point()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_SizeF()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertFrom_Object()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
-        }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_BadString()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom("System.Drawing.String"));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_BadString_Culture()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, "System.Drawing.String"));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_Bitmap()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Bitmap(20, 20)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_Point()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new Point(10, 10)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_SizeF()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new SizeF(10, 10)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertFrom_Object()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertFrom(null, CultureInfo.InvariantCulture, new object()));
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo()
+        public void ConvertTo_String()
         {
             Assert.Equal(_imageStr, (string)_imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(string)));
             Assert.Equal(_imageStr, (string)_imgConv.ConvertTo(_image, typeof(string)));
@@ -201,154 +147,77 @@ namespace System.ComponentModel.TypeConverterTests
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void ConvertTo_ByteArray()
         {
-            byte[] newImageBytes = (byte[])_imgConv.ConvertTo(null, CultureInfo.InvariantCulture,
-                _image, _imageBytes.GetType());
+            byte[] newImageBytes = (byte[])_imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, _imageBytes.GetType());
+            Assert.Equal(_imageBytes, newImageBytes);
 
-            Assert.Equal(_imageBytes.Length, newImageBytes.Length);
-
-            newImageBytes = (byte[])_imgConv.ConvertTo(_image, _imageBytes.GetType());
-
-            Assert.Equal(_imageBytes.Length, newImageBytes.Length);
-
-            newImageBytes = (byte[])_imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture,
-                _image, _imageBytes.GetType());
-
-            Assert.Equal(_imageBytes.Length, newImageBytes.Length);
+            newImageBytes = (byte[])_imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, _imageBytes.GetType());
+            Assert.Equal(_imageBytes, newImageBytes);
 
             newImageBytes = (byte[])_imgConvFrmTD.ConvertTo(_image, _imageBytes.GetType());
-
-            Assert.Equal(_imageBytes.Length, newImageBytes.Length);
+            Assert.Equal(_imageBytes, newImageBytes);
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Rectangle()
+        public void ConvertTo_ThrowsNotSupportedException()
         {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Rectangle)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Image()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, _image.GetType()));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Size()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Size)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Bitmap()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Bitmap)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Point()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Point)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Metafile()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Metafile)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Object()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(object)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void ConvertTo_Int()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConv.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(int)));
-        }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Rectangle()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Rectangle)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Image()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, _image.GetType()));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Size()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Size)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Bitmap()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Bitmap)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Point()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Point)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Metafile()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(Metafile)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Object()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(object)));
-        }
-
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
-        public void TypeDescriptor_ConvertTo_Int()
-        {
             Assert.Throws<NotSupportedException>(() => _imgConvFrmTD.ConvertTo(null, CultureInfo.InvariantCulture, _image, typeof(int)));
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestGetPropertiesSupported()
         {
-            Assert.True(_imgConv.GetPropertiesSupported(), "GPS#1");
-            Assert.True(_imgConv.GetPropertiesSupported(null), "GPS#2");
+            Assert.True(_imgConv.GetPropertiesSupported(), "GetPropertiesSupported()");
+            Assert.True(_imgConv.GetPropertiesSupported(null), "GetPropertiesSupported(null)");
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void TestGetProperties()
         {
-            int basecount = 1;
+            const int allPropertiesCount = 14; // Count of all properties in Image class.
+            const int browsablePropertiesCount = 7; // Count of browsable properties in Image class (BrowsableAttribute.Yes).
+
             PropertyDescriptorCollection propsColl;
 
+            // Internally calls TypeDescriptor.GetProperties(typeof(Image), null), which returns all properties.
             propsColl = _imgConv.GetProperties(null, _image, null);
-            Assert.Equal(13 + basecount, propsColl.Count);
+            Assert.Equal(allPropertiesCount, propsColl.Count);
 
+            // Internally calls TypeDescriptor.GetProperties(typeof(Image), new Attribute[] { BrowsableAttribute.Yes }).
             propsColl = _imgConv.GetProperties(null, _image);
-            Assert.Equal(6 + basecount, propsColl.Count);
-
+            Assert.Equal(browsablePropertiesCount, propsColl.Count);
             propsColl = _imgConv.GetProperties(_image);
-            Assert.Equal(6 + basecount, propsColl.Count);
+            Assert.Equal(browsablePropertiesCount, propsColl.Count);
 
+
+            // Returns all properties of Image class.
             propsColl = TypeDescriptor.GetProperties(typeof(Image));
-            Assert.Equal(13 + basecount, propsColl.Count);
+            Assert.Equal(allPropertiesCount, propsColl.Count);
 
+            // Internally calls TypeDescriptor.GetProperties(typeof(Image), null), which returns all properties.
             propsColl = _imgConvFrmTD.GetProperties(null, _image, null);
-            Assert.Equal(13 + basecount, propsColl.Count);
+            Assert.Equal(allPropertiesCount, propsColl.Count);
 
+            // Internally calls TypeDescriptor.GetProperties(typeof(Image), new Attribute[] { BrowsableAttribute.Yes }).
             propsColl = _imgConvFrmTD.GetProperties(null, _image);
-            Assert.Equal(6 + basecount, propsColl.Count);
-
+            Assert.Equal(browsablePropertiesCount, propsColl.Count);
             propsColl = _imgConvFrmTD.GetProperties(_image);
-            Assert.Equal(6 + basecount, propsColl.Count);
+            Assert.Equal(browsablePropertiesCount, propsColl.Count);
         }
     }
 }
