@@ -1,6 +1,6 @@
 Compat issues with assembly Microsoft.VisualBasic:
 
-# Loaded via reflection, so it should not be added to the ref assembly:
+# Loaded via reflection so needs to be public in the implementation but we don't want to expose them publicly in the ref assembly:
 MembersMustExist : Member 'Microsoft.VisualBasic.CompilerServices.Conversions.FallbackUserDefinedConversion(System.Object, System.Type)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'Microsoft.VisualBasic.CompilerServices.NewLateBinding.FallbackCall(System.Object, System.String, System.Object[], System.String[], System.Boolean)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'Microsoft.VisualBasic.CompilerServices.NewLateBinding.FallbackGet(System.Object, System.String, System.Object[], System.String[])' does not exist in the implementation but it does exist in the contract.
