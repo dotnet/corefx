@@ -2942,7 +2942,9 @@ namespace System.Net.Http.Functional.Tests
         {
             if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
             {
-                // Issue #27746: WinHttpHandler and netfx hang on this test
+                // Issue #27746: WinHttpHandler and netfx hang on this test. 
+                // The same happens consistently on macOS 10.13 Release and with some
+                // frequency on some Linux flavors, disabling the test for curl handler due to that.
                 return;
             }
 
