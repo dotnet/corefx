@@ -6,6 +6,7 @@
 
 //------------------------------------------------------------------------------
 
+using System.Data.Common;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -54,16 +55,16 @@ namespace System.Data.Common
 
         internal bool ConvertValueToIntegratedSecurityInternal(string stringValue)
         {
-            if (CompareInsensitiveInvariant(stringValue, "sspi") || CompareInsensitiveInvariant(stringValue, "true") || CompareInsensitiveInvariant(stringValue, "yes"))
+            if (ADP.CompareInsensitiveInvariant(stringValue, "sspi") || ADP.CompareInsensitiveInvariant(stringValue, "true") || ADP.CompareInsensitiveInvariant(stringValue, "yes"))
                 return true;
-            else if (CompareInsensitiveInvariant(stringValue, "false") || CompareInsensitiveInvariant(stringValue, "no"))
+            else if (ADP.CompareInsensitiveInvariant(stringValue, "false") || ADP.CompareInsensitiveInvariant(stringValue, "no"))
                 return false;
             else
             {
                 string tmp = stringValue.Trim();  // Remove leading & trailing whitespace.
-                if (CompareInsensitiveInvariant(tmp, "sspi") || CompareInsensitiveInvariant(tmp, "true") || CompareInsensitiveInvariant(tmp, "yes"))
+                if (ADP.CompareInsensitiveInvariant(tmp, "sspi") || ADP.CompareInsensitiveInvariant(tmp, "true") || ADP.CompareInsensitiveInvariant(tmp, "yes"))
                     return true;
-                else if (CompareInsensitiveInvariant(tmp, "false") || CompareInsensitiveInvariant(tmp, "no"))
+                else if (ADP.CompareInsensitiveInvariant(tmp, "false") || ADP.CompareInsensitiveInvariant(tmp, "no"))
                     return false;
                 else
                 {

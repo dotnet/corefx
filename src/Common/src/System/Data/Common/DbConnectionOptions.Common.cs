@@ -139,9 +139,6 @@ namespace System.Data.Common
             }
         }
 
-        private static bool CompareInsensitiveInvariant(string strvalue, string strconst) =>
-            (0 == StringComparer.OrdinalIgnoreCase.Compare(strvalue, strconst));
-
         [System.Diagnostics.Conditional("DEBUG")]
         static partial void DebugTraceKeyValuePair(string keyname, string keyvalue, Dictionary<string, string> synonyms);
 

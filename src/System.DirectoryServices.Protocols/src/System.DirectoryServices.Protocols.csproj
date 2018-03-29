@@ -14,7 +14,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="System\DirectoryServices\Protocols\ExternDll.cs" />
     <Compile Include="System\DirectoryServices\Protocols\common\AuthTypes.cs" />
     <Compile Include="System\DirectoryServices\Protocols\common\BerConverter.cs" />
     <Compile Include="System\DirectoryServices\Protocols\common\DereferenceAlias.cs" />

@@ -14,7 +14,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\DirectoryServices\ExternDll.cs" />
-    <Compile Include="System\DirectoryServices\PrivilegedConfigurationManager.cs" />
     <Compile Include="System\DirectoryServices\ActiveDirectorySecurity.cs" />
     <Compile Include="System\DirectoryServices\AdsVLV.cs" />
     <Compile Include="System\DirectoryServices\AuthenticationTypes.cs" />

@@ -889,15 +889,5 @@ namespace System.Data.ProviderBase
         {
             return true;
         }
-
-        protected internal virtual DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
-        {
-            Debug.Assert(outerConnection != null, "outerConnection may not be null.");
-
-            DbMetaDataFactory metaDataFactory = factory.GetMetaDataFactory(poolGroup, this);
-            Debug.Assert(metaDataFactory != null, "metaDataFactory may not be null.");
-
-            return metaDataFactory.GetSchema(outerConnection, collectionName, restrictions);
-        }
     }
 }
