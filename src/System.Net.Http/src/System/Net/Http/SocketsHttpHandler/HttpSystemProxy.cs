@@ -66,21 +66,56 @@ namespace System.Net.Http
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
-                    // Process bypass list for manual setting.
-                    string[] list = proxyHelper.ProxyBypass.Split(';');
-                    _bypass = new List<Regex>(list.Length);
+                    int idx = 0;
+                    int start = 0;
+                    string tmp;
 
-                    foreach (string value in list)
+                    // Process bypass list for manual setting.
+                    _bypass = new List<Regex>(proxyHelper.ProxyBypass.Length / 5); // Best guess based on string length.
+
+                    while (idx < proxyHelper.ProxyBypass.Length)
                     {
-                        string tmp = value.Trim();
-                        if (tmp.Length == 0)
+                        // Strip leading spaces and scheme if any.
+                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == ' ') { idx += 1; };
+                        if (String.Compare(proxyHelper.ProxyBypass, idx, "http://", 0, 7, StringComparison.OrdinalIgnoreCase) == 0)
                         {
-                            continue;
+                            idx += 7;
+                        }
+                        else if (String.Compare(proxyHelper.ProxyBypass, idx, "https://", 0, 8, StringComparison.OrdinalIgnoreCase) == 0)
+                        {
+                            idx += 8;
                         }
 
-                        if (tmp == "<local>")
+                        start = idx;
+                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ' ' && proxyHelper.ProxyBypass[idx] != ';') {idx += 1; };
+
+                        if (idx == start)
+                        {
+                            // Empty string.
+                            tmp = null;
+                        }
+                        else if (String.Compare(proxyHelper.ProxyBypass, start, "<local>", 0, 7, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             _bypassLocal = true;
+                            tmp = null;
+                        }
+                        else
+                        {
+                            tmp = proxyHelper.ProxyBypass.Substring(start, idx-start);
+                        }
+
+                        // Skip trailing characters if any.
+                        if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';')
+                        {
+                            // Got stopped at space.
+                            while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';' ) {idx += 1; };
+                        }
+                        if  (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == ';')
+                        {
+                            idx ++;
+                        }
+                        if (tmp == null)
+                        {
                             continue;
                         }
 
@@ -173,28 +208,28 @@ namespace System.Net.Http
                         return null;
                     }
 
-                    if (uri.Host[0] == '[' || Char.IsNumber(uri.Host[0]))
+                    // Pre-Check if host may be IP address to avoid parsing.
+                    if (uri.Host[0] == '[' || (uri.Host[0] >= '0' && uri.Host[0] <= '9'))
                     {
                         // RFC1123 allows labels to start with number.
                         // Leading number may or may not be IP address.
                         // IPv6 [::1] notation. '[' is not valid character in names.
-                        IPAddress.TryParse(uri.Host, out address);
-                    }
-
-                    if (address != null)
-                    {
-                        // Host is valid IP address.
-                        // Check if it belongs to local system.
-                        foreach (IPAddress a in _localIp)
+                        if (IPAddress.TryParse(uri.Host, out address))
                         {
-                            if (a.Equals(address))
+                            // Host is valid IP address.
+                            // Check if it belongs to local system.
+                            foreach (IPAddress a in _localIp)
                             {
-                                return null;
+                                if (a.Equals(address))
+                                {
+                                    return null;
+                                }
                             }
                         }
                     }
-                    else if (uri.Host.IndexOf('.') == -1)
+                    if (uri.Host[0] != '[' && uri.Host.IndexOf('.') == -1)
                     {
+                        // Not address and does not have a dot.
                         // Hosts without FQDN are considered local.
                         return null;
                     }
@@ -205,7 +240,8 @@ namespace System.Net.Http
                 {
                     foreach (var entry in _bypass)
                     {
-                        if (entry.IsMatch(uri.Host))
+                        // IdnHost does not have [].
+                        if (entry.IsMatch(uri.Host[0] == '[' ? uri.Host : uri.IdnHost))
                         {
                             return null;
                         }

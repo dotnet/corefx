@@ -56,6 +56,8 @@ namespace System.Net.Http.Tests
         [InlineData("http://[2002::11]/", true)]
         [InlineData("http://[2607:f8b0:4005:80a::200e]/", true)]
         [InlineData("http://[2607:f8B0:4005:80A::200E]/", true)]
+        [InlineData("http://b\u00e9b\u00e9.eu/", true)]
+        [InlineData("http://www.b\u00e9b\u00e9.eu/", true)]
         public void HttpProxy_Local_Bypassed(string name, bool shouldBypass)
         {
             RemoteInvoke((url, expected) =>
@@ -65,7 +67,7 @@ namespace System.Net.Http.Tests
 
                 FakeRegistry.Reset();
                 FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
-                FakeRegistry.WinInetProxySettings.ProxyBypass = "23.23.86.44;*.foo.com;<local>;BAR.COM; ; 162*;[2002::11];[*:f8b0:4005:80a::200e]";
+                FakeRegistry.WinInetProxySettings.ProxyBypass = "23.23.86.44;*.foo.com;<local>;BAR.COM; ; 162*;[2002::11];[*:f8b0:4005:80a::200e]; http://www.xn--mnchhausen-9db.at;http://*.xn--bb-bjab.eu;http://xn--bb-bjab.eu;";
 
                 Assert.True(HttpSystemProxy.TryCreate(out p));
                 Assert.NotNull(p);
