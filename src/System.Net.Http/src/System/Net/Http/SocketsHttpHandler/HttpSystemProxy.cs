@@ -34,6 +34,7 @@ namespace System.Net.Http
             {
                 return false;
             }
+
             if (proxyHelper.AutoSettingsUsed)
             {
                 sessionHandle = Interop.WinHttp.WinHttpOpen(
@@ -42,12 +43,14 @@ namespace System.Net.Http
                     Interop.WinHttp.WINHTTP_NO_PROXY_NAME,
                     Interop.WinHttp.WINHTTP_NO_PROXY_BYPASS,
                     (int)Interop.WinHttp.WINHTTP_FLAG_ASYNC);
+
                 if (sessionHandle.IsInvalid)
                 {
                     // Proxy failures are currently ignored by managed handler.
                     return false;
                 }
             }
+
             proxy  = new HttpSystemProxy(proxyHelper, sessionHandle);
             return true;
         }
@@ -74,11 +77,13 @@ namespace System.Net.Http
                         {
                             continue;
                         }
+
                         if (tmp == "<local>")
                         {
                             _bypassLocal = true;
                             continue;
                         }
+
                         try
                         {
                             // Escape any special characters and unescape * to get wildcard pattern match.
@@ -95,6 +100,7 @@ namespace System.Net.Http
                         }
                     }
                 }
+
                 if (_bypassLocal)
                 {
                     _localIp =  new List<IPAddress>();
@@ -156,7 +162,7 @@ namespace System.Net.Http
         {
             if (_proxyHelper.ManualSettingsOnly)
             {
-                if ( _bypassLocal)
+                if (_bypassLocal)
                 {
                     IPAddress address = null;
 
@@ -166,6 +172,7 @@ namespace System.Net.Http
                         // Unfortunately this does not work for all local addresses.
                         return null;
                     }
+
                     if (uri.Host[0] == '[' || Char.IsNumber(uri.Host[0]))
                     {
                         // RFC1123 allows labels to start with number.
@@ -173,11 +180,12 @@ namespace System.Net.Http
                         // IPv6 [::1] notation. '[' is not valid character in names.
                         IPAddress.TryParse(uri.Host, out address);
                     }
+
                     if (address != null)
                     {
                         // Host is valid IP address.
                         // Check if it belongs to local system.
-                        foreach (var a in _localIp)
+                        foreach (IPAddress a in _localIp)
                         {
                             if (a.Equals(address))
                             {
@@ -185,10 +193,10 @@ namespace System.Net.Http
                             }
                         }
                     }
-                    else
+                    else if (uri.Host.IndexOf('.') == -1)
                     {
                         // Hosts without FQDN are considered local.
-                        if (uri.Host.IndexOf('.') == -1) return null;
+                        return null;
                     }
                 }
 
