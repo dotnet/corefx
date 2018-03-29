@@ -174,13 +174,13 @@ namespace System.DirectoryServices.Protocols
                 {
                     SearchResponse response = (SearchResponse)(((DirectoryOperationException)e).Response);
 
-                    if (asyncResult.response != null)
-                        AddResult(asyncResult.response, response);
+                    if (asyncResult._response != null)
+                        AddResult(asyncResult._response, response);
                     else
-                        asyncResult.response = response;
+                        asyncResult._response = response;
 
                     // set the response back to the exception so it holds all the results up to now
-                    ((DirectoryOperationException)e).response = asyncResult.response;
+                    ((DirectoryOperationException)e).response = asyncResult._response;
                 }
                 else if (e is LdapException ldapException)
                 {

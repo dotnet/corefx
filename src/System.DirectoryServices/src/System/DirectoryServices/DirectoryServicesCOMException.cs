@@ -30,11 +30,6 @@ namespace System.DirectoryServices
         {
         }
 
-        protected DirectoryServicesCOMException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
         internal DirectoryServicesCOMException(string extendedMessage, int extendedError, COMException e) : base(e.Message, e.ErrorCode)
         {
             ExtendedError = extendedError;
