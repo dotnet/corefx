@@ -438,7 +438,7 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClient client = CreateHttpClient())
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() =>
                     client.SendAsync(request, cts.Token));
                 Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
                 if (!PlatformDetection.IsFullFramework)
@@ -2035,8 +2035,8 @@ namespace System.Net.Http.Functional.Tests
                         } // Dispose the handler while requests are still outstanding
 
                         // Requests 1 and 2 should be canceled as we haven't finished receiving their headers
-                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get1);
-                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get2);
+                        await Assert.ThrowsAsync<TaskCanceledException>(() => get1);
+                        await Assert.ThrowsAsync<TaskCanceledException>(() => get2);
 
                         // Request 3 should still be active, and we should be able to receive all of the data.
                         unblockServers.SetResult(true);
@@ -2831,12 +2831,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(CredentialsForProxyNonRfcCompliant))]
         public async Task Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_NonRfcCompliant(ICredentials creds, bool wrapCredsInCache)
         {
-            if (UseSocketsHttpHandler)
-            {
-                // TODO #23135: SocketsHttpHandler currently gets error "System.NotImplementedException : Basic auth: can't handle ':' in domain "dom:\ain""
-                return;
-            }
-
             await Proxy_BypassFalse_GetRequestGoesThroughCustomProxy_Implementation(creds, wrapCredsInCache);
         }
 
@@ -2946,9 +2940,11 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Proxy_UseSecureProxyTunnel_Success()
         {
-            if (IsWinHttpHandler || IsNetfxHandler)
+            if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
             {
-                // Issue #27746: WinHttpHandler and netfx hang on this test
+                // Issue #27746: WinHttpHandler and netfx hang on this test. 
+                // The same happens consistently on macOS 10.13 Release and with some
+                // frequency on some Linux flavors, disabling the test for curl handler due to that.
                 return;
             }
 
@@ -2982,6 +2978,47 @@ namespace System.Net.Http.Functional.Tests
                await serverTask;
             }, options);
             await proxy;
+        }
+
+        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public async Task ProxyAuth_Digest_Succeeds()
+        {
+            if (IsCurlHandler)
+            {
+                // Issue #27870 curl HttpHandler can only do basic auth to proxy
+                return;
+            }
+
+            const string expectedUsername = "testusername";
+            const string expectedPassword = "testpassword";
+            const string authHeader = "Proxy-Authenticate: Digest realm=\"NetCore\", nonce=\"PwOnWgAAAAAAjnbW438AAJSQi1kAAAAA\", qop=\"auth\", stale=false\r\n";
+            LoopbackServer.Options options = new LoopbackServer.Options { IsProxy = true, Username = expectedUsername, Password = expectedPassword };
+            var proxyCreds = new NetworkCredential(expectedUsername, expectedPassword);
+
+            await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, proxyCreds);
+
+                    // URL does not matter. We will get response from "proxy" code bellow.
+                    Task<HttpResponseMessage> responseTask = client.GetAsync("http://notatrealserver.com/");
+
+                    //  Send Digest challenge.
+                    await proxyServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.ProxyAuthenticationRequired, authHeader);
+                    // Verify user & password.
+                    var task = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("");
+                    await TestHelper.WhenAllCompletedOrAnyFailedWithTimeout(TestHelper.PassingTestTimeoutMilliseconds, task);
+
+                    await TestHelper.WhenAllCompletedOrAnyFailedWithTimeout(TestHelper.PassingTestTimeoutMilliseconds, responseTask);
+                    HttpResponseMessage response = responseTask.Result;
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            }, options);
+
         }
 
         private static IEnumerable<object[]> BypassedProxies()

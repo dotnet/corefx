@@ -462,13 +462,10 @@ namespace System.Text
                     throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_SmallCapacity);
                 }
 
-                int originalCapacity = Capacity;
-
                 if (value == 0 && m_ChunkPrevious == null)
                 {
                     m_ChunkLength = 0;
                     m_ChunkOffset = 0;
-                    Debug.Assert(Capacity >= originalCapacity);
                     return;
                 }
 
@@ -483,22 +480,32 @@ namespace System.Text
                     StringBuilder chunk = FindChunkForIndex(value);
                     if (chunk != this)
                     {
-                        // We crossed a chunk boundary when reducing the Length. We must replace this middle-chunk with a new larger chunk,
-                        // to ensure the original capacity is preserved.
-                        int newLen = originalCapacity - chunk.m_ChunkOffset;
-                        char[] newArray = new char[newLen];
+                        // Avoid possible infinite capacity growth.  See https://github.com/dotnet/coreclr/pull/16926
+                        int capacityToPreserve = Math.Min(Capacity, Math.Max(Length * 6 / 5, m_ChunkChars.Length));
+                        int newLen = capacityToPreserve - chunk.m_ChunkOffset;
+                        if (newLen > chunk.m_ChunkChars.Length)
+                        {
+                            // We crossed a chunk boundary when reducing the Length. We must replace this middle-chunk with a new larger chunk,
+                            // to ensure the capacity we want is preserved.
+                            char[] newArray = new char[newLen];
+                            Array.Copy(chunk.m_ChunkChars, 0, newArray, 0, chunk.m_ChunkLength);
+                            m_ChunkChars = newArray;
+                        }
+                        else
+                        {
+                            // Special case where the capacity we want to keep corresponds exactly to the size of the content.
+                            // Just take ownership of the array.
+                            Debug.Assert(newLen == chunk.m_ChunkChars.Length, "The new chunk should be larger or equal to the one it is replacing.");
+                            m_ChunkChars = chunk.m_ChunkChars;
+                        }
 
-                        Debug.Assert(newLen > chunk.m_ChunkChars.Length, "The new chunk should be larger than the one it is replacing.");
-                        Array.Copy(chunk.m_ChunkChars, 0, newArray, 0, chunk.m_ChunkLength);
-
-                        m_ChunkChars = newArray;
                         m_ChunkPrevious = chunk.m_ChunkPrevious;
                         m_ChunkOffset = chunk.m_ChunkOffset;
                     }
                     m_ChunkLength = value - chunk.m_ChunkOffset;
                     AssertInvariants();
                 }
-                Debug.Assert(Capacity >= originalCapacity);
+                Debug.Assert(Length == value, "Something went wrong setting Length.");
             }
         }
 
@@ -1680,10 +1687,10 @@ namespace System.Text
         /// <summary>
         /// Determines if the contents of this builder are equal to the contents of ReadOnlySpan<char>.
         /// </summary>
-        /// <param name="value">The ReadOnlySpan{char}.</param>
-        public bool Equals(ReadOnlySpan<char> value)
+        /// <param name="span">The ReadOnlySpan{char}.</param>
+        public bool Equals(ReadOnlySpan<char> span)
         {
-            if (value.Length != Length)
+            if (span.Length != Length)
                 return false;
 
             StringBuilder sbChunk = this;
@@ -1696,7 +1703,7 @@ namespace System.Text
 
                 ReadOnlySpan<char> chunk = new ReadOnlySpan<char>(sbChunk.m_ChunkChars, 0, chunk_length);
 
-                if (!chunk.EqualsOrdinal(value.Slice(value.Length - offset, chunk_length)))
+                if (!chunk.EqualsOrdinal(span.Slice(span.Length - offset, chunk_length)))
                     return false;
 
                 sbChunk = sbChunk.m_ChunkPrevious;
