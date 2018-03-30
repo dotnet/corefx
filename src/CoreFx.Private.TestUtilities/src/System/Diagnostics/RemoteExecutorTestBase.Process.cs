@@ -53,7 +53,16 @@ namespace System.Diagnostics
             // If we need the host (if it exists), use it, otherwise target the console app directly.
             string metadataArgs = PasteArguments.Paste(new string[] { a.FullName, t.FullName, method.Name, options.ExceptionFile }, pasteFirstArgumentUsingArgV0Rules: false);
             string passedArgs = pasteArguments ? PasteArguments.Paste(args, pasteFirstArgumentUsingArgV0Rules: false) : string.Join(" ", args);
-            string testConsoleAppArgs = ExtraParameter + " " + metadataArgs + " " + passedArgs;
+
+            string testConsoleAppArgs;
+            if (!string.IsNullOrEmpty(psi.FileName) && File.Exists(psi.FileName))
+            {
+                testConsoleAppArgs = psi.FileName + " " + metadataArgs + " " + passedArgs;
+            }
+            else
+            {
+                testConsoleAppArgs = ExtraParameter + " " + metadataArgs + " " + passedArgs;
+            }
 
             if (!File.Exists(HostRunner))
                 throw new IOException($"{HostRunner} test app isn't present in the test runtime directory.");
