@@ -16,6 +16,42 @@ namespace System.Drawing.Tests
             yield return new object[] { FontFamily.GenericSerif, float.MaxValue };
         }
 
+        public static IEnumerable<object[]> FontFamily_Equals_SameFamily_TestData()
+        {
+            yield return new object[] { FontFamily.GenericMonospace, 1 };
+            yield return new object[] { FontFamily.GenericSerif, float.MaxValue };
+            yield return new object[] { FontFamily.GenericSansSerif, 10 };
+        }
+
+        public static IEnumerable<object[]> FontFamily_Equals_DifferentFamily_TestData()
+        {
+            yield return new object[] { FontFamily.GenericMonospace, FontFamily.GenericSerif };
+            yield return new object[] { FontFamily.GenericSansSerif, FontFamily.GenericSerif };
+            yield return new object[] { FontFamily.GenericSansSerif, FontFamily.GenericMonospace };
+        }
+
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [MemberData(nameof(FontFamily_Equals_SameFamily_TestData))]
+        public void Font_Equals_SameFontFamily(FontFamily fontFamily, float size)
+        {
+            using (var font1 = new Font(fontFamily, size))
+            using (var font2 = new Font(fontFamily, size))
+            {
+                Assert.True(font1.Equals(font2));
+            }
+        }
+
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [MemberData(nameof(FontFamily_Equals_DifferentFamily_TestData))]
+        public void Font_Equals_DifferentFontFamily(FontFamily fontFamily1, FontFamily fontFamily2)
+        {
+            using (var font1 = new Font(fontFamily1, 9))
+            using (var font2 = new Font(fontFamily2, 9))
+            {
+                Assert.False(font1.Equals(font2));
+            }
+        }
+
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(Ctor_Family_Size_TestData))]
