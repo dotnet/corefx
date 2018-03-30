@@ -10,6 +10,8 @@ TypesMustExist : Type 'System.Security.Cryptography.ECParameters' does not exist
 TypesMustExist : Type 'System.Security.Cryptography.ECPoint' does not exist in the implementation but it does exist in the contract.
 
 Compat issues with assembly System.Runtime:
+MembersMustExist : Member 'System.Memory<T>.Pin()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.ReadOnlyMemory<T>.Pin()' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Buffers.IMemoryOwner<T>' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Buffers.IPinnable' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Buffers.MemoryManager<T>' does not exist in the implementation but it does exist in the contract.
