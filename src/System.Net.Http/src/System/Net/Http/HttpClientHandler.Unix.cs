@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    public class HttpClientHandler : HttpMessageHandler
+    public partial class HttpClientHandler : HttpMessageHandler
     {
         #region Properties
 
@@ -119,13 +119,6 @@ namespace System.Net.Http
         {
             get { return _curlHandler.MaxConnectionsPerServer; }
             set { _curlHandler.MaxConnectionsPerServer = value; }
-        }
-
-        public long MaxRequestContentBufferSize
-        {
-            // See comments in HttpClientHandler.Windows.cs.  This behavior matches.
-            get { return 0; }
-            set { throw new PlatformNotSupportedException(); }
         }
 
         public int MaxResponseHeadersLength
