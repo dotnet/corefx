@@ -36,7 +36,7 @@ namespace System.Net.Security
     // Internal versions of the above delegates.
     internal delegate bool RemoteCertValidationCallback(string host, X509Certificate2 certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors);
     internal delegate X509Certificate LocalCertSelectionCallback(string targetHost, X509CertificateCollection localCertificates, X509Certificate2 remoteCertificate, string[] acceptableIssuers);
-    internal delegate X509Certificate ServerCertCallback(string hostName);
+    internal delegate X509Certificate ServerCertSelectionCallback(string hostName);
 
     public class SslStream : AuthenticatedStream
     {
@@ -153,17 +153,17 @@ namespace System.Net.Security
         private void SetServerCertificateSelectionCallbackWrapper(SslServerAuthenticationOptions sslServerAuthenticationOptions)
         {
             _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
-            sslServerAuthenticationOptions._serverCertDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertCallback(ServerCertSelectionCallbackWrapper);
+            sslServerAuthenticationOptions._serverCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
         }
 
         private SslAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
         {
-            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions._serverCertDelegate == null)
+            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions._serverCertSelectionDelegate == null)
             {
                 throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions._serverCertDelegate != null)
+            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions._serverCertSelectionDelegate != null)
             {
                 throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
             }

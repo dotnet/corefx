@@ -16,7 +16,7 @@ namespace System.Net.Security
         private bool _allowRenegotiation = true;
 
         internal RemoteCertValidationCallback _certValidationDelegate;
-        internal ServerCertCallback _serverCertDelegate;
+        internal ServerCertSelectionCallback _serverCertSelectionDelegate;
 
         public bool AllowRenegotiation
         {
