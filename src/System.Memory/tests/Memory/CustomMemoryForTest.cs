@@ -54,7 +54,7 @@ namespace System.MemoryTests
 
                 try
                 {
-                    if ((uint)elementIndex > (uint)_array.Length)
+                    if ((uint)elementIndex > (uint)(_array.Length - _offset))
                     {
                         throw new ArgumentOutOfRangeException(nameof(elementIndex));
                     }

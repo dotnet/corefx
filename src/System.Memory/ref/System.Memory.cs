@@ -306,8 +306,6 @@ namespace System.Buffers
         public ReadOnlySequence(T[] array) { throw null; }
         public ReadOnlySequence(T[] array, int start, int length) { throw null; }
         public ReadOnlySequence(System.ReadOnlyMemory<T> memory) { throw null; }
-        public ReadOnlySequence(System.Buffers.MemoryManager<T> memory) { throw null; }
-        public ReadOnlySequence(System.Buffers.MemoryManager<T> memory, int start, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
@@ -523,10 +521,10 @@ namespace System.Runtime.InteropServices
         public static T Read<T>(System.ReadOnlySpan<byte> source) where T : struct { throw null; }
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetArray<T>(System.ReadOnlyMemory<T> memory, out System.ArraySegment<T> segment) { throw null; }
-        public static bool TryGetMemoryManager<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner owner)
-            where TOwner : System.Buffers.MemoryManager<T> { throw null; }
-        public static bool TryGetMemoryManager<T, TOwner>(ReadOnlyMemory<T> memory, out TOwner owner, out int start, out int length)
-            where TOwner : System.Buffers.MemoryManager<T> { throw null; }
+        public static bool TryGetMemoryManager<T, TManager>(ReadOnlyMemory<T> memory, out TManager manager)
+            where TManager : System.Buffers.MemoryManager<T> { throw null; }
+        public static bool TryGetMemoryManager<T, TManager>(ReadOnlyMemory<T> memory, out TManager manager, out int start, out int length)
+            where TManager : System.Buffers.MemoryManager<T> { throw null; }
         public static bool TryGetString(System.ReadOnlyMemory<char> memory, out string text, out int start, out int length) { throw null; }
         public static bool TryRead<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
         public static bool TryWrite<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }

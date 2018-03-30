@@ -15,7 +15,7 @@ namespace System.Buffers
 {
     internal sealed partial class ArrayMemoryPool<T> : MemoryPool<T>
     {
-        private sealed class ArrayMemoryPoolBuffer : OwnedMemory<T>
+        private sealed class ArrayMemoryPoolBuffer : MemoryManager<T>
         {
             private T[] _array;
             private int _refCount;
@@ -28,20 +28,9 @@ namespace System.Buffers
 
             public sealed override int Length => _array.Length;
 
-            public sealed override bool IsDisposed => _array == null;
+            public bool IsDisposed => _array == null;
 
-            protected sealed override bool IsRetained => Volatile.Read(ref _refCount) > 0;
-
-            public sealed override Span<T> Span
-            {
-                get
-                {
-                    if (IsDisposed)
-                        ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-
-                    return _array;
-                }
-            }
+            public bool IsRetained => Volatile.Read(ref _refCount) > 0;
             
             public sealed override Span<T> GetSpan()
             {
@@ -75,44 +64,39 @@ namespace System.Buffers
                 return true;
             }
 
-            public sealed override MemoryHandle Pin(int byteOffset = 0)
+            public sealed override MemoryHandle Pin(int elementIndex = 0)
             {
                 unsafe
                 {
-                    Retain(); // this checks IsDisposed
+                    while (true)
+                    {
+                        int currentCount = Volatile.Read(ref _refCount);
+                        if (currentCount <= 0)
+                            ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                        if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount)
+                            break;
+                    }
 
                     try
                     {
-                        if ((IntPtr.Size == 4 && (uint)byteOffset > (uint)_array.Length * (uint)Unsafe.SizeOf<T>())
-                            || (IntPtr.Size != 4 && (ulong)byteOffset > (uint)_array.Length * (ulong)Unsafe.SizeOf<T>()))
+                        if ((uint)elementIndex > (uint)_array.Length)
                         {
-                            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteOffset);
+                            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.elementIndex);
                         }
 
                         GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                        return new MemoryHandle(this, ((byte*)handle.AddrOfPinnedObject()) + byteOffset, handle);
+                        
+                        return new MemoryHandle(Unsafe.Add<T>(((void*)handle.AddrOfPinnedObject()), elementIndex), handle, this);
                     }
                     catch
                     {
-                        Release();
+                        Unpin();
                         throw;
                     }
                 }
             }
 
-            public sealed override void Retain()
-            {
-                while (true)
-                {
-                    int currentCount = Volatile.Read(ref _refCount);
-                    if (currentCount <= 0)
-                        ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-                    if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount)
-                        break;
-                }
-            }
-
-            public sealed override void Release()
+            public sealed override void Unpin()
             {
                 while (true)
                 {
@@ -123,7 +107,7 @@ namespace System.Buffers
                     {
                         if (currentCount == 1)
                         {
-                            Dispose();
+                            Dispose(true);
                         }
                         break;
                     }
