@@ -316,18 +316,6 @@ namespace System
             return true;
         }
 
-        public static string GetDistroVersionString()
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return "";
-            }
-
-            DistroInfo v = ParseOsReleaseFile();
-
-            return "Distro=" + v.Id + " VersionId=" + v.VersionId + " Pretty=" + v.PrettyName + " Version=" + v.Version;
-        }
-
         private static IdVersionPair ParseOsReleaseFile()
         {
             Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
