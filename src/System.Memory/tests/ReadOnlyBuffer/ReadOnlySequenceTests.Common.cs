@@ -46,20 +46,20 @@ namespace System.Memory.Tests
         [InlineData(0)]
         [InlineData(long.MaxValue - 25)]
         [InlineData(-25)]
-        public void GetPositionPrefersNextSegment(long startIndex)
+        public void GetPositionPrefersCurrentSegment(long startIndex)
         {
             BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[50], startIndex);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[50]);
 
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
             SequencePosition c1 = buffer.GetPosition(50);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
 
             c1 = buffer.GetPosition(50, buffer.Start);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
         }
 
         [Theory]
@@ -97,15 +97,15 @@ namespace System.Memory.Tests
             ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
 
             SequencePosition c1 = buffer.GetPosition(200);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment3, c1.GetObject());
+            Assert.Equal(100, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
 
             ReadOnlySequence<byte> seq = buffer.Slice(0, c1);
             Assert.Equal(200, seq.Length);
 
             c1 = buffer.GetPosition(200, buffer.Start);
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment3, c1.GetObject());
+            Assert.Equal(100, c1.GetInteger());
+            Assert.Equal(bufferSegment2, c1.GetObject());
 
             seq = buffer.Slice(0, c1);
             Assert.Equal(200, seq.Length);
@@ -162,30 +162,6 @@ namespace System.Memory.Tests
 
         [Theory]
         [InlineData(0)]
-        [InlineData(long.MaxValue - 100)]
-        [InlineData(-100)]
-        public void SeekSkipsEmptySegments(long startIndex)
-        {
-            BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
-            BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
-
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 100);
-
-            SequencePosition c1 = buffer.GetPosition(100);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment4, c1.GetObject());
-
-            c1 = buffer.GetPosition(100, buffer.Start);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment4, c1.GetObject());
-        }
-
-        [Theory]
-        [InlineData(0)]
         [InlineData(long.MaxValue)]
         [InlineData(long.MinValue)]
         [InlineData(-1)]
@@ -224,23 +200,19 @@ namespace System.Memory.Tests
         public void SeekEmptySkipDoesNotCrossPastEnd(long startIndex)
         {
             BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
 
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 0);
 
-            SequencePosition c1 = buffer.GetPosition(100);
-            Assert.Equal(0, c1.GetInteger());
+            SequencePosition c1 = buffer.GetPosition(200);
+            Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
 
-            c1 = buffer.GetPosition(100, buffer.Start);
-            Assert.Equal(0, c1.GetInteger());
+            c1 = buffer.GetPosition(200, buffer.Start);
+            Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
-
-            // Go out of bounds for segment
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => buffer.GetPosition(150, buffer.Start));
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => buffer.GetPosition(250, buffer.Start));
         }
 
         [Theory]
@@ -250,25 +222,21 @@ namespace System.Memory.Tests
         public void SeekEmptySkipDoesNotCrossPastEndWithExtraChainedBlocks(long startIndex)
         {
             BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[100], startIndex);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
             BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
             BufferSegment<byte> bufferSegment4 = bufferSegment3.Append(new byte[100]);
             BufferSegment<byte> bufferSegment5 = bufferSegment4.Append(new byte[0]);
             BufferSegment<byte> bufferSegment6 = bufferSegment5.Append(new byte[100]);
 
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment4, 0);
 
-            SequencePosition c1 = buffer.GetPosition(100);
-            Assert.Equal(0, c1.GetInteger());
+            SequencePosition c1 = buffer.GetPosition(200);
+            Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
 
-            c1 = buffer.GetPosition(100, buffer.Start);
-            Assert.Equal(0, c1.GetInteger());
+            c1 = buffer.GetPosition(200, buffer.Start);
+            Assert.Equal(100, c1.GetInteger());
             Assert.Equal(bufferSegment2, c1.GetObject());
-
-            // Go out of bounds for segment
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => c1 = buffer.GetPosition(150, buffer.Start));
-            Assert.Throws<ArgumentOutOfRangeException>("offset", () => c1 = buffer.GetPosition(250, buffer.Start));
         }
 
         #endregion
@@ -333,8 +301,8 @@ namespace System.Memory.Tests
             SequencePosition start = buffer.Start;
             Assert.True(buffer.TryGet(ref start, out memory));
             Assert.Equal(100, memory.Length);
-            Assert.True(buffer.TryGet(ref start, out memory));
-            Assert.Equal(0, memory.Length);
+            //Assert.True(buffer.TryGet(ref start, out memory));
+            //Assert.Equal(0, memory.Length);
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
@@ -353,8 +321,8 @@ namespace System.Memory.Tests
             SequencePosition start = buffer.Start;
             Assert.True(buffer.TryGet(ref start, out memory));
             Assert.Equal(100, memory.Length);
-            Assert.True(buffer.TryGet(ref start, out memory));
-            Assert.Equal(0, memory.Length);
+            //Assert.True(buffer.TryGet(ref start, out memory));
+            //Assert.Equal(0, memory.Length);
             Assert.False(buffer.TryGet(ref start, out memory));
         }
 
@@ -400,8 +368,8 @@ namespace System.Memory.Tests
                 sizes.Add(memory.Length);
             }
 
-            Assert.Equal(2, sizes.Count);
-            Assert.Equal(new [] { 100, 0 }, sizes);
+            Assert.Equal(1, sizes.Count);
+            Assert.Equal(new [] { 100 }, sizes);
         }
 
         [Theory]
@@ -421,8 +389,8 @@ namespace System.Memory.Tests
                 sizes.Add(memory.Length);
             }
 
-            Assert.Equal(2, sizes.Count);
-            Assert.Equal(new [] { 100, 0 }, sizes);
+            Assert.Equal(1, sizes.Count);
+            Assert.Equal(new [] { 100 }, sizes);
         }
 
         #endregion

@@ -92,6 +92,7 @@ namespace System.Memory.Tests
             Assert.Equal(new char[] { (char)5, (char)6, (char)7, (char)8, (char)9 }, slice.ToArray());
         }
 
+        [Trait("MyTrait", "MyTraitValue")]
         [Theory]
         [MemberData(nameof(OutOfRangeSliceCases))]
         public void ReadOnlyBufferDoesNotAllowSlicingOutOfRange(Action<ReadOnlySequence<char>> fail)
@@ -157,22 +158,22 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void GetPositionPrefersNextSegment()
+        public void GetPositionPrefersCurrentSegment()
         {
             BufferSegment<char> bufferSegment1 = new BufferSegment<char>(new char[50]);
-            BufferSegment<char> bufferSegment2 = bufferSegment1.Append(new char[0]);
+            BufferSegment<char> bufferSegment2 = bufferSegment1.Append(new char[50]);
 
-            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(bufferSegment1, 0, bufferSegment2, 50);
 
             SequencePosition c1 = buffer.GetPosition(50);
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
 
             c1 = buffer.GetPosition(50, buffer.Start);
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
         }
 
         [Fact]
@@ -261,7 +262,7 @@ namespace System.Memory.Tests
             SequencePosition? result = buffer.PositionOf((char)searchFor);
 
             Assert.NotNull(result);
-            Assert.Equal(buffer.Slice(result.Value).ToArray(), raw.Substring(expectIndex));
+            Assert.Equal(raw.Substring(expectIndex).ToArray(), buffer.Slice(result.Value).ToArray());
         }
 
         [Fact]
@@ -307,12 +308,92 @@ namespace System.Memory.Tests
 
         public static TheoryData<Action<ReadOnlySequence<char>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<char>>>
         {
-            b => b.Slice(101),
+            b => b.Slice(-1),
+            b => b.Slice(-1, -1),
+            b => b.Slice(-1, 0),
+            b => b.Slice(-1, 1),
+            b => b.Slice(-1, b.Start),
+            b => b.Slice(-1, b.End),
+
+            //b => b.Slice(0),
+            b => b.Slice(0, -1),
+            //b => b.Slice(0, 0),
             b => b.Slice(0, 101),
+            //b => b.Slice(0, b.Start),
+            //b => b.Slice(0, b.End),
+
+            //b => b.Slice(100),
+            b => b.Slice(100, -1),
+            //b => b.Slice(100, 0),
+            b => b.Slice(100, 1),
+            b => b.Slice(100, b.Start),
+            //b => b.Slice(100, b.End),
+
+            b => b.Slice(101),
+            b => b.Slice(101, -1),
+            b => b.Slice(101, 0),
+            b => b.Slice(101, 1),
+            b => b.Slice(101, b.Start),
+            b => b.Slice(101, b.End),
+
+            //b => b.Slice(b.Start),
+            b => b.Slice(b.Start, -1),
+            //b => b.Slice(b.Start, 0),
             b => b.Slice(b.Start, 101),
-            b => b.Slice(0, 70).Slice(b.End, b.End),
+            //b => b.Slice(b.Start, b.Start),
+            //b => b.Slice(b.Start, b.End),
+
+            //b => b.Slice(b.End),
+            b => b.Slice(b.End, -1),
+            //b => b.Slice(b.End, 0),
+            b => b.Slice(b.End, 1),
+            b => b.Slice(b.End, b.Start),
+            //b => b.Slice(b.End, b.End),
+
+            //b => b.Slice(0, 70).Slice(0, b.Start),
+            b => b.Slice(0, 70).Slice(0, b.End),
+            //b => b.Slice(0, 70).Slice(b.Start),
+            //b => b.Slice(0, 70).Slice(b.Start, b.Start),
             b => b.Slice(0, 70).Slice(b.Start, b.End),
-            b => b.Slice(0, 70).Slice(0, b.End)
+            b => b.Slice(0, 70).Slice(b.End),
+            b => b.Slice(0, 70).Slice(b.End, b.Start),
+            b => b.Slice(0, 70).Slice(b.End, b.End),
+
+            //b => b.Slice(b.Start, 70).Slice(0, b.Start),
+            b => b.Slice(b.Start, 70).Slice(0, b.End),
+            //b => b.Slice(b.Start, 70).Slice(b.Start),
+            //b => b.Slice(b.Start, 70).Slice(b.Start, b.Start),
+            b => b.Slice(b.Start, 70).Slice(b.Start, b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End, b.Start),
+            b => b.Slice(b.Start, 70).Slice(b.End, b.End),
+
+            b => b.Slice(30, 40).Slice(0, b.Start),
+            b => b.Slice(30, 40).Slice(0, b.End),
+            b => b.Slice(30, 40).Slice(b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, b.End),
+            b => b.Slice(30, 40).Slice(b.End),
+            b => b.Slice(30, 40).Slice(b.End, b.Start),
+            b => b.Slice(30, 40).Slice(b.End, b.End),
+
+            b => b.Slice(70, 30).Slice(0, b.Start),
+            //b => b.Slice(70, 30).Slice(0, b.End),
+            b => b.Slice(70, 30).Slice(b.Start),
+            b => b.Slice(70, 30).Slice(b.Start, b.Start),
+            b => b.Slice(70, 30).Slice(b.Start, b.End),
+            //b => b.Slice(70, 30).Slice(b.End),
+            b => b.Slice(70, 30).Slice(b.End, b.Start),
+            //b => b.Slice(70, 30).Slice(b.End, b.End),
+
+            b => b.Slice(70, b.End).Slice(0, b.Start),
+            //b => b.Slice(70, b.End).Slice(0, b.End),
+            b => b.Slice(70, b.End).Slice(b.Start),
+            b => b.Slice(70, b.End).Slice(b.Start, b.Start),
+            b => b.Slice(70, b.End).Slice(b.Start, b.End),
+            //b => b.Slice(70, b.End).Slice(b.End),
+            b => b.Slice(70, b.End).Slice(b.End, b.Start),
+            //b => b.Slice(70, b.End).Slice(b.End, b.End),
         };
     }
 }

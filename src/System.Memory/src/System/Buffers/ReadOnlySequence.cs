@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
 {
@@ -91,65 +92,54 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
             }
 
-            long longLength = endSegment.RunningIndex - startSegment.RunningIndex;
-            long longLength2 = longLength - startIndex + endIndex;
-            if (longLength < 0 || longLength2 < 0)
-                ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
-            if (longLength2 == 0)
-                goto Empty;
+            _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
+            _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
 
-            if (startIndex == 0)
+            if (startSegment == endSegment)
             {
-                // Truncate empty segments
-                while (startSegment != endSegment)
-                {
-                    Debug.Assert(startSegment.Next != null);
-                    if (startSegment.Next.RunningIndex != startSegment.RunningIndex)
-                        break;
-                    startSegment = startSegment.Next;
-                }
-            }
-
-            if (startSegment != endSegment)
-            {
-                _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(startIndex));
-                _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(endIndex));
+                if (endIndex < startIndex)
+                    ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
                 return;
             }
 
-            ReadOnlyMemory<T> memory = startSegment.Memory;
-            if (MemoryMarshal.TryGetOwnedMemory(memory, out OwnedMemory<T> ownedMemory, out int index, out int _))
-            {
-                _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index + startIndex));
-                _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(index + endIndex));
-            }
-            else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
-            {
-                T[] array = segment.Array;
-                int offset = segment.Offset;
-                _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(offset + startIndex));
-                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(offset + endIndex));
-            }
-            else if (typeof(T) == typeof(char))
-            {
-                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out _))
-                    ThrowHelper.ThrowInvalidOperationException();
+            long longLength = endSegment.RunningIndex - startSegment.RunningIndex;
+            if (longLength < 0)
+                ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
 
-                _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start + startIndex));
-                _sequenceEnd = new SequencePosition(text, ReadOnlySequence.StringToSequenceEnd(start + endIndex));
-            }
-            else
+            if (startIndex == startSegment.Memory.Length)
             {
-                // Should never be reached
-                ThrowHelper.ThrowInvalidOperationException();
-                goto Empty;
-            }
-            return;
+                _sequenceStart = SeekStart(_sequenceStart, _sequenceEnd, 0);
+                Debug.Assert(_sequenceStart.GetObject() != startSegment);
+                Debug.Assert(_sequenceStart.GetInteger() == 0);
 
-        Empty:
-            T[] emptyArray = Array.Empty<T>();
-            _sequenceStart = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceStart(0));
-            _sequenceEnd = new SequencePosition(emptyArray, ReadOnlySequence.ArrayToSequenceEnd(0));
+                startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceStart.GetObject());
+#pragma warning disable 162
+                if (ReadOnlySequence.SegmentStartMask != 0)
+                    _sequenceStart = new SequencePosition(startSegment, ReadOnlySequence.SegmentToSequenceStart(0));
+#pragma warning restore 162
+
+                if (startSegment == endSegment)
+                    return;
+            }
+
+            if (endIndex == 0)
+            {
+                long longLength2 = longLength - startIndex + endIndex;
+                if (longLength < 0)
+                    ThrowHelper.ThrowArgumentValidationException(startSegment, startIndex, endSegment);
+
+                _sequenceEnd = SeekEnd(_sequenceStart, _sequenceEnd, longLength2);
+                Debug.Assert(_sequenceEnd.GetObject() != endSegment);
+                Debug.Assert(_sequenceEnd.GetInteger() > 0);
+
+#pragma warning disable 162
+                if (ReadOnlySequence.SegmentStartMask != 0)
+                {
+                    endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceEnd.GetObject());
+                    _sequenceEnd = new SequencePosition(endSegment, ReadOnlySequence.SegmentToSequenceEnd(_sequenceEnd.GetInteger()));
+                }
+#pragma warning restore 162
+            }
         }
 
         /// <summary>
@@ -289,8 +279,8 @@ namespace System.Buffers
             if (start < 0 || length < 0)
                 ThrowHelper.ThrowArgumentValidationException(start);
 
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-            SequencePosition end = SeekFirst(begin, _sequenceEnd, length);
+            SequencePosition begin = SeekStart(_sequenceStart, _sequenceEnd, start);
+            SequencePosition end = SeekEnd(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -303,9 +293,10 @@ namespace System.Buffers
         {
             if (start < 0)
                 ThrowHelper.ThrowArgumentValidationException(start);
+            BoundsCheck(_sequenceStart, end);
             BoundsCheck(end, _sequenceEnd);
 
-            SequencePosition begin = Seek(_sequenceStart, end, start);
+            SequencePosition begin = SeekStart(_sequenceStart, end, start);
             return SliceImpl(begin, end);
         }
 
@@ -318,9 +309,10 @@ namespace System.Buffers
         {
             if (length < 0)
                 ThrowHelper.ThrowArgumentValidationException(0);
+            BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = SeekFirst(start, _sequenceEnd, length);
+            SequencePosition end = SeekEnd(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 
@@ -334,8 +326,8 @@ namespace System.Buffers
             if (start < 0 || length < 0)
                 ThrowHelper.ThrowArgumentValidationException(start);
 
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-            SequencePosition end = SeekFirst(begin, _sequenceEnd, length);
+            SequencePosition begin = SeekStart(_sequenceStart, _sequenceEnd, start);
+            SequencePosition end = SeekEnd(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
         }
 
@@ -348,9 +340,10 @@ namespace System.Buffers
         {
             if (start < 0)
                 ThrowHelper.ThrowArgumentValidationException(start);
+            BoundsCheck(_sequenceStart, end);
             BoundsCheck(end, _sequenceEnd);
 
-            SequencePosition begin = Seek(_sequenceStart, end, start);
+            SequencePosition begin = SeekStart(_sequenceStart, end, start);
             return SliceImpl(begin, end);
         }
 
@@ -363,9 +356,10 @@ namespace System.Buffers
         {
             if (length < 0)
                 ThrowHelper.ThrowArgumentValidationException(0);
+            BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, _sequenceEnd);
 
-            SequencePosition end = SeekFirst(start, _sequenceEnd, length);
+            SequencePosition end = SeekEnd(start, _sequenceEnd, length);
             return SliceImpl(start, end);
         }
 
@@ -376,8 +370,9 @@ namespace System.Buffers
         /// <param name="end">The ending (inclusive) <see cref="SequencePosition"/> of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, SequencePosition end)
         {
-            BoundsCheck(end, _sequenceEnd);
+            BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, end);
+            BoundsCheck(end, _sequenceEnd);
 
             return SliceImpl(start, end);
         }
@@ -388,6 +383,7 @@ namespace System.Buffers
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
+            BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, _sequenceEnd);
 
             return SliceImpl(start, _sequenceEnd);
@@ -404,7 +400,7 @@ namespace System.Buffers
             if (start == 0)
                 return this;
 
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
+            SequencePosition begin = SeekStart(_sequenceStart, _sequenceEnd, start);
             return SliceImpl(begin, _sequenceEnd);
         }
 
@@ -429,7 +425,7 @@ namespace System.Buffers
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-            return Seek(origin, _sequenceEnd, offset);
+            return SeekEnd(origin, _sequenceEnd, offset);
         }
 
         /// <summary>
@@ -449,17 +445,51 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition begin, in SequencePosition end)
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
         {
             // In this method we reset high order bits from indices
             // of positions that were passed in
             // and apply type bits specific for current ReadOnlySequence type
 
+            object startObject = start.GetObject();
+            int startIndex = start.GetInteger() & ReadOnlySequence.IndexBitMask;
+            object endObject = end.GetObject();
+            int endIndex = end.GetInteger() & ReadOnlySequence.IndexBitMask;
+
+            if (startObject != endObject)
+            {
+                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                if (startIndex == startSegment.Memory.Length)
+                {
+                    SequencePosition begin = SeekStart(start, end, 0);
+                    Debug.Assert(begin.GetObject() != startSegment);
+                    Debug.Assert(begin.GetInteger() == 0);
+
+                    startObject = begin.GetObject();
+                    startIndex = 0;
+                    if (startObject == endObject)
+                        goto Return;
+                }
+
+                if (endIndex == 0)
+                {
+                    startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                    var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+                    long longLength = endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex;
+
+                    SequencePosition finish = SeekEnd(start, end, longLength);
+                    Debug.Assert(finish.GetObject() != endSegment);
+                    Debug.Assert(finish.GetInteger() > 0);
+
+                    endObject = finish.GetObject();
+                    endIndex = finish.GetInteger();
+                }
+            }
+
+        Return:
             return new ReadOnlySequence<T>(
-                begin.GetObject(),
-                begin.GetInteger() & ReadOnlySequence.IndexBitMask | (Start.GetInteger() & ReadOnlySequence.FlagBitMask),
-                end.GetObject(),
-                end.GetInteger() & ReadOnlySequence.IndexBitMask | (End.GetInteger() & ReadOnlySequence.FlagBitMask)
+                startObject, startIndex | (Start.GetInteger() & ReadOnlySequence.FlagBitMask),
+                endObject, endIndex | (End.GetInteger() & ReadOnlySequence.FlagBitMask)
             );
         }
 
