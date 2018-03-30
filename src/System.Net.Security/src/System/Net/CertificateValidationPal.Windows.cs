@@ -185,17 +185,10 @@ namespace System.Net
             X509Store store = new X509Store(StoreName.My, storeLocation);
 
             // For app-compat We want to ensure the store is opened under the **process** account.
-            try
+            WindowsIdentity.RunImpersonated(SafeAccessTokenHandle.InvalidHandle, () =>
             {
-                WindowsIdentity.RunImpersonated(SafeAccessTokenHandle.InvalidHandle, () =>
-                {
-                    store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-                });
-            }
-            catch
-            {
-                throw;
-            }
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            });
 
             return store;
         }
