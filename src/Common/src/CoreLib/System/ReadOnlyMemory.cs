@@ -241,7 +241,7 @@ namespace System
         {
             if (_index < 0)
             {
-                return ((MemoryManager<T>)_object).Pin((_index & RemoveFlagsBitMask) * Unsafe.SizeOf<T>());
+                return ((MemoryManager<T>)_object).Pin((_index & RemoveFlagsBitMask));
             }
             else if (typeof(T) == typeof(char) && _object is string s)
             {

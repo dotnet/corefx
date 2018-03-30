@@ -396,33 +396,6 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void Ctor_OwnedMemory_Offset()
-        {
-            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            var buffer = new ReadOnlySequence<byte>(ownedMemory, 2, 3);
-            Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
-        }
-
-        [Fact]
-        public void Ctor_OwnedMemory_NoOffset()
-        {
-            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            var buffer = new ReadOnlySequence<byte>(ownedMemory);
-            Assert.Equal(buffer.ToArray(), new byte[] { 1, 2, 3, 4, 5 });
-        }
-
-        [Fact]
-        public void Ctor_OwnedMemory_ValidatesArguments()
-        {
-            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 6, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 4, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, -4, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySequence<byte>(ownedMemory, 4, -2));
-            Assert.Throws<ArgumentNullException>(() => new ReadOnlySequence<byte>((CustomMemoryForTest<byte>)null, 4, 2));
-        }
-
-        [Fact]
         public void Ctor_Memory()
         {
             var memory = new ReadOnlyMemory<byte>(new byte[] { 1, 2, 3, 4, 5 });

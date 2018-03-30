@@ -139,7 +139,7 @@ namespace System.MemoryTests
         }
 
         [Fact]
-        public static void MemoryFromMemoryManagerAfterDispose()
+        public static void SpanFromMemoryManagerAfterDispose()
         {
             int[] a = { 91, 92, -93, 94 };
             MemoryManager<int> manager;
@@ -147,7 +147,7 @@ namespace System.MemoryTests
             {
 
             }
-            Assert.Throws<ObjectDisposedException>(() => manager.Memory);
+            Assert.Throws<ObjectDisposedException>(() => manager.GetSpan());
         }
     }
 

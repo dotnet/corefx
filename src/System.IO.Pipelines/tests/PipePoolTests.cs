@@ -16,16 +16,16 @@ namespace System.IO.Pipelines.Tests
             public int DisposedBlocks { get; set; }
             public int CurrentlyRentedBlocks { get; set; }
 
-            public override OwnedMemory<byte> Rent(int size)
+            public override IMemoryOwner<byte> Rent(int size)
             {
-                return new DisposeTrackingOwnedMemory(new byte[size], this);
+                return new DisposeTrackingMemoryManager(new byte[size], this);
             }
 
             protected override void Dispose(bool disposing)
             {
             }
 
-            private class DisposeTrackingOwnedMemory : OwnedMemory<byte>
+            private class DisposeTrackingMemoryManager : MemoryManager<byte>
             {
                 private byte[] _array;
 
@@ -33,7 +33,7 @@ namespace System.IO.Pipelines.Tests
 
                 private int _refCount = 1;
 
-                public DisposeTrackingOwnedMemory(byte[] array, DisposeTrackingBufferPool bufferPool)
+                public DisposeTrackingMemoryManager(byte[] array, DisposeTrackingBufferPool bufferPool)
                 {
                     _array = array;
                     _bufferPool = bufferPool;
@@ -42,22 +42,13 @@ namespace System.IO.Pipelines.Tests
 
                 public override int Length => _array.Length;
 
-                public override Span<byte> Span
+                public bool IsDisposed => _array == null;
+
+                protected bool IsRetained => _refCount > 0;
+
+                public override MemoryHandle Pin(int elementIndex = 0)
                 {
-                    get
-                    {
-                        if (IsDisposed)
-                            throw new ObjectDisposedException(nameof(DisposeTrackingBufferPool));
-                        return _array;
-                    }
-                }
-
-                public override bool IsDisposed => _array == null;
-
-                protected override bool IsRetained => _refCount > 0;
-
-                public override MemoryHandle Pin(int byteOffset = 0)
-                {
+                    _refCount++;
                     throw new NotImplementedException();
                 }
 
@@ -80,17 +71,18 @@ namespace System.IO.Pipelines.Tests
                     _array = null;
                 }
 
-                public override bool Release()
+                public override Span<byte> GetSpan()
+                {
+                    if (IsDisposed)
+                        throw new ObjectDisposedException(nameof(DisposeTrackingBufferPool));
+                    return _array;
+                }
+
+                public override void Unpin()
                 {
                     _bufferPool.ReturnedBlocks++;
                     _bufferPool.CurrentlyRentedBlocks--;
                     _refCount--;
-                    return IsRetained;
-                }
-
-                public override void Retain()
-                {
-                    _refCount++;
                 }
             }
         }

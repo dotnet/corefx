@@ -63,25 +63,6 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void Ctor_OwnedMemory_Offset()
-        {
-            var ownedMemory = new CustomMemoryForTest<byte>(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
-            var buffer = new ReadOnlySequence<byte>(ownedMemory, 2, 3);
-
-            Assert.True(SequenceMarshal.TryGetMemoryManager(buffer, out MemoryManager<byte> newOwnedMemory, out int start, out int length));
-            Assert.Equal(ownedMemory, newOwnedMemory);
-            Assert.Equal(2, start);
-            Assert.Equal(3, length);
-
-            Assert.False(SequenceMarshal.TryGetReadOnlySequenceSegment(buffer, out _, out _, out _, out _));
-            Assert.False(SequenceMarshal.TryGetArray(buffer, out _));
-
-            // OwnedMemory can be retrieved with TryGetReadOnlyMemory
-            Assert.True(SequenceMarshal.TryGetReadOnlyMemory(buffer, out ReadOnlyMemory<byte> newMemory));
-            Assert.Equal(new byte[] { 3, 4, 5 }, newMemory.ToArray());
-        }
-
-        [Fact]
         public void Ctor_IMemoryList_SingleBlock()
         {
             var memoryListSegment = new BufferSegment<byte>(new byte[] { 1, 2, 3, 4, 5 });

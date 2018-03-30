@@ -78,7 +78,7 @@ namespace System.IO.Pipelines
             AvailableMemory = default;
         }
 
-        internal IMemoryOwner<byte> IMemoryOwner => _memoryOwner;
+        internal IMemoryOwner<byte> MemoryOwner => _memoryOwner;
 
         public Memory<byte> AvailableMemory { get; private set; }
 
