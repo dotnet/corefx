@@ -191,6 +191,27 @@ namespace System.Tests
             }
         }
 
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [Fact]
+        public void FailFast_InnerExceptionStackTrace()
+        {
+            var options = new RemoteInvokeOptions
+            {
+                CollectConsoleOutput = true,
+            };
+
+            using (RemoteInvokeHandle handle = RemoteInvoke(() => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; }, new RemoteInvokeOptions { CollectConsoleOutput = true }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                String consoleOutput = p.StandardError.ReadToEnd();
+                Assert.True(consoleOutput.Contains("Exception details:"));
+                Assert.True(consoleOutput.Contains("ArgumentException"));
+                Assert.True(consoleOutput.Contains("bad arg"));
+            }
+        }
+
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
         public void GetFolderPath_Unix_PersonalIsHomeAndUserProfile()

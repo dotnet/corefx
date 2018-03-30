@@ -294,6 +294,7 @@ namespace System.Diagnostics
         public ProcessStartInfo StartInfo { get; set; } = new ProcessStartInfo();
         public bool EnableProfiling { get; set; } = true;
         public bool CheckExitCode { get; set; } = true;
+        public bool CollectConsoleOutput { get; set; } = false;
 
         public int TimeOut {get; set; } = RemoteExecutorTestBase.FailWaitTimeoutMilliseconds;
         public int ExpectedExitCode { get; set; } = RemoteExecutorTestBase.SuccessExitCode;
