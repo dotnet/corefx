@@ -163,6 +163,7 @@
     <Compile Include="Memory\GetHashCode.cs" />
     <Compile Include="Memory\ImplicitConversion.cs" />
     <Compile Include="Memory\OwnedMemory.cs" />
+    <Compile Include="ReadOnlyMemory\Pin.cs" />
     <Compile Include="Memory\Slice.cs" />
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\Strings.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="ReadOnlyMemory\Equality.cs" />
     <Compile Include="ReadOnlyMemory\GetHashCode.cs" />
     <Compile Include="ReadOnlyMemory\ImplicitConversion.cs" />
+    <Compile Include="ReadOnlyMemory\Pin.cs" />
     <Compile Include="ReadOnlyMemory\Slice.cs" />
     <Compile Include="ReadOnlyMemory\Span.cs" />
     <Compile Include="ReadOnlyMemory\Strings.cs" />
