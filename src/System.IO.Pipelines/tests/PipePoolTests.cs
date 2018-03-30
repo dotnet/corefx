@@ -88,6 +88,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public async Task AdvanceToEndReturnsAllBlocks()
         {
             var pool = new DisposeTrackingBufferPool();
@@ -110,6 +111,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public async Task CanWriteAfterReturningMultipleBlocks()
         {
             var pool = new DisposeTrackingBufferPool();
@@ -140,6 +142,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public async Task MultipleCompleteReaderWriterCauseDisposeOnlyOnce()
         {
             var pool = new DisposeTrackingBufferPool();
@@ -159,6 +162,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public async Task RentsMinimumSegmentSize()
         {
             var pool = new DisposeTrackingBufferPool();
@@ -181,6 +185,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public void ReturnsWriteHeadOnComplete()
         {
             var pool = new DisposeTrackingBufferPool();
@@ -195,6 +200,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        [ActiveIssue(28640)]
         public void ReturnsWriteHeadWhenRequestingLargerBlock()
         {
             var pool = new DisposeTrackingBufferPool();
