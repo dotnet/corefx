@@ -46,6 +46,11 @@ namespace System.IO.Pipelines.Tests
                     throw new NotImplementedException();
                 }
 
+                public override void Unpin()
+                {
+                    throw new NotImplementedException();
+                }
+
                 protected override bool TryGetArray(out ArraySegment<byte> segment)
                 {
                     if (IsDisposed)
