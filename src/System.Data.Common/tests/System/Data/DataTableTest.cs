@@ -1250,8 +1250,12 @@ Assert.False(true);
                 Assert.Equal(typeof(ConstraintException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "id" + @"[\p{Pf}\p{Po}]"));
-                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "3" + @"[\p{Pf}\p{Po}]"));
+
+                // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                Assert.Matches(@"[\p{Pi}\p{Po}]" + "id" + @"[\p{Pf}\p{Po}]", ex.Message);
+                Assert.Matches(@"[\p{Pi}\p{Po}]" + "3" + @"[\p{Pf}\p{Po}]", ex.Message);
             }
 
             // check row states
@@ -1354,8 +1358,12 @@ Assert.False(true);
                 Assert.Equal(typeof(ConstraintException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "col" + @"[\p{Pf}\p{Po}]"));
-                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "1" + @"[\p{Pf}\p{Po}]"));
+
+                // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                Assert.Matches(@"[\p{Pi}\p{Po}]" + "col" + @"[\p{Pf}\p{Po}]", ex.Message);
+                Assert.Matches(@"[\p{Pi}\p{Po}]" + "1" + @"[\p{Pf}\p{Po}]", ex.Message);
             }
         }
 

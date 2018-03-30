@@ -651,7 +651,12 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
                 Assert.NotNull(ex.Message);
-                Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
+
+                // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                Assert.Matches(@"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]", ex.Message);
+
                 Assert.Null(ex.ParamName);
             }
         }
@@ -1521,7 +1526,12 @@ namespace System.Data.Tests
                     Assert.Equal(typeof(ArgumentException), ex.GetType());
                     Assert.Null(ex.InnerException);
                     Assert.NotNull(ex.Message);
-                    Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
+
+                    // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                    // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                    // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                    Assert.Matches(@"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]", ex.Message);
+
                     Assert.Null(ex.ParamName);
                 }
             }
@@ -1700,7 +1710,12 @@ namespace System.Data.Tests
                     Assert.Equal(typeof(ArgumentException), ex.GetType());
                     Assert.Null(ex.InnerException);
                     Assert.NotNull(ex.Message);
-                    Assert.True(Regex.IsMatch(ex.Message, @"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]"));
+
+                    // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
+                    // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
+                    // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
+                    Assert.Matches(@"[\p{Pi}\p{Po}]" + "Table1" + @"[\p{Pf}\p{Po}]", ex.Message);
+
                     Assert.Null(ex.ParamName);
                 }
             }
