@@ -108,32 +108,38 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
-        public void ConnectionTimeoutTestWithThread()
+        public static void ConnectionTimeoutTestWithThread()
         {
-            int timeoutSec = 5;
-            string connStrNotAvailable = $"Server=tcp:fakeServer,1433;uid=fakeuser;pwd=fakepwd;Connection Timeout={timeoutSec}";
+            const int timeoutSec = 5;
+            const int numOfTry = 2;
+            const int numOfThreads = 5;
 
-            List<ConnectionWorker> list = new List<ConnectionWorker>();
-            for (int i = 0; i < 10; ++i)
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = "invalidhost";
+            builder.IntegratedSecurity = true;
+            builder.ConnectTimeout = timeoutSec;
+            string connStrNotAvailable = builder.ConnectionString;
+
+            for (int i = 0; i < numOfThreads; ++i)
             {
-                list.Add(new ConnectionWorker(connStrNotAvailable));
+                new ConnectionWorker(connStrNotAvailable, numOfTry);
             }
 
             ConnectionWorker.Start();
             ConnectionWorker.Stop();
 
-            double theMax = 0;
-            foreach (ConnectionWorker w in list)
+            double timeTotal = 0;
+            double timeElapsed = 0;
+
+            foreach (ConnectionWorker w in ConnectionWorker.WorkerList)
             {
-                if (theMax < w.MaxTimeElapsed)
-                {
-                    theMax = w.MaxTimeElapsed;
-                }
+                timeTotal += w.TimeElapsed;
             }
+            timeElapsed = timeTotal / Convert.ToDouble(ConnectionWorker.WorkerList.Count);
 
-            int threshold = (timeoutSec + 1) * 1000;
+            int threshold = timeoutSec * numOfTry * 2 * 1000;
 
-            Console.WriteLine($"ConnectionTimeoutTestWithThread: Elapsed Time {theMax} and threshold {threshold}");
+            Assert.True(timeElapsed < threshold);
         }
 
         [OuterLoop("Can take up to 4 seconds")]
@@ -198,65 +204,64 @@ namespace System.Data.SqlClient.Tests
 
         public class ConnectionWorker
         {
-            private static ManualResetEventSlim startEvent = new ManualResetEventSlim(false);
             private static List<ConnectionWorker> workerList = new List<ConnectionWorker>();
-            private ManualResetEventSlim doneEvent = new ManualResetEventSlim(false);
-            private double maxTimeElapsed;
-            private Thread thread;
-            private string connectionString;
+            private ManualResetEventSlim _doneEvent = new ManualResetEventSlim(false);
+            private double _timeElapsed;
+            private Thread _thread;
+            private string _connectionString;
+            private int _numOfTry;
 
-            public ConnectionWorker(string connectionString)
+            public ConnectionWorker(string connectionString, int numOfTry)
             {
                 workerList.Add(this);
-                this.connectionString = connectionString;
-                thread = new Thread(new ThreadStart(SqlConnectionOpen));
-                thread.Start();
+                _connectionString = connectionString;
+                _numOfTry = numOfTry;
+                _thread = new Thread(new ThreadStart(SqlConnectionOpen));
             }
 
-            public double MaxTimeElapsed
-            {
-                get
-                {
-                    return maxTimeElapsed;
-                }
-            }
+            public static List<ConnectionWorker> WorkerList => workerList;
+
+            public double TimeElapsed => _timeElapsed;
 
             public static void Start()
             {
-                startEvent.Set();
+                foreach (ConnectionWorker w in workerList)
+                {
+                    w._thread.Start();
+                }
             }
 
             public static void Stop()
             {
                 foreach (ConnectionWorker w in workerList)
                 {
-                    w.doneEvent.Wait();
+                    w._doneEvent.Wait();
                 }
             }
 
             public void SqlConnectionOpen()
             {
-                startEvent.Wait();
-
                 Stopwatch sw = new Stopwatch();
-                using (SqlConnection con = new SqlConnection(connectionString))
+                double totalTime = 0;
+                for (int i = 0; i < _numOfTry; ++i)
                 {
-                    sw.Start();
-                    try
+                    using (SqlConnection con = new SqlConnection(_connectionString))
                     {
-                        con.Open();
+                        sw.Start();
+                        try
+                        {
+                            con.Open();
+                        }
+                        catch { }
+                        sw.Stop();
                     }
-                    catch { }
-                    sw.Stop();
+                    totalTime += sw.Elapsed.TotalMilliseconds;
+                    sw.Reset();
                 }
 
-                double elapsed = sw.Elapsed.TotalMilliseconds;
-                if (maxTimeElapsed < elapsed)
-                {
-                    maxTimeElapsed = elapsed;
-                }
+                _timeElapsed = totalTime / Convert.ToDouble(_numOfTry);
 
-                doneEvent.Set();
+                _doneEvent.Set();
             }
         }
     }
