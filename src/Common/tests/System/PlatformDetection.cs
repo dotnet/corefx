@@ -21,7 +21,6 @@ namespace System
         public static bool IsUap => IsWinRT || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
         public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
-        public static bool IsNetCore => RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
@@ -37,18 +36,6 @@ namespace System
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
-        public static bool IsWindows10InsiderPreviewBuild16215OrGreater => IsWindows &&
-            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16215;
-        public static bool IsWindows10Version16251OrGreater => IsWindows &&
-            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16251;
-        public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
-        public static bool IsNotArmProcess => !IsArmProcess;
-
-        // Officially, .Net Native only supports processes running in an AppContainer. However, the majority of tests still work fine 
-        // in a normal Win32 process and we often do so as running in an AppContainer imposes a substantial tax in debuggability
-        // and investigatability. This predicate is used in ConditionalFacts to disable the specific tests that really need to be
-        // running in AppContainer when running on .NetNative.
-        public static bool IsNotNetNativeRunningAsConsoleApp => !(IsNetNative && !IsWinRT);
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
@@ -166,10 +153,6 @@ namespace System
             }
         }
 
-        public static bool IsNotWinRT => !IsWinRT;
-        public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
-        public static bool IsNotWinRTSupported => !IsWinRTSupported;
-
         private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
 
         public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
@@ -275,7 +258,7 @@ namespace System
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                DistroInfo v = ParseOsReleaseFile();
+                IdVersionPair v = ParseOsReleaseFile();
                 if (v.Id == distroId && (versionId == null || v.VersionId == versionId))
                 {
                     return true;
@@ -327,12 +310,100 @@ namespace System
             return true;
         }
 
-        private struct DistroInfo
+        private static IdVersionPair ParseOsReleaseFile()
+        {
+            Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+
+            IdVersionPair ret = new IdVersionPair();
+            ret.Id = "";
+            ret.VersionId = "";
+
+            if (File.Exists("/etc/os-release"))
+            {
+                foreach (string line in File.ReadLines("/etc/os-release"))
+                {
+                    if (line.StartsWith("ID=", System.StringComparison.Ordinal))
+                    {
+                        ret.Id = RemoveQuotes(line.Substring("ID=".Length));
+                    }
+                    else if (line.StartsWith("VERSION_ID=", System.StringComparison.Ordinal))
+                    {
+                        ret.VersionId = RemoveQuotes(line.Substring("VERSION_ID=".Length));
+                    }
+                }
+            }
+            else 
+            {
+                string fileName = null;
+                if (File.Exists("/etc/redhat-release"))
+                    fileName = "/etc/redhat-release";
+
+                if (fileName == null && File.Exists("/etc/system-release"))
+                    fileName = "/etc/system-release";
+                
+                if (fileName != null)
+                {
+                    // Parse the format like the following line:
+                    // Red Hat Enterprise Linux Server release 7.3 (Maipo)
+                    using (StreamReader file = new StreamReader(fileName))
+                    {
+                        string line = file.ReadLine();
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            if (line.StartsWith("Red Hat Enterprise Linux", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhel";
+                            }
+                            else if (line.StartsWith("Centos", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "centos";
+                            }
+                            else 
+                            {
+                                // automatically generate the distro label
+                                string [] words = line.Split(' ');
+                                StringBuilder sb = new StringBuilder();
+
+                                foreach (string word in words)
+                                {
+                                    if (word.Length > 0)
+                                    {
+                                        if (Char.IsNumber(word[0]) || 
+                                            word.Equals("release", StringComparison.OrdinalIgnoreCase) ||
+                                            word.Equals("server", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                break;
+                                            }
+                                        sb.Append(Char.ToLower(word[0]));
+                                    }
+                                }
+                                ret.Id = sb.ToString();
+                            }
+
+                            int i = 0;
+                            while (i < line.Length && !Char.IsNumber(line[i])) // stop at first number
+                                i++;
+
+                            if (i < line.Length)
+                            {
+                                int j = i + 1;
+                                while (j < line.Length && (Char.IsNumber(line[j]) || line[j] == '.'))
+                                    j++;
+
+                                ret.VersionId = line.Substring(i, j - i);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        private struct IdVersionPair
         {
             public string Id { get; set; }
             public string VersionId { get; set; }
-            public string Version { get; set; }
-            public string PrettyName { get; set; }
         }
 
         private static int GetWindowsVersion()
@@ -493,9 +564,6 @@ namespace System
         private static volatile Tuple<bool> s_lazyNonZeroLowerBoundArraySupported;
 
         public static bool IsReflectionEmitSupported = !PlatformDetection.IsNetNative;
-
-        // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
-        public static bool IsInvokingStaticConstructorsSupported => !PlatformDetection.IsNetNative;
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
