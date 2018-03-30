@@ -21,9 +21,7 @@ namespace System.Xml
         private static UTF8Encoding UTF8BomThrowing =>
             s_utf8BomThrowing ?? (s_utf8BomThrowing = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true, throwOnInvalidBytes: true));
 
-        //
         // Private helper types
-        //
         // ParsingFunction = what should the reader do when the next Read() is called
         private enum ParsingFunction
         {
