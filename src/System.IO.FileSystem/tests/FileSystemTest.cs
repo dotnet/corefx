@@ -60,44 +60,6 @@ namespace System.IO.Tests
         }
 
         /// <summary>
-        /// Do a test action against read only file system (for Unix).
-        /// </summary>
-        /// <param name="testAction">Test action to perform. The string argument will be read only directory.</param>
-        /// <param name="subDirectoryName">Optional subdirectory to create.</param>
-        protected void ReadOnly_FileSystemHelper(Action<string> testAction, string subDirectoryName = null)
-        {
-            // Set up read only file system
-            // Set up the source directory
-            string sourceDirectory = GetTestFilePath();
-            if (subDirectoryName == null)
-            {
-                Directory.CreateDirectory(sourceDirectory);
-            }
-            else
-            {
-                string sourceSubDirectory = Path.Combine(sourceDirectory, subDirectoryName);
-                Directory.CreateDirectory(sourceSubDirectory);
-            }
-
-            // Set up the target directory and mount as a read only
-            string readOnlyDirectory = GetTestFilePath();
-            Directory.CreateDirectory(readOnlyDirectory);
-
-            Assert.Equal(0, AdminHelpers.RunAsSudo($"mount --bind {sourceDirectory} {readOnlyDirectory}"));
-
-            try
-            {
-                Assert.Equal(0, AdminHelpers.RunAsSudo($"mount -o remount,ro,bind {sourceDirectory} {readOnlyDirectory}"));
-                testAction(readOnlyDirectory);
-            }
-            finally
-            {
-                // Clean up test environment
-                Assert.Equal(0, AdminHelpers.RunAsSudo($"umount {readOnlyDirectory}"));
-            }
-        }
-
-        /// <summary>
         /// Runs the given command as sudo
         /// </summary>
         /// <param name="commandLine">The command line to run as sudo</param>
