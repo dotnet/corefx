@@ -195,12 +195,9 @@ namespace System.Tests
         [Fact]
         public void FailFast_InnerExceptionStackTrace()
         {
-            var options = new RemoteInvokeOptions
-            {
-                CollectConsoleOutput = true,
-            };
-
-            using (RemoteInvokeHandle handle = RemoteInvoke(() => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; }, new RemoteInvokeOptions { CollectConsoleOutput = true }))
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; },
+                new RemoteInvokeOptions { CollectConsoleOutput = true }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
@@ -209,6 +206,34 @@ namespace System.Tests
                 Assert.True(consoleOutput.Contains("Exception details:"));
                 Assert.True(consoleOutput.Contains("ArgumentException"));
                 Assert.True(consoleOutput.Contains("bad arg"));
+            }
+            // Test using another type of exception
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return SuccessExitCode; },
+                new RemoteInvokeOptions { CollectConsoleOutput = true }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                String consoleOutput = p.StandardError.ReadToEnd();
+                Assert.True(consoleOutput.Contains("Exception details:"));
+                Assert.True(consoleOutput.Contains("StackOverflowException"));
+                Assert.True(consoleOutput.Contains("SO exception"));
+            }
+            // Test if inner exception details are also logged
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return SuccessExitCode; },
+                new RemoteInvokeOptions { CollectConsoleOutput = true }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                String consoleOutput = p.StandardError.ReadToEnd();
+                Assert.True(consoleOutput.Contains("Exception details:"));
+                Assert.True(consoleOutput.Contains("first exception"));
+                Assert.True(consoleOutput.Contains("inner exception"));
+                Assert.True(consoleOutput.Contains("ArgumentException"));
+                Assert.True(consoleOutput.Contains("NullReferenceException"));
             }
         }
 
