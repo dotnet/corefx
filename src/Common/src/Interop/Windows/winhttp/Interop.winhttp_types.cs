@@ -310,5 +310,13 @@ internal partial class Interop
             public uint dwBytesTransferred;
             public WINHTTP_WEB_SOCKET_BUFFER_TYPE eBufferType;
         }
+
+        [Flags]
+        internal enum AutoDetectType
+        {
+            None = 0x0,
+            Dhcp = 0x1, // WINHTTP_AUTO_DETECT_TYPE_DHCP
+            DnsA = 0x2, // WINHTTP_AUTO_DETECT_TYPE_DNS_A
+        }
     }
 }

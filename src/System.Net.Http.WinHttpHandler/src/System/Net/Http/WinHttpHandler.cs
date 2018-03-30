@@ -1014,6 +1014,7 @@ namespace System.Net.Http
                             proxyInfo.Proxy = Marshal.StringToHGlobalUni(proxyString);
                         }
                     }
+                    // If AutoDetect is not set, the result is cached in AutoSettingsUsed.
                     else if (_proxyHelper != null && _proxyHelper.AutoSettingsUsed)
                     {
                         if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))

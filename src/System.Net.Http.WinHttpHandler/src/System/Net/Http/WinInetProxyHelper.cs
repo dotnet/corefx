@@ -14,44 +14,18 @@ namespace System.Net.Http
     internal class WinInetProxyHelper
     {
         private bool _useProxy = false;
+        private bool _scriptDetectionFailed = false;
 
         public WinInetProxyHelper()
         {
-            var proxyConfig = new Interop.WinHttp.WINHTTP_CURRENT_USER_IE_PROXY_CONFIG();
+            // If auto-detect the URL for the proxy auto-config file failed, cache the information.
+            DetectScriptLocation();
 
-            try
+            // Unable to find an auto-config file.
+            // Check whether a proxy server is listed in Internet Explorer's settings.
+            if (_scriptDetectionFailed && string.IsNullOrEmpty(AutoConfigUrl))
             {
-                if (Interop.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(out proxyConfig))
-                {
-                    AutoConfigUrl = Marshal.PtrToStringUni(proxyConfig.AutoConfigUrl);
-                    AutoDetect = proxyConfig.AutoDetect;
-                    Proxy = Marshal.PtrToStringUni(proxyConfig.Proxy);
-                    ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
-
-                    WinHttpTraceHelper.Trace(
-                        "WinInetProxyHelper.ctor: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
-                        AutoConfigUrl,
-                        AutoDetect,
-                        Proxy,
-                        ProxyBypass);
-                    _useProxy = true;
-                }
-                else
-                {
-                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
-                    int lastError = Marshal.GetLastWin32Error();
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: error={0}", lastError);
-                }
-
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: _useProxy={0}", _useProxy);
-            }
-
-            finally
-            {
-                // FreeHGlobal already checks for null pointer before freeing the memory.
-                Marshal.FreeHGlobal(proxyConfig.AutoConfigUrl);
-                Marshal.FreeHGlobal(proxyConfig.Proxy);
-                Marshal.FreeHGlobal(proxyConfig.ProxyBypass);
+                GetIEProxySetting();
             }
         }
 
@@ -88,6 +62,7 @@ namespace System.Net.Http
             proxyInfo.Proxy = IntPtr.Zero;
             proxyInfo.ProxyBypass = IntPtr.Zero;
 
+            // If no proxy is used, skip retriving proxy data.
             if (!_useProxy)
             {
                 return false;
@@ -177,6 +152,98 @@ namespace System.Net.Http
             WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: useProxy={0}", useProxy);
 
             return useProxy;
+        }
+
+        private void DetectScriptLocation()
+        {
+            if (_scriptDetectionFailed || AutoConfigUrl != null)
+            {
+                return;
+            }
+
+            WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery PROXY_AUTO_DETECT_TYPE_DHCP.");
+            AutoConfigUrl = SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType.Dhcp);
+
+            if (AutoConfigUrl == null)
+            {
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery AUTO_DETECT_TYPE_DNS_A.");
+                AutoConfigUrl = SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType.DnsA);
+            }
+            else
+            {
+                // Auto-detect succeed.
+                return;
+            }
+
+            if (AutoConfigUrl == null)
+            {
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Auto discovery failed.");
+                AutoDetect = false;
+                _scriptDetectionFailed = true;
+            }
+        }
+
+        private string SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType discoveryMethod)
+        {
+            string url = null;
+            IntPtr autoProxyUrl = new IntPtr();
+
+            try
+            {
+                bool success = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(discoveryMethod, out autoProxyUrl);
+
+                if (success)
+                {
+                    url = Marshal.PtrToStringUni(autoProxyUrl);
+                    _useProxy = true;
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(autoProxyUrl);
+            }
+
+            return url;
+        }
+
+        private void GetIEProxySetting()
+        {
+            var proxyConfig = new Interop.WinHttp.WINHTTP_CURRENT_USER_IE_PROXY_CONFIG();
+
+            try
+            {
+                if (Interop.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(out proxyConfig))
+                {
+                    AutoConfigUrl = Marshal.PtrToStringUni(proxyConfig.AutoConfigUrl);
+                    AutoDetect = proxyConfig.AutoDetect;
+                    Proxy = Marshal.PtrToStringUni(proxyConfig.Proxy);
+                    ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
+
+                    WinHttpTraceHelper.Trace(
+                        "WinInetProxyHelper.ctor: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
+                        AutoConfigUrl,
+                        AutoDetect,
+                        Proxy,
+                        ProxyBypass);
+
+                    _useProxy = true;
+                }
+                else
+                {
+                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
+                    int lastError = Marshal.GetLastWin32Error();
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: error={0}", lastError);
+                }
+
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: _useProxy={0}", _useProxy);
+            }
+            finally
+            {
+                // FreeHGlobal already checks for null pointer before freeing the memory.
+                Marshal.FreeHGlobal(proxyConfig.AutoConfigUrl);
+                Marshal.FreeHGlobal(proxyConfig.Proxy);
+                Marshal.FreeHGlobal(proxyConfig.ProxyBypass);
+            }
         }
     }
 }
