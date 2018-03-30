@@ -48,8 +48,17 @@ namespace System.Drawing.Tests
             using (var font1 = new Font(fontFamily1, 9))
             using (var font2 = new Font(fontFamily2, 9))
             {
-                Assert.False(font1.Equals(font2));
+                // In some Linux distros all the default fonts live under the same family (Fedora, Centos, Redhat)
+                if (font1.FontFamily.GetHashCode() != font2.FontFamily.GetHashCode())
+                    Assert.False(font1.Equals(font2));
             }
+        }
+
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        public void FontFamily_Equals_NullObject()
+        {
+            FontFamily nullFamily = null;
+            Assert.False(FontFamily.GenericMonospace.Equals(nullFamily));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]

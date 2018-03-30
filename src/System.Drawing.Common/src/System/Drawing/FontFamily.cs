@@ -75,7 +75,6 @@ namespace System.Drawing
 
             int status = SafeNativeMethods.Gdip.GdipCreateFontFamilyFromName(name, new HandleRef(fontCollection, nativeFontCollection), out fontfamily);
 
-
             if (status != SafeNativeMethods.Gdip.Ok)
             {
                 if (_createDefaultOnFail)

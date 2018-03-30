@@ -16,6 +16,7 @@ namespace System.Drawing
                 return true;
             }
 
+            // if obj = null then (obj is FontFamily) = false.
             if (!(obj is FontFamily otherFamily))
             {
                 return false;
@@ -23,7 +24,7 @@ namespace System.Drawing
 
             // In unix FontFamily objects are not singleton so they don't share the same native pointer,
             // the best we have to know if they are the same is FontFamily.Name which gets resolved from the native pointer.
-            return string.Compare(otherFamily.Name, Name, StringComparison.Ordinal) == 0;
+            return Name.Equals(otherFamily.Name, StringComparison.Ordinal);
         }
     }
 }

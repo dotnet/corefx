@@ -16,6 +16,7 @@ namespace System.Drawing
                 return true;
             }
 
+            // if obj = null then (obj is FontFamily) = false.
             if (!(obj is FontFamily otherFamily))
             {
                 return false;
