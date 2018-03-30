@@ -537,7 +537,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #region protected
+#region protected
         /// <summary>
         /// This is the constructor that most users will use to create their eventSource.   It takes 
         /// no parameters.  The ETW provider name and GUID of the EventSource are determined by the EventSource 
@@ -606,6 +606,13 @@ namespace System.Diagnostics.Tracing
         // typed event methods. Dynamically defined events (that use Write) hare defined on the fly and are handled elsewhere.
         private unsafe void DefineEventPipeEvents()
         {
+            // If the EventSource is set to emit all events as TraceLogging events, skip this initialization.
+            // Events will be defined when they are emitted for the first time.
+            if(SelfDescribingEvents)
+            {
+                return;
+            }
+
             Debug.Assert(m_eventData != null);
             Debug.Assert(m_provider != null);
             int cnt = m_eventData.Length;
@@ -615,101 +622,29 @@ namespace System.Diagnostics.Tracing
                 if (eventID == 0)
                     continue;
 
+                byte[] metadata = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(m_eventData[i]);
+                uint metadataLength = (metadata != null) ? (uint)metadata.Length : 0;
+
                 string eventName = m_eventData[i].Name;
                 Int64 keywords = m_eventData[i].Descriptor.Keywords;
                 uint eventVersion = m_eventData[i].Descriptor.Version;
                 uint level = m_eventData[i].Descriptor.Level;
 
-                // evnetID          : 4 bytes
-                // eventName        : (eventName.Length + 1) * 2 bytes
-                // keywords         : 8 bytes
-                // eventVersion     : 4 bytes
-                // level            : 4 bytes
-                // parameterCount   : 4 bytes
-                uint metadataLength = 24 + ((uint)eventName.Length + 1) * 2;
-
-                // Increase the metadataLength for the types of all parameters.
-                metadataLength += (uint)m_eventData[i].Parameters.Length * 4;
-
-                // Increase the metadataLength for the names of all parameters.
-                foreach (var parameter in m_eventData[i].Parameters)
-                {
-                    string parameterName = parameter.Name;
-                    metadataLength = metadataLength + ((uint)parameterName.Length + 1) * 2;
-                }
-
-                byte[] metadata = new byte[metadataLength];
-
-                // Write metadata: evnetID, eventName, keywords, eventVersion, level, parameterCount, param1 type, param1 name...
                 fixed (byte *pMetadata = metadata)
                 {
-                    uint offset = 0;
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, eventID);
-                    fixed(char *pEventName = eventName)
-                    {
-                        WriteToBuffer(pMetadata, metadataLength, ref offset, (byte *)pEventName, ((uint)eventName.Length + 1) * 2);
-                    }
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, keywords);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, eventVersion);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, level);
-                    WriteToBuffer(pMetadata, metadataLength, ref offset, (uint)m_eventData[i].Parameters.Length);
-                    foreach (var parameter in m_eventData[i].Parameters)
-                    {
-                        // Write parameter type.
-                        WriteToBuffer(pMetadata, metadataLength, ref offset, (uint)GetTypeCodeExtended(parameter.ParameterType));
-                        
-                        // Write parameter name.
-                        string parameterName = parameter.Name;
-                        fixed (char *pParameterName = parameterName)
-                        {
-                            WriteToBuffer(pMetadata, metadataLength, ref offset, (byte *)pParameterName, ((uint)parameterName.Length + 1) * 2);
-                        }
-                    }
-                    Debug.Assert(metadataLength == offset);
-                    IntPtr eventHandle = m_provider.m_eventProvider.DefineEventHandle(eventID, eventName, keywords, eventVersion, level, pMetadata, metadataLength);
-                    m_eventData[i].EventHandle = eventHandle; 
+                    IntPtr eventHandle = m_provider.m_eventProvider.DefineEventHandle(
+                        eventID,
+                        eventName,
+                        keywords,
+                        eventVersion,
+                        level,
+                        pMetadata,
+                        metadataLength);
+
+                    Debug.Assert(eventHandle != IntPtr.Zero);
+                    m_eventData[i].EventHandle = eventHandle;
                 }
             }
-        }
-
-        // Copy src to buffer and modify the offset.
-        // Note: We know the buffer size ahead of time to make sure no buffer overflow.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, byte *src, uint srcLength)
-        {
-            Debug.Assert(bufferLength >= (offset + srcLength));
-            for (int i = 0; i < srcLength; i++)
-            {
-                *(byte *)(buffer + offset + i) = *(byte *)(src + i);
-            }
-            offset += srcLength;
-        }
-
-        // Copy uint value to buffer.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, uint value)
-        {
-            Debug.Assert(bufferLength >= (offset + 4));
-            *(uint *)(buffer + offset) = value;
-            offset += 4;
-        }
-
-        // Copy long value to buffer.
-        private static unsafe void WriteToBuffer(byte *buffer, uint bufferLength, ref uint offset, long value)
-        {
-            Debug.Assert(bufferLength >= (offset + 8));
-            *(long *)(buffer + offset) = value;
-            offset += 8;
-        }
-
-        private static TypeCode GetTypeCodeExtended(Type parameterType)
-        {
-            // Guid is not part of TypeCode, we decided to use 17 to represent it, as it's the "free slot" 
-            // see https://github.com/dotnet/coreclr/issues/16105#issuecomment-361749750 for more
-            const TypeCode GuidTypeCode = (TypeCode)17;
-
-            if (parameterType == typeof(Guid)) // Guid is not a part of TypeCode enum
-                return GuidTypeCode;
-
-            return Type.GetTypeCode(parameterType);
         }
 #endif
 
@@ -966,7 +901,7 @@ namespace System.Diagnostics.Tracing
                     EventSource.EventData* descrs = stackalloc EventSource.EventData[2];
                     descrs[0].DataPointer = (IntPtr)string1Bytes;
                     descrs[0].Size = ((arg1.Length + 1) * 2);
-                    descrs[1].Reserved = 0;
+                    descrs[0].Reserved = 0;
                     descrs[1].DataPointer = (IntPtr)(&arg2);
                     descrs[1].Size = 8;
                     descrs[1].Reserved = 0;
@@ -1112,7 +1047,7 @@ namespace System.Diagnostics.Tracing
             /// </summary>
             internal int Reserved { get { return m_Reserved; } set { m_Reserved = value; } }
 
-            #region private
+#region private
             /// <summary>
             /// Initializes the members of this EventData object to point at a previously-pinned
             /// tracelogging-compatible metadata blob.
@@ -1134,7 +1069,7 @@ namespace System.Diagnostics.Tracing
 #pragma warning disable 0649
             internal int m_Reserved;       // Used to pad the size to match the Win32 API
 #pragma warning restore 0649
-            #endregion
+#endregion
         }
 
         /// <summary>
@@ -1300,9 +1235,9 @@ namespace System.Diagnostics.Tracing
             WriteEventVarargs(eventId, &relatedActivityId, args);
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Members
+#region IDisposable Members
         /// <summary>
         /// Disposes of an EventSource.
         /// </summary>
@@ -1357,13 +1292,14 @@ namespace System.Diagnostics.Tracing
         {
             this.Dispose(false);
         }
-        #endregion
+#endregion
 
-        #region private
+#region private
 
         private unsafe void WriteEventRaw(
             string eventName,
             ref EventDescriptor eventDescriptor,
+            IntPtr eventHandle,
             Guid* activityID,
             Guid* relatedActivityID,
             int dataCount,
@@ -1376,7 +1312,7 @@ namespace System.Diagnostics.Tracing
             }
             else
             {
-                if (!m_provider.WriteEventRaw(ref eventDescriptor, activityID, relatedActivityID, dataCount, data))
+                if (!m_provider.WriteEventRaw(ref eventDescriptor, eventHandle, activityID, relatedActivityID, dataCount, data))
                     ThrowEventSourceException(eventName);
             }
 #endif // FEATURE_MANAGED_ETW
@@ -2732,7 +2668,7 @@ namespace System.Diagnostics.Tracing
 
             Debug.Assert(!SelfDescribingEvents);
 
-#if FEATURE_MANAGED_ETW 
+#if FEATURE_MANAGED_ETW
             fixed (byte* dataPtr = rawManifest)
             {
                 // we don't want the manifest to show up in the event log channels so we specify as keywords 

@@ -16,6 +16,8 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Buffers;
+using System.Text;
 
 namespace System.Globalization
 {
@@ -339,7 +341,7 @@ namespace System.Globalization
             if (_invariantMode)
             {
                 if ((options & CompareOptions.IgnoreCase) != 0)
-                    return CompareOrdinalIgnoreCase(string1, 0, string1.Length, string2, 0, string2.Length);
+                    return CompareOrdinalIgnoreCase(string1, string2);
 
                 return String.CompareOrdinal(string1, string2);
             }
@@ -389,15 +391,23 @@ namespace System.Globalization
             return CompareString(string1, string2, options);
         }
 
-        internal virtual int CompareOptionNone(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
+        internal int CompareOptionNone(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
         {
+            // Check for empty span or span from a null string
+            if (string1.Length == 0 || string2.Length == 0)
+                return string1.Length - string2.Length;
+
             return _invariantMode ?
                 string.CompareOrdinal(string1, string2) :
                 CompareString(string1, string2, CompareOptions.None);
         }
 
-        internal virtual int CompareOptionIgnoreCase(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
+        internal int CompareOptionIgnoreCase(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
         {
+            // Check for empty span or span from a null string
+            if (string1.Length == 0 || string2.Length == 0)
+                return string1.Length - string2.Length;
+
             return _invariantMode ?
                 CompareOrdinalIgnoreCase(string1, string2) :
                 CompareString(string1, string2, CompareOptions.IgnoreCase);
@@ -491,35 +501,23 @@ namespace System.Globalization
                 return (1);
             }
 
+            ReadOnlySpan<char> span1 = string1.AsSpan(offset1, length1);
+            ReadOnlySpan<char> span2 = string2.AsSpan(offset2, length2);
+
             if (options == CompareOptions.Ordinal)
             {
-                return CompareOrdinal(string1, offset1, length1,
-                                      string2, offset2, length2);
+                return string.CompareOrdinal(span1, span2);
             }
 
             if (_invariantMode)
             {
                 if ((options & CompareOptions.IgnoreCase) != 0)
-                    return CompareOrdinalIgnoreCase(string1, offset1, length1, string2, offset2, length2);
+                    return CompareOrdinalIgnoreCase(span1, span2);
 
-                return CompareOrdinal(string1, offset1, length1, string2, offset2, length2);
+                return string.CompareOrdinal(span1, span2);
             }
 
-            return CompareString(
-                string1.AsSpan(offset1, length1),
-                string2.AsSpan(offset2, length2),
-                options);
-        }
-
-        private static int CompareOrdinal(string string1, int offset1, int length1, string string2, int offset2, int length2)
-        {
-            int result = String.CompareOrdinal(string1, offset1, string2, offset2,
-                                                       (length1 < length2 ? length1 : length2));
-            if ((length1 != length2) && result == 0)
-            {
-                return (length1 > length2 ? 1 : -1);
-            }
-            return (result);
+            return CompareString(span1, span2, options);
         }
 
         //
@@ -890,15 +888,19 @@ namespace System.Globalization
             return IndexOfCore(source, value, startIndex, count, options, null);
         }
 
-        internal virtual int IndexOfOrdinal(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+        internal int IndexOfOrdinal(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
         {
             Debug.Assert(!_invariantMode);
+            Debug.Assert(!source.IsEmpty);
+            Debug.Assert(!value.IsEmpty);
             return IndexOfOrdinalCore(source, value, ignoreCase);
         }
 
-        internal unsafe virtual int IndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
+        internal unsafe int IndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
         {
             Debug.Assert(!_invariantMode);
+            Debug.Assert(!source.IsEmpty);
+            Debug.Assert(!value.IsEmpty);
             return IndexOfCore(source, value, options, null);
         }
 
@@ -1217,6 +1219,34 @@ namespace System.Globalization
             return (this.Name.GetHashCode());
         }
 
+        internal static unsafe int GetIgnoreCaseHash(string source)
+        {
+            Debug.Assert(source != null, "source must not be null");
+
+            // Do not allocate on the stack if string is empty
+            if (source.Length == 0)
+            {
+                return source.GetHashCode();
+            }
+
+            char[] borrowedArr = null;
+            Span<char> span = source.Length <= 255 ?
+                stackalloc char[255] :
+                (borrowedArr = ArrayPool<char>.Shared.Rent(source.Length));
+
+            int charsWritten = source.AsSpan().ToUpperInvariant(span);
+
+            // Slice the array to the size returned by ToUpperInvariant.
+            int hash = Marvin.ComputeHash32(MemoryMarshal.AsBytes(span.Slice(0, charsWritten)), Marvin.DefaultSeed);
+
+            // Return the borrowed array if necessary.
+            if (borrowedArr != null)
+            {
+                ArrayPool<char>.Shared.Return(borrowedArr);
+            }
+
+            return hash;
+        }
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -1259,7 +1289,7 @@ namespace System.Globalization
 
             if (_invariantMode)
             {
-                return ((options & CompareOptions.IgnoreCase) != 0) ? TextInfo.GetHashCodeOrdinalIgnoreCase(source) : source.GetHashCode();
+                return ((options & CompareOptions.IgnoreCase) != 0) ? GetIgnoreCaseHash(source) : source.GetHashCode();
             }
 
             return GetHashCodeOfStringCore(source, options);
@@ -1279,7 +1309,7 @@ namespace System.Globalization
 
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
-                return TextInfo.GetHashCodeOrdinalIgnoreCase(source);
+                return GetIgnoreCaseHash(source);
             }
 
             //

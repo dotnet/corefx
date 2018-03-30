@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -28,37 +29,102 @@ namespace System
             => (IndexOf(span, value, comparisonType) >= 0);
 
         /// <summary>
-        /// Determines whether this <paramref name="span"/> and the specified <paramref name="value"/> span have the same characters
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="other"/> span have the same characters
         /// when compared using the specified <paramref name="comparisonType"/> option.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.SequenceEqual<char>(value);
+                return span.SequenceEqual<char>(other);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                if (span.Length != other.Length)
+                    return false;
+                return EqualsOrdinalIgnoreCase(span, other);
             }
 
-            return span.ToString().Equals(value.ToString(), comparisonType);
+            return span.ToString().Equals(other.ToString(), comparisonType);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool EqualsOrdinalIgnoreCase(ReadOnlySpan<char> span, ReadOnlySpan<char> other)
+        {
+            Debug.Assert(span.Length == other.Length);
+            if (other.Length == 0)  // span.Length == other.Length == 0
+                return true;
+            return (CompareToOrdinalIgnoreCase(span, other) == 0);
         }
 
         /// <summary>
-        /// Compares the specified <paramref name="span"/> and <paramref name="value"/> using the specified <paramref name="comparisonType"/>,
+        /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,
         /// and returns an integer that indicates their relative position in the sort order.
         /// <param name="span">The source span.</param>
-        /// <param name="value">The value to compare with the source span.</param>
-        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
             if (comparisonType == StringComparison.Ordinal)
             {
-                return span.SequenceCompareTo(value);
+                return span.SequenceCompareTo(other);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return CompareToOrdinalIgnoreCase(span, other);
             }
 
-            return string.Compare(span.ToString(), value.ToString(), comparisonType);
+            return string.Compare(span.ToString(), other.ToString(), comparisonType);
+        }
+
+        // Borrowed from https://github.com/dotnet/coreclr/blob/master/src/mscorlib/shared/System/Globalization/CompareInfo.cs#L539
+        private static unsafe int CompareToOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+        {
+            int length = Math.Min(strA.Length, strB.Length);
+            int range = length;
+
+            fixed (char* ap = &MemoryMarshal.GetReference(strA))
+            fixed (char* bp = &MemoryMarshal.GetReference(strB))
+            {
+                char* a = ap;
+                char* b = bp;
+
+                while (length != 0 && (*a <= 0x7F) && (*b <= 0x7F))
+                {
+                    int charA = *a;
+                    int charB = *b;
+
+                    if (charA == charB)
+                    {
+                        a++; b++;
+                        length--;
+                        continue;
+                    }
+
+                    // uppercase both chars - notice that we need just one compare per char
+                    if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+                    if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
+
+                    // Return the (case-insensitive) difference between them.
+                    if (charA != charB)
+                        return charA - charB;
+
+                    // Next char
+                    a++; b++;
+                    length--;
+                }
+
+                if (length == 0)
+                    return strA.Length - strB.Length;
+
+                range -= length;
+
+                return string.Compare(strA.Slice(range).ToString(), strB.Slice(range).ToString(), StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
@@ -175,6 +241,10 @@ namespace System
             {
                 return span.EndsWith<char>(value);
             }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return value.Length <= span.Length && EqualsOrdinalIgnoreCase(span.Slice(span.Length - value.Length), value);
+            }
 
             string sourceString = span.ToString();
             string valueString = value.ToString();
@@ -193,54 +263,14 @@ namespace System
             {
                 return span.StartsWith<char>(value);
             }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return value.Length <= span.Length && EqualsOrdinalIgnoreCase(span.Slice(0, value.Length), value);
+            }
 
             string sourceString = span.ToString();
             string valueString = value.ToString();
             return sourceString.StartsWith(valueString, comparisonType);
-        }
-
-        /// <summary>
-        /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
-        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="T"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> AsBytes<T>(this Span<T> source)
-            where T : struct
-        {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-
-            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
-            return new Span<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
-        }
-
-        /// <summary>
-        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="T"/> to ReadOnlySpan of bytes.
-        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="T"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
-            where T : struct
-        {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-
-            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
-            return new ReadOnlySpan<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
         }
 
         /// <summary>

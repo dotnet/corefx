@@ -685,7 +685,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessStartTime()
         {
-            TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
+            TimeSpan allowedWindow = TimeSpan.FromSeconds(3);
 
             for (int i = 0; i < 2; i++)
             {
@@ -711,6 +711,20 @@ namespace System.Diagnostics.Tests
                 {
                     Assert.InRange(processStartTime, testStartTime - allowedWindow, testEndTime + allowedWindow);
                     break;
+                }
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] 
+        public void ProcessStartTime_Deterministic_Across_Instances()
+        {
+            CreateDefaultProcess();
+            for (int i = 0; i < 10; ++i)
+            {
+                using (var p = Process.GetProcessById(_process.Id))
+                {
+                    Assert.Equal(_process.StartTime, p.StartTime);
                 }
             }
         }

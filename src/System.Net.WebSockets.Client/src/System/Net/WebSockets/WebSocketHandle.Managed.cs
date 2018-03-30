@@ -78,8 +78,6 @@ namespace System.Net.WebSockets
             bool disposeHandler = true;
             try
             {
-                // Create the request message, including a uri with ws{s} switched to http{s}.
-                uri = new UriBuilder(uri) { Scheme = (uri.Scheme == UriScheme.Ws) ? UriScheme.Http : UriScheme.Https }.Uri;
                 var request = new HttpRequestMessage(HttpMethod.Get, uri);
                 if (options._requestHeaders?.Count > 0) // use field to avoid lazily initializing the collection
                 {
@@ -206,12 +204,12 @@ namespace System.Net.WebSockets
                 }
 
                 // Get or create the buffer to use
-                const int MinBufferSize = 14; // from ManagedWebSocket.MaxMessageHeaderLength
+                const int MinBufferSize = 125; // from ManagedWebSocket.MaxControlPayloadLength
                 ArraySegment<byte> optionsBuffer = options.Buffer.GetValueOrDefault();
                 Memory<byte> buffer =
                     optionsBuffer.Count >= MinBufferSize ? optionsBuffer : // use the provided buffer if it's big enough
-                    options.ReceiveBufferSize >= MinBufferSize ? new byte[options.ReceiveBufferSize] : // or use the requested size if it's big enough
-                    Memory<byte>.Empty; // or let WebSocket.CreateFromStream use its default
+                    default; // or let WebSocket.CreateFromStream use its default
+                    // options.ReceiveBufferSize is ignored, as we rely on the buffer inside the SocketsHttpHandler stream
 
                 // Get the response stream and wrap it in a web socket.
                 Stream connectedStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);

@@ -32,7 +32,7 @@ namespace System.Net.Http
             }
         }
 
-        public static async ValueTask<Stream> ConnectAsync(string host, int port, CancellationToken cancellationToken)
+        public static async ValueTask<(Socket, Stream)> ConnectAsync(string host, int port, CancellationToken cancellationToken)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace System.Net.Http
                             case SocketError.ConnectionAborted:
                                 if (csaea.CancellationToken.IsCancellationRequested)
                                 {
-                                    csaea.Builder.SetException(new OperationCanceledException(csaea.CancellationToken));
+                                    csaea.Builder.SetException(CancellationHelper.CreateOperationCanceledException(null, csaea.CancellationToken));
                                     break;
                                 }
                                 goto default;
@@ -86,17 +86,17 @@ namespace System.Net.Http
 
                     Debug.Assert(saea.SocketError == SocketError.Success, $"Expected Success, got {saea.SocketError}.");
                     Debug.Assert(saea.ConnectSocket != null, "Expected non-null socket");
-
+                   
                     // Configure the socket and return a stream for it.
                     Socket socket = saea.ConnectSocket;
                     socket.NoDelay = true;
-                    return new NetworkStream(socket, ownsSocket: true);
+                    return (socket, new NetworkStream(socket, ownsSocket: true));
                 }
             }
             catch (Exception error)
             {
-                throw HttpConnection.ShouldWrapInOperationCanceledException(error, cancellationToken) ?
-                    HttpConnection.CreateOperationCanceledException(error, cancellationToken) :
+                throw CancellationHelper.ShouldWrapInOperationCanceledException(error, cancellationToken) ?
+                    CancellationHelper.CreateOperationCanceledException(error, cancellationToken) :
                     new HttpRequestException(error.Message, error);
             }
         }
@@ -149,9 +149,9 @@ namespace System.Net.Http
             {
                 sslStream.Dispose();
 
-                if (HttpConnection.ShouldWrapInOperationCanceledException(e, cancellationToken))
+                if (CancellationHelper.ShouldWrapInOperationCanceledException(e, cancellationToken))
                 {
-                    throw HttpConnection.CreateOperationCanceledException(e, cancellationToken);
+                    throw CancellationHelper.CreateOperationCanceledException(e, cancellationToken);
                 }
 
                 throw new HttpRequestException(SR.net_http_ssl_connection_failed, e);
@@ -165,7 +165,7 @@ namespace System.Net.Http
             if (cancellationToken.IsCancellationRequested)
             {
                 sslStream.Dispose();
-                throw new OperationCanceledException(cancellationToken);
+                throw CancellationHelper.CreateOperationCanceledException(null, cancellationToken);
             }
 
             return sslStream;

@@ -178,11 +178,7 @@ namespace System.Net.Security
             SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
             SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
 
-            // Set the delegates on the options.
-            sslClientAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
-            sslClientAuthenticationOptions._certSelectionDelegate = _certSelectionDelegate;
-
-            _sslState.ValidateCreateContext(sslClientAuthenticationOptions);
+            _sslState.ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
 
             LazyAsyncResult result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
             _sslState.ProcessAuthentication(result);
@@ -302,11 +298,7 @@ namespace System.Net.Security
             SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
             SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
 
-            // Set the delegates on the options.
-            sslClientAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
-            sslClientAuthenticationOptions._certSelectionDelegate = _certSelectionDelegate;
-
-            _sslState.ValidateCreateContext(sslClientAuthenticationOptions);
+            _sslState.ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
             _sslState.ProcessAuthentication(null);
         }
 
@@ -711,9 +703,9 @@ namespace System.Net.Security
             return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.WriteAsync(source, cancellationToken);
+            return _sslState.SecureStream.WriteAsync(buffer, cancellationToken);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -721,9 +713,9 @@ namespace System.Net.Security
             return _sslState.SecureStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            return _sslState.SecureStream.ReadAsync(destination, cancellationToken);
+            return _sslState.SecureStream.ReadAsync(buffer, cancellationToken);
         }
     }
 }
