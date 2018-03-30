@@ -5,14 +5,14 @@
 namespace System.Buffers
 {
     /// <summary>
-    /// Provides a mechanism for manual lifetime management.
+    /// Owner of Memory<typeparamref name="T"/> that is responsible for disposing the underlying memory appropriately.
     /// </summary>
-    public interface IRetainable
+    public interface IMemoryOwner<T> : IDisposable
     {
         /// <summary>
-        /// Call this method to indicate that the IRetainable object is no longer in use.
-        /// The object can now be disposed.
+        /// Returns a Memory<typeparamref name="T"/>.
         /// </summary>
-        void Release();
+        Memory<T> Memory { get; }
+
     }
 }

@@ -35,7 +35,7 @@ namespace System.Net.Http.Functional.Tests
         public void ContentLength_LengthMatchesArrayLength(int contentLength, bool useArray)
         {
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(contentLength, useArray, out memory, out ownedMemory);
 
             Assert.Equal(contentLength, content.Headers.ContentLength);
@@ -49,7 +49,7 @@ namespace System.Net.Http.Functional.Tests
         {
             const int ContentLength = 42;
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             using (Stream stream = await content.ReadAsStreamAsync())
@@ -83,7 +83,7 @@ namespace System.Net.Http.Functional.Tests
         {
             const int ContentLength = 42;
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             using (Stream s = await content.ReadAsStreamAsync())
@@ -146,7 +146,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task ReadAsStreamAsync_ReadByte_MatchesInput(int contentLength, bool useArray)
         {
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(contentLength, useArray, out memory, out ownedMemory);
 
             using (Stream stream = await content.ReadAsStreamAsync())
@@ -169,7 +169,7 @@ namespace System.Net.Http.Functional.Tests
         {
             const int ContentLength = 42;
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             using (Stream stream = await content.ReadAsStreamAsync())
@@ -208,7 +208,7 @@ namespace System.Net.Http.Functional.Tests
             const int ContentLength = 1024;
 
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             var buffer = new byte[3];
@@ -251,7 +251,7 @@ namespace System.Net.Http.Functional.Tests
             const int ContentLength = 100;
 
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             var buffer = new byte[1];
@@ -286,7 +286,7 @@ namespace System.Net.Http.Functional.Tests
             const int ContentLength = 2;
 
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             using (Stream stream = await content.ReadAsStreamAsync())
@@ -304,7 +304,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task CopyToAsync_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(contentLength, useArray, out memory, out ownedMemory);
 
             var destination = new MemoryStream();
@@ -320,7 +320,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task ReadAsStreamAsync_CopyTo_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(contentLength, useArray, out memory, out ownedMemory);
 
             var destination = new MemoryStream();
@@ -340,7 +340,7 @@ namespace System.Net.Http.Functional.Tests
         {
             const int ContentLength = 42;
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(ContentLength, useArray, out memory, out ownedMemory);
 
             using (Stream s = await content.ReadAsStreamAsync())
@@ -368,7 +368,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task ReadAsStreamAsync_CopyToAsync_AllContentCopied(int contentLength, bool useArray)
         {
             Memory<byte> memory;
-            OwnedMemory<byte> ownedMemory;
+            MemoryManager<byte> ownedMemory;
             ReadOnlyMemoryContent content = CreateContent(contentLength, useArray, out memory, out ownedMemory);
 
             var destination = new MemoryStream();
@@ -382,7 +382,7 @@ namespace System.Net.Http.Functional.Tests
             ownedMemory?.Dispose();
         }
 
-        private static ReadOnlyMemoryContent CreateContent(int contentLength, bool useArray, out Memory<byte> memory, out OwnedMemory<byte> ownedMemory)
+        private static ReadOnlyMemoryContent CreateContent(int contentLength, bool useArray, out Memory<byte> memory, out MemoryManager<byte> ownedMemory)
         {
             if (useArray)
             {
@@ -391,7 +391,7 @@ namespace System.Net.Http.Functional.Tests
             }
             else
             {
-                ownedMemory = new NativeOwnedMemory(contentLength);
+                ownedMemory = new NativeMemoryManager(contentLength);
                 memory = ownedMemory.Memory;
             }
 

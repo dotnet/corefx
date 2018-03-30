@@ -1687,10 +1687,13 @@ namespace System
         private readonly object _dummy;
         public Memory(T[] array) { throw null; }
         public Memory(T[] array, int start, int length) { throw null; }
+        public Memory(System.Buffers.MemoryManager<T> manager, int start, int length) { throw null; }
         public static System.Memory<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         public System.Span<T> Span { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public static System.Memory<T> CreateFromPinnedArray(T[] array, int start, int length) { throw null; }
         public void CopyTo(System.Memory<T> destination) { }
         public bool Equals(System.Memory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
@@ -1701,7 +1704,6 @@ namespace System
         public static implicit operator System.ReadOnlyMemory<T> (System.Memory<T> memory) { throw null; }
         public static implicit operator System.Memory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Pin() { throw null; }
-        public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
         public System.Memory<T> Slice(int start) { throw null; }
         public System.Memory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
@@ -1949,7 +1951,6 @@ namespace System
         public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Pin() { throw null; }
-        public System.Buffers.MemoryHandle Retain(bool pin = false) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
@@ -3704,34 +3705,35 @@ namespace System
 }
 namespace System.Buffers
 {
-    public partial interface IRetainable
+    public partial interface IMemoryOwner<T> : System.IDisposable
     {
-        void Release();
+        System.Memory<T> Memory { get; }
+    }
+    public partial interface IPinnable
+    {
+        System.Buffers.MemoryHandle Pin(int elementIndex);
+        void Unpin();
     }
     public partial struct MemoryHandle : System.IDisposable
     {
         private object _dummy;
         [System.CLSCompliantAttribute(false)]
-        public unsafe MemoryHandle(System.Buffers.IRetainable retainable, void* pointer = null, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle)) { throw null; }
+        public unsafe MemoryHandle(void* pointer, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle), System.Buffers.IPinnable pinnable = default(System.Buffers.IPinnable)) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public unsafe void* Pointer { get { throw null; } }
         public void Dispose() { }
     }
-    public abstract partial class OwnedMemory<T> : System.Buffers.IRetainable, System.IDisposable
+    public abstract partial class MemoryManager<T> : System.Buffers.IMemoryOwner<T>, System.Buffers.IPinnable
     {
-        protected OwnedMemory() { }
-        public abstract bool IsDisposed { get; }
-        protected abstract bool IsRetained { get; }
+        protected MemoryManager() { }
         public abstract int Length { get; }
         public System.Memory<T> Memory { get { throw null; } }
-        public abstract System.Span<T> Span { get; }
-        public void Dispose() { }
         protected abstract void Dispose(bool disposing);
+        void System.IDisposable.Dispose() { }
         public abstract System.Span<T> GetSpan();
-        public abstract System.Buffers.MemoryHandle Pin(int byteOffset = 0);
-        public abstract void Release();
-        public abstract void Retain();
-        protected internal abstract bool TryGetArray(out System.ArraySegment<T> segment);
+        public abstract System.Buffers.MemoryHandle Pin(int elementIndex = 0);
+        protected internal virtual bool TryGetArray(out System.ArraySegment<T> segment) { throw null; }
+        public abstract void Unpin();
     }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
