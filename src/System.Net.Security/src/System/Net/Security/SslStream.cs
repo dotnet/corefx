@@ -150,25 +150,24 @@ namespace System.Net.Security
             return _userServerCertificateSelectionCallback(this, targetHost);
         }
 
-        private void SetServerCertificateSelectionCallbackWrapper(SslServerAuthenticationOptions sslServerAuthenticationOptions)
-        {
-            _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
-            sslServerAuthenticationOptions._serverCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
-        }
-
         private SslAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
         {
-            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions._serverCertSelectionDelegate == null)
+            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback == null)
             {
                 throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions._serverCertSelectionDelegate != null)
+            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null)
             {
                 throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
             }
 
-            return new SslAuthenticationOptions(sslServerAuthenticationOptions);
+            var authOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
+
+            _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
+            authOptions.ServerCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
+
+            return authOptions;
         }
 
         //
@@ -261,8 +260,6 @@ namespace System.Net.Security
 
             // Set the delegate on the options.
             sslServerAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
-
-            SetServerCertificateSelectionCallbackWrapper(sslServerAuthenticationOptions);
 
             _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
 

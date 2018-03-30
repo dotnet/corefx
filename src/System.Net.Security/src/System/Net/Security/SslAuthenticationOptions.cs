@@ -49,7 +49,6 @@ namespace System.Net.Security
             // Server specific options.
             CertificateRevocationCheckMode = sslServerAuthenticationOptions.CertificateRevocationCheckMode;
             ServerCertificate = sslServerAuthenticationOptions.ServerCertificate;
-            ServerCertSelectionDelegate = sslServerAuthenticationOptions._serverCertSelectionDelegate;
         }
 
         internal bool AllowRenegotiation { get; set; }
