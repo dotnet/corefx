@@ -4,6 +4,7 @@
 
 using System.Numerics.Hashing;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 
 namespace System
 {
@@ -28,12 +29,14 @@ namespace System
         /// <summary>
         /// Returns object part of this <see cref="SequencePosition"/>
         /// </summary>
+        [Pure]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public object GetObject() => _object;
 
         /// <summary>
         /// Returns integer part of this <see cref="SequencePosition"/>
         /// </summary>
+        [Pure]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int GetInteger() => _integer;
 

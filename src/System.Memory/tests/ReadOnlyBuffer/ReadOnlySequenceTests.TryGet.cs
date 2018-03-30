@@ -89,11 +89,10 @@ namespace System.Memory.Tests
             var buffer = new ReadOnlySequence<byte>(memoryListSegment, 2, memoryListSegment, 5);
 
             Assert.True(SequenceMarshal.TryGetReadOnlySequenceSegment(buffer, out ReadOnlySequenceSegment<byte> startSegment, out int startIndex, out ReadOnlySequenceSegment<byte> endSegment, out int endIndex));
-            Assert.Equal(startSegment, memoryListSegment);
-            Assert.Equal(endSegment, memoryListSegment);
-
             Assert.Equal(2, startIndex);
             Assert.Equal(5, endIndex);
+            Assert.Equal(memoryListSegment, startSegment);
+            Assert.Equal(memoryListSegment, endSegment);
 
             Assert.False(SequenceMarshal.TryGetArray(buffer, out _));
             Assert.False(SequenceMarshal.TryGetOwnedMemory(buffer, out _, out _, out _));

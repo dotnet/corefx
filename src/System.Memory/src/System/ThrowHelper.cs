@@ -80,9 +80,9 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange() { return new ArgumentOutOfRangeException("position"); }
 
-        internal static void ThrowArgumentOutOfRangeException_CountOutOfRange() { throw CreateArgumentOutOfRangeException_CountOutOfRange(); }
+        internal static void ThrowArgumentOutOfRangeException_OffsetOutOfRange() { throw CreateArgumentOutOfRangeException_OffsetOutOfRange(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentOutOfRangeException_CountOutOfRange() { return new ArgumentOutOfRangeException("count"); }
+        private static Exception CreateArgumentOutOfRangeException_OffsetOutOfRange() { return new ArgumentOutOfRangeException(nameof(ExceptionArgument.offset)); }
 
         internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer() { throw CreateObjectDisposedException_ArrayMemoryPoolBuffer(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -135,12 +135,13 @@ namespace System
         {
             if (startSegment == null)
                 return CreateArgumentNullException(ExceptionArgument.startSegment);
-            else if (endSegment == null)
+            if (endSegment == null)
                 return CreateArgumentNullException(ExceptionArgument.endSegment);
-            else if ((uint)startSegment.Memory.Length < (uint)startIndex)
+            if ((uint)startSegment.Memory.Length < (uint)startIndex)
                 return CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
-            else
-                return CreateArgumentOutOfRangeException(ExceptionArgument.endIndex);
+            if (endSegment.RunningIndex - startSegment.RunningIndex < 0)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+            return CreateArgumentOutOfRangeException(ExceptionArgument.endIndex);
         }
 
         public static void ThrowArgumentValidationException(Array array, int start)
@@ -168,6 +169,20 @@ namespace System
             else
                 return CreateArgumentOutOfRangeException(ExceptionArgument.length);
         }
+
+        //
+        // ReadOnlySequence Slice validation Throws coalesced to enable inlining of the Slice
+        //
+        public static void ThrowArgumentValidationException(long start)
+            => throw CreateArgumentValidationException(start);
+
+        private static Exception CreateArgumentValidationException(long start)
+        {
+            if (start < 0)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
+
     }
 
     //

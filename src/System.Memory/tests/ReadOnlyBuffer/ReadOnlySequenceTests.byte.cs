@@ -154,22 +154,22 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void GetPositionPrefersNextSegment()
+        public void GetPositionPrefersCurrentSegment()
         {
             BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[50]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
+            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[50]);
 
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
             SequencePosition c1 = buffer.GetPosition(50);
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
 
             c1 = buffer.GetPosition(50, buffer.Start);
 
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
+            Assert.Equal(50, c1.GetInteger());
+            Assert.Equal(bufferSegment1, c1.GetObject());
         }
 
         [Fact]
@@ -258,7 +258,7 @@ namespace System.Memory.Tests
             SequencePosition? result = buffer.PositionOf((byte)searchFor);
 
             Assert.NotNull(result);
-            Assert.Equal(buffer.Slice(result.Value).ToArray(), Encoding.ASCII.GetBytes(raw.Substring(expectIndex)));
+            Assert.Equal(Encoding.ASCII.GetBytes(raw.Substring(expectIndex)), buffer.Slice(result.Value).ToArray());
         }
 
         [Fact]
@@ -304,12 +304,92 @@ namespace System.Memory.Tests
 
         public static TheoryData<Action<ReadOnlySequence<byte>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<byte>>>
         {
-            b => b.Slice(101),
+            b => b.Slice(-1),
+            b => b.Slice(-1, -1),
+            b => b.Slice(-1, 0),
+            b => b.Slice(-1, 1),
+            b => b.Slice(-1, b.Start),
+            b => b.Slice(-1, b.End),
+
+            //b => b.Slice(0),
+            b => b.Slice(0, -1),
+            //b => b.Slice(0, 0),
             b => b.Slice(0, 101),
+            //b => b.Slice(0, b.Start),
+            //b => b.Slice(0, b.End),
+
+            //b => b.Slice(100),
+            b => b.Slice(100, -1),
+            //b => b.Slice(100, 0),
+            b => b.Slice(100, 1),
+            b => b.Slice(100, b.Start),
+            //b => b.Slice(100, b.End),
+
+            b => b.Slice(101),
+            b => b.Slice(101, -1),
+            b => b.Slice(101, 0),
+            b => b.Slice(101, 1),
+            b => b.Slice(101, b.Start),
+            b => b.Slice(101, b.End),
+
+            //b => b.Slice(b.Start),
+            b => b.Slice(b.Start, -1),
+            //b => b.Slice(b.Start, 0),
             b => b.Slice(b.Start, 101),
-            b => b.Slice(0, 70).Slice(b.End, b.End),
+            //b => b.Slice(b.Start, b.Start),
+            //b => b.Slice(b.Start, b.End),
+
+            //b => b.Slice(b.End),
+            b => b.Slice(b.End, -1),
+            //b => b.Slice(b.End, 0),
+            b => b.Slice(b.End, 1),
+            b => b.Slice(b.End, b.Start),
+            //b => b.Slice(b.End, b.End),
+
+            //b => b.Slice(0, 70).Slice(0, b.Start),
+            b => b.Slice(0, 70).Slice(0, b.End),
+            //b => b.Slice(0, 70).Slice(b.Start),
+            //b => b.Slice(0, 70).Slice(b.Start, b.Start),
             b => b.Slice(0, 70).Slice(b.Start, b.End),
-            b => b.Slice(0, 70).Slice(0, b.End)
+            b => b.Slice(0, 70).Slice(b.End),
+            b => b.Slice(0, 70).Slice(b.End, b.Start),
+            b => b.Slice(0, 70).Slice(b.End, b.End),
+
+            //b => b.Slice(b.Start, 70).Slice(0, b.Start),
+            b => b.Slice(b.Start, 70).Slice(0, b.End),
+            //b => b.Slice(b.Start, 70).Slice(b.Start),
+            //b => b.Slice(b.Start, 70).Slice(b.Start, b.Start),
+            b => b.Slice(b.Start, 70).Slice(b.Start, b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End, b.Start),
+            b => b.Slice(b.Start, 70).Slice(b.End, b.End),
+
+            b => b.Slice(30, 40).Slice(0, b.Start),
+            b => b.Slice(30, 40).Slice(0, b.End),
+            b => b.Slice(30, 40).Slice(b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, b.End),
+            b => b.Slice(30, 40).Slice(b.End),
+            b => b.Slice(30, 40).Slice(b.End, b.Start),
+            b => b.Slice(30, 40).Slice(b.End, b.End),
+
+            b => b.Slice(70, 30).Slice(0, b.Start),
+            //b => b.Slice(70, 30).Slice(0, b.End),
+            b => b.Slice(70, 30).Slice(b.Start),
+            b => b.Slice(70, 30).Slice(b.Start, b.Start),
+            b => b.Slice(70, 30).Slice(b.Start, b.End),
+            //b => b.Slice(70, 30).Slice(b.End),
+            b => b.Slice(70, 30).Slice(b.End, b.Start),
+            //b => b.Slice(70, 30).Slice(b.End, b.End),
+
+            b => b.Slice(70, b.End).Slice(0, b.Start),
+            //b => b.Slice(70, b.End).Slice(0, b.End),
+            b => b.Slice(70, b.End).Slice(b.Start),
+            b => b.Slice(70, b.End).Slice(b.Start, b.Start),
+            b => b.Slice(70, b.End).Slice(b.Start, b.End),
+            //b => b.Slice(70, b.End).Slice(b.End),
+            b => b.Slice(70, b.End).Slice(b.End, b.Start),
+            //b => b.Slice(70, b.End).Slice(b.End, b.End),
         };
     }
 }
