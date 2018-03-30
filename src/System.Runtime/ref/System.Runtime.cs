@@ -1685,16 +1685,16 @@ namespace System
     public readonly partial struct Memory<T>
     {
         private readonly object _dummy;
+        public Memory(System.Buffers.MemoryManager<T> manager, int start, int length) { throw null; }
         public Memory(T[] array) { throw null; }
         public Memory(T[] array, int start, int length) { throw null; }
-        public Memory(System.Buffers.MemoryManager<T> manager, int start, int length) { throw null; }
         public static System.Memory<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         public System.Span<T> Span { get { throw null; } }
+        public void CopyTo(System.Memory<T> destination) { }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static System.Memory<T> CreateFromPinnedArray(T[] array, int start, int length) { throw null; }
-        public void CopyTo(System.Memory<T> destination) { }
         public bool Equals(System.Memory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
@@ -3718,20 +3718,20 @@ namespace System.Buffers
     {
         private object _dummy;
         [System.CLSCompliantAttribute(false)]
-        public unsafe MemoryHandle(void* pointer, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle), System.Buffers.IPinnable pinnable = default(System.Buffers.IPinnable)) { throw null; }
+        public unsafe MemoryHandle(void* pointer, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle), System.Buffers.IPinnable pinnable = null) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public unsafe void* Pointer { get { throw null; } }
         public void Dispose() { }
     }
-    public abstract partial class MemoryManager<T> : System.Buffers.IMemoryOwner<T>, System.Buffers.IPinnable
+    public abstract partial class MemoryManager<T> : System.Buffers.IMemoryOwner<T>, System.Buffers.IPinnable, System.IDisposable
     {
         protected MemoryManager() { }
         public abstract int Length { get; }
         public System.Memory<T> Memory { get { throw null; } }
         protected abstract void Dispose(bool disposing);
-        void System.IDisposable.Dispose() { }
         public abstract System.Span<T> GetSpan();
         public abstract System.Buffers.MemoryHandle Pin(int elementIndex = 0);
+        void System.IDisposable.Dispose() { }
         protected internal virtual bool TryGetArray(out System.ArraySegment<T> segment) { throw null; }
         public abstract void Unpin();
     }
@@ -6637,10 +6637,10 @@ namespace System.Runtime.CompilerServices
     }
     public static partial class RuntimeFeature
     {
-        public const string PortablePdb = "PortablePdb";
 #if FEATURE_DEFAULT_INTERFACES
         public const string DefaultImplementationsOfInterfaces = "DefaultImplementationsOfInterfaces";
 #endif
+        public const string PortablePdb = "PortablePdb";
         public static bool IsSupported(string feature) { throw null; }
     }
     public static partial class RuntimeHelpers
@@ -8003,9 +8003,9 @@ namespace System.Threading.Tasks
     [System.Runtime.CompilerServices.AsyncMethodBuilderAttribute(typeof(System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder))]
     public readonly partial struct ValueTask : System.IEquatable<System.Threading.Tasks.ValueTask>
     {
-        internal readonly object _dummy;
-        public ValueTask(System.Threading.Tasks.Task task) { throw null; }
+        private readonly object _dummy;
         public ValueTask(System.Threading.Tasks.Sources.IValueTaskSource source, short token) { throw null; }
+        public ValueTask(System.Threading.Tasks.Task task) { throw null; }
         public bool IsCanceled { get { throw null; } }
         public bool IsCompleted { get { throw null; } }
         public bool IsCompletedSuccessfully { get { throw null; } }
@@ -8016,16 +8016,16 @@ namespace System.Threading.Tasks
         public bool Equals(System.Threading.Tasks.ValueTask other) { throw null; }
         public System.Runtime.CompilerServices.ValueTaskAwaiter GetAwaiter() { throw null; }
         public override int GetHashCode() { throw null; }
-        public System.Threading.Tasks.ValueTask Preserve() { throw null; }
         public static bool operator ==(System.Threading.Tasks.ValueTask left, System.Threading.Tasks.ValueTask right) { throw null; }
         public static bool operator !=(System.Threading.Tasks.ValueTask left, System.Threading.Tasks.ValueTask right) { throw null; }
+        public System.Threading.Tasks.ValueTask Preserve() { throw null; }
     }
     [System.Runtime.CompilerServices.AsyncMethodBuilderAttribute(typeof(System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder<>))]
     public readonly partial struct ValueTask<TResult> : System.IEquatable<System.Threading.Tasks.ValueTask<TResult>>
     {
         internal readonly TResult _result;
-        public ValueTask(System.Threading.Tasks.Task<TResult> task) { throw null; }
         public ValueTask(System.Threading.Tasks.Sources.IValueTaskSource<TResult> source, short token) { throw null; }
+        public ValueTask(System.Threading.Tasks.Task<TResult> task) { throw null; }
         public ValueTask(TResult result) { throw null; }
         public bool IsCanceled { get { throw null; } }
         public bool IsCompleted { get { throw null; } }
@@ -8038,38 +8038,38 @@ namespace System.Threading.Tasks
         public bool Equals(System.Threading.Tasks.ValueTask<TResult> other) { throw null; }
         public System.Runtime.CompilerServices.ValueTaskAwaiter<TResult> GetAwaiter() { throw null; }
         public override int GetHashCode() { throw null; }
-        public System.Threading.Tasks.ValueTask<TResult> Preserve() { throw null; }
         public static bool operator ==(System.Threading.Tasks.ValueTask<TResult> left, System.Threading.Tasks.ValueTask<TResult> right) { throw null; }
         public static bool operator !=(System.Threading.Tasks.ValueTask<TResult> left, System.Threading.Tasks.ValueTask<TResult> right) { throw null; }
+        public System.Threading.Tasks.ValueTask<TResult> Preserve() { throw null; }
         public override string ToString() { throw null; }
     }
 }
 namespace System.Threading.Tasks.Sources
 {
-    [Flags]
+    public partial interface IValueTaskSource
+    {
+        void GetResult(short token);
+        System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
+        void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
+    }
+    public partial interface IValueTaskSource<out TResult>
+    {
+        TResult GetResult(short token);
+        System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
+        void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
+    }
+    [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags
     {
-        None,
-        UseSchedulingContext = 0x1,
-        FlowExecutionContext = 0x2,
+        FlowExecutionContext = 2,
+        None = 0,
+        UseSchedulingContext = 1,
     }
     public enum ValueTaskSourceStatus
     {
+        Canceled = 3,
+        Faulted = 2,
         Pending = 0,
         Succeeded = 1,
-        Faulted = 2,
-        Canceled = 3
-    }
-    public interface IValueTaskSource
-    {
-        System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
-        void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
-        void GetResult(short token);
-    }
-    public interface IValueTaskSource<out TResult>
-    {
-        System.Threading.Tasks.Sources.ValueTaskSourceStatus GetStatus(short token);
-        void OnCompleted(System.Action<object> continuation, object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags);
-        TResult GetResult(short token);
     }
 }

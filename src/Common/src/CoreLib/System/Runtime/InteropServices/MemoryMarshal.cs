@@ -91,7 +91,7 @@ namespace System.Runtime.InteropServices
             start &= ReadOnlyMemory<T>.RemoveFlagsBitMask;
 
             Debug.Assert(length >= 0);
-            
+
             if (ReferenceEquals(manager, null))
             {
                 start = default;

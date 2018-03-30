@@ -31,12 +31,12 @@ namespace System.Buffers
             public bool IsDisposed => _array == null;
 
             public bool IsRetained => Volatile.Read(ref _refCount) > 0;
-            
+
             public sealed override Span<T> GetSpan()
             {
                 if (IsDisposed)
                     ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-                    
+
                 return _array;
             }
 
@@ -85,7 +85,7 @@ namespace System.Buffers
                         }
 
                         GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                        
+
                         return new MemoryHandle(Unsafe.Add<T>(((void*)handle.AddrOfPinnedObject()), elementIndex), handle, this);
                     }
                     catch
