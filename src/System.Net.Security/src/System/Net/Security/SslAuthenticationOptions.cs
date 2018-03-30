@@ -37,7 +37,6 @@ namespace System.Net.Security
             // Common options.
             AllowRenegotiation = sslServerAuthenticationOptions.AllowRenegotiation;
             ApplicationProtocols = sslServerAuthenticationOptions.ApplicationProtocols;
-            CertValidationDelegate = sslServerAuthenticationOptions._certValidationDelegate;
             CheckCertName = false;
             EnabledSslProtocols = sslServerAuthenticationOptions.EnabledSslProtocols;
             EncryptionPolicy = sslServerAuthenticationOptions.EncryptionPolicy;

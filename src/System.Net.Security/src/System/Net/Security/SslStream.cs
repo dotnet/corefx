@@ -167,6 +167,8 @@ namespace System.Net.Security
             _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
             authOptions.ServerCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
 
+            authOptions.CertValidationDelegate = _certValidationDelegate;
+
             return authOptions;
         }
 
@@ -257,9 +259,6 @@ namespace System.Net.Security
         {
             SecurityProtocol.ThrowOnNotAllowed(sslServerAuthenticationOptions.EnabledSslProtocols);
             SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
-
-            // Set the delegate on the options.
-            sslServerAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
 
             _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
 
@@ -359,9 +358,6 @@ namespace System.Net.Security
         {
             SecurityProtocol.ThrowOnNotAllowed(sslServerAuthenticationOptions.EnabledSslProtocols);
             SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
-
-            // Set the delegate on the options.
-            sslServerAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
 
             _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
             _sslState.ProcessAuthentication(null);
