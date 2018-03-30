@@ -78,7 +78,7 @@ namespace System.Net.Http
                         // certificate as part of that, disable libcurl's verification of the host name; we need to get
                         // the callback from libcurl even if the host name doesn't match, so we take on the responsibility
                         // of doing the host name match in the callback prior to invoking the user's delegate.
-                        if (easy._handler.ServerCertificateValidationCallback != null)
+                        if (easy._handler.ServerCertificateValidationCustomCallback != null)
                         {
                             easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYHOST, 0);
                             // But don't change the CURLOPT_SSL_VERIFYPEER setting, as setting it to 0 will

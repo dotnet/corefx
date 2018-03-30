@@ -23,8 +23,8 @@ namespace System.Net.Http
 
         public bool UseCookies
         {
-            get { return _curlHandler.UseCookie; }
-            set { _curlHandler.UseCookie = value; }
+            get { return _curlHandler.UseCookies; }
+            set { _curlHandler.UseCookies = value; }
         }
 
         public CookieContainer CookieContainer
@@ -45,8 +45,8 @@ namespace System.Net.Http
 
         public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
         {
-            get { return _curlHandler.ServerCertificateValidationCallback; }
-            set { _curlHandler.ServerCertificateValidationCallback = value; }
+            get { return _curlHandler.ServerCertificateCustomValidationCallback; }
+            set { _curlHandler.ServerCertificateCustomValidationCallback = value; }
         }
 
         public bool CheckCertificateRevocationList
@@ -105,8 +105,8 @@ namespace System.Net.Http
 
         public bool AllowAutoRedirect
         {
-            get { return _curlHandler.AutomaticRedirection; }
-            set { _curlHandler.AutomaticRedirection = value; }
+            get { return _curlHandler.AllowAutoRedirect; }
+            set { _curlHandler.AllowAutoRedirect = value; }
         }
 
         public int MaxAutomaticRedirections

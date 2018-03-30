@@ -763,7 +763,7 @@ namespace System.Net.Http
             }
 
             internal bool ServerCertificateValidationCallbackAcceptsAll => ReferenceEquals(
-                _handler.ServerCertificateValidationCallback,
+                _handler.ServerCertificateCustomValidationCallback,
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator);
 
             internal void SetCurlCallbacks(
