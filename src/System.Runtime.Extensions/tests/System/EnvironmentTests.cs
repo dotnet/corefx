@@ -195,9 +195,12 @@ namespace System.Tests
         [Fact]
         public void FailFast_InnerExceptionStackTrace()
         {
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; },
-                new RemoteInvokeOptions { CollectConsoleOutput = true }))
+                new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
@@ -210,7 +213,7 @@ namespace System.Tests
             // Test using another type of exception
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return SuccessExitCode; },
-                new RemoteInvokeOptions { CollectConsoleOutput = true }))
+                new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;
@@ -223,7 +226,7 @@ namespace System.Tests
             // Test if inner exception details are also logged
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return SuccessExitCode; },
-                new RemoteInvokeOptions { CollectConsoleOutput = true }))
+                new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
                 handle.Process = null;

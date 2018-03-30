@@ -69,12 +69,6 @@ namespace System.Diagnostics
                 psi.Arguments = testConsoleAppArgs;
             }
 
-            if (options.CollectConsoleOutput)
-            {
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
-            }
-
             // Return the handle to the process, which may or not be started
             return new RemoteInvokeHandle(options.Start ?
                 Process.Start(psi) :
