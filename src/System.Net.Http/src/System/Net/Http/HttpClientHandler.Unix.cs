@@ -121,13 +121,6 @@ namespace System.Net.Http
             set { _curlHandler.MaxConnectionsPerServer = value; }
         }
 
-        public long MaxRequestContentBufferSize
-        {
-            // See comments in HttpClientHandler.Windows.cs.  This behavior matches.
-            get { return 0; }
-            set { throw new PlatformNotSupportedException(); }
-        }
-
         public int MaxResponseHeadersLength
         {
             get { return _curlHandler.MaxResponseHeadersLength; }
