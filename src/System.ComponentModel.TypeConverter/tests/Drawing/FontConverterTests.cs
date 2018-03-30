@@ -14,7 +14,14 @@ namespace System.ComponentModel.TypeConverterTests
         {
             FontConverter.FontNameConverter converter = new FontConverter.FontNameConverter();
             // returns "Times" under Linux and "Times New Roman" under Windows
-            Assert.True((converter.ConvertFrom("Times") as string).StartsWith("Times"), "string test");
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Equal("Times New Roman", converter.ConvertFrom("Times") as string);
+            }
+            else
+            {
+                Assert.Equal("Times", converter.ConvertFrom("Times") as string);
+            }
             Assert.True(converter.GetStandardValuesSupported(), "standard values supported");
             Assert.False(converter.GetStandardValuesExclusive(), "standard values exclusive");
         }

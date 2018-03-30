@@ -339,17 +339,17 @@ namespace System.Drawing
 
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
-                return value is string ? value : base.ConvertFrom(context, culture, value);
+                return value is string ? MatchFontName((string)value, context) : base.ConvertFrom(context, culture, value);
             }
 
             public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
             {
                 string[] values = new string[_fonts.Length];
-                for (int i = _fonts.Length; i > 0;)
+                for (int i = 0; i < _fonts.Length; i++)
                 {
-                    i--;
                     values[i] = _fonts[i].Name;
                 }
+                Array.Sort(values, Comparer.Default);
 
                 return new TypeConverter.StandardValuesCollection(values);
             }
@@ -359,6 +359,31 @@ namespace System.Drawing
 
             // Yes, we support picking an element from the list.
             public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
+
+            private string MatchFontName(string name, ITypeDescriptorContext context)
+            {
+                // Try a partial match
+                string bestMatch = null;
+
+                foreach (string fontName in GetStandardValues(context))
+                {
+                    if (fontName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        // For an exact match, return immediately
+                        return fontName;
+                    }
+                    else if (fontName.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (bestMatch == null || fontName.Length <= bestMatch.Length)
+                        {
+                            bestMatch = fontName;
+                        }
+                    }
+                }
+
+                // no match... fall back on whatever was provided
+                return bestMatch ?? name;
+            }
         }
 
         public class FontUnitConverter : EnumConverter
