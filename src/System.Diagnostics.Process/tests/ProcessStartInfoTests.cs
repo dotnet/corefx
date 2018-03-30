@@ -355,8 +355,7 @@ namespace System.Diagnostics.Tests
         public void TestWorkingDirectoryPropertyInChildProcess()
         {
             Assert.NotEqual(TestDirectory, Directory.GetCurrentDirectory());
-            string fileName = Path.Combine(Directory.GetCurrentDirectory(), TestConsoleApp);
-            var psi = new ProcessStartInfo { FileName = fileName, WorkingDirectory = TestDirectory };
+            var psi = new ProcessStartInfo { WorkingDirectory = TestDirectory };
             RemoteInvoke(wd => { Assert.Equal(Directory.GetCurrentDirectory(), wd); return SuccessExitCode; }, TestDirectory, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
