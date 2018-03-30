@@ -30,7 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'uap' ">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap' ">
     <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
@@ -492,7 +492,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Data.Common" />
     <Reference Include="System.ComponentModel.Primitives" />
