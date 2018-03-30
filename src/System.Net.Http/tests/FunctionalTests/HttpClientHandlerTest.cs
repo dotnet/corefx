@@ -502,6 +502,7 @@ namespace System.Net.Http.Functional.Tests
             from useSsl in new[] { true, false }
             select new object[] { address, useSsl };
 
+        [OuterLoop]
         [Theory]
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
