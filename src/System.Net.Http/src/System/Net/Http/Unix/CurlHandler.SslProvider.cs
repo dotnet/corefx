@@ -111,7 +111,7 @@ namespace System.Net.Http
                     throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported, CurlVersionDescription, CurlSslVersionDescription));
                 }
 
-                if (easy._handler.ServerCertificateValidationCallback != null)
+                if (easy._handler.ServerCertificateCustomValidationCallback  != null)
                 {
                     if (easy.ServerCertificateValidationCallbackAcceptsAll)
                     {
@@ -292,7 +292,7 @@ namespace System.Net.Http
                     // We need to respect the user's server validation callback if there is one.  If there isn't one,
                     // we can start by first trying to use OpenSSL's verification, though only if CRL checking is disabled,
                     // as OpenSSL doesn't do that.
-                    if (easy._handler.ServerCertificateValidationCallback == null &&
+                    if (easy._handler.ServerCertificateCustomValidationCallback == null &&
                         !easy._handler.CheckCertificateRevocationList)
                     {
                         // Start by using the default verification provided directly by OpenSSL.

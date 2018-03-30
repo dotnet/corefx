@@ -15,7 +15,6 @@ namespace System.Net.Http
     {
         // Only one of these two handlers will be initialized.
         private readonly CurlHandler _curlHandler;
-        private readonly ManagedHandler _managedHandler;
         private readonly DiagnosticsHandler _diagnosticsHandler;
 
         public HttpClientHandler()
