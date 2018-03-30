@@ -285,22 +285,6 @@ namespace System
             return false;
         }
 
-        private static bool IsRedHatFamilyAndVersion(string versionId = null)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                IdVersionPair v = ParseOsReleaseFile();
-
-                // RedHat includes minor version. We need to account for that when comparing
-                if ((v.Id == "rhel" || v.Id == "centos") && VersionEqual(versionId, v.VersionId))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private static bool VersionEqual(string expectedVersionId, string actualVersionId)
         {
             if (expectedVersionId == null)
