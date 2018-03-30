@@ -3726,8 +3726,8 @@ namespace System.Buffers
     public abstract partial class MemoryManager<T> : System.Buffers.IMemoryOwner<T>, System.Buffers.IPinnable, System.IDisposable
     {
         protected MemoryManager() { }
-        public abstract int Length { get; }
-        public System.Memory<T> Memory { get { throw null; } }
+        public virtual int Length { get { throw null; } }
+        public virtual System.Memory<T> Memory { get { throw null; } }
         protected abstract void Dispose(bool disposing);
         public abstract System.Span<T> GetSpan();
         public abstract System.Buffers.MemoryHandle Pin(int elementIndex = 0);
