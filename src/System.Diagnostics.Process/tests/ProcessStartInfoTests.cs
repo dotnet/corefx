@@ -352,6 +352,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public void TestWorkingDirectoryPropertyInChildProcess()
         {
             Assert.NotEqual(TestDirectory, Directory.GetCurrentDirectory());
