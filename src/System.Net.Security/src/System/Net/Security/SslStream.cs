@@ -156,6 +156,21 @@ namespace System.Net.Security
             sslServerAuthenticationOptions._serverCertDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertCallback(ServerCertSelectionCallbackWrapper);
         }
 
+        private SslAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        {
+            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions._serverCertDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
+            }
+
+            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions._serverCertDelegate != null)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
+            }
+
+            return new SslAuthenticationOptions(sslServerAuthenticationOptions);
+        }
+
         //
         // Client side auth.
         //
@@ -249,7 +264,7 @@ namespace System.Net.Security
 
             SetServerCertificateSelectionCallbackWrapper(sslServerAuthenticationOptions);
 
-            _sslState.ValidateCreateContext(sslServerAuthenticationOptions);
+            _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
 
             LazyAsyncResult result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
             _sslState.ProcessAuthentication(result);
@@ -351,7 +366,7 @@ namespace System.Net.Security
             // Set the delegate on the options.
             sslServerAuthenticationOptions._certValidationDelegate = _certValidationDelegate;
 
-            _sslState.ValidateCreateContext(sslServerAuthenticationOptions);
+            _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
             _sslState.ProcessAuthentication(null);
         }
         #endregion
