@@ -43,6 +43,12 @@ namespace System
         public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
         public static bool IsNotArmProcess => !IsArmProcess;
 
+        // Officially, .Net Native only supports processes running in an AppContainer. However, the majority of tests still work fine 
+        // in a normal Win32 process and we often do so as running in an AppContainer imposes a substantial tax in debuggability
+        // and investigatability. This predicate is used in ConditionalFacts to disable the specific tests that really need to be
+        // running in AppContainer when running on .NetNative.
+        public static bool IsNotNetNativeRunningAsConsoleApp => !(IsNetNative && !IsWinRT);
+
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP => (!IsWindows || 
             File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "httpapi.dll")));

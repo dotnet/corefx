@@ -160,4 +160,12 @@ namespace System.Net.Mail.Tests
             Assert.Equal(SmtpStatusCode.GeneralFailure, se.StatusCode);
         }
     }
+
+    class MySmtpException : SmtpException
+    {
+        public MySmtpException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
 }
