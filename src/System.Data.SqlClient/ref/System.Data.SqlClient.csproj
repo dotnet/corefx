@@ -11,24 +11,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
-    <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
+    <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM);uap10.0.16299" />
     <Compile Include="System.Data.SqlClient.cs" />
     <Compile Include="System.Data.SqlClient.Manual.cs" />
   </ItemGroup>
   <ItemGroup  Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System.Data.SqlClient.NetCoreApp.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Runtime.Extensions\ref\System.Runtime.Extensions.csproj" />
-    <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
-    <ProjectReference Include="..\..\System.Data.Common\ref\System.Data.Common.csproj" />
-    <ProjectReference Include="..\..\System.ComponentModel.Primitives\ref\System.ComponentModel.Primitives.csproj" />
-    <ProjectReference Include="..\..\System.Xml.ReaderWriter\ref\System.Xml.ReaderWriter.csproj" />
-    <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />

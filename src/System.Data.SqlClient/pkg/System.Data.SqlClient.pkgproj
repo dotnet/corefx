@@ -22,7 +22,7 @@
          to match what shipped inbox: since we can provide a new library
          we can update it to add API without raising the netstandard version. -->
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
-      <Value>UAP</Value>
+      <Value>.NETCoreApp;UAP</Value>
     </ValidatePackageSuppression>
   </ItemGroup>
   <ItemGroup>
