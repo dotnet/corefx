@@ -352,12 +352,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]
         public void TestWorkingDirectoryPropertyInChildProcess()
         {
-            Assert.NotEqual(TestDirectory, Directory.GetCurrentDirectory());
-            var psi = new ProcessStartInfo { WorkingDirectory = TestDirectory };
-            RemoteInvoke(wd => { Assert.Equal(Directory.GetCurrentDirectory(), wd); return SuccessExitCode; }, TestDirectory, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+            Assert.NotEqual(Environment.SystemDirectory, Directory.GetCurrentDirectory());
+            var psi = new ProcessStartInfo { WorkingDirectory = Environment.SystemDirectory };
+            RemoteInvoke(wd => { Assert.Equal(wd, Directory.GetCurrentDirectory()); return SuccessExitCode; }, Environment.SystemDirectory, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
         [ActiveIssue(12696)]
