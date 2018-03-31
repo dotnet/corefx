@@ -118,7 +118,7 @@ namespace System.Net.Http
             if (_host != null)
             {
                 int posColon = -1;
-                bool isHostTypeIPv6 = (-1 != (posColon = _host.IndexOf(':')) && -1 != (posColon = _host.IndexOf(':', posColon)));
+                bool isHostTypeIPv6 = (posColon = _host.IndexOf(':')) != -1 && _host.IndexOf(':', posColon+1) != -1;
                 string hostAddress = isHostTypeIPv6 ? "[" + _host + "]" : _host;
 
                 // Precalculate ASCII bytes for Host header
