@@ -78,5 +78,41 @@ namespace System.Net.Http.Tests
                 return SuccessExitCode;
            }, name, shouldBypass.ToString()).Dispose();
         }
+
+        [Theory]
+        [InlineData("", 0)]
+        [InlineData(" ", 0)]
+        [InlineData(" ; ;  ", 0)]
+        [InlineData("http://127.0.0.1/", 1)]
+        [InlineData("[::]", 1)]
+        public void HttpProxy_Local_Parsing(string bypass, int count)
+        {
+            RemoteInvoke((bypassValue, expected) =>
+            {
+                int expectedCount = Convert.ToInt32(expected);
+                IWebProxy p;
+
+                FakeRegistry.Reset();
+                FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
+                FakeRegistry.WinInetProxySettings.ProxyBypass = bypassValue;
+
+                Assert.True(HttpSystemProxy.TryCreate(out p));
+                Assert.NotNull(p);
+
+                HttpSystemProxy sp = p as HttpSystemProxy;
+                Assert.NotNull(sp);
+
+                if (expectedCount > 0)
+                {
+                    Assert.Equal(expectedCount, sp.BypassList.Count);
+                }
+                else
+                {
+                    Assert.Null(sp.BypassList);
+                }
+                return SuccessExitCode;
+           }, bypass, count.ToString()).Dispose();
+
+        }
     }
 }

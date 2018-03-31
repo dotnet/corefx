@@ -71,7 +71,8 @@ namespace System.Net.Http
                     string tmp;
 
                     // Process bypass list for manual setting.
-                    _bypass = new List<Regex>(proxyHelper.ProxyBypass.Length / 5); // Best guess based on string length.
+                    // Initial list size is best guess based on string length assuming each entry is at least 5 characters on average.
+                    _bypass = new List<Regex>(proxyHelper.ProxyBypass.Length / 5);
 
                     while (idx < proxyHelper.ProxyBypass.Length)
                     {
@@ -86,8 +87,14 @@ namespace System.Net.Http
                             idx += 8;
                         }
 
+                        if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == '[')
+                        {
+                            // Strip [] from IPv6 so we can use IdnHost laster for matching.
+                            idx +=1;
+                        }
+
                         start = idx;
-                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ' ' && proxyHelper.ProxyBypass[idx] != ';') {idx += 1; };
+                        while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ' ' && proxyHelper.ProxyBypass[idx] != ';' && proxyHelper.ProxyBypass[idx] != ']') {idx += 1; };
 
                         if (idx == start)
                         {
@@ -107,7 +114,7 @@ namespace System.Net.Http
                         // Skip trailing characters if any.
                         if (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';')
                         {
-                            // Got stopped at space.
+                            // Got stopped at space or ']'. Strip until next ';' or end.
                             while (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] != ';' ) {idx += 1; };
                         }
                         if  (idx < proxyHelper.ProxyBypass.Length && proxyHelper.ProxyBypass[idx] == ';')
@@ -133,6 +140,11 @@ namespace System.Net.Http
                                 NetEventSource.Info(this, "Failed to process " + tmp + " from bypass list.");
                             }
                         }
+                    }
+                    if (_bypass.Count == 0)
+                    {
+                        // Bypass string only had garbage we did not parse.
+                        _bypass = null;
                     }
                 }
 
@@ -209,12 +221,12 @@ namespace System.Net.Http
                     }
 
                     // Pre-Check if host may be IP address to avoid parsing.
-                    if (uri.Host[0] == '[' || (uri.Host[0] >= '0' && uri.Host[0] <= '9'))
+                    if (uri.HostNameType == UriHostNameType.IPv6 || uri.HostNameType == UriHostNameType.IPv4)
                     {
                         // RFC1123 allows labels to start with number.
                         // Leading number may or may not be IP address.
                         // IPv6 [::1] notation. '[' is not valid character in names.
-                        if (IPAddress.TryParse(uri.Host, out address))
+                        if (IPAddress.TryParse(uri.IdnHost, out address))
                         {
                             // Host is valid IP address.
                             // Check if it belongs to local system.
@@ -227,7 +239,7 @@ namespace System.Net.Http
                             }
                         }
                     }
-                    if (uri.Host[0] != '[' && uri.Host.IndexOf('.') == -1)
+                    if (uri.HostNameType != UriHostNameType.IPv6 && uri.IdnHost.IndexOf('.') == -1)
                     {
                         // Not address and does not have a dot.
                         // Hosts without FQDN are considered local.
@@ -238,10 +250,10 @@ namespace System.Net.Http
                 // Check if we have other rules for bypass.
                 if (_bypass != null)
                 {
-                    foreach (var entry in _bypass)
+                    foreach (Regex entry in _bypass)
                     {
                         // IdnHost does not have [].
-                        if (entry.IsMatch(uri.Host[0] == '[' ? uri.Host : uri.IdnHost))
+                        if (entry.IsMatch(uri.IdnHost))
                         {
                             return null;
                         }
@@ -302,5 +314,8 @@ namespace System.Net.Http
                 _credentials = value;
             }
         }
+
+        // Access function for unit tests.
+        internal List<Regex> BypassList => _bypass;
     }
 }
