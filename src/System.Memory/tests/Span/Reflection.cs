@@ -98,7 +98,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void Memory_SpanPropertyReturnValue()
+        public static void Memory_PropertyReturningSpan()
         {
             Type type = typeof(Memory<int>);
 
@@ -152,7 +152,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void ReadOnlyMemory_ReadOnlySpanPropertyReturnValue()
+        public static void ReadOnlyMemory_PropertyReturningReadOnlySpan()
         {
             Type type = typeof(ReadOnlyMemory<int>);
 
@@ -161,7 +161,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void MemoryManager_SpanReturnValue()
+        public static void MemoryManager_MethodReturningSpan()
         {
             Type type = typeof(MemoryManager<int>);
 
