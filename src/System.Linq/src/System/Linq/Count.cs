@@ -20,7 +20,7 @@ namespace System.Linq
             {
                 return collectionoft.Count;
             }
-
+            
             if (source is IIListProvider<TSource> listProv)
             {
                 return listProv.GetCount(onlyIfCheap: false);
@@ -31,6 +31,11 @@ namespace System.Linq
                 return collection.Count;
             }
 
+            if (source is IReadOnlyCollection<TSource> rocollectionoft)
+            {
+                return rocollectionoft.Count;
+            }
+            
             int count = 0;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
