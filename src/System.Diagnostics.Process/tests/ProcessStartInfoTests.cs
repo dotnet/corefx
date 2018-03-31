@@ -354,9 +354,10 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingDirectoryPropertyInChildProcess()
         {
-            Assert.NotEqual(Environment.SystemDirectory, Directory.GetCurrentDirectory());
-            var psi = new ProcessStartInfo { WorkingDirectory = Environment.SystemDirectory };
-            RemoteInvoke(wd => { Assert.Equal(wd, Directory.GetCurrentDirectory()); return SuccessExitCode; }, Environment.SystemDirectory, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+            string workingDirectory = string.IsNullOrEmpty(Environment.SystemDirectory) ? TestDirectory : Environment.SystemDirectory ;
+            Assert.NotEqual(workingDirectory, Directory.GetCurrentDirectory());
+            var psi = new ProcessStartInfo { WorkingDirectory = workingDirectory };
+            RemoteInvoke(wd => { Assert.Equal(wd, Directory.GetCurrentDirectory()); return SuccessExitCode; }, workingDirectory, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
         [ActiveIssue(12696)]
