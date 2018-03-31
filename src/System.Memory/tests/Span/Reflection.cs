@@ -5,10 +5,9 @@
 using Xunit;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.Globalization;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.MemoryTests;
 
 namespace System.SpanTests
 {
@@ -16,6 +15,7 @@ namespace System.SpanTests
     {
         // Calling Span APIs via Reflection is not supported yet.
         // These tests check that using reflection results in graceful failures. See https://github.com/dotnet/coreclr/issues/17296
+        // These tests are only relevant for fast span.
 
         [Fact]
         public static void MemoryExtensions_StaticReturningReadOnlySpan()
@@ -86,7 +86,7 @@ namespace System.SpanTests
             Type type = typeof(Span<int>);
 
             PropertyInfo property = type.GetProperty(nameof(Span<int>.Empty));
-            Assert.Throws<NotSupportedException>(() => property.GetValue(null));
+            Assert.Throws<NotSupportedException>(() => property.GetValue(default));
         }
 
         [Fact]
@@ -95,10 +95,10 @@ namespace System.SpanTests
             Type type = typeof(Span<int>);
 
             MethodInfo method = type.GetMethod("op_Equality");
-            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default }));
+            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default, default }));
 
             method = type.GetMethod("op_Inequality");
-            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default }));
+            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default, default }));
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace System.SpanTests
             Type type = typeof(ReadOnlySpan<int>);
 
             PropertyInfo property = type.GetProperty(nameof(ReadOnlySpan<int>.Empty));
-            Assert.Throws<NotSupportedException>(() => property.GetValue(null));
+            Assert.Throws<NotSupportedException>(() => property.GetValue(default));
         }
 
         [Fact]
@@ -140,10 +140,10 @@ namespace System.SpanTests
             Type type = typeof(ReadOnlySpan<int>);
 
             MethodInfo method = type.GetMethod("op_Equality");
-            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default }));
+            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default, default }));
 
             method = type.GetMethod("op_Inequality");
-            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default }));
+            Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { default, default }));
         }
 
         [Fact]
@@ -178,8 +178,9 @@ namespace System.SpanTests
         {
             Type type = typeof(MemoryManager<int>);
 
-            MethodInfo method = type.GetMethod(nameof(MemoryManager<int>.GetSpan));
-            Assert.Throws<NotSupportedException>(() => method.Invoke(null, null));
+            MemoryManager<int> manager = new CustomMemoryForTest<int>(new int[10]);
+            MethodInfo method = type.GetMethod(nameof(MemoryManager<int>.GetSpan), BindingFlags.Public | BindingFlags.Instance);
+            Assert.Throws<NotSupportedException>(() => method.Invoke(manager, null));
         }
     }
 }
