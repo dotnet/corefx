@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -625,6 +626,66 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (var chain = X509Chain.Create())
                 Assert.NotNull(chain);
+        }
+
+        [Fact]
+        public static void InvalidSelfSignedSignature()
+        {
+            X509ChainStatusFlags expectedFlags;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                expectedFlags = X509ChainStatusFlags.NotSignatureValid;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // For OSX alone expectedFlags here means OR instead of AND.
+                // Because the error code changed in 10.13.4 from UntrustedRoot to PartialChain
+                // and we handle that later in this test.
+                expectedFlags =
+                    X509ChainStatusFlags.UntrustedRoot |
+                    X509ChainStatusFlags.PartialChain;
+            }
+            else
+            {
+                expectedFlags =
+                    X509ChainStatusFlags.NotSignatureValid |
+                    X509ChainStatusFlags.UntrustedRoot;
+            }
+
+            byte[] certBytes = (byte[])TestData.MicrosoftDotComRootBytes.Clone();
+            // The signature goes up to the very last byte, so flip some bits in it.
+            certBytes[certBytes.Length - 1] ^= 0xFF;
+
+            using (var cert = new X509Certificate2(certBytes))
+            using (ChainHolder holder = new ChainHolder())
+            {
+                X509Chain chain = holder.Chain;
+                X509ChainPolicy policy = chain.ChainPolicy;
+                policy.VerificationTime = cert.NotBefore.AddDays(3);
+                policy.RevocationMode = X509RevocationMode.NoCheck;
+
+                chain.Build(cert);
+
+                X509ChainStatusFlags allFlags =
+                    chain.ChainStatus.Select(cs => cs.Status).Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, b) => a | b);
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // If we're on 10.13.3 or older we get UntrustedRoot.
+                    // If we're on 10.13.4 or newer we get PartialChain.
+                    //
+                    // So make the expectedValue be whichever of those two is set.
+                    expectedFlags = (expectedFlags & allFlags);
+                    // One of them has to be set.
+                    Assert.NotEqual(X509ChainStatusFlags.NoError, expectedFlags);
+                    // Continue executing now to ensure that no other unexpected flags were set.
+                }
+
+                Assert.Equal(expectedFlags, allFlags);
+            }
         }
     }
 }
