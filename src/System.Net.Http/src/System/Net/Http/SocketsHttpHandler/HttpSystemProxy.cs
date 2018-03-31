@@ -190,7 +190,7 @@ namespace System.Net.Http
             }
 
             int idx = value.IndexOf("http://");
-            if( idx >= 0 )
+            if (idx >= 0)
             {
                 int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
                 int proxyLength = (endOfProxy == -1) ? value.Length - idx : endOfProxy - idx;
@@ -202,7 +202,7 @@ namespace System.Net.Http
             }
 
             idx = value.IndexOf("http=");
-            if( idx >= 0 )
+            if (idx >= 0)
             {
                 idx += 5; // Skip "http=" so we can replace it with "http://"
                 int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
