@@ -192,6 +192,7 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [Fact]
         public void FailFast_ExceptionStackTrace_ArgumentException()
         {
@@ -214,6 +215,7 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [Fact]
         public void FailFast_ExceptionStackTrace_StackOverflowException()
         {
@@ -237,6 +239,7 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [Fact]
         public void FailFast_ExceptionStackTrace_InnerException()
         { 
