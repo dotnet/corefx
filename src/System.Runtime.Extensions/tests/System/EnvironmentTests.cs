@@ -193,10 +193,11 @@ namespace System.Tests
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
         [Fact]
-        public void FailFast_InnerExceptionStackTrace()
+        public void FailFast_ExceptionStackTrace_ArgumentException()
         {
             var psi = new ProcessStartInfo();
             psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
 
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; },
@@ -205,12 +206,22 @@ namespace System.Tests
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
-                String consoleOutput = p.StandardError.ReadToEnd();
-                Assert.True(consoleOutput.Contains("Exception details:"));
-                Assert.True(consoleOutput.Contains("ArgumentException"));
-                Assert.True(consoleOutput.Contains("bad arg"));
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("ArgumentException:", consoleOutput);
+                Assert.Contains("bad arg", consoleOutput);
             }
+        }
+
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [Fact]
+        public void FailFast_ExceptionStackTrace_StackOverflowException()
+        {
             // Test using another type of exception
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return SuccessExitCode; },
                 new RemoteInvokeOptions { StartInfo = psi }))
@@ -218,12 +229,22 @@ namespace System.Tests
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
-                String consoleOutput = p.StandardError.ReadToEnd();
-                Assert.True(consoleOutput.Contains("Exception details:"));
-                Assert.True(consoleOutput.Contains("StackOverflowException"));
-                Assert.True(consoleOutput.Contains("SO exception"));
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("StackOverflowException", consoleOutput);
+                Assert.Contains("SO exception", consoleOutput);
             }
+        }
+
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [Fact]
+        public void FailFast_ExceptionStackTrace_InnerException()
+        { 
             // Test if inner exception details are also logged
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+
             using (RemoteInvokeHandle handle = RemoteInvoke(
                 () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return SuccessExitCode; },
                 new RemoteInvokeOptions { StartInfo = psi }))
@@ -231,12 +252,12 @@ namespace System.Tests
                 Process p = handle.Process;
                 handle.Process = null;
                 p.WaitForExit();
-                String consoleOutput = p.StandardError.ReadToEnd();
-                Assert.True(consoleOutput.Contains("Exception details:"));
-                Assert.True(consoleOutput.Contains("first exception"));
-                Assert.True(consoleOutput.Contains("inner exception"));
-                Assert.True(consoleOutput.Contains("ArgumentException"));
-                Assert.True(consoleOutput.Contains("NullReferenceException"));
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("first exception", consoleOutput);
+                Assert.Contains("inner exception", consoleOutput);
+                Assert.Contains("ArgumentException", consoleOutput);
+                Assert.Contains("NullReferenceException", consoleOutput);
             }
         }
 
