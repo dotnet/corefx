@@ -21,6 +21,7 @@ namespace System.Net.Http
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
         private bool _disposed;
+        private static char[] _proxyDelimiters = {';', ' ', '\n', '\r', '\t'};
 
         public static bool TryCreate(out IWebProxy proxy)
         {
@@ -178,8 +179,8 @@ namespace System.Net.Http
 
         /// <summary>
         /// This function will evaluate given string and it will try to convert
-        /// it to Uri object. The string could contain URI fragment, IP address and  port
-        /// tuple or just IP address or name. It will return null if parsing fails.
+        /// it to a Uri. The string contains a list of schemes and proxies,
+        /// separated by semicolons or whitespace. For now we support http only.
         /// </summary>
         private static Uri GetUriFromString(string value)
         {
@@ -188,16 +189,29 @@ namespace System.Net.Http
                 return null;
             }
 
-            if (!value.Contains("://"))
+            int idx = value.IndexOf("http://");
+            if( idx >= 0 )
             {
-                value = "http://" + value;
+                int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
+                int proxyLength = (endOfProxy == -1) ? value.Length - idx : endOfProxy - idx;
+
+                if (Uri.TryCreate( value.Substring(idx, proxyLength) , UriKind.Absolute, out Uri uri))
+                {
+                    return uri;
+                }
             }
 
-            if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri) &&
-                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            idx = value.IndexOf("http=");
+            if( idx >= 0 )
             {
-                // We only support http and https for now.
-                return uri;
+                idx += 5; // Skip "http=" so we can replace it with "http://"
+                int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
+                int proxyLength = (endOfProxy == -1) ? value.Length - idx : endOfProxy - idx;
+
+                if (Uri.TryCreate( "http://" + value.Substring(idx, proxyLength) , UriKind.Absolute, out Uri uri))
+                {
+                    return uri;
+                }
             }
             return null;
         }

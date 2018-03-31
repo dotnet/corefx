@@ -14,7 +14,6 @@ namespace System.Net.Http.Tests
     public class HttpSystemProxyTest : RemoteExecutorTestBase
     {
         private readonly ITestOutputHelper _output;
-        private const string FakeProxyString = "http://proxy.contoso.com";
         private readonly Uri fakeProxyUri = new Uri("http://proxy.contoso.com");
         private readonly Uri fooHttp = new Uri("http://foo.com");
         private readonly Uri fooHttps = new Uri("https://foo.com");
@@ -24,18 +23,31 @@ namespace System.Net.Http.Tests
             _output = output;
         }
 
-        [Fact]
-        public void HttpProxy_SystemProxy_Loaded()
+        [Theory]
+        [InlineData("http://proxy.contoso.com")]
+        [InlineData("http=proxy.contoso.com")]
+        [InlineData("https://proxy.wrong.com http://proxy.contoso.com")]
+        [InlineData("https=proxy.wrong.com http=proxy.contoso.com")]
+        [InlineData("https://proxy.wrong.com\nhttp://proxy.contoso.com")]
+        [InlineData("https=proxy.wrong.com\nhttp=proxy.contoso.com")]
+        [InlineData("https://proxy.wrong.com;http://proxy.contoso.com")]
+        [InlineData("https=proxy.wrong.com;http=proxy.contoso.com")]
+        [InlineData(";http=proxy.contoso.com;;")]
+        [InlineData("    http=proxy.contoso.com    ")]
+        [InlineData("http=proxy.contoso.com;http=proxy.wrong.com")]
+        public void HttpProxy_SystemProxy_Loaded(string proxyString)
         {
             IWebProxy p;
 
             FakeRegistry.Reset();
             Assert.False(HttpSystemProxy.TryCreate(out p));
 
-            FakeRegistry.WinInetProxySettings.Proxy = FakeProxyString;
+            FakeRegistry.WinInetProxySettings.Proxy = proxyString;
+            WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
 
             Assert.True(HttpSystemProxy.TryCreate(out p));
             Assert.NotNull(p);
+
             Assert.Equal(fakeProxyUri, p.GetProxy(fooHttp));
             Assert.Equal(fakeProxyUri, p.GetProxy(fooHttps));
         }
@@ -112,7 +124,29 @@ namespace System.Net.Http.Tests
                 }
                 return SuccessExitCode;
            }, bypass, count.ToString()).Dispose();
+        }
 
+        [InlineData("http://")]
+        [InlineData("http=")]
+        [InlineData("http://;")]
+        [InlineData("http=;")]
+        [InlineData("  ;  ")]
+        [InlineData("proxy.contoso.com")]
+        public void HttpProxy_InvalidSystemProxy_Null(string proxyString)
+        {
+            IWebProxy p;
+
+            FakeRegistry.Reset();
+            Assert.False(HttpSystemProxy.TryCreate(out p));
+
+            FakeRegistry.WinInetProxySettings.Proxy = proxyString;
+            WinInetProxyHelper proxyHelper = new WinInetProxyHelper();
+
+            Assert.True(HttpSystemProxy.TryCreate(out p));
+            Assert.NotNull(p);
+
+            Assert.Equal(null, p.GetProxy(fooHttp));
+            Assert.Equal(null, p.GetProxy(fooHttps));
         }
     }
 }
