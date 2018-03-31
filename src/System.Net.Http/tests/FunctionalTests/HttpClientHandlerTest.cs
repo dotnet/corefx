@@ -507,6 +507,11 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
         {
+            if (IsCurlHandler)
+            {
+                return;
+            }
+
             var options = new LoopbackServer.Options { Address = address, UseSsl= useSsl };
             bool connectionAccepted = false;
             string host = "";
