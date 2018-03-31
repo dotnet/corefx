@@ -30,6 +30,30 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void MemoryExtensions_StaticWithSpanArguments()
+        {
+            Type type = typeof(MemoryExtensions);
+
+            MethodInfo method = type.GetMethod(nameof(MemoryExtensions.CompareTo));
+
+            int result = (int)method.Invoke(null, new object[] { default, default, StringComparison.Ordinal });
+            Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public static void BinaryPrimitives_StaticWithSpanArgument()
+        {
+            Type type = typeof(BinaryPrimitives);
+
+            MethodInfo method = type.GetMethod(nameof(BinaryPrimitives.ReadInt16LittleEndian));
+            Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { default }));
+
+            method = type.GetMethod(nameof(BinaryPrimitives.TryReadInt16LittleEndian));
+            bool result = (bool)method.Invoke(null, new object[] { default, null });
+            Assert.False(result);
+        }
+
+        [Fact]
         public static void MemoryMarshal_GenericStaticReturningSpan()
         {
             Type type = typeof(MemoryMarshal);
@@ -39,17 +63,6 @@ namespace System.SpanTests
 
             MethodInfo method = type.GetMethod(nameof(MemoryMarshal.CreateSpan)).MakeGenericMethod((refInt.GetType()));
             Assert.Throws<NotSupportedException>(() => method.Invoke(null, new object[] { null, 0 }));
-        }
-
-        [Fact]
-        public static void MemoryExtensions_StaticWithSpanArguments()
-        {
-            Type type = typeof(MemoryExtensions);
-
-            MethodInfo method = type.GetMethod(nameof(MemoryExtensions.CompareTo));
-
-            int result = (int)method.Invoke(null, new object[] { default, default, StringComparison.Ordinal });
-            Assert.Equal(0, result);
         }
 
         [Fact]
@@ -98,15 +111,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void Memory_PropertyReturningSpan()
-        {
-            Type type = typeof(Memory<int>);
-
-            PropertyInfo property = type.GetProperty(nameof(Memory<int>.Span));
-            Assert.Throws<NotSupportedException>(() => property.GetValue(null));
-        }
-
-        [Fact]
         public static void ReadOnlySpan_Constructor()
         {
             Type type = typeof(ReadOnlySpan<int>);
@@ -152,6 +156,15 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void Memory_PropertyReturningSpan()
+        {
+            Type type = typeof(Memory<int>);
+
+            PropertyInfo property = type.GetProperty(nameof(Memory<int>.Span));
+            Assert.Throws<NotSupportedException>(() => property.GetValue(null));
+        }
+
+        [Fact]
         public static void ReadOnlyMemory_PropertyReturningReadOnlySpan()
         {
             Type type = typeof(ReadOnlyMemory<int>);
@@ -167,19 +180,6 @@ namespace System.SpanTests
 
             MethodInfo method = type.GetMethod(nameof(MemoryManager<int>.GetSpan));
             Assert.Throws<NotSupportedException>(() => method.Invoke(null, null));
-        }
-
-        [Fact]
-        public static void BinaryPrimitives_StaticWithSpanArgument()
-        {
-            Type type = typeof(BinaryPrimitives);
-
-            MethodInfo method = type.GetMethod(nameof(BinaryPrimitives.ReadInt16LittleEndian));
-            Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { default }));
-
-            method = type.GetMethod(nameof(BinaryPrimitives.TryReadInt16LittleEndian));
-            bool result = (bool)method.Invoke(null, new object[] { default, null });
-            Assert.False(result);
         }
     }
 }
