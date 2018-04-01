@@ -48,19 +48,16 @@ namespace System.Buffers
                 if (type == SequenceType.Array)
                 {
                     Debug.Assert(startObject is T[]);
-
                     data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
                 }
                 else if (typeof(T) == typeof(char)  && type == SequenceType.String)
                 {
                     Debug.Assert(startObject is string);
-
                     data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
                 }
-                else // if (type == SequenceType.OwnedMemory)
+                else // if (type == SequenceType.MemoryManager)
                 {
                     Debug.Assert(startObject is MemoryManager<T>);
-
                     data = (Unsafe.As<MemoryManager<T>>(startObject)).Memory;
                 }
             }
@@ -70,62 +67,43 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlyMemory<T> GetFirstBuffer(in SequencePosition start, in SequencePosition end)
+        private ReadOnlyMemory<T> GetFirstBuffer()
         {
-            SequenceType type;
-            int startIndex = 0;
-            int endIndex = 0;
-            object startObject = start.GetObject();
-            if (startObject != null)
-            {
-                GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out type, out startIndex, out endIndex);
-            }
-            else
-            {
-                type = SequenceType.Empty;
-            }
+            ReadOnlyMemory<T> data;
+            object startObject = Start.GetObject();
+            GetTypeAndIndices(Start.GetInteger(), End.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
 
-            int length = endIndex - startIndex;
-            object endObject = end.GetObject();
-
-            if (type != SequenceType.MultiSegment && type != SequenceType.Empty && startObject != endObject)
-                ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-
-            ReadOnlyMemory<T> memory;
             if (type == SequenceType.MultiSegment)
             {
                 Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
                 ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                memory = startSegment.Memory;
-                if (startObject != endObject)
-                {
-                    length = memory.Length - startIndex;
-                }
-            }
-            else if (type == SequenceType.Array)
-            {
-                Debug.Assert(startObject is T[]);
 
-                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
-            }
-            else if (type == SequenceType.MemoryManager)
-            {
-                Debug.Assert(startObject is MemoryManager<T>);
-
-                memory = (Unsafe.As<MemoryManager<T>>(startObject)).Memory;
-            }
-            else if (typeof(T) == typeof(char) && type == SequenceType.String)
-            {
-                Debug.Assert(startObject is string);
-
-                memory = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
+                data = startSegment.Memory;
+                if (startSegment != End.GetObject())
+                    endIndex = data.Length;
             }
             else
             {
-                return default;
+                Debug.Assert(startObject == End.GetObject());
+
+                if (type == SequenceType.Array)
+                {
+                    Debug.Assert(startObject is T[]);
+                    data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
+                }
+                else if (typeof(T) == typeof(char)  && type == SequenceType.String)
+                {
+                    Debug.Assert(startObject is string);
+                    data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory();
+                }
+                else // if (type == SequenceType.MemoryManager)
+                {
+                    Debug.Assert(startObject is MemoryManager<T>);
+                    data = (Unsafe.As<MemoryManager<T>>(startObject)).Memory;
+                }
             }
 
-            return memory.Slice(startIndex, length);
+            return data.Slice(startIndex, endIndex - startIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

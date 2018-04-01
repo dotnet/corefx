@@ -47,7 +47,7 @@ namespace System.Buffers
         /// <summary>
         /// Gets <see cref="ReadOnlyMemory{T}"/> from the first segment.
         /// </summary>
-        public ReadOnlyMemory<T> First => GetFirstBuffer(_sequenceStart, _sequenceEnd);
+        public ReadOnlyMemory<T> First => GetFirstBuffer();
 
         /// <summary>
         /// A position to the start of the <see cref="ReadOnlySequence{T}"/>.
@@ -384,8 +384,7 @@ namespace System.Buffers
             MultiSegment = 0x00,
             Array = 0x1,
             MemoryManager = 0x2,
-            String = 0x3,
-            Empty = 0x4
+            String = 0x3
         }
     }
 
