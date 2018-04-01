@@ -117,16 +117,12 @@ namespace System.Net.Http
 
             if (_host != null)
             {
-                int posColon = -1;
-                bool isHostTypeIPv6 = (posColon = _host.IndexOf(':')) != -1 && _host.IndexOf(':', posColon+1) != -1;
-                string hostAddress = isHostTypeIPv6 ? "[" + _host + "]" : _host;
-
                 // Precalculate ASCII bytes for Host header
                 // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
                 string hostHeader =
                     (_port != (_sslOptions == null ? DefaultHttpPort : DefaultHttpsPort)) ?
-                    $"{hostAddress}:{_port}" :
-                    hostAddress;
+                    $"{_host}:{_port}" :
+                    _host;
 
                 // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
                 _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
