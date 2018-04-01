@@ -269,8 +269,12 @@ namespace System.Net.Http
             else
             {
                 Debug.Assert(_pool.UsingProxy);
+
+                // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
+                // In this case, use uri.Host instead, which will correctly enclose with [].
+                // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
                 await WriteAsciiStringAsync(uri.HostNameType == UriHostNameType.IPv6 ?
-                    "[" + uri.IdnHost + "]" : uri.IdnHost).ConfigureAwait(false);
+                    uri.Host : uri.IdnHost).ConfigureAwait(false);
 
                 if (!uri.IsDefaultPort)
                 {
