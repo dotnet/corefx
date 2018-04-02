@@ -341,26 +341,5 @@ namespace System.Text
             }
         }
 
-        // Method assumes that memory pointer is aligned
-        internal static unsafe void ZeroMemAligned(byte* buffer, int count)
-        {
-            long* pLong = (long*)buffer;
-            long* pLongEnd = (long*)(buffer + count - sizeof(long));
-
-            while (pLong < pLongEnd)
-            {
-                *pLong = 0;
-                pLong++;
-            }
-
-            byte* pByte = (byte*)pLong;
-            byte* pEnd = buffer + count;
-
-            while (pByte < pEnd)
-            {
-                *pByte = 0;
-                pByte++;
-            }
-        }
     }
 }

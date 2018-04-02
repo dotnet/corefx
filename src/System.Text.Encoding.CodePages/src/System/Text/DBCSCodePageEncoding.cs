@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Text
 {
@@ -107,8 +108,7 @@ namespace System.Text
                 // Plus 4 byte to remember CP # when done loading it. (Don't want to get IA64 or anything out of alignment)
                 int sizeToAllocate = 65536 * 2 * 2 + 4 + iExtraBytes;
                 byte* pNativeMemory = GetNativeMemory(sizeToAllocate);
-                ZeroMemAligned(pNativeMemory, sizeToAllocate);
-
+                Unsafe.InitBlockUnaligned(pNativeMemory, 0, (uint)sizeToAllocate);
 
                 mapBytesToUnicode = (char*)pNativeMemory;
                 mapUnicodeToBytes = (ushort*)(pNativeMemory + 65536 * 2);
