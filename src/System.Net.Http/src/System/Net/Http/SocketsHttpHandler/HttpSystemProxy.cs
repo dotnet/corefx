@@ -13,11 +13,11 @@ namespace System.Net.Http
 {
     internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
-        private readonly List<IPAddress> _localIp;
         private readonly Uri _insecureProxyUri;         // URI of the http system proxy if set
         private readonly Uri _secureProxyUri;         // URI of the https system proxy if set
         private readonly List<Regex> _bypass;           // list of domains not to proxy
         private readonly bool _bypassLocal = false;     // we should bypass domain considered local
+        private readonly List<IPAddress> _localIp;
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
@@ -314,6 +314,7 @@ namespace System.Net.Http
                     }
                 }
 
+                // We did not find match on bypass list.
                 return (uri.Scheme == UriScheme.Https || uri.Scheme == UriScheme.Wss) ? _secureProxyUri : _insecureProxyUri;
             }
 

@@ -153,6 +153,8 @@ namespace System.Net.Http.Tests
 
             Assert.Equal(null, p.GetProxy(fooHttp));
             Assert.Equal(null, p.GetProxy(fooHttps));
+            Assert.Equal(null, p.GetProxy(fooWs));
+            Assert.Equal(null, p.GetProxy(fooWss));
         }
     }
 }
