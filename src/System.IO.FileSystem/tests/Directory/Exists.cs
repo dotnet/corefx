@@ -380,6 +380,7 @@ namespace System.IO.Tests
         public void NonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
+            Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
         }
 
         [Fact]
