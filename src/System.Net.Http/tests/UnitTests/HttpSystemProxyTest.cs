@@ -14,6 +14,7 @@ namespace System.Net.Http.Tests
     public class HttpSystemProxyTest : RemoteExecutorTestBase
     {
         private readonly ITestOutputHelper _output;
+        private const string FakeProxyString = "http://proxy.contoso.com";
         private readonly Uri insecureProxyUri = new Uri("http://proxy.insecure.com");
         private readonly Uri secureProxyUri = new Uri("http://proxy.secure.com");
         private readonly Uri fooHttp = new Uri("http://foo.com");
