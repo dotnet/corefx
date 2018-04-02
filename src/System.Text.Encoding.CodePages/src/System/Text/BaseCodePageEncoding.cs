@@ -81,7 +81,7 @@ namespace System.Text
             throw new PlatformNotSupportedException();
         }
 
-        // Just a helper as we cannot use 'this' when calling 'base(...)' 
+        // Just a helper as we cannot use 'this' when calling 'base(...)'
         private void SetFallbackEncoding()
         {
             (EncoderFallback as InternalEncoderBestFitFallback).encoding = this;
@@ -329,8 +329,8 @@ namespace System.Text
             return arrayBytesBestFit;
         }
 
-        // During the AppDomain shutdown the Encoding class may have already finalized, making the memory section 
-        // invalid. We detect that by validating the memory section handle then re-initializing the memory 
+        // During the AppDomain shutdown the Encoding class may have already finalized, making the memory section
+        // invalid. We detect that by validating the memory section handle then re-initializing the memory
         // section by calling LoadManagedCodePage() method and eventually the mapped file handle and
         // the memory section pointer will get finalized one more time.
         internal unsafe void CheckMemorySection()
@@ -338,6 +338,28 @@ namespace System.Text
             if (safeNativeMemoryHandle != null && safeNativeMemoryHandle.DangerousGetHandle() == IntPtr.Zero)
             {
                 LoadManagedCodePage();
+            }
+        }
+
+        // Method assumes that memory pointer is aligned
+        internal static unsafe void ZeroMemAligned(byte* buffer, int count)
+        {
+            long* pLong = (long*)buffer;
+            long* pLongEnd = (long*)(buffer + count - sizeof(long));
+
+            while (pLong < pLongEnd)
+            {
+                *pLong = 0;
+                pLong++;
+            }
+
+            byte* pByte = (byte*)pLong;
+            byte* pEnd = buffer + count;
+
+            while (pByte < pEnd)
+            {
+                *pByte = 0;
+                pByte++;
             }
         }
     }
