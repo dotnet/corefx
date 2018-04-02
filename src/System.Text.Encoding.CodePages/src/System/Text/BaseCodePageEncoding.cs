@@ -340,6 +340,5 @@ namespace System.Text
                 LoadManagedCodePage();
             }
         }
-
     }
 }
