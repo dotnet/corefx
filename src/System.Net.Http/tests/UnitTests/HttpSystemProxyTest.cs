@@ -19,6 +19,8 @@ namespace System.Net.Http.Tests
         private readonly Uri secureProxyUri = new Uri("http://proxy.secure.com");
         private readonly Uri fooHttp = new Uri("http://foo.com");
         private readonly Uri fooHttps = new Uri("https://foo.com");
+        private readonly Uri fooWs = new Uri("ws://foo.com");
+        private readonly Uri fooWss = new Uri("wss://foo.com");
 
         public HttpSystemProxyTest(ITestOutputHelper output)
         {
@@ -52,6 +54,8 @@ namespace System.Net.Http.Tests
 
             Assert.Equal(hasInsecureProxy ? insecureProxyUri : null, p.GetProxy(fooHttp));
             Assert.Equal(hasSecureProxy ? secureProxyUri : null, p.GetProxy(fooHttps));
+            Assert.Equal(hasInsecureProxy ? insecureProxyUri : null, p.GetProxy(fooWs));
+            Assert.Equal(hasSecureProxy ? secureProxyUri : null, p.GetProxy(fooWss));
         }
 
         [Theory]
