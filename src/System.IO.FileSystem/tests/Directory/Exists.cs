@@ -384,6 +384,14 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
+        public void ExistentDriveAsPath_ReturnsTrue()
+        {
+            Assert.All(IOServices.GetReadyDrives(), drive => Assert.True(Exists(drive)));
+            Assert.All(IOServices.GetReadyDrives(), drive => Assert.True(Exists(IOInputs.ExtendedPrefix + drive)));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void SubdirectoryOnNonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(Path.Combine(IOServices.GetNonExistentDrive(), "nonexistentsubdir")));
