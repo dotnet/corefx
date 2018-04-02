@@ -298,7 +298,10 @@ namespace System.Net.Security
             catch (ArgumentException)
             {
                 // client has not done IDN mapping
-                return idnEncodedString;
+                // TODO: this logic is replaced only for testing various implementations,
+                //       this change should be removed before merging
+                // return idnEncodedString;
+                return null;
             }
         }
 
