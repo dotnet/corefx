@@ -314,7 +314,7 @@ namespace System.Net.Http
                     }
                 }
 
-                return uri.Scheme == Uri.UriSchemeHttps ? _secureProxyUri : _insecureProxyUri;
+                return (uri.Scheme == UriScheme.Https || uri.Scheme == UriScheme.Wss) ? _secureProxyUri : _insecureProxyUri;
             }
 
             // For anything else ask WinHTTP.
