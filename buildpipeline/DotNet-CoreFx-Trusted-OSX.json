@@ -1,433 +1,433 @@
 {
   "build": [
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": true,
-    "alwaysRun": false,
-    "displayName": "Run AgentTools/Begin.ps1",
-    "timeoutInMinutes": 0,
-    "condition": "succeededOrFailed()",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Run AgentTools/Begin.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "2.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "targetType": "inline",
         "filePath": "",
         "arguments": "",
-        "script": "if (Test-Path \"$(AgentToolsPath)\\Begin.ps1\") {\n     \"Begin.ps1 script found. Executing...\"\n     cd $(AgentToolsPath)\n     & $(AgentToolsPath)\\Begin.ps1\n} else {\n   \"Begin.ps1 script does not exist. Moving on...\"\n}",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\Begin.ps1\") {\n   \"Begin.ps1 script found. Executing...\"\n   cd $(AgentToolsPath)\n   & $(AgentToolsPath)\\Begin.ps1\n} else {\n   \"Begin.ps1 script does not exist. Moving on...\"\n}",
         "errorActionPreference": "continue",
         "failOnStderr": "false",
         "ignoreLASTEXITCODE": "true",
         "workingDirectory": ""
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Delete files from $(Agent.BuildDirectory)/s",
-    "timeoutInMinutes": 0,
-    "refName": "Task1",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Delete files from $(Agent.BuildDirectory)/s",
+      "timeoutInMinutes": 0,
+      "refName": "Task1",
+      "task": {
         "id": "b7e8b412-0437-4065-9371-edc5881de25b",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "SourceFolder": "$(Agent.BuildDirectory)/s",
         "Contents": "**\n.gitignore"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "git clone",
-    "timeoutInMinutes": 0,
-    "refName": "Task2",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "git clone",
+      "timeoutInMinutes": 0,
+      "refName": "Task2",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "git",
         "arguments": "clone $(PB_VsoCorefxGitUrl) $(Agent.BuildDirectory)/s/corefx",
         "workingFolder": "",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "git checkout",
-    "timeoutInMinutes": 0,
-    "refName": "Task3",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "git checkout",
+      "timeoutInMinutes": 0,
+      "refName": "Task3",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "git",
         "arguments": "checkout $(SourceVersion)",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Run $(Agent.BuildDirectory)/s/corefx/clean.sh",
-    "timeoutInMinutes": 0,
-    "refName": "Task4",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run $(Agent.BuildDirectory)/s/corefx/clean.sh",
+      "timeoutInMinutes": 0,
+      "refName": "Task4",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/clean.sh",
         "arguments": "-all",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Run $(Agent.BuildDirectory)/s/corefx/sync.sh",
-    "timeoutInMinutes": 0,
-    "refName": "Task5",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run $(Agent.BuildDirectory)/s/corefx/sync.sh",
+      "timeoutInMinutes": 0,
+      "refName": "Task5",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/sync.sh",
         "arguments": "$(PB_SyncArguments)",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx/",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Generate Native Version Assets",
-    "timeoutInMinutes": 0,
-    "refName": "Task6",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Generate Native Version Assets",
+      "timeoutInMinutes": 0,
+      "refName": "Task6",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/build-managed.sh",
         "arguments": "-OfficialBuildId=$(OfficialBuildId) -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Run $(Agent.BuildDirectory)/s/corefx/build.sh",
-    "timeoutInMinutes": 0,
-    "refName": "Task7",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run $(Agent.BuildDirectory)/s/corefx/build.sh",
+      "timeoutInMinutes": 0,
+      "refName": "Task7",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/build.sh",
         "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx/",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Run $(Agent.BuildDirectory)/s/corefx/build-tests.sh",
-    "timeoutInMinutes": 0,
-    "refName": "Task8",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run $(Agent.BuildDirectory)/s/corefx/build-tests.sh",
+      "timeoutInMinutes": 0,
+      "refName": "Task8",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/build-tests.sh",
         "arguments": "$(PB_BuildTestsArguments)",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx/",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Create Helix Test Jobs",
-    "timeoutInMinutes": 0,
-    "refName": "Task9",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Create Helix Test Jobs",
+      "timeoutInMinutes": 0,
+      "refName": "Task9",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/Tools/msbuild.sh",
         "arguments": "$(Agent.BuildDirectory)/s/corefx/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:\"TargetQueues=$(PB_TargetQueue)\" /p:\"OfficialBuildId=$(OfficialBuildId)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": false,
-    "alwaysRun": false,
-    "displayName": "Push packages to Azure",
-    "timeoutInMinutes": 0,
-    "refName": "Task10",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Push packages to Azure",
+      "timeoutInMinutes": 0,
+      "refName": "Task10",
+      "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "filename": "$(Agent.BuildDirectory)/s/corefx/publish-packages.sh",
         "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "$(Agent.BuildDirectory)/s/corefx/",
         "failOnStandardError": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": true,
-    "alwaysRun": true,
-    "displayName": "Copy Files to: $(Build.StagingDirectory)\\BuildLogs",
-    "timeoutInMinutes": 0,
-    "refName": "CopyFiles1",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Copy Files to: $(Build.StagingDirectory)\\BuildLogs",
+      "timeoutInMinutes": 0,
+      "refName": "CopyFiles1",
+      "task": {
         "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
         "versionSpec": "2.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "SourceFolder": "",
         "Contents": "*.log\n$(Agent.BuildDirectory)/s/corefx/*.log",
         "TargetFolder": "$(Build.StagingDirectory)\\BuildLogs",
         "CleanTargetFolder": "false",
         "OverWrite": "false",
         "flattenFolders": "false"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": true,
-    "alwaysRun": true,
-    "displayName": "Publish Artifact: BuildLogs",
-    "timeoutInMinutes": 0,
-    "refName": "PublishBuildArtifacts2",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Publish Artifact: BuildLogs",
+      "timeoutInMinutes": 0,
+      "refName": "PublishBuildArtifacts2",
+      "task": {
         "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
         "versionSpec": "1.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "PathtoPublish": "$(Build.StagingDirectory)\\BuildLogs",
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)",
         "Parallel": "false",
         "ParallelCount": "8"
-    }
+      }
     },
     {
-    "environment": {},
-    "enabled": true,
-    "continueOnError": true,
-    "alwaysRun": true,
-    "displayName": "Run AgentTools/End.ps1",
-    "timeoutInMinutes": 0,
-    "condition": "succeededOrFailed()",
-    "task": {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "Run AgentTools/End.ps1",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "2.*",
         "definitionType": "task"
-    },
-    "inputs": {
+      },
+      "inputs": {
         "targetType": "inline",
         "filePath": "",
         "arguments": "",
-        "script": "if (Test-Path \"$(AgentToolsPath)\\End.ps1\") {\n     \"End.ps1 script found. Executing...\"\n     cd $(AgentToolsPath)\n     & $(AgentToolsPath)\\End.ps1\n} else {\n   \"End.ps1 script does not exist. Moving on...\"\n}",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\End.ps1\") {\n   \"End.ps1 script found. Executing...\"\n   cd $(AgentToolsPath)\n   & $(AgentToolsPath)\\End.ps1\n} else {\n   \"End.ps1 script does not exist. Moving on...\"\n}",
         "errorActionPreference": "continue",
         "failOnStderr": "false",
         "ignoreLASTEXITCODE": "true",
         "workingDirectory": ""
-    }
+      }
     }
   ],
   "options": [
-  {
-  "enabled": false,
-  "definition": {
-    "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
-  },
-  "inputs": {
-    "workItemType": "234347",
-    "assignToRequestor": "true",
-    "additionalFields": "{}"
-  }
-  },
-  {
-  "enabled": false,
-  "definition": {
-    "id": "57578776-4c22-4526-aeb0-86b6da17ee9c"
-  },
-  "inputs": {
-    "additionalFields": "{}"
-  }
-  },
-  {
-  "enabled": false,
-  "definition": {
-    "id": "5d58cc01-7c75-450c-be18-a388ddb129ec"
-  },
-  "inputs": {
-    "branchFilters": "[\"+refs/heads/*\"]",
-    "additionalFields": "{}"
-  }
-  }
+    {
+      "enabled": false,
+      "definition": {
+        "id": "a9db38f9-9fdc-478c-b0f9-464221e58316"
+      },
+      "inputs": {
+        "workItemType": "234347",
+        "assignToRequestor": "true",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "57578776-4c22-4526-aeb0-86b6da17ee9c"
+      },
+      "inputs": {
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": {
+        "id": "5d58cc01-7c75-450c-be18-a388ddb129ec"
+      },
+      "inputs": {
+        "branchFilters": "[\"+refs/heads/*\"]",
+        "additionalFields": "{}"
+      }
+    }
   ],
   "variables": {
-  "system.debug": {
-  "value": "false",
-  "allowOverride": true
-  },
-  "PB_CloudDropAccountName": {
-  "value": "dotnetbuildoutput"
-  },
-  "CloudDropAccessToken": {
-  "value": null,
-  "isSecret": true
-  },
-  "OfficialBuildId": {
-  "value": "$(Build.BuildNumber)",
-  "allowOverride": true
-  },
-  "PB_Label": {
-  "value": "$(Build.BuildNumber)",
-  "allowOverride": true
-  },
-  "SourceVersion": {
-  "value": "HEAD",
-  "allowOverride": true
-  },
-  "PB_VsoAccountName": {
-  "value": "dn-bot"
-  },
-  "VsoPassword": {
-  "value": null,
-  "isSecret": true
-  },
-  "PB_VsoRepositoryName": {
-  "value": "DotNet-CoreFX-Trusted",
-  "allowOverride": true
-  },
-  "PB_VsoCorefxGitUrl": {
-  "value": "https://github.com/dotnet/corefx"
-  },
-  "PB_BuildArguments": {
-  "value": "-buildArch=x64 -Release",
-  "allowOverride": true
-  },
-  "PB_BuildTestsArguments": {
-  "value": "-buildArch=x64 -Release -SkipTests",
-  "allowOverride": true
-  },
-  "PB_SyncArguments": {
-  "value": "-p -- /p:ArchGroup=x64",
-  "allowOverride": true
-  },
-  "PB_CreateHelixArguments": {
-  "value": "/t:CloudBuild /p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=true /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=OSX\" /p:FilterToOSGroup=OSX",
-  "allowOverride": true
-  }
+    "system.debug": {
+      "value": "false",
+      "allowOverride": true
+    },
+    "PB_CloudDropAccountName": {
+      "value": "dotnetbuildoutput"
+    },
+    "CloudDropAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
+    "OfficialBuildId": {
+      "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "PB_Label": {
+      "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "SourceVersion": {
+      "value": "HEAD",
+      "allowOverride": true
+    },
+    "PB_VsoAccountName": {
+      "value": "dn-bot"
+    },
+    "VsoPassword": {
+      "value": null,
+      "isSecret": true
+    },
+    "PB_VsoRepositoryName": {
+      "value": "DotNet-CoreFX-Trusted",
+      "allowOverride": true
+    },
+    "PB_VsoCorefxGitUrl": {
+      "value": "https://github.com/dotnet/corefx"
+    },
+    "PB_BuildArguments": {
+      "value": "-buildArch=x64 -Release",
+      "allowOverride": true
+    },
+    "PB_BuildTestsArguments": {
+      "value": "-buildArch=x64 -Release -SkipTests",
+      "allowOverride": true
+    },
+    "PB_SyncArguments": {
+      "value": "-p -- /p:ArchGroup=x64",
+      "allowOverride": true
+    },
+    "PB_CreateHelixArguments": {
+      "value": "/t:CloudBuild /p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=true /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=OSX\" /p:FilterToOSGroup=OSX",
+      "allowOverride": true
+    }
   },
   "demands": [
-  "Configuration -equals VSTSAgent_Mac_v3.0.0"
+    "Configuration -equals VSTSAgent_Mac_v3.0.0"
   ],
   "retentionRules": [
-  {
-  "branches": [
-    "+refs/heads/*"
-  ],
-  "artifacts": [
-    "build.SourceLabel"
-  ],
-  "artifactTypesToDelete": [],
-  "daysToKeep": 10,
-  "minimumToKeep": 1,
-  "deleteBuildRecord": true,
-  "deleteTestResults": true
-  }
+    {
+      "branches": [
+        "+refs/heads/*"
+      ],
+      "artifacts": [
+        "build.SourceLabel"
+      ],
+      "artifactTypesToDelete": [],
+      "daysToKeep": 10,
+      "minimumToKeep": 1,
+      "deleteBuildRecord": true,
+      "deleteTestResults": true
+    }
   ],
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 60,
   "jobCancelTimeoutInMinutes": 5,
   "repository": {
-  "properties": {
-  "labelSources": "0",
-  "reportBuildStatus": "true",
-  "fetchDepth": "0",
-  "gitLfsSupport": "false",
-  "skipSyncSource": "true",
-  "cleanOptions": "3",
-  "checkoutNestedSubmodules": "false",
-  "labelSourcesFormat": "$(build.buildNumber)"
-  },
-  "id": "0a2b2664-c1be-429c-9b40-8a24dee27a4a",
-  "type": "TfsGit",
-  "name": "DotNet-BuildPipeline",
-  "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline",
-  "defaultBranch": "refs/heads/master",
-  "clean": "false",
-  "checkoutSubmodules": false
+    "properties": {
+      "labelSources": "0",
+      "reportBuildStatus": "true",
+      "fetchDepth": "0",
+      "gitLfsSupport": "false",
+      "skipSyncSource": "true",
+      "cleanOptions": "3",
+      "checkoutNestedSubmodules": "false",
+      "labelSourcesFormat": "$(build.buildNumber)"
+    },
+    "id": "0a2b2664-c1be-429c-9b40-8a24dee27a4a",
+    "type": "TfsGit",
+    "name": "DotNet-BuildPipeline",
+    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline",
+    "defaultBranch": "refs/heads/master",
+    "clean": "false",
+    "checkoutSubmodules": false
   },
   "processParameters": {},
   "quality": "definition",
   "queue": {
-  "id": 330,
-  "name": "DotNetCore-Build",
-  "pool": {
-  "id": 97,
-  "name": "DotNetCore-Build"
-  }
+    "id": 330,
+    "name": "DotNetCore-Build",
+    "pool": {
+      "id": 97,
+      "name": "DotNetCore-Build"
+    }
   },
   "id": 1053,
   "name": "DotNet-CoreFx-Trusted-OSX",
@@ -435,12 +435,12 @@
   "type": "build",
   "queueStatus": "enabled",
   "project": {
-  "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
-  "name": "DevDiv",
-  "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
-  "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
-  "state": "wellFormed",
-  "revision": 418098167,
-  "visibility": "organization"
+    "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "name": "DevDiv",
+    "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
+    "state": "wellFormed",
+    "revision": 418098167,
+    "visibility": "organization"
   }
 }
