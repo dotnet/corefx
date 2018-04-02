@@ -27,6 +27,7 @@ namespace System.Text
             get => _pos;
             set
             {
+                Debug.Assert(value >= 0);
                 Debug.Assert(value <= _chars.Length);
                 _pos = value;
             }
@@ -40,7 +41,19 @@ namespace System.Text
                 Grow(capacity - _chars.Length);
         }
 
-        public ref char GetPinnableReference() => ref MemoryMarshal.GetReference(_chars);
+        /// <summary>
+        /// Get a pinnable reference to the builder.
+        /// </summary>
+        /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+        public ref char GetPinnableReference(bool terminate = false)
+        {
+            if (terminate)
+            {
+                EnsureCapacity(Length + 1);
+                _chars[Length] = '\0';
+            }
+            return ref MemoryMarshal.GetReference(_chars);
+        }
 
         public ref char this[int index]
         {
@@ -56,6 +69,23 @@ namespace System.Text
             var s = new string(_chars.Slice(0, _pos));
             Dispose();
             return s;
+        }
+
+        /// <summary>Returns the underlying storage of the builder.</summary>
+        public Span<char> RawChars => _chars;
+
+        /// <summary>
+        /// Returns a span around the contents of the builder.
+        /// </summary>
+        /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+        public ReadOnlySpan<char> AsSpan(bool terminate)
+        {
+            if (terminate)
+            {
+                EnsureCapacity(Length + 1);
+                _chars[Length] = '\0';
+            }
+            return _chars.Slice(0, _pos);
         }
 
         public ReadOnlySpan<char> AsSpan() => _chars.Slice(0, _pos);

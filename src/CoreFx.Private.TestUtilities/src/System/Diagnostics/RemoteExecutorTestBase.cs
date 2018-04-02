@@ -20,7 +20,7 @@ namespace System.Diagnostics
         public const int SuccessExitCode = 42;
 
         /// <summary>The name of the test console app.</summary>
-        protected static readonly string TestConsoleApp = "RemoteExecutorConsoleApp.exe";
+        protected static readonly string TestConsoleApp = Path.GetFullPath("RemoteExecutorConsoleApp.exe");
 
         /// <summary>Invokes the method from this assembly in another process using the specified arguments.</summary>
         /// <param name="method">The method to invoke.</param>
@@ -195,6 +195,27 @@ namespace System.Diagnostics
                 MethodName = methodName;
             }
 
+            private int _exitCode;
+            public int ExitCode
+            {
+                get
+                {
+                    if (!PlatformDetection.IsUap)
+                    {
+                        Process.WaitForExit();
+                        return Process.ExitCode;
+                    }
+                    return _exitCode;
+                }
+                internal set
+                {
+                    if (!PlatformDetection.IsUap)
+                    {
+                        throw new PlatformNotSupportedException("ExitCode property can only be set in UWP");
+                    }
+                    _exitCode = value;
+                }
+            }
             public Process Process { get; set; }
             public RemoteInvokeOptions Options { get; private set; }
             public string AssemblyName { get; private set; }
@@ -203,8 +224,8 @@ namespace System.Diagnostics
 
             public void Dispose()
             {
+                GC.SuppressFinalize(this); // before Dispose(true) in case the Dispose call throws
                 Dispose(disposing: true);
-                GC.SuppressFinalize(this);
             }
 
             private void Dispose(bool disposing)

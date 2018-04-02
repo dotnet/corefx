@@ -344,8 +344,22 @@ namespace System.Data.SqlClient.SNI
         private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress));
-            IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
-            string fullyQualifiedDomainName = hostEntry.HostName;
+            IPHostEntry hostEntry = null;
+            string fullyQualifiedDomainName;
+            try
+            {
+                hostEntry = Dns.GetHostEntry(hostNameOrAddress);
+            }
+            catch (SocketException)
+            {
+                // A SocketException can occur while resolving the hostname.
+                // We will fallback on using hostname from the connection string in the finally block
+            }
+            finally
+            {
+                // If the DNS lookup failed, then resort to using the user provided hostname to construct the SPN.
+                fullyQualifiedDomainName = hostEntry?.HostName ?? hostNameOrAddress;
+            }
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName;
             if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
@@ -429,7 +443,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">Packet</param>
         /// <returns>SNI error status</returns>
-        public uint ReadAsync(SNIHandle handle, out SNIPacket packet, bool isMars = false)
+        public uint ReadAsync(SNIHandle handle, out SNIPacket packet)
         {
             packet = null;
             return handle.ReceiveAsync(ref packet);

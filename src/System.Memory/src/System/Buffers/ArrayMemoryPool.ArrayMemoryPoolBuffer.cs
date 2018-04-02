@@ -15,7 +15,7 @@ namespace System.Buffers
 {
     internal sealed partial class ArrayMemoryPool<T> : MemoryPool<T>
     {
-        private sealed class ArrayMemoryPoolBuffer : OwnedMemory<T>
+        private sealed class ArrayMemoryPoolBuffer : MemoryManager<T>
         {
             private T[] _array;
             private int _refCount;
@@ -28,19 +28,16 @@ namespace System.Buffers
 
             public sealed override int Length => _array.Length;
 
-            public sealed override bool IsDisposed => _array == null;
+            public bool IsDisposed => _array == null;
 
-            protected sealed override bool IsRetained => Volatile.Read(ref _refCount) > 0;
+            public bool IsRetained => Volatile.Read(ref _refCount) > 0;
 
-            public sealed override Span<T> Span
+            public sealed override Span<T> GetSpan()
             {
-                get
-                {
-                    if (IsDisposed)
-                        ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                if (IsDisposed)
+                    ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
 
-                    return _array;
-                }
+                return _array;
             }
 
             protected sealed override void Dispose(bool disposing)
@@ -52,69 +49,67 @@ namespace System.Buffers
                 }
             }
 
+            // TryGetArray is exposed as "protected internal". Normally, the rules of C# dictate we override it as "protected" because the base class is
+            // in a different assembly. Except in the netstandard config where the base class is in the same assembly.
             protected
-#if netstandard // TryGetArray is exposed as "protected internal". Normally, the rules of C# dictate we override it as "protected" because the base class is
-                // in a different assembly. Except in the netstandard config where the base class is in the same assembly.
+#if netstandard  
             internal
 #endif
-            sealed override bool TryGetArray(out ArraySegment<T> arraySegment)
+            sealed override bool TryGetArray(out ArraySegment<T> segment)
             {
                 if (IsDisposed)
                     ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
 
-                arraySegment = new ArraySegment<T>(_array);
+                segment = new ArraySegment<T>(_array);
                 return true;
             }
 
-            public sealed override MemoryHandle Pin(int byteOffset = 0)
+            public sealed override MemoryHandle Pin(int elementIndex = 0)
             {
                 unsafe
                 {
-                    Retain(); // this checks IsDisposed
+                    while (true)
+                    {
+                        int currentCount = Volatile.Read(ref _refCount);
+                        if (currentCount <= 0)
+                            ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                        if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount)
+                            break;
+                    }
 
                     try
                     {
-                        if ((IntPtr.Size == 4 && (uint)byteOffset > (uint)_array.Length * (uint)Unsafe.SizeOf<T>())
-                            || (IntPtr.Size != 4 && (ulong)byteOffset > (uint)_array.Length * (ulong)Unsafe.SizeOf<T>()))
+                        if ((uint)elementIndex > (uint)_array.Length)
                         {
-                            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteOffset);
+                            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.elementIndex);
                         }
 
                         GCHandle handle = GCHandle.Alloc(_array, GCHandleType.Pinned);
-                        return new MemoryHandle(this, ((byte*)handle.AddrOfPinnedObject()) + byteOffset, handle);
+
+                        return new MemoryHandle(Unsafe.Add<T>(((void*)handle.AddrOfPinnedObject()), elementIndex), handle, this);
                     }
                     catch
                     {
-                        Release();
+                        Unpin();
                         throw;
                     }
                 }
             }
 
-            public sealed override void Retain()
+            public sealed override void Unpin()
             {
                 while (true)
                 {
                     int currentCount = Volatile.Read(ref _refCount);
-                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
-                    if (Interlocked.CompareExchange(ref _refCount, currentCount + 1, currentCount) == currentCount) break;
-                }
-            }
-
-            public sealed override bool Release()
-            {
-                while (true)
-                {
-                    int currentCount = Volatile.Read(ref _refCount);
-                    if (currentCount <= 0) ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
+                    if (currentCount <= 0)
+                        ThrowHelper.ThrowObjectDisposedException_ArrayMemoryPoolBuffer();
                     if (Interlocked.CompareExchange(ref _refCount, currentCount - 1, currentCount) == currentCount)
                     {
                         if (currentCount == 1)
                         {
-                            Dispose();
-                            return false;
+                            Dispose(true);
                         }
-                        return true;
+                        break;
                     }
                 }
             }

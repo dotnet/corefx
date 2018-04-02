@@ -18,6 +18,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="..\..\Common\src\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
@@ -83,6 +85,9 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Collections\HashHelpers.cs">
+      <Link>Common\System\Collections\HashHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
     <Compile Include="System\Environment.WinRT.cs" />
@@ -104,8 +109,8 @@
     <Compile Include="System\Environment.Windows.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Windows.cs" />
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>

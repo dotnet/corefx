@@ -30,12 +30,7 @@ namespace System.Net.Http
     internal sealed class HttpConnectionPoolManager : IDisposable
     {
         /// <summary>How frequently an operation should be initiated to clean out old pools and connections in those pools.</summary>
-        private const int CleanPoolTimeoutMilliseconds =
-#if DEBUG
-            1_000;
-#else
-            30_000;
-#endif
+        private readonly TimeSpan _cleanPoolTimeout;
         /// <summary>The pools, indexed by endpoint.</summary>
         private readonly ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool> _pools;
         /// <summary>Timer used to initiate cleaning of the pools.</summary>
@@ -63,7 +58,45 @@ namespace System.Net.Http
             _settings = settings;
             _maxConnectionsPerServer = settings._maxConnectionsPerServer;
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
+
             // Start out with the timer not running, since we have no pools.
+            // When it does run, run it with a frequency based on the idle timeout.
+            if (!AvoidStoringConnections)
+            {
+                if (settings._pooledConnectionIdleTimeout == Timeout.InfiniteTimeSpan)
+                {
+                    const int DefaultScavengeSeconds = 30;
+                    _cleanPoolTimeout = TimeSpan.FromSeconds(DefaultScavengeSeconds);
+                }
+                else
+                {
+                    const int ScavengesPerIdle = 4;
+                    const int MinScavengeSeconds = 1;
+                    TimeSpan timerPeriod = settings._pooledConnectionIdleTimeout / ScavengesPerIdle;
+                    _cleanPoolTimeout = timerPeriod.TotalSeconds >= MinScavengeSeconds ? timerPeriod : TimeSpan.FromSeconds(MinScavengeSeconds);
+                }
+
+                bool restoreFlow = false;
+                try
+                {
+                    // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+                    if (!ExecutionContext.IsFlowSuppressed())
+                    {
+                        ExecutionContext.SuppressFlow();
+                        restoreFlow = true;
+                    }
+
+                    _cleaningTimer = new Timer(s => ((HttpConnectionPoolManager)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+                }
+                finally
+                {
+                    // Restore the current ExecutionContext
+                    if (restoreFlow)
+                    {
+                        ExecutionContext.RestoreFlow();
+                    }
+                }
+            }
 
             // Figure out proxy stuff.
             if (settings._useProxy)
@@ -74,29 +107,13 @@ namespace System.Net.Http
                     _proxyCredentials = _proxy.Credentials ?? settings._defaultProxyCredentials;
                 }
             }
-
-            // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
-            bool restoreFlow = false;
-            try
-            {
-                if (!ExecutionContext.IsFlowSuppressed())
-                {
-                    ExecutionContext.SuppressFlow();
-                    restoreFlow = true;
-                }
-
-                _cleaningTimer = new Timer(s => ((HttpConnectionPoolManager)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
-            }
-            finally
-            {
-                // Restore the current ExecutionContext
-                if (restoreFlow)
-                    ExecutionContext.RestoreFlow();
-            }
         }
 
         public HttpConnectionSettings Settings => _settings;
         public ICredentials ProxyCredentials => _proxyCredentials;
+        public bool AvoidStoringConnections =>
+            _settings._pooledConnectionIdleTimeout == TimeSpan.Zero ||
+            _settings._pooledConnectionLifetime == TimeSpan.Zero;
 
         private static string ParseHostNameFromHeader(string hostHeader)
         {
@@ -157,10 +174,18 @@ namespace System.Net.Http
                 Debug.Assert(HttpUtilities.IsSupportedNonSecureScheme(proxyUri.Scheme));
                 if (sslHostName == null)
                 {
-                    // Standard HTTP proxy usage for non-secure requests
-                    // The destination host and port are ignored here, since these connections
-                    // will be shared across any requests that use the proxy.
-                    return new HttpConnectionKey(HttpConnectionKind.Proxy, null, 0, null, proxyUri);
+                    if (HttpUtilities.IsNonSecureWebSocketScheme(uri.Scheme))
+                    {
+                        // Non-secure websocket connection through proxy to the destination.
+                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, uri.IdnHost, uri.Port, null, proxyUri);
+                    }
+                    else
+                    {
+                        // Standard HTTP proxy usage for non-secure requests
+                        // The destination host and port are ignored here, since these connections
+                        // will be shared across any requests that use the proxy.
+                        return new HttpConnectionKey(HttpConnectionKind.Proxy, null, 0, null, proxyUri);
+                    }
                 }
                 else
                 {
@@ -186,7 +211,7 @@ namespace System.Net.Http
             while (!_pools.TryGetValue(key, out pool))
             {
                 pool = new HttpConnectionPool(this, key.Kind, key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
-                if (_pools.TryAdd(key, pool))
+                if (_pools.TryAdd(key, pool) && _cleaningTimer != null)
                 {
                     // We need to ensure the cleanup timer is running if it isn't
                     // already now that we added a new connection pool.
@@ -194,7 +219,7 @@ namespace System.Net.Http
                     {
                         if (!_timerIsRunning)
                         {
-                            _cleaningTimer.Change(CleanPoolTimeoutMilliseconds, CleanPoolTimeoutMilliseconds);
+                            _cleaningTimer.Change(_cleanPoolTimeout, _cleanPoolTimeout);
                             _timerIsRunning = true;
                         }
                     }
@@ -245,7 +270,8 @@ namespace System.Net.Http
         /// <summary>Disposes of the pools, disposing of each individual pool.</summary>
         public void Dispose()
         {
-            _cleaningTimer.Dispose();
+            _cleaningTimer?.Dispose();
+
             foreach (KeyValuePair<HttpConnectionKey, HttpConnectionPool> pool in _pools)
             {
                 pool.Value.Dispose();
@@ -260,6 +286,8 @@ namespace System.Net.Http
         /// <summary>Removes unusable connections from each pool, and removes stale pools entirely.</summary>
         private void RemoveStalePools()
         {
+            Debug.Assert(_cleaningTimer != null);
+
             // Iterate through each pool in the set of pools.  For each, ask it to clear out
             // any unusable connections (e.g. those which have expired, those which have been closed, etc.)
             // The pool may detect that it's empty and long unused, in which case it'll dispose of itself,

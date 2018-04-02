@@ -15,8 +15,6 @@ namespace System.Net.Security
         private EncryptionPolicy _encryptionPolicy = EncryptionPolicy.RequireEncryption;
         private bool _allowRenegotiation = true;
 
-        internal RemoteCertValidationCallback _certValidationDelegate;
-
         public bool AllowRenegotiation
         {
             get => _allowRenegotiation;
@@ -28,6 +26,8 @@ namespace System.Net.Security
         public List<SslApplicationProtocol> ApplicationProtocols { get; set; }
 
         public RemoteCertificateValidationCallback RemoteCertificateValidationCallback { get; set; }
+
+        public ServerCertificateSelectionCallback ServerCertificateSelectionCallback { get; set; }
 
         public X509Certificate ServerCertificate { get; set; }
 

@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -40,9 +41,9 @@ namespace System.Net.Http
         private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
-        private static readonly string s_cancellationMessage = new OperationCanceledException().Message; // use same message as the default ctor
 
         private readonly HttpConnectionPool _pool;
+        private readonly Socket _socket; // used for polling; _stream should be used for all reading/writing. _stream owns disposal.
         private readonly Stream _stream;
         private readonly TransportContext _transportContext;
         private readonly bool _usingProxy;
@@ -54,6 +55,7 @@ namespace System.Net.Http
         private int _allowedReadLineBytes;
 
         private ValueTask<int>? _readAheadTask;
+        private int _readAheadTaskLock = 0; // 0 == free, 1 == held
         private byte[] _readBuffer;
         private int _readOffset;
         private int _readLength;
@@ -65,6 +67,7 @@ namespace System.Net.Http
 
         public HttpConnection(
             HttpConnectionPool pool,
+            Socket socket,
             Stream stream,
             TransportContext transportContext)
         {
@@ -72,6 +75,7 @@ namespace System.Net.Http
             Debug.Assert(stream != null);
 
             _pool = pool;
+            _socket = socket; // may be null in cases where we couldn't easily get the underlying socket
             _stream = stream;
             _transportContext = transportContext;
             _usingProxy = pool.UsingProxy;
@@ -118,32 +122,82 @@ namespace System.Net.Http
 
                     // Eat any exceptions from the read-ahead task.  We don't need to log, as we expect
                     // failures from this task due to closing the connection while a read is in progress.
-                    if (_readAheadTask != null)
+                    ValueTask<int>? readAheadTask = ConsumeReadAheadTask();
+                    if (readAheadTask != null)
                     {
-                        ValueTask<int> t = _readAheadTask.GetValueOrDefault();
-                        if (t.IsCompleted && !t.IsCompletedSuccessfully)
-                        {
-                            Exception ignored = t.AsTask().Exception; // accessing Exception prop is sufficient to suppress unobserved exception events
-                        }
-                        else
-                        {
-                            t.AsTask().ContinueWith(p =>
-                            {
-                                Exception ignored = p.Exception;
-                            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
-                        }
+                        IgnoreExceptionsAsync(readAheadTask.GetValueOrDefault());
                     }
                 }
             }
         }
 
-        public bool ReadAheadCompleted
+        /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
+        private static async void IgnoreExceptionsAsync(ValueTask<int> task)
         {
-            get
+            try { await task.ConfigureAwait(false); } catch { }
+        }
+
+        /// <summary>Do a non-blocking poll to see whether the connection has data available or has been closed.</summary>
+        /// <remarks>If we don't have direct access to the underlying socket, we instead use a read-ahead task.</remarks>
+        public bool PollRead()
+        {
+            if (_socket != null) // may be null if we don't have direct access to the socket
             {
-                Debug.Assert(_readAheadTask != null, $"{nameof(_readAheadTask)} should have been initialized");
-                return _readAheadTask.GetValueOrDefault().IsCompleted;
+                try
+                {
+                    return _socket.Poll(0, SelectMode.SelectRead);
+                }
+                catch (Exception e) when (e is SocketException || e is ObjectDisposedException)
+                {
+                    // Poll can throw when used on a closed socket.
+                    return true;
+                }
             }
+            else
+            {
+                return EnsureReadAheadAndPollRead();
+            }
+        }
+
+        /// <summary>
+        /// Issues a read-ahead on the connection, which will serve both as the first read on the
+        /// response as well as a polling indication of whether the connection is usable.
+        /// </summary>
+        /// <returns>true if there's data available on the connection or it's been closed; otherwise, false.</returns>
+        public bool EnsureReadAheadAndPollRead()
+        {
+            try
+            {
+                Debug.Assert(_readAheadTask == null || _socket == null, "Should only already have a read-ahead task if we don't have a socket to poll");
+                if (_readAheadTask == null)
+                {
+                    _readAheadTask = _stream.ReadAsync(new Memory<byte>(_readBuffer));
+                }
+            }
+            catch (Exception error)
+            {
+                // If reading throws, eat the error and don't pool the connection.
+                if (NetEventSource.IsEnabled) Trace($"Error performing read ahead: {error}");
+                Dispose();
+                _readAheadTask = new ValueTask<int>(0);
+            }
+
+            return _readAheadTask.Value.IsCompleted; // equivalent to polling
+        }
+
+        private ValueTask<int>? ConsumeReadAheadTask()
+        {
+            if (Interlocked.CompareExchange(ref _readAheadTaskLock, 1, 0) == 0)
+            {
+                ValueTask<int>? t = _readAheadTask;
+                _readAheadTask = null;
+                Volatile.Write(ref _readAheadTaskLock, 0);
+                return t;
+            }
+
+            // We couldn't get the lock, which means it must already be held
+            // by someone else who will consume the task.
+            return null;
         }
 
         public bool IsNewConnection
@@ -409,16 +463,11 @@ namespace System.Net.Http
                 // by the previous request handling.  (Note we do not support HTTP pipelining.)
                 Debug.Assert(_readOffset == _readLength);
 
-                // When the connection was put back into the pool, a pre-emptive read was performed
-                // into the read buffer.  That read should not complete prior to us using the
-                // connection again, as that would mean the connection was either closed or had
-                // erroneous data sent on it by the server in response to no request from us.
-                // We need to consume that read prior to issuing another read request.
-                ValueTask<int>? t = _readAheadTask;
+                // When the connection was taken out of the pool, a pre-emptive read was performed
+                // into the read buffer. We need to consume that read prior to issuing another read.
+                ValueTask<int>? t = ConsumeReadAheadTask();
                 if (t != null)
                 {
-                    _readAheadTask = null;
-
                     int bytesRead = await t.GetValueOrDefault().ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
 
@@ -507,7 +556,7 @@ namespace System.Net.Http
                 // here (if an exception has occurred or does occur while creating/returning the stream,
                 // we'll still dispose of it in the catch below as part of Dispose'ing the connection).
                 cancellationRegistration.Dispose();
-                cancellationToken.ThrowIfCancellationRequested(); // in case cancellation may have disposed of the stream
+                CancellationHelper.ThrowIfCancellationRequested(cancellationToken); // in case cancellation may have disposed of the stream
 
                 // Create the response stream.
                 HttpContentStream responseStream;
@@ -577,7 +626,7 @@ namespace System.Net.Http
                 // At this point, we're going to throw an exception; we just need to
                 // determine which exception to throw.
 
-                if (ShouldWrapInOperationCanceledException(error, cancellationToken))
+                if (CancellationHelper.ShouldWrapInOperationCanceledException(error, cancellationToken))
                 {
                     // Cancellation was requested, so assume that the failure is due to
                     // the cancellation request. This is a bit unorthodox, as usually we'd
@@ -588,7 +637,7 @@ namespace System.Net.Http
                     // exceptions (argument exceptions, object disposed exceptions, socket exceptions,
                     // etc.), as a middle ground we treat it as cancellation, but still propagate the
                     // original information as the inner exception, for diagnostic purposes.
-                    throw CreateOperationCanceledException(error, cancellationToken);
+                    throw CancellationHelper.CreateOperationCanceledException(error, cancellationToken);
                 }
                 else if (error is InvalidOperationException || error is IOException)
                 {
@@ -653,12 +702,6 @@ namespace System.Net.Http
                 }
             }, _weakThisRef);
         }
-
-        internal static bool ShouldWrapInOperationCanceledException(Exception error, CancellationToken cancellationToken) =>
-            !(error is OperationCanceledException) && cancellationToken.IsCancellationRequested;
-
-        internal static Exception CreateOperationCanceledException(Exception error, CancellationToken cancellationToken) =>
-            new OperationCanceledException(s_cancellationMessage, error, cancellationToken);
 
         private static bool LineIsEmpty(ArraySegment<byte> line) => line.Count == 0;
 
@@ -1273,6 +1316,52 @@ namespace System.Net.Http
             return count;
         }
 
+        private ValueTask<int> ReadBufferedAsync(Memory<byte> destination)
+        {
+            // If the caller provided buffer, and thus the amount of data desired to be read,
+            // is larger than the internal buffer, there's no point going through the internal
+            // buffer, so just do an unbuffered read.
+            return destination.Length >= _readBuffer.Length ?
+                ReadAsync(destination) :
+                ReadBufferedAsyncCore(destination);
+        }
+
+        private async ValueTask<int> ReadBufferedAsyncCore(Memory<byte> destination)
+        {
+            // This is called when reading the response body.
+
+            int remaining = _readLength - _readOffset;
+            if (remaining > 0)
+            {
+                // We have data in the read buffer.  Return it to the caller.
+                if (destination.Length <= remaining)
+                {
+                    ReadFromBuffer(destination.Span);
+                    return destination.Length;
+                }
+                else
+                {
+                    ReadFromBuffer(destination.Span.Slice(0, remaining));
+                    return remaining;
+                }
+            }
+
+            // No data in read buffer. 
+            _readOffset = _readLength = 0;
+
+            // Do a buffered read directly against the underlying stream.
+            Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
+            int bytesRead = await _stream.ReadAsync(_readBuffer.AsMemory()).ConfigureAwait(false);
+            if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
+            _readLength = bytesRead;
+
+            // Hand back as much data as we can fit.
+            int bytesToCopy = Math.Min(bytesRead, destination.Length);
+            _readBuffer.AsSpan(0, bytesToCopy).CopyTo(destination.Span);
+            _readOffset = bytesToCopy;
+            return bytesToCopy;
+        }
+
         private async Task CopyFromBufferAsync(Stream destination, int count, CancellationToken cancellationToken)
         {
             Debug.Assert(count <= _readLength - _readOffset);
@@ -1439,26 +1528,6 @@ namespace System.Net.Http
             }
             else
             {
-                try
-                {
-                    // When putting a connection back into the pool, we initiate a pre-emptive
-                    // read on the stream.  When the connection is subsequently taken out of the
-                    // pool, this can be used in place of the first read on the stream that would
-                    // otherwise be done.  But by doing it now, we can check the status of the read
-                    // at any point to understand if the connection has been closed or if errant data
-                    // has been sent on the connection by the server, either of which would mean we
-                    // should close the connection and not use it for subsequent requests.
-                    _readAheadTask = _stream.ReadAsync(new Memory<byte>(_readBuffer));
-                }
-                catch (Exception error)
-                {
-                    // If reading throws, eat the error and don't pool the connection.
-                    if (NetEventSource.IsEnabled) Trace($"Error performing read ahead when returning connection to pool: {error}");
-
-                    Dispose();
-                    return;
-                }
-
                 // Put connection back in the pool.
                 _pool.ReturnConnection(this);
             }
@@ -1501,7 +1570,7 @@ namespace System.Net.Http
 
     internal sealed class HttpConnectionWithFinalizer : HttpConnection
     {
-        public HttpConnectionWithFinalizer(HttpConnectionPool pool, Stream stream, TransportContext transportContext) : base(pool, stream, transportContext) { }
+        public HttpConnectionWithFinalizer(HttpConnectionPool pool, Socket socket, Stream stream, TransportContext transportContext) : base(pool, socket, stream, transportContext) { }
 
         // This class is separated from HttpConnection so we only pay the price of having a finalizer
         // when it's actually needed, e.g. when MaxConnectionsPerServer is enabled.

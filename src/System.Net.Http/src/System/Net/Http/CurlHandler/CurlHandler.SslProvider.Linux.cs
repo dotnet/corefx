@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.IO;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -24,6 +25,8 @@ namespace System.Net.Http
             private static readonly Interop.Http.SslCtxCallback s_sslCtxCallback = SslCtxCallback;
             private static readonly Interop.Ssl.AppVerifyCallback s_sslVerifyCallback = VerifyCertChain;
             private static readonly Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1");
+            private static string _sslCaPath;
+            private static string _sslCaInfo;
 
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
             {
@@ -101,25 +104,64 @@ namespace System.Net.Http
                 }
             }
 
+            private static void GetSslCaLocations(out string path, out string info)
+            {
+                // We only provide curl option values when SSL_CERT_FILE or SSL_CERT_DIR is set.
+                // When that is the case, we set the options so curl ends up using the same certificates as the
+                // X509 machine store.
+                path = _sslCaPath;
+                info = _sslCaInfo;
+
+                if (path == null || info == null)
+                {
+                    bool hasEnvironmentVariables = Environment.GetEnvironmentVariable("SSL_CERT_FILE") != null ||
+                                                   Environment.GetEnvironmentVariable("SSL_CERT_DIR") != null;
+
+                    if (hasEnvironmentVariables)
+                    {
+                        path = Interop.Crypto.GetX509RootStorePath();
+                        if (!Directory.Exists(path))
+                        {
+                            // X509 store ignores non-existing.
+                            path = string.Empty;
+                        }
+
+                        info = Interop.Crypto.GetX509RootStoreFile();
+                        if (!File.Exists(info))
+                        {
+                            // X509 store ignores non-existing.
+                            info = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        path = string.Empty;
+                        info = string.Empty;
+                    }
+                    _sslCaPath = path;
+                    _sslCaInfo = info;
+                }
+            }
+
             private static void SetSslOptionsForCertificateStore(EasyRequest easy)
             {
                 // Support specifying certificate directory/bundle via environment variables: SSL_CERT_DIR, SSL_CERT_FILE.
-                string sslCertDir = Environment.GetEnvironmentVariable("SSL_CERT_DIR");
-                if (sslCertDir != null)
+                GetSslCaLocations(out string sslCaPath, out string sslCaInfo);
+
+                if (sslCaPath != string.Empty)
                 {
-                    easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_CAPATH, sslCertDir);
+                    easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_CAPATH, sslCaPath);
 
                     // https proxy support requires libcurl 7.52.0+
-                    easy.TrySetCurlOption(Interop.Http.CURLoption.CURLOPT_PROXY_CAPATH, sslCertDir);
+                    easy.TrySetCurlOption(Interop.Http.CURLoption.CURLOPT_PROXY_CAPATH, sslCaPath);
                 }
 
-                string sslCertFile = Environment.GetEnvironmentVariable("SSL_CERT_FILE");
-                if (sslCertFile != null)
+                if (sslCaInfo != string.Empty)
                 {
-                    easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_CAINFO, sslCertFile);
+                    easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_CAINFO, sslCaInfo);
 
                     // https proxy support requires libcurl 7.52.0+
-                    easy.TrySetCurlOption(Interop.Http.CURLoption.CURLOPT_PROXY_CAINFO, sslCertFile);
+                    easy.TrySetCurlOption(Interop.Http.CURLoption.CURLOPT_PROXY_CAINFO, sslCaInfo);
                 }
             }
 
@@ -167,16 +209,21 @@ namespace System.Net.Http
                     return;
                 }
 
-                // We explicitly disallow choosing SSL2/3. Make sure they were filtered out.
-                Debug.Assert((protocols & ~SecurityProtocol.AllowedSecurityProtocols) == 0, 
-                    "Disallowed protocols should have been filtered out.");
-
                 // libcurl supports options for either enabling all of the TLS1.* protocols or enabling 
-                // just one of them; it doesn't currently support enabling two of the three, e.g. you can't 
+                // just one protocol; it doesn't currently support enabling two of the three, e.g. you can't 
                 // pick TLS1.1 and TLS1.2 but not TLS1.0, but you can select just TLS1.2.
                 Interop.Http.CurlSslVersion curlSslVersion;
                 switch (protocols)
                 {
+#pragma warning disable 0618 // SSL2/3 are deprecated
+                    case SslProtocols.Ssl2:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_SSLv2;
+                        break;
+                    case SslProtocols.Ssl3:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_SSLv3;
+                        break;
+#pragma warning restore 0618
+
                     case SslProtocols.Tls:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_0;
                         break;

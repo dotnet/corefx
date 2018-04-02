@@ -685,7 +685,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessStartTime()
         {
-            TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
+            TimeSpan allowedWindow = TimeSpan.FromSeconds(3);
 
             for (int i = 0; i < 2; i++)
             {
@@ -711,6 +711,20 @@ namespace System.Diagnostics.Tests
                 {
                     Assert.InRange(processStartTime, testStartTime - allowedWindow, testEndTime + allowedWindow);
                     break;
+                }
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] 
+        public void ProcessStartTime_Deterministic_Across_Instances()
+        {
+            CreateDefaultProcess();
+            for (int i = 0; i < 10; ++i)
+            {
+                using (var p = Process.GetProcessById(_process.Id))
+                {
+                    Assert.Equal(_process.StartTime, p.StartTime);
                 }
             }
         }
@@ -1610,15 +1624,15 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Process_StartTest()
         {
-            string currentProcessName = GetCurrentProcessName();
+            string name = "xcopy.exe";
             string userName = string.Empty;
             string domain = "thisDomain";
             SecureString password = AsSecureString("Value");
 
-            using (Process p = Process.Start(currentProcessName, userName, password, domain)) // This writes junk to the Console but with this overload, we can't prevent that.
+            using (Process p = Process.Start(name, userName, password, domain)) // This writes junk to the Console but with this overload, we can't prevent that.
             {
                 Assert.NotNull(p);
-                Assert.Equal(currentProcessName, p.StartInfo.FileName);
+                Assert.Equal(name, p.StartInfo.FileName);
                 Assert.Equal(userName, p.StartInfo.UserName);
                 Assert.Same(password, p.StartInfo.Password);
                 Assert.Equal(domain, p.StartInfo.Domain);

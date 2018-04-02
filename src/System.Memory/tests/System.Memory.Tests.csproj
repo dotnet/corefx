@@ -16,6 +16,7 @@
     <!-- Tests specific to the fast span -->
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
     <Compile Include="MemoryMarshal\CreateReadOnlySpan.cs" />
+    <Compile Include="Span\Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
@@ -24,7 +25,6 @@
     <Compile Include="TestHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Span\AsBytes.cs" />
     <Compile Include="Span\AsSpan.cs" />
     <Compile Include="Span\Fill.cs" />
     <Compile Include="Span\Clear.cs" />
@@ -60,7 +60,11 @@
     <Compile Include="Span\LastIndexOfSequence.T.cs" />
     <Compile Include="Span\Overflow.cs" />
     <Compile Include="Span\Reverse.cs" />
+    <Compile Include="Span\SequenceCompareTo.bool.cs" />
     <Compile Include="Span\SequenceCompareTo.byte.cs" />
+    <Compile Include="Span\SequenceCompareTo.char.cs" />
+    <Compile Include="Span\SequenceCompareTo.int.cs" />
+    <Compile Include="Span\SequenceCompareTo.long.cs" />
     <Compile Include="Span\SequenceCompareTo.T.cs" />
     <Compile Include="Span\SequenceEqual.byte.cs" />
     <Compile Include="Span\SequenceEqual.char.cs" />
@@ -85,7 +89,6 @@
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadOnlySpan\AsBytes.cs" />
     <Compile Include="ReadOnlySpan\AsReadOnlySpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
     <Compile Include="ReadOnlySpan\CompareTo.cs" />
@@ -125,6 +128,12 @@
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.bool.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.byte.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.char.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.int.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.long.cs" />
+    <Compile Include="ReadOnlySpan\SequenceCompareTo.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.long.cs" />
@@ -154,8 +163,8 @@
     <Compile Include="Memory\Equality.cs" />
     <Compile Include="Memory\GetHashCode.cs" />
     <Compile Include="Memory\ImplicitConversion.cs" />
-    <Compile Include="Memory\OwnedMemory.cs" />
-    <Compile Include="Memory\Retain.cs" />
+    <Compile Include="Memory\MemoryManager.cs" />
+    <Compile Include="Memory\Pin.cs" />
     <Compile Include="Memory\Slice.cs" />
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\Strings.cs" />
@@ -163,12 +172,14 @@
     <Compile Include="Memory\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MemoryMarshal\AsBytesReadOnlySpan.cs" />
+    <Compile Include="MemoryMarshal\AsBytesSpan.cs" />
     <Compile Include="MemoryMarshal\AsMemory.cs" />
     <Compile Include="MemoryMarshal\CastReadOnlySpan.cs" />
     <Compile Include="MemoryMarshal\CastSpan.cs" />
     <Compile Include="MemoryMarshal\GetReference.cs" />
     <Compile Include="MemoryMarshal\TryGetArray.cs" />
-    <Compile Include="MemoryMarshal\TryGetOwnedMemory.cs" />
+    <Compile Include="MemoryMarshal\TryGetMemoryManager.cs" />
     <Compile Include="MemoryMarshal\TryGetString.cs" />
     <Compile Include="MemoryMarshal\ToEnumerable.cs" />
   </ItemGroup>
@@ -183,7 +194,7 @@
     <Compile Include="ReadOnlyMemory\Equality.cs" />
     <Compile Include="ReadOnlyMemory\GetHashCode.cs" />
     <Compile Include="ReadOnlyMemory\ImplicitConversion.cs" />
-    <Compile Include="ReadOnlyMemory\Retain.cs" />
+    <Compile Include="ReadOnlyMemory\Pin.cs" />
     <Compile Include="ReadOnlyMemory\Slice.cs" />
     <Compile Include="ReadOnlyMemory\Span.cs" />
     <Compile Include="ReadOnlyMemory\Strings.cs" />
@@ -224,8 +235,8 @@
     <Compile Include="Base64\Base64TestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Buffers\NativeOwnedMemory.cs">
-      <Link>Common\System\Buffers\NativeOwnedMemory.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
+      <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>

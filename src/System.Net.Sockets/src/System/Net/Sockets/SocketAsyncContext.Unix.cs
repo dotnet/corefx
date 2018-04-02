@@ -266,7 +266,7 @@ namespace System.Net.Sockets
                     // we can't pool the object, as ProcessQueue may still have a reference to it, due to
                     // using a pattern whereby it takes the lock to grab an item, but then releases the lock
                     // to do further processing on the item that's still in the list.
-                    ThreadPool.QueueUserWorkItem(o => ((AsyncOperation)o).InvokeCallback(allowPooling: false), this);
+                    ThreadPool.UnsafeQueueUserWorkItem(o => ((AsyncOperation)o).InvokeCallback(allowPooling: false), this);
                 }
 
                 Trace("Exit");
@@ -431,8 +431,22 @@ namespace System.Net.Sockets
 
             public BufferMemoryReceiveOperation(SocketAsyncContext context) : base(context) { }
 
-            protected override bool DoTryComplete(SocketAsyncContext context) =>
-                SocketPal.TryCompleteReceiveFrom(context._socket, Buffer.Span, null, Flags, SocketAddress, ref SocketAddressLen, out BytesTransferred, out ReceivedFlags, out ErrorCode);
+            protected override bool DoTryComplete(SocketAsyncContext context)
+            {
+                // Zero byte read is performed to know when data is available.
+                // We don't have to call receive, our caller is interested in the event.
+                if (Buffer.Length == 0 && Flags == SocketFlags.None && SocketAddress == null)
+                {
+                    BytesTransferred = 0;
+                    ReceivedFlags = SocketFlags.None;
+                    ErrorCode = SocketError.Success;
+                    return true;
+                }
+                else
+                {
+                    return SocketPal.TryCompleteReceiveFrom(context._socket, Buffer.Span, null, Flags, SocketAddress, ref SocketAddressLen, out BytesTransferred, out ReceivedFlags, out ErrorCode);
+                }
+            }
 
             public override void InvokeCallback(bool allowPooling)
             {
@@ -823,7 +837,7 @@ namespace System.Net.Sockets
 
                 // We just transitioned from Waiting to Processing.
                 // Spawn a work item to do the actual processing.
-                ThreadPool.QueueUserWorkItem(s_processingCallback, context);
+                ThreadPool.UnsafeQueueUserWorkItem(s_processingCallback, context);
             }
 
             // Called on the threadpool when data may be available.
@@ -954,7 +968,7 @@ namespace System.Net.Sockets
                         Debug.Assert(_state == QueueState.Processing);
 
                         // Spawn a new work item to continue processing the queue.
-                        ThreadPool.QueueUserWorkItem(s_processingCallback, context);
+                        ThreadPool.UnsafeQueueUserWorkItem(s_processingCallback, context);
                     }
 
                     // At this point, the operation has completed and it's no longer

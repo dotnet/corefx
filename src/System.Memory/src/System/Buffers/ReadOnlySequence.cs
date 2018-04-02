@@ -20,10 +20,11 @@ namespace System.Buffers
         /// Returns empty <see cref="ReadOnlySequence{T}"/>
         /// </summary>
 #if FEATURE_PORTABLE_SPAN
-        public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(SpanHelpers.PerTypeValues<T>.EmptyArray); 
+        public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
 #else
-        public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(Array.Empty<T>()); 
+        public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(Array.Empty<T>());
 #endif // FEATURE_PORTABLE_SPAN 
+
         /// <summary>
         /// Length of the <see cref="ReadOnlySequence{T}"/>.
         /// </summary>
@@ -116,23 +117,23 @@ namespace System.Buffers
         /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="ReadOnlyMemory{T}"/>.
         /// Consumer is expected to manage lifetime of memory until <see cref="ReadOnlySequence{T}"/> is not used anymore.
         /// </summary>
-        public ReadOnlySequence(ReadOnlyMemory<T> readOnlyMemory)
+        public ReadOnlySequence(ReadOnlyMemory<T> memory)
         {
-            if (MemoryMarshal.TryGetOwnedMemory(readOnlyMemory, out OwnedMemory<T> ownedMemory, out int index, out int length))
+            if (MemoryMarshal.TryGetMemoryManager(memory, out MemoryManager<T> manager, out int index, out int length))
             {
-                _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(index));
-                _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(length));
+                _sequenceStart = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceStart(index));
+                _sequenceEnd = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceEnd(length));
             }
-            else if (MemoryMarshal.TryGetArray(readOnlyMemory, out ArraySegment<T> arraySegment))
+            else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
-                T[] array = arraySegment.Array;
-                int start = arraySegment.Offset;
+                T[] array = segment.Array;
+                int start = segment.Offset;
                 _sequenceStart = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceStart(start));
-                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + arraySegment.Count));
+                _sequenceEnd = new SequencePosition(array, ReadOnlySequence.ArrayToSequenceEnd(start + segment.Count));
             }
             else if (typeof(T) == typeof(char))
             {
-                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)readOnlyMemory), out string text, out int start, out length))
+                if (!MemoryMarshal.TryGetString(((ReadOnlyMemory<char>)(object)memory), out string text, out int start, out length))
                     ThrowHelper.ThrowInvalidOperationException();
 
                 _sequenceStart = new SequencePosition(text, ReadOnlySequence.StringToSequenceStart(start));
@@ -145,34 +146,6 @@ namespace System.Buffers
                 _sequenceStart = default;
                 _sequenceEnd = default;
             }
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="OwnedMemory{T}"/>.
-        /// Consumer is expected to manage lifetime of memory until <see cref="ReadOnlySequence{T}"/> is not used anymore.
-        /// </summary>
-        public ReadOnlySequence(OwnedMemory<T> ownedMemory)
-        {
-            if (ownedMemory == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
-
-            _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(0));
-            _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(ownedMemory.Length));
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="OwnedMemory{T}"/>, start and length.
-        /// Consumer is expected to manage lifetime of memory until <see cref="ReadOnlySequence{T}"/> is not used anymore.
-        /// </summary>
-        public ReadOnlySequence(OwnedMemory<T> ownedMemory, int start, int length)
-        {
-            if (ownedMemory == null ||
-                (uint)start > (uint)ownedMemory.Length ||
-                (uint)length > (uint)(ownedMemory.Length - start))
-                ThrowHelper.ThrowArgumentValidationException(ownedMemory, start);
-
-            _sequenceStart = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceStart(start));
-            _sequenceEnd = new SequencePosition(ownedMemory, ReadOnlySequence.OwnedMemoryToSequenceEnd(start + length));
         }
 
         /// <summary>
@@ -327,13 +300,13 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Tries to retrieve next segment after <paramref name="position"/> and return its contents in <paramref name="data"/>.
+        /// Tries to retrieve next segment after <paramref name="position"/> and return its contents in <paramref name="memory"/>.
         /// Returns <code>false</code> if end of <see cref="ReadOnlySequence{T}"/> was reached otherwise <code>true</code>.
         /// Sets <paramref name="position"/> to the beginning of next segment if <paramref name="advance"/> is set to <code>true</code>.
         /// </summary>
-        public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> data, bool advance = true)
+        public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> memory, bool advance = true)
         {
-            bool result = TryGetBuffer(position, End, out data, out SequencePosition next);
+            bool result = TryGetBuffer(position, End, out memory, out SequencePosition next);
             if (advance)
             {
                 position = next;
@@ -410,7 +383,7 @@ namespace System.Buffers
         {
             MultiSegment = 0x00,
             Array = 0x1,
-            OwnedMemory = 0x2,
+            MemoryManager = 0x2,
             String = 0x3,
             Empty = 0x4
         }
@@ -427,8 +400,8 @@ namespace System.Buffers
         public const int ArrayStartMask = 0;
         public const int ArrayEndMask = FlagBitMask;
 
-        public const int OwnedMemoryStartMask = FlagBitMask;
-        public const int OwnedMemoryEndMask = 0;
+        public const int MemoryManagerStartMask = FlagBitMask;
+        public const int MemoryManagerEndMask = 0;
 
         public const int StringStartMask = FlagBitMask;
         public const int StringEndMask = FlagBitMask;
@@ -442,9 +415,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ArrayToSequenceEnd(int endIndex) => endIndex | ArrayEndMask;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int OwnedMemoryToSequenceStart(int startIndex) => startIndex | OwnedMemoryStartMask;
+        public static int MemoryManagerToSequenceStart(int startIndex) => startIndex | MemoryManagerStartMask;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int OwnedMemoryToSequenceEnd(int endIndex) => endIndex | OwnedMemoryEndMask;
+        public static int MemoryManagerToSequenceEnd(int endIndex) => endIndex | MemoryManagerEndMask;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int StringToSequenceStart(int startIndex) => startIndex | StringStartMask;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
