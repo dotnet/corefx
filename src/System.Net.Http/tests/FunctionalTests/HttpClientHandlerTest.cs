@@ -518,7 +518,12 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (useSsl)
                     {
-                        handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                        handler.ServerCertificateCustomValidationCallback =
+#if netcoreapp
+                            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#else // .NET Framework doesn't contain a definition for DangerousAcceptAnyServerCertificateValidator.
+                            delegate { return true; };
+#endif
                     }
                     try { await client.GetAsync(url); } catch { }
                 }
