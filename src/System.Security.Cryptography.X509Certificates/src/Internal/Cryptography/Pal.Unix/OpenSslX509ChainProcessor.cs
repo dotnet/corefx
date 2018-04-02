@@ -584,42 +584,49 @@ namespace Internal.Cryptography.Pal
             return CertificateAssetDownloader.DownloadCertificate(uri, ref remainingDownloadTime);
         }
 
-        internal static string FindHttpAiaRecord(byte[] authorityInformationAccess, string recordTypeOid)
+        private static string FindHttpAiaRecord(byte[] authorityInformationAccess, string recordTypeOid)
         {
-            DerSequenceReader reader = new DerSequenceReader(authorityInformationAccess);
-
-            while (reader.HasData)
+            try
             {
-                DerSequenceReader innerReader = reader.ReadSequence();
+                DerSequenceReader reader = new DerSequenceReader(authorityInformationAccess);
 
-                // If the sequence's first element is a sequence, unwrap it.
-                if (innerReader.PeekTag() == ConstructedSequenceTagId)
+                while (reader.HasData)
                 {
-                    innerReader = innerReader.ReadSequence();
-                }
+                    DerSequenceReader innerReader = reader.ReadSequence();
 
-                Oid oid = innerReader.ReadOid();
-
-                if (StringComparer.Ordinal.Equals(oid.Value, recordTypeOid))
-                {
-                    string uri = innerReader.ReadIA5String();
-
-                    Uri parsedUri;
-                    if (!Uri.TryCreate(uri, UriKind.Absolute, out parsedUri))
+                    // If the sequence's first element is a sequence, unwrap it.
+                    if (innerReader.PeekTag() == ConstructedSequenceTagId)
                     {
-                        continue;
+                        innerReader = innerReader.ReadSequence();
                     }
 
-                    if (!StringComparer.Ordinal.Equals(parsedUri.Scheme, "http"))
-                    {
-                        continue;
-                    }
+                    Oid oid = innerReader.ReadOid();
 
-                    return uri;
+                    if (StringComparer.Ordinal.Equals(oid.Value, recordTypeOid))
+                    {
+                        string uri = innerReader.ReadIA5String();
+
+                        Uri parsedUri;
+                        if (!Uri.TryCreate(uri, UriKind.Absolute, out parsedUri))
+                        {
+                            continue;
+                        }
+
+                        if (!StringComparer.Ordinal.Equals(parsedUri.Scheme, "http"))
+                        {
+                            continue;
+                        }
+
+                        return uri;
+                    }
                 }
+
+                return null;
             }
-
-            return null;
+            catch (CryptographicException)
+            {
+                return null;
+            }
         }
 
         private class WorkingChain
