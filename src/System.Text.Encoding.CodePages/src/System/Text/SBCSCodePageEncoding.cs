@@ -71,7 +71,7 @@ namespace System.Text
                 const int CodePageNumberSize = 4;
                 int bytesToAllocate = UnicodeToBytesMappingSize + BytesToUnicodeMappingSize + CodePageNumberSize + iExtraBytes;
                 byte* pNativeMemory = GetNativeMemory(bytesToAllocate);
-                Unsafe.InitBlockUnaligned(pNativeMemory, 0, (uint) bytesToAllocate);
+                Unsafe.InitBlockUnaligned(pNativeMemory, 0, (uint)bytesToAllocate);
 
                 char* mapBytesToUnicode = (char*)pNativeMemory;
                 byte* mapUnicodeToBytes = (byte*)(pNativeMemory + 256 * 2);
