@@ -12,6 +12,8 @@ def projectFolder = Utilities.getFolderName(project) + '/' + Utilities.getFolder
 
 // Globals
 
+// Dummy comment
+
 // Map of osName -> osGroup.
 def osGroupMap = ['Windows 7':'Windows_NT',
                   'Windows_NT':'Windows_NT',
