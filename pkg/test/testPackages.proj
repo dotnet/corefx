@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TestDir>$(PackageOutputPath)test/</TestDir>
+    <TestDir>$(BinDir)testPkg/</TestDir>
     <TestProjectName>test.msbuild</TestProjectName>
     <TestProject>$(TestDir)$(TestProjectName)</TestProject>
     <TestToolsDir>$(TestDir)tools/</TestToolsDir>
