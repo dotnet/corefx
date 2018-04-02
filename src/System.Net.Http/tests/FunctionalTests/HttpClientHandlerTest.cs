@@ -31,6 +31,7 @@ namespace System.Net.Http.Functional.Tests
         private const string ExpectedContent = "Test content";
         private const string Username = "testuser";
         private const string Password = "password";
+        private const string HttpDefaultPort = "80";
 
         private readonly NetworkCredential _credential = new NetworkCredential(Username, Password);
 
@@ -492,6 +493,91 @@ namespace System.Net.Http.Functional.Tests
                 connectionAccepted = true;
                 List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
                 Assert.Contains($"Host: {host}", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        [Theory]
+        [InlineData("321.123.456.789")]
+        [InlineData("321.123.456.789:8080")]
+        [InlineData("[::1234]")]
+        [InlineData("[::1234]:8080")]
+        public async Task ProxiedIPAddressRequest_NotDefaultPort_CorrectlyFormatted(string host)
+        {
+            string ipAddress = "http://" + host;
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(ipAddress); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"GET {ipAddress}/ HTTP/1.1", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        [Theory]
+        [OuterLoop] // Test uses azure endpoint.
+        [InlineData("corefx-net.cloudapp.net")]
+        [InlineData("321.123.456.789")]
+        [InlineData("[::1234]")]
+        public async Task ProxiedRequest_DefaultPort_PortStrippedOffInUri(string host)
+        {
+            string addressUri = $"http://{host}:{HttpDefaultPort}/";
+            string expectedAddressUri = $"http://{host}/";
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(addressUri); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"GET {expectedAddressUri} HTTP/1.1", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        [Fact]
+        [OuterLoop] // Test uses azure endpoint.
+        public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
+        {
+            // Https proxy request will use CONNECT tunnel, even the default 443 port is specified, it will not be stripped off.
+            string expectedAddressUri = "corefx-net.cloudapp.net:443";
+            string addressUri = "https://corefx-net.cloudapp.net:443/";
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    try { await client.GetAsync(addressUri); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"CONNECT {expectedAddressUri} HTTP/1.1", headers);
             }));
 
             Assert.True(connectionAccepted);
