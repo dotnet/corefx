@@ -3833,6 +3833,11 @@
         "4.0.2.0": "4.3.0"
       }
     },
+    "System.Runtime.CompilerServices.Unsafe": {
+      "InboxOn": {
+        "uap10.0.16300": "4.0.4.0"
+      }
+    },
     "System.Runtime.Intrinsics.Experimental": {
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
