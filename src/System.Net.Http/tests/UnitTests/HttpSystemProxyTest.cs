@@ -14,7 +14,8 @@ namespace System.Net.Http.Tests
     public class HttpSystemProxyTest : RemoteExecutorTestBase
     {
         private readonly ITestOutputHelper _output;
-        private readonly Uri fakeProxyUri = new Uri("http://proxy.contoso.com");
+        private readonly Uri insecureProxyUri = new Uri("http://proxy.insecure.com");
+        private readonly Uri secureProxyUri = new Uri("http://proxy.secure.com");
         private readonly Uri fooHttp = new Uri("http://foo.com");
         private readonly Uri fooHttps = new Uri("https://foo.com");
 
@@ -24,18 +25,18 @@ namespace System.Net.Http.Tests
         }
 
         [Theory]
-        [InlineData("http://proxy.contoso.com")]
-        [InlineData("http=proxy.contoso.com")]
-        [InlineData("https://proxy.wrong.com http://proxy.contoso.com")]
-        [InlineData("https=proxy.wrong.com http=proxy.contoso.com")]
-        [InlineData("https://proxy.wrong.com\nhttp://proxy.contoso.com")]
-        [InlineData("https=proxy.wrong.com\nhttp=proxy.contoso.com")]
-        [InlineData("https://proxy.wrong.com;http://proxy.contoso.com")]
-        [InlineData("https=proxy.wrong.com;http=proxy.contoso.com")]
-        [InlineData(";http=proxy.contoso.com;;")]
-        [InlineData("    http=proxy.contoso.com    ")]
-        [InlineData("http=proxy.contoso.com;http=proxy.wrong.com")]
-        public void HttpProxy_SystemProxy_Loaded(string proxyString)
+        [InlineData("http://proxy.insecure.com", true, false)]
+        [InlineData("http=proxy.insecure.com", true, false)]
+        [InlineData("http://proxy.insecure.com http://proxy.wrong.com", true, false)]
+        [InlineData("https=proxy.secure.com http=proxy.insecure.com", true, true)]
+        [InlineData("https://proxy.secure.com\nhttp://proxy.insecure.com", true, true)]
+        [InlineData("https=proxy.secure.com\nhttp=proxy.insecure.com", true, true)]
+        [InlineData("https://proxy.secure.com;http://proxy.insecure.com", true, true)]
+        [InlineData("https=proxy.secure.com;http=proxy.insecure.com", true, true)]
+        [InlineData(";http=proxy.insecure.com;;", true, false)]
+        [InlineData("    http=proxy.insecure.com    ", true, false)]
+        [InlineData("http=proxy.insecure.com;http=proxy.wrong.com", true, false)]
+        public void HttpProxy_SystemProxy_Loaded(string proxyString, bool hasInsecureProxy, bool hasSecureProxy)
         {
             IWebProxy p;
 
@@ -48,8 +49,8 @@ namespace System.Net.Http.Tests
             Assert.True(HttpSystemProxy.TryCreate(out p));
             Assert.NotNull(p);
 
-            Assert.Equal(fakeProxyUri, p.GetProxy(fooHttp));
-            Assert.Equal(fakeProxyUri, p.GetProxy(fooHttps));
+            Assert.Equal(hasInsecureProxy ? insecureProxyUri : null, p.GetProxy(fooHttp));
+            Assert.Equal(hasSecureProxy ? secureProxyUri : null, p.GetProxy(fooHttps));
         }
 
         [Theory]

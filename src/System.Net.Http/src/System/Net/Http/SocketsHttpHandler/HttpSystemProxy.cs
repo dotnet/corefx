@@ -13,15 +13,16 @@ namespace System.Net.Http
 {
     internal sealed class HttpSystemProxy : IWebProxy, IDisposable
     {
-        private readonly Uri _proxyUri;                 // URI of the system proxy if set
+        private readonly List<IPAddress> _localIp;
+        private readonly Uri _insecureProxyUri;         // URI of the http system proxy if set
+        private readonly Uri _secureProxyUri;         // URI of the https system proxy if set
         private readonly List<Regex> _bypass;           // list of domains not to proxy
         private readonly bool _bypassLocal = false;     // we should bypass domain considered local
-        private readonly List<IPAddress> _localIp;
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
         private SafeWinHttpHandle _sessionHandle;
         private bool _disposed;
-        private static char[] _proxyDelimiters = {';', ' ', '\n', '\r', '\t'};
+        private static readonly char[] s_proxyDelimiters = {';', ' ', '\n', '\r', '\t'};
 
         public static bool TryCreate(out IWebProxy proxy)
         {
@@ -63,7 +64,7 @@ namespace System.Net.Http
 
             if (proxyHelper.ManualSettingsOnly)
             {
-                _proxyUri = GetUriFromString(proxyHelper.Proxy);
+                ParseProxyConfig(proxyHelper.Proxy, out _insecureProxyUri, out _secureProxyUri);
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
@@ -179,8 +180,8 @@ namespace System.Net.Http
 
         /// <summary>
         /// This function will evaluate given string and it will try to convert
-        /// it to a Uri. The string contains a list of schemes and proxies,
-        /// separated by semicolons or whitespace. For now we support http only.
+        /// it to a Uri object. The string could contain URI fragment, IP address and  port
+        /// tuple or just IP address or name. It will return null if parsing fails.
         /// </summary>
         private static Uri GetUriFromString(string value)
         {
@@ -189,31 +190,70 @@ namespace System.Net.Http
                 return null;
             }
 
+            if (!value.Contains("://"))
+            {
+                value = "http://" + value;
+            }
+
+            if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri) &&
+                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            {
+                // We only support http and https for now.
+                return uri;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// This function is used to parse WinINet Proxy strings. The strings are a semicolon
+        /// or whitespace separated list, with each entry in the following format:
+        /// ([<scheme>=][<scheme>"://"]<server>[":"<port>])
+        /// </summary>
+        private static void ParseProxyConfig(string value, out Uri insecureProxy, out Uri secureProxy )
+        {
+            secureProxy = null;
+            insecureProxy = null;
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
             int idx = value.IndexOf("http://");
             if (idx >= 0)
             {
-                int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
-                int proxyLength = (endOfProxy == -1) ? value.Length - idx : endOfProxy - idx;
-
-                if (Uri.TryCreate( value.Substring(idx, proxyLength) , UriKind.Absolute, out Uri uri))
-                {
-                    return uri;
-                }
+                int proxyLength = GetProxySubstringLength(value, idx);
+                Uri.TryCreate(value.Substring(idx, proxyLength) , UriKind.Absolute, out insecureProxy);
             }
 
             idx = value.IndexOf("http=");
             if (idx >= 0)
             {
                 idx += 5; // Skip "http=" so we can replace it with "http://"
-                int endOfProxy = value.IndexOfAny(_proxyDelimiters, idx);
-                int proxyLength = (endOfProxy == -1) ? value.Length - idx : endOfProxy - idx;
-
-                if (Uri.TryCreate( "http://" + value.Substring(idx, proxyLength) , UriKind.Absolute, out Uri uri))
-                {
-                    return uri;
-                }
+                int proxyLength = GetProxySubstringLength(value, idx);
+                Uri.TryCreate("http://" + value.Substring(idx, proxyLength) , UriKind.Absolute, out insecureProxy);
             }
-            return null;
+
+            idx = value.IndexOf("https://");
+            if (idx >= 0)
+            {
+                idx += 8; // Skip "https://" so we can replace it with "http://"
+                int proxyLength = GetProxySubstringLength(value, idx);
+                Uri.TryCreate("http://" + value.Substring(idx, proxyLength) , UriKind.Absolute, out secureProxy);
+            }
+
+            idx = value.IndexOf("https=");
+            if (idx >= 0)
+            {
+                idx += 6; // Skip "https=" so we can replace it with "http://"
+                int proxyLength = GetProxySubstringLength(value, idx);
+                Uri.TryCreate("http://" + value.Substring(idx, proxyLength) , UriKind.Absolute, out secureProxy);
+            }
+        }
+
+        private static int GetProxySubstringLength(String proxyString, int idx)
+        {
+            int endOfProxy = proxyString.IndexOfAny(s_proxyDelimiters, idx);
+            return (endOfProxy == -1) ? proxyString.Length - idx : endOfProxy - idx;
         }
 
         /// <summary>
@@ -274,8 +314,7 @@ namespace System.Net.Http
                     }
                 }
 
-                // We did not find match on bypass list.
-                return _proxyUri;
+                return uri.Scheme == Uri.UriSchemeHttps ? _secureProxyUri : _insecureProxyUri;
             }
 
             // For anything else ask WinHTTP.
