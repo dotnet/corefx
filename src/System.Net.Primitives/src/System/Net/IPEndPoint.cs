@@ -20,7 +20,7 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MinPort = 0x00000000;
+        public const int MinPort = ushort.MinValue;
 
         /// <devdoc>
         ///    <para>
@@ -28,15 +28,12 @@ namespace System.Net
         ///       property.
         ///    </para>
         /// </devdoc>
-        public const int MaxPort = 0x0000FFFF;
+        public const int MaxPort = ushort.MaxValue;
 
         private IPAddress _address;
-        private int _port;
+        private ushort _port;
 
         internal const int AnyPort = MinPort;
-
-        internal static IPEndPoint Any = new IPEndPoint(IPAddress.Any, AnyPort);
-        internal static IPEndPoint IPv6Any = new IPEndPoint(IPAddress.IPv6Any, AnyPort);
 
         public override AddressFamily AddressFamily
         {
@@ -58,7 +55,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = port;
+            _port = (ushort) port;
             _address = new IPAddress(address);
         }
 
@@ -77,7 +74,7 @@ namespace System.Net
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            _port = port;
+            _port = (ushort) port;
             _address = address;
         }
 
@@ -107,7 +104,7 @@ namespace System.Net
         {
             get
             {
-                return _port;
+                return (int) _port;
             }
             set
             {
@@ -115,7 +112,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                _port = value;
+                _port = (ushort) value;
             }
         }
 
