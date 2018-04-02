@@ -506,12 +506,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
         {
-            if (IsCurlHandler)
-            {
-                // Issue: #28703.
-                return;
-            }
-
             var options = new LoopbackServer.Options { Address = address, UseSsl= useSsl };
             bool connectionAccepted = false;
             string host = "";
@@ -524,8 +518,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (useSsl)
                     {
-                        handler.ServerCertificateCustomValidationCallback = delegate { return true; };
-                        handler.ClientCertificateOptions = ClientCertificateOption.Automatic;
+                        handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                     }
                     try { await client.GetAsync(url); } catch { }
                 }
