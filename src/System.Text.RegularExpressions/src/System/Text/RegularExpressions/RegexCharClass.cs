@@ -716,7 +716,7 @@ namespace System.Text.RegularExpressions
 
         public static (char, char) DoubletonChars(string set)
         {
-            Debug.Assert(IsDoubleton(set), "Tried to get the singleton char out of a non singleton character class");
+            Debug.Assert(IsDoubleton(set), "Tried to get the doubleton char out of a non doubleton character class");
             return (set[SETSTART], set[SETSTART + 2]);
         }
 

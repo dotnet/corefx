@@ -434,7 +434,7 @@ namespace System.Text.RegularExpressions
             {
                 (char a, char b) chars = RegexCharClass.DoubletonChars(set);
 
-                for (i = Forwardchars(); i > 0; i--)
+                for (int i = Forwardchars(); i > 0; i--)
                 {
                     char ch = Forwardcharnext();
                     if (ch == chars.a || ch == chars.b)
