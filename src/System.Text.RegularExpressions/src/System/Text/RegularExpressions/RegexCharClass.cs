@@ -747,9 +747,12 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public static bool IsDoubleton(string set)
         {
-            if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 4 && !IsSubtraction(set) &&
-                ((set[SETSTART] + 1 == set[SETSTART + 1]) &&   // if the class only has one member eg., "T", it is stored as "TU"
-                (set[SETSTART + 2] == LastChar || set[SETSTART + 2] + 1 == set[SETSTART + 3])))
+            if (set[FLAGS] == 0 && // it's not negated. [a-z^aeiuo] shows negation
+                set[CATEGORYLENGTH] == 0 && // there are no categories (like "punctuation") only raw ranges
+                set[SETLENGTH] == 4 && // negation + count + start and end of range = 4
+                !IsSubtraction(set) && // not a subtraction. [a-z-[aeiuo]] shows subtraction
+                ((set[SETSTART] + 1 == set[SETSTART + 1]) &&   // first range is a single character (note that end stored is one past actual end, so 'T' is stored as 'TU')
+                (set[SETSTART + 2] == LastChar || set[SETSTART + 2] + 1 == set[SETSTART + 3]))) // second range is a single character (LastChar check is for \uFFFF: the end could not be incremented in that case)
                 return true;
             else
                 return false;
