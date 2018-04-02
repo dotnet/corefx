@@ -155,10 +155,10 @@ namespace System
         //
         // ReadOnlySequence Slice validation Throws coalesced to enable inlining of the Slice
         //
-        public static void ThrowArgumentValidationException(long start)
-            => throw CreateArgumentValidationException(start);
+        public static void ThrowStartOrEndArgumentValidationException(long start)
+            => throw CreateStartOrEndArgumentValidationException(start);
 
-        private static Exception CreateArgumentValidationException(long start)
+        private static Exception CreateStartOrEndArgumentValidationException(long start)
         {
             if (start < 0)
                 return CreateArgumentOutOfRangeException(ExceptionArgument.start);

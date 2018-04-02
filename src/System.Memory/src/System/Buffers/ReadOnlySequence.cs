@@ -154,7 +154,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(long start, long length)
         {
             if (start < 0 || length < 0)
-                ThrowHelper.ThrowArgumentValidationException(start);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
@@ -169,7 +169,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(long start, SequencePosition end)
         {
             if (start < 0)
-                ThrowHelper.ThrowArgumentValidationException(start);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -192,7 +192,7 @@ namespace System.Buffers
             BoundsCheck(start, _sequenceEnd); // check start before length
             if (length < 0)
                 // Passing value >= 0 means throw exception on length argument
-                ThrowHelper.ThrowArgumentValidationException(0);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
@@ -206,7 +206,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(int start, int length)
         {
             if (start < 0 || length < 0)
-                ThrowHelper.ThrowArgumentValidationException(start);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
@@ -221,7 +221,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(int start, SequencePosition end)
         {
             if (start < 0)
-                ThrowHelper.ThrowArgumentValidationException(start);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -244,7 +244,7 @@ namespace System.Buffers
             BoundsCheck(start, _sequenceEnd); // check start before length
             if (length < 0)
                 // Passing value >= 0 means throw exception on length argument
-                ThrowHelper.ThrowArgumentValidationException(0);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
@@ -281,7 +281,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(long start)
         {
             if (start < 0)
-                ThrowHelper.ThrowArgumentValidationException(start);
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
 
             if (start == 0)
                 return this;
