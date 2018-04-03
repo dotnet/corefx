@@ -267,9 +267,9 @@ namespace System.Security.Cryptography
             int keySize = KeySize;
 
             // size check -- must be at most the modulus size
-            if (rgb.Length > (keySize / 8))
+            if (rgb.Length != (keySize / 8))
             {
-                throw new CryptographicException(SR.Format(SR.Cryptography_Padding_DecDataTooBig, Convert.ToString(keySize / 8)));
+                throw new CryptographicException(SR.Cryptography_RSA_DecryptWrongSize);
             }
 
             byte[] decryptedKey;
