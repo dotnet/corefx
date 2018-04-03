@@ -25,7 +25,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.0'">
     <Reference Include="System.Runtime" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8' or '$(TargetGroup)' == 'netfx' or '$(TargetGroup)' == 'net47'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8' or '$(TargetGroup)' == 'net461' or '$(TargetGroup)' == 'net47'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

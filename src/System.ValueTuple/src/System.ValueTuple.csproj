@@ -32,7 +32,7 @@
       <Link>Common\System\Reflection\AssemblyMetadataAttribute.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8' OR '$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'net47'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'portable_net40+sl4+win8+wp8' OR '$(TargetGroup)' == 'net461' OR '$(TargetGroup)' == 'net47'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
