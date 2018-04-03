@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Buffers.Tests
 {
-    public class Rerf_ReadOnlySequence_First
+    public class Rerf_ReadOnlySequence_TryGet
     {
         private const int InnerCount = 1000;
         volatile static int _volatileInt = 0;
@@ -32,8 +32,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -60,8 +61,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -88,8 +90,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -117,11 +120,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -142,8 +143,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < Benchmark.InnerIterationCount; j++)
                         {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -165,8 +167,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < Benchmark.InnerIterationCount; j++)
                         {
-                            ReadOnlyMemory<byte> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -192,8 +195,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -220,8 +224,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -248,8 +253,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -277,11 +283,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -295,9 +299,9 @@ namespace System.Buffers.Tests
         [InlineData(1000 * 1000, 1000, 998 * 1000)]
         private static void String(int size, int start, int lenght)
         {
-            ReadOnlyMemory<char> memory = new string('a', size).AsMemory();
-            memory = memory.Slice(start, lenght);
-            var buffer = new ReadOnlySequence<char>(memory);
+            ReadOnlyMemory<char> strMemory = new string('a', size).AsMemory();
+            strMemory = strMemory.Slice(start, lenght);
+            var buffer = new ReadOnlySequence<char>(strMemory);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -308,8 +312,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < size / 10; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -331,8 +336,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < Benchmark.InnerIterationCount; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
@@ -354,8 +360,9 @@ namespace System.Buffers.Tests
                     {
                         for (int j = 0; j < Benchmark.InnerIterationCount; j++)
                         {
-                            ReadOnlyMemory<char> first = buffer.First;
-                            localInt ^= first.Length;
+                            var p = buffer.Start;
+                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                                localInt ^= memory.Length;
                         }
                     }
                 }
