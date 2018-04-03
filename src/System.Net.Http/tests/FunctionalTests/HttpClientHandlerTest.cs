@@ -499,13 +499,13 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData("321.123.456.789")]
-        [InlineData("321.123.456.789:8080")]
+        [InlineData("1.2.3.4")]
+        [InlineData("1.2.3.4:8080")]
         [InlineData("[::1234]")]
         [InlineData("[::1234]:8080")]
         public async Task ProxiedIPAddressRequest_NotDefaultPort_CorrectlyFormatted(string host)
         {
-            string ipAddress = "http://" + host;
+            string uri = "http://" + host;
             bool connectionAccepted = false;
 
             await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
@@ -514,13 +514,13 @@ namespace System.Net.Http.Functional.Tests
                 using (var client = new HttpClient(handler))
                 {
                     handler.Proxy = new WebProxy(proxyUri);
-                    try { await client.GetAsync(ipAddress); } catch { }
+                    try { await client.GetAsync(uri); } catch { }
                 }
             }, server => server.AcceptConnectionAsync(async connection =>
             {
                 connectionAccepted = true;
                 List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
-                Assert.Contains($"GET {ipAddress}/ HTTP/1.1", headers);
+                Assert.Contains($"GET {uri}/ HTTP/1.1", headers);
             }));
 
             Assert.True(connectionAccepted);
@@ -529,7 +529,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [OuterLoop] // Test uses azure endpoint.
         [InlineData("corefx-net.cloudapp.net")]
-        [InlineData("321.123.456.789")]
+        [InlineData("1.2.3.4")]
         [InlineData("[::1234]")]
         public async Task ProxiedRequest_DefaultPort_PortStrippedOffInUri(string host)
         {
