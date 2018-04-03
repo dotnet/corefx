@@ -9,7 +9,7 @@
   <ItemGroup>
     <Compile Include="System.Reflection.TypeExtensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
   </ItemGroup>
 </Project>

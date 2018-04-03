@@ -15,7 +15,7 @@
     <Compile Include="System\Reflection\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="mscorlib" Condition="'$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'net461'" />
+    <Reference Include="mscorlib" Condition="'$(TargetsNetFx)' == 'true'" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uapaot'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3' OR '$(TargetGroup)' == 'netstandard1.5'">

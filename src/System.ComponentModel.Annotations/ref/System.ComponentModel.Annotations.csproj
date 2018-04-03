@@ -10,7 +10,7 @@
   <ItemGroup>
     <Compile Include="System.ComponentModel.Annotations.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>

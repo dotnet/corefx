@@ -15,7 +15,7 @@
     <Compile Include="..\..\System.IO.Pipes\src\System\IO\Pipes\PipeAuditRule.cs" />
     <Compile Include="..\..\System.IO.Pipes\src\System\IO\Pipes\PipesAclExtensions.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Core" />
     <Compile Include="System\IO\PipesAclExtensions.net46.cs" />
