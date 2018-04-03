@@ -483,7 +483,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create(TestData.RSA2048Params))
             {
-                byte[] decrypted = rsa.Decrypt(encrypted, RSAEncryptionPadding.Pkcs1);
+                byte[] decrypted = Decrypt(rsa, encrypted, RSAEncryptionPadding.Pkcs1);
                 Assert.Equal(TestData.HelloBytes, decrypted);
             }
         }
@@ -511,7 +511,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create(TestData.RSA2048Params))
             {
-                byte[] decrypted = rsa.Decrypt(correctlyPadded, RSAEncryptionPadding.Pkcs1);
+                byte[] decrypted = Decrypt(rsa, correctlyPadded, RSAEncryptionPadding.Pkcs1);
                 Assert.NotNull(decrypted);
 
                 Assert.ThrowsAny<CryptographicException>(
