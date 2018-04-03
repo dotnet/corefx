@@ -67,8 +67,7 @@ namespace System.Tests
 
             try
             {
-                // Keep the two statements below together
-                callStack.Push(GetSourceInformation());
+                callStack.Push(GetSourceInformation(1));
                 ThrowAndRethrowSameMethod(callStack);
             }
             catch (Exception ex)
@@ -81,16 +80,14 @@ namespace System.Tests
         {
             try
             {
-                // Keep the statements below together
                 if (!PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation());
+                    callStack.Push(GetSourceInformation(1));
                 throw new Exception("Boom!");
             }
             catch
             {
-                // Keep the statements below together
                 if (PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation());
+                    callStack.Push(GetSourceInformation(1));
                 throw;
             }
         }
@@ -102,8 +99,7 @@ namespace System.Tests
 
             try
             {
-                // Keep the two statements below together
-                callStack.Push(GetSourceInformation());
+                callStack.Push(GetSourceInformation(1));
                 ThrowAndRethrowOtherMethod(callStack);
             }
             catch (Exception ex)
@@ -116,9 +112,8 @@ namespace System.Tests
         {
             try
             {
-                // Keep the statements below together
                 if (!PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation());
+                    callStack.Push(GetSourceInformation(1));
                 ThrowException(callStack);
             }
             catch
@@ -126,9 +121,8 @@ namespace System.Tests
                 if (PlatformDetection.IsFullFramework)
                 {
                     var throwFrame = callStack.Pop();
-                    // Keep the statements below in the same line
-                    callStack.Push(GetSourceInformation()); callStack.Push(throwFrame);
-                    throw;
+                    callStack.Push(GetSourceInformation(3));
+                    callStack.Push(throwFrame);
                 }
                 throw;
             }
@@ -136,8 +130,7 @@ namespace System.Tests
 
         private static void ThrowException(Stack<(string, string, int)> callStack)
         {
-            // Keep the two statements below together
-            callStack.Push(GetSourceInformation());
+            callStack.Push(GetSourceInformation(1));
             throw new Exception("Boom!");
         }
 
@@ -145,7 +138,7 @@ namespace System.Tests
             Stack<(string CallerMemberName, string SourceFilePath, int SourceLineNumber)> expectedCallStack, string reportedCallStack)
         {
             Console.WriteLine("* ExceptionTests - reported call stack:\n{0}", reportedCallStack);
-            const string FrameParserRegex = @"\s+at\s.+\.(?<memberName>[^(]+)\([^)]*\)\sin\s(?<filePath>.*)\:line\s(?<lineNumber>[\d]+)";
+            const string frameParserRegex = @"\s+at\s.+\.(?<memberName>[^(.]+)\([^)]*\)\sin\s(?<filePath>.*)\:line\s(?<lineNumber>[\d]+)";
 
             using (var sr = new StringReader(reportedCallStack))
             {
@@ -153,21 +146,22 @@ namespace System.Tests
                 while (!string.IsNullOrEmpty(frame = sr.ReadLine()))
                 {
                     var exptectedFrame = expectedCallStack.Pop();
-                    var match = Regex.Match(frame, FrameParserRegex);
+                    var match = Regex.Match(frame, frameParserRegex);
                     Assert.True(match.Success);
                     Assert.Equal(exptectedFrame.CallerMemberName, match.Groups["memberName"].Value);
                     Assert.Equal(exptectedFrame.SourceFilePath, match.Groups["filePath"].Value);
-                    Assert.Equal(exptectedFrame.SourceLineNumber + 1, Convert.ToInt32(match.Groups["lineNumber"].Value));
+                    Assert.Equal(exptectedFrame.SourceLineNumber, Convert.ToInt32(match.Groups["lineNumber"].Value));
                 }
             }
         }
 
         private static (string, string, int) GetSourceInformation(
+            int offset,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            return (memberName, sourceFilePath, sourceLineNumber);
+            return (memberName, sourceFilePath, sourceLineNumber + offset);
         }
     }
 
