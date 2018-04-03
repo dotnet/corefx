@@ -174,12 +174,12 @@ __StaticLibLink=0
 __PortableBuild=0
 
 CPUName=$(uname -p)
-# Some Linux platforms report unknown for platform, but the arch for machine.
-if [ $CPUName == "unknown" ]; then
+# Some Linux platforms report unknown for processor, but the arch for machine.
+if [ "$CPUName" == "unknown" ]; then
     CPUName=$(uname -m)
 fi
 
-if [ $CPUName == "i686" ]; then
+if [ "$CPUName" == "i686" ]; then
     __BuildArch=x86
 fi
 
