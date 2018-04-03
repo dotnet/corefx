@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(CoreFX)
 
+include(CheckCXXCompilerFlag)
 set(CMAKE_MACOSX_RPATH ON)
 set(CMAKE_INSTALL_PREFIX $ENV{__CMakeBinDir})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,6 +21,11 @@ add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-Wno-c99-extensions)
+
+# This compiler warning will fail code as innocuous as:
+# static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+# Check if the compiler knows about this warning so we can disable it
+check_cxx_compiler_flag(-Wzero-as-null-pointer-constant HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
 
 if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
     add_compile_options(-Wno-zero-as-null-pointer-constant)
