@@ -154,7 +154,7 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
     CFStringRef keyString = reinterpret_cast<CFStringRef>(key);
 
     if (CFEqual(keyString, CFSTR("NotValidBefore")) || CFEqual(keyString, CFSTR("ValidLeaf")) ||
-        CFEqual(keyString, CFSTR("ValidIntermediates")) || CFEqual(keyString, CFSTR("ValidRoot")))	
+        CFEqual(keyString, CFSTR("ValidIntermediates")) || CFEqual(keyString, CFSTR("ValidRoot")))
         *pStatus |= PAL_X509ChainNotTimeValid;
     else if (CFEqual(keyString, CFSTR("Revocation")))
         *pStatus |= PAL_X509ChainRevoked;
