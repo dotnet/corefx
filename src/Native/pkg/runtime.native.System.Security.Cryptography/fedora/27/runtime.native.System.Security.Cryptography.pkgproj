@@ -1,19 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
   <PropertyGroup>
-    <PackageVersion>1.1.1</PackageVersion>
-    <SkipValidatePackage>true</SkipValidatePackage>
+    <PackageRid>fedora.27-$(PackagePlatform)</PackageRid>
+    <IdPrefix>runtime.$(PackageRid).</IdPrefix>
+    <!-- only build for x64 -->
+    <PackagePlatforms>x64;</PackagePlatforms>
   </PropertyGroup>
-  
   <ItemGroup>
-    <File Include="runtime.json" />
-    <!-- make this package installable and noop in a packages.config-based project -->
-    <File Include="$(PlaceHolderFile)">
-      <TargetPath>lib/netstandard1.0</TargetPath>
-    </File>
+    <NativeFile Include="$(Fedora27NativePath)System.Security.Cryptography.Native.so">
+      <TargetPath>runtimes/$(PackageRid)/native</TargetPath>
+    </NativeFile>
   </ItemGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

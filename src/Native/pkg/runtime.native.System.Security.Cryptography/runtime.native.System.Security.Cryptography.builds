@@ -19,6 +19,10 @@
       <OSGroup>fedora.24</OSGroup>
       <Platform>amd64</Platform>
     </Project>
+    <Project Include="fedora\27\runtime.native.System.Security.Cryptography.pkgproj">
+      <OSGroup>fedora.24</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
     <Project Include="ubuntu\14.04\runtime.native.System.Security.Cryptography.pkgproj">
       <OSGroup>ubuntu.14.04</OSGroup>
       <Platform>amd64</Platform>
@@ -31,6 +35,10 @@
       <OSGroup>ubuntu.16.10</OSGroup>
       <Platform>amd64</Platform>
     </Project>
+    <Project Include="ubuntu\18.04\runtime.native.System.Security.Cryptography.pkgproj">
+      <OSGroup>ubuntu.18.04</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
     <Project Include="osx\runtime.native.System.Security.Cryptography.pkgproj">
       <OSGroup>osx.10</OSGroup>
       <Platform>amd64</Platform>
@@ -41,6 +49,10 @@
     </Project>
     <Project Include="opensuse\42.1\runtime.native.System.Security.Cryptography.pkgproj">
       <OSGroup>opensuse.42.1</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="opensuse\42.3\runtime.native.System.Security.Cryptography.pkgproj">
+      <OSGroup>opensuse.42.3</OSGroup>
       <Platform>amd64</Platform>
     </Project>
   </ItemGroup>

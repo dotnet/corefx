@@ -31,12 +31,15 @@
     <DebianNativePath Condition="'$(DebianNativePath)' == ''">$(BuildNativePath)</DebianNativePath>
     <Fedora23NativePath Condition="'$(Fedora23NativePath)' == ''">$(BuildNativePath)</Fedora23NativePath>
     <Fedora24NativePath Condition="'$(Fedora24NativePath)' == ''">$(BuildNativePath)</Fedora24NativePath>
+    <Fedora27NativePath Condition="'$(Fedora27NativePath)' == ''">$(BuildNativePath)</Fedora27NativePath>
     <OSXNativePath Condition="'$(OSXNativePath)' == ''">$(BuildNativePath)</OSXNativePath>
     <OpenSuse132NativePath Condition="'$(OpenSuse132NativePath)' == ''">$(BuildNativePath)</OpenSuse132NativePath>
     <OpenSuse421NativePath Condition="'$(OpenSuse421NativePath)' == ''">$(BuildNativePath)</OpenSuse421NativePath>
+    <OpenSuse423NativePath Condition="'$(OpenSuse423NativePath)' == ''">$(BuildNativePath)</OpenSuse423NativePath>
     <Ubuntu1404NativePath Condition="'$(Ubuntu1404NativePath)' == ''">$(BuildNativePath)</Ubuntu1404NativePath>
     <Ubuntu1604NativePath Condition="'$(Ubuntu1604NativePath)' == ''">$(BuildNativePath)</Ubuntu1604NativePath>
     <Ubuntu1610NativePath Condition="'$(Ubuntu1610NativePath)' == ''">$(BuildNativePath)</Ubuntu1610NativePath>
+    <Ubuntu1804NativePath Condition="'$(Ubuntu1804NativePath)' == ''">$(BuildNativePath)</Ubuntu1804NativePath>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
   </PropertyGroup>
 

@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="dir.props" />
   <PropertyGroup>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>    
-    <PackageVersion>4.3.1</PackageVersion>
     <!-- the native compression packages require nuget >3.5 for nativeassets support -->
     <MinClientVersion3>3.5</MinClientVersion3>    
   </PropertyGroup>
@@ -42,6 +41,9 @@
     <ProjectReference Include="fedora\24\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
+    <ProjectReference Include="fedora\27\runtime.native.System.IO.Compression.pkgproj">
+      <Platform>amd64</Platform>
+    </ProjectReference>
     <ProjectReference Include="osx\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
@@ -51,6 +53,9 @@
     <ProjectReference Include="opensuse\42.1\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
+    <ProjectReference Include="opensuse\42.3\runtime.native.System.IO.Compression.pkgproj">
+      <Platform>amd64</Platform>
+    </ProjectReference>
     <ProjectReference Include="ubuntu\14.04\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
@@ -58,6 +63,9 @@
       <Platform>amd64</Platform>
     </ProjectReference>
     <ProjectReference Include="ubuntu\16.10\runtime.native.System.IO.Compression.pkgproj">
+      <Platform>amd64</Platform>
+    </ProjectReference>
+    <ProjectReference Include="ubuntu\18.04\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
     </ProjectReference>
     <ProjectReference Include="win\runtime.native.System.IO.Compression.pkgproj">
