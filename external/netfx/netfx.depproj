@@ -7,21 +7,15 @@
     <BinPlaceRuntime>true</BinPlaceRuntime>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
     <NETStandardSupportPackageId>NETStandard.Library.NETFramework</NETStandardSupportPackageId>
-    <NETStandardSupportPackageVersion>2.0.0-preview2-25405-01</NETStandardSupportPackageVersion>
+    <NETStandardSupportPackageVersion>2.1.0-preview2-25630-02</NETStandardSupportPackageVersion>
     <NETStandardSupportRoot>$(PackagesDir)$(NETStandardSupportPackageId.ToLower())\$(NETStandardSupportPackageVersion)\build</NETStandardSupportRoot>
-    <AddNetStandardSupportPackage Condition="'$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'net461' OR '$(TargetGroup)' == 'net462' OR '$(TargetGroup)' == 'net47'">true</AddNetStandardSupportPackage>
-    <!-- temporary until we can get an updated 4.7.1 targeting pack -->
-    <AddNetStandardSupportPackage Condition="'$(TargetGroup)' == '471' ">true</AddNetStandardSupportPackage>
+    <AddNetStandardSupportPackage Condition="'$(TargetGroup)' == 'net461' OR '$(TargetGroup)' == 'net462' OR '$(TargetGroup)' == 'net47'">true</AddNetStandardSupportPackage>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsNetFx)' != 'true'">
-    <!-- For things not .NETFramework we need the net461 targeting pack to generate facades -->
-    <NuGetTargetMoniker>.NETFramework,Version=v4.6.1</NuGetTargetMoniker>
-    <NuGetTargetMonikerShort>net461</NuGetTargetMonikerShort>
-    <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.6.1</TargetingPackNugetPackageId>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetingPackNugetPackageId)' == 'Microsoft.TargetingPack.NETFramework.v4.7.1'">
-    <!-- Missing 4.7.1 targeting pack, use 4.7 for now -->
-    <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7</TargetingPackNugetPackageId>
+    <!-- For things not .NETFramework we need the net471 targeting pack to generate facades -->
+    <NuGetTargetMoniker>.NETFramework,Version=v4.7.1</NuGetTargetMoniker>
+    <NuGetTargetMonikerShort>net471</NuGetTargetMonikerShort>
+    <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.1</TargetingPackNugetPackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,7 +42,8 @@
 
   <ItemGroup>
     <PackageReference Include="$(TargetingPackNugetPackageId)">
-      <Version>1.0.1</Version>
+      <Version Condition="'$(TargetingPackNugetPackageId)' == 'Microsoft.TargetingPack.NETFramework.v4.7.1'">1.0.0-preview</Version>
+      <Version Condition="'$(TargetingPackNugetPackageId)' != 'Microsoft.TargetingPack.NETFramework.v4.7.1'">1.0.1</Version>
     </PackageReference>
     <PackageReference Include="$(NETStandardSupportPackageId)" Condition="'$(AddNetStandardSupportPackage)' == 'true'">
       <Version>$(NETStandardSupportPackageVersion)</Version>
