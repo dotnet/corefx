@@ -39,6 +39,8 @@ namespace System.Net.Http.Tests
         [InlineData(";http=proxy.insecure.com;;", true, false)]
         [InlineData("    http=proxy.insecure.com    ", true, false)]
         [InlineData("http=proxy.insecure.com;http=proxy.wrong.com", true, false)]
+        [InlineData("http=http://proxy.insecure.com", true, false)]
+        [InlineData("https=https://proxy.secure.com", false, true)]
         public void HttpProxy_SystemProxy_Loaded(string proxyString, bool hasInsecureProxy, bool hasSecureProxy)
         {
             IWebProxy p;
