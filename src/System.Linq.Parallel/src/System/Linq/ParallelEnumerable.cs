@@ -1652,7 +1652,7 @@ namespace System.Linq
         }
 
         /// <summary>
-        /// Applies in parallel an accumulator function over a sequence. 
+        /// Applies an accumulator function sequentially over a sequence. 
         /// The specified seed value is used as the initial accumulator value.
         /// </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
