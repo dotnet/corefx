@@ -10,9 +10,6 @@
     <Compile Include="SymLanguageVendorTests.cs" />
     <Compile Include="SymbolTokenTests.cs" />
     <Compile Include="StackFrameTests.cs" />
-    <Compile Include="StackFrameExtensionsTests.cs" Condition="'$(TargetGroup)' != 'netfx'" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
-    <ReferenceFromRuntime Include="System.Runtime.InteropServices.RuntimeInformation" />
+    <Compile Include="StackFrameExtensionsTests.cs" />
   </ItemGroup>
 </Project>
