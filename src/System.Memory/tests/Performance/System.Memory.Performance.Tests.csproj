@@ -21,10 +21,17 @@
     <Compile Include="Perf.MemorySlice.cs" />
     <Compile Include="Perf.Utf8Formatter.cs" />
     <Compile Include="Perf.Utf8Parser.cs" />
+    <Compile Include="Perf.ReadOnlySequence.First.cs" />
     <Compile Include="..\Base64\Base64TestHelper.cs" />
     <Compile Include="..\TestHelpers.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\Memory\CustomMemoryForTest.cs">
+      <Link>Common\System\MemoryTests\CustomMemoryForTest.cs</Link>
+    </Compile>
+    <Compile Include="..\ReadOnlyBuffer\BufferSegment.cs">
+      <Link>Common\System\Memory\Tests\BufferSegment.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
