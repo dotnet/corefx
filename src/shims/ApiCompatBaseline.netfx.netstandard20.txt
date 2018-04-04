@@ -163,4 +163,7 @@ MembersMustExist : Member 'System.Text.RegularExpressions.Regex.CapNames.get()' 
 MembersMustExist : Member 'System.Text.RegularExpressions.Regex.CapNames.set(System.Collections.IDictionary)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.RegularExpressions.Regex.Caps.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Text.RegularExpressions.Regex.Caps.set(System.Collections.IDictionary)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Runtime.Caching.MemoryCache..ctor(System.String, System.Collections.Specialized.NameValueCollection, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Runtime.Caching.MemoryCache.GetLastSize(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Runtime.Caching.MemoryCache.Remove(System.String, System.Runtime.Caching.CacheEntryRemovedReason, System.String)' does not exist in the implementation but it does exist in the contract.
 Total Issues: 151
