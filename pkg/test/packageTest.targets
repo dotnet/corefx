@@ -101,7 +101,7 @@
   <Target Name="_test"
           DependsOnTargets="$(TestDependsOn)">
     <MakeDir Directories="$(IntermediateOutputPath)" />
-    <Touch AlwaysCreate="true" Files="$(IntermediateOutputPath)\.testComplete" />
+    <Touch AlwaysCreate="true" Files="$(IntermediateOutputPath)\$(RuntimeIdentifier)\.testComplete" />
   </Target>
   
   <Target Name="_getTestProjects">
