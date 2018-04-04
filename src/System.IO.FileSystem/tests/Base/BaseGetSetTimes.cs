@@ -70,6 +70,7 @@ namespace System.IO.Tests
             ValidateSetTimes(item, beforeTime, afterTime);
         }
 
+        [OuterLoop("Incurs long sleeps")]
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux)] // Windows tested below, and OSX does not currently support millisec granularity
         public void TimesIncludeMillisecondPart_Linux()
