@@ -87,6 +87,15 @@ namespace System.IO.Tests
             // Windows cuts off any simple white space added to a path
             string path = "C:\\Test" + component;
             Assert.Equal("C:\\Test", Path.GetFullPath(path));
+
+            string expected = "C:\\Test";
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
         }
 
         [Fact]
@@ -164,6 +173,14 @@ namespace System.IO.Tests
         public void GetFullPath_RelativeRoot(string path, string expected)
         {
             Assert.Equal(Path.GetFullPath(path), expected);
+
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
         }
 
         [Fact]
@@ -248,6 +265,13 @@ namespace System.IO.Tests
             if (path.StartsWith(@"\\?\"))
             {
                 Assert.Equal(path, Path.GetFullPath(path));
+                int chars;
+                char[] arr = new char[path.Length];
+                Span<char> destination = new Span<char>(arr, 0, path.Length);
+
+                Assert.True(Path.TryGetFullPath(path.AsSpan(), destination, out chars));
+                Assert.Equal(path, destination.ToString());
+                Assert.Equal(path.Length, chars);
             }
             else
             {
@@ -300,6 +324,14 @@ namespace System.IO.Tests
             else
             {
                 Assert.Equal(expected, Path.GetFullPath(path));
+
+                int chars;
+                char[] arr = new char[expected.Length];
+                Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+                Assert.True(Path.TryGetFullPath(path.AsSpan(), destination, out chars));
+                Assert.Equal(expected, destination.ToString());
+                Assert.Equal(expected.Length, chars);
             }
         }
 

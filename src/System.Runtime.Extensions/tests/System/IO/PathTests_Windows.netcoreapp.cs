@@ -55,22 +55,12 @@ namespace System.IO.Tests
         public void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
-
-            int chars;
-            char[] arr = new char[expected.Length];
-            Span<char> destination = new Span<char>(arr, 0, expected.Length);
-
-            Assert.True(Path.TryGetFullPath(path.AsSpan(),basePath.AsSpan(), destination, out chars));
-            Assert.Equal(expected, destination.ToString());
-            Assert.Equal(expected.Length, chars);
         }
 
         [Theory,
             MemberData(nameof(GetFullPath_Windows_FullyQualified))]
         public void TryGetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
-            Assert.Equal(expected, Path.GetFullPath(path, basePath));
-
             int chars;
             char[] arr = new char[expected.Length];
             Span<char> destination = new Span<char>(arr, 0, expected.Length);
@@ -121,16 +111,16 @@ namespace System.IO.Tests
             char[] arr = new char[expected.Length + 8];
             Span<char> destination = new Span<char>(arr, 0, expected.Length + 8);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, basePath, destination, out chars));
+            Assert.Equal(expected, destination.ToString());
             Assert.Equal(expected.Length, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\.\" + basePath, destination, out chars));
+            Assert.Equal(@"\\.\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\?\" + basePath, destination, out chars));
+            Assert.Equal(@"\\?\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length, chars);
         }
 
@@ -187,16 +177,16 @@ namespace System.IO.Tests
             char[] arr = new char[expected.Length + 8];
             Span<char> destination = new Span<char>(arr, 0, expected.Length + 8);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\" + basePath, destination, out chars));
+            Assert.Equal(@"\\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 2, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\UNC\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\.\UNC\" + basePath, destination, out chars));
+            Assert.Equal(@"\\.\UNC\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 8, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\UNC\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\?\UNC\" + basePath, destination, out chars));
+            Assert.Equal(@"\\?\UNC\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 8, chars);
         }
 
@@ -255,12 +245,12 @@ namespace System.IO.Tests
             char[] arr = new char[expected.Length + 4];
             Span<char> destination = new Span<char>(arr, 0, expected.Length + 4);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), @"\\.\" + basePath, destination, out chars));
+            Assert.Equal(@"\\.\UNC\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 4, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), @"\\?\" + basePath, destination, out chars));
+            Assert.Equal(@"\\?\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 4, chars);
         }
 
@@ -349,16 +339,16 @@ namespace System.IO.Tests
             char[] arr = new char[expected.Length + 4];
             Span<char> destination = new Span<char>(arr, 0, expected.Length + 4);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, basePath, destination, out chars));
+            Assert.Equal(@"\\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\.\" + basePath, destination, out chars));
+            Assert.Equal(@"\\.\UNC\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 4, chars);
 
-            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
-            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.True(Path.TryGetFullPath(path, @"\\?\" + basePath, destination, out chars));
+            Assert.Equal(@"\\?\" + expected, destination.Slice(0, chars).ToString());
             Assert.Equal(expected.Length + 4, chars);
         }
 
