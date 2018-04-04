@@ -306,7 +306,7 @@ namespace System.Buffers
         /// </summary>
         public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> memory, bool advance = true)
         {
-            bool result = TryGetBuffer(position, End, out memory, out SequencePosition next);
+            bool result = TryGetBuffer(position, out memory, out SequencePosition next);
             if (advance)
             {
                 position = next;

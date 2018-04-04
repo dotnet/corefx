@@ -11,17 +11,14 @@ namespace System.Buffers.Tests
 {
     public class Rerf_ReadOnlySequence_TryGet
     {
-        private const int InnerCount = 1000;
+        private const int InnerCount = 100_000;
         volatile static int _volatileInt = 0;
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Byte_Array(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Byte_Array(int size, int offset)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[size], start, lenght);
+            var buffer = new ReadOnlySequence<byte>(new byte[size], offset, size - 2 * offset);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -30,12 +27,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -43,13 +37,10 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Byte_Memory(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Byte_Memory(int size, int offset)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[size], start, lenght);
+            var manager = new CustomMemoryForTest<byte>(new byte[size], offset, size - 2 * offset);
             var buffer = new ReadOnlySequence<byte>(manager.Memory);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -59,12 +50,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -72,14 +60,11 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Byte_SingleSegment(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Byte_SingleSegment(int size, int offset)
         {
             var segment1 = new BufferSegment<byte>(new byte[size]);
-            var buffer = new ReadOnlySequence<byte>(segment1, start, segment1, start + lenght);
+            var buffer = new ReadOnlySequence<byte>(segment1, offset, segment1, size - offset);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -88,12 +73,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -101,17 +83,14 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Byte_MultiSegment(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Byte_MultiSegment(int size, int offset)
         {
-            var segment1 = new BufferSegment<byte>(new byte[size]);
+            var segment1 = new BufferSegment<byte>(new byte[size / 10]);
             BufferSegment<byte> segment2 = segment1;
             for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[size]);
-            var buffer = new ReadOnlySequence<byte>(segment1, start, segment2, lenght);
+                segment2 = segment2.Append(new byte[size / 10]);
+            var buffer = new ReadOnlySequence<byte>(segment1, offset, segment2, size / 10 - offset);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -141,12 +120,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < Benchmark.InnerIterationCount; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -165,12 +141,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < Benchmark.InnerIterationCount; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -178,103 +151,10 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Char_Array(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Char_Array(int size, int offset)
         {
-            var buffer = new ReadOnlySequence<char>(new char[size], start, lenght);
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Char_Memory(int size, int start, int lenght)
-        {
-            var manager = new CustomMemoryForTest<char>(new char[size], start, lenght);
-            var buffer = new ReadOnlySequence<char>(manager.Memory);
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Char_SingleSegment(int size, int start, int lenght)
-        {
-            var segment1 = new BufferSegment<char>(new char[size]);
-            var buffer = new ReadOnlySequence<char>(segment1, start, segment1, start + lenght);
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void Char_MultiSegment(int size, int start, int lenght)
-        {
-            var segment1 = new BufferSegment<char>(new char[size]);
-            BufferSegment<char> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new char[size]);
-            var buffer = new ReadOnlySequence<char>(segment1, start, segment2, lenght);
+            var buffer = new ReadOnlySequence<char>(new char[size], offset, size - 2 * offset);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -293,14 +173,83 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(1000, 0, 1000)]
-        [InlineData(1000, 100, 800)]
-        [InlineData(1000 * 1000, 0, 1000 * 1000)]
-        [InlineData(1000 * 1000, 1000, 998 * 1000)]
-        private static void String(int size, int start, int lenght)
+        [InlineData(10_000, 100)]
+        private static void Char_Memory(int size, int offset)
+        {
+            var manager = new CustomMemoryForTest<char>(new char[size], offset, size - 2 * offset);
+            var buffer = new ReadOnlySequence<char>(manager.Memory);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                int localInt = 0;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
+                    }
+                }
+                _volatileInt = localInt;
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 100)]
+        private static void Char_SingleSegment(int size, int offset)
+        {
+            var segment1 = new BufferSegment<char>(new char[size]);
+            var buffer = new ReadOnlySequence<char>(segment1, offset, segment1, size - offset);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                int localInt = 0;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
+                    }
+                }
+                _volatileInt = localInt;
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 100)]
+        private static void Char_MultiSegment(int size, int offset)
+        {
+            var segment1 = new BufferSegment<char>(new char[size / 10]);
+            BufferSegment<char> segment2 = segment1;
+            for (int j = 0; j < 10; j++)
+                segment2 = segment2.Append(new char[size / 10]);
+            var buffer = new ReadOnlySequence<char>(segment1, offset, segment2, size / 10 - offset);
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                int localInt = 0;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
+                    }
+                }
+                _volatileInt = localInt;
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 100)]
+        private static void String(int size, int offset)
         {
             ReadOnlyMemory<char> strMemory = new string('a', size).AsMemory();
-            strMemory = strMemory.Slice(start, lenght);
+            strMemory = strMemory.Slice(offset, size - offset);
             var buffer = new ReadOnlySequence<char>(strMemory);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -310,12 +259,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < size / 10; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -334,12 +280,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < Benchmark.InnerIterationCount; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
@@ -358,12 +301,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < Benchmark.InnerIterationCount; j++)
-                        {
-                            var p = buffer.Start;
-                            while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
-                                localInt ^= memory.Length;
-                        }
+                        var p = buffer.Start;
+                        while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
+                            localInt ^= memory.Length;
                     }
                 }
                 _volatileInt = localInt;
