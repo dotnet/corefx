@@ -25,6 +25,7 @@ namespace System.Buffers
             }
 
             GetTypeAndIndices(position.GetInteger(), _sequenceEnd.GetInteger(), out SequenceType type, out int positionIndex, out int endIndex);
+            int length = endIndex - positionIndex;
             if (type == SequenceType.MultiSegment)
             {
                 Debug.Assert(positionObject is ReadOnlySequenceSegment<T>);
@@ -50,7 +51,7 @@ namespace System.Buffers
                     Debug.Assert(nextSegment != null);
 
                     next = new SequencePosition(nextSegment, 0);
-                    endIndex = data.Length;
+                    length = data.Length - positionIndex;
                 }
             }
             else
@@ -79,7 +80,7 @@ namespace System.Buffers
                 }
             }
 
-            data = data.Slice(positionIndex, endIndex - positionIndex);
+            data = data.Slice(positionIndex, length);
             return true;
         }
 
@@ -87,6 +88,7 @@ namespace System.Buffers
         private ReadOnlyMemory<T> GetFirstBuffer(in SequencePosition start, in SequencePosition end)
         {
             GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
+            int length = endIndex - startIndex;
             object startObject = start.GetObject();
             ReadOnlyMemory<T> memory;
             if (type == SequenceType.MultiSegment)
@@ -96,7 +98,7 @@ namespace System.Buffers
                 memory = startSegment.Memory;
                 if (startObject != end.GetObject())
                 {
-                    endIndex = memory.Length;
+                    length = memory.Length - startIndex;
                 }
             }
             else if (type == SequenceType.Array)
@@ -122,7 +124,7 @@ namespace System.Buffers
                 return default;
             }
 
-            return memory.Slice(startIndex, endIndex - startIndex);
+            return memory.Slice(startIndex, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
