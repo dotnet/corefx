@@ -55,6 +55,29 @@ namespace System.IO.Tests
         public void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
+
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(),basePath.AsSpan(), destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_FullyQualified))]
+        public void TryGetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), basePath.AsSpan(), destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
         }
 
         public static TheoryData<string, string, string> GetFullPath_Windows_PathIsDevicePath => new TheoryData<string, string, string>
@@ -88,6 +111,27 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
             Assert.Equal(expected, Path.GetFullPath(path, @"\\.\" + basePath));
             Assert.Equal(expected, Path.GetFullPath(path, @"\\?\" + basePath));
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_PathIsDevicePath))]
+        public void TryGetFullPath_BasicExpansions_Windows_PathIsDevicePath(string path, string basePath, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length + 8];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length + 8);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
         }
 
         public static TheoryData<string, string, string> GetFullPath_Windows_UNC => new TheoryData<string, string, string>
@@ -135,6 +179,27 @@ namespace System.IO.Tests
             Assert.Equal(@"\\?\UNC\" + expected, Path.GetFullPath(path, @"\\?\UNC\" + basePath));
         }
 
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_UNC))]
+        public void TryGetFullPath_CommonUnc_Windows(string path, string basePath, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length + 8];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length + 8);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 2, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\UNC\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 8, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\UNC\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 8, chars);
+        }
+
         public static TheoryData<string, string, string> GetFullPath_Windows_CommonDevicePaths => new TheoryData<string, string, string>
         {
             // Device paths
@@ -179,7 +244,24 @@ namespace System.IO.Tests
         public void GetFullPath_CommonDevice_Windows(string path, string basePath, string expected)
         {
             Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
-            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));            
+            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_CommonDevicePaths))]
+        public void TryGetFullPath_CommonDevice_Windows(string path, string basePath, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length + 4];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length + 4);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 4, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 4, chars);
         }
 
         public static TheoryData<string, string, string> GetFullPath_CommonRootedWindowsData => new TheoryData<string, string, string>
@@ -257,6 +339,27 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
             Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
             Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_CommonRootedWindowsData))]
+        public void TryGetFullPath_CommonUnRooted_Windows(string path, string basePath, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length + 4];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length + 4);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\" + expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\.\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\.\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 4, chars);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), new string(@"\\?\" + basePath).AsSpan(), destination, out chars));
+            //Assert.Equal(@"\\?\UNC\" + expected, destination.ToString());
+            Assert.Equal(expected.Length + 4, chars);
         }
 
         [Fact]
