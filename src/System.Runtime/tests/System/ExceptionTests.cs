@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -63,31 +63,30 @@ namespace System.Tests
         [Fact]
         public static void ThrowStatementDoesNotResetExceptionStackLineSameMethod()
         {
-            var callStack = new Stack<(string, string, int)>();
+            (string, string, int) rethrownExceptionStackFrame = (null, null, 0);
 
             try
             {
-                callStack.Push(GetSourceInformation(1));
-                ThrowAndRethrowSameMethod(callStack);
+                ThrowAndRethrowSameMethod(out rethrownExceptionStackFrame);
             }
             catch (Exception ex)
             {
-                VerifyCallStack(callStack, ex.StackTrace);
+                VerifyCallStack(rethrownExceptionStackFrame, ex.StackTrace, 0);
             }
         }
 
-        private static void ThrowAndRethrowSameMethod(Stack<(string, string, int)> callStack)
+        private static (string, string, int) ThrowAndRethrowSameMethod(out (string, string, int) rethrownExceptionStackFrame)
         {
             try
             {
                 if (!PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation(1));
+                    rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw new Exception("Boom!");
             }
             catch
             {
                 if (PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation(1));
+                    rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw;
             }
         }
@@ -95,63 +94,58 @@ namespace System.Tests
         [Fact]
         public static void ThrowStatementDoesNotResetExceptionStackLineOtherMethod()
         {
-            var callStack = new Stack<(string, string, int)>();
+            (string, string, int) rethrownExceptionStackFrame = (null, null, 0);
 
             try
             {
-                callStack.Push(GetSourceInformation(1));
-                ThrowAndRethrowOtherMethod(callStack);
+                ThrowAndRethrowOtherMethod(out rethrownExceptionStackFrame);
             }
             catch (Exception ex)
             {
-                VerifyCallStack(callStack, ex.StackTrace);
+                VerifyCallStack(rethrownExceptionStackFrame, ex.StackTrace, 1);
             }
         }
 
-        private static void ThrowAndRethrowOtherMethod(Stack<(string, string, int)> callStack)
+        private static void ThrowAndRethrowOtherMethod(out (string, string, int) rethrownExceptionStackFrame)
         {
             try
             {
                 if (!PlatformDetection.IsFullFramework)
-                    callStack.Push(GetSourceInformation(1));
-                ThrowException(callStack);
+                    rethrownExceptionStackFrame = GetSourceInformation(1);
+                ThrowException(); Assert.True(false, "Workaround for Linux Release builds (https://github.com/dotnet/corefx/pull/28059#issuecomment-378335456)");
             }
             catch
             {
                 if (PlatformDetection.IsFullFramework)
-                {
-                    var throwFrame = callStack.Pop();
-                    callStack.Push(GetSourceInformation(3));
-                    callStack.Push(throwFrame);
-                }
+                    rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw;
             }
+            rethrownExceptionStackFrame = (null, null, 0);
         }
 
-        private static void ThrowException(Stack<(string, string, int)> callStack)
+        private static void ThrowException()
         {
-            callStack.Push(GetSourceInformation(1));
             throw new Exception("Boom!");
         }
 
         private static void VerifyCallStack(
-            Stack<(string CallerMemberName, string SourceFilePath, int SourceLineNumber)> expectedCallStack, string reportedCallStack)
+            (string CallerMemberName, string SourceFilePath, int SourceLineNumber) expectedStackFrame,
+            string reportedCallStack, int skipFrames)
         {
             Console.WriteLine("* ExceptionTests - reported call stack:\n{0}", reportedCallStack);
             const string frameParserRegex = @"\s+at\s.+\.(?<memberName>[^(.]+)\([^)]*\)\sin\s(?<filePath>.*)\:line\s(?<lineNumber>[\d]+)";
 
             using (var sr = new StringReader(reportedCallStack))
             {
-                string frame;
-                while (!string.IsNullOrEmpty(frame = sr.ReadLine()))
-                {
-                    var exptectedFrame = expectedCallStack.Pop();
-                    var match = Regex.Match(frame, frameParserRegex);
-                    Assert.True(match.Success);
-                    Assert.Equal(exptectedFrame.CallerMemberName, match.Groups["memberName"].Value);
-                    Assert.Equal(exptectedFrame.SourceFilePath, match.Groups["filePath"].Value);
-                    Assert.Equal(exptectedFrame.SourceLineNumber, Convert.ToInt32(match.Groups["lineNumber"].Value));
-                }
+                for (int i = 0; i < skipFrames; i++)
+                    sr.ReadLine();
+                string frame = sr.ReadLine();
+                Assert.NotNull(frame);
+                var match = Regex.Match(frame, frameParserRegex);
+                Assert.True(match.Success);
+                Assert.Equal(expectedStackFrame.CallerMemberName, match.Groups["memberName"].Value);
+                Assert.Equal(expectedStackFrame.SourceFilePath, match.Groups["filePath"].Value);
+                Assert.Equal(expectedStackFrame.SourceLineNumber, Convert.ToInt32(match.Groups["lineNumber"].Value));
             }
         }
 
