@@ -72,6 +72,7 @@ namespace System.Collections.Generic
         public System.Collections.Generic.IEqualityComparer<TKey> Comparer { get { throw null; } }
         public int Count { get { throw null; } }
         public TValue this[TKey key] { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public ref TValue ValueRef(TKey key) { throw null; }
         public System.Collections.Generic.Dictionary<TKey, TValue>.KeyCollection Keys { get { throw null; } }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.IsReadOnly { get { throw null; } }
@@ -299,6 +300,7 @@ namespace System.Collections.Generic
         public int Capacity { get { throw null; } set { } }
         public int Count { get { throw null; } }
         public T this[int index] { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public ref T ItemRef(int index) { throw null; }
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
         bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
