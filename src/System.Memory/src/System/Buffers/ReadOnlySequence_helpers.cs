@@ -93,10 +93,11 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
                 ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-
                 memory = startSegment.Memory;
                 if (startObject != end.GetObject())
+                {
                     endIndex = memory.Length;
+                }
             }
             else if (type == SequenceType.Array)
             {
