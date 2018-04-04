@@ -150,22 +150,5 @@ namespace System.Collections.Tests
         }
 
         #endregion
-
-        #region Dictionary<TKey, TValue>.ValueRef 
-
-        [Theory]
-        [MemberData(nameof(ValidCollectionSizes))]
-        public void Dictionary_Generic_ValueRef_ContainsAllCorrectValues(int count)
-        {
-            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
-            IEnumerable<TKey> keys = ((IReadOnlyDictionary<TKey, TValue>)dictionary).Keys;
-
-            foreach(TKey key in keys)
-            {
-                Assert.Equal(dictionary[key], dictionary.ValueRef(key));
-            }
-        }
-
-        #endregion
     }
 }

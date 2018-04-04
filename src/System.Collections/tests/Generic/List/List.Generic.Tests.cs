@@ -48,8 +48,6 @@ namespace System.Collections.Tests
             for (int i = 0; i < list.Count; ++i)
             {
                 Assert.True(list[i] == null ? expectedItems[i] == null : list[i].Equals(expectedItems[i]));
-                Assert.True(list[i] == null ? expectedItems.ItemRef(i) == null : list[i].Equals(expectedItems.ItemRef(i)));
-                Assert.True(list.ItemRef(i) == null ? expectedItems[i] == null : list.ItemRef(i).Equals(expectedItems[i]));
             }
         }
 
