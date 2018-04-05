@@ -127,7 +127,6 @@ namespace System.Memory.Tests
                     chars[dataOffset + j] = s[j];
                 }
 
-                // Create a segment that has offset relative to the OwnedMemory and OwnedMemory itself has offset relative to array
                 Memory<T> memory = new Memory<T>(chars).Slice(length, length);
 
                 if (first == null)

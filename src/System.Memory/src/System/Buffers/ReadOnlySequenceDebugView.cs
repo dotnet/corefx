@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Buffers
@@ -12,21 +11,30 @@ namespace System.Buffers
         private readonly T[] _array;
 
         private readonly ReadOnlySequenceDebugViewSegments _segments;
-        
+
         public ReadOnlySequenceDebugView(ReadOnlySequence<T> sequence)
         {
             _array = sequence.ToArray();
-            var segments = new List<ReadOnlyMemory<T>>();
-            foreach (var readOnlyMemory in sequence)
+
+            var segmentCount = 0;
+            foreach (var _ in sequence)
             {
-                segments.Add(readOnlyMemory);
+                segmentCount++;
+            }
+
+            var segments = new ReadOnlyMemory<T>[segmentCount];
+            int i = 0;
+            foreach (ReadOnlyMemory<T> readOnlyMemory in sequence)
+            {
+                segments[i] = readOnlyMemory;
+                i++;
             }
             _segments = new ReadOnlySequenceDebugViewSegments()
             {
-                Segments = segments.ToArray()
+                Segments = segments
             };
         }
-        
+
         public ReadOnlySequenceDebugViewSegments BufferSegments => _segments;
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -36,7 +44,6 @@ namespace System.Buffers
         public struct ReadOnlySequenceDebugViewSegments
         {
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        
             public ReadOnlyMemory<T>[] Segments { get; set; }
         }
     }
