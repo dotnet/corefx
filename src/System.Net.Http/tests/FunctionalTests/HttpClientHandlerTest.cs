@@ -526,11 +526,16 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        public static IEnumerable<object[]> DestinationHost_MemberData()
+        {
+            yield return new object[] { Configuration.Http.Host };
+            yield return new object[] { "1.2.3.4" };
+            yield return new object[] { "[::1234]" };
+        }
+
         [Theory]
         [OuterLoop] // Test uses azure endpoint.
-        [InlineData("corefx-net.cloudapp.net")]
-        [InlineData("1.2.3.4")]
-        [InlineData("[::1234]")]
+        [MemberData(nameof(DestinationHost_MemberData))]
         public async Task ProxiedRequest_DefaultPort_PortStrippedOffInUri(string host)
         {
             string addressUri = $"http://{host}:{HttpDefaultPort}/";
@@ -560,8 +565,8 @@ namespace System.Net.Http.Functional.Tests
         public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
         {
             // Https proxy request will use CONNECT tunnel, even the default 443 port is specified, it will not be stripped off.
-            string expectedAddressUri = "corefx-net.cloudapp.net:443";
-            string addressUri = "https://corefx-net.cloudapp.net:443/";
+            string requestTarget = $"{Configuration.Http.SecureHost}:443";
+            string addressUri = $"https://{requestTarget}/";
             bool connectionAccepted = false;
 
             await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
@@ -577,7 +582,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 connectionAccepted = true;
                 List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
-                Assert.Contains($"CONNECT {expectedAddressUri} HTTP/1.1", headers);
+                Assert.Contains($"CONNECT {requestTarget} HTTP/1.1", headers);
             }));
 
             Assert.True(connectionAccepted);
