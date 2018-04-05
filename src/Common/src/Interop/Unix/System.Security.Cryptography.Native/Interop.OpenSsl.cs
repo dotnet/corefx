@@ -227,7 +227,7 @@ internal static partial class Interop
 
         internal static int Encrypt(SafeSslHandle context, ReadOnlyMemory<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
-#if DEBUG
+#if DEBUG_SSL_ERROR_QUEUE
             ulong assertNoError = Crypto.ErrPeekError();
             if (assertNoError != 0)
                 Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
@@ -281,7 +281,7 @@ internal static partial class Interop
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
-#if DEBUG
+#if DEBUG_SSL_ERROR_QUEUE
             ulong assertNoError = Crypto.ErrPeekError();
             if (assertNoError != 0)
                 Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
@@ -473,7 +473,7 @@ internal static partial class Interop
                     break;
 
                 case Ssl.SslErrorCode.SSL_ERROR_SSL:
-                    // OpenSSL failure occurred.  The error queue contains more details.
+                    // OpenSSL failure occurred.  The error queue contains more details, it will be cleaned after the exception is built.
                     innerError = Interop.Crypto.CreateOpenSslCryptographicException();
                     break;
 
