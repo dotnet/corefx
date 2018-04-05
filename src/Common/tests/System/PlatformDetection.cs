@@ -21,7 +21,6 @@ namespace System
         public static bool IsUap => IsWinRT || IsNetNative;
         public static bool IsFullFramework => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
         public static bool IsNetNative => RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
-        public static bool IsNetCore => RuntimeInformation.FrameworkDescription.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
@@ -166,18 +165,19 @@ namespace System
             }
         }
 
-        public static bool IsNotWinRT => !IsWinRT;
-        public static bool IsWinRTSupported => IsWinRT || (IsWindows && !IsWindows7);
-        public static bool IsNotWinRTSupported => !IsWinRTSupported;
-
         private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
 
         public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
         public static bool IsNotWindowsSubsystemForLinux => !IsWindowsSubsystemForLinux;
 
-        public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
-
         public static bool IsFedora => IsDistroAndVersion("fedora");
+
+        // RedHat family covers RedHat and CentOS
+        public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
+        public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion("7");
+        public static bool IsRedHatFamily69 => IsRedHatFamilyAndVersion("6.9");
+        public static bool IsNotRedHatFamily69 => !IsRedHatFamily69;
+        public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
 
         private static bool GetIsWindowsSubsystemForLinux()
         {
@@ -203,12 +203,62 @@ namespace System
         public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
-        public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
-        public static bool IsTizen => IsDistroAndVersion("tizen");
 
-        // If we need this long-term hopefully we can come up with a better detection than the kernel verison.
-        public static bool IsMacOsHighSierra { get; } =
-            IsOSX && RuntimeInformation.OSDescription.StartsWith("Darwin 17.0.0");
+        private static readonly Version s_osxProductVersion = GetOSXProductVersion();
+ 
+        public static bool IsMacOsHighSierraOrHigher { get; } =
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
+ 
+        public static bool IsNotMacOsHighSierraOrHigher { get; } = !IsMacOsHighSierraOrHigher;
+
+        private static Version GetOSXProductVersion()
+        {
+            try
+            {
+                if (IsOSX)
+                {
+                    // <plist version="1.0">
+                    // <dict>
+                    //         <key>ProductBuildVersion</key>
+                    //         <string>17A330h</string>
+                    //         <key>ProductCopyright</key>
+                    //         <string>1983-2017 Apple Inc.</string>
+                    //         <key>ProductName</key>
+                    //         <string>Mac OS X</string>
+                    //         <key>ProductUserVisibleVersion</key>
+                    //         <string>10.13</string>
+                    //         <key>ProductVersion</key>
+                    //         <string>10.13</string>
+                    // </dict>
+                    // </plist>
+
+                    // not using Xml parsers here to avoid having every test project using PlatformDetection 
+                    // to include a reference to the Xml assemblies
+
+                    string s = File.ReadAllText("/System/Library/CoreServices/SystemVersion.plist");
+                    int index = s.IndexOf(@"ProductVersion", StringComparison.OrdinalIgnoreCase);
+                    if (index > 0)
+                    {
+                        index = s.IndexOf(@"<string>", index + 14, StringComparison.OrdinalIgnoreCase);
+                        if (index > 0)
+                        {
+                            int endIndex = s.IndexOf(@"</string>", index + 8, StringComparison.OrdinalIgnoreCase);
+                            if (endIndex > 0)
+                            {
+                                string versionString = s.Substring(index + 8, endIndex - index - 8);
+                                return Version.Parse(versionString);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            // In case of exception or couldn't get the version 
+            return new Version(0, 0, 0);
+        }
 
         /// <summary>
         /// Get whether the OS platform matches the given Linux distro and optional version.
@@ -220,7 +270,7 @@ namespace System
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                DistroInfo v = ParseOsReleaseFile();
+                IdVersionPair v = ParseOsReleaseFile();
                 if (v.Id == distroId && (versionId == null || v.VersionId == versionId))
                 {
                     return true;
@@ -230,27 +280,55 @@ namespace System
             return false;
         }
 
-        public static string GetDistroVersionString()
+        private static bool IsRedHatFamilyAndVersion(string versionId = null)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return "";
+                IdVersionPair v = ParseOsReleaseFile();
+
+                // RedHat includes minor version. We need to account for that when comparing
+                if ((v.Id == "rhel" || v.Id == "centos") && VersionEqual(versionId, v.VersionId))
+                {
+                    return true;
+                }
             }
 
-            DistroInfo v = ParseOsReleaseFile();
-
-            return "Distro=" + v.Id + " VersionId=" + v.VersionId + " Pretty=" + v.PrettyName + " Version=" + v.Version;
+            return false;
         }
 
-        private static DistroInfo ParseOsReleaseFile()
+        private static bool VersionEqual(string expectedVersionId, string actualVersionId)
+        {
+            if (expectedVersionId == null)
+            {
+                return true;
+            }
+
+            string[] expected = expectedVersionId.Split('.');
+            string[] actual = actualVersionId.Split('.');
+
+            if (expected.Length > actual.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < expected.Length; i++)
+            {
+                if (expected[i] != actual[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static IdVersionPair ParseOsReleaseFile()
         {
             Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
 
-            DistroInfo ret = new DistroInfo();
+            IdVersionPair ret = new IdVersionPair();
             ret.Id = "";
             ret.VersionId = "";
-            ret.Version = "";
-            ret.PrettyName = "";
 
             if (File.Exists("/etc/os-release"))
             {
@@ -264,13 +342,69 @@ namespace System
                     {
                         ret.VersionId = RemoveQuotes(line.Substring("VERSION_ID=".Length));
                     }
-                    else if (line.StartsWith("VERSION=", System.StringComparison.Ordinal))
+                }
+            }
+            else 
+            {
+                string fileName = null;
+                if (File.Exists("/etc/redhat-release"))
+                    fileName = "/etc/redhat-release";
+
+                if (fileName == null && File.Exists("/etc/system-release"))
+                    fileName = "/etc/system-release";
+                
+                if (fileName != null)
+                {
+                    // Parse the format like the following line:
+                    // Red Hat Enterprise Linux Server release 7.3 (Maipo)
+                    using (StreamReader file = new StreamReader(fileName))
                     {
-                        ret.Version = RemoveQuotes(line.Substring("VERSION=".Length));
-                    }
-                    else if (line.StartsWith("PRETTY_NAME=", System.StringComparison.Ordinal))
-                    {
-                        ret.PrettyName = RemoveQuotes(line.Substring("PRETTY_NAME=".Length));
+                        string line = file.ReadLine();
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            if (line.StartsWith("Red Hat Enterprise Linux", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhel";
+                            }
+                            else if (line.StartsWith("Centos", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "centos";
+                            }
+                            else 
+                            {
+                                // automatically generate the distro label
+                                string [] words = line.Split(' ');
+                                StringBuilder sb = new StringBuilder();
+
+                                foreach (string word in words)
+                                {
+                                    if (word.Length > 0)
+                                    {
+                                        if (Char.IsNumber(word[0]) || 
+                                            word.Equals("release", StringComparison.OrdinalIgnoreCase) ||
+                                            word.Equals("server", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                break;
+                                            }
+                                        sb.Append(Char.ToLower(word[0]));
+                                    }
+                                }
+                                ret.Id = sb.ToString();
+                            }
+
+                            int i = 0;
+                            while (i < line.Length && !Char.IsNumber(line[i])) // stop at first number
+                                i++;
+
+                            if (i < line.Length)
+                            {
+                                int j = i + 1;
+                                while (j < line.Length && (Char.IsNumber(line[j]) || line[j] == '.'))
+                                    j++;
+
+                                ret.VersionId = line.Substring(i, j - i);
+                            }
+                        }
                     }
                 }
             }
@@ -278,24 +412,10 @@ namespace System
             return ret;
         }
 
-        private static string RemoveQuotes(string s)
-        {
-            s = s.Trim();
-            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
-            {
-                // Remove quotes.
-                s = s.Substring(1, s.Length - 2);
-            }
-
-            return s;
-        }
-
-        private struct DistroInfo
+        private struct IdVersionPair
         {
             public string Id { get; set; }
             public string VersionId { get; set; }
-            public string Version { get; set; }
-            public string PrettyName { get; set; }
         }
 
         private static int GetWindowsVersion()
@@ -335,6 +455,18 @@ namespace System
             }
 
             return -1;
+        }
+
+        private static string RemoveQuotes(string s)
+        {
+            s = s.Trim();
+            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
+            {
+                // Remove quotes.
+                s = s.Substring(1, s.Length - 2);
+            }
+
+            return s;
         }
 
         [DllImport("ntdll.dll")]
@@ -445,12 +577,9 @@ namespace System
 
         public static bool IsReflectionEmitSupported = !PlatformDetection.IsNetNative;
 
-        // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
-        public static bool IsInvokingStaticConstructorsSupported => !PlatformDetection.IsNetNative;
-
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
-        public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;
+        public static bool IsXmlDsigXsltTransformSupported => PlatformDetection.IsReflectionEmitSupported;
 
         public static Range[] FrameworkRanges => new Range[]{
           new Range(new Version(4, 7, 2500, 0), null, new Version(4, 7, 1)),

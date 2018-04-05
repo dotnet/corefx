@@ -65,34 +65,8 @@ namespace System.Net
         private int m_version = 0; // Do not rename (binary serialization)
 
         private string m_domainKey = string.Empty; // Do not rename (binary serialization)
-
-/* 
-    TODO: #13607
-    VSO 449560
-    Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-    block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-    public, this is a temporary workaround till that happens. 
-*/
-#if uap 
-        public
-#else 
-        internal
-#endif
-        bool IsQuotedVersion = false;
-
-/* 
-    TODO: #13607
-    VSO 449560
-    Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-    block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-    public, this is a temporary workaround till that happens. 
-*/
-#if uap 
-        public
-#else 
-        internal
-#endif
-        bool IsQuotedDomain = false;
+        internal bool IsQuotedVersion = false;
+        internal bool IsQuotedDomain = false;
 
 #if DEBUG
         static Cookie()

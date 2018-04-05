@@ -60,9 +60,8 @@ namespace System.IO.IsolatedStorage
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetFileNames("\0bad"));
             }
         }
-
-        [Theory MemberData(nameof(ValidStores))]
-        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
+        [Theory, MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void GetFileNames_GetsFileNames(PresetScopes scope)
         {
             TestHelper.WipeStores();

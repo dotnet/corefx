@@ -221,4 +221,3 @@ namespace System.Drawing
             new SizeF(size.width * multiplier, size.height * multiplier);
     }
 }
-

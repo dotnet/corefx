@@ -467,7 +467,6 @@ namespace System.Data.SqlClient
 
         internal static Exception SqlDependencyIdMismatch()
         {
-            // do not include the id because it may require SecurityPermission(Infrastructure) permission
             return ADP.InvalidOperation(SR.GetString(SR.SqlDependency_IdMismatch));
         }
 

@@ -56,7 +56,6 @@
       <Link>System\Data\Common\AdapterUtil.cs</Link>
     </Compile>
     <Compile Include="System\Data\Common\AdapterUtil.SqlClient.cs" />
-    <Compile Include="System\Data\Common\SR.cs" />
     <Compile Include="System\Data\Common\DbConnectionOptions.cs" />
     <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionOptions.Common.cs">
       <Link>System\Data\Common\DbConnectionOptions.Common.cs</Link>
@@ -93,6 +92,7 @@
     <Compile Include="System\Data\Sql\SqlNotificationRequest.cs" />
     <Compile Include="System\Data\SqlClient\ApplicationIntent.cs" />
     <Compile Include="System\Data\SqlClient\LocalDBAPI.cs" />
+    <Compile Include="System\Data\SqlClient\OnChangedEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\ParameterPeekAheadValue.cs" />
     <Compile Include="System\Data\SqlClient\RowsCopiedEventArgs.cs" />
     <Compile Include="System\Data\SqlClient\RowsCopiedEventHandler.cs" />
@@ -138,7 +138,6 @@
     <Compile Include="System\Data\SqlClient\SqlNotificationInfo.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationSource.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationType.cs" />
-    <Compile Include="System\Data\SqlClient\OnChangedEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameter.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollection.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollectionHelper.cs" />

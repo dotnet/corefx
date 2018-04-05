@@ -472,7 +472,7 @@ namespace System.Net.Tests
         public void Add_NullName_ThrowsArgumentNullException()
         {
             var headers = new WebHeaderCollection();
-            AssertExtensions.Throws<ArgumentNullException>("name", () => headers.Add(null, "value"));
+            Assert.Throws<ArgumentNullException>("name", () => headers.Add(null, "value"));
         }
 
         [Theory]
@@ -484,7 +484,7 @@ namespace System.Net.Tests
         public void Add_InvalidName_ThrowsArgumentException(string name)
         {
             var headers = new WebHeaderCollection();
-            AssertExtensions.Throws<ArgumentException>("name", () => headers.Add(name, "value"));
+            Assert.Throws<ArgumentException>("name", () => headers.Add(name, "value"));
         }
 
         [Theory]
@@ -492,7 +492,7 @@ namespace System.Net.Tests
         public void Add_InvalidValue_ThrowsArgumentException(string value)
         {
             var headers = new WebHeaderCollection();
-            AssertExtensions.Throws<ArgumentException>("value", () => headers.Add("name", value));
+            Assert.Throws<ArgumentException>("value", () => headers.Add("name", value));
         }
 
         [Fact]
@@ -514,7 +514,7 @@ namespace System.Net.Tests
         public void Add_NullHeader_ThrowsArgumentNullException(string header)
         {
             var headers = new WebHeaderCollection();
-            AssertExtensions.Throws<ArgumentNullException>("header", () => headers.Add(header));
+            Assert.Throws<ArgumentNullException>("header", () => headers.Add(header));
         }
 
         [Theory]
@@ -526,7 +526,7 @@ namespace System.Net.Tests
         public void Add_InvalidHeader_ThrowsArgumentException(string header, string paramName)
         {
             var headers = new WebHeaderCollection();
-            AssertExtensions.Throws<ArgumentException>(paramName, () => headers.Add(header));
+            Assert.Throws<ArgumentException>(paramName, () => headers.Add(header));
         }
 
         [Fact]
@@ -623,8 +623,8 @@ namespace System.Net.Tests
             WebHeaderCollection w = new WebHeaderCollection();
             char[] arr = new char[ushort.MaxValue + 1];
             string maxStr = new string(arr);
-            AssertExtensions.Throws<ArgumentException>("value", () => w.Add(HttpRequestHeader.ContentLength,maxStr));
-            AssertExtensions.Throws<ArgumentException>("value", () => w.Add("ContentLength", maxStr));
+            Assert.Throws<ArgumentException>(() => w.Add(HttpRequestHeader.ContentLength,maxStr));
+            Assert.Throws<ArgumentException>(() => w.Add("ContentLength", maxStr));
         }
 
         [Fact]

@@ -628,6 +628,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ListMembers()
     {
         TypeWithListMembers x = new TypeWithListMembers
@@ -811,6 +812,8 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19516")]
+    [ActiveIssue("dotnet/corefx #20476", TargetFrameworkMonikers.UapAot)]
     public static void DCS_TypeWithPrivateFieldAndPrivateGetPublicSetProperty()
     {
         TypeWithPrivateFieldAndPrivateGetPublicSetProperty x = new TypeWithPrivateFieldAndPrivateGetPublicSetProperty
@@ -1049,19 +1052,6 @@ public static partial class DataContractSerializerTests
         VerifyXElementObject(original.list[0], actual.list[0], checkFirstAttribute: false);
         VerifyXElementObject(original.list[1], actual.list[1], checkFirstAttribute: false);
         VerifyXElementObject(original.list[2], actual.list[2], checkFirstAttribute: false);
-    }
-
-    [Fact]
-    public static void DCS_DerivedTypeWithDifferentOverrides()
-    {
-        var x = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
-        var y = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(x, @"<DerivedTypeWithDifferentOverrides xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Name1>Name1</Name1><Name2 i:nil=""true""/><Name3 i:nil=""true""/><Name4 i:nil=""true""/><Name5 i:nil=""true""/><Name6 i:nil=""true""/><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
-
-        Assert.StrictEqual(x.Name1, y.Name1);
-        Assert.StrictEqual(x.Name2, y.Name2);
-        Assert.StrictEqual(x.Name3, y.Name3);
-        Assert.Null(y.Name4);
-        Assert.StrictEqual(x.Name5, y.Name5);
     }
 
     [Fact]
@@ -1435,6 +1425,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(((SimpleKnownTypeValue)actual.SimpleTypeValue).StrProperty, "PropertyValue");
     }
 
+    [ActiveIssue(20361)]
     [Fact]
     public static void DCS_ExceptionObject()
     {
@@ -1448,6 +1439,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.HelpLink, actual.HelpLink);
     }
 
+    [ActiveIssue(20361)]
     [Fact]
     public static void DCS_MyArgumentExceptionObject()
     {
@@ -1462,6 +1454,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.HelpLink, actual.HelpLink);
     }
 
+    [ActiveIssue(20361)]
     [Fact]
     public static void DCS_ExceptionMessageWithSpecialChars()
     {
@@ -1476,6 +1469,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #19585", TargetFrameworkMonikers.UapAot)]
     public static void DCS_InnerExceptionMessageWithSpecialChars()
     {
         var value = new Exception("", new Exception("Test Exception<>&'\""));
@@ -1594,6 +1588,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_GenericQueue()
     {
         Queue<int> value = new Queue<int>();
@@ -1607,6 +1602,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_GenericStack()
     {
         var value = new Stack<int>();
@@ -1622,6 +1618,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_Queue()
     {
         var value = new Queue();
@@ -1636,6 +1633,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_Stack()
     {
         var value = new Stack();
@@ -1651,6 +1649,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_SortedList()
     {
         var value = new SortedList();
@@ -1663,6 +1662,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_SystemVersion()
     {
         Version value = new Version(1, 2, 3, 4);
@@ -1868,6 +1868,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ReadOnlyCollection()
     {
         List<string> list = new List<string>() { "Foo", "Bar" };
@@ -1879,6 +1880,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_ReadOnlyDictionary()
     {
         var dict = new Dictionary<string, int>();
@@ -3037,6 +3039,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCS_BasicRoundtripDCRDefaultCollections()
     {
         var defaultCollections = new SerializationTestTypes.DefaultCollections();

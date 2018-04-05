@@ -507,4 +507,3 @@ namespace System.Data.SqlClient
         internal SqlNotificationType Type => _type;
     }
 }
-

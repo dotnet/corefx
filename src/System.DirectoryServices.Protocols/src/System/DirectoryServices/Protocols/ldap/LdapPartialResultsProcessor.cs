@@ -168,24 +168,21 @@ namespace System.DirectoryServices.Protocols
                     asyncResult._resultStatus = ResultsStatus.Done;
                 }
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                if (exception is DirectoryOperationException directoryOperationException)
+                if (e is DirectoryOperationException)
                 {
-                    SearchResponse response = (SearchResponse)directoryOperationException.Response;
-                    if (asyncResult._response != null)
-                    {
-                        AddResult(asyncResult._response, response);
-                    }
-                    else
-                    {
-                        asyncResult._response = response;
-                    }
+                    SearchResponse response = (SearchResponse)(((DirectoryOperationException)e).Response);
 
-                    // Set the response back to the exception so it holds all the results up to now.
-                    directoryOperationException.Response = asyncResult._response;
+                    if (asyncResult._response != null)
+                        AddResult(asyncResult._response, response);
+                    else
+                        asyncResult._response = response;
+
+                    // set the response back to the exception so it holds all the results up to now
+                    ((DirectoryOperationException)e).response = asyncResult._response;
                 }
-                else if (exception is LdapException ldapException)
+                else if (e is LdapException ldapException)
                 {
                     LdapError errorCode = (LdapError)ldapException.ErrorCode;
 
@@ -212,7 +209,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 
                 // Exception occurs, this operation is done.
-                asyncResult._exception = exception;
+                asyncResult._exception = e;
                 asyncResult._resultStatus = ResultsStatus.Done;
 
                 // Need to abandon this request.

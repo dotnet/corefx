@@ -6,6 +6,12 @@ using System.Runtime.Serialization;
 
 namespace System.DirectoryServices.Protocols
 {
+    using System.Globalization;
+    using System.Runtime.Serialization;
+    using System.Security.Permissions;
+
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class DirectoryException : Exception
     {
         protected DirectoryException(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -26,8 +32,11 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class DirectoryOperationException : DirectoryException, ISerializable
     {
+        internal DirectoryResponse response = null;
         protected DirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public DirectoryOperationException() : base() { }
@@ -36,24 +45,37 @@ namespace System.DirectoryServices.Protocols
 
         public DirectoryOperationException(string message, Exception inner) : base(message, inner) { }
 
-        public DirectoryOperationException(DirectoryResponse response) : base(SR.DefaultOperationsError)
+        public DirectoryOperationException(DirectoryResponse response) : base(String.Format(CultureInfo.CurrentCulture, SR.DefaultOperationsError))
         {
-            Response = response;
+            this.response = response;
         }
 
         public DirectoryOperationException(DirectoryResponse response, string message) : base(message)
         {
-            Response = response;
+            this.response = response;
         }
 
         public DirectoryOperationException(DirectoryResponse response, string message, Exception inner) : base(message, inner)
         {
-            Response = response;
+            this.response = response;
         }
 
-        public DirectoryResponse Response { get; internal set; }
+        public DirectoryResponse Response
+        {
+            get
+            {
+                return response;
+            }
+        }
+        
+        public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+            base.GetObjectData(serializationInfo, streamingContext);
+        }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class BerConversionException : DirectoryException
     {
         protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context) { }

@@ -79,8 +79,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
-        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
+        [Theory, MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void MoveDirectory_MoveOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -93,8 +93,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
-        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
+        [Theory, MemberData(nameof(ValidStores))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18265")]
         public void MoveDirectory_MovesDirectory(PresetScopes scope)
         {
             TestHelper.WipeStores();

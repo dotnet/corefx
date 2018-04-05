@@ -14,16 +14,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net471'">
     <Compile Include="System\Xml\XPath\XDocumentExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' or '$(TargetGroup)'=='uap'">
     <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
     <ProjectReference Include="..\..\System.Private.Xml.Linq\src\System.Private.Xml.Linq.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netfx'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netfx' Or '$(TargetGroup)'=='net471'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />

@@ -6,7 +6,7 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{5471BFE8-8071-466F-838E-5ADAA779E742}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -15,6 +15,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
@@ -48,7 +50,7 @@
       <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <Compile Include="System\IO\Compression\CompressionLevel.cs" />
     <Compile Include="System\IO\Compression\CompressionMode.cs" />
     <Compile Include="System\IO\Compression\GZipStream.cs" />
@@ -57,7 +59,6 @@
     <Compile Include="System\IO\Compression\DeflateZLib\Inflater.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibException.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.cs" />
-    <Compile Include="System\IO\Compression\ZLibException.Serialization.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
       <Link>Common\System\IO\PathInternal.cs</Link>
     </Compile>
@@ -69,7 +70,7 @@
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\IO\Compression\ZipArchiveEntry.Windows.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.Windows.cs" />
     <Compile Include="Interop\Interop.zlib.Windows.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
@@ -94,7 +95,7 @@
       <Link>Common\Interop\Unix\System.Native\Interop.PathConf.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Contracts" />
@@ -107,7 +108,7 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">
     <Compile Include="AssemblyInfo.cs" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />

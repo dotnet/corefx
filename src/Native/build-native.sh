@@ -23,14 +23,21 @@ usage()
 
 initHostDistroRid()
 {
+    __HostDistroRid=""
     if [ "$__HostOS" == "Linux" ]; then
-        if [ ! -e /etc/os-release ]; then
-            echo "WARNING: Can not determine runtime id for current distro."
-            __HostDistroRid=""
-        else
+        if [ -e /etc/os-release ]; then
             source /etc/os-release
             __HostDistroRid="$ID.$VERSION_ID-$__HostArch"
+        elif [ -e /etc/redhat-release ]; then
+            local redhatRelease=$(</etc/redhat-release)
+            if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
+               __HostDistroRid="rhel.6-$__HostArch"
+            fi
         fi
+    fi
+
+    if [ "$__HostDistroRid" == "" ]; then
+        echo "WARNING: Can not determine runtime id for current distro."
     fi
 }
 
@@ -357,6 +364,11 @@ if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
             __ClangMajorVersion=3
             __ClangMinorVersion=6
         fi
+    elif [[ "$__HostOS" == "Linux" && \
+            "$(lsb_release --id --short)" == "Ubuntu" && \
+            "$(lsb_release --release --short)" == "16.04" ]]; then
+        __ClangMajorVersion=3
+        __ClangMinorVersion=9
     else
         __ClangMajorVersion=3
         __ClangMinorVersion=5

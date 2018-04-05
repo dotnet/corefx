@@ -10,6 +10,8 @@ namespace System.ComponentModel
     /// <summary>
     ///    <para>The exception that is thrown when using invalid arguments that are enumerators.</para>
     /// </summary>
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InvalidEnumArgumentException : ArgumentException
     {
         /// <summary>

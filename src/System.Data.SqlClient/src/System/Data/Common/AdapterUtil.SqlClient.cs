@@ -9,6 +9,22 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Transactions;
 
+namespace System
+{
+    internal static partial class SR
+    {
+        internal static string GetString(string value)
+        {
+            return value;
+        }
+
+        internal static string GetString(string format, params object[] args)
+        {
+            return SR.Format(format, args);
+        }
+    }
+}
+
 namespace System.Data.Common
 {
     internal static partial class ADP
@@ -312,7 +328,7 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSequentialColumnAccess, badCol.ToString(CultureInfo.InvariantCulture), currCol.ToString(CultureInfo.InvariantCulture)));
         }
 
-        internal static Exception InvalidXmlInvalidValue(string collectionName, string columnName)
+        static internal Exception InvalidXmlInvalidValue(string collectionName, string columnName)
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
@@ -719,6 +735,11 @@ namespace System.Data.Common
                     isSqlType = false;
                 }
             }
+        }
+
+        internal static Exception AmbientTransactionIsNotSupported()
+        {
+            return new NotSupportedException(SR.AmbientTransactionsNotSupported);
         }
 
         private static Version s_systemDataVersion;

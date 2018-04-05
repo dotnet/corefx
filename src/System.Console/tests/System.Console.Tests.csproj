@@ -15,7 +15,6 @@
       <Link>Common\tests\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="CancelKeyPress.cs" />
-    <Compile Include="CancelKeyPress.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="Helpers.cs" />
     <Compile Include="ReadAndWrite.cs" />
     <Compile Include="ConsoleKeyInfoTests.cs" />
@@ -25,7 +24,6 @@
     <Compile Include="SetOut.cs" />
     <Compile Include="NegativeTesting.cs" />
     <Compile Include="ConsoleEncoding.cs" />
-    <Compile Include="ConsoleEncoding.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="SyncTextReader.cs" />
     <Compile Include="SyncTextWriter.cs" />
     <Compile Include="Timeout.cs" />
@@ -43,10 +41,34 @@
     <Compile Include="WindowAndCursorProps.cs" />
   </ItemGroup>
   <ItemGroup>
+    <SupplementalTestData Include="$(MSBuildThisFileDirectory)TestData\**\*.*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </SupplementalTestData>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'" >
+    <Compile Include="ConsoleEncoding.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' != 'true'" >
+    <Compile Include="CancelKeyPress.Unix.cs" />
+    <Compile Include="NonStandardConfiguration.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
+      <Link>Interop\Unix\System.Native\Interop.Fcntl.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ncursesFormats\" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

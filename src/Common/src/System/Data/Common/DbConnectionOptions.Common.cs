@@ -121,16 +121,16 @@ namespace System.Data.Common
 
         internal static bool ConvertValueToBooleanInternal(string keyName, string stringValue)
         {
-            if (CompareInsensitiveInvariant(stringValue, "true") || CompareInsensitiveInvariant(stringValue, "yes"))
+            if (ADP.CompareInsensitiveInvariant(stringValue, "true") || ADP.CompareInsensitiveInvariant(stringValue, "yes"))
                 return true;
-            else if (CompareInsensitiveInvariant(stringValue, "false") || CompareInsensitiveInvariant(stringValue, "no"))
+            else if (ADP.CompareInsensitiveInvariant(stringValue, "false") || ADP.CompareInsensitiveInvariant(stringValue, "no"))
                 return false;
             else
             {
                 string tmp = stringValue.Trim();  // Remove leading & trailing whitespace.
-                if (CompareInsensitiveInvariant(tmp, "true") || CompareInsensitiveInvariant(tmp, "yes"))
+                if (ADP.CompareInsensitiveInvariant(tmp, "true") || ADP.CompareInsensitiveInvariant(tmp, "yes"))
                     return true;
-                else if (CompareInsensitiveInvariant(tmp, "false") || CompareInsensitiveInvariant(tmp, "no"))
+                else if (ADP.CompareInsensitiveInvariant(tmp, "false") || ADP.CompareInsensitiveInvariant(tmp, "no"))
                     return false;
                 else
                 {
@@ -138,9 +138,6 @@ namespace System.Data.Common
                 }
             }
         }
-
-        private static bool CompareInsensitiveInvariant(string strvalue, string strconst) =>
-            (0 == StringComparer.OrdinalIgnoreCase.Compare(strvalue, strconst));
 
         [System.Diagnostics.Conditional("DEBUG")]
         static partial void DebugTraceKeyValuePair(string keyname, string keyvalue, Dictionary<string, string> synonyms);

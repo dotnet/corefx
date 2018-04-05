@@ -745,7 +745,7 @@ namespace Microsoft.XmlSerializer.Generator
             for (StructMapping derived = mapping.DerivedMappings; derived != null; derived = derived.NextDerivedMapping)
             {
                 string fullTypeName = derived.TypeDesc.CSharpName;
-                Writer.Write("else if (");
+                Writer.Write("if (");
                 WriteTypeCompare("t", fullTypeName, derived.TypeDesc.UseReflection);
                 Writer.WriteLine(") {");
                 Writer.Indent++;
@@ -783,7 +783,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         EnumMapping mapping = (EnumMapping)m;
                         string fullTypeName = mapping.TypeDesc.CSharpName;
-                        Writer.Write("else if (");
+                        Writer.Write("if (");
                         WriteTypeCompare("t", fullTypeName, mapping.TypeDesc.UseReflection);
                         Writer.WriteLine(") {");
                         Writer.Indent++;
@@ -815,7 +815,7 @@ namespace Microsoft.XmlSerializer.Generator
                         ArrayMapping mapping = m as ArrayMapping;
                         if (mapping == null || m.IsSoap) continue;
                         string fullTypeName = mapping.TypeDesc.CSharpName;
-                        Writer.Write("else if (");
+                        Writer.Write("if (");
                         if (mapping.TypeDesc.IsArray)
                             WriteArrayTypeCompare("t", fullTypeName, mapping.TypeDesc.ArrayElementTypeDesc.CSharpName, mapping.TypeDesc.UseReflection);
                         else
@@ -885,12 +885,12 @@ namespace Microsoft.XmlSerializer.Generator
                 WriteTypeCompare("t", fullTypeName, mapping.TypeDesc.UseReflection);
                 Writer.WriteLine(") {");
                 Writer.WriteLine("}");
+                Writer.WriteLine("else {");
+                Writer.Indent++;
                 WriteDerivedTypes(mapping);
                 if (mapping.TypeDesc.IsRoot)
                     WriteEnumAndArrayTypes();
-                Writer.WriteLine("else {");
 
-                Writer.Indent++;
                 if (mapping.TypeDesc.IsRoot)
                 {
                     Writer.WriteLine("WriteTypedPrimitive(n, ns, o, true);");
@@ -2044,7 +2044,16 @@ namespace Microsoft.XmlSerializer.Generator
                 else if (type == typeof(Int32))
                     Writer.Write(((Int32)value).ToString(null, NumberFormatInfo.InvariantInfo));
                 else if (type == typeof(Double))
-                    Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                {
+                    if (double.IsNaN((Double)value))
+                    {
+                        Writer.Write("double.NaN");
+                    }
+                    else
+                    {
+                        Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                    }
+                }
                 else if (type == typeof(Boolean))
                     Writer.Write((bool)value ? "true" : "false");
                 else if ((type == typeof(Int16)) || (type == typeof(Int64)) || (type == typeof(UInt16)) || (type == typeof(UInt32)) || (type == typeof(UInt64)) || (type == typeof(Byte)) || (type == typeof(SByte)))
@@ -2058,8 +2067,15 @@ namespace Microsoft.XmlSerializer.Generator
                 }
                 else if (type == typeof(Single))
                 {
-                    Writer.Write(((Single)value).ToString("R", NumberFormatInfo.InvariantInfo));
-                    Writer.Write("f");
+                    if (Single.IsNaN((Single)value))
+                    {
+                        Writer.Write("System.Single.NaN");
+                    }
+                    else
+                    {
+                        Writer.Write(((Single)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write("f");
+                    }
                 }
                 else if (type == typeof(Decimal))
                 {

@@ -34,7 +34,7 @@ namespace System.IO
             DisplayPath = GetDisplayName(OriginalPath);
         }
 
-        public override string Name
+        public override String Name
         {
             get
             {

@@ -15,6 +15,9 @@
 
     <!-- Private packages need symbols -->
     <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
+
+    <!-- UAP10.1 is stripped out of other packages, but we don't want to do that for the framework package -->
+    <KeepUAPContent>true</KeepUAPContent>
   </PropertyGroup>
 
   <ItemGroup>

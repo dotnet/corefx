@@ -10,6 +10,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
@@ -23,7 +25,7 @@
     <ProjectReference Include="..\..\System.Security.Cryptography.X509Certificates\ref\System.Security.Cryptography.X509Certificates.csproj" />
     <ProjectReference Include="..\..\System.Text.Encoding\ref\System.Text.Encoding.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' OR '$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471' OR '$(TargetGroup)' == 'net46'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
   </ItemGroup>

@@ -185,7 +185,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { environment.CopyTo(kvpa, -1); });
 
             //Exception not thrown with null key
-            AssertExtensions.Throws<ArgumentException>(null, () => { environment.CopyTo(kvpa, 9); });
+            Assert.Throws<ArgumentException>(() => { environment.CopyTo(kvpa, 9); });
 
             //Exception not thrown with null key
             Assert.Throws<ArgumentNullException>(() =>
@@ -196,7 +196,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Retrieving information about local processes is not supported on uap")]
         public void TestEnvironmentOfChildProcess()
         {
             const string ItemSeparator = "CAFF9451396B4EEF8A5155A15BDC2080"; // random string that shouldn't be in any env vars; used instead of newline to separate env var strings
@@ -472,7 +471,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(2, psi.EnvironmentVariables.Count);
             Assert.Equal(psi.Environment.Count, psi.EnvironmentVariables.Count);
 
-            AssertExtensions.Throws<ArgumentException>(null, () => psi.EnvironmentVariables.Add("NewKey2", "NewValue2"));
+            Assert.Throws<ArgumentException>(null, () => psi.EnvironmentVariables.Add("NewKey2", "NewValue2"));
             psi.EnvironmentVariables.Add("NewKey3", "NewValue3");
 
             psi.Environment.Add("NewKey3", "NewValue3Overridden");
@@ -501,19 +500,11 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.Environment.Contains(new KeyValuePair<string,string>("NewKey3", "NewValue3")));
         }
 
-        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
+        [Fact]
         public void Verbs_GetWithExeExtension_ReturnsExpected()
         {
             var psi = new ProcessStartInfo { FileName = $"{Process.GetCurrentProcess().ProcessName}.exe" };
-
-            if (PlatformDetection.IsNetNative)
-            {
-                // UapAot doesn't have RegistryKey apis available so ProcessStartInfo.Verbs returns Array<string>.Empty().
-                Assert.Equal(0, psi.Verbs.Length);
-                return;
-            }
 
             Assert.Contains("open", psi.Verbs, StringComparer.OrdinalIgnoreCase);
             if (PlatformDetection.IsNotWindowsNanoServer)
@@ -674,8 +665,7 @@ namespace System.Diagnostics.Tests
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Test case is specific to Unix
         [Fact]
-        public void TestEnvironmentVariablesPropertyUnix()
-        {
+        public void TestEnvironmentVariablesPropertyUnix(){
             ProcessStartInfo psi = new ProcessStartInfo();
 
             // Creating a detached ProcessStartInfo will pre-populate the environment
@@ -695,7 +685,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(CountItems + 1, environmentVariables.Count);
 
             //Exception not thrown with invalid key
-            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.Add("NewKey2", "NewValue2"); });
+            Assert.Throws<ArgumentException>(() => { environmentVariables.Add("NewKey2", "NewValue2"); });
             Assert.False(environmentVariables.ContainsKey("NewKey"));
 
             environmentVariables.Add("newkey2", "newvalue2");
@@ -757,7 +747,7 @@ namespace System.Diagnostics.Tests
             //Exception not thrown with invalid key
             Assert.Throws<ArgumentNullException>(() => environmentVariables.Add(null, "NewValue2"));
 
-            AssertExtensions.Throws<ArgumentException>(null, () => environmentVariables.Add("newkey2", "NewValue2"));
+            Assert.Throws<ArgumentException>(() => environmentVariables.Add("newkey2", "NewValue2"));
 
             //Use DictionaryEntry Enumerator
             var x = environmentVariables.GetEnumerator() as IEnumerator;
@@ -777,14 +767,14 @@ namespace System.Diagnostics.Tests
             Assert.Equal("newvalue3", kvpa[2].Value);
 
             string[] kvp = new string[10];
-            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.CopyTo(kvp, 6); });
+            Assert.Throws<ArgumentException>(() => { environmentVariables.CopyTo(kvp, 6); });
             environmentVariables.CopyTo(kvpa, 6);
             Assert.Equal("NewKey", kvpa[6].Key);
             Assert.Equal("newvalue", kvpa[6].Value);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => { environmentVariables.CopyTo(kvpa, -1); });
 
-            AssertExtensions.Throws<ArgumentException>(null, () => { environmentVariables.CopyTo(kvpa, 9); });
+            Assert.Throws<ArgumentException>(() => { environmentVariables.CopyTo(kvpa, 9); });
 
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -954,14 +944,14 @@ namespace System.Diagnostics.Tests
                 FileName = @"http://www.microsoft.com"
             };
 
-            Process.Start(info); // Returns null after navigating browser
+            Process.Start(info);
         }
 
         [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))] // No Notepad on Nano
         [MemberData(nameof(UseShellExecute))]
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WaitForInputIdle, ProcessName, and MainWindowTitle are not supported on UAP")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
         public void StartInfo_NotepadWithContent(bool useShellExecute)
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -977,8 +967,6 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
-                Assert.True(process != null, $"Could not start {info.FileName} {info.Arguments} UseShellExecute={info.UseShellExecute}");
-
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
@@ -989,8 +977,7 @@ namespace System.Diagnostics.Tests
                 }
                 finally
                 {
-                    if (process != null && !process.HasExited)
-                        process.Kill();
+                    process.Kill();
                 }
             }
         }
@@ -999,10 +986,7 @@ namespace System.Diagnostics.Tests
                          nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindows8x))]   // https://github.com/dotnet/corefx/issues/20388
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        // Re-enabling with extra diagnostic info
-        // [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
-        // We don't have the ability yet for UseShellExecute in UAP
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20204", TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "https://github.com/dotnet/corefx/issues/20204")]
         public void StartInfo_TextFile_ShellExecute()
         {
             string tempFile = GetTestFilePath() + ".txt";
@@ -1017,75 +1001,20 @@ namespace System.Diagnostics.Tests
 
             using (var process = Process.Start(info))
             {
-                Assert.True(process != null, $"Could not start {info.FileName} UseShellExecute={info.UseShellExecute}\r\n{GetAssociationDetails()}");
-
                 try
                 {
                     process.WaitForInputIdle(); // Give the file a chance to load
                     Assert.Equal("notepad", process.ProcessName);
 
-                    if (PlatformDetection.IsUap)
-                    {
-                        Assert.Throws<PlatformNotSupportedException>(() => process.MainWindowTitle);
-                    }
-                    else
-                    {
-                        // On some Windows versions, the file extension is not included in the title
-                        Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
-                    }
+                    // On some Windows versions, the file extension is not included in the title
+                    Assert.StartsWith(Path.GetFileNameWithoutExtension(tempFile), process.MainWindowTitle);
                 }
                 finally
                 {
-                    if (process != null && !process.HasExited)
-                        process.Kill();
+                    process.Kill();
                 }
             }
         }
-
-        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        private unsafe static extern int AssocQueryStringW(
-            int flags,
-            int str,
-            string pszAssoc,
-            string pszExtra,
-            char* pszOut,
-            ref uint pcchOut);
-
-        private unsafe static string GetAssociationString(int flags, int str, string pszAssoc, string pszExtra)
-        {
-            uint count = 0;
-            int result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, null, ref count);
-            if (result != 1)
-                return $"Didn't get expected HRESULT (1) when getting char count. HRESULT was 0x{result:x8}";
-
-            string value = new string((char)0, (int)count - 1);
-            fixed(char* s = value)
-            {
-                result = AssocQueryStringW(flags, str, pszAssoc, pszExtra, s, ref count);
-            }
-
-            if (result != 0)
-                return $"Didn't get expected HRESULT (0), when getting char count. HRESULT was 0x{result:x8}";
-
-            return value;
-        }
-
-        private static string GetAssociationDetails()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Association details for '.txt'");
-            sb.AppendLine("------------------------------");
-
-            string open = GetAssociationString(0, 1 /* ASSOCSTR_COMMAND */, ".txt", "open");
-            sb.AppendFormat("Open command: {0}", open);
-            sb.AppendLine();
-
-            string progId = GetAssociationString(0, 20 /* ASSOCSTR_PROGID */, ".txt", null);
-            sb.AppendFormat("ProgID: {0}", progId);
-            sb.AppendLine();
-            return sb.ToString();
-        }
-
 
         [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsWindowsNanoServer))]
         public void ShellExecute_Nano_Fails_Start()

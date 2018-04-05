@@ -5,6 +5,7 @@
       uap-Windows_NT;
       netcoreapp;
       netfx;
+      net471;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

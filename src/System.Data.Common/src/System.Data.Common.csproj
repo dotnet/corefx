@@ -6,22 +6,21 @@
     <AssemblyName>System.Data.Common</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net471'" >
     <Compile Include="System\Data\Common\DbColumn.cs" />
     <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <Compile Include="System.Data.Common.TypeForwards.cs" />
     <Compile Include="System\HResults.cs" />
     <Compile Include="System\Xml\TreeIterator.cs" />
@@ -282,14 +281,16 @@
     <Compile Include="System\Data\ProviderBase\DataReaderContainer.cs" />
     <Compile Include="System\Data\ProviderBase\SchemaMapping.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Compile Include="System\Data\Common\DbDataReaderExtensions.Facade.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />

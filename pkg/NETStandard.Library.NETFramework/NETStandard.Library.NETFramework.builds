@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <!-- for official builds, only build during the AllConfigurations leg -->
-  <ItemGroup Condition="'$(OfficialBuildId)' == '' Or '$(BuildAllConfigurations)' == 'true'">
+  <ItemGroup Condition="'$(BuildingAnOfficialBuildLeg)' != 'true' Or '$(BuildAllConfigurations)' == 'true'">
     <Project Include="$(MSBuildProjectName).pkgproj" />
   </ItemGroup>
 

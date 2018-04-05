@@ -4,6 +4,7 @@
   <PropertyGroup>
     <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
+    <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <!-- Temporarily Override restore moniker since NETNative's targeting pack still uses uap10.1 moniker -->
@@ -24,13 +25,13 @@
 
   <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>$(PlatformPackageVersion)</Version>
+      <Version>$(MicrosoftNETCorePlatformsPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.TestHost">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni">
       <Version>$(PackageVersion)-$(CoreFxExpectedPrerelease)</Version>
@@ -68,6 +69,7 @@
           SkipUnchangedFiles="true"
           UseHardlinksIfPossible="true" />
 
+    <Exec Command="chmod +x $(TestHostRootPath)dotnet" Condition="'$(RunningOnUnix)' == 'true'"/>
   </Target>
 
   <Target Name="OverrideRuntime"

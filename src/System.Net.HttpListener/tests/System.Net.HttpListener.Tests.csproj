@@ -10,10 +10,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="GetContextHelper.cs" />
-    <Compile Include="HttpListenerFactory.cs" />
     <Compile Include="HttpListenerAuthenticationTests.cs" />
     <Compile Include="HttpListenerContextTests.cs" />
     <Compile Include="HttpListenerPrefixCollectionTests.cs" />
+    <Compile Include="HttpListenerResponseTests.Cookies.cs" />
+    <Compile Include="HttpListenerResponseTests.Headers.cs" />
     <Compile Include="HttpListenerResponseTests.cs" />
     <Compile Include="HttpListenerResponseTests.Cookies.cs" />
     <Compile Include="HttpListenerResponseTests.Headers.cs" />
@@ -25,6 +26,8 @@
     <Compile Include="HttpResponseStreamTests.cs" />
     <Compile Include="InvalidClientRequestTests.cs" />
     <Compile Include="SimpleHttpTests.cs" />
+    <Compile Include="HttpListenerFactory.cs" />
+    <Compile Include="HttpListenerWebSocketTests.cs" />
     <Compile Include="WebSocketTests.cs" />
     <Compile Include="XUnitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
@@ -36,6 +39,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\System.Net.HttpListener.Tests.rd.xml" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsOSX)'=='true'">
+    <TestCommandLines Include="ulimit -n 7000" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
     <TestCommandLines Include="ulimit -n 7000" />
