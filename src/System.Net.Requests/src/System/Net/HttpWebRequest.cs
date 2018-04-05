@@ -1442,7 +1442,14 @@ namespace System.Net
                 {
                     return DateTime.MinValue; // MinValue means header is not present
                 }
-                return HttpDateParse.StringToDate(headerValue);
+                if (HttpDateParser.TryStringToDate(headerValue, out var dateTimeOffset))
+                {
+                    return dateTimeOffset.LocalDateTime;
+                }
+                else
+                {
+                    throw new ProtocolViolationException(SR.net_baddate);
+                }
 #if DEBUG
             }
 #endif
@@ -1457,17 +1464,10 @@ namespace System.Net
                 if (dateTime == DateTime.MinValue)
                     SetSpecialHeaders(headerName, null); // remove header
                 else
-                    SetSpecialHeaders(headerName, DateToString(dateTime));
+                    SetSpecialHeaders(headerName, HttpDateParser.DateToString(dateTime.ToUniversalTime()));
 #if DEBUG
             }
 #endif
-        }
-
-        // convert Date to String using RFC 1123 pattern
-        private static string DateToString(DateTime D)
-        {
-            DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();
-            return D.ToUniversalTime().ToString("R", dateFormat);
         }
 
         private bool TryGetHostUri(string hostName, out Uri hostUri)

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Test.Common;
@@ -26,6 +27,106 @@ namespace System.Net.Tests
         private readonly ITestOutputHelper _output;
 
         public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.Http.EchoServers;
+
+        public static IEnumerable<object[]> Dates_ReadValue_Data()
+        {
+            var zero_formats = new[]
+            {
+                // RFC1123
+                "R",
+                // RFC1123 - UTC
+                "ddd, dd MMM yyyy HH:mm:ss 'UTC'",
+                // RFC850
+                "dddd, dd-MMM-yy HH:mm:ss 'GMT'",
+                // RFC850 - UTC
+                "dddd, dd-MMM-yy HH:mm:ss 'UTC'",
+                // ANSI
+                "ddd MMM d HH:mm:ss yyyy",
+            };
+
+            var offset_formats = new[]
+            {
+                // RFC1123 - Offset
+                "ddd, dd MMM yyyy HH:mm:ss zzz",
+                // RFC850 - Offset
+                "dddd, dd-MMM-yy HH:mm:ss zzz",
+            };
+
+            var dates = new[]
+            {
+                new DateTimeOffset(2018, 1, 1, 12, 1, 14, TimeSpan.Zero),
+                new DateTimeOffset(2018, 1, 3, 15, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2015, 5, 6, 20, 45, 38, TimeSpan.Zero),
+            };
+
+            foreach (var date in dates)
+            {
+                var expected = date.LocalDateTime;
+
+                foreach (var format in zero_formats.Concat(offset_formats))
+                {
+                    var formatted = date.ToString(format);
+                    yield return new object[] { formatted, expected };
+                }
+            }
+
+            foreach (var format in offset_formats)
+            {
+                foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
+                {
+                    var formatted = date.ToString(format);
+                    var expected = date.LocalDateTime;
+                    yield return new object[] { formatted, expected };
+                    yield return new object[] { formatted.ToLowerInvariant(), expected };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> Dates_Invalid_Data()
+        {
+            yield return new object[] { "not a valid date here" };
+            yield return new object[] { "Sun, 32 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25 Car 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Nov 1234567890 33:77:80 GMT" };
+            yield return new object[] { "Sun, 25 Nov 2018 55:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Nov-18 16:77:01 GMT" };
+            yield return new object[] { "Sunday, 25-Nov-18 16:33:65 UTC" };
+            yield return new object[] { "Broken, 25-Nov-18 21:33:01+05:00" };
+            yield return new object[] { "Always Nov 25 21:33:01 2018" };
+
+            // Sat/Saturday is invalid, because 2018/3/25 is Sun/Sunday...
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 GMT" };
+            yield return new object[] { "Sat, 25 Mar 2018 16:33:01 UTC" };
+            yield return new object[] { "Sat, 25 Mar 2018 21:33:01+05:00" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 GMT" };
+            yield return new object[] { "Saturday, 25-Mar-18 16:33:01 UTC" };
+            yield return new object[] { "Saturday, 25-Mar-18 21:33:01+05:00" };
+            yield return new object[] { "Sat Mar 25 21:33:01 2018" };
+            // Invalid day-of-week values
+            yield return new object[] { "Sue, 25 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sue, 25 Nov 2018 16:33:01 UTC" };
+            yield return new object[] { "Sue, 25 Nov 2018 21:33:01+05:00" };
+            yield return new object[] { "Surprise, 25-Nov-18 16:33:01 GMT" };
+            yield return new object[] { "Surprise, 25-Nov-18 16:33:01 UTC" };
+            yield return new object[] { "Surprise, 25-Nov-18 21:33:01+05:00" };
+            yield return new object[] { "Sue Nov 25 21:33:01 2018" };
+            // Invalid month values
+            yield return new object[] { "Sun, 25 Not 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25 Not 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Not 2018 21:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Not-18 16:33:01 GMT" };
+            yield return new object[] { "Sunday, 25-Not-18 16:33:01 UTC" };
+            yield return new object[] { "Sunday, 25-Not-18 21:33:01+05:00" };
+            yield return new object[] { "Sun Not 25 21:33:01 2018" };
+            // Strange separators
+            yield return new object[] { "Sun? 25 Nov 2018 16:33:01 GMT" };
+            yield return new object[] { "Sun, 25*Nov 2018 16:33:01 UTC" };
+            yield return new object[] { "Sun, 25 Nov{2018 21:33:01+05:00" };
+            yield return new object[] { "Sunday, 25-Nov-18]16:33:01 GMT" };
+            yield return new object[] { "Sunday, 25-Nov-18 16/33:01 UTC" };
+            yield return new object[] { "Sunday, 25-Nov-18 21:33|01+05:00" };
+            yield return new object[] { "Sun=Not 25 21:33:01 2018" };
+        }
 
         public HttpWebRequestTest(ITestOutputHelper output)
         {
@@ -661,6 +762,38 @@ namespace System.Net.Tests
             Assert.Equal(ifModifiedSince, request.IfModifiedSince);
         }
 
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,
+            "Net Framework currently retains the custom date parsing that retains some bugs (mostly related to offset), and also prevents setting the raw header value")]
+        public void IfModifiedSince_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, raw);
+
+            Assert.Equal(expected, request.IfModifiedSince);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_Invalid_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,
+            "Net Framework currently retains the custom date parsing that accepts a wider range of values, and also prevents setting the raw header value")]
+        public void IfModifiedSince_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.IfModifiedSince, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.IfModifiedSince);
+        }
+
+        [Fact]
+        public void IfModifiedSince_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.IfModifiedSince);
+        }
+
         [Theory, MemberData(nameof(EchoServers))]
         public void Date_SetMinDateAfterValidDate_ValuesMatch(Uri remoteServer)
         {
@@ -673,6 +806,38 @@ namespace System.Net.Tests
             DateTime date = DateTime.MinValue;
             request.Date = date;
             Assert.Equal(date, request.Date);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_ReadValue_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,
+            "Net Framework currently retains the custom date parsing that retains some bugs (mostly related to offset), and also prevents setting the raw header value")]
+        public void Date_ReadValue(string raw, DateTime expected)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, raw);
+
+            Assert.Equal(expected, request.Date);
+        }
+
+        [Theory]
+        [MemberData(nameof(Dates_Invalid_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,
+            "Net Framework currently retains the custom date parsing that accepts a wider range of values, and also prevents setting the raw header value")]
+        public void Date_InvalidValue(string invalid)
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+            request.Headers.Set(HttpRequestHeader.Date, invalid);
+
+            Assert.Throws<ProtocolViolationException>(() => request.Date);
+        }
+
+        [Fact]
+        public void Date_NotPresent()
+        {
+            HttpWebRequest request = WebRequest.CreateHttp("http://localhost");
+
+            Assert.Equal(DateTime.MinValue, request.Date);
         }
 
         [Theory, MemberData(nameof(EchoServers))]

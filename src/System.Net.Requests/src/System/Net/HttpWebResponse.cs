@@ -150,7 +150,14 @@ namespace System.Net
                     return DateTime.Now;
                 }
 
-                return HttpDateParse.StringToDate(lastmodHeaderValue);
+                if (HttpDateParser.TryStringToDate(lastmodHeaderValue, out var dateTimeOffset))
+                {
+                    return dateTimeOffset.LocalDateTime;
+                }
+                else
+                {
+                    throw new ProtocolViolationException(SR.net_baddate);
+                }
             }
         }
 
