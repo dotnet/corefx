@@ -121,6 +121,7 @@
     <Compile Include="SQL\UdtTest\UdtTestHelpers.cs" />
     <Compile Include="SQL\WeakRefTest\WeakRefTest.cs" />
     <Compile Include="SQL\WeakRefTestYukonSpecific\WeakRefTestYukonSpecific.cs" />
+	<Compile Include="SQL\SqlFileStreamTest\SqlFileStreamTest.cs" />
     <Compile Include="XUnitAssemblyAttributes.cs" />
     <Content Include="DDBasics\DDDataTypesTest\data.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

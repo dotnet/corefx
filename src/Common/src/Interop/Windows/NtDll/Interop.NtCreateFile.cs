@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Data.Common;
 
 internal partial class Interop
 {
@@ -11,6 +12,7 @@ internal partial class Interop
     {
         // https://msdn.microsoft.com/en-us/library/bb432380.aspx
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff566424.aspx
+#pragma warning disable BCL0015 // Invalid Pinvoke call
         [DllImport(Libraries.NtDll, CharSet = CharSet.Unicode, ExactSpelling = true)]
         private unsafe static extern int NtCreateFile(
             out IntPtr FileHandle,
@@ -22,8 +24,9 @@ internal partial class Interop
             System.IO.FileShare ShareAccess,
             CreateDisposition CreateDisposition,
             CreateOptions CreateOptions,
-            void* EaBuffer,
+            SafeHandle EaBuffer,
             uint EaLength);
+#pragma warning restore BCL0015 // Invalid Pinvoke call
 
         internal unsafe static (int status, IntPtr handle) CreateFile(
             ReadOnlySpan<char> path,
@@ -33,7 +36,25 @@ internal partial class Interop
             System.IO.FileShare shareAccess = System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete,
             System.IO.FileAttributes fileAttributes = 0,
             CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
-            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE)
+            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
+            )
+        {
+                return ( CreateFile(EaBuffer: null, EaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
+        }
+
+
+        internal unsafe static (int status, IntPtr handle) CreateFile(
+            SafeHandle EaBuffer,
+            uint EaLength,
+            ReadOnlySpan<char> path,
+            IntPtr rootDirectory,
+            CreateDisposition createDisposition,
+            DesiredAccess desiredAccess = DesiredAccess.FILE_GENERIC_READ | DesiredAccess.SYNCHRONIZE,
+            System.IO.FileShare shareAccess = System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete,
+            System.IO.FileAttributes fileAttributes = 0,
+            CreateOptions createOptions = CreateOptions.FILE_SYNCHRONOUS_IO_NONALERT,
+            ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
+           )
         {
             fixed (char* c = &MemoryMarshal.GetReference(path))
             {
@@ -59,12 +80,16 @@ internal partial class Interop
                     ShareAccess: shareAccess,
                     CreateDisposition: createDisposition,
                     CreateOptions: createOptions,
-                    EaBuffer: null,
-                    EaLength: 0);
+                    EaBuffer: EaBuffer,
+                    EaLength: EaLength);
 
                 return (status, handle);
             }
         }
+
+
+
+       
 
         // https://msdn.microsoft.com/en-us/library/windows/hardware/ff557749.aspx
         public unsafe struct OBJECT_ATTRIBUTES
@@ -101,7 +126,7 @@ internal partial class Interop
             /// </summary>
             public unsafe OBJECT_ATTRIBUTES(UNICODE_STRING* objectName, ObjectAttributes attributes, IntPtr rootDirectory)
             {
-                Length = (uint)sizeof(OBJECT_ATTRIBUTES);
+                Length = (uint)Marshal.SizeOf(typeof(OBJECT_ATTRIBUTES));
                 RootDirectory = rootDirectory;
                 ObjectName = objectName;
                 Attributes = attributes;
@@ -109,6 +134,60 @@ internal partial class Interop
                 SecurityQualityOfService = null;
             }
         }
+
+        //[StructLayoutAttribute(LayoutKind.Sequential)]
+        //public unsafe struct FILE_FULL_EA_INFORMATION
+        //{
+        //    internal UInt32 nextEntryOffset;
+        //    internal Byte flags;
+        //    internal Byte EaNameLength;
+        //    internal UInt16 EaValueLength;
+        //    internal Byte EaName;
+        //}
+
+        //[StructLayoutAttribute(LayoutKind.Sequential)]
+        //public unsafe struct SECURITY_QUALITY_OF_SERVICE
+        //{
+        //    internal UInt32 length;
+        //    [MarshalAs(UnmanagedType.I4)]
+        //    internal int impersonationLevel;
+        //    internal byte contextDynamicTrackingMode;
+        //    internal byte effectiveOnly;
+        //}
+
+        internal const ushort FILE_DEVICE_FILE_SYSTEM = 0x0009;
+        internal const int ERROR_MR_MID_NOT_FOUND = 317;
+        //public enum Method
+        //{
+        //    METHOD_BUFFERED,
+        //    METHOD_IN_DIRECT,
+        //    METHOD_OUT_DIRECT,
+        //    METHOD_NEITHER
+        //};
+
+        //public enum Access
+        //{
+        //    FILE_ANY_ACCESS,
+        //    FILE_READ_ACCESS,
+        //    FILE_WRITE_ACCESS
+        //}
+
+//#pragma warning disable BCL0015  // Invalid Pinvoke call
+//        [DllImport(Interop.Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true)]
+//        [System.Runtime.Versioning.ResourceExposure(System.Runtime.Versioning.ResourceScope.Machine)]
+//        internal static extern bool DeviceIoControl
+//            (
+//                Microsoft.Win32.SafeHandles.SafeFileHandle fileHandle,
+//                uint ioControlCode,
+//                IntPtr inBuffer,
+//                uint cbInBuffer,
+//                IntPtr outBuffer,
+//                uint cbOutBuffer,
+//                out uint cbBytesReturned,
+//                IntPtr overlapped
+//            );
+//#pragma warning restore BCL0015 // Invalid Pinvoke call
+
 
         [Flags]
         public enum ObjectAttributes : uint
@@ -576,5 +655,7 @@ internal partial class Interop
             /// </summary>
             FILE_GENERIC_EXECUTE = 0x20000000 // GENERIC_EXECUTE
         }
+
+       
     }
 }
