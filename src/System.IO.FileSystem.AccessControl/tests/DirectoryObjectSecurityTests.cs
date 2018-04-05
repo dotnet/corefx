@@ -109,7 +109,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
 
             var customAuditRuleReadWrite = new CustomAuditRule
                 (
@@ -118,7 +118,7 @@ namespace System.Security.AccessControl
                 );
             var customAuditRuleSynchronize = new CustomAuditRule
                 (
-                    new NTAccount(@"NT AUTHORITY\SYSTEM"), SynchronizeAccessMask, true, InheritanceFlags.None,
+                    new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount)), SynchronizeAccessMask, true, InheritanceFlags.None,
                     PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AuditFlags.Success
                 );
 
@@ -148,7 +148,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
             var customAuditRuleReadWrite = new CustomAuditRule(
                 identityReference, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AuditFlags.Success
@@ -388,7 +388,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
 
             var customAccessRuleReadWrite = new CustomAccessRule(
                 identityReference, ReadWriteAccessMask, true, InheritanceFlags.None,
@@ -445,7 +445,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
             var customAccessRuleReadWrite = new CustomAccessRule(
                 identityReference, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Allow
@@ -477,7 +477,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
             var customAccessRuleReadWrite = new CustomAccessRule(
                 identityReference, ReadWriteAccessMask, true, InheritanceFlags.ObjectInherit,
                 PropagationFlags.InheritOnly, objectTypeGuid, Guid.NewGuid(), AccessControlType.Deny
@@ -494,7 +494,7 @@ namespace System.Security.AccessControl
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
 
             var objectTypeGuid = Guid.NewGuid();
-            var identityReference = new NTAccount(@"NT AUTHORITY\SYSTEM");
+            var identityReference = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null).Translate(typeof(NTAccount));
             var customAccessRuleReadWrite = new CustomAccessRule(
                 identityReference, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Deny
