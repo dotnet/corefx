@@ -25,17 +25,8 @@ namespace System.Collections.Generic
     {
         private const int DefaultSize = 17;
 
-        public LowLevelDictionary()
-            : this(DefaultSize, new DefaultComparer<TKey>())
-        {
-        }
-
         public LowLevelDictionary(int capacity)
             : this(capacity, new DefaultComparer<TKey>())
-        {
-        }
-
-        public LowLevelDictionary(IEqualityComparer<TKey> comparer) : this(DefaultSize, comparer)
         {
         }
 
@@ -91,17 +82,6 @@ namespace System.Collections.Generic
                 return true;
             }
             return false;
-        }
-
-        public void Add(TKey key, TValue value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            Entry entry = Find(key);
-            if (entry != null)
-                throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
-            _version++;
-            UncheckedAdd(key, value);
         }
 
         public void Clear(int capacity = DefaultSize)

@@ -38,29 +38,6 @@ namespace System.Collections.Generic
         public int Capacity => _array?.Length ?? 0;
 
         /// <summary>
-        /// Gets the number of items in the array currently in use.
-        /// </summary>
-        public int Count => _count;
-
-        /// <summary>
-        /// Gets or sets the item at a certain index in the array.
-        /// </summary>
-        /// <param name="index">The index into the array.</param>
-        public T this[int index]
-        {
-            get
-            {
-                Debug.Assert(index >= 0 && index < _count);
-                return _array[index];
-            }
-            set
-            {
-                Debug.Assert(index >= 0 && index < _count);
-                _array[index] = value;
-            }
-        }
-
-        /// <summary>
         /// Adds an item to the backing array, resizing it if necessary.
         /// </summary>
         /// <param name="item">The item to add.</param>
@@ -72,24 +49,6 @@ namespace System.Collections.Generic
             }
 
             UncheckedAdd(item);
-        }
-
-        /// <summary>
-        /// Gets the first item in this builder.
-        /// </summary>
-        public T First()
-        {
-            Debug.Assert(_count > 0);
-            return _array[0];
-        }
-
-        /// <summary>
-        /// Gets the last item in this builder.
-        /// </summary>
-        public T Last()
-        {
-            Debug.Assert(_count > 0);
-            return _array[_count - 1];
         }
 
         /// <summary>

@@ -63,13 +63,6 @@ namespace System
 
         private UriSyntaxFlags _flags;
 
-        // Some flags (specified in c_UpdatableFlags) besides being set in the ctor, can also be set at a later
-        // point. Such "updatable" flags can be set using SetUpdatableFlags(); if this method is called,
-        // the value specified in the ctor is ignored (i.e. for all c_UpdatableFlags the value in m_Flags is
-        // ignored), and the new value is used (i.e. for all c_UpdatableFlags the value in m_UpdatableFlags is used).
-        private volatile UriSyntaxFlags _updatableFlags;
-        private volatile bool _updatableFlagsUsed;
-
         // The following flags can be updated at any time.
         private const UriSyntaxFlags c_UpdatableFlags = UriSyntaxFlags.UnEscapeDotsAndSlashes;
 
@@ -229,14 +222,14 @@ namespace System
             UriSyntaxFlags mergedFlags;
 
             // if none of the flags in 'flags' is an updatable flag, we ignore m_UpdatableFlags
-            if (((flags & c_UpdatableFlags) == 0) || !_updatableFlagsUsed)
+            if ((flags & c_UpdatableFlags) == 0)
             {
                 mergedFlags = _flags;
             }
             else
             {
                 // mask m_Flags to only use the flags not in c_UpdatableFlags
-                mergedFlags = (_flags & (~c_UpdatableFlags)) | _updatableFlags;
+                mergedFlags = (_flags & (~c_UpdatableFlags));
             }
 
             return (mergedFlags & flags) == expected;
@@ -348,21 +341,6 @@ namespace System
             {
                 _flags |= UriSyntaxFlags.SimpleUserSyntax;
             }
-        }
-
-        //
-        // This method is used to update flags. The scenario where this is needed is when the user specifies
-        // flags in the config file. The config file is read after UriParser instances were created.
-        //
-        internal void SetUpdatableFlags(UriSyntaxFlags flags)
-        {
-            Debug.Assert(!_updatableFlagsUsed,
-                "SetUpdatableFlags() already called. It can only be called once per parser.");
-            Debug.Assert((flags & (~c_UpdatableFlags)) == 0, "Only updatable flags can be set.");
-
-            // No locks necessary. Reordering won't happen due to volatile.
-            _updatableFlags = flags;
-            _updatableFlagsUsed = true;
         }
 
         //
