@@ -12,7 +12,7 @@ namespace System.Collections.Generic
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public class LinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IDeserializationCallback
+    public class LinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
     {
         // This LinkedList is a doubly-Linked circular list.
         internal LinkedListNode<T> head;
@@ -41,6 +41,11 @@ namespace System.Collections.Generic
             {
                 AddLast(item);
             }
+        }
+
+        protected LinkedList(SerializationInfo info, StreamingContext context)
+        {
+            _siInfo = info;
         }
 
         public int Count
