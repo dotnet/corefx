@@ -65,6 +65,7 @@
     <Compile Include="System\Threading\Tasks\AsyncInfoToTaskBridge.CoreCLR.cs" />
     <Compile Include="System\Threading\WindowsRuntimeSynchronizationContext.cs" />
     <Compile Include="System\WindowsRuntimeSystemExtensions.CoreCLR.cs" />
+    <Compile Include="System\InternalHelpers.CoreCLR.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetRestrictedErrorInfo.cs">
       <Link>Common\Interop\Windows\mincore\Interop.GetRestrictedErrorInfo.cs</Link>
     </Compile>
@@ -76,6 +77,7 @@
     <Compile Include="System\IO\StreamOperationAsyncResult.CoreRT.cs" />
     <Compile Include="System\Threading\Tasks\AsyncInfoToTaskBridge.CoreRT.cs" />
     <Compile Include="System\WindowsRuntimeSystemExtensions.CoreRT.cs" />
+    <Compile Include="System\InternalHelpers.CoreRT.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ResolveLocaleName.cs">
@@ -96,7 +98,6 @@
     <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
       <Link>Common\System\IO\Win32Marshal.cs</Link>
     </Compile>
-    <Compile Include="System\InternalHelpers.cs" />
     <Compile Include="System\IO\HANDLE_ACCESS_OPTIONS.cs" />
     <Compile Include="System\IO\HANDLE_CREATION_OPTIONS.cs" />
     <Compile Include="System\IO\HANDLE_OPTIONS.cs" />
