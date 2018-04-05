@@ -46,6 +46,10 @@ def targetGroupOsMapOuterloop = ['netcoreapp': ['Windows 7', 'Windows_NT', 'Ubun
 def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ubuntu16.04', 'Ubuntu16.10', 'CentOS7.1',
                                         'RHEL7.2', 'Fedora24', 'Debian8.4', 'OSX10.12', 'PortableLinux']]
 
+def spanishTargetGroupOsInnerLoopMap = ['netcoreapp': ['Windows_NT'] ]
+
+def spanishTargetGroupOsOuterLoopMap = ['netcoreapp': ['Windows 7', 'Windows_NT'] ]
+
 // **************************
 // Define code coverage build
 // **************************
@@ -202,6 +206,54 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
     }
 }
 
+// **************************
+// Define outerloop testing for OSes that can build and run. Run locally on each non english windows machine.
+// **************************
+[true, false].each { isPR ->
+    ['netcoreapp'].each { targetGroup ->
+        (spanishTargetGroupOsOuterLoopMap[targetGroup]).each { osName ->
+            ['Debug', 'Release'].each { configurationGroup ->
+                def osForMachineAffinity = osName
+                def osGroup = osGroupMap[osName]
+                def archGroup = "x64"
+                def newJobName = "outerloop_${targetGroup}_${osShortName[osName]}_${configurationGroup.toLowerCase()}_es_unit32"
+
+                def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+                    steps {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -framework:${targetGroup} -${configurationGroup}")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -framework:${targetGroup} -${configurationGroup} -outerloop -- /p:IsCIBuild=true")
+                        batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin\\runtime\\${targetGroup}-${osGroup}-${configurationGroup}-${archGroup}")
+                    }
+                }
+
+                // Set the affinity.  OS name matches the machine affinity.
+                if (osName == 'Windows_NT') {
+                    Utilities.setMachineAffinity(newJob, osForMachineAffinity, "latest-or-auto-elevated")
+                }
+                else {
+                    Utilities.setMachineAffinity(newJob, osForMachineAffinity, 'latest-or-auto');
+                }
+
+                // Set up standard options.
+                Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+                // Add the unit test results
+                Utilities.addXUnitDotNETResults(newJob, 'bin/**/testResults.xml')
+                def archiveContents = "msbuild.log,bin/build.pack"
+                Utilities.addArchival(newJob, archiveContents, '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
+                // Set up appropriate triggers.  PR on demand, otherwise nightly
+                if (isPR) {
+                    // Set PR trigger.
+                    // TODO: More elaborate regex trigger?
+                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "OuterLoop Non English windows ${targetGroup} ${osName} ${configurationGroup} ${archGroup}", "(?i).*test\\W+outerloop\\W+${targetGroup} ${osName}\\W+${configurationGroup}.*")
+                }
+                else {
+                    // Set a periodic trigger
+                    Utilities.addPeriodicTrigger(newJob, '@daily')
+                }
+            }
+        }
+    }
+}
 
 // **************************
 // Define innerloop testing.  These jobs run on every merge and a subset of them run on every PR, the ones
@@ -266,6 +318,48 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
                 if (isPR) {
                     targetGroupString = targetGroupString.replaceAll('_', ' ');
                     Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop ${targetGroupString}${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${targetGroupString}${osName}\\W+${configurationGroup}.*")
+                }
+                else {
+                    // Set a push trigger
+                    Utilities.addGithubPushTrigger(newJob)
+                }
+            }
+        }
+    }
+}
+
+// **************************
+// Define innerloop testing. These jobs run on request on non english windows
+// **************************
+[true, false].each { isPR ->
+    ['netcoreapp'].each { targetGroup ->
+        (spanishTargetGroupOsInnerLoopMap[targetGroup]).each { osName ->
+            ['Debug', 'Release'].each { configurationGroup ->
+                def osGroup = osGroupMap[osName]
+                def osForMachineAffinity = osName
+                def archGroup = buildArchConfiguration[configurationGroup]
+                def newJobName = "${targetGroup}_${osName.toLowerCase()}_${configurationGroup.toLowerCase()}_es_unit32"
+
+                def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+                    steps {
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -os:${osGroup} -buildArch:${archGroup} -framework:${targetGroup}")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-tests.cmd -${configurationGroup} -os:${osGroup} -buildArch:${archGroup} -framework:${targetGroup} -- /p:IsCIBuild=true")
+                        batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+                    }
+                }
+
+                // Set the affinity.
+                Utilities.setMachineAffinity(newJob, osForMachineAffinity, 'latest-or-auto')
+                // Set up standard options.
+                Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+                // Add the unit test results
+                Utilities.addXUnitDotNETResults(newJob, 'bin/**/testResults.xml')
+                def archiveContents = "msbuild.log,bin/build.pack"
+                // Add archival for the built data.
+                Utilities.addArchival(newJob, archiveContents, '', doNotFailIfNothingArchived=true, archiveOnlyIfSuccessful=false)
+                // Set up triggers
+                if (isPR) {
+                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "Innerloop Non English Windows ${targetGroup} ${osName} ${configurationGroup} ${archGroup} Build and Test", "(?i).*test\\W+innerloop\\W+${targetGroup} ${osName}\\W+${configurationGroup}.*")
                 }
                 else {
                     // Set a push trigger
