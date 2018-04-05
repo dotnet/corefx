@@ -144,8 +144,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
         [InlineData("http://[::1234]", false, null)]
         [InlineData("http://[::1234]:8080", false, null)]
         [InlineData("http://127.0.0.1", false, null)]
-        [InlineData("http://www.microsoft.com", false, "www.microsoft.com")]
-        [Trait("MyTrait", "MyTrait")]
+        [InlineData("http://www.microsoft.com", false, "www.microsoft.com")]        
         public async Task ManualTest_IdnHostName(string requestUri, bool codeBase64, string requestHost)
         {
             //convert if codeBase64 parameter
