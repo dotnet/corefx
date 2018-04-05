@@ -23,6 +23,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+
+  <ItemGroup>
+    <SeedTypePreference Include="System.Diagnostics.DebuggerStepperBoundaryAttribute">
+      <Assembly>System.Diagnostics.Debug</Assembly>
+    </SeedTypePreference>
+    <SeedTypePreference Include="System.Diagnostics.DebuggerVisualizerAttribute">
+      <Assembly>System.Diagnostics.Debug</Assembly>
+    </SeedTypePreference>
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
     <ReferencePath Include="$(RuntimePath)System.*.dll;$(RuntimePath)Microsoft.*.dll" Exclude="$(RuntimePath)Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
