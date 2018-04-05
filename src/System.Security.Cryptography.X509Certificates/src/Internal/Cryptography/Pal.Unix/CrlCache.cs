@@ -83,9 +83,12 @@ namespace Internal.Cryptography.Pal
                         return false;
                     }
 
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
+                        // than X509_R_CERT_ALREADY_IN_HASH_TABLE
+                        Interop.Crypto.ErrClearError();
+                    }
 
                     return true;
                 }
@@ -111,9 +114,12 @@ namespace Internal.Cryptography.Pal
                 // null is a valid return (e.g. no remainingDownloadTime)
                 if (crl != null && !crl.IsInvalid)
                 {
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
+                        // than X509_R_CERT_ALREADY_IN_HASH_TABLE
+                        Interop.Crypto.ErrClearError();
+                    }
 
                     // Saving the CRL to the disk is just a performance optimization for later requests to not
                     // need to use the network again, so failure to save shouldn't throw an exception or mark
