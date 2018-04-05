@@ -6,7 +6,7 @@
 
 namespace System.Collections
 {
-    internal sealed partial class CompatibleComparer : IEqualityComparer
+    internal sealed class CompatibleComparer : IEqualityComparer
     {
         private readonly IHashCodeProvider _hcp;
         private readonly IComparer _comparer;
@@ -16,6 +16,10 @@ namespace System.Collections
             _hcp = hashCodeProvider;
             _comparer = comparer;
         }
+
+        internal IHashCodeProvider HashCodeProvider => _hcp;
+
+        internal IComparer Comparer => _comparer;
 
         public new bool Equals(object a, object b) => Compare(a, b) == 0;
 
