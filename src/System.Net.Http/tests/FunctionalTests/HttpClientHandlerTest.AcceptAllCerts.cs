@@ -24,7 +24,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(HttpClientHandler.DangerousAcceptAnyServerCertificateValidator(null, null, null, SslPolicyErrors.None));
         }
 
-        [ActiveIssue(25676, TestPlatforms.Linux)]
         [Theory]
         [InlineData(SslProtocols.Tls, false)] // try various protocols to ensure we correctly set versions even when accepting all certs
         [InlineData(SslProtocols.Tls, true)]
@@ -33,6 +32,14 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.None, false)]
         [InlineData(SslProtocols.None, true)]
         public async Task SetDelegate_ConnectionSucceeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
+        {
+            for (int i = 0; i < 250; ++i)
+            {
+                await SetDelegate_ConnectionSucceedsImpl(acceptedProtocol, requestOnlyThisProtocol);
+            }
+        }
+
+        public async Task SetDelegate_ConnectionSucceedsImpl(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
