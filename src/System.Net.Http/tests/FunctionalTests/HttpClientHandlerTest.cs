@@ -2557,9 +2557,15 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
-        [OuterLoop] // takes several seconds
+        // [OuterLoop] // takes several seconds
         [Fact]
         public async Task PostAsync_RedirectWith307_LargePayload()
+        {
+            for (int i = 0; i < 60; ++i )
+                await PostAsync_RedirectWith307_LargePayloadImpl();
+        }
+
+        public async Task PostAsync_RedirectWith307_LargePayloadImpl()
         {
             await PostAsync_Redirect_LargePayload_Helper(307, true);
         }
