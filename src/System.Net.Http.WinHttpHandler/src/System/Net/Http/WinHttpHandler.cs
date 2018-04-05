@@ -539,14 +539,16 @@ namespace System.Net.Http
 
             TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
 
+            var winHttpRequestMessage = request as WinHttpRequestMessage;
+
             // Create state object and save current values of handler settings.
             var state = new WinHttpRequestState();
             state.Tcs = tcs;
             state.CancellationToken = cancellationToken;
             state.RequestMessage = request;
             state.Handler = this;
-            state.CheckCertificateRevocationList = _checkCertificateRevocationList;
-            state.ServerCertificateValidationCallback = _serverCertificateValidationCallback;
+            state.CheckCertificateRevocationList = winHttpRequestMessage != null ? winHttpRequestMessage.CheckCertificateRevocationList : _checkCertificateRevocationList;
+            state.ServerCertificateValidationCallback = winHttpRequestMessage != null ? winHttpRequestMessage.ServerCertificateValidationCallback : _serverCertificateValidationCallback;
             state.WindowsProxyUsePolicy = _windowsProxyUsePolicy;
             state.Proxy = _proxy;
             state.ServerCredentials = _serverCredentials;
@@ -974,11 +976,11 @@ namespace System.Net.Http
         private void SetRequestHandleOptions(WinHttpRequestState state)
         {
             SetRequestHandleProxyOptions(state);
-            SetRequestHandleDecompressionOptions(state.RequestHandle);
+            SetRequestHandleDecompressionOptions(state);
             SetRequestHandleRedirectionOptions(state.RequestHandle);
             SetRequestHandleCookieOptions(state.RequestHandle);
-            SetRequestHandleTlsOptions(state.RequestHandle);
-            SetRequestHandleClientCertificateOptions(state.RequestHandle, state.RequestMessage.RequestUri);
+            SetRequestHandleTlsOptions(state);
+            SetRequestHandleClientCertificateOptions(state);
             SetRequestHandleCredentialsOptions(state);
             SetRequestHandleBufferingOptions(state.RequestHandle);
             SetRequestHandleHttp2Options(state.RequestHandle, state.RequestMessage.Version);
@@ -1048,25 +1050,27 @@ namespace System.Net.Http
             }
         }
 
-        private void SetRequestHandleDecompressionOptions(SafeWinHttpHandle requestHandle)
+        private void SetRequestHandleDecompressionOptions(WinHttpRequestState state)
         {
             uint optionData = 0;
+            var winHttpRequestMessage = state.RequestMessage as WinHttpRequestMessage;
+            var requestAutomaticDecompression = winHttpRequestMessage != null ? winHttpRequestMessage.AutomaticDecompression : _automaticDecompression;
 
-            if (_automaticDecompression != DecompressionMethods.None)
+            if (requestAutomaticDecompression != DecompressionMethods.None)
             {
-                if ((_automaticDecompression & DecompressionMethods.GZip) != 0)
+                if ((requestAutomaticDecompression & DecompressionMethods.GZip) != 0)
                 {
                     optionData |= Interop.WinHttp.WINHTTP_DECOMPRESSION_FLAG_GZIP;
                 }
 
-                if ((_automaticDecompression & DecompressionMethods.Deflate) != 0)
+                if ((requestAutomaticDecompression & DecompressionMethods.Deflate) != 0)
                 {
                     optionData |= Interop.WinHttp.WINHTTP_DECOMPRESSION_FLAG_DEFLATE;
                 }
 
                 try
                 {
-                    SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_DECOMPRESSION, ref optionData);
+                    SetWinHttpOption(state.RequestHandle, Interop.WinHttp.WINHTTP_OPTION_DECOMPRESSION, ref optionData);
                 }
                 catch (WinHttpException ex)
                 {
@@ -1112,40 +1116,44 @@ namespace System.Net.Http
             }
         }
 
-        private void SetRequestHandleTlsOptions(SafeWinHttpHandle requestHandle)
+        private void SetRequestHandleTlsOptions(WinHttpRequestState state)
         {
             // If we have a custom server certificate validation callback method then
             // we need to have WinHTTP ignore some errors so that the callback method
             // will have a chance to be called.
             uint optionData;
-            if (_serverCertificateValidationCallback != null)
+            if (state.ServerCertificateValidationCallback != null)
             {
                 optionData =
                     Interop.WinHttp.SECURITY_FLAG_IGNORE_UNKNOWN_CA |
                     Interop.WinHttp.SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE |
                     Interop.WinHttp.SECURITY_FLAG_IGNORE_CERT_CN_INVALID |
                     Interop.WinHttp.SECURITY_FLAG_IGNORE_CERT_DATE_INVALID;
-                SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_SECURITY_FLAGS, ref optionData);
+                SetWinHttpOption(state.RequestHandle, Interop.WinHttp.WINHTTP_OPTION_SECURITY_FLAGS, ref optionData);
             }
-            else if (_checkCertificateRevocationList)
+            else if (state.CheckCertificateRevocationList)
             {
                 // If no custom validation method, then we let WinHTTP do the revocation check itself.
                 optionData = Interop.WinHttp.WINHTTP_ENABLE_SSL_REVOCATION;
-                SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_ENABLE_FEATURE, ref optionData);
+                SetWinHttpOption(state.RequestHandle, Interop.WinHttp.WINHTTP_OPTION_ENABLE_FEATURE, ref optionData);
             }
         }
 
-        private void SetRequestHandleClientCertificateOptions(SafeWinHttpHandle requestHandle, Uri requestUri)
+        private void SetRequestHandleClientCertificateOptions(WinHttpRequestState state)
         {
-            if (requestUri.Scheme != UriScheme.Https)
+            if (state.RequestMessage.RequestUri.Scheme != UriScheme.Https)
             {
                 return;
             }
 
+            var winHttpRequestMessage = state.RequestMessage as WinHttpRequestMessage;
+            var requestClientCertificateOption = winHttpRequestMessage != null ? winHttpRequestMessage.ClientCertificateOption : _clientCertificateOption;
+
             X509Certificate2 clientCertificate = null;
-            if (_clientCertificateOption == ClientCertificateOption.Manual)
+            if (requestClientCertificateOption == ClientCertificateOption.Manual)
             {
-                clientCertificate = CertificateHelper.GetEligibleClientCertificate(ClientCertificates);
+                var requestClientCertificates = winHttpRequestMessage != null ? winHttpRequestMessage.ClientCertificates : ClientCertificates;
+                clientCertificate = CertificateHelper.GetEligibleClientCertificate(requestClientCertificates);
             }
             else
             {
@@ -1155,14 +1163,14 @@ namespace System.Net.Http
             if (clientCertificate != null)
             {
                 SetWinHttpOption(
-                    requestHandle,
+                    state.RequestHandle,
                     Interop.WinHttp.WINHTTP_OPTION_CLIENT_CERT_CONTEXT,
                     clientCertificate.Handle,
                     (uint)Marshal.SizeOf<Interop.Crypt32.CERT_CONTEXT>());
             }
             else
             {
-                SetNoClientCertificate(requestHandle);
+                SetNoClientCertificate(state.RequestHandle);
             }
         }
 

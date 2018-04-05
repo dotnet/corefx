@@ -49,4 +49,15 @@ namespace System.Net.Http
         protected override void Dispose(bool disposing) { }
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
+    public partial class WinHttpRequestMessage : HttpRequestMessage
+    {
+        public WinHttpRequestMessage() { }
+        public WinHttpRequestMessage(HttpMethod method, Uri requestUri) { }
+        public WinHttpRequestMessage(HttpMethod method, string requestUri) { }
+        public DecompressionMethods AutomaticDecompression { get { throw null; } set { } }
+        public System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> ServerCertificateValidationCallback { get { throw null; } set { } }
+        public bool CheckCertificateRevocationList { get { throw null; } set { } }
+        public System.Net.Http.ClientCertificateOption ClientCertificateOption { get { throw null; } set { } }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection ClientCertificates { get { throw null; } }
+    }
 }

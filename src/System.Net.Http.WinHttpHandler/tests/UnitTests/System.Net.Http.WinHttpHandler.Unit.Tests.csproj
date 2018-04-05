@@ -109,6 +109,9 @@
     <Compile Include="..\..\src\System\Net\Http\WinHttpRequestCallback.cs">
       <Link>ProductionCode\WinHttpRequestCallback.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\WinHttpRequestMessage.cs">
+      <Link>ProductionCode\WinHttpRequestMessage.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\WinHttpRequestState.cs">
       <Link>ProductionCode\WinHttpRequestState.cs</Link>
     </Compile>
