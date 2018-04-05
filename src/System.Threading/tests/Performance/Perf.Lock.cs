@@ -9,17 +9,21 @@ namespace System.Threading.Tests
 {
     public class Perf_Lock
     {
-        [Benchmark]
+        private const int IterationCount = 2_000_000;
+
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void ReaderWriterLockSlimPerf()
         {
             ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
-
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    rwLock.EnterReadLock();
-                    rwLock.ExitReadLock();
+                    for (int i = 0; i < IterationCount; i++)
+                    {
+                        rwLock.EnterReadLock();
+                        rwLock.ExitReadLock();
+                    }
                 }
             }
         }
