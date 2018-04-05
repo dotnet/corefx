@@ -105,8 +105,23 @@
           Condition="'$(FilterProjectsByBuildConfiguration)' != 'false'"
           DependsOnTargets="ExpandAllBuildConfigurations;FilterBuildConfiguration" />
 
+  <!-- When building all configurations we don't want to have any place holder configuration, so remove them
+  before we return all configurations when calling GetBuildConfigurations to not affect bin placing -->
+  <Target Name="FilterPlaceHolderConfigurations"
+          Condition="'$(BuildAllConfigurations)' == 'true' AND '$(BuildConfigurations)' != ''">
+    <ItemGroup>
+      <_allConfigurations Include="$(BuildConfigurations)" />
+      <_allConfigurations Remove="@(_allConfigurations)" Condition="$([System.String]::Copy('%(Identity)').StartsWith('_'))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <BuildConfigurations>@(_allConfigurations)</BuildConfigurations>
+    </PropertyGroup>
+  </Target>
+
   <!-- Runs in a leaf project (eg: csproj) to determine all configurations -->
   <Target Name="GetBuildConfigurations"
+          DependsOnTargets="FilterPlaceHolderConfigurations"
           Returns="$(_AllBuildConfigurations)">
     <PropertyGroup>
       <_AllBuildConfigurations>$(BuildConfigurations)</_AllBuildConfigurations>
