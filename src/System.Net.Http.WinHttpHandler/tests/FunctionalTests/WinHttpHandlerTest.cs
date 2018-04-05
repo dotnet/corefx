@@ -134,6 +134,48 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             }
         }
 
+        [OuterLoop]
+        [Theory]
+        /*
+            Take internationalized domain name 'Bangladesh' sample url from http://www.i18nguy.com/markup/idna-examples.html 
+            Saved in codeBase64 to avoid Visual Studio complains about encoding
+        */
+        [InlineData("aHR0cDovL+CmrOCmvuCmguCmsuCmvuCmpuCnh+Cmti5pY29tLm11c2V1bQ==", true, "icom.museum")]
+        [InlineData("http://[::1234]", false, null)]
+        [InlineData("http://[::1234]:8080", false, null)]
+        [InlineData("http://127.0.0.1", false, null)]
+        [InlineData("http://www.microsoft.com", false, "www.microsoft.com")]
+        [Trait("MyTrait", "MyTrait")]
+        public async Task ManualTest_IdnHostName(string requestUri, bool codeBase64, string requestHost)
+        {
+            //convert if codeBase64 parameter
+            requestUri = (codeBase64 ? System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(requestUri)) : requestUri);
+            var handler = new WinHttpHandler();
+            using (HttpClient client = new HttpClient(handler))
+            {
+                try
+                {
+                    var response = await client.GetAsync(requestUri);
+                    //We expect only IDN sample reach this point
+                    Assert.NotNull(requestHost);
+                    Assert.Equal(requestHost, response.RequestMessage.RequestUri.Host);
+                }
+                catch (HttpRequestException ex)
+                {
+                    Assert.NotNull(ex.InnerException);
+
+                    //ERROR_INTERNET_INVALID_URL https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465(v=vs.85).aspx
+                    Assert.NotEqual(12005, (int)ex.InnerException.GetType().GetProperty("NativeErrorCode").GetValue(ex.InnerException));
+
+                    /*
+                         We expect only connection attempt failed
+                         ERROR_INTERNET_CANNOT_CONNECT https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465(v=vs.85).aspx
+                    */
+                    Assert.Equal(12029, (int)ex.InnerException.GetType().GetProperty("NativeErrorCode").GetValue(ex.InnerException));
+                }
+            }
+        }
+
         public static bool JsonMessageContainsKeyValue(string message, string key, string value)
         {
             // TODO: Merge with System.Net.Http TestHelper class as part of GitHub Issue #4989.
