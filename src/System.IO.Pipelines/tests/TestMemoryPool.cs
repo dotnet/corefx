@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -15,7 +16,7 @@ namespace System.IO.Pipelines
 
         private bool _disposed;
 
-        public override OwnedMemory<byte> Rent(int minBufferSize = -1)
+        public override IMemoryOwner<byte> Rent(int minBufferSize = -1)
         {
             CheckDisposed();
             return new PooledMemory(_pool.Rent(minBufferSize), this);
@@ -36,9 +37,9 @@ namespace System.IO.Pipelines
             }
         }
 
-        private class PooledMemory : OwnedMemory<byte>
+        private class PooledMemory : MemoryManager<byte>
         {
-            private OwnedMemory<byte> _ownedMemory;
+            private IMemoryOwner<byte> _owner;
 
             private readonly TestMemoryPool _pool;
 
@@ -48,9 +49,9 @@ namespace System.IO.Pipelines
 
             private string _leaser;
 
-            public PooledMemory(OwnedMemory<byte> ownedMemory, TestMemoryPool pool)
+            public PooledMemory(IMemoryOwner<byte> owner, TestMemoryPool pool)
             {
-                _ownedMemory = ownedMemory;
+                _owner = owner;
                 _pool = pool;
                 _leaser = Environment.StackTrace;
                 _referenceCount = 1;
@@ -64,26 +65,42 @@ namespace System.IO.Pipelines
             protected override void Dispose(bool disposing)
             {
                 _pool.CheckDisposed();
-                _ownedMemory.Dispose();
             }
 
-            public override MemoryHandle Pin(int byteOffset = 0)
+            public override MemoryHandle Pin(int elementIndex = 0)
             {
                 _pool.CheckDisposed();
-                return _ownedMemory.Pin(byteOffset);
-            }
-
-            public override void Retain()
-            {
-                _pool.CheckDisposed();
-                _ownedMemory.Retain();
                 Interlocked.Increment(ref _referenceCount);
+
+                if (!MemoryMarshal.TryGetArray(_owner.Memory, out ArraySegment<byte> segment))
+                {
+                    throw new InvalidOperationException();
+                }
+
+                unsafe
+                {
+                    try
+                    {
+                        if ((uint)elementIndex > (uint)segment.Count)
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(elementIndex));
+                        }
+
+                        GCHandle handle = GCHandle.Alloc(segment.Array, GCHandleType.Pinned);
+
+                        return new MemoryHandle(Unsafe.Add<byte>(((void*)handle.AddrOfPinnedObject()), elementIndex + segment.Offset), handle, this);
+                    }
+                    catch
+                    {
+                        Unpin();
+                        throw;
+                    }
+                }
             }
 
-            public override bool Release()
+            public override void Unpin()
             {
                 _pool.CheckDisposed();
-                _ownedMemory.Release();
 
                 int newRefCount = Interlocked.Decrement(ref _referenceCount);
 
@@ -93,33 +110,13 @@ namespace System.IO.Pipelines
                 if (newRefCount == 0)
                 {
                     _returned = true;
-                    return false;
                 }
-                return true;
             }
 
             protected override bool TryGetArray(out ArraySegment<byte> segment)
             {
                 _pool.CheckDisposed();
-                return MemoryMarshal.TryGetArray(_ownedMemory.Memory, out segment);
-            }
-
-            public override bool IsDisposed
-            {
-                get
-                {
-                    _pool.CheckDisposed();
-                    return _ownedMemory.IsDisposed;
-                }
-            }
-
-            protected override bool IsRetained
-            {
-                get
-                {
-                    _pool.CheckDisposed();
-                    return !_returned;
-                }
+                return MemoryMarshal.TryGetArray(_owner.Memory, out segment);
             }
 
             public override int Length
@@ -127,17 +124,14 @@ namespace System.IO.Pipelines
                 get
                 {
                     _pool.CheckDisposed();
-                    return _ownedMemory.Length;
+                    return _owner.Memory.Length;
                 }
             }
 
-            public override Span<byte> Span
+            public override Span<byte> GetSpan()
             {
-                get
-                {
-                    _pool.CheckDisposed();
-                    return _ownedMemory.Span;
-                }
+                _pool.CheckDisposed();
+                return _owner.Memory.Span;
             }
         }
     }

@@ -8,7 +8,9 @@ namespace System.Threading.Tests
 {
     public class Perf_Interlocked
     {
-        [Benchmark(InnerIterationCount = 1000)]
+        private const int IterationCount = 10_000_000;
+
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void Increment_int()
         {
             int location = 0;
@@ -17,7 +19,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Increment(ref location);
                     }
@@ -25,7 +27,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void Decrement_int()
         {
             int location = 0;
@@ -34,7 +36,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Decrement(ref location);
                     }
@@ -42,7 +44,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Increment_long()
         {
             long location = 0;
@@ -51,7 +53,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Increment(ref location);
                     }
@@ -59,7 +61,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Decrement_long()
         {
             long location = 0;
@@ -68,7 +70,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Decrement(ref location);
                     }
@@ -76,7 +78,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Add_int()
         {
             int location = 0;
@@ -85,7 +87,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Add(ref location, 2);
                     }
@@ -93,7 +95,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Add_long()
         {
             long location = 0;
@@ -102,7 +104,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Add(ref location, 2);
                     }
@@ -110,7 +112,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void Exchange_int()
         {
             int location = 0;
@@ -120,7 +122,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Exchange(ref location, newValue);
                     }
@@ -128,7 +130,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 1000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void Exchange_long()
         {
             long location = 0;
@@ -138,7 +140,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.Exchange(ref location, newValue);
                     }
@@ -146,7 +148,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 500)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void CompareExchange_int()
         {
             int location = 0;
@@ -157,7 +159,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.CompareExchange(ref location, newValue, comparand);
                     }
@@ -165,7 +167,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 500)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public static void CompareExchange_long()
         {
             long location = 0;
@@ -176,7 +178,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Interlocked.CompareExchange(ref location, newValue, comparand);
                     }
