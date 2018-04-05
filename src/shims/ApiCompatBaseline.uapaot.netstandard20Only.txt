@@ -1,1 +1,7 @@
-Total Issues: 0
+MembersMustExist : Member 'System.ReadOnlySpan<T>..ctor(T[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.ReadOnlySpan<T>.DangerousCreate(System.Object, T, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.ReadOnlySpan<T>.DangerousGetPinnableReference()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Span<T>..ctor(T[], System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Span<T>.DangerousCreate(System.Object, T, System.Int32)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Span<T>.DangerousGetPinnableReference()' does not exist in the implementation but it does exist in the contract.
+Total Issues: 6
