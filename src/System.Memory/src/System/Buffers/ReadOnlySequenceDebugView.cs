@@ -27,10 +27,10 @@ namespace System.Buffers
             };
         }
         
+        public ReadOnlySequenceDebugViewSegments BufferSegments => _segments;
+
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Items => _array;
-
-        public ReadOnlySequenceDebugViewSegments ASegments => _segments;
 
         [DebuggerDisplay("Count: {Segments.Length}", Name = "Segments")]
         public struct ReadOnlySequenceDebugViewSegments
