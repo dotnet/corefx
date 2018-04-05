@@ -227,7 +227,11 @@ internal static partial class Interop
 
         internal static int Encrypt(SafeSslHandle context, ReadOnlyMemory<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
-            Debug.Assert(Crypto.ErrGetError() == 0, "OpenSsl thread error queue is not empty");
+#if DEBUG
+            ulong assertNoError = Crypto.ErrPeekError();
+            if (assertNoError != 0)
+                Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+#endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal;
@@ -277,7 +281,11 @@ internal static partial class Interop
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
-            Debug.Assert(Crypto.ErrGetError() == 0, "OpenSsl thread error queue is not empty");
+#if DEBUG
+            ulong assertNoError = Crypto.ErrPeekError();
+            if (assertNoError != 0)
+                Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+#endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal = BioWrite(context.InputBio, outBuffer, offset, count);
