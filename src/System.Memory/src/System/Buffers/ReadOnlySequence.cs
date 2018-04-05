@@ -6,11 +6,17 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
+
 namespace System.Buffers
 {
     /// <summary>
     /// Represents a sequence that can read a sequential series of <typeparam name="T" />.
     /// </summary>
+    [DebuggerTypeProxy(typeof(ReadOnlySequenceDebugView<>))]
+    [DebuggerDisplay("{ToString(),raw}")]
     public readonly partial struct ReadOnlySequence<T>
     {
         private readonly SequencePosition _sequenceStart;
@@ -276,7 +282,23 @@ namespace System.Buffers
         }
 
         /// <inheritdoc />
-        public override string ToString() => string.Format("System.Buffers.ReadOnlySequence<{0}>[{1}]", typeof(T).Name, Length);
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char) && Length < int.MaxValue)
+            {
+                return string.Create((int)Length, this, (span, sequence) =>
+                {
+                    foreach (ReadOnlyMemory<T> readOnlyMemory in sequence)
+                    {
+                        var sourceSpan = ((ReadOnlyMemory<char>)(object)readOnlyMemory).Span;
+                        sourceSpan.CopyTo(span);
+                        span = span.Slice(sourceSpan.Length);
+                    }
+                });
+            }
+
+            return string.Format("System.Buffers.ReadOnlySequence<{0}>[{1}]", typeof(T).Name, Length);
+        }   
 
         /// <summary>
         /// Returns an enumerator over the <see cref="ReadOnlySequence{T}"/>

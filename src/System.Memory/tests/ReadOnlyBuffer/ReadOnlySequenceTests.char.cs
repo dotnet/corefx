@@ -74,8 +74,10 @@ namespace System.Memory.Tests
         [Fact]
         public void ToStringIsCorrect()
         {
-            ReadOnlySequence<char> buffer = Factory.CreateWithContent(Enumerable.Range(0, 255).Select(i => (char)i).ToArray());
-            Assert.Equal("System.Buffers.ReadOnlySequence<Char>[255]", buffer.ToString());
+            char[] array = Enumerable.Range(0, 255).Select(i => (char)i).ToArray();
+            ReadOnlySequence<char> buffer = Factory.CreateWithContent(array);
+            Assert.Equal(array, buffer.ToString());
+            while (!System.Diagnostics.Debugger.IsAttached) { System.Threading.Thread.Sleep(1000);}
         }
 
         [Theory]
