@@ -351,6 +351,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(28749)]
         [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // TODO: make unconditional after #26813 and #26476 are fixed
@@ -469,6 +470,67 @@ namespace System.Net.Http.Functional.Tests
                         null);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("[::1234]")]
+        [InlineData("[::1234]:8080")]
+        public async Task GetAsync_IPv6AddressInHostHeader_CorrectlyFormatted(string host)
+        {
+            string ipv6Address = "http://" + host;
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(ipv6Address); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"Host: {host}", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        public static IEnumerable<object[]> SecureAndNonSecure_IPBasedUri_MemberData() =>
+            from address in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback }
+            from useSsl in new[] { true, false }
+            select new object[] { address, useSsl };
+
+        [Theory]
+        [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
+        public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
+        {
+            var options = new LoopbackServer.Options { Address = address, UseSsl= useSsl };
+            bool connectionAccepted = false;
+            string host = "";
+
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                host = $"{url.Host}:{url.Port}";
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    if (useSsl)
+                    {
+                        handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    }
+                    try { await client.GetAsync(url); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"Host: {host}", headers);
+            }), options);
+
+            Assert.True(connectionAccepted);
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -2403,7 +2465,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23768)]
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // takes several seconds
         [Fact]
@@ -2940,9 +3001,11 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Proxy_UseSecureProxyTunnel_Success()
         {
-            if (IsWinHttpHandler || IsNetfxHandler)
+            if (IsWinHttpHandler || IsNetfxHandler || IsCurlHandler)
             {
-                // Issue #27746: WinHttpHandler and netfx hang on this test
+                // Issue #27746: WinHttpHandler and netfx hang on this test. 
+                // The same happens consistently on macOS 10.13 Release and with some
+                // frequency on some Linux flavors, disabling the test for curl handler due to that.
                 return;
             }
 
