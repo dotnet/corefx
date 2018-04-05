@@ -155,7 +155,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
                 try
                 {
                     var response = await client.GetAsync(requestUri);
-                    //We expect only IDN sample reach this point
+                    //We expect only not null requestHost sample reach this point
                     Assert.NotNull(requestHost);
                     Assert.Equal(requestHost, response.RequestMessage.RequestUri.Host);
                 }
