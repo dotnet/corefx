@@ -266,5 +266,19 @@ namespace System.IO.Tests
         {
             Assert.Equal(expected, Path.GetFullPath(path));
         }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_BasicExpansions)),
+            MemberData(nameof(GetFullPath_TildePaths))]
+        public void TryGetFullPath_CoreTests(string path, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path, destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
+        }
     }
 }
