@@ -24,6 +24,7 @@
     <Compile Include="..\..\Common\src\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
     </Compile>
+    <Compile Include="Common\System\Collections\CompatibleComparer.Runtime.cs" />
     <Compile Include="System\AppDomain.cs" />
     <Compile Include="System\AppDomainUnloadedException.cs" />
     <Compile Include="System\ApplicationId.cs" />

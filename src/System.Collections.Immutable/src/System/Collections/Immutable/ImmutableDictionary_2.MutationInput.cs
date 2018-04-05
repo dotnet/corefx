@@ -98,14 +98,6 @@ namespace System.Collections.Immutable
             {
                 get { return _comparers.HashBucketEqualityComparer; }
             }
-
-            /// <summary>
-            /// Gets the current number of elements in the collection.
-            /// </summary>
-            internal int Count
-            {
-                get { return _count; }
-            }
         }
     }
 }
