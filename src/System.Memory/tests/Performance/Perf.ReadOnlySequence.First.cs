@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Buffers.Tests
 {
-    public class Rerf_ReadOnlySequence_First
+    public class Perf_ReadOnlySequence_First
     {
         private const int InnerCount = 100_000;
         volatile static int _volatileInt = 0;

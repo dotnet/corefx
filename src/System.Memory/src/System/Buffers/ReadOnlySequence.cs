@@ -333,9 +333,11 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private SequenceType GetSequenceType()
         {
-            // We take high order bits of two indexes index and move them
-            // to a first and second position to convert to BufferType
-            return _sequenceStart.GetObject() == null ? SequenceType.Empty : (SequenceType)((((uint)_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask) >> 30) | (uint)_sequenceEnd.GetInteger() >> 31);
+            // We take high order bits of two indexes and move them
+            // to a first and second position to convert to SequenceType
+            return _sequenceStart.GetObject() == null
+                ? SequenceType.Empty
+                : (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -346,10 +348,11 @@ namespace System.Buffers
         {
             startIndex = start & ReadOnlySequence.IndexBitMask;
             endIndex = end & ReadOnlySequence.IndexBitMask;
-            // We take high order bits of two indexes index and move them
-            // to a first and second position to convert to BufferType
-            // Masking with 2 is required to only keep the second bit of Start.GetInteger()
-            sequenceType = Start.GetObject() == null ? SequenceType.Empty : (SequenceType)((((uint)Start.GetInteger() >> 30) & 2) | (uint)End.GetInteger() >> 31);
+            // We take high order bits of two indexes and move them
+            // to a first and second position to convert to SequenceType
+            sequenceType = _sequenceStart.GetObject() == null
+                ? SequenceType.Empty
+                : (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
         }
 
         /// <summary>

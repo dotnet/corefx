@@ -25,7 +25,6 @@ namespace System.Buffers
             }
 
             int endIndex = GetIndex(_sequenceEnd);
-            //int length = GetIndex(_sequenceEnd) - positionIndex;
 
             SequenceType type = GetSequenceType();
             if (type == SequenceType.MultiSegment)
@@ -56,7 +55,6 @@ namespace System.Buffers
 
                     next = new SequencePosition(nextSegment, 0);
                     endIndex = memory.Length;
-                    //length = memory.Length - positionIndex;
                 }
             }
             else
