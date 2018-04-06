@@ -19,7 +19,7 @@ namespace System.Buffers.Text
 
         // The three-letter abbreviation is packed into a 24-bit unsigned integer
         // where the least significant byte represents the first letter.
-        private static readonly uint[] DayAbbreviations = new uint[]
+        private static readonly uint[] s_dayAbbreviations = new uint[]
         {
             'S' + ('u' << 8) + ('n' << 16),
             'M' + ('o' << 8) + ('n' << 16),
@@ -30,7 +30,7 @@ namespace System.Buffers.Text
             'S' + ('a' << 8) + ('t' << 16),
         };
 
-        private static readonly uint[] DayAbbreviationsLowercase = new uint[]
+        private static readonly uint[] s_dayAbbreviationsLowercase = new uint[]
         {
             's' + ('u' << 8) + ('n' << 16),
             'm' + ('o' << 8) + ('n' << 16),
@@ -41,7 +41,7 @@ namespace System.Buffers.Text
             's' + ('a' << 8) + ('t' << 16)
         };
 
-        private static readonly uint[] MonthAbbreviations = new uint[]
+        private static readonly uint[] s_monthAbbreviations = new uint[]
         {
             'J' + ('a' << 8) + ('n' << 16),
             'F' + ('e' << 8) + ('b' << 16),
@@ -57,7 +57,7 @@ namespace System.Buffers.Text
             'D' + ('e' << 8) + ('c' << 16),
         };
 
-        private static readonly uint[] MonthAbbreviationsLowercase = new uint[]
+        private static readonly uint[] s_monthAbbreviationsLowercase = new uint[]
         {
             'j' + ('a' << 8) + ('n' << 16),
             'f' + ('e' << 8) + ('b' << 16),
