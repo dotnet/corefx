@@ -14,89 +14,94 @@ namespace System.Buffers
     public readonly partial struct ReadOnlySequence<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool TryGetBuffer(in SequencePosition position, out ReadOnlyMemory<T> data, out SequencePosition next)
+        private bool TryGetBuffer(in SequencePosition position, out ReadOnlyMemory<T> memory, out SequencePosition next)
         {
             next = default;
             object positionObject = position.GetObject();
             if (positionObject == null)
             {
-                data = default;
+                memory = default;
                 return false;
             }
 
-            GetTypeAndIndices(position.GetInteger(), _sequenceEnd.GetInteger(), out SequenceType type, out int positionIndex, out int endIndex);
-            int length = endIndex - positionIndex;
+            int positionIndex = GetIndex(position);
+            int length = GetIndex(_sequenceEnd) - positionIndex;
+
+            SequenceType type = GetSequenceType();
             if (type == SequenceType.MultiSegment)
             {
                 Debug.Assert(positionObject is ReadOnlySequenceSegment<T>);
                 ReadOnlySequenceSegment<T> positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
 
                 // Bounds check
-                Debug.Assert(_sequenceStart.GetObject() != _sequenceEnd.GetObject() || _sequenceStart.GetObject() == positionObject);
+                #if DEBUG
+                Debug.Assert(positionSegment == _sequenceEnd.GetObject() || _sequenceStart.GetObject() != _sequenceEnd.GetObject());
 
-                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceStart.GetObject());
-                var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceEnd.GetObject());
+                ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceStart.GetObject());
+                ReadOnlySequenceSegment<T> endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(_sequenceEnd.GetObject());
 
                 // startSegment.RunningIndex + startIndex <= positionSegment.RunningIndex + positionIndex &&
                 // positionSegment.RunningIndex + positionIndex <= endSegment.RunningIndex + endIndex
                 // Rearranged to avoid overflow
-                Debug.Assert(startSegment.RunningIndex - positionSegment.RunningIndex <= positionIndex - (_sequenceStart.GetInteger() & ReadOnlySequence.IndexBitMask) ||
-                             positionIndex - endIndex <= endSegment.RunningIndex - positionSegment.RunningIndex);
+                Debug.Assert(startSegment.RunningIndex - positionSegment.RunningIndex <= positionIndex - GetIndex(_sequenceStart) ||
+                             positionIndex - GetIndex(_sequenceEnd) <= endSegment.RunningIndex - positionSegment.RunningIndex);
+                #endif
 
-                data = positionSegment.Memory;
-                if (positionSegment != endSegment)
+                memory = positionSegment.Memory;
+                if (positionSegment != _sequenceEnd.GetObject())
                 {
 
                     ReadOnlySequenceSegment<T> nextSegment = positionSegment.Next;
                     Debug.Assert(nextSegment != null);
 
                     next = new SequencePosition(nextSegment, 0);
-                    length = data.Length - positionIndex;
+                    length = memory.Length - positionIndex;
                 }
             }
             else
             {
                 // Bounds check
-                Debug.Assert(positionObject == _sequenceStart.GetObject());
-                Debug.Assert((_sequenceStart.GetInteger() & ReadOnlySequence.IndexBitMask) <= positionIndex && positionIndex <= endIndex);
+                Debug.Assert(positionObject == _sequenceEnd.GetObject());
+                Debug.Assert(GetIndex(_sequenceStart) <= positionIndex && positionIndex <= GetIndex(_sequenceEnd));
 
                 if (type == SequenceType.Array)
                 {
                     Debug.Assert(positionObject is T[]);
 
-                    data = new ReadOnlyMemory<T>(Unsafe.As<T[]>(positionObject));
+                    memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(positionObject));
                 }
                 else if (typeof(T) == typeof(char) && type == SequenceType.String)
                 {
                     Debug.Assert(positionObject is string);
 
-                    data = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(positionObject)).AsMemory();
+                    memory = (ReadOnlyMemory<T>)(object)Unsafe.As<string>(positionObject).AsMemory();
                 }
                 else // if (type == SequenceType.MemoryManager)
                 {
                     Debug.Assert(positionObject is MemoryManager<T>);
 
-                    data = (Unsafe.As<MemoryManager<T>>(positionObject)).Memory;
+                    memory = (Unsafe.As<MemoryManager<T>>(positionObject)).Memory;
                 }
             }
 
-            data = data.Slice(positionIndex, length);
+            memory = memory.Slice(positionIndex, length);
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlyMemory<T> GetFirstBuffer(in SequencePosition start, in SequencePosition end)
+        private ReadOnlyMemory<T> GetFirstBuffer()
         {
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-            int length = endIndex - startIndex;
-            object startObject = start.GetObject();
+            int startIndex = GetIndex(_sequenceStart);
+            int length = GetIndex(_sequenceEnd) - startIndex;
+            SequenceType type = GetSequenceType();
+            object startObject = _sequenceStart.GetObject();
             ReadOnlyMemory<T> memory;
             if (type == SequenceType.MultiSegment)
             {
                 Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
                 ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
                 memory = startSegment.Memory;
-                if (startObject != end.GetObject())
+                if (startObject != _sequenceEnd.GetObject())
                 {
                     length = memory.Length - startIndex;
                 }

@@ -47,7 +47,7 @@ namespace System.Buffers
         /// <summary>
         /// Gets <see cref="ReadOnlyMemory{T}"/> from the first segment.
         /// </summary>
-        public ReadOnlyMemory<T> First => GetFirstBuffer(_sequenceStart, _sequenceEnd);
+        public ReadOnlyMemory<T> First => GetFirstBuffer();
 
         /// <summary>
         /// A position to the start of the <see cref="ReadOnlySequence{T}"/>.
@@ -329,6 +329,17 @@ namespace System.Buffers
                 end.GetInteger() & ReadOnlySequence.IndexBitMask | (End.GetInteger() & ReadOnlySequence.FlagBitMask)
             );
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SequenceType GetSequenceType()
+        {
+            // We take high order bits of two indexes index and move them
+            // to a first and second position to convert to BufferType
+            return _sequenceStart.GetObject() == null ? SequenceType.Empty : (SequenceType)((((uint)_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask) >> 30) | (uint)_sequenceEnd.GetInteger() >> 31);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetIndex(in SequencePosition position) => position.GetInteger() & ReadOnlySequence.IndexBitMask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetTypeAndIndices(int start, int end, out SequenceType sequenceType, out int startIndex, out int endIndex)
