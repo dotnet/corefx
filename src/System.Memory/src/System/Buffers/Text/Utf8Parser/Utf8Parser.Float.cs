@@ -68,7 +68,7 @@ namespace System.Buffers.Text
             if (TryParseNormalAsFloatingPoint(source, out value, out bytesConsumed, standardFormat))
                 return true;
 
-            return TryParseAsSpecialFloatingPoint<double>(source, double.PositiveInfinity, double.NegativeInfinity, double.NaN, out value, out bytesConsumed);
+            return TryParseAsSpecialFloatingPoint(source, double.PositiveInfinity, double.NegativeInfinity, double.NaN, out value, out bytesConsumed);
         }
 
         //
