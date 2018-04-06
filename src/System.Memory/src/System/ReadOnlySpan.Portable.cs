@@ -108,6 +108,17 @@ namespace System
             _byteOffset = byteOffset;
         }
 
+        // Dangerous constructor without bounds checks. For internal use only.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ReadOnlySpan<T> DangerousCreate(T[] array, int start, int length)
+        {
+            Debug.Assert(start >= 0);
+            Debug.Assert(length >= 0);
+            Debug.Assert(array != null);
+
+            return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(array), SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start), length);
+        }
+
         /// <summary>
         /// Returns the specified element of the read-only span.
         /// </summary>

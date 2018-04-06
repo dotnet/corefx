@@ -171,6 +171,7 @@ namespace System
         startIndex,
         endIndex,
         array,
-        culture
+        culture,
+        manager
     }
 }
