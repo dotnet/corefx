@@ -30,7 +30,6 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-
 using Xunit;
 
 namespace System.Data.Tests.SqlTypes
@@ -38,6 +37,7 @@ namespace System.Data.Tests.SqlTypes
     public class SqlDoubleTest
     {
         private CultureInfo _originalCulture;
+        private static IFormatProvider s_numberFormat = System.Globalization.CultureInfo.CurrentCulture.NumberFormat;
 
         // Test constructor
         [Fact]
@@ -403,14 +403,14 @@ namespace System.Data.Tests.SqlTypes
             }
 
             // ToSqlString ()
-            Assert.Equal("250", Test1.ToSqlString().Value);
-            Assert.Equal("0", Test0.ToSqlString().Value);
-            Assert.Equal("6.4E+65", Test2.ToSqlString().Value);
+            Assert.Equal(250.ToString(s_numberFormat), Test1.ToSqlString().Value);
+            Assert.Equal(0.ToString(s_numberFormat), Test0.ToSqlString().Value);
+            Assert.Equal(6.4E+65.ToString(s_numberFormat), Test2.ToSqlString().Value);
 
             // ToString ()
-            Assert.Equal("250", Test1.ToString());
-            Assert.Equal("0", Test0.ToString());
-            Assert.Equal("6.4E+65", Test2.ToString());
+            Assert.Equal(250.ToString(s_numberFormat), Test1.ToString());
+            Assert.Equal(0.ToString(s_numberFormat), Test0.ToString());
+            Assert.Equal(6.4E+65.ToString(s_numberFormat), Test2.ToString());
         }
 
         // OPERATORS
