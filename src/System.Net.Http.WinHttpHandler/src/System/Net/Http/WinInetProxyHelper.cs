@@ -162,16 +162,16 @@ namespace System.Net.Http
             }
 
             WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery PROXY_AUTO_DETECT_TYPE_DHCP.");
-            AutoConfigUrl = SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType.Dhcp);
+            AutoConfigUrl = GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType.Dhcp);
 
             if (AutoConfigUrl == null)
             {
                 WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery AUTO_DETECT_TYPE_DNS_A.");
-                AutoConfigUrl = SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType.DnsA);
+                AutoConfigUrl = GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType.DnsA);
             }
             else
             {
-                // Auto-detect succeed.
+                // Auto-detect succeeded.
                 return;
             }
 
@@ -183,7 +183,7 @@ namespace System.Net.Http
             }
         }
 
-        private string SafeDetectAutoProxyUrl(Interop.WinHttp.AutoDetectType discoveryMethod)
+        private string GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType discoveryMethod)
         {
             string url = null;
             IntPtr autoProxyUrl = new IntPtr();

@@ -312,7 +312,7 @@ internal partial class Interop
         }
 
         [Flags]
-        internal enum AutoDetectType
+        public enum AutoDetectType
         {
             None = 0x0,
             Dhcp = 0x1, // WINHTTP_AUTO_DETECT_TYPE_DHCP
