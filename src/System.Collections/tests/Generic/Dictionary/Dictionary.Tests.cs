@@ -229,8 +229,8 @@ namespace System.Collections.Tests
         public void Remove_NonExistentEntries_DoesNotThrow()
         {
             var dictionary = new Dictionary<string, string>();
-            dictionary.Add("a","b");
-            dictionary.Add("c","d");
+            dictionary.Add("a", "b");
+            dictionary.Add("c", "d");
             foreach (var entry in dictionary)
             {
                 if (dictionary.Remove(entry.Key + "Sibling"))
