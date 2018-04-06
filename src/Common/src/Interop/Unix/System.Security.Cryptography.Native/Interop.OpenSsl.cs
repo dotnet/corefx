@@ -229,8 +229,7 @@ internal static partial class Interop
         {
 #if DEBUG_SSL_ERROR_QUEUE
             ulong assertNoError = Crypto.ErrPeekError();
-            if (assertNoError != 0)
-                Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+            Debug.Assert(assertNoError == 0, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
 #endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
@@ -246,6 +245,18 @@ internal static partial class Interop
             if (retVal != input.Length)
             {
                 errorCode = GetSslError(context, retVal, out Exception innerError);
+                if (errorCode == Ssl.SslErrorCode.SSL_ERROR_SSL)
+                {
+                    // The error may be a left over from other, unrelated Ssl/Crypto call, on the same thread. 
+                    // If we get SSL_ERROR_SYSCALL on an empty error queue assume that first error was legitimate.
+                    Ssl.SslErrorCode secondErrorCode = GetSslError(context, retVal, out Exception secondInnerError);
+                    if (secondErrorCode != Ssl.SslErrorCode.SSL_ERROR_SYSCALL)
+                    {
+                        errorCode = secondErrorCode;
+                        innerError = secondInnerError;
+                    }
+                }
+
                 retVal = 0;
 
                 switch (errorCode)
@@ -283,8 +294,7 @@ internal static partial class Interop
         {
 #if DEBUG_SSL_ERROR_QUEUE
             ulong assertNoError = Crypto.ErrPeekError();
-            if (assertNoError != 0)
-                Debug.Assert(false, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+            Debug.Assert(assertNoError == 0, "OpenSsl thread error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
 #endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
@@ -310,6 +320,18 @@ internal static partial class Interop
             {
                 Exception innerError;
                 errorCode = GetSslError(context, retVal, out innerError);
+                if (errorCode == Ssl.SslErrorCode.SSL_ERROR_SSL)
+                {
+                    // The error may be a left over from other, unrelated Ssl/Crypto call, on the same thread. 
+                    // If we get SSL_ERROR_SYSCALL on an empty error queue assume that first error was legitimate.
+                    Ssl.SslErrorCode secondErrorCode = GetSslError(context, retVal, out Exception secondInnerError);
+                    if (secondErrorCode != Ssl.SslErrorCode.SSL_ERROR_SYSCALL)
+                    {
+                        errorCode = secondErrorCode;
+                        innerError = secondInnerError;
+                    }
+                }
+
                 retVal = 0;
 
                 switch (errorCode)
