@@ -228,19 +228,20 @@ namespace System.Collections.Tests
         [Fact]
         public void Remove_NonExistentEntries_DoesNotPreventEnumeration()
         {
+            const string NonExistentKey = "Sibling";
             var dictionary = new Dictionary<string, string>();
             dictionary.Add("a", "b");
             dictionary.Add("c", "d");
             foreach (var entry in dictionary)
             {
-                if (dictionary.Remove(entry.Key + "Sibling"))
+                if (dictionary.Remove(entry.Key + NonExistentKey))
                     break;
             }
 
-            dictionary.Add("cSibling", "d");
+            dictionary.Add("c" + NonExistentKey, "d");
             foreach (var entry in dictionary)
             {
-                if (dictionary.Remove(entry.Key + "Sibling"))
+                if (dictionary.Remove(entry.Key + NonExistentKey))
                     break;
             }
         }
