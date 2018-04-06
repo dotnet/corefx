@@ -18,7 +18,7 @@ namespace System.SpanTests
             unsafe
             {
                 int[] a = { 90, 91, 92 };
-                fixed (int *pa = a)
+                fixed (int* pa = a)
                 {
                     Span<int> span = new Span<int>(pa, 3);
                     span.Validate(90, 91, 92);

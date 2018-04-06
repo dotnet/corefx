@@ -54,7 +54,8 @@ namespace System.Buffers
 
         public override unsafe MemoryHandle Pin(int elementIndex = 0)
         {
-            if (elementIndex < 0 || elementIndex > _length) throw new ArgumentOutOfRangeException(nameof(elementIndex));
+            if (elementIndex < 0 || elementIndex > _length)
+                throw new ArgumentOutOfRangeException(nameof(elementIndex));
 
             lock (this)
             {
