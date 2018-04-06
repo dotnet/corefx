@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Test.Common;
@@ -132,43 +131,6 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             {
                 HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
                 _output.WriteLine(ex.ToString());
-            }
-        }
-
-        [OuterLoop]
-        [Theory]
-        //Take internationalized domain name 'Bangladesh' sample url from http://www.i18nguy.com/markup/idna-examples.html                     
-        [InlineData("http://\u09AC\u09BE\u0982\u09B2\u09BE\u09A6\u09C7\u09B6.icom.museum", "icom.museum")]
-        [InlineData("http://[::1234]", null)]
-        [InlineData("http://[::1234]:8080", null)]
-        [InlineData("http://127.0.0.1", null)]
-        [InlineData("http://www.microsoft.com", "www.microsoft.com")]        
-        public async Task ManualTest_IdnHostName(string requestUri, string requestHost)
-        {
-            var handler = new WinHttpHandler();
-            using (HttpClient client = new HttpClient(handler))
-            {
-                try
-                {
-                    var response = await client.GetAsync(requestUri);
-                    //We expect only not null requestHost sample reach this point
-                    Assert.NotNull(requestHost);
-                    Assert.Equal(requestHost, response.RequestMessage.RequestUri.Host);
-                }
-                catch (HttpRequestException ex)
-                {
-                    Assert.NotNull(ex.InnerException);
-                    Assert.IsAssignableFrom<Win32Exception>(ex.InnerException);
-
-                    //ERROR_INTERNET_INVALID_URL https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465(v=vs.85).aspx
-                    Assert.NotEqual(12005, ((Win32Exception)ex.InnerException).NativeErrorCode);
-
-                    /*
-                         We expect only connection attempt failed
-                         ERROR_INTERNET_CANNOT_CONNECT https://msdn.microsoft.com/en-us/library/windows/desktop/aa385465(v=vs.85).aspx
-                    */
-                    Assert.Equal(12029, ((Win32Exception)ex.InnerException).NativeErrorCode);
-                }
             }
         }
 
