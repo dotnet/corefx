@@ -116,6 +116,9 @@ namespace Microsoft.Win32.RegistryTests
         [MemberData(nameof(TestEnvironment))]
         public void SetValueWithEnvironmentVariable(string valueName, string envVariableName, string expectedVariableValue)
         {
+            if (envVariableName == "ProgramFiles" && PlatformDetection.IsArmProcess)
+                return;
+
             string value = "%" + envVariableName + "%";
             Registry.SetValue(TestRegistryKey.Name, valueName, value);
 
