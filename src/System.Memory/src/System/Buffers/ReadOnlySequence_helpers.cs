@@ -24,8 +24,8 @@ namespace System.Buffers
                 return false;
             }
 
-            int positionIndex = GetIndex(position);
-            int length = GetIndex(_sequenceEnd) - positionIndex;
+            int endIndex = GetIndex(_sequenceEnd);
+            //int length = GetIndex(_sequenceEnd) - positionIndex;
 
             SequenceType type = GetSequenceType();
             if (type == SequenceType.MultiSegment)
@@ -43,8 +43,8 @@ namespace System.Buffers
                 // startSegment.RunningIndex + startIndex <= positionSegment.RunningIndex + positionIndex &&
                 // positionSegment.RunningIndex + positionIndex <= endSegment.RunningIndex + endIndex
                 // Rearranged to avoid overflow
-                Debug.Assert(startSegment.RunningIndex - positionSegment.RunningIndex <= positionIndex - GetIndex(_sequenceStart) ||
-                             positionIndex - GetIndex(_sequenceEnd) <= endSegment.RunningIndex - positionSegment.RunningIndex);
+                Debug.Assert(startSegment.RunningIndex - positionSegment.RunningIndex <= GetIndex(position) - GetIndex(_sequenceStart) ||
+                             GetIndex(position) - GetIndex(_sequenceEnd) <= endSegment.RunningIndex - positionSegment.RunningIndex);
                 #endif
 
                 memory = positionSegment.Memory;
@@ -55,14 +55,15 @@ namespace System.Buffers
                     Debug.Assert(nextSegment != null);
 
                     next = new SequencePosition(nextSegment, 0);
-                    length = memory.Length - positionIndex;
+                    endIndex = memory.Length;
+                    //length = memory.Length - positionIndex;
                 }
             }
             else
             {
                 // Bounds check
                 Debug.Assert(positionObject == _sequenceEnd.GetObject());
-                Debug.Assert(GetIndex(_sequenceStart) <= positionIndex && positionIndex <= GetIndex(_sequenceEnd));
+                Debug.Assert(GetIndex(_sequenceStart) <= GetIndex(position) && GetIndex(position) <= GetIndex(_sequenceEnd));
 
                 if (type == SequenceType.Array)
                 {
@@ -74,25 +75,25 @@ namespace System.Buffers
                 {
                     Debug.Assert(positionObject is string);
 
-                    memory = (ReadOnlyMemory<T>)(object)Unsafe.As<string>(positionObject).AsMemory();
+                    memory = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(positionObject).AsMemory());
                 }
                 else // if (type == SequenceType.MemoryManager)
                 {
                     Debug.Assert(positionObject is MemoryManager<T>);
 
-                    memory = (Unsafe.As<MemoryManager<T>>(positionObject)).Memory;
+                    memory = Unsafe.As<MemoryManager<T>>(positionObject).Memory;
                 }
             }
 
-            memory = memory.Slice(positionIndex, length);
+            int positionIndex = GetIndex(position);
+            memory = memory.Slice(positionIndex, endIndex - positionIndex);
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ReadOnlyMemory<T> GetFirstBuffer()
         {
-            int startIndex = GetIndex(_sequenceStart);
-            int length = GetIndex(_sequenceEnd) - startIndex;
+            int endIndex = GetIndex(_sequenceEnd);
             SequenceType type = GetSequenceType();
             object startObject = _sequenceStart.GetObject();
             ReadOnlyMemory<T> memory;
@@ -103,7 +104,7 @@ namespace System.Buffers
                 memory = startSegment.Memory;
                 if (startObject != _sequenceEnd.GetObject())
                 {
-                    length = memory.Length - startIndex;
+                    endIndex = memory.Length;
                 }
             }
             else if (type == SequenceType.Array)
@@ -122,14 +123,15 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is MemoryManager<T>);
 
-                memory = (Unsafe.As<MemoryManager<T>>(startObject)).Memory;
+                memory = Unsafe.As<MemoryManager<T>>(startObject).Memory;
             }
             else
             {
                 return default;
             }
 
-            return memory.Slice(startIndex, length);
+            int startIndex = GetIndex(_sequenceStart);
+            return memory.Slice(startIndex, endIndex - startIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

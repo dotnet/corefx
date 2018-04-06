@@ -27,7 +27,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -50,7 +50,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -73,7 +73,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -99,7 +99,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -120,7 +120,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -141,7 +141,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<byte> memory))
                             localInt ^= memory.Length;
                     }
@@ -163,7 +163,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -186,7 +186,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -209,7 +209,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -235,7 +235,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -259,7 +259,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -280,7 +280,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
@@ -301,7 +301,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var p = buffer.Start;
+                        SequencePosition p = buffer.Start;
                         while (buffer.TryGet(ref p, out ReadOnlyMemory<char> memory))
                             localInt ^= memory.Length;
                     }
