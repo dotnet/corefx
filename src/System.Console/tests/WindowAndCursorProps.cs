@@ -142,8 +142,13 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
     [InlineData(0)]
     [InlineData(1)]
+    [InlineData(254)]
     [InlineData(255)]
     [InlineData(256)]
+    [InlineData(257)]
+    [InlineData(511)]
+    [InlineData(512)]
+    [InlineData(513)]
     [InlineData(1024)]
     [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
@@ -187,8 +192,10 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
     public static void Title_Set_Windows_GreaterThan24500Chars_ThrowsArgumentOutOfRangeException()
     {
+        // We don't explicitly throw on Core as this isn't technically correct
         string newTitle = new string('a', 24501);
         AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Console.Title = newTitle);
     }

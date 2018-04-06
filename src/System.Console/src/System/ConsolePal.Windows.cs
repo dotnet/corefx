@@ -600,31 +600,16 @@ namespace System
             }
         }
 
-        // Although msdn states that the max allowed limit is 65K,
-        // desktop limits this to 24500 as buffer sizes greater than it
-        // throw.
-        private const int MaxConsoleTitleLength = 24500;
-
         public static string Title
         {
             get
             {
-                string title = null;
-                int titleLength = -1;
-                int r = Interop.Kernel32.GetConsoleTitle(out title, out titleLength);
+                string title = Interop.Kernel32.GetConsoleTitle(out int error);
+                if (error != Interop.Errors.ERROR_SUCCESS)
+                    throw Win32Marshal.GetExceptionForWin32Error(error, string.Empty);
 
-                if (0 != r)
-                {
-                    throw Win32Marshal.GetExceptionForWin32Error(r, string.Empty);
-                }
-
-                if (titleLength > MaxConsoleTitleLength)
-                    throw new InvalidOperationException(SR.ArgumentOutOfRange_ConsoleTitleTooLong);
-
-                Debug.Assert(title.Length == titleLength);
                 return title;
             }
-
             set
             {
                 if (!Interop.Kernel32.SetConsoleTitle(value))
