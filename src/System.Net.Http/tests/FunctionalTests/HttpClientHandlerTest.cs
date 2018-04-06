@@ -2144,8 +2144,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
-            {
-                
+            {                
                 //international version of the Starbucks website
                 //punnycode: xn--oy2b35ckwhba574atvuzkc.com                
                 string idn = "\uc2a4\ud0c0\ubc85\uc2a4\ucf54\ub9ac\uc544.com";
