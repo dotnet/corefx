@@ -34,6 +34,8 @@ namespace System.Data.Tests.SqlTypes
 {
     public class SqlSingleTest
     {
+        private static IFormatProvider _numberFormat = System.Globalization.CultureInfo.CurrentCulture.NumberFormat;
+
         // Test constructor
         [Fact]
         public void Create()
@@ -390,14 +392,14 @@ namespace System.Data.Tests.SqlTypes
 
 
             // ToSqlString ()
-            Assert.Equal("250", Test1.ToSqlString().Value);
-            Assert.Equal("0", Test0.ToSqlString().Value);
-            Assert.Equal("6.4E+17", Test2.ToSqlString().Value);
+            Assert.Equal(250.ToString(_numberFormat), Test1.ToSqlString().Value);
+            Assert.Equal(0.ToString(_numberFormat), Test0.ToSqlString().Value);
+            Assert.Equal(6.4E+17.ToString(_numberFormat), Test2.ToSqlString().Value);
 
             // ToString ()
-            Assert.Equal("250", Test1.ToString());
-            Assert.Equal("0", Test0.ToString());
-            Assert.Equal("6.4E+17", Test2.ToString());
+            Assert.Equal(250.ToString(_numberFormat), Test1.ToString());
+            Assert.Equal(0.ToString(_numberFormat), Test0.ToString());
+            Assert.Equal(6.4E+17.ToString(_numberFormat), Test2.ToString());
         }
 
         // OPERATORS
