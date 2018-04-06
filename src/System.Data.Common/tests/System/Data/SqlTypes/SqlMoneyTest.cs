@@ -38,6 +38,7 @@ namespace System.Data.Tests.SqlTypes
         private SqlMoney _test2;
         private SqlMoney _test3;
         private SqlMoney _test4;
+        private static IFormatProvider s_numberFormat = CultureInfo.CurrentCulture.NumberFormat;
 
         public SqlMoneyTest()
         {
@@ -354,12 +355,12 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal((float)6464.6464, _test1.ToSqlSingle().Value);
 
             // ToSqlString ()
-            Assert.Equal("6464.6464", _test1.ToSqlString().Value);
-            Assert.Equal("90000.00", _test2.ToSqlString().Value);
+            Assert.Equal(6464.6464.ToString(s_numberFormat), _test1.ToSqlString().Value);
+            Assert.Equal(90000.00.ToString(s_numberFormat), _test2.ToSqlString().Value);
 
             // ToString ()
-            Assert.Equal("6464.6464", _test1.ToString());
-            Assert.Equal("90000.00", _test2.ToString());
+            Assert.Equal(6464.6464.ToString(s_numberFormat), _test1.ToString());
+            Assert.Equal(90000.00.ToString(s_numberFormat), _test2.ToString());
         }
 
         // OPERATORS
