@@ -53,17 +53,17 @@ namespace System.Net.Http.Functional.Tests
     }
 
 #if netcoreapp
-    public sealed class PlatformHandler_HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test : HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test
-    {
-        protected override bool UseSocketsHttpHandler => false;
-    }
+    // public sealed class PlatformHandler_HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test : HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test
+    // {
+    //     protected override bool UseSocketsHttpHandler => false;
+    // }
 #endif
 
-    public sealed class PlatformHandler_HttpClientHandler_ClientCertificates_Test : HttpClientHandler_ClientCertificates_Test
-    {
-        public PlatformHandler_HttpClientHandler_ClientCertificates_Test(ITestOutputHelper output) : base(output) { }
-        protected override bool UseSocketsHttpHandler => false;
-    }
+    // public sealed class PlatformHandler_HttpClientHandler_ClientCertificates_Test : HttpClientHandler_ClientCertificates_Test
+    // {
+    //     public PlatformHandler_HttpClientHandler_ClientCertificates_Test(ITestOutputHelper output) : base(output) { }
+    //     protected override bool UseSocketsHttpHandler => false;
+    // }
 
     public sealed class PlatformHandler_HttpClientHandler_DefaultProxyCredentials_Test : HttpClientHandler_DefaultProxyCredentials_Test
     {
@@ -75,10 +75,10 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    public sealed class PlatformHandler_HttpClientHandler_ServerCertificates_Test : HttpClientHandler_ServerCertificates_Test
-    {
-        protected override bool UseSocketsHttpHandler => false;
-    }
+    // public sealed class PlatformHandler_HttpClientHandler_ServerCertificates_Test : HttpClientHandler_ServerCertificates_Test
+    // {
+    //     protected override bool UseSocketsHttpHandler => false;
+    // }
 
     public sealed class PlatformHandler_PostScenarioTest : PostScenarioTest
     {
@@ -92,10 +92,10 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    public sealed class PlatformHandler_HttpClientHandler_SslProtocols_Test : HttpClientHandler_SslProtocols_Test
-    {
-        protected override bool UseSocketsHttpHandler => false;
-    }
+    // public sealed class PlatformHandler_HttpClientHandler_SslProtocols_Test : HttpClientHandler_SslProtocols_Test
+    // {
+    //     protected override bool UseSocketsHttpHandler => false;
+    // }
 
     public sealed class PlatformHandler_SchSendAuxRecordHttpTest : SchSendAuxRecordHttpTest
     {
@@ -152,8 +152,8 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    public sealed class PlatformHandler_HttpClientHandler_Authentication_Test : HttpClientHandler_Authentication_Test
-    {
-        protected override bool UseSocketsHttpHandler => false;
-    }
+    // public sealed class PlatformHandler_HttpClientHandler_Authentication_Test : HttpClientHandler_Authentication_Test
+    // {
+    //     protected override bool UseSocketsHttpHandler => false;
+    // }
 }
