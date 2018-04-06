@@ -2138,6 +2138,25 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop]
+        [Fact]
+        public async Task GetAsync_IdnHostName()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                /*
+                    international version of the Starbucks website
+                    Punnycode: xn--oy2b35ckwhba574atvuzkc.com
+                */
+                string idn = "\uc2a4\ud0c0\ubc85\uc2a4\ucf54\ub9ac\uc544.com";
+                using (HttpResponseMessage response = await client.GetAsync("http://" + idn))
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+            }
+        }
+
         #region Post Methods Tests
 
         [OuterLoop] // TODO: Issue #11345
