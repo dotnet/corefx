@@ -724,9 +724,11 @@ namespace System.Linq.Parallel
     /// </summary>
     internal class OrderedGroupByGrouping<TGroupKey, TOrderKey, TElement> : IGrouping<TGroupKey, TElement>
     {
+        const int INITIAL_CHUNK_SIZE = 2;
+
         private TGroupKey _groupKey; // The group key for this grouping
-        private GrowingArray<TElement> _values; // Values in this group
-        private GrowingArray<TOrderKey> _orderKeys; // Order keys that correspond to the values
+        private ListChunk<Pair<TOrderKey, TElement>> _values; // Values in this group
+        private TElement[] _sortedValues; // Sorted values (allocated in DoneAdding)
         private IComparer<TOrderKey> _orderComparer; // Comparer for order keys
 
         /// <summary>
@@ -737,8 +739,7 @@ namespace System.Linq.Parallel
             IComparer<TOrderKey> orderComparer)
         {
             _groupKey = groupKey;
-            _values = new GrowingArray<TElement>();
-            _orderKeys = new GrowingArray<TOrderKey>();
+            _values = new ListChunk<Pair<TOrderKey, TElement>>(INITIAL_CHUNK_SIZE);
             _orderComparer = orderComparer;
         }
 
@@ -755,17 +756,9 @@ namespace System.Linq.Parallel
 
         IEnumerator<TElement> IEnumerable<TElement>.GetEnumerator()
         {
-            Debug.Assert(_values != null);
+            Debug.Assert(_sortedValues != null);
 
-
-            int valueCount = _values.Count;
-            TElement[] valueArray = _values.InternalArray;
-            Debug.Assert(valueArray.Length >= valueCount); // valueArray.Length may be larger than valueCount
-
-            for (int i = 0; i < valueCount; i++)
-            {
-                yield return valueArray[i];
-            }
+            return ((IEnumerable<TElement>)_sortedValues).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -779,10 +772,8 @@ namespace System.Linq.Parallel
         internal void Add(TElement value, TOrderKey orderKey)
         {
             Debug.Assert(_values != null);
-            Debug.Assert(_orderKeys != null);
 
-            _values.Add(value);
-            _orderKeys.Add(orderKey);
+            _values.Add(new Pair<TOrderKey, TElement>(orderKey, value));
         }
 
         /// <summary>
@@ -791,12 +782,32 @@ namespace System.Linq.Parallel
         internal void DoneAdding()
         {
             Debug.Assert(_values != null);
-            Debug.Assert(_orderKeys != null);
 
-            Array.Sort(_orderKeys.InternalArray, _values.InternalArray, 0, _values.Count, _orderComparer);
+            int count = _values.Count;
+            ListChunk<Pair<TOrderKey, TElement>> curChunk = _values;
+            while ((curChunk = curChunk.Next) != null)
+            {
+                count += curChunk.Count;
+            }
+
+            TElement[] values = new TElement[count];
+            TOrderKey[] orderKeys = new TOrderKey[count];
+
+            int idx = 0;
+            foreach (Pair<TOrderKey, TElement> p in _values)
+            {
+                orderKeys[idx] = p.First;
+                values[idx] = p.Second;
+
+                idx++;
+            }
+
+            Array.Sort(orderKeys, values, _orderComparer);
+
+            _sortedValues = values;
 
 #if DEBUG
-            _orderKeys = null; // Any future calls to Add() or DoneAdding() will fail
+            _values = null; // Any future calls to Add() or DoneAdding() will fail
 #endif
         }
     }
