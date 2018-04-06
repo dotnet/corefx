@@ -246,7 +246,7 @@ namespace System
 
         internal static int CombineHashCodes(int h1, int h2)
         {
-            return HashHelpers.Combine(HashHelpers.Combine(HashHelpers.RandomSeed, h1), h2);
+            return HashHelpers.Combine(HashHelpers.Combine(HashHelpers.s_randomSeed, h1), h2);
         }
 
         internal static int CombineHashCodes(int h1, int h2, int h3)
