@@ -226,7 +226,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void Remove_NonExistentEntries_DoesNotThrow()
+        public void Remove_NonExistentEntries_DoesNotPreventEnumeration()
         {
             var dictionary = new Dictionary<string, string>();
             dictionary.Add("a", "b");
