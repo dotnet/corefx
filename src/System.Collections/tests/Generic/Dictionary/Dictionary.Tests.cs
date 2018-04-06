@@ -236,6 +236,13 @@ namespace System.Collections.Tests
                 if (dictionary.Remove(entry.Key + "Sibling"))
                     break;
             }
+
+            dictionary.Add("cSibling", "d");
+            foreach (var entry in dictionary)
+            {
+                if (dictionary.Remove(entry.Key + "Sibling"))
+                    break;
+            }
         }
 
         [Theory]
