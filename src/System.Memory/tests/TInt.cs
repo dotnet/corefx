@@ -30,19 +30,13 @@ namespace System
 
         public bool Equals(TInt other)
         {
-            if (_onCompare != null)
-            {
-                _onCompare(Value, other.Value);
-            }
+            _onCompare?.Invoke(Value, other.Value);
             return Value == other.Value;
         }
 
         public int CompareTo(TInt other)
         {
-            if (_onCompare != null)
-            {
-                _onCompare(Value, other.Value);
-            }
+            _onCompare?.Invoke(Value, other.Value);
             return Value.CompareTo(other.Value);
         }
 
