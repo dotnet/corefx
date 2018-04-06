@@ -225,6 +225,19 @@ namespace System.Collections.Tests
                 Assert.Equal(array[i++], obj.Key);
         }
 
+        [Fact]
+        public void Remove_NonExistentEntries_DoesNotThrow()
+        {
+            var dictionary = new Dictionary<string, string>();
+            dictionary.Add("a","b");
+            dictionary.Add("c","d");
+            foreach (var entry in dictionary)
+            {
+                if (dictionary.Remove(entry.Key + "Sibling"))
+                    break;
+            }
+        }
+
         [Theory]
         [MemberData(nameof(CopyConstructorInt32Data))]
         public void CopyConstructorInt32(int size, Func<int, int> keyValueSelector, Func<IDictionary<int, int>, IDictionary<int, int>> dictionarySelector)
