@@ -413,7 +413,7 @@ namespace System
             return (Memory<T>)boxedMemory;
         }
 
-        /// <summary>Creates a <see cref="Memory{T}"/> with the specified values in its backing field.</summary>
+        /// <summary>Creates a <see cref="ReadOnlyMemory{T}"/> with the specified values in its backing field.</summary>
         public static ReadOnlyMemory<T> DangerousCreateReadOnlyMemory<T>(object obj, int offset, int length) =>
             DangerousCreateMemory<T>(obj, offset, length).AsReadOnlyMemory();
     }
