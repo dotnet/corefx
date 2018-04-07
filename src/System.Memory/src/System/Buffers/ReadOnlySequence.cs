@@ -378,12 +378,9 @@ namespace System.Buffers
             /// <returns></returns>
             public bool MoveNext()
             {
-                if (_next.GetObject() == null)
-                {
-                    return false;
-                }
-
-                return _sequence.TryGet(ref _next, out _currentMemory);
+                bool result = _sequence.TryGetTrusted(_next, out _currentMemory, out SequencePosition next);
+                _next = next;
+                return result;
             }
         }
 

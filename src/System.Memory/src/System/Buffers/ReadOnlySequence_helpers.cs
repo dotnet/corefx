@@ -14,7 +14,7 @@ namespace System.Buffers
     public readonly partial struct ReadOnlySequence<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool TryGetBuffer(in SequencePosition position, out ReadOnlyMemory<T> memory, out SequencePosition next)
+        internal bool TryGetBuffer(in SequencePosition position, out ReadOnlyMemory<T> memory, out SequencePosition next, bool tructed = false)
         {
             object positionObject = position.GetObject();
             if (positionObject == null)
@@ -26,22 +26,20 @@ namespace System.Buffers
             if (type == SequenceType.MultiSegment)
             {
                 object endObject = _sequenceEnd.GetObject();
-                if (endObject == null) // Empty Segment
+                if (!tructed && endObject == null) // Empty Segment
                     goto EndPositionNotReached;
 
                 // End segment
                 if (positionObject == endObject)
                 {
                     ReadOnlySequenceSegment<T> positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
-                    if (positionSegment == null)
-                        goto EndPositionNotReached;
 
                     // Bounds check
-                    if (positionSegment == _sequenceStart.GetObject() && positionIndex < GetIndex(_sequenceStart))
+                    if (!tructed && positionSegment == _sequenceStart.GetObject() && positionIndex < GetIndex(_sequenceStart))
                         goto PositionOutOfRange;
 
                     int length = GetIndex(_sequenceEnd) - positionIndex;
-                    if (length < 0)
+                    if (!tructed && length < 0)
                         goto PositionOutOfRange;
 
                     memory = positionSegment.Memory.Slice(positionIndex, length);
@@ -53,35 +51,41 @@ namespace System.Buffers
                 {
                     ReadOnlySequenceSegment<T> positionSegment;
 
-                    // Bounds check
-                    object startObject = _sequenceStart.GetObject();
-                    if (positionObject == startObject) // Start segment
+                    if (!tructed) // Bounds check
+                    {
+                        object startObject = _sequenceStart.GetObject();
+                        if (positionObject == startObject) // Start segment
+                        {
+                            positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
+                            if (positionIndex < GetIndex(_sequenceStart))
+                                goto PositionOutOfRange;
+                        }
+                        else // Middle Segment
+                        {
+                            positionSegment = positionObject as ReadOnlySequenceSegment<T>;
+                            if (positionSegment == null)
+                                goto EndPositionNotReached;
+
+                            ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                            ReadOnlySequenceSegment<T> endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+
+                            if (positionSegment.RunningIndex - startSegment.RunningIndex < 0 || endSegment.RunningIndex - positionSegment.RunningIndex < 0)
+                                goto PositionOutOfRange;
+                        }
+                    }
+                    else
                     {
                         positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
-                        if (positionIndex < GetIndex(_sequenceStart))
-                            goto PositionOutOfRange;
-                    }
-                    else // Middle Segment
-                    {
-                        positionSegment = positionObject as ReadOnlySequenceSegment<T>;
-                        if (positionSegment == null)
-                            goto EndPositionNotReached;
-
-                        ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                        ReadOnlySequenceSegment<T> endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
-
-                        if (positionSegment.RunningIndex - startSegment.RunningIndex < 0 || endSegment.RunningIndex - positionSegment.RunningIndex < 0)
-                            goto PositionOutOfRange;
                     }
 
                     ReadOnlySequenceSegment<T> nextSegment = positionSegment.Next;
-                    if (nextSegment == null)
+                    if (!tructed && nextSegment == null)
                         goto EndPositionNotReached;
                     next = new SequencePosition(nextSegment, 0);
 
                     ReadOnlyMemory<T> positionMemory = positionSegment.Memory;
                     int length = positionMemory.Length - positionIndex;
-                    if (length < 0)
+                    if (!tructed && length < 0)
                         goto PositionOutOfRange;
 
                     memory = positionMemory.Slice(positionIndex, length);
@@ -92,13 +96,13 @@ namespace System.Buffers
             // Array or String or MemoryManager
             {
                 // Bounds check
-                if (positionObject != _sequenceStart.GetObject())
+                if (!tructed && positionObject != _sequenceStart.GetObject())
                     goto EndPositionNotReached;
 
                 int length = GetIndex(_sequenceEnd) - positionIndex;
 
                 // Bounds check
-                if (length < 0 || positionIndex < GetIndex(_sequenceStart))
+                if (!tructed && (length < 0 || positionIndex < GetIndex(_sequenceStart)))
                     goto PositionOutOfRange;
 
                 next = default;
@@ -135,6 +139,11 @@ namespace System.Buffers
             next = default;
             memory = default;
             return false;
+        }
+
+        internal bool TryGetTrusted(in SequencePosition position, out ReadOnlyMemory<T> memory, out SequencePosition next)
+        {
+            return TryGetBuffer(position, out memory, out next, false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
