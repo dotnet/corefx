@@ -6,6 +6,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace System
 {
@@ -1243,8 +1244,12 @@ namespace System
             {
                 Debug.Assert(!_handlerRegistered);
 
-                Interop.Kernel32.SetConsoleCtrlHandler(_handler, true);
-                
+                bool r = Interop.Kernel32.SetConsoleCtrlHandler(_handler, true);
+                if (!r)
+                {
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
+                }
+
                 _handlerRegistered = true;
             }
 
@@ -1252,8 +1257,11 @@ namespace System
             {
                 Debug.Assert(_handlerRegistered);
 
-                Interop.Kernel32.SetConsoleCtrlHandler(_handler, false);
-
+                bool r = Interop.Kernel32.SetConsoleCtrlHandler(_handler, false);
+                if (!r)
+                {
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
+                }
                 _handlerRegistered = false;
             }
 

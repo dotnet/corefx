@@ -73,6 +73,21 @@ namespace System.IO
         }
 
         /// <summary>
+        /// Returns a Win32 error code for the specified HRESULT if it came from FACILITY_WIN32
+        /// If not, returns the HRESULT unchanged
+        /// </summary>
+        internal static int TryMakeWin32ErrorCodeFromHR(int hr)
+        {
+            if ((0xFFFF0000 & hr) == 0x80070000)
+            {
+                // Win32 error, Win32Marshal.GetExceptionForWin32Error expects the Win32 format
+                hr &= 0x0000FFFF;
+            }
+
+            return hr;
+        }
+
+        /// <summary>
         /// Returns a string message for the specified Win32 error code.
         /// </summary>
         internal static string GetMessage(int errorCode) => Interop.Kernel32.GetMessage(errorCode);
