@@ -23,11 +23,12 @@ internal partial class Interop
 
             do
             {
+                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity);
+
                 // The documentation asserts that the console's title is stored in a shared 64KB buffer.
                 // The magic number that used to exist here (24500), is likely related to that.
                 // A full UNICODE_STRING is 32K chars...
-                Debug.Assert(builder.Capacity <= short.MaxValue, "shouldn't be possible to grow beyond UNICODE_STRING size");
-                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity);
+                Debug.Assert(result <= short.MaxValue, "shouldn't be possible to grow beyond UNICODE_STRING size");
 
                 if (result == 0)
                 {
