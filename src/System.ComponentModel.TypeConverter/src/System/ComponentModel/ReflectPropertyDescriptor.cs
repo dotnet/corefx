@@ -3,12 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Specialized;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
-using System.Threading;
 
 namespace System.ComponentModel
 {
@@ -74,7 +72,9 @@ namespace System.ComponentModel
         private MethodInfo _shouldSerializeMethod;      // the should serialize method
         private MethodInfo _resetMethod;                // the reset property method
         private EventDescriptor _realChangedEvent;           // <propertyname>Changed event handler on object
+#pragma warning disable CS0649
         private EventDescriptor _realIPropChangedEvent;      // INotifyPropertyChanged.PropertyChanged event handler on object
+#pragma warning restore CS0649
         private readonly Type _receiverType;               // Only set if we are an extender
 
         /// <summary>
@@ -262,11 +262,6 @@ namespace System.ComponentModel
                 }
 
                 return _realIPropChangedEvent;
-            }
-            set
-            {
-                _realIPropChangedEvent = value;
-                _state[s_bitIPropChangedQueried] = true;
             }
         }
 
