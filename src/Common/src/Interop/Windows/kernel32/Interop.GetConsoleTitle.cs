@@ -26,7 +26,7 @@ internal partial class Interop
                 uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity);
 
                 // The documentation asserts that the console's title is stored in a shared 64KB buffer.
-                // The magic number that used to exist here (24500), is likely related to that.
+                // The magic number that used to exist here (24500) is likely related to that.
                 // A full UNICODE_STRING is 32K chars...
                 Debug.Assert(result <= short.MaxValue, "shouldn't be possible to grow beyond UNICODE_STRING size");
 
@@ -35,7 +35,7 @@ internal partial class Interop
                     error = Marshal.GetLastWin32Error();
                     if (error == Errors.ERROR_INSUFFICIENT_BUFFER)
                     {
-                        // Typically this API truncates, but there was a bug in RS2 so we'll make an attempt to handle
+                        // Typically this API truncates but there was a bug in RS2 so we'll make an attempt to handle
                         builder.EnsureCapacity(builder.Capacity * 2);
                     }
                     else
