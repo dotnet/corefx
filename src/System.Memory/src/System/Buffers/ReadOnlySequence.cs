@@ -335,9 +335,7 @@ namespace System.Buffers
         {
             // We take high order bits of two indexes and move them
             // to a first and second position to convert to SequenceType
-            return _sequenceStart.GetObject() == null
-                ? SequenceType.Empty
-                : (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
+            return (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -348,11 +346,7 @@ namespace System.Buffers
         {
             startIndex = start & ReadOnlySequence.IndexBitMask;
             endIndex = end & ReadOnlySequence.IndexBitMask;
-            // We take high order bits of two indexes and move them
-            // to a first and second position to convert to SequenceType
-            sequenceType = _sequenceStart.GetObject() == null
-                ? SequenceType.Empty
-                : (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
+            sequenceType = GetSequenceType();
         }
 
         /// <summary>
@@ -398,8 +392,7 @@ namespace System.Buffers
             MultiSegment = 0x00,
             Array = 0x1,
             MemoryManager = 0x2,
-            String = 0x3,
-            Empty = 0x4
+            String = 0x3
         }
     }
 
