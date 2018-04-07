@@ -608,7 +608,7 @@ namespace System.Data.Tests
                 else
                     str = dr["expr"].ToString();
 
-                if (str == 7.60.ToString())
+                if (str == 7.60m.ToString())
                     str = 7.6.ToString();
 
                 Assert.Equal(temp, str);

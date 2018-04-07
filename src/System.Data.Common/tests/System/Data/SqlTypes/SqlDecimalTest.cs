@@ -253,11 +253,11 @@ Assert.False(true);
         [Fact]
         public void AdjustScale()
         {
-            Assert.Equal(6464.646400.ToString(), SqlDecimal.AdjustScale(_test1, 2, false).Value.ToString());
+            Assert.Equal(6464.646400m.ToString(), SqlDecimal.AdjustScale(_test1, 2, false).Value.ToString());
             Assert.Equal(6464.65.ToString(), SqlDecimal.AdjustScale(_test1, -2, true).Value.ToString());
             Assert.Equal(6464.64.ToString(), SqlDecimal.AdjustScale(_test1, -2, false).Value.ToString());
-            Assert.Equal(10000.000000000000.ToString(), SqlDecimal.AdjustScale(_test2, 10, false).Value.ToString());
-            Assert.Equal(79228162514264337593543950335.00.ToString(), SqlDecimal.AdjustScale(_test5, 2, false).ToString());
+            Assert.Equal(10000.000000000000m.ToString(), SqlDecimal.AdjustScale(_test2, 10, false).Value.ToString());
+            Assert.Equal(79228162514264337593543950335.00m.ToString(), SqlDecimal.AdjustScale(_test5, 2, false).ToString());
             try
             {
                 SqlDecimal test = SqlDecimal.AdjustScale(_test1, -5, false);

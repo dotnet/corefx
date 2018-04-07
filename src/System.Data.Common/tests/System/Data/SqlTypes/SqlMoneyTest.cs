@@ -38,7 +38,6 @@ namespace System.Data.Tests.SqlTypes
         private SqlMoney _test2;
         private SqlMoney _test3;
         private SqlMoney _test4;
-        private static IFormatProvider s_numberFormat = CultureInfo.CurrentCulture.NumberFormat;
 
         public SqlMoneyTest()
         {
@@ -356,11 +355,11 @@ namespace System.Data.Tests.SqlTypes
 
             // ToSqlString ()
             Assert.Equal(6464.6464.ToString(), _test1.ToSqlString().Value);
-            Assert.Equal(90000.00.ToString(), _test2.ToSqlString().Value);
+            Assert.Equal(90000.00m.ToString(), _test2.ToSqlString().Value);
 
             // ToString ()
             Assert.Equal(6464.6464.ToString(), _test1.ToString());
-            Assert.Equal(90000.00.ToString(), _test2.ToString());
+            Assert.Equal(90000.00m.ToString(), _test2.ToString());
         }
 
         // OPERATORS
