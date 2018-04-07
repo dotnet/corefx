@@ -269,6 +269,8 @@ namespace System
     public readonly partial struct ArraySegment<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.IEnumerable
     {
         private readonly T[] _array;
+        private readonly object _dummy;
+        private readonly int _dummyInt;
         public ArraySegment(T[] array) { throw null; }
         public ArraySegment(T[] array, int offset, int count) { throw null; }
         public T[] Array { get { throw null; } }
@@ -304,6 +306,8 @@ namespace System
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable
         {
             private readonly T[] _array;
+            private object _dummy;
+            private int _dummyInt;
             public T Current { get { throw null; } }
             object System.Collections.IEnumerator.Current { get { throw null; } }
             public void Dispose() { }
@@ -584,7 +588,7 @@ namespace System
     public delegate TOutput Converter<in TInput, out TOutput>(TInput input);
     public readonly partial struct DateTime : System.IComparable, System.IComparable<System.DateTime>, System.IConvertible, System.IEquatable<System.DateTime>, System.IFormattable, System.Runtime.Serialization.ISerializable
     {
-        private readonly int _dummy;
+        private readonly int _dummyInt;
         public static readonly System.DateTime MaxValue;
         public static readonly System.DateTime MinValue;
         public static readonly System.DateTime UnixEpoch;
@@ -712,7 +716,7 @@ namespace System
     }
     public partial struct DateTimeOffset : System.IComparable, System.IComparable<System.DateTimeOffset>, System.IEquatable<System.DateTimeOffset>, System.IFormattable, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
     {
-        private int _dummy;
+        private int _dummyInt;
         public static readonly System.DateTimeOffset MaxValue;
         public static readonly System.DateTimeOffset MinValue;
         public static readonly System.DateTimeOffset UnixEpoch;
@@ -840,7 +844,7 @@ namespace System
     }
     public partial struct Decimal : System.IComparable, System.IComparable<decimal>, System.IConvertible, System.IEquatable<decimal>, System.IFormattable, System.Runtime.Serialization.IDeserializationCallback
     {
-        private int _dummy;
+        private int _dummyInt;
         [System.Runtime.CompilerServices.DecimalConstantAttribute((byte)0, (byte)0, (uint)4294967295, (uint)4294967295, (uint)4294967295)]
         public static readonly decimal MaxValue;
         [System.Runtime.CompilerServices.DecimalConstantAttribute((byte)0, (byte)128, (uint)0, (uint)0, (uint)1)]
@@ -1307,7 +1311,7 @@ namespace System
     }
     public partial struct Guid : System.IComparable, System.IComparable<System.Guid>, System.IEquatable<System.Guid>, System.IFormattable
     {
-        private int _dummy;
+        private int _dummyInt;
         public static readonly System.Guid Empty;
         public Guid(byte[] b) { throw null; }
         public Guid(int a, short b, short c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k) { throw null; }
@@ -1341,7 +1345,7 @@ namespace System
     }
     public partial struct HashCode
     {
-        private int _dummy;
+        private int _dummyInt;
         public void Add<T>(T value) { }
         public void Add<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         public static int Combine<T1>(T1 value1) { throw null; }
@@ -1485,7 +1489,7 @@ namespace System
     }
     public partial struct Int32 : System.IComparable, System.IComparable<int>, System.IConvertible, System.IEquatable<int>, System.IFormattable
     {
-        private int _dummy;
+        private int _dummyInt;
         public const int MaxValue = 2147483647;
         public const int MinValue = -2147483648;
         public System.Int32 CompareTo(System.Int32 value) { throw null; }
@@ -1567,7 +1571,6 @@ namespace System
     }
     public partial struct IntPtr : System.IEquatable<System.IntPtr>, System.Runtime.Serialization.ISerializable
     {
-        private int _dummy;
         public static readonly System.IntPtr Zero;
         public IntPtr(int value) { throw null; }
         public IntPtr(long value) { throw null; }
@@ -1685,6 +1688,7 @@ namespace System
     public readonly partial struct Memory<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public Memory(System.Buffers.MemoryManager<T> manager, int start, int length) { throw null; }
         public Memory(T[] array) { throw null; }
         public Memory(T[] array, int start, int length) { throw null; }
@@ -1850,6 +1854,7 @@ namespace System
     public partial struct Nullable<T> where T : struct
     {
         internal T value;
+        private int _dummyInt;
         public Nullable(T value) { throw null; }
         public bool HasValue { get { throw null; } }
         public T Value { get { throw null; } }
@@ -1936,6 +1941,7 @@ namespace System
     public readonly partial struct ReadOnlyMemory<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public ReadOnlyMemory(T[] array) { throw null; }
         public ReadOnlyMemory(T[] array, int start, int length) { throw null; }
         public static System.ReadOnlyMemory<T> Empty { get { throw null; } }
@@ -1960,6 +1966,7 @@ namespace System
     public readonly ref partial struct ReadOnlySpan<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         [System.CLSCompliantAttribute(false)]
         public unsafe ReadOnlySpan(void* pointer, int length) { throw null; }
         public ReadOnlySpan(T[] array) { throw null; }
@@ -1988,6 +1995,7 @@ namespace System
         public ref partial struct Enumerator
         {
             private object _dummy;
+            private int _dummyInt;
             public ref readonly T Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }
@@ -2001,7 +2009,7 @@ namespace System
     }
     public ref partial struct RuntimeArgumentHandle
     {
-        private int _dummy;
+        private int _dummyInt;
     }
     public partial struct RuntimeFieldHandle : System.Runtime.Serialization.ISerializable
     {
@@ -2158,6 +2166,7 @@ namespace System
     public readonly ref partial struct Span<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         [System.CLSCompliantAttribute(false)]
         public unsafe Span(void* pointer, int length) { throw null; }
         public Span(T[] array) { throw null; }
@@ -2189,6 +2198,7 @@ namespace System
         public ref partial struct Enumerator
         {
             private object _dummy;
+            private int _dummyInt;
             public ref T Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }
@@ -2422,7 +2432,7 @@ namespace System
     }
     public partial struct TimeSpan : System.IComparable, System.IComparable<System.TimeSpan>, System.IEquatable<System.TimeSpan>, System.IFormattable
     {
-        private int _dummy;
+        private int _dummyInt;
         public static readonly System.TimeSpan MaxValue;
         public static readonly System.TimeSpan MinValue;
         public const long TicksPerDay = (long)864000000000;
@@ -2581,7 +2591,7 @@ namespace System
         }
         public readonly partial struct TransitionTime : System.IEquatable<System.TimeZoneInfo.TransitionTime>, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
         {
-            private readonly int _dummy;
+            private readonly int _dummyInt;
             public int Day { get { throw null; } }
             public System.DayOfWeek DayOfWeek { get { throw null; } }
             public bool IsFixedDateRule { get { throw null; } }
@@ -3067,7 +3077,7 @@ namespace System
     [System.CLSCompliantAttribute(false)]
     public ref partial struct TypedReference
     {
-        private int _dummy;
+        private int _dummyInt;
         public override bool Equals(object o) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.Type GetTargetType(System.TypedReference value) { throw null; }
@@ -3257,7 +3267,6 @@ namespace System
     [System.CLSCompliantAttribute(false)]
     public partial struct UIntPtr : System.IEquatable<System.UIntPtr>, System.Runtime.Serialization.ISerializable
     {
-        private int _dummy;
         public static readonly System.UIntPtr Zero;
         public UIntPtr(uint value) { throw null; }
         public UIntPtr(ulong value) { throw null; }
@@ -3717,6 +3726,7 @@ namespace System.Buffers
     public partial struct MemoryHandle : System.IDisposable
     {
         private object _dummy;
+        private int _dummyInt;
         [System.CLSCompliantAttribute(false)]
         public unsafe MemoryHandle(void* pointer, System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle), System.Buffers.IPinnable pinnable = null) { throw null; }
         [System.CLSCompliantAttribute(false)]
@@ -5520,6 +5530,7 @@ namespace System.Reflection
     public partial struct CustomAttributeNamedArgument
     {
         private object _dummy;
+        private int _dummyInt;
         public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, object value) { throw null; }
         public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, System.Reflection.CustomAttributeTypedArgument typedArgument) { throw null; }
         public bool IsField { get { throw null; } }
@@ -6343,6 +6354,7 @@ namespace System.Runtime.CompilerServices
     public partial struct AsyncValueTaskMethodBuilder
     {
         private object _dummy;
+        private int _dummyInt;
         public System.Threading.Tasks.ValueTask Task { get { throw null; } }
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
@@ -6355,6 +6367,8 @@ namespace System.Runtime.CompilerServices
     public partial struct AsyncValueTaskMethodBuilder<TResult>
     {
         private TResult _result;
+        private object _dummy;
+        private int _dummyInt;
         public System.Threading.Tasks.ValueTask<TResult> Task { get { throw null; } }
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : System.Runtime.CompilerServices.INotifyCompletion where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
@@ -6419,10 +6433,12 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ConfiguredTaskAwaitable
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter GetAwaiter() { throw null; }
         public readonly partial struct ConfiguredTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
         {
             private readonly object _dummy;
+            private readonly int _dummyInt;
             public bool IsCompleted { get { throw null; } }
             public void GetResult() { }
             public void OnCompleted(System.Action continuation) { }
@@ -6432,10 +6448,12 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ConfiguredTaskAwaitable<TResult>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public System.Runtime.CompilerServices.ConfiguredTaskAwaitable<TResult>.ConfiguredTaskAwaiter GetAwaiter() { throw null; }
         public readonly partial struct ConfiguredTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
         {
             private readonly object _dummy;
+            private readonly int _dummyInt;
             public bool IsCompleted { get { throw null; } }
             public TResult GetResult() { throw null; }
             public void OnCompleted(System.Action continuation) { }
@@ -6445,10 +6463,12 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ConfiguredValueTaskAwaitable
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable.ConfiguredValueTaskAwaiter GetAwaiter() { throw null; }
         public readonly partial struct ConfiguredValueTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
         {
             private readonly object _dummy;
+            private readonly int _dummyInt;
             public bool IsCompleted { get { throw null; } }
             public void GetResult() { }
             public void OnCompleted(System.Action continuation) { }
@@ -6458,10 +6478,12 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ConfiguredValueTaskAwaitable<TResult>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable<TResult>.ConfiguredValueTaskAwaiter GetAwaiter() { throw null; }
         public readonly partial struct ConfiguredValueTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
         {
             private readonly object _dummy;
+            private readonly int _dummyInt;
             public bool IsCompleted { get { throw null; } }
             public TResult GetResult() { throw null; }
             public void OnCompleted(System.Action continuation) { }
@@ -6744,6 +6766,7 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ValueTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public bool IsCompleted { get { throw null; } }
         public void GetResult() { }
         public void OnCompleted(System.Action continuation) { }
@@ -6752,6 +6775,7 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ValueTaskAwaiter<TResult> : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public bool IsCompleted { get { throw null; } }
         public TResult GetResult() { throw null; }
         public void OnCompleted(System.Action continuation) { }
@@ -6871,7 +6895,7 @@ namespace System.Runtime.InteropServices
     }
     public partial struct GCHandle
     {
-        private int _dummy;
+        private int _dummyInt;
         public bool IsAllocated { get { throw null; } }
         public object Target { get { throw null; } set { } }
         public System.IntPtr AddrOfPinnedObject() { throw null; }
@@ -7092,6 +7116,7 @@ namespace System.Runtime.Serialization
     public readonly partial struct StreamingContext
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public StreamingContext(System.Runtime.Serialization.StreamingContextStates state) { throw null; }
         public StreamingContext(System.Runtime.Serialization.StreamingContextStates state, object additional) { throw null; }
         public object Context { get { throw null; } }
@@ -7622,6 +7647,7 @@ namespace System.Threading
     public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public System.Threading.CancellationToken Token { get { throw null; } }
         public void Dispose() { }
         public override bool Equals(object obj) { throw null; }
@@ -8004,6 +8030,7 @@ namespace System.Threading.Tasks
     public readonly partial struct ValueTask : System.IEquatable<System.Threading.Tasks.ValueTask>
     {
         private readonly object _dummy;
+        private readonly int _dummyInt;
         public ValueTask(System.Threading.Tasks.Sources.IValueTaskSource source, short token) { throw null; }
         public ValueTask(System.Threading.Tasks.Task task) { throw null; }
         public bool IsCanceled { get { throw null; } }
@@ -8024,6 +8051,8 @@ namespace System.Threading.Tasks
     public readonly partial struct ValueTask<TResult> : System.IEquatable<System.Threading.Tasks.ValueTask<TResult>>
     {
         internal readonly TResult _result;
+        private readonly object _dummy;
+        private readonly int _dummyInt;
         public ValueTask(System.Threading.Tasks.Sources.IValueTaskSource<TResult> source, short token) { throw null; }
         public ValueTask(System.Threading.Tasks.Task<TResult> task) { throw null; }
         public ValueTask(TResult result) { throw null; }
