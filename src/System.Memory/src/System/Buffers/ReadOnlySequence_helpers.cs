@@ -29,13 +29,14 @@ namespace System.Buffers
                 if (endObject == null) // Empty Segment
                     goto EndPositionNotReached;
 
-                ReadOnlySequenceSegment<T> positionSegment = positionObject as ReadOnlySequenceSegment<T>;
-                if (positionSegment == null)
-                    goto EndPositionNotReached;
-
                 // End segment
-                if (positionSegment == endObject)
+                if (positionObject == endObject)
                 {
+                    ReadOnlySequenceSegment<T> positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
+                    if (positionSegment == null)
+                        goto EndPositionNotReached;
+
+                    // Bounds check
                     if (positionSegment == _sequenceStart.GetObject() && positionIndex < GetIndex(_sequenceStart))
                         goto PositionOutOfRange;
 
@@ -50,31 +51,36 @@ namespace System.Buffers
 
                 // Start or Middle segment
                 {
-                    ReadOnlySequenceSegment<T> nextSegment = positionSegment.Next;
-                    if (nextSegment == null)
-                        goto EndPositionNotReached;
-                    next = new SequencePosition(nextSegment, 0);
+                    ReadOnlySequenceSegment<T> positionSegment;
 
                     // Bounds check
                     object startObject = _sequenceStart.GetObject();
-                    if (positionSegment == startObject) // Start segment
+                    if (positionObject == startObject) // Start segment
                     {
+                        positionSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(positionObject);
                         if (positionIndex < GetIndex(_sequenceStart))
                             goto PositionOutOfRange;
                     }
                     else // Middle Segment
                     {
+                        positionSegment = positionObject as ReadOnlySequenceSegment<T>;
+                        if (positionSegment == null)
+                            goto EndPositionNotReached;
+
                         ReadOnlySequenceSegment<T> startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                        ReadOnlySequenceSegment<T>endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+                        ReadOnlySequenceSegment<T> endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
 
                         if (positionSegment.RunningIndex - startSegment.RunningIndex < 0 || endSegment.RunningIndex - positionSegment.RunningIndex < 0)
                             goto PositionOutOfRange;
                     }
 
+                    ReadOnlySequenceSegment<T> nextSegment = positionSegment.Next;
+                    if (nextSegment == null)
+                        goto EndPositionNotReached;
+                    next = new SequencePosition(nextSegment, 0);
+
                     ReadOnlyMemory<T> positionMemory = positionSegment.Memory;
                     int length = positionMemory.Length - positionIndex;
-
-                    // Bounds check
                     if (length < 0)
                         goto PositionOutOfRange;
 
