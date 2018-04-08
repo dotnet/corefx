@@ -18,13 +18,6 @@
   <ItemGroup>
     <Compile Include="PlatformHandlerTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
-    <Reference Include="Windows" />
-    <Compile Include="MultiInterfaceNonRewindableReadOnlyStream.cs" />
-    <Compile Include="MultiInterfaceReadOnlyStream.cs" />
-    <Compile Include="MultiInterfaceStreamContent.cs" />
-    <Compile Include="PostScenarioUWPTest.cs" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\System.Net.Http.Functional.Tests.csproj">
       <Project>{C85CF035-7804-41FF-9557-48B7C948B58D}</Project>
