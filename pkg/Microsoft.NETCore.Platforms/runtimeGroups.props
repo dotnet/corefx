@@ -3,7 +3,7 @@
   <ItemGroup>
     <RuntimeGroup Include="unix">
       <Parent>any</Parent>
-      <Architectures>x64;x86;arm;armel;arm64</Architectures>
+      <Architectures>x64;x86;arm;armel;arm64;wasm</Architectures>
     </RuntimeGroup>
     <RuntimeGroup Include="linux">
       <Parent>unix</Parent>
@@ -140,6 +140,11 @@
       <AdditionalQualifiers>aot</AdditionalQualifiers>
       <Architectures>x64;x86;arm;arm64</Architectures>
       <Versions>7;8;81;10</Versions>
+    </RuntimeGroup>
+
+    <RuntimeGroup Include="webassembly">
+      <Parent>unix</Parent>
+      <Architectures>wasm</Architectures>
     </RuntimeGroup>
 
     <!-- add corert to all RIDs -->
