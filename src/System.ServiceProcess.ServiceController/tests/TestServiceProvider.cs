@@ -47,6 +47,7 @@ namespace System.ServiceProcess.Tests
         public readonly string TestMachineName;
         public readonly TimeSpan ControlTimeout;
         public readonly string TestServiceName;
+        public readonly string Username;
         public readonly string TestServiceDisplayName;
 
         private readonly TestServiceProvider _dependentServices;
@@ -63,12 +64,13 @@ namespace System.ServiceProcess.Tests
             CreateTestServices();
         }
 
-        public TestServiceProvider(string serviceName)
+        public TestServiceProvider(string serviceName, string userName = "NT AUTHORITY\\LocalService")
         {
             TestMachineName = ".";
             ControlTimeout = TimeSpan.FromSeconds(120);
             TestServiceName = serviceName;
             TestServiceDisplayName = "Test Service " + TestServiceName;
+            Username = userName; 
 
             // Create the service
             CreateTestServices();
@@ -102,6 +104,7 @@ namespace System.ServiceProcess.Tests
             string processName = Process.GetCurrentProcess().MainModule.FileName;
             string entryPointName = typeof(TestService).Assembly.Location;
             string arguments = TestServiceName;
+            testServiceInstaller.Username = Username;
 
             // if process and entry point aren't the same then we are running hosted so pass
             // in the entrypoint as the first argument

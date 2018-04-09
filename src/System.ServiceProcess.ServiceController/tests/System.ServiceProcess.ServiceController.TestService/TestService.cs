@@ -15,7 +15,7 @@ namespace System.ServiceProcess.Tests
         private NamedPipeServerStream _serverStream;
         private readonly Exception _exception;
 
-        public TestService(string serviceName, Exception throwException = null)
+        public TestService(string serviceName, Exception throwException = null, bool autoLog = true)
         {
             this.ServiceName = serviceName;
 
@@ -28,6 +28,7 @@ namespace System.ServiceProcess.Tests
             this.CanHandleSessionChangeEvent = false;
             this.CanHandlePowerEvent = false;
             this._exception = throwException;
+            this.AutoLog = autoLog;
 
             this._serverStream = new NamedPipeServerStream(serviceName);
             _waitClientConnect = this._serverStream.WaitForConnectionAsync();

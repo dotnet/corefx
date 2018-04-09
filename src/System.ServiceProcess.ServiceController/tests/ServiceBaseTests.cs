@@ -164,43 +164,21 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten()
         {
-            using (EventLog eventLog = new EventLog("Application"))
-            {
-                ServiceBase sb = new ServiceBase() { ServiceName = nameof(LogWritten) + Guid.NewGuid().ToString() };
-                Assert.False(EventLog.SourceExists(sb.ServiceName));
-                try
-                {
-                    ServiceBase.Run(sb);
-                    eventLog.Source = sb.ServiceName;
-                    Assert.True(EventLog.SourceExists(sb.ServiceName));
-                }
-                finally
-                {
-                    sb.Stop();
-                    EventLog.DeleteEventSource(sb.ServiceName);
-                }
-            }
+            string serviceName = Guid.NewGuid().ToString();
+            TestServiceProvider _testService = new TestServiceProvider(serviceName, null);
+            Assert.True(EventLog.SourceExists(serviceName));
+            _testService.DeleteTestServices();
         }
 
         [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten_AutoLog_False()
         {
-            using (EventLog eventLog = new EventLog("Application"))
-            {
-                ServiceBase sb = new ServiceBase() { ServiceName = nameof(LogWritten) + Guid.NewGuid().ToString(), AutoLog = false };
-                Assert.False(EventLog.SourceExists(sb.ServiceName));
-                try
-                {
-                    ServiceBase.Run(sb);
-                    Assert.False(EventLog.SourceExists(sb.ServiceName));
-                }
-                finally
-                {
-                    sb.Stop();
-                }
-            }
+            string serviceName = nameof(LogWritten_AutoLog_False) + Guid.NewGuid().ToString();
+            TestServiceProvider _testService = new TestServiceProvider(serviceName);
+            Assert.False(EventLog.SourceExists(serviceName));
+            _testService.DeleteTestServices();
         }
-        
+
         [ConditionalFact(nameof(IsProcessElevated))]
         public void PropagateExceptionFromOnStart()
         {
