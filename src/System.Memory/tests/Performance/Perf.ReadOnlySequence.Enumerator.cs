@@ -11,10 +11,10 @@ namespace System.Buffers.Tests
 {
     public class Perf_ReadOnlySequence_Enumerator
     {
-        private const int InnerCount = 10_000;
+        private const int InnerCount = 100_000;
         volatile static int _volatileInt = 0;
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Byte_Array(int bufSize, int bufOffset)
         {
@@ -35,7 +35,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Byte_Memory(int bufSize, int bufOffset)
         {
@@ -57,7 +57,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Byte_SingleSegment(int bufSize, int bufOffset)
         {
@@ -79,7 +79,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount / 10)]
         [InlineData(10_000, 100)]
         private static void Byte_MultiSegment(int bufSize, int bufOffset)
         {
@@ -104,7 +104,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         private static void Byte_Empty()
         {
             ReadOnlySequence<byte> buffer = ReadOnlySequence<byte>.Empty;
@@ -124,7 +124,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         private static void Byte_Default()
         {
             ReadOnlySequence<byte> buffer = default;
@@ -144,7 +144,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Char_Array(int bufSize, int bufOffset)
         {
@@ -165,7 +165,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Char_Memory(int bufSize, int bufOffset)
         {
@@ -187,7 +187,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void Char_SingleSegment(int bufSize, int bufOffset)
         {
@@ -209,7 +209,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount / 10)]
         [InlineData(10_000, 100)]
         private static void Char_MultiSegment(int bufSize, int bufOffset)
         {
@@ -234,7 +234,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 100)]
         private static void String(int bufSize, int bufOffset)
         {
@@ -257,7 +257,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         private static void Char_Empty()
         {
             ReadOnlySequence<char> buffer = ReadOnlySequence<char>.Empty;
@@ -277,7 +277,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount * 10)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         private static void Char_Default()
         {
             ReadOnlySequence<char> buffer = default;
