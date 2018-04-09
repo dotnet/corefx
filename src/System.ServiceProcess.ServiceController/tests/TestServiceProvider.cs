@@ -12,6 +12,7 @@ namespace System.ServiceProcess.Tests
     internal sealed class TestServiceProvider
     {
         private const int readTimeout = 60000;
+        public const string LocalServiceName = "NT AUTHORITY\\LocalService";
 
         private static readonly Lazy<bool> s_runningWithElevatedPrivileges = new Lazy<bool>(
             () => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator));
@@ -64,7 +65,7 @@ namespace System.ServiceProcess.Tests
             CreateTestServices();
         }
 
-        public TestServiceProvider(string serviceName, string userName = "NT AUTHORITY\\LocalService")
+        public TestServiceProvider(string serviceName, string userName = LocalServiceName)
         {
             TestMachineName = ".";
             ControlTimeout = TimeSpan.FromSeconds(120);
