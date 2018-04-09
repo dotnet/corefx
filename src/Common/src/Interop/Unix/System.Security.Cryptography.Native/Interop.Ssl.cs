@@ -318,6 +318,9 @@ namespace Microsoft.Win32.SafeHandles
                 // Do a bi-directional shutdown.
                 retVal = Interop.Ssl.SslShutdown(handle);
             }
+
+            // Clean up the errors
+            Interop.Crypto.ErrClearError();
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)
