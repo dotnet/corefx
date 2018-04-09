@@ -10,6 +10,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Perf.Base64EncodeDecode.cs" />
+    <Compile Include="Perf.Memory.Slice.cs" />
+    <Compile Include="Perf.Memory.Span.cs" />
     <Compile Include="Perf.Span.BinaryReadAndWrite.cs" />
     <Compile Include="Perf.Span.BinarySearch.cs" />
     <Compile Include="Perf.Span.Clear.cs" />
@@ -18,8 +20,6 @@
     <Compile Include="Perf.Span.IndexOfAny.cs" />
     <Compile Include="Perf.Span.SequenceCompareTo.cs" />
     <Compile Include="Perf.Span.StartsWith.cs" />
-    <Compile Include="Perf.MemorySlice.cs" />
-    <Compile Include="Perf.Memory.Span.cs" />
     <Compile Include="Perf.Utf8Formatter.cs" />
     <Compile Include="Perf.Utf8Parser.cs" />
     <Compile Include="..\Base64\Base64TestHelper.cs" />
