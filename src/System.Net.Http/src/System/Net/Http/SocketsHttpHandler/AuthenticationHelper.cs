@@ -159,7 +159,6 @@ namespace System.Net.Http
             // Any errors in obtaining parameter return false and we don't proceed with auth
             if (string.IsNullOrEmpty(parameter))
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(null, "Null parameter");
                 return false;
             }
 

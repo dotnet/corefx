@@ -262,12 +262,11 @@ namespace System.Net.Http
             {
                 // Eat any exception from the IWebProxy and just treat it as no proxy.
                 // This matches the behavior of other handlers.
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, ex);
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Exception from IWebProxy.GetProxy({request.RequestUri}): {ex}");
             }
 
             if (proxyUri != null && proxyUri.Scheme != UriScheme.Http)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, SR.net_http_invalid_proxy_scheme);
                 throw new NotSupportedException(SR.net_http_invalid_proxy_scheme);
             }
 

@@ -141,7 +141,7 @@ namespace System.Net.Http
                         {
                             if (NetEventSource.IsEnabled)
                             {
-                                NetEventSource.Error(this, ex, "Failed to process " + tmp + " from bypass list.");
+                                NetEventSource.Error(this, $"Failed to process {tmp} from bypass list: {ex}");
                             }
                         }
                     }
