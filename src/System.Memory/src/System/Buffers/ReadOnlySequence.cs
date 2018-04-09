@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -64,6 +65,8 @@ namespace System.Buffers
             // Used by SliceImpl to create new ReadOnlySequence
             
             // startSegment and endSegment can be null for default ReadOnlySequence
+            Debug.Assert(startSegment != null && endSegment != null || startSegment == null && endSegment == null && startIndexAndFlags == 0 && endIndexAndFlags ==  0);
+
             _sequenceStart = new SequencePosition(startSegment, startIndexAndFlags);
             _sequenceEnd = new SequencePosition(endSegment, endIndexAndFlags);
         }
