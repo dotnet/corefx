@@ -14,6 +14,9 @@ internal partial class Interop
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
         private static extern uint GetConsoleTitleW(ref char title, uint nSize);
 
+        // Used to handle API behavior difference between Windows 7 and later
+        private static uint s_sizeMultiplier = 1;
+
         internal static string GetConsoleTitle(out int error)
         {
             error = Errors.ERROR_SUCCESS;
@@ -23,7 +26,7 @@ internal partial class Interop
 
             do
             {
-                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity);
+                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity * s_sizeMultiplier);
 
                 // The documentation asserts that the console's title is stored in a shared 64KB buffer.
                 // The magic number that used to exist here (24500) is likely related to that.
@@ -37,6 +40,7 @@ internal partial class Interop
                     {
                         // Typically this API truncates but there was a bug in RS2 so we'll make an attempt to handle
                         builder.EnsureCapacity(builder.Capacity * 2);
+                        error = Errors.ERROR_SUCCESS;
                     }
                     else
                     {
@@ -51,7 +55,14 @@ internal partial class Interop
                 else
                 {
                     builder.Length = (int)result;
-                    return builder.ToString();
+                    string title = builder.ToString();
+                    if (title.EndsWith('\0'))
+                    {
+                        // In Windows 7 the passed in capacity is bytes, not unicode chars.
+                        // Change our input multiplier and retry.
+                        s_sizeMultiplier = 2;
+                        return GetConsoleTitle(out error);
+                    }
                 }
             } while (true);
         }
