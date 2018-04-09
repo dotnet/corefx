@@ -165,7 +165,7 @@ namespace System.ServiceProcess.Tests
         public void LogWritten()
         {
             string serviceName = Guid.NewGuid().ToString();
-            TestServiceProvider _testService = new TestServiceProvider(serviceName, null);
+            var _testService = new TestServiceProvider(serviceName, userName: null);
             Assert.True(EventLog.SourceExists(serviceName));
             _testService.DeleteTestServices();
         }
@@ -174,7 +174,7 @@ namespace System.ServiceProcess.Tests
         public void LogWritten_AutoLog_False()
         {
             string serviceName = nameof(LogWritten_AutoLog_False) + Guid.NewGuid().ToString();
-            TestServiceProvider _testService = new TestServiceProvider(serviceName);
+            var _testService = new TestServiceProvider(serviceName);
             Assert.False(EventLog.SourceExists(serviceName));
             _testService.DeleteTestServices();
         }
@@ -184,7 +184,7 @@ namespace System.ServiceProcess.Tests
         public void PropagateExceptionFromOnStart()
         {
             string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();
-            TestServiceProvider _testService = new TestServiceProvider(serviceName);
+            var _testService = new TestServiceProvider(serviceName);
             _testService.Client.Connect(connectionTimeout);
             Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
             Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
