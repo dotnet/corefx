@@ -167,18 +167,18 @@ namespace System.ServiceProcess.Tests
             string serviceName = Guid.NewGuid().ToString();
             // The default username for installing the service is NT AUTHORITY\\LocalService which does not have access to EventLog.
             // If the username is null, then the service is created under LocalSystem Account which have access to EventLog.
-            var _testService = new TestServiceProvider(serviceName, userName: null);
+            var testService = new TestServiceProvider(serviceName, userName: null);
             Assert.True(EventLog.SourceExists(serviceName));
-            _testService.DeleteTestServices();
+            testService.DeleteTestServices();
         }
 
         [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten_AutoLog_False()
         {
             string serviceName = nameof(LogWritten_AutoLog_False) + Guid.NewGuid().ToString();
-            var _testService = new TestServiceProvider(serviceName);
+            var testService = new TestServiceProvider(serviceName);
             Assert.False(EventLog.SourceExists(serviceName));
-            _testService.DeleteTestServices();
+            testService.DeleteTestServices();
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
@@ -186,11 +186,11 @@ namespace System.ServiceProcess.Tests
         public void PropagateExceptionFromOnStart()
         {
             string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();
-            var _testService = new TestServiceProvider(serviceName);
-            _testService.Client.Connect(connectionTimeout);
-            Assert.Equal((int)PipeMessageByteCode.Connected, _testService.GetByte());
-            Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, _testService.GetByte());
-            _testService.DeleteTestServices();
+            var testService = new TestServiceProvider(serviceName);
+            testService.Client.Connect(connectionTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Connected, testService.GetByte());
+            Assert.Equal((int)PipeMessageByteCode.ExceptionThrown, testService.GetByte());
+            testService.DeleteTestServices();
         }
 
         private ServiceController ConnectToServer()

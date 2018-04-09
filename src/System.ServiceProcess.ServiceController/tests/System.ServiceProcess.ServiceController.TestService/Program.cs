@@ -33,7 +33,8 @@ namespace System.ServiceProcess.Tests
                 }
                 else if (args[0].StartsWith("LogWritten"))
                 {
-                    testService = new TestService(args[0], throwException: null, autoLog: false);
+                    testService = new TestService(args[0], throwException: null);
+                    testService.AutoLog = false;
                     ServiceBase.Run(testService);
                 }
                 else
