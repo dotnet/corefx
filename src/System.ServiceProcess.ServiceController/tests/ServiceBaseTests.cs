@@ -165,6 +165,8 @@ namespace System.ServiceProcess.Tests
         public void LogWritten()
         {
             string serviceName = Guid.NewGuid().ToString();
+            // The default username for installing the service is NT AUTHORITY\\LocalService which does not have access to EventLog.
+            // If the username is null, then the service is created under LocalSystem Account which have access to EventLog.
             var _testService = new TestServiceProvider(serviceName, userName: null);
             Assert.True(EventLog.SourceExists(serviceName));
             _testService.DeleteTestServices();
@@ -180,7 +182,7 @@ namespace System.ServiceProcess.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full Framework receives the Connected Byte Code after the Exception Thrown Byte Code")]
         public void PropagateExceptionFromOnStart()
         {
             string serviceName = nameof(PropagateExceptionFromOnStart) + Guid.NewGuid().ToString();

@@ -94,6 +94,7 @@ namespace System.ServiceProcess.Tests
             testServiceInstaller.ServiceName = TestServiceName;
             testServiceInstaller.DisplayName = TestServiceDisplayName;
             testServiceInstaller.Description = "__Dummy Test Service__";
+            testServiceInstaller.Username = Username;
 
             if (_dependentServices != null)
             {
@@ -104,7 +105,6 @@ namespace System.ServiceProcess.Tests
             string processName = Process.GetCurrentProcess().MainModule.FileName;
             string entryPointName = typeof(TestService).Assembly.Location;
             string arguments = TestServiceName;
-            testServiceInstaller.Username = Username;
 
             // if process and entry point aren't the same then we are running hosted so pass
             // in the entrypoint as the first argument
