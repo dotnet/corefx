@@ -319,8 +319,11 @@ namespace Microsoft.Win32.SafeHandles
                 retVal = Interop.Ssl.SslShutdown(handle);
             }
 
-            // Clean up the errors
-            Interop.Crypto.ErrClearError();
+            if (retVal == -1)
+            {
+                // Clean up the errors
+                Interop.Crypto.ErrClearError();
+            }
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)
