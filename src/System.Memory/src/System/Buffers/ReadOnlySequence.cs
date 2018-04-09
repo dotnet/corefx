@@ -64,8 +64,9 @@ namespace System.Buffers
         {
             // Used by SliceImpl to create new ReadOnlySequence
             
-            // startSegment and endSegment can be null for default ReadOnlySequence
-            Debug.Assert(startSegment != null && endSegment != null || startSegment == null && endSegment == null && startIndexAndFlags == 0 && endIndexAndFlags ==  0);
+            // startSegment and endSegment can be null for default ReadOnlySequence only
+            Debug.Assert( (startSegment != null && endSegment != null) || 
+                (startSegment == null && endSegment == null && startIndexAndFlags == 0 && endIndexAndFlags ==  0) );
 
             _sequenceStart = new SequencePosition(startSegment, startIndexAndFlags);
             _sequenceEnd = new SequencePosition(endSegment, endIndexAndFlags);
