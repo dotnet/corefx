@@ -78,6 +78,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // This only applies where OpenSsl is used.
         public async Task SslStream_SendReceiveOverNetworkStream_AuthenticationException()
         {
             TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
@@ -90,7 +91,7 @@ namespace System.Net.Security.Tests
                 Task clientConnectTask = client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
                 Task<TcpClient> listenerAcceptTask = listener.AcceptTcpClientAsync();
 
-                await Task.WhenAll(clientConnectTask, listenerAcceptTask);
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(clientConnectTask, listenerAcceptTask);
 
                 TcpClient server = listenerAcceptTask.Result;
                 using (SslStream clientStream = new SslStream(
