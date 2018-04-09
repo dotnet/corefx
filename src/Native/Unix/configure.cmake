@@ -20,6 +20,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
     include_directories(SYSTEM /usr/local/include)
 elseif (CMAKE_SYSTEM_NAME STREQUAL NetBSD)
     set(PAL_UNIX_NAME \"NETBSD\")
+elseif (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set(PAL_UNIX_NAME \"WEBASSEMBLY\")
 else ()
     message(FATAL_ERROR "Unknown platform.  Cannot define PAL_UNIX_NAME, used by RuntimeInformation.")
 endif ()
@@ -91,24 +93,29 @@ check_function_exists(
     getifaddrs
     HAVE_GETIFADDRS)
 
-check_function_exists(
+check_symbol_exists(
     lseek64
+    unistd.h
     HAVE_LSEEK64)
 
-check_function_exists(
+check_symbol_exists(
     mmap64
+    sys/mman.h
     HAVE_MMAP64)
 
-check_function_exists(
+check_symbol_exists(
     ftruncate64
+    unistd.h
     HAVE_FTRUNCATE64)
 
-check_function_Exists(
+check_symbol_Exists(
     posix_fadvise64
+    fnctl.h
     HAVE_POSIX_FADVISE64)
 
-check_function_exists(
+check_symbol_exists(
     stat64
+    sys/stat.h
     HAVE_STAT64)
 
 check_symbol_exists(
@@ -116,12 +123,14 @@ check_symbol_exists(
     unistd.h
     HAVE_PIPE2)
 
-check_function_exists(
+check_symbol_exists(
     getmntinfo
+    mount.h
     HAVE_MNTINFO)
 
-check_function_exists(
+check_symbol_exists(
     strcpy_s
+    string.h
     HAVE_STRCPY_S)
 
 check_function_exists(
@@ -228,7 +237,7 @@ endif ()
 set(CMAKE_EXTRA_INCLUDE_FILES ${STATFS_INCLUDES})
 check_type_size(
     "struct statfs"
-    HAVE_STATFS
+    STATFS_SIZE
     BUILTIN_TYPES_ONLY)
 set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 # /statfs
@@ -302,8 +311,9 @@ check_c_source_compiles(
     "
     HAVE_SENDFILE_6)
 
-check_function_exists(
+check_symbol_exists(
     fcopyfile
+    copyfile.h
     HAVE_FCOPYFILE)
 
 check_include_files(
@@ -387,12 +397,14 @@ check_c_source_runs(
     "
     HAVE_CLOCK_REALTIME)
 
-check_function_exists(
+check_symbol_exists(
     mach_absolute_time
+    mach/mach_time.h
     HAVE_MACH_ABSOLUTE_TIME)
 
-check_function_exists(
+check_symbol_exists(
     mach_timebase_info
+    mach/mach_time.h
     HAVE_MACH_TIMEBASE_INFO)
 
 check_function_exists(
@@ -583,8 +595,9 @@ check_include_files(
     linux/rtnetlink.h
     HAVE_LINUX_RTNETLINK_H)
 
-check_function_exists(
+check_symbol_exists(
     getpeereid
+    unistd.h
     HAVE_GETPEEREID)
 
 check_function_exists(
@@ -594,6 +607,12 @@ check_function_exists(
 check_function_exists(
     uname
     HAVE_UNAME)
+
+check_symbol_exists(
+    ucred
+    sys/socket.h
+    HAVE_UCRED
+)
 
 # getdomainname on OSX takes an 'int' instead of a 'size_t'
 # check if compiling with 'size_t' would cause a warning
