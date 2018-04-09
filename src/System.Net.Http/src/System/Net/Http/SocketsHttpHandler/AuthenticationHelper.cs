@@ -159,6 +159,7 @@ namespace System.Net.Http
             // Any errors in obtaining parameter return false and we don't proceed with auth
             if (string.IsNullOrEmpty(parameter))
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, "Null parameter");
                 return false;
             }
 
@@ -251,11 +252,19 @@ namespace System.Net.Http
                                     {
                                         try
                                         {
+                                            if (NetEventSource.IsEnabled)
+                                            {
+                                                NetEventSource.Info(pool.PreAuthCredentials, $"Adding Basic credential to cache, uri={authUri}, username={challenge.Credential.UserName}");
+                                            }
                                             pool.PreAuthCredentials.Add(authUri, BasicScheme, challenge.Credential);
                                         }
                                         catch (ArgumentException)
                                         {
                                             // The credential already existed.
+                                            if (NetEventSource.IsEnabled)
+                                            {
+                                                NetEventSource.Info(pool.PreAuthCredentials, $"Basic credential present in cache, uri={authUri}, username={challenge.Credential.UserName}");
+                                            }
                                         }
                                     }
                                     break;
