@@ -752,6 +752,7 @@ namespace System.Net.Http
                     // Remove the operation from the multi handle so we can shut down the multi handle cleanly
                     CURLMcode removeResult = Interop.Http.MultiRemoveHandle(_multiHandle, activeRequest.EasyHandle);
                     Debug.Assert(removeResult == CURLMcode.CURLM_OK, "Failed to remove easy handle"); // ignore cleanup errors in release
+                    Interop.Crypto.ErrClearError(); // Do not risk any SSL error leaking via curl calls to SSL_shutdown
 
                     // Release the associated GCHandle so that it's not kept alive forever
                     if (gcHandlePtr != IntPtr.Zero)
