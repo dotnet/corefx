@@ -40,8 +40,10 @@ get_current_linux_name() {
         echo "rhel"
         return 0
     elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
-        echo "debian"
-        return 0
+        if [ "$(cat /etc/*-release | grep VERSION_ID= | cut -d "=" -f2)" -eq "8" ]; then
+            echo "debian"
+            return 0
+        fi
     elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
         echo -n "fedora."; cat /etc/*-release | grep  VERSION_ID= | cut -d "=" -f2
         return 0;
@@ -58,8 +60,8 @@ get_current_linux_name() {
         return 0
     fi
 
-    # Cannot determine Linux distribution, assuming Ubuntu 14.04.
-    echo "ubuntu"
+    # Cannot determine Linux distribution, use portable linux cli
+    echo "linux"
     return 0
 }
 
@@ -78,9 +80,9 @@ OSName=$(uname -s)
             ;;
 
         *)
-            echo "Unsupported OS '$OSName' detected. Downloading ubuntu-x64 tools."
+        echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
             OS=Linux
-            __DOTNET_PKG=dotnet-dev-ubuntu-x64
+            __DOTNET_PKG=dotnet-dev-linux-x64
             ;;
   esac
 fi
