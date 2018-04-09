@@ -14,7 +14,7 @@ namespace System.Buffers.Tests
         private const int InnerCount = 10_000;
         volatile static int _volatileInt = 0;
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Byte_Array(int bufSize, int bufOffset)
         {
@@ -25,7 +25,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<byte> memory in buffer)
                             localInt ^= memory.Length;
@@ -35,7 +35,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Byte_Memory(int bufSize, int bufOffset)
         {
@@ -47,7 +47,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<byte> memory in buffer)
                             localInt ^= memory.Length;
@@ -57,7 +57,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Byte_SingleSegment(int bufSize, int bufOffset)
         {
@@ -69,7 +69,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<byte> memory in buffer)
                             localInt ^= memory.Length;
@@ -104,7 +104,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Byte_Empty()
         {
             ReadOnlySequence<byte> buffer = ReadOnlySequence<byte>.Empty;
@@ -114,7 +114,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<byte> memory in buffer)
                             localInt ^= memory.Length;
@@ -124,7 +124,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Byte_Default()
         {
             ReadOnlySequence<byte> buffer = default;
@@ -134,7 +134,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<byte> memory in buffer)
                             localInt ^= memory.Length;
@@ -144,7 +144,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Char_Array(int bufSize, int bufOffset)
         {
@@ -155,7 +155,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;
@@ -165,7 +165,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Char_Memory(int bufSize, int bufOffset)
         {
@@ -177,7 +177,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;
@@ -187,7 +187,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void Char_SingleSegment(int bufSize, int bufOffset)
         {
@@ -199,7 +199,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;
@@ -234,7 +234,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         [InlineData(10_000, 100)]
         private static void String(int bufSize, int bufOffset)
         {
@@ -247,7 +247,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;
@@ -257,7 +257,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Char_Empty()
         {
             ReadOnlySequence<char> buffer = ReadOnlySequence<char>.Empty;
@@ -267,7 +267,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;
@@ -277,7 +277,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Char_Default()
         {
             ReadOnlySequence<char> buffer = default;
@@ -287,7 +287,7 @@ namespace System.Buffers.Tests
                 int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount * 10; i++)
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
                         foreach(ReadOnlyMemory<char> memory in buffer)
                             localInt ^= memory.Length;

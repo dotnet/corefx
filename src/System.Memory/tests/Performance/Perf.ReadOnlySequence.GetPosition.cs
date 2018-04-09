@@ -19,6 +19,7 @@ namespace System.Buffers.Tests
         {
             var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
             int offset = (int)buffer.Length / 10;
+            SequencePosition end = buffer.GetPosition(0, buffer.End);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -27,11 +28,11 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        SequencePosition p = buffer.Start;
-                        for (int j = 0; j < 10; j++)
+                        SequencePosition pos = buffer.Start;
+                        while (pos != end)
                         {
-                            p = buffer.GetPosition(offset, p);
-                            localInt ^= p.GetInteger();
+                            pos = buffer.GetPosition(offset, pos);
+                            localInt ^= pos.GetInteger();
                         }
                     }
                 }
@@ -49,6 +50,7 @@ namespace System.Buffers.Tests
                 segment2 = segment2.Append(new byte[bufSize / 10]);
             var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
             int offset = (int)buffer.Length / 10;
+            SequencePosition end = buffer.GetPosition(0, buffer.End);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -57,11 +59,11 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        SequencePosition p = buffer.Start;
-                        for (int j = 0; j < 10; j++)
+                        SequencePosition pos = buffer.Start;
+                        while (pos != end)
                         {
-                            p = buffer.GetPosition(offset, p);
-                            localInt ^= p.GetInteger();
+                            pos = buffer.GetPosition(offset, pos);
+                            localInt ^= pos.GetInteger();
                         }
                     }
                 }
@@ -69,7 +71,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Byte_Empty()
         {
             ReadOnlySequence<byte> buffer = ReadOnlySequence<byte>.Empty;
@@ -81,18 +83,15 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < 10; j++)
-                        {
-                            SequencePosition p = buffer.GetPosition(0);
-                            localInt ^= p.GetInteger();
-                        }
+                        SequencePosition pos = buffer.GetPosition(0);
+                        localInt ^= pos.GetInteger();
                     }
                 }
                 _volatileInt = localInt;
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Byte_Default()
         {
             ReadOnlySequence<byte> buffer = default;
@@ -104,11 +103,8 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < 10; j++)
-                        {
-                            SequencePosition p = buffer.GetPosition(0);
-                            localInt ^= p.GetInteger();
-                        }
+                        SequencePosition pos = buffer.GetPosition(0);
+                        localInt ^= pos.GetInteger();
                     }
                 }
                 _volatileInt = localInt;
@@ -123,9 +119,9 @@ namespace System.Buffers.Tests
             BufferSegment<char> segment2 = segment1;
             for (int j = 0; j < 10; j++)
                 segment2 = segment2.Append(new char[bufSize / 10]);
-
             var buffer = new ReadOnlySequence<char>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
             int offset = (int)buffer.Length / 10;
+            SequencePosition end = buffer.GetPosition(0, buffer.End);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -134,11 +130,11 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        SequencePosition p = buffer.Start;
-                        for (int j = 0; j < 10; j++)
+                        SequencePosition pos = buffer.Start;
+                        while (pos != end)
                         {
-                            p = buffer.GetPosition(offset, p);
-                            localInt ^= p.GetInteger();
+                            pos = buffer.GetPosition(offset, pos);
+                            localInt ^= pos.GetInteger();
                         }
                     }
                 }
@@ -154,6 +150,7 @@ namespace System.Buffers.Tests
             memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
             var buffer = new ReadOnlySequence<char>(memory);
             int offset = (int)buffer.Length / 10;
+            SequencePosition end = buffer.GetPosition(0, buffer.End);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -162,11 +159,11 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        SequencePosition p = buffer.Start;
-                        for (int j = 0; j < 10; j++)
+                        SequencePosition pos = buffer.Start;
+                        while (pos != end)
                         {
-                            p = buffer.GetPosition(offset, p);
-                            localInt ^= p.GetInteger();
+                            pos = buffer.GetPosition(offset, pos);
+                            localInt ^= pos.GetInteger();
                         }
                     }
                 }
@@ -174,7 +171,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Char_Empty()
         {
             ReadOnlySequence<char> buffer = ReadOnlySequence<char>.Empty;
@@ -186,18 +183,15 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < 10; j++)
-                        {
-                            SequencePosition p = buffer.GetPosition(0);
-                            localInt ^= p.GetInteger();
-                        }
+                        SequencePosition p = buffer.GetPosition(0);
+                        localInt ^= p.GetInteger();
                     }
                 }
                 _volatileInt = localInt;
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount * 10)]
         private static void Char_Default()
         {
             ReadOnlySequence<char> buffer = default;
@@ -209,11 +203,8 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for (int j = 0; j < 10; j++)
-                        {
-                            SequencePosition p = buffer.GetPosition(0);
-                            localInt ^= p.GetInteger();
-                        }
+                        SequencePosition p = buffer.GetPosition(0);
+                        localInt ^= p.GetInteger();
                     }
                 }
                 _volatileInt = localInt;
