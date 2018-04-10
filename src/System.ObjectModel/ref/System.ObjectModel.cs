@@ -195,6 +195,17 @@ namespace System.ComponentModel
         public virtual string PropertyName { get { throw null; } }
     }
     public delegate void PropertyChangingEventHandler(object sender, System.ComponentModel.PropertyChangingEventArgs e);
+    [System.AttributeUsageAttribute((System.AttributeTargets)(32767))]
+    public sealed partial class TypeConverterAttribute : System.Attribute
+    {
+        public static readonly System.ComponentModel.TypeConverterAttribute Default;
+        public TypeConverterAttribute() { }
+        public TypeConverterAttribute(string typeName) { }
+        public TypeConverterAttribute(System.Type type) { }
+        public string ConverterTypeName { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+    }
 }
 namespace System.Windows.Input
 {
