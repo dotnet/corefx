@@ -15,7 +15,6 @@ __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
 __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
 
-# Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
 get_current_linux_name() {
     # Detect Distro name and version
     __DISTRO_TYPE="$(cat /etc/*-release | grep -w ID | cut -d "=" -f2 | tr -d '"')"
@@ -33,11 +32,6 @@ get_current_linux_name() {
         [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
         [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
         echo $__DISTRO_NAME
-    elif [ "$__DISTRO_NAME" == "ubuntu.14.04" ] ||
-        [ "$__DISTRO_NAME" == "centos.7" ] ||
-        [ "$__DISTRO_NAME" == "rhel.7" ]; then
-        # The CLI for these versions doesn't include the version number in the link.
-        echo $__DISTRO_TYPE
     else
         echo "linux"
     fi
@@ -59,7 +53,7 @@ OSName=$(uname -s)
             ;;
 
         *)
-        echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
+            echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
             OS=Linux
             __DOTNET_PKG=dotnet-dev-linux-x64
             ;;
