@@ -5,12 +5,17 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if !FEATURE_PORTABLE_SPAN
+using Internal.Runtime.CompilerServices;
+#endif // FEATURE_PORTABLE_SPAN
 
 namespace System.Buffers
 {
     /// <summary>
     /// Represents a sequence that can read a sequential series of <typeparam name="T" />.
     /// </summary>
+    [DebuggerTypeProxy(typeof(ReadOnlySequenceDebugView<>))]
+    [DebuggerDisplay("{ToString(),raw}")]
     public readonly partial struct ReadOnlySequence<T>
     {
         private readonly SequencePosition _sequenceStart;
@@ -23,7 +28,7 @@ namespace System.Buffers
         public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(SpanHelpers.PerTypeValues<T>.EmptyArray);
 #else
         public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(Array.Empty<T>());
-#endif // FEATURE_PORTABLE_SPAN 
+#endif // FEATURE_PORTABLE_SPAN
 
         /// <summary>
         /// Length of the <see cref="ReadOnlySequence{T}"/>.
@@ -63,8 +68,10 @@ namespace System.Buffers
         private ReadOnlySequence(object startSegment, int startIndexAndFlags, object endSegment, int endIndexAndFlags)
         {
             // Used by SliceImpl to create new ReadOnlySequence
-            Debug.Assert(startSegment != null);
-            Debug.Assert(endSegment != null);
+            
+            // startSegment and endSegment can be null for default ReadOnlySequence only
+            Debug.Assert( (startSegment != null && endSegment != null) || 
+                (startSegment == null && endSegment == null && startIndexAndFlags == 0 && endIndexAndFlags ==  0) );
 
             _sequenceStart = new SequencePosition(startSegment, startIndexAndFlags);
             _sequenceEnd = new SequencePosition(endSegment, endIndexAndFlags);
@@ -155,6 +162,9 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(long start, long length)
         {
+            if (start < 0 || length < 0)
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
+
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
@@ -167,6 +177,8 @@ namespace System.Buffers
         /// <param name="end">The end (inclusive) of the slice</param>
         public ReadOnlySequence<T> Slice(long start, SequencePosition end)
         {
+            if (start < 0)
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -186,7 +198,10 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, long length)
         {
-            BoundsCheck(start, _sequenceEnd);
+            BoundsCheck(start, _sequenceEnd); // check start before length
+            if (length < 0)
+                // Passing value >= 0 means throw exception on length argument
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
@@ -199,6 +214,9 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(int start, int length)
         {
+            if (start < 0 || length < 0)
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
+
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             SequencePosition end = Seek(begin, _sequenceEnd, length);
             return SliceImpl(begin, end);
@@ -211,6 +229,8 @@ namespace System.Buffers
         /// <param name="end">The end (inclusive) of the slice</param>
         public ReadOnlySequence<T> Slice(int start, SequencePosition end)
         {
+            if (start < 0)
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
             BoundsCheck(end, _sequenceEnd);
 
             SequencePosition begin = Seek(_sequenceStart, end, start);
@@ -230,7 +250,10 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, int length)
         {
-            BoundsCheck(start, _sequenceEnd);
+            BoundsCheck(start, _sequenceEnd); // check start before length
+            if (length < 0)
+                // Passing value >= 0 means throw exception on length argument
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
             SequencePosition end = Seek(start, _sequenceEnd, length);
             return SliceImpl(start, end);
@@ -266,17 +289,49 @@ namespace System.Buffers
         /// <param name="start">The start index at which to begin this slice.</param>
         public ReadOnlySequence<T> Slice(long start)
         {
+            if (start < 0)
+                ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
+
             if (start == 0)
-            {
                 return this;
-            }
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
             return SliceImpl(begin, _sequenceEnd);
         }
 
         /// <inheritdoc />
-        public override string ToString() => string.Format("System.Buffers.ReadOnlySequence<{0}>[{1}]", typeof(T).Name, Length);
+        public override string ToString()
+        {
+            if (typeof(T) == typeof(char))
+            {
+                ReadOnlySequence<T> localThis = this;
+                ReadOnlySequence<char> charSequence = Unsafe.As<ReadOnlySequence<T>, ReadOnlySequence<char>>(ref localThis);
+
+                if (SequenceMarshal.TryGetString(charSequence, out string text, out int start, out int length))
+                {
+                    return text.Substring(start, length);
+                }
+
+                if (Length < int.MaxValue)
+                {
+#if !FEATURE_PORTABLE_SPAN
+                    return string.Create((int)Length, charSequence, (span, sequence) =>
+                    {
+                        foreach (ReadOnlyMemory<char> readOnlyMemory in sequence)
+                        {
+                            ReadOnlySpan<char> sourceSpan = readOnlyMemory.Span;
+                            sourceSpan.CopyTo(span);
+                            span = span.Slice(sourceSpan.Length);
+                        }
+                    });
+#else
+                    return new string(charSequence.ToArray());
+#endif
+                }
+            }
+
+            return string.Format("System.Buffers.ReadOnlySequence<{0}>[{1}]", typeof(T).Name, Length);
+        }
 
         /// <summary>
         /// Returns an enumerator over the <see cref="ReadOnlySequence{T}"/>
@@ -294,7 +349,7 @@ namespace System.Buffers
         public SequencePosition GetPosition(long offset, SequencePosition origin)
         {
             if (offset < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
             return Seek(origin, _sequenceEnd, offset);
         }

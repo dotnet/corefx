@@ -13,6 +13,8 @@ namespace Internal.Cryptography.Pal
 {
     internal static class CrlCache
     {
+        private const ulong X509_R_CERT_ALREADY_IN_HASH_TABLE = 0x0B07D065;
+
         public static void AddCrlForCertificate(
             X509Certificate2 cert,
             SafeX509StoreHandle store,
@@ -85,9 +87,15 @@ namespace Internal.Cryptography.Pal
 
                     if (!Interop.Crypto.X509StoreAddCrl(store, crl))
                     {
-                        // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                        // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                        Interop.Crypto.ErrClearError();
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
                     }
 
                     return true;
@@ -116,9 +124,15 @@ namespace Internal.Cryptography.Pal
                 {
                     if (!Interop.Crypto.X509StoreAddCrl(store, crl))
                     {
-                        // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                        // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                        Interop.Crypto.ErrClearError();
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
                     }
 
                     // Saving the CRL to the disk is just a performance optimization for later requests to not
