@@ -14,25 +14,16 @@ internal partial class Interop
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
         private static extern uint GetConsoleTitleW(ref char title, uint nSize);
 
-        // Used to handle API behavior difference between Windows 7 and later
-        private static uint s_sizeMultiplier = 1;
+        private static bool s_isWindows7 = GetIsWindows7();
 
-        internal static string GetConsoleTitle(out int error)
+        private static bool GetIsWindows7()
         {
-            string title = GetConsoleTitleInternal(out error);
-
-            if (title.EndsWith('\0'))
-            {
-                // In Windows 7 the passed in capacity is bytes, not unicode chars.
-                // Change our input multiplier and retry.
-                s_sizeMultiplier = 2;
-                return GetConsoleTitleInternal(out error);
-            }
-
-            return title;
+            // Version lies from the OS kick in starting with Windows 8 (6.2)
+            Version version = Environment.OSVersion.Version;
+            return version.Major == 6 && version.Minor == 1;
         }
 
-        private static string GetConsoleTitleInternal(out int error)
+        internal static string GetConsoleTitle(out int error)
         {
             error = Errors.ERROR_SUCCESS;
 
@@ -41,7 +32,8 @@ internal partial class Interop
 
             do
             {
-                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity * s_sizeMultiplier);
+                // Windows 7 copies count of bytes into the output buffer but returns count of chars.
+                uint result = GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity * (uint)(s_isWindows7 ? sizeof(char) : 1));
 
                 // The documentation asserts that the console's title is stored in a shared 64KB buffer.
                 // The magic number that used to exist here (24500) is likely related to that.

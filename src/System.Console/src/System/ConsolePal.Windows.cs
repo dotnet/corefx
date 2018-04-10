@@ -606,7 +606,7 @@ namespace System
             {
                 string title = Interop.Kernel32.GetConsoleTitle(out int error);
                 if (error != Interop.Errors.ERROR_SUCCESS)
-                    throw new IOException($"Error: {error}");
+                    throw Win32Marshal.GetExceptionForWin32Error(error, string.Empty);
 
                 return title;
             }

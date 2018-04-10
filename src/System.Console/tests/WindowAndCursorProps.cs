@@ -144,8 +144,15 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     public static void Title_Get_Windows_NoNulls()
     {
         string title = Console.Title;
-        string trimmedTitle = title.TrimEnd('\0');
-        Assert.Equal(trimmedTitle, title);
+        if (PlatformDetection.IsWindowsNanoServer)
+        {
+            Assert.NotNull(title);
+        }
+        else
+        {
+            string trimmedTitle = title.TrimEnd('\0');
+            Assert.Equal(trimmedTitle, title);
+        }
     }
 
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
@@ -169,7 +176,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
             string newTitle = new string('a', int.Parse(lengthOfTitleString));
             Console.Title = newTitle;
 
-            if (newTitle.Length > 513 && PlatformDetection.IsWindows10Version1703OrGreater && !PlatformDetection.IsWindows10Version1709OrGreater)
+            if (newTitle.Length >= 511 && !PlatformDetection.IsNetCore && PlatformDetection.IsWindows10Version1703OrGreater && !PlatformDetection.IsWindows10Version1709OrGreater)
             {
                 // RS2 has a bug when getting the window title when the title length is longer than 513 character
                 Assert.Throws<IOException>(() => Console.Title);
