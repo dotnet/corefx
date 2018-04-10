@@ -17,6 +17,9 @@ namespace System.MemoryTests
             int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
             var memory = new Memory<int>(a, 3, 2);
             memory.Validate(93, 94);
+
+            Memory<int> pinnedMemory = Memory<int>.CreateFromPinnedArray(a, 3, 2);
+            pinnedMemory.Validate(93, 94);
         }
 
         [Fact]
@@ -25,6 +28,9 @@ namespace System.MemoryTests
             long[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
             var memory = new Memory<long>(a, 4, 3);
             memory.Validate(94, 95, 96);
+
+            Memory<long> pinnedMemory = Memory<long>.CreateFromPinnedArray(a, 4, 3);
+            pinnedMemory.Validate(94, 95, 96);
         }
 
         [Fact]
@@ -33,6 +39,9 @@ namespace System.MemoryTests
             long[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
             var memory = new Memory<long>(a, 4, 5);
             memory.Validate(94, 95, 96, 97, 98);
+
+            Memory<long> pinnedMemory = Memory<long>.CreateFromPinnedArray(a, 4, 5);
+            pinnedMemory.Validate(94, 95, 96, 97, 98);
         }
 
         [Fact]
@@ -40,6 +49,8 @@ namespace System.MemoryTests
         {
             int[] a = new int[3];
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, -1, 0));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, -1, 0));
         }
 
         [Fact]
@@ -47,6 +58,8 @@ namespace System.MemoryTests
         {
             int[] a = new int[3];
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, 4, 0));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 4, 0));
         }
 
         [Fact]
@@ -54,6 +67,8 @@ namespace System.MemoryTests
         {
             int[] a = new int[3];
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, 0, -1));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 0, -1));
         }
 
         [Fact]
@@ -65,6 +80,12 @@ namespace System.MemoryTests
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, 1, 3));
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, 0, 4));
             Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(a, int.MaxValue, int.MaxValue));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 3, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 2, 2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 1, 3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, 0, 4));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Memory<int>.CreateFromPinnedArray(a, int.MaxValue, int.MaxValue));
         }
 
         [Fact]
@@ -74,6 +95,9 @@ namespace System.MemoryTests
             int[] a = { 91, 92, 93 };
             var memory = new Memory<int>(a, 3, 0);
             memory.Validate();
+
+            Memory<int> pinnedMemory = Memory<int>.CreateFromPinnedArray(a, 3, 0);
+            pinnedMemory.Validate();
         }
     }
 }
