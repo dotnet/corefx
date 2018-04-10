@@ -263,9 +263,16 @@ namespace System.Net.Http
                         cookiesFromContainer = null;
                     }
 
+                    HttpHeaderParser parser = header.Key.Parser;
+                    string separator = HttpHeaderParser.DefaultSeparator;
+                    if (parser != null && parser.SupportsMultipleValues)
+                    {
+                        separator = parser.Separator;
+                    }
+
                     for (int i = 1; i < header.Value.Length; i++)
                     {
-                        await WriteTwoBytesAsync((byte)',', (byte)' ').ConfigureAwait(false);
+                        await WriteAsciiStringAsync(separator).ConfigureAwait(false);
                         await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
                     }
                 }
