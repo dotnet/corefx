@@ -4,8 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Xml.XPath;
 using System.Xml.Schema;
+using System.Xml.XPath;
 using System.Xml.Xsl.Qil;
 using System.Xml.Xsl.Runtime;
 using System.Xml.Xsl.XPath;
@@ -26,11 +26,6 @@ namespace System.Xml.Xsl.Xslt
             {
                 Debug.Assert(args == null || args.Length == 0, "Error message must already be composed in res");
                 throw new XslLoadException(SR.Xml_UserException, res);
-            }
-
-            public void ReportWarning(string res, params string[] args)
-            {
-                Debug.Fail("Should never get here");
             }
         }
 
@@ -411,9 +406,9 @@ namespace System.Xml.Xsl.Xslt
             if (name.NodeType == QilNodeType.LiteralString)
             {
                 string keyName = (string)(QilLiteral)name;
-                string prefix, local, nsUri;
+                string nsUri;
 
-                _compiler.ParseQName(keyName, out prefix, out local, new ThrowErrorHelper());
+                _compiler.ParseQName(keyName, out string prefix, out string local, new ThrowErrorHelper());
                 nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/true, prefix);
                 QilName qname = _f.QName(local, nsUri, prefix);
 
@@ -645,9 +640,9 @@ namespace System.Xml.Xsl.Xslt
         private XmlQualifiedName ResolveQNameThrow(bool ignoreDefaultNs, QilNode qilName)
         {
             string name = (string)(QilLiteral)qilName;
-            string prefix, local, nsUri;
+            string nsUri;
 
-            _compiler.ParseQName(name, out prefix, out local, new ThrowErrorHelper());
+            _compiler.ParseQName(name, out string prefix, out string local, new ThrowErrorHelper());
             nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/ignoreDefaultNs, prefix);
 
             return new XmlQualifiedName(local, nsUri);

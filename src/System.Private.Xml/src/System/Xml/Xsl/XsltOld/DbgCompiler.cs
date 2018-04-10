@@ -6,35 +6,29 @@ namespace System.Xml.Xsl.XsltOld
 {
     using System;
     using System.Collections;
-    using System.Xml;
+    using System.Diagnostics;
     using System.Xml.XPath;
     using System.Xml.Xsl.XsltOld.Debugger;
-    using System.Diagnostics;
-    using System.Runtime.Versioning;
 
     internal class DbgData
     {
-        private XPathNavigator _styleSheet;
         private VariableAction[] _variables;
-        public XPathNavigator StyleSheet { get { return _styleSheet; } }
-        public VariableAction[] Variables { get { return _variables; } }
+        public XPathNavigator StyleSheet { get; }
         public DbgData(Compiler compiler)
         {
             DbgCompiler dbgCompiler = (DbgCompiler)compiler;
-            _styleSheet = dbgCompiler.Input.Navigator.Clone();
+            StyleSheet = dbgCompiler.Input.Navigator.Clone();
             _variables = dbgCompiler.LocalVariables;
             dbgCompiler.Debugger.OnInstructionCompile(this.StyleSheet);
         }
         internal void ReplaceVariables(VariableAction[] vars) { _variables = vars; }
 
-        // static Empty:
-        private static DbgData s_nullDbgData = new DbgData();
         private DbgData()
         {
-            _styleSheet = null;
+            StyleSheet = null;
             _variables = Array.Empty<VariableAction>();
         }
-        public static DbgData Empty { get { return s_nullDbgData; } }
+        public static DbgData Empty { get; } = new DbgData();
     }
 
     internal class DbgCompiler : Compiler
@@ -323,12 +317,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ApplyImportsActionDbg : ApplyImportsAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -344,12 +334,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ApplyTemplatesActionDbg : ApplyTemplatesAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -365,12 +351,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class AttributeActionDbg : AttributeAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -386,12 +368,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class AttributeSetActionDbg : AttributeSetAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -407,12 +385,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class CallTemplateActionDbg : CallTemplateAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -428,12 +402,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class CommentActionDbg : CommentAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -449,12 +419,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class CopyActionDbg : CopyAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -470,12 +436,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class CopyOfActionDbg : CopyOfAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -491,12 +453,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ElementActionDbg : ElementAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -512,12 +470,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ForEachActionDbg : ForEachAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -540,12 +494,8 @@ namespace System.Xml.Xsl.XsltOld
         {
             internal IfActionDbg(ConditionType type) : base(type) { }
 
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -561,12 +511,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class MessageActionDbg : MessageAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -582,12 +528,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class NewInstructionActionDbg : NewInstructionAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -603,12 +545,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class NumberActionDbg : NumberAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -624,12 +562,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ProcessingInstructionActionDbg : ProcessingInstructionAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -646,7 +580,6 @@ namespace System.Xml.Xsl.XsltOld
         private class RootActionDbg : RootAction
         {
             private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
 
             // SxS: This method does not take any resource name and does not expose any resources to the caller.
             // It's OK to suppress the SxS warning.
@@ -686,12 +619,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class SortActionDbg : SortAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -707,12 +636,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class TemplateActionDbg : TemplateAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -733,12 +658,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class TextActionDbg : TextAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -754,12 +675,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class UseAttributeSetsActionDbg : UseAttributeSetsAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -775,12 +692,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class ValueOfActionDbg : ValueOfAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
@@ -798,7 +711,6 @@ namespace System.Xml.Xsl.XsltOld
         {
             internal VariableActionDbg(VariableType type) : base(type) { }
             private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
 
             internal override void Compile(Compiler compiler)
             {
@@ -819,12 +731,8 @@ namespace System.Xml.Xsl.XsltOld
 
         private class WithParamActionDbg : WithParamAction
         {
-            private DbgData _dbgData;
-            internal override DbgData GetDbgData(ActionFrame frame) { return _dbgData; }
-
             internal override void Compile(Compiler compiler)
             {
-                _dbgData = new DbgData(compiler);
                 base.Compile(compiler);
             }
 
