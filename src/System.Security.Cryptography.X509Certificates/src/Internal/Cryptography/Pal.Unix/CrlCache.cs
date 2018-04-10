@@ -87,11 +87,15 @@ namespace Internal.Cryptography.Pal
 
                     if (!Interop.Crypto.X509StoreAddCrl(store, crl))
                     {
-                        // Ignore cert already store throw on anything else, in both cases the error queue will be cleared.
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
                         if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
                             Interop.Crypto.ErrClearError();
+                        }
                         else
+                        {
                             throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
                     }
 
                     return true;
@@ -120,11 +124,15 @@ namespace Internal.Cryptography.Pal
                 {
                     if (!Interop.Crypto.X509StoreAddCrl(store, crl))
                     {
-                        // Ignore cert already store throw on anything else, in both cases the error queue will be cleared.
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
                         if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
                             Interop.Crypto.ErrClearError();
+                        }
                         else
+                        {
                             throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
                     }
 
                     // Saving the CRL to the disk is just a performance optimization for later requests to not
