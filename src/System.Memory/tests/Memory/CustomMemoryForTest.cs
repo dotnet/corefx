@@ -102,6 +102,10 @@ namespace System.MemoryTests
                 _noReferencesCalledCount++;
             }
         }
+
+        public Memory<T> CreateMemoryForTest(int length) => CreateMemory(length);
+
+        public Memory<T> CreateMemoryForTest(int start, int length) => CreateMemory(start, length);
     }
 }
 
