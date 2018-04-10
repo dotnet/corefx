@@ -222,7 +222,7 @@ internal partial class Interop
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool WinHttpDetectAutoProxyConfigUrl(
-            AutoDetectType autoDetectFlags,
+            uint autoDetectFlags,
             out IntPtr autoConfigUrl);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]

@@ -612,7 +612,7 @@ internal static partial class Interop
         }
 
         public static bool WinHttpDetectAutoProxyConfigUrl(
-            AutoDetectType autoDetectFlags,
+            uint autoDetectFlags,
             out IntPtr autoConfigUrl)
         {
             if (FakeRegistry.WinInetProxySettings.AutoDetect)

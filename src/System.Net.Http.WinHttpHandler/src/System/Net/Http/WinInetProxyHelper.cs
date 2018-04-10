@@ -14,18 +14,16 @@ namespace System.Net.Http
     internal class WinInetProxyHelper
     {
         private bool _useProxy = false;
-        private bool _scriptDetectionFailed = false;
 
         public WinInetProxyHelper()
         {
-            // If auto-detect the URL for the proxy auto-config file failed, cache the information.
-            DetectScriptLocation();
+            // When running on platform earlier than Win8.1/Win2K12R2 which doesn't support
+            // WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, we'll need to read the proxy settings ourselves.
+            GetIEProxySetting();
 
-            // Unable to find an auto-config file.
-            // Check whether a proxy server is listed in Internet Explorer's settings.
-            if (_scriptDetectionFailed && string.IsNullOrEmpty(AutoConfigUrl))
+            if (AutoDetect)
             {
-                GetIEProxySetting();
+                DetectScriptLocation();
             }
         }
 
@@ -156,54 +154,42 @@ namespace System.Net.Http
 
         private void DetectScriptLocation()
         {
-            if (_scriptDetectionFailed || AutoConfigUrl != null)
-            {
-                return;
-            }
-
-            WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery PROXY_AUTO_DETECT_TYPE_DHCP.");
-            AutoConfigUrl = GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType.Dhcp);
-
-            if (AutoConfigUrl == null)
-            {
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Attempting discovery AUTO_DETECT_TYPE_DNS_A.");
-                AutoConfigUrl = GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType.DnsA);
-            }
-            else
-            {
-                // Auto-detect succeeded.
-                return;
-            }
-
-            if (AutoConfigUrl == null)
-            {
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Auto discovery failed.");
-                AutoDetect = false;
-                _scriptDetectionFailed = true;
-            }
-        }
-
-        private string GetAutoProxyConfigUrl(Interop.WinHttp.AutoDetectType discoveryMethod)
-        {
-            string url = null;
+            WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Start auto discovery.");
             IntPtr autoProxyUrl = new IntPtr();
 
             try
             {
-                bool success = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(discoveryMethod, out autoProxyUrl);
+                bool success = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(
+                    Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DHCP | Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DNS_A,
+                    out autoProxyUrl);
 
                 if (success)
                 {
-                    url = Marshal.PtrToStringUni(autoProxyUrl);
+                    // AutoDetect has precedence over the other settings.
+                    // If there is already a automatic configuration script location, override the value.
+                    AutoConfigUrl = Marshal.PtrToStringUni(autoProxyUrl);
                     _useProxy = true;
+                }
+                else
+                {
+                    if (AutoConfigUrl == null)
+                    {
+                        WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Auto discovery failed.");
+
+                        // This is to improve performance. For example, on home networks, where auto-detect will always
+                        // fail, but IE settings turn auto-detect ON by default. So in home networks on each
+                        // call we would try to retrieve the PAC location.
+
+                        // The downside of this approach is that if after some time the PAC file can be downloaded,
+                        // we will skip it.
+                        AutoDetect = false;
+                    }
                 }
             }
             finally
             {
                 Marshal.FreeHGlobal(autoProxyUrl);
             }
-
-            return url;
         }
 
         private void GetIEProxySetting()
