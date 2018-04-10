@@ -42,7 +42,6 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
                     if [ -e /etc/os-release ]; then
                         source /etc/os-release
                         __DISTRO_NAME=$ID.$VERSION_ID
-                        echo $__DISTRO_NAME
                         if  [ "$__DISTRO_NAME" == 'ubuntu.16.04' ] ||
                             [ "$__DISTRO_NAME" == 'ubuntu.16.10' ] ||
                             [ "$__DISTRO_NAME" == 'ubuntu.18.04' ] ||
@@ -54,7 +53,6 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
                             [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
                             [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
                             __PKG_RID=$__DISTRO_NAME
-                            echo $__DISTRO_NAME
                         fi
                     fi
                     
