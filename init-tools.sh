@@ -31,6 +31,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
             OSName=$(uname -s)
             case $OSName in
                 Darwin)
+                    __PKG_RID=osx
                     OS=OSX
                     ulimit -n 2048
                     ;;
