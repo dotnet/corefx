@@ -398,5 +398,19 @@ namespace System.Net
 
             return true;
         }
+
+        // parse String to DateTime format.
+        public static DateTime StringToDate(String S)
+        {
+            DateTime dtOut;
+            if (HttpDateParse.ParseHttpDate(S, out dtOut))
+            {
+                return dtOut;
+            }
+            else
+            {
+                throw new ProtocolViolationException(SR.net_baddate);
+            }
+        }
     }
 }
