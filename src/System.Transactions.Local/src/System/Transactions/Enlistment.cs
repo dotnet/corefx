@@ -20,21 +20,11 @@ namespace System.Transactions
 
         void Committed();
 
-        void Aborted();
-
         void Aborted(Exception e);
-
-        void InDoubt();
 
         void InDoubt(Exception e);
 
         byte[] GetRecoveryInformation();
-
-        InternalEnlistment InternalEnlistment
-        {
-            get;
-            set;
-        }
     }
 
     //
@@ -42,7 +32,7 @@ namespace System.Transactions
     // There are derived classes to support durable, phase1 volatile & PSPE
     // enlistments.
     //
-    internal class InternalEnlistment : ISinglePhaseNotificationInternal
+    internal class InternalEnlistment
     {
         // Storage for the state of the enlistment.
         internal EnlistmentState _twoPhaseState;
@@ -266,56 +256,6 @@ namespace System.Transactions
                 Debug.Assert(false, "ResourceManagerIdentifier called for non durable enlistment");
                 throw new NotImplementedException();
             }
-        }
-
-        void ISinglePhaseNotificationInternal.SinglePhaseCommit(IPromotedEnlistment singlePhaseEnlistment)
-        {
-            bool spcCommitted = false;
-            _promotedEnlistment = singlePhaseEnlistment;
-            try
-            {
-                _singlePhaseNotifications.SinglePhaseCommit(SinglePhaseEnlistment);
-                spcCommitted = true;
-            }
-            finally
-            {
-                if (!spcCommitted)
-                {
-                    SinglePhaseEnlistment.InDoubt();
-                }
-            }
-        }
-
-        void IEnlistmentNotificationInternal.Prepare(
-            IPromotedEnlistment preparingEnlistment
-            )
-        {
-            _promotedEnlistment = preparingEnlistment;
-            _twoPhaseNotifications.Prepare(PreparingEnlistment);
-        }
-
-        void IEnlistmentNotificationInternal.Commit(
-            IPromotedEnlistment enlistment
-            )
-        {
-            _promotedEnlistment = enlistment;
-            _twoPhaseNotifications.Commit(Enlistment);
-        }
-
-        void IEnlistmentNotificationInternal.Rollback(
-            IPromotedEnlistment enlistment
-            )
-        {
-            _promotedEnlistment = enlistment;
-            _twoPhaseNotifications.Rollback(Enlistment);
-        }
-
-        void IEnlistmentNotificationInternal.InDoubt(
-            IPromotedEnlistment enlistment
-            )
-        {
-            _promotedEnlistment = enlistment;
-            _twoPhaseNotifications.InDoubt(Enlistment);
         }
     }
 
