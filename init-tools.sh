@@ -17,51 +17,30 @@ __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
 
 # Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
 get_current_linux_name() {
-    # Detect Distro
-    if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
-            echo "ubuntu.16.04"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 16.10)" -eq 1 ]; then
-            echo "ubuntu.16.10"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 18.04)" -eq 1 ]; then
-            echo "ubuntu.18.04"
-            return 0
-        fi
-        echo "ubuntu"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
-        echo "centos"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-        echo "rhel"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep VERSION_ID= | cut -d "=" -f2)" -eq "8" ]; then
-            echo "debian"
-            return 0
-        fi
-    elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
-        echo -n "fedora."; cat /etc/*-release | grep  VERSION_ID= | cut -d "=" -f2
-        return 0;
-    elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
-            echo "opensuse.13.2"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 42.1)" -eq 1 ]; then
-            echo "opensuse.42.1"
-            return 0
-        fi 
-        echo "opensuse.42.3"
-        return 0
-    fi
+    # Detect Distro name and version
+    __DISTRO_TYPE="$(cat /etc/*-release | grep -w ID | cut -d "=" -f2 | tr -d '"')"
+    __DISTRO_VERSION="$(cat /etc/*-release | grep -w VERSION_ID | cut -d "=" -f2 | tr -d '"')"
+    __DISTRO_NAME=$__DISTRO_TYPE.$__DISTRO_VERSION
 
-    # Cannot determine Linux distribution, use portable linux cli
-    echo "linux"
+    if  [ "$__DISTRO_NAME" == 'ubuntu.16.04' ] ||
+        [ "$__DISTRO_NAME" == 'ubuntu.16.10' ] ||
+        [ "$__DISTRO_NAME" == 'ubuntu.18.04' ] ||
+        [ "$__DISTRO_NAME" == 'debian.8' ] ||
+        [ "$__DISTRO_NAME" == 'fedora.23' ] ||
+        [ "$__DISTRO_NAME" == 'fedora.24' ] ||
+        [ "$__DISTRO_NAME" == 'fedora.27' ] ||
+        [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
+        [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
+        [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
+        echo $__DISTRO_NAME
+    elif [ "$__DISTRO_NAME" == "ubuntu.14.04" ] ||
+        [ "$__DISTRO_NAME" == "centos.7" ] ||
+        [ "$__DISTRO_NAME" == "rhel.7" ]; then
+        # The CLI for these versions doesn't include the version number in the link.
+        echo $__DISTRO_TYPE
+    else
+        echo "linux"
+    fi
     return 0
 }
 
