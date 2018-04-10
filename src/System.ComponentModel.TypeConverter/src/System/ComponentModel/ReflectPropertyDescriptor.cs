@@ -250,18 +250,17 @@ namespace System.ComponentModel
         {
             get
             {
+#if FEATURE_INOTIFYPROPERTYCHANGED
                 if (!_state[s_bitIPropChangedQueried])
                 {
-#if FEATURE_INOTIFYPROPERTYCHANGED
                     if (typeof(INotifyPropertyChanged).IsAssignableFrom(ComponentType))
                     {
                         _realIPropChangedEvent = TypeDescriptor.GetEvents(typeof(INotifyPropertyChanged))["PropertyChanged"];
                     }
-#endif
+    
                     _state[s_bitIPropChangedQueried] = true;
                 }
 
-#if FEATURE_INOTIFYPROPERTYCHANGED
                 return _realIPropChangedEvent;
 #else
                 return null;
