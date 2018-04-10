@@ -404,19 +404,16 @@ namespace System.Net.Http.Functional.Tests
         public async Task SendAsync_UserAgent_CorrectlyWritten()
         {
             string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.18 Safari/537.36";
-            string requestUri = "http://[::1234]";
             bool connectionAccepted = false;
 
-            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (var client = new HttpClient(handler))
                 {
-                    handler.Proxy = new WebProxy(proxyUri);
-                    var message = new HttpRequestMessage(HttpMethod.Post, requestUri);
+                    var message = new HttpRequestMessage(HttpMethod.Post, uri);
                     message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
-                    try { await client.SendAsync(message).ConfigureAwait(false); }
-                    catch { }
+                    await client.SendAsync(message).ConfigureAwait(false);
                 }
             }, server => server.AcceptConnectionAsync(async connection =>
             {
