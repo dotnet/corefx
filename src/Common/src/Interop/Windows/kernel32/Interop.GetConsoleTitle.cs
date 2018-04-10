@@ -19,6 +19,21 @@ internal partial class Interop
 
         internal static string GetConsoleTitle(out int error)
         {
+            string title = GetConsoleTitleInternal(out error);
+
+            if (title.EndsWith('\0'))
+            {
+                // In Windows 7 the passed in capacity is bytes, not unicode chars.
+                // Change our input multiplier and retry.
+                s_sizeMultiplier = 2;
+                return GetConsoleTitleInternal(out error);
+            }
+
+            return title;
+        }
+
+        private static string GetConsoleTitleInternal(out int error)
+        {
             error = Errors.ERROR_SUCCESS;
 
             Span<char> initialBuffer = stackalloc char[256];
@@ -55,15 +70,7 @@ internal partial class Interop
                 else
                 {
                     builder.Length = (int)result;
-                    string title = builder.ToString();
-                    if (title.EndsWith('\0'))
-                    {
-                        // In Windows 7 the passed in capacity is bytes, not unicode chars.
-                        // Change our input multiplier and retry.
-                        s_sizeMultiplier = 2;
-                        return GetConsoleTitle(out error);
-                    }
-                    return title;
+                    return builder.ToString();
                 }
             } while (true);
         }

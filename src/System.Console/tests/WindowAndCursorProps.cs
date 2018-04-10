@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -132,11 +131,21 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [PlatformSpecific(TestPlatforms.Windows)]
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Get_Windows()
     {
         Assert.NotNull(Console.Title);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
+    public static void Title_Get_Windows_NoNulls()
+    {
+        string title = Console.Title;
+        string trimmedTitle = title.TrimEnd('\0');
+        Assert.Equal(trimmedTitle, title);
     }
 
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
@@ -150,7 +159,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [InlineData(512)]
     [InlineData(513)]
     [InlineData(1024)]
-    [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior specific to Windows
+    [PlatformSpecific(TestPlatforms.Windows)]
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, the stream cannot be opened: there is no Console
     public static void Title_Set_Windows(int lengthOfTitle)
     {
