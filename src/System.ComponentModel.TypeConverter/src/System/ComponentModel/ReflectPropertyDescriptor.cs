@@ -72,9 +72,9 @@ namespace System.ComponentModel
         private MethodInfo _shouldSerializeMethod;      // the should serialize method
         private MethodInfo _resetMethod;                // the reset property method
         private EventDescriptor _realChangedEvent;           // <propertyname>Changed event handler on object
-#pragma warning disable CS0649
+#if FEATURE_INOTIFYPROPERTYCHANGED
         private EventDescriptor _realIPropChangedEvent;      // INotifyPropertyChanged.PropertyChanged event handler on object
-#pragma warning restore CS0649
+#endif
         private readonly Type _receiverType;               // Only set if we are an extender
 
         /// <summary>
@@ -261,7 +261,11 @@ namespace System.ComponentModel
                     _state[s_bitIPropChangedQueried] = true;
                 }
 
+#if FEATURE_INOTIFYPROPERTYCHANGED
                 return _realIPropChangedEvent;
+#else
+                return null;
+#endif
             }
         }
 
@@ -315,7 +319,7 @@ namespace System.ComponentModel
 #if VERIFY_REFLECTION_CHANGE
                             BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty;
                             _propInfo = _componentClass.GetProperty(Name, bindingFlags, null, PropertyType, Array.Empty<Type>(), Array.Empty<ParameterModifier>());
-#else 
+#else
                             _propInfo = _componentClass.GetProperty(Name, PropertyType, Array.Empty<Type>(), Array.Empty<ParameterModifier>());
 #endif
                         }
