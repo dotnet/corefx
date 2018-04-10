@@ -28,10 +28,12 @@
     <BuildNativePath Condition="'$(BuildNativePath)' == ''">$(BinDir)$(OSGroupPath).$(PackagePlatform).$(ConfigurationGroup)\Native\</BuildNativePath>
     <WinNativePath Condition="'$(WinNativePath)' == ''">$(BuildNativePath)</WinNativePath>
     <RHELNativePath Condition="'$(RHELNativePath)' == ''">$(BuildNativePath)</RHELNativePath>
-    <DebianNativePath Condition="'$(DebianNativePath)' == ''">$(BuildNativePath)</DebianNativePath>
+    <Debian8NativePath Condition="'$(Debian8NativePath)' == ''">$(BuildNativePath)</Debian8NativePath>
+    <Debian9NativePath Condition="'$(Debian9NativePath)' == ''">$(BuildNativePath)</Debian9NativePath>
     <Fedora23NativePath Condition="'$(Fedora23NativePath)' == ''">$(BuildNativePath)</Fedora23NativePath>
     <Fedora24NativePath Condition="'$(Fedora24NativePath)' == ''">$(BuildNativePath)</Fedora24NativePath>
     <Fedora27NativePath Condition="'$(Fedora27NativePath)' == ''">$(BuildNativePath)</Fedora27NativePath>
+    <Fedora28NativePath Condition="'$(Fedora28NativePath)' == ''">$(BuildNativePath)</Fedora28NativePath>
     <OSXNativePath Condition="'$(OSXNativePath)' == ''">$(BuildNativePath)</OSXNativePath>
     <OpenSuse132NativePath Condition="'$(OpenSuse132NativePath)' == ''">$(BuildNativePath)</OpenSuse132NativePath>
     <OpenSuse421NativePath Condition="'$(OpenSuse421NativePath)' == ''">$(BuildNativePath)</OpenSuse421NativePath>
