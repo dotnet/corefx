@@ -27,7 +27,7 @@ namespace System.SpanTests
             {
                 for (int i = 0; i < span.Length; i++)
                 {
-                    Assert.True(a[i], ptr[i]);
+                    Assert.Equal(a[i], ptr[i]);
                 }
             }
         }
@@ -66,8 +66,8 @@ namespace System.SpanTests
                 ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
 
-                span = Array.Empty<int>();
-                pinnableReference = ref span.GetPinnableReference();
+                ReadOnlySpan<int> spanFromEmptyArray = Array.Empty<int>();
+                pinnableReference = ref Unsafe.AsRef(in spanFromEmptyArray.GetPinnableReference());
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
             }
         }

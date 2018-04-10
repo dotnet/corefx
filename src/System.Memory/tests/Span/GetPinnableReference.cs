@@ -27,7 +27,7 @@ namespace System.SpanTests
             {
                 for (int i = 0; i < span.Length; i++)
                 {
-                    Assert.True(a[i], ptr[i]);
+                    Assert.Equal(a[i], ptr[i]);
                 }
             }
         }

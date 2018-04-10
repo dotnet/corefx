@@ -162,13 +162,10 @@ namespace System
         /// It can be used for pinning and is required to support the use of span within a fixed statement.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ref T GetPinnableReference()
-        {
-            if (_length == 0)
-                return ref SpanHelpers.PerTypeValues<T>.NullPtr;
-            else
-                return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
-        }
+        public unsafe ref T GetPinnableReference()
+            => ref (_length != 0) ?
+            ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset) :
+            ref Unsafe.AsRef<T>(null);
 
         /// <summary>
         /// Clears the contents of this span.
