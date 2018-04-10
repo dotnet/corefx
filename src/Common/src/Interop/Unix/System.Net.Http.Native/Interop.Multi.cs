@@ -93,6 +93,10 @@ internal static partial class Interop
                 bool result = MultiDestroy(handle) == CURLMcode.CURLM_OK;
                 Interop.Crypto.ErrClearError(); // Do not risk any SSL error leaking via curl calls to SSL_shutdown
                 SetHandle(IntPtr.Zero);
+
+#if !SYSNETHTTP_NO_OPENSSL
+                Interop.Crypto.ErrClearError(); // Ensure that no SSL errors were left on the queue by libcurl.
+#endif
                 return result;
             }
         }

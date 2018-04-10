@@ -754,6 +754,10 @@ namespace System.Net.Http
                     Debug.Assert(removeResult == CURLMcode.CURLM_OK, "Failed to remove easy handle"); // ignore cleanup errors in release
                     Interop.Crypto.ErrClearError(); // Do not risk any SSL error leaking via curl calls to SSL_shutdown
 
+#if !SYSNETHTTP_NO_OPENSSL
+                    Interop.Crypto.ErrClearError(); // Ensure that no SSL errors were left on the queue by libcurl.
+#endif
+
                     // Release the associated GCHandle so that it's not kept alive forever
                     if (gcHandlePtr != IntPtr.Zero)
                     {
