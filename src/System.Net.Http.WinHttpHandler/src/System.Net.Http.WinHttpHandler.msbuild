@@ -35,6 +35,7 @@
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpException.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpHandler.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestCallback.cs" />
+    <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestMessage.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestState.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestStream.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpResponseHeaderReader.cs" />
