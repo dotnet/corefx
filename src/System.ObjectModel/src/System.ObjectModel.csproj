@@ -26,6 +26,7 @@
     <Compile Include="System\ComponentModel\PropertyChangedEventHandler.cs" />
     <Compile Include="System\ComponentModel\PropertyChangingEventArgs.cs" />
     <Compile Include="System\ComponentModel\PropertyChangingEventHandler.cs" />
+    <Compile Include="System\Windows\Markup\ValueSerializerAttribute.cs" />
     <Compile Include="System\Windows\Input\ICommand.cs" />
   </ItemGroup>
   <ItemGroup>
