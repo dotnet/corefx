@@ -2,7 +2,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Http.Functional.Tests", "tests\FunctionalTests\System.Net.Http.Functional.Tests.csproj", "{C85CF035-7804-41FF-9557-48B7C948B58D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Http.Functional.Tests", "tests\FunctionalTests\Shared\System.Net.Http.Functional.Tests.csproj", "{C85CF035-7804-41FF-9557-48B7C948B58D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE} = {1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Http.Functional.PlatformHandler.Tests", "tests\FunctionalTests\PlatformHandler\System.Net.Http.Functional.PlatformHandler.Tests.csproj", "{2A2D0899-69C2-4E13-A263-92C6B45CFAD6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE} = {1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Http.Functional.SocketsHttpHandler.Tests", "tests\FunctionalTests\SocketsHttpHandler\System.Net.Http.Functional.SocketsHttpHandler.Tests.csproj", "{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE} = {1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}
 	EndProjectSection
@@ -35,6 +45,14 @@ Global
 		{C85CF035-7804-41FF-9557-48B7C948B58D}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
 		{C85CF035-7804-41FF-9557-48B7C948B58D}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
 		{C85CF035-7804-41FF-9557-48B7C948B58D}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
+		{2A2D0899-69C2-4E13-A263-92C6B45CFAD6}.Debug|Any CPU.ActiveCfg = uap-Windows_NT-Debug|Any CPU
+		{2A2D0899-69C2-4E13-A263-92C6B45CFAD6}.Debug|Any CPU.Build.0 = uap-Windows_NT-Debug|Any CPU
+		{2A2D0899-69C2-4E13-A263-92C6B45CFAD6}.Release|Any CPU.ActiveCfg = uap-Windows_NT-Release|Any CPU
+		{2A2D0899-69C2-4E13-A263-92C6B45CFAD6}.Release|Any CPU.Build.0 = uap-Windows_NT-Release|Any CPU
+		{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
+		{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
+		{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
+		{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
 		{5F9C3C9F-652E-461E-B2D6-85D264F5A733}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
 		{5F9C3C9F-652E-461E-B2D6-85D264F5A733}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
 		{5F9C3C9F-652E-461E-B2D6-85D264F5A733}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
@@ -53,6 +71,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C85CF035-7804-41FF-9557-48B7C948B58D} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{2A2D0899-69C2-4E13-A263-92C6B45CFAD6} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{2BC5A25E-5044-4B50-8B2E-B0A0610FA2B6} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{5F9C3C9F-652E-461E-B2D6-85D264F5A733} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
 		{132BF813-FC40-4D39-8B6F-E55D7633F0ED} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}

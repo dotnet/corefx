@@ -115,7 +115,6 @@
     <Compile Include="MessageProcessingHandlerTest.cs" />
     <Compile Include="MultipartContentTest.cs" />
     <Compile Include="MultipartFormDataContentTest.cs" />
-    <Compile Include="PlatformHandlerTest.cs" />
     <Compile Include="PostScenarioTest.cs" />
     <Compile Include="RepeatedFlushContent.cs" />
     <Compile Include="ResponseStreamTest.cs" />
@@ -132,7 +131,6 @@
     <Compile Include="HttpClientTest.netcoreapp.cs" />
     <Compile Include="HttpMethodTest.netcoreapp.cs" />
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
-    <Compile Include="SocketsHttpHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs">
