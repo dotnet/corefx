@@ -17,41 +17,13 @@ namespace System.Net.Http
 
         public WinInetProxyHelper()
         {
-            var proxyConfig = new Interop.WinHttp.WINHTTP_CURRENT_USER_IE_PROXY_CONFIG();
+            // When running on platform earlier than Win8.1/Win2K12R2 which doesn't support
+            // WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, we'll need to read the proxy settings ourselves.
+            GetIEProxySetting();
 
-            try
+            if (AutoDetect)
             {
-                if (Interop.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(out proxyConfig))
-                {
-                    AutoConfigUrl = Marshal.PtrToStringUni(proxyConfig.AutoConfigUrl);
-                    AutoDetect = proxyConfig.AutoDetect;
-                    Proxy = Marshal.PtrToStringUni(proxyConfig.Proxy);
-                    ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
-
-                    WinHttpTraceHelper.Trace(
-                        "WinInetProxyHelper.ctor: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
-                        AutoConfigUrl,
-                        AutoDetect,
-                        Proxy,
-                        ProxyBypass);
-                    _useProxy = true;
-                }
-                else
-                {
-                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
-                    int lastError = Marshal.GetLastWin32Error();
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: error={0}", lastError);
-                }
-
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: _useProxy={0}", _useProxy);
-            }
-
-            finally
-            {
-                // FreeHGlobal already checks for null pointer before freeing the memory.
-                Marshal.FreeHGlobal(proxyConfig.AutoConfigUrl);
-                Marshal.FreeHGlobal(proxyConfig.Proxy);
-                Marshal.FreeHGlobal(proxyConfig.ProxyBypass);
+                DetectScriptLocation();
             }
         }
 
@@ -88,6 +60,7 @@ namespace System.Net.Http
             proxyInfo.Proxy = IntPtr.Zero;
             proxyInfo.ProxyBypass = IntPtr.Zero;
 
+            // If no proxy is used, skip retriving proxy data.
             if (!_useProxy)
             {
                 return false;
@@ -177,6 +150,90 @@ namespace System.Net.Http
             WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: useProxy={0}", useProxy);
 
             return useProxy;
+        }
+
+        private void DetectScriptLocation()
+        {
+            WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Start auto discovery.");
+            IntPtr autoProxyUrl = new IntPtr();
+
+            try
+            {
+                bool success = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(
+                    Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DHCP | Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DNS_A,
+                    out autoProxyUrl);
+
+                if (success)
+                {
+                    // AutoDetect has precedence over the other settings.
+                    // If there is already a automatic configuration script location, override the value.
+                    AutoConfigUrl = Marshal.PtrToStringUni(autoProxyUrl);
+                    _useProxy = true;
+                }
+                else
+                {
+                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
+                    int lastError = Marshal.GetLastWin32Error();
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: error={0}", lastError);
+
+                    if (AutoConfigUrl == null)
+                    {
+                        WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Auto discovery failed.");
+
+                        // This is to improve performance. For example, on home networks, where auto-detect will always
+                        // fail, but IE settings turn auto-detect ON by default. So in home networks on each
+                        // call we would try to retrieve the PAC location.
+
+                        // The downside of this approach is that if after some time the PAC file can be downloaded,
+                        // we will skip it.
+                        AutoDetect = false;
+                    }
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(autoProxyUrl);
+            }
+        }
+
+        private void GetIEProxySetting()
+        {
+            var proxyConfig = new Interop.WinHttp.WINHTTP_CURRENT_USER_IE_PROXY_CONFIG();
+
+            try
+            {
+                if (Interop.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(out proxyConfig))
+                {
+                    AutoConfigUrl = Marshal.PtrToStringUni(proxyConfig.AutoConfigUrl);
+                    AutoDetect = proxyConfig.AutoDetect;
+                    Proxy = Marshal.PtrToStringUni(proxyConfig.Proxy);
+                    ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
+
+                    WinHttpTraceHelper.Trace(
+                        "WinInetProxyHelper.GetIEProxySetting: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
+                        AutoConfigUrl,
+                        AutoDetect,
+                        Proxy,
+                        ProxyBypass);
+
+                    _useProxy = true;
+                }
+                else
+                {
+                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
+                    int lastError = Marshal.GetLastWin32Error();
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.GetIEProxySetting: error={0}", lastError);
+                }
+
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.GetIEProxySetting: _useProxy={0}", _useProxy);
+            }
+            finally
+            {
+                // FreeHGlobal already checks for null pointer before freeing the memory.
+                Marshal.FreeHGlobal(proxyConfig.AutoConfigUrl);
+                Marshal.FreeHGlobal(proxyConfig.Proxy);
+                Marshal.FreeHGlobal(proxyConfig.ProxyBypass);
+            }
         }
     }
 }
