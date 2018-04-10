@@ -30,7 +30,18 @@ namespace System.MemoryTests
         [Fact]
         public static void MemoryManagerMemoryCtorInvalid()
         {
-            MemoryForInternalMemoryCreate<int> manager = new MemoryForInternalMemoryCreate<int>();
+            int[] a = { 91, 92, -93, 94 };
+            CustomMemoryForTest<int> manager = new CustomMemoryForTest<int>(a);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, 0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1, -1));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(0, a.Length + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(1, a.Length));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(-1));
             Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(0, -1));
@@ -159,20 +170,6 @@ namespace System.MemoryTests
 
             }
             Assert.Throws<ObjectDisposedException>(() => manager.GetSpan());
-        }
-
-
-        internal class MemoryForInternalMemoryCreate<T> : MemoryManager<T>
-        {
-            public MemoryForInternalMemoryCreate() { }
-
-            public Memory<T> CreateMemoryForTest(int length) => CreateMemory(length);
-            public Memory<T> CreateMemoryForTest(int start, int length) => CreateMemory(start, length);
-
-            public override Span<T> GetSpan() => throw new NotImplementedException();
-            public override MemoryHandle Pin(int elementIndex = 0) => throw new NotImplementedException();
-            protected override void Dispose(bool disposing) => throw new NotImplementedException();
-            public override void Unpin() => throw new NotImplementedException();
         }
     }
 }
