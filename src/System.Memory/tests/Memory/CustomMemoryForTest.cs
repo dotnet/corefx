@@ -31,7 +31,7 @@ namespace System.MemoryTests
 
         public int OnNoRefencesCalledCount => _noReferencesCalledCount;
 
-        public override int Length => _length;
+        public override Memory<byte> Memory => CreateMemory(_length);
 
         public bool IsDisposed => _disposed;
 
