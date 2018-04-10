@@ -132,16 +132,8 @@ namespace System.SpanTests
         [Fact]
         public static unsafe void CreateFromPinnedArrayVerifyPinning()
         {
-            int[] unpinnedArray = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
             int[] pinnedArray = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
-            GCHandle handle = GCHandle.Alloc(pinnedArray, GCHandleType.Pinned);
-
-            var memory = new Memory<int>(unpinnedArray, 0, 2);
-            void* ptr = Unsafe.AsPointer(ref MemoryMarshal.GetReference(memory.Span));
-
-            MemoryHandle memoryHandle = memory.Pin();
-            void* memoryHandlePtr = memoryHandle.Pointer;
-            memoryHandle.Dispose();
+            GCHandle pinnedGCHandle = GCHandle.Alloc(pinnedArray, GCHandleType.Pinned);
 
             Memory<int> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(pinnedArray, 0, 2);
             void* pinnedPtr = Unsafe.AsPointer(ref MemoryMarshal.GetReference(pinnedMemory.Span));
@@ -151,10 +143,9 @@ namespace System.SpanTests
             GC.Collect(2);
 
             Assert.Equal((int)pinnedPtr, (int)Unsafe.AsPointer(ref MemoryMarshal.GetReference(pinnedMemory.Span)));
-            Assert.NotEqual((int)ptr, (int)Unsafe.AsPointer(ref MemoryMarshal.GetReference(memory.Span)));
+            Assert.Equal((int)memoryHandlePinnedPtr, (int)pinnedGCHandle.AddrOfPinnedObject().ToPointer());
 
-            Assert.Equal((int)memoryHandlePinnedPtr, (int)handle.AddrOfPinnedObject().ToPointer());
-            Assert.NotEqual((int)memoryHandlePtr, (int)memory.Pin().Pointer);
+            pinnedGCHandle.Free();
         }
     }
 }
