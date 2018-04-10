@@ -158,6 +158,19 @@ namespace System
         }
 
         /// <summary>
+        /// Returns a reference to the 0th element of the Span. If the Span is empty, returns null reference.
+        /// It can be used for pinning and is required to support the use of span within a fixed statement.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ref T GetPinnableReference()
+        {
+            if (_length == 0)
+                return ref SpanHelpers.PerTypeValues<T>.NullPtr;
+            else
+                return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
+        }
+
+        /// <summary>
         /// Clears the contents of this span.
         /// </summary>
         public unsafe void Clear()

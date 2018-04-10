@@ -312,6 +312,8 @@ namespace System
                 T[] sampleArray = new T[1];
                 return Unsafe.ByteOffset<T>(ref Unsafe.As<Pinnable<T>>(sampleArray).Data, ref sampleArray[0]);
             }
+
+            public static T NullPtr = default;
         }
     }
 }
