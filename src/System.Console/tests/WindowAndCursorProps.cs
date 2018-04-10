@@ -144,13 +144,15 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     public static void Title_Get_Windows_NoNulls()
     {
         string title = Console.Title;
+        string trimmedTitle = title.TrimEnd('\0');
+
         if (PlatformDetection.IsWindowsNanoServer)
         {
-            Assert.NotNull(title);
+            // Nano server titles are currently broken
+            Assert.NotEqual(trimmedTitle, title);
         }
         else
         {
-            string trimmedTitle = title.TrimEnd('\0');
             Assert.Equal(trimmedTitle, title);
         }
     }
