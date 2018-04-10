@@ -263,6 +263,7 @@ namespace System.Net.Http
                         cookiesFromContainer = null;
                     }
 
+                    // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
                     HttpHeaderParser parser = header.Key.Parser;
                     string separator = HttpHeaderParser.DefaultSeparator;
                     if (parser != null && parser.SupportsMultipleValues)
