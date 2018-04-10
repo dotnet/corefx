@@ -96,6 +96,7 @@ internal static partial class Interop
 #if !SYSNETHTTP_NO_OPENSSL
                 Interop.Crypto.ErrClearError(); // Ensure that no SSL errors were left on the queue by libcurl.
 #endif
+
                 return result;
             }
         }
