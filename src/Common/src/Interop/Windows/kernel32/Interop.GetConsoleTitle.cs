@@ -63,6 +63,7 @@ internal partial class Interop
                         s_sizeMultiplier = 2;
                         return GetConsoleTitle(out error);
                     }
+                    return title;
                 }
             } while (true);
         }
