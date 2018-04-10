@@ -84,7 +84,10 @@ namespace System.Net.Http.Functional.Tests
 #pragma warning disable 0618
             if (PlatformDetection.IsWindows ||
                 PlatformDetection.IsOSX ||
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian))
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+                 PlatformDetection.OpenSslVersion < new Version(1, 0, 2) &&
+                 !PlatformDetection.IsDebian &&
+                 !PlatformDetection.IsRedHatFamily6))
             {
                 yield return new object[] { SslProtocols.Ssl3, true };
             }
