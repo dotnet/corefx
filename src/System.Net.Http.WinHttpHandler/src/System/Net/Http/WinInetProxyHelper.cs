@@ -172,6 +172,10 @@ namespace System.Net.Http
                 }
                 else
                 {
+                    // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
+                    int lastError = Marshal.GetLastWin32Error();
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: error={0}", lastError);
+
                     if (AutoConfigUrl == null)
                     {
                         WinHttpTraceHelper.Trace("WinInetProxyHelper.DetectScriptLocation: Auto discovery failed.");
@@ -206,7 +210,7 @@ namespace System.Net.Http
                     ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
 
                     WinHttpTraceHelper.Trace(
-                        "WinInetProxyHelper.ctor: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
+                        "WinInetProxyHelper.GetIEProxySetting: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
                         AutoConfigUrl,
                         AutoDetect,
                         Proxy,
@@ -218,10 +222,10 @@ namespace System.Net.Http
                 {
                     // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
                     int lastError = Marshal.GetLastWin32Error();
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: error={0}", lastError);
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.GetIEProxySetting: error={0}", lastError);
                 }
 
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: _useProxy={0}", _useProxy);
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.GetIEProxySetting: _useProxy={0}", _useProxy);
             }
             finally
             {
