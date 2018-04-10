@@ -55,13 +55,6 @@ namespace System.Transactions
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Serialization not yet supported and will be done using DistributedTransaction")]
     public class Transaction : IDisposable, ISerializable
     {
-        // UseServiceDomain
-        //
-        // Property tells parts of system.transactions if it should use a
-        // service domain for current.
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        internal static bool UseServiceDomainForCurrent() => false;
-
         // InteropMode
         //
         // This property figures out the current interop mode based on the

@@ -26,11 +26,6 @@ namespace System.Transactions
         public string TransactionIdentifier => _transactionIdentifier;
 
         private readonly int _cloneIdentifier;
-        /// <summary>
-        /// An integer value that allows different clones of the same
-        /// transaction to be distinguished in the tracing.
-        /// </summary>
-        public int CloneIdentifier => _cloneIdentifier;
 
         public override int GetHashCode() => base.GetHashCode();  // Don't have anything better to do.
 

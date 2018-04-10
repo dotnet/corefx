@@ -40,10 +40,6 @@ namespace System.Transactions
 
             return new TransactionException(message, innerException);
         }
-        internal static TransactionException CreateTransactionStateException(Exception innerException)
-        {
-            return Create(SR.TransactionStateException, innerException);
-        }
 
         internal static Exception CreateEnlistmentStateException(Exception innerException, Guid distributedTxId)
         {
@@ -119,24 +115,6 @@ namespace System.Transactions
                 messagewithTxId = string.Format(SR.DistributedTxIDInTransactionException, messagewithTxId, distributedTxId);
 
             return Create(messagewithTxId, innerException);
-        }
-
-        internal static TransactionException Create(TraceSourceType traceSource, string message, Exception innerException, Guid distributedTxId)
-        {
-            string messagewithTxId = message;
-            if (IncludeDistributedTxId(distributedTxId))
-                messagewithTxId = string.Format(SR.DistributedTxIDInTransactionException, messagewithTxId, distributedTxId);
-
-            return Create(traceSource, messagewithTxId, innerException);
-        }
-
-        internal static TransactionException Create(TraceSourceType traceSource, string message, Guid distributedTxId)
-        {
-            if (IncludeDistributedTxId(distributedTxId))
-            {
-                return new TransactionException(string.Format(SR.DistributedTxIDInTransactionException, message, distributedTxId));
-            }
-            return new TransactionException(message);
         }
 
         internal static TransactionException CreateTransactionStateException(Exception innerException, Guid distributedTxId)
@@ -220,15 +198,6 @@ namespace System.Transactions
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
-        internal TransactionAbortedException(Exception innerException) : base(SR.TransactionAborted, innerException)
-        {
-        }
-
         internal TransactionAbortedException(Exception innerException, Guid distributedTxId) :
             base(IncludeDistributedTxId(distributedTxId) ?
                 string.Format(SR.DistributedTxIDInTransactionException, SR.TransactionAborted, distributedTxId)
@@ -253,13 +222,13 @@ namespace System.Transactions
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionInDoubtException : TransactionException
     {
-        internal static new TransactionInDoubtException Create(TraceSourceType traceSource, string message, Exception innerException, Guid distributedTxId)
+        internal static TransactionInDoubtException Create(TraceSourceType traceSource, string message, Exception innerException, Guid distributedTxId)
         {
             string messagewithTxId = message;
             if (IncludeDistributedTxId(distributedTxId))
                 messagewithTxId = string.Format(SR.DistributedTxIDInTransactionException, messagewithTxId, distributedTxId);
 
-            return TransactionInDoubtException.Create(traceSource, messagewithTxId, innerException);
+            return Create(traceSource, messagewithTxId, innerException);
         }
 
         internal static new TransactionInDoubtException Create(TraceSourceType traceSource, string message, Exception innerException)
@@ -314,22 +283,6 @@ namespace System.Transactions
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionManagerCommunicationException : TransactionException
     {
-        internal static new TransactionManagerCommunicationException Create(string message, Exception innerException)
-        {
-            TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
-            if (etwLog.IsEnabled())
-            {
-                etwLog.TransactionExceptionTrace(TransactionExceptionType.TransactionManagerCommunicationException, message, innerException==null?String.Empty:innerException.ToString());
-            }
-
-            return new TransactionManagerCommunicationException(message, innerException);
-        }
-
-        internal static TransactionManagerCommunicationException Create(Exception innerException)
-        {
-            return Create(SR.TransactionManagerCommunicationException, innerException);
-        }
-
         /// <summary>
         ///
         /// </summary>

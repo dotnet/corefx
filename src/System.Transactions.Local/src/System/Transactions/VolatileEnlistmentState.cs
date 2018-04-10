@@ -6,8 +6,6 @@ using System.Threading;
 
 namespace System.Transactions
 {
-    internal delegate void FinishVolatileDelegate(InternalEnlistment enlistment);
-
     // Base class for all volatile enlistment states
     internal abstract class VolatileEnlistmentState : EnlistmentState
     {

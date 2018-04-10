@@ -2,16 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-//using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Collections;
 
 namespace System.Transactions
 {
@@ -241,32 +234,6 @@ namespace System.Transactions
         {
             SetActivityId(transactionIdentifier);
             WriteEvent(TRANSACTION_CLONECREATE_EVENTID, transactionIdentifier, type);
-        }
-        #endregion
-
-        #region Transaction Serialized
-        /// <summary>Trace an event when a transaction is serialized.</summary>
-        /// <param name="transaction">The transaction that was serialized.</param>
-        /// <param name="type">The type of transaction.</param>
-        [NonEvent]
-        internal void TransactionSerialized(Transaction transaction, string type)
-        {
-            Debug.Assert(transaction != null, "Transaction needed for the ETW event.");
-
-            if (IsEnabled(EventLevel.Informational, ALL_KEYWORDS))
-            {
-                if (transaction != null && transaction.TransactionTraceId != null)
-                    TransactionSerialized(transaction.TransactionTraceId.TransactionIdentifier, type);
-                else
-                    TransactionSerialized(string.Empty, type);
-            }
-        }
-
-        [Event(TRANSACTION_SERIALIZED_EVENTID, Keywords = Keywords.TraceLtm, Level = EventLevel.Informational, Task = Tasks.Transaction, Opcode = Opcodes.Serialized, Message = "Transaction Serialized. ID is {0}, type is {1}")]
-        private void TransactionSerialized(string transactionIdentifier, string type)
-        {
-            SetActivityId(transactionIdentifier);
-            WriteEvent(TRANSACTION_SERIALIZED_EVENTID, transactionIdentifier, type);
         }
         #endregion
 

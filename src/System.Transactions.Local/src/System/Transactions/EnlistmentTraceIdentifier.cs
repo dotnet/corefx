@@ -24,19 +24,8 @@ namespace System.Transactions
         }
 
         private readonly Guid _resourceManagerIdentifier;
-        /// <summary>
-        /// The Guid identifier of the resource manager that made the
-        /// enlistment.  If the enlistment is a Volatile enlistment,
-        /// this value will be Guid.Empty.
-        /// </summary>
-        public Guid ResourceManagerIdentifier => _resourceManagerIdentifier;
 
         private readonly TransactionTraceIdentifier _transactionTraceIdentifier;
-        /// <summary>
-        /// The TransactionTraceIdentifier for the transaction that is
-        /// enlisted upon.
-        /// </summary>
-        public TransactionTraceIdentifier TransactionTraceId => _transactionTraceIdentifier;
 
         private readonly int _enlistmentIdentifier;
         /// <summary>

@@ -289,58 +289,6 @@ namespace System.Transactions
             _promoteState = TransactionState.TransactionStateDelegatedSubordinate;
         }
 
-        internal static void DistributedTransactionOutcome(InternalTransaction tx, TransactionStatus status)
-        {
-            FinalizedObject fo = null;
-
-            lock (tx)
-            {
-                if (null == tx._innerException)
-                {
-                    tx._innerException = tx.PromotedTransaction.InnerException;
-                }
-
-                switch (status)
-                {
-                    case TransactionStatus.Committed:
-                        {
-                            tx.State.ChangeStatePromotedCommitted(tx);
-                            break;
-                        }
-
-                    case TransactionStatus.Aborted:
-                        {
-                            tx.State.ChangeStatePromotedAborted(tx);
-                            break;
-                        }
-
-                    case TransactionStatus.InDoubt:
-                        {
-                            tx.State.InDoubtFromDtc(tx);
-                            break;
-                        }
-
-                    default:
-                        {
-                            Debug.Assert(false, "InternalTransaction.DistributedTransactionOutcome - Unexpected TransactionStatus");
-                            TransactionException.CreateInvalidOperationException(TraceSourceType.TraceSourceLtm,
-                                "",
-                                null,
-                                tx.DistributedTxId
-                                );
-                            break;
-                        }
-                }
-
-                fo = tx._finalizedObject;
-            }
-
-            if (null != fo)
-            {
-                fo.Dispose();
-            }
-        }
-
         #region Outcome Events
 
         // Signal Waiters anyone waiting for transaction outcome.
