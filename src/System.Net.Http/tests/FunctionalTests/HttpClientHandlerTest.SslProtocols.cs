@@ -80,7 +80,10 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { protocol, true };
             }
 
-            // These protocols are disabled by default, so we can only connect with them explicitly
+            // These protocols are disabled by default, so we can only connect with them explicitly.
+            // Some linux distributions intentionally misreport the current OpenSsl version for
+            // compatability reasons, and so the default behavior may vary from what we expect.
+            // Since we cannot detect the actual OpenSSL version, we have to skip this case.
 #pragma warning disable 0618
             if (PlatformDetection.IsWindows ||
                 PlatformDetection.IsOSX ||
