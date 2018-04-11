@@ -69,5 +69,15 @@ namespace System.IO.Tests
         {
             Assert.Equal(expected.OrderBy(e => e).Select(o => o), actual.OrderBy(a => a).Select(o => o));
         }
+
+        public static bool Any<T>(IEnumerable<T> collection, Func<T, bool> func)
+        {
+            foreach (T item in collection)
+            {
+                if (func(item))
+                    return true;
+            }
+            return false;
+        }
     }
 }
