@@ -118,7 +118,8 @@ namespace System.Buffers
                 {
                     Debug.Assert(positionObject is string);
 
-                    memory = (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(positionObject).AsMemory().Slice(positionIndex, length));
+                    ReadOnlyMemory<char> charMemory = Unsafe.As<string>(positionObject).AsMemory(positionIndex, length);
+                    memory = Unsafe.As<ReadOnlyMemory<char>, ReadOnlyMemory<T>>(ref charMemory);
                     return true;
                 }
 
@@ -178,7 +179,9 @@ namespace System.Buffers
                 Debug.Assert(startObject is string);
 
                 int startIndex = GetIndex(_sequenceStart);
-                return (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject).AsMemory(startIndex, GetIndex(_sequenceEnd) - startIndex));
+
+                ReadOnlyMemory<char> charMemory = Unsafe.As<string>(startObject).AsMemory(startIndex, GetIndex(_sequenceEnd) - startIndex);
+                return Unsafe.As<ReadOnlyMemory<char>, ReadOnlyMemory<T>>(ref charMemory);
             }
 
             // if (type == SequenceType.MemoryManager)
@@ -374,26 +377,28 @@ namespace System.Buffers
 
         internal bool TryGetReadOnlyMemory(out ReadOnlyMemory<T> memory)
         {
-            GetTypeAndIndices(Start.GetInteger(), End.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-
             object startObject = Start.GetObject();
             object endObject = End.GetObject();
+
+            // Multi-block segments or default sequence
+            if (startObject != endObject || startObject == null)
+            {
+                memory = default;
+                return startObject == null;
+            }
 
             Debug.Assert(startObject != null);
             Debug.Assert(endObject != null);
 
+            GetTypeAndIndices(Start.GetInteger(), End.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
+
             int length = endIndex - startIndex;
-            if (startObject != endObject || startObject == null)
-            {
-                // Can't get ReadOnlyMemory from multi-block segments and default sequence
-                memory = default;
-                return false;
-            }
-            else if (type == SequenceType.Array)
+            if (type == SequenceType.Array)
             {
                 Debug.Assert(startObject is T[]);
 
-                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject));
+                memory = new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, length);
+                return true;
             }
             else if (type == SequenceType.MemoryManager)
             {
@@ -405,8 +410,9 @@ namespace System.Buffers
             {
                 Debug.Assert(startObject is string);
 
-                var text = Unsafe.As<string>(startObject);
-                memory = (ReadOnlyMemory<T>)(object)text.AsMemory();
+                ReadOnlyMemory<char> charMemory = Unsafe.As<string>(startObject).AsMemory(startIndex, length);
+                memory = Unsafe.As<ReadOnlyMemory<char>, ReadOnlyMemory<T>>(ref charMemory);
+                return true;
             }
             else // ReadOnlySequenceSegment
             {
