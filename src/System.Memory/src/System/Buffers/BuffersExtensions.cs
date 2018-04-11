@@ -36,13 +36,14 @@ namespace System.Buffers
         private static SequencePosition? PositionOfMultiSegment<T>(in ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
             SequencePosition position = source.Start;
-            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, true))
+            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, trusted: true))
             {
                 int index = memory.Span.IndexOf(value);
                 if (index != -1)
                 {
                     return source.GetPosition(index, position);
                 }
+
                 position = next;
             }
 
@@ -73,7 +74,7 @@ namespace System.Buffers
         private static void CopyToMultiSegment<T>(in ReadOnlySequence<T> source, Span<T> destination)
         {
             SequencePosition position = source.Start;
-            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, true))
+            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, trusted: true))
             {
                 memory.Span.CopyTo(destination);
                 position = next;

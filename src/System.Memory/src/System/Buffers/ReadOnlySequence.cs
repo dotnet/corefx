@@ -433,7 +433,7 @@ namespace System.Buffers
             /// <returns></returns>
             public bool MoveNext()
             {
-                bool result = _sequence.TryGetBuffer(_next, out _currentMemory, out SequencePosition next, true);
+                bool result = _sequence.TryGetBuffer(_next, out _currentMemory, out SequencePosition next, trusted: true);
                 _next = next;
                 return result;
             }
