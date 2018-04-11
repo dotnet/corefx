@@ -18,19 +18,37 @@ namespace System.SpanTests
             Assert.True(Unsafe.AreSame(ref a[1], ref pinnableReference));
         }
 
-        [Fact]
-        public static unsafe void UsingSpanInFixed()
-        {
-            byte[] a = { 91, 92, 93, 94, 95 };
-            Span<byte> span = a;
-            fixed (byte* ptr = span)
-            {
-                for (int i = 0; i < span.Length; i++)
-                {
-                    Assert.Equal(a[i], ptr[i]);
-                }
-            }
-        }
+        // Enable this test once we use C# 7.3
+        //[Fact]
+        //public static unsafe void UsingSpanInFixed()
+        //{
+        //    byte[] a = { 91, 92, 93, 94, 95 };
+        //    Span<byte> span = a;
+        //    fixed (byte* ptr = span)
+        //    {
+        //        for (int i = 0; i < span.Length; i++)
+        //        {
+        //            Assert.Equal(a[i], ptr[i]);
+        //        }
+        //    }
+        //}
+
+        // Enable this test once we use C# 7.3
+        //[Fact]
+        //public static unsafe void UsingEmptySpanInFixed()
+        //{
+        //    Span<int> span = Span<int>.Empty;
+        //    fixed (int* ptr = span)
+        //    {
+        //        Assert.True(ptr == null);
+        //    }
+
+        //    Span<int> spanFromEmptyArray = Array.Empty<int>();
+        //    fixed (int* ptr = spanFromEmptyArray)
+        //    {
+        //        Assert.True(ptr == null);
+        //    }
+        //}
 
         [Fact]
         public static void GetPinnableReferenceArrayPastEnd()
@@ -66,19 +84,9 @@ namespace System.SpanTests
                 ref int pinnableReference = ref span.GetPinnableReference();
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
 
-                fixed (int* ptr = span)
-                {
-                    Assert.True(ptr == null);
-                }
-
                 span = Array.Empty<int>();
                 pinnableReference = ref span.GetPinnableReference();
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
-
-                fixed (int* ptr = span)
-                {
-                    Assert.True(ptr == null);
-                }
             }
         }
     }
