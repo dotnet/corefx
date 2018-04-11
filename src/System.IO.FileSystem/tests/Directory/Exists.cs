@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -385,7 +384,7 @@ namespace System.IO.Tests
         public void DriveAsPath()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
-            Assert.True(FSAssert.Any(IOServices.GetReadyDrives(), Exists));
+            Assert.True(IOServices.GetReadyDrives().Any(drive => Exists(drive)));
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
@@ -393,13 +392,7 @@ namespace System.IO.Tests
         public void ExtendedDriveAsPath()
         {
             Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
-
-            var drives = new List<string>();
-            foreach (string item in IOServices.GetReadyDrives())
-            {
-                drives.Add(IOInputs.ExtendedPrefix + item);
-            }
-            Assert.True(FSAssert.Any(drives, Exists));
+            Assert.True(IOServices.GetReadyDrives().Any(drive => Exists(IOInputs.ExtendedPrefix + drive)));
         }
 
         [Fact]
