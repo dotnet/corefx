@@ -384,7 +384,7 @@ namespace System.IO.Tests
         public void DriveAsPath()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
-            Assert.True(IOServices.GetReadyDrives().Any(drive => Exists(drive)));
+            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(drive));
         }
 
         [ConditionalFact(nameof(UsingNewNormalization))]
@@ -392,7 +392,7 @@ namespace System.IO.Tests
         public void ExtendedDriveAsPath()
         {
             Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
-            Assert.True(IOServices.GetReadyDrives().Any(drive => Exists(IOInputs.ExtendedPrefix + drive)));
+            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
         }
 
         [Fact]
