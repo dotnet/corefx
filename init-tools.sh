@@ -15,78 +15,6 @@ __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
 __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
 
-# Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
-get_current_linux_name() {
-    # Detect Distro
-    if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
-            echo "ubuntu.16.04"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 16.10)" -eq 1 ]; then
-            echo "ubuntu.16.10"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 18.04)" -eq 1 ]; then
-            echo "ubuntu.18.04"
-            return 0
-        fi
-        echo "ubuntu"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
-        echo "centos"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 rhel)" -eq 1 ]; then
-        echo "rhel"
-        return 0
-    elif [ "$(cat /etc/*-release | grep -cim1 debian)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep VERSION_ID= | cut -d "=" -f2)" -eq "8" ]; then
-            echo "debian"
-            return 0
-        fi
-    elif [ "$(cat /etc/*-release | grep -cim1 fedora)" -eq 1 ]; then
-        echo -n "fedora."; cat /etc/*-release | grep  VERSION_ID= | cut -d "=" -f2
-        return 0;
-    elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
-        if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
-            echo "opensuse.13.2"
-            return 0
-        fi
-        if [ "$(cat /etc/*-release | grep -cim1 42.1)" -eq 1 ]; then
-            echo "opensuse.42.1"
-            return 0
-        fi 
-        echo "opensuse.42.3"
-        return 0
-    fi
-
-    # Cannot determine Linux distribution, use portable linux cli
-    echo "linux"
-    return 0
-}
-
-if [ -z "$__DOTNET_PKG" ]; then
-OSName=$(uname -s)
-    case $OSName in
-        Darwin)
-            OS=OSX
-            __DOTNET_PKG=dotnet-dev-osx-x64
-            ulimit -n 2048
-            ;;
-
-        Linux)
-            __DOTNET_PKG="dotnet-dev-$(get_current_linux_name)-x64"
-            OS=Linux
-            ;;
-
-        *)
-        echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
-            OS=Linux
-            __DOTNET_PKG=dotnet-dev-linux-x64
-            ;;
-  esac
-fi
-
 display_error_message()
 {
     echo "Please check the detailed log that follows." 1>&2
@@ -97,6 +25,49 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
     if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
     if [ ! -e $__DOTNET_PATH ]; then
+        if [ -z "$__DOTNET_PKG" ]; then
+            __PKG_ARCH=x64
+            
+            OSName=$(uname -s)
+            case $OSName in
+                Darwin)
+                    __PKG_RID=osx
+                    OS=OSX
+                    ulimit -n 2048
+                    ;;
+
+                Linux)
+                    __PKG_RID=linux
+                    OS=Linux
+                    
+                    if [ -e /etc/os-release ]; then
+                        source /etc/os-release
+                        __DISTRO_NAME=$ID.$VERSION_ID
+                        if  [ "$__DISTRO_NAME" == 'ubuntu.16.04' ] ||
+                            [ "$__DISTRO_NAME" == 'ubuntu.16.10' ] ||
+                            [ "$__DISTRO_NAME" == 'ubuntu.18.04' ] ||
+                            [ "$__DISTRO_NAME" == 'debian.8' ] ||
+                            [ "$__DISTRO_NAME" == 'fedora.23' ] ||
+                            [ "$__DISTRO_NAME" == 'fedora.24' ] ||
+                            [ "$__DISTRO_NAME" == 'fedora.27' ] ||
+                            [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
+                            [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
+                            [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
+                            __PKG_RID=$__DISTRO_NAME
+                        fi
+                    fi
+                    
+                    ;;
+                *)
+                echo "Unsupported OS '$OSName' detected. Downloading linux-$__PKG_ARCH tools."
+                    OS=Linux
+                    __PKG_RID=linux
+                    ;;
+            esac
+            
+            __DOTNET_PKG=dotnet-dev-$__PKG_RID-$__PKG_ARCH
+        fi
+
         echo "Installing dotnet cli..."
         __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
         # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
