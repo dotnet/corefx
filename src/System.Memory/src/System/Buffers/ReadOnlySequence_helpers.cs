@@ -421,7 +421,7 @@ namespace System.Buffers
 
         internal bool TryGetString(out string text, out int start, out int length)
         {
-            if (typeof(T) != typeof(char))
+            if (typeof(T) != typeof(char) || GetSequenceType() != SequenceType.String)
             {
                 start = 0;
                 length = 0;
@@ -429,20 +429,11 @@ namespace System.Buffers
                 return false;
             }
 
-            GetTypeAndIndices(Start.GetInteger(), End.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
+            Debug.Assert(_sequenceStart.GetObject() is string);
 
-            if (type != SequenceType.String)
-            {
-                start = 0;
-                length = 0;
-                text = null;
-                return false;
-            }
-
-            start = startIndex;
-            length = endIndex - startIndex;
-            text = (string)Start.GetObject();
-
+            text = Unsafe.As<string>(_sequenceStart.GetObject());
+            start = GetIndex(_sequenceStart);
+            length = GetIndex(_sequenceEnd) - start;
             return true;
         }
     }
