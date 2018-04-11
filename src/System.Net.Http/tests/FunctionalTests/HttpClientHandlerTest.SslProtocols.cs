@@ -81,9 +81,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             // These protocols are disabled by default, so we can only connect with them explicitly.
-            // Some linux distributions intentionally misreport the current OpenSsl version for
-            // compatibility reasons, and so the default behavior may vary from what we expect.
-            // Since we cannot detect the actual OpenSSL version, we have to skip this case.
+            // On certain platforms these are completely disabled and cannot be used at all.
 #pragma warning disable 0618
             if (PlatformDetection.IsWindows ||
                 PlatformDetection.IsOSX ||
@@ -92,6 +90,7 @@ namespace System.Net.Http.Functional.Tests
                  !PlatformDetection.IsDebian &&
                  !PlatformDetection.IsRedHatFamily6))
             {
+                // TODO #28790: SSLv3 is supported on RHEL 6, but this test case still fails.
                 yield return new object[] { SslProtocols.Ssl3, true };
             }
             if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1607OrGreater)
