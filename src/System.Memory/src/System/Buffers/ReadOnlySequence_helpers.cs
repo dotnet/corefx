@@ -51,33 +51,30 @@ namespace System.Buffers
                     memory = startSegment.Memory.Slice(startIndex, endIndex - startIndex);
                 }
             }
-            else if (type == SequenceType.Array)
+            else
             {
                 if (positionObject != endObject)
                     ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-                Debug.Assert(positionObject is T[]);
+                if (type == SequenceType.Array)
+                {
+                    Debug.Assert(positionObject is T[]);
 
-                memory = new ReadOnlyMemory<T>((T[])positionObject, startIndex, endIndex - startIndex);
-            }
-            else if (typeof(T) == typeof(char) && type == SequenceType.String)
-            {
-                if (positionObject != endObject)
-                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+                    memory = new ReadOnlyMemory<T>((T[])positionObject, startIndex, endIndex - startIndex);
+                }
+                else if (typeof(T) == typeof(char) && type == SequenceType.String)
+                {
+                    Debug.Assert(positionObject is string);
 
-                Debug.Assert(positionObject is string);
+                    memory = (ReadOnlyMemory<T>)(object)((string)positionObject).AsMemory(startIndex, endIndex - startIndex);
+                }
+                else // type == SequenceType.MemoryManager
+                {
+                    Debug.Assert(type == SequenceType.MemoryManager);
+                    Debug.Assert(positionObject is MemoryManager<T>);
 
-                memory = (ReadOnlyMemory<T>)(object)((string)positionObject).AsMemory(startIndex, endIndex - startIndex);
-            }
-            else // type == SequenceType.MemoryManager
-            {
-                if (positionObject != endObject)
-                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-
-                Debug.Assert(type == SequenceType.MemoryManager);
-                Debug.Assert(positionObject is MemoryManager<T>);
-
-                memory = ((MemoryManager<T>)positionObject).Memory.Slice(startIndex, endIndex - startIndex);
+                    memory = ((MemoryManager<T>)positionObject).Memory.Slice(startIndex, endIndex - startIndex);
+                }
             }
 
             return true;
