@@ -409,7 +409,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 using (var client = CreateHttpClient())
                 {
-                    var message = new HttpRequestMessage(HttpMethod.Post, uri);
+                    var message = new HttpRequestMessage(HttpMethod.Get, uri);
                     message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
                     (await client.SendAsync(message).ConfigureAwait(false)).Dispose();
                 }
