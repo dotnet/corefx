@@ -191,10 +191,10 @@ namespace System.Net.Http
             int currentTimeStamp = Environment.TickCount;
 
             // Environment.TickCount will increment from zero to Int32.MaxValue for approximately 24.9 days, then jump to
-            // Int32.MinValue. When that happens, we may skip doing WinHttpDetectAutoProxyConfigUrl for one request which we
-            // suppose to do. Since _previousTimeStampTicks will get updated in that request, susequent requests in next 24.9
-            // days period will behave correctly.
-            doAutoDetect = currentTimeStamp - _previousTimeStampTicks > TimerPeriodInMilliseconds ? true : false;
+            // Int32.MinValue. When that happens, we may skip calling WinHttpDetectAutoProxyConfigUrl for one request which we
+            // otherwise will call. Since _previousTimeStampTicks will get updated in that request, subsequent requests in
+            // next 24.9 days period will behave correctly.
+            doAutoDetect = currentTimeStamp - _previousTimeStampTicks > TimerPeriodInMilliseconds;
             _previousTimeStampTicks = currentTimeStamp;
 
             if (doAutoDetect)
