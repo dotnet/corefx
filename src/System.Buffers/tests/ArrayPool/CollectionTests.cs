@@ -13,10 +13,10 @@ using System.Runtime.InteropServices;
 namespace System.Buffers.ArrayPool.Tests
 {
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-    public class CollectionTests : RemoteExecutorTestBase
+    public class CollectionTests : ArrayPoolTest
     {
-        private const string TrimSwitchName = "DOTNET_SYSTEM_BUFFERS_ARRAYPOOL_TRIMSHARED";
-
+        // Will make this outer loop before checking in
+        // [OuterLoop("This is a long running test (over 60 seconds)")]
         [Theory,
             InlineData(true),
             InlineData(false)]
