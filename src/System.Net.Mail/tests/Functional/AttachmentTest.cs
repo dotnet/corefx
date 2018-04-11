@@ -33,6 +33,23 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
+        public void ConstructorPathName()
+        {
+            string attachFile = Path.GetTempFileName();
+            try
+            {
+                var fileStream = File.Create(attachFile);
+                fileStream.Close();
+                Attachment attach = new Attachment(attachFile);
+                Assert.Equal(Path.GetFileName(attachFile), attach.Name);
+            }
+            finally
+            {
+                File.Delete(attachFile);
+            }
+        }
+
+        [Fact]
         public void CreateAttachmentFromStringNullName()
         {
             Attachment attach = Attachment.CreateAttachmentFromString("", null, Encoding.ASCII, "application/octet-stream");
