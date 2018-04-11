@@ -383,9 +383,9 @@ namespace System.Buffers
             Debug.Assert(endObject != null);
 
             int length = endIndex - startIndex;
-            if (startObject != endObject)
+            if (startObject != endObject || startObject == null)
             {
-                // Can't get ReadOnlyMemory from multi-block segments
+                // Can't get ReadOnlyMemory from multi-block segments and default sequence
                 memory = default;
                 return false;
             }
