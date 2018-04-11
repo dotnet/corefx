@@ -158,7 +158,7 @@ SystemNative_TermiosSpeed2rate(int speed)
 }
 
 static int
-SystemNative_termios2speed(speed_t brate)
+SystemNative_TermiosRate2speed(speed_t brate)
 {
     switch (brate)
     {
@@ -212,7 +212,7 @@ SystemNative_TermiosGetSpeed(int fd)
         return  -1;
     }
 
-    return SystemNative_termios2speed(cfgetispeed(&term));
+    return SystemNative_TermiosRate2speed(cfgetispeed(&term));
 }
 
 extern "C" int32_t
@@ -248,8 +248,6 @@ SystemNative_TermiosAvailableBytes(int fd, int readBuffer)
 extern "C" int32_t
 SystemNative_TermiosDiscard(int fd, int queue)
 {
-    //usleep(200000);
-
     return tcflush(fd, queue == 0 ? TCIOFLUSH : queue == 1 ? TCIFLUSH : TCOFLUSH);
 }
 
@@ -258,7 +256,6 @@ SystemNative_TermiosDrain(int fd)
 {
     return tcdrain(fd);
 }
-
 
 extern "C" int32_t
 SystemNative_TermiosSendBreak(int fd, int duration)
@@ -345,7 +342,6 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
             term.c_iflag |= IXOFF | IXON;
             break;
     }
-    //fprintf(stderr, "handshake set to %d\n", handshake);
 
     if (speed)
     {
