@@ -109,7 +109,8 @@ namespace System.Xml.Linq
                 lock (this)
                 {
                     XHashtableState newState = _state.Resize();
-                    System.Threading.Interlocked.CompareExchange<XHashtableState>(ref _state, null, null);
+                    // Use memory barrier to ensure that the resized XHashtableState object is fully constructed before it is assigned
+                    Thread.MemoryBarrier();
                     _state = newState;
                 }
             }
@@ -290,7 +291,9 @@ namespace System.Xml.Linq
                 _entries[newEntry].Value = value;
                 _entries[newEntry].HashCode = hashCode;
 
-                System.Threading.Interlocked.CompareExchange<Entry[]>(ref _entries, null, null);
+                // Ensure that all writes to the entry can't be reordered past this barrier (or other threads might see new entry
+                // in list before entry has been initialized!).
+                Thread.MemoryBarrier();
 
                 // Loop until a matching entry is found, a new entry is added, or linked list is found to be full
                 entryIndex = 0;
