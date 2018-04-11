@@ -36,7 +36,10 @@ internal static partial class Interop
             }
 
             Sec_Application_Protocols protocols = new Sec_Application_Protocols();
-            protocols.ProtocolListsSize = (uint)((sizeof(Sec_Application_Protocols) - sizeof(uint)) + protocolListSize);
+
+            int protocolListConstSize = sizeof(Sec_Application_Protocols) - sizeof(uint) /* offsetof(Sec_Application_Protocols, ProtocolExtensionType) */;
+            protocols.ProtocolListsSize = (uint)(protocolListConstSize + protocolListSize);
+
             protocols.ProtocolExtensionType = ApplicationProtocolNegotiationExt.ALPN;
             protocols.ProtocolListSize = (short)protocolListSize;
 
