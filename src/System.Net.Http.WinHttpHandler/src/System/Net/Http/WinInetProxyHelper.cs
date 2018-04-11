@@ -15,8 +15,8 @@ namespace System.Net.Http
     {
         private bool _useProxy = false;
         private bool _scriptDetectionStatus = false;
-        private long _previousTimeStampTicks = DateTime.MinValue.Ticks;
-        private const long TimerPeriod = TimeSpan.TicksPerMinute * 2; // Set to 2 minutes.
+        private int _previousTimeStampTicks = int.MinValue;
+        private const int TimerPeriodInMilliseconds = 120000; // Set to 2 minutes.
 
         public WinInetProxyHelper()
         {
@@ -188,16 +188,14 @@ namespace System.Net.Http
             if (!AutoDetect) return false;
 
             bool doAutoDetect = false;
-            object executionLock = new object();
-            long currentTimeStamp = DateTime.Now.Ticks;
+            int currentTimeStamp = Environment.TickCount;
 
-            lock (executionLock)
-            {
-                doAutoDetect = _previousTimeStampTicks == DateTime.MinValue.Ticks ?
-                    true : (currentTimeStamp - _previousTimeStampTicks > TimerPeriod ? true : false);
-
-                _previousTimeStampTicks = currentTimeStamp;
-            }
+            // Environment.TickCount will increment from zero to Int32.MaxValue for approximately 24.9 days, then jump to
+            // Int32.MinValue. When that happens, we may skip doing WinHttpDetectAutoProxyConfigUrl for one request which we
+            // suppose to do. Since _previousTimeStampTicks will get updated in that request, susequent requests in next 24.9
+            // days period will behave correctly.
+            doAutoDetect = currentTimeStamp - _previousTimeStampTicks > TimerPeriodInMilliseconds ? true : false;
+            _previousTimeStampTicks = currentTimeStamp;
 
             if (doAutoDetect)
             {
