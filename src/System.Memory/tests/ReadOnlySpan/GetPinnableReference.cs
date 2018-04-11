@@ -66,9 +66,19 @@ namespace System.SpanTests
                 ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
 
+                fixed (int* ptr = span)
+                {
+                    Assert.True(ptr == null);
+                }
+
                 ReadOnlySpan<int> spanFromEmptyArray = Array.Empty<int>();
                 pinnableReference = ref Unsafe.AsRef(in spanFromEmptyArray.GetPinnableReference());
                 Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
+
+                fixed (int* ptr = span)
+                {
+                    Assert.True(ptr == null);
+                }
             }
         }
     }
