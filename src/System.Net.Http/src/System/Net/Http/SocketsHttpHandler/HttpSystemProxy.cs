@@ -330,9 +330,17 @@ namespace System.Net.Http
             var proxyInfo = new Interop.WinHttp.WINHTTP_PROXY_INFO();
             try
             {
-                if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                // When not able to find script using WPAD protocol, and there is no explicit
+                // PAC file set, we can avoid calling WinHttpGetProxyForUrl for each request.
+                bool skipGetProxyForUrl = string.IsNullOrEmpty(_proxyHelper.AutoConfigUrl) &&
+                    _proxyHelper.AutoDetectScriptSuccess() == false;
+
+                if (!skipGetProxyForUrl)
                 {
-                    return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                    if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                    {
+                        return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                    }
                 }
             }
             finally

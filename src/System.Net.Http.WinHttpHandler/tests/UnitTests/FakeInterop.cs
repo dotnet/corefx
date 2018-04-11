@@ -611,6 +611,24 @@ internal static partial class Interop
             return true;
         }
 
+        public static bool WinHttpDetectAutoProxyConfigUrl(
+            uint autoDetectFlags,
+            out IntPtr autoConfigUrl)
+        {
+            if (FakeRegistry.WinInetProxySettings.AutoDetect)
+            {
+                autoConfigUrl = Marshal.StringToHGlobalUni(FakeRegistry.WinInetProxySettings.AutoConfigUrl);
+                return true;
+            }
+            else
+            {
+                autoConfigUrl = IntPtr.Zero;
+
+                TestControl.LastWin32Error = (int)Interop.WinHttp.ERROR_FILE_NOT_FOUND;
+                return false;
+            }
+        }
+
         public static IntPtr WinHttpSetStatusCallback(
             SafeWinHttpHandle handle,
             Interop.WinHttp.WINHTTP_STATUS_CALLBACK callback,

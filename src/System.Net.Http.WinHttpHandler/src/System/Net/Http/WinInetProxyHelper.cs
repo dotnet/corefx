@@ -14,6 +14,9 @@ namespace System.Net.Http
     internal class WinInetProxyHelper
     {
         private bool _useProxy = false;
+        private bool _scriptDetectionStatus = false;
+        private int _previousTimeStampTicks = int.MinValue;
+        private const int TimerPeriodInMilliseconds = 120000; // Set to 2 minutes.
 
         public WinInetProxyHelper()
         {
@@ -177,6 +180,43 @@ namespace System.Net.Http
             WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: useProxy={0}", useProxy);
 
             return useProxy;
+        }
+
+        public bool AutoDetectScriptSuccess()
+        {
+            // Only check WinHttpDetectAutoProxyConfigUrl if auto detect is set.
+            if (!AutoDetect) return false;
+
+            bool doAutoDetect = false;
+            int currentTimeStamp = Environment.TickCount;
+
+            // Environment.TickCount will increment from zero to Int32.MaxValue for approximately 24.9 days, then jump to
+            // Int32.MinValue. When that happens, we may skip calling WinHttpDetectAutoProxyConfigUrl for one request which we
+            // otherwise will call. Since _previousTimeStampTicks will get updated in that request, subsequent requests in
+            // next 24.9 days period will behave correctly.
+            doAutoDetect = currentTimeStamp - _previousTimeStampTicks > TimerPeriodInMilliseconds;
+            _previousTimeStampTicks = currentTimeStamp;
+
+            if (doAutoDetect)
+            {
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.AutoDetectScriptSuccess: Start auto discovery.");
+                IntPtr autoProxyUrl = new IntPtr();
+
+                try
+                {
+                    _scriptDetectionStatus = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(
+                        Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DHCP | Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DNS_A,
+                        out autoProxyUrl);
+
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.AutoDetectScriptSuccess: DetectAutoProxy={0}", _scriptDetectionStatus);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(autoProxyUrl);
+                }
+            }
+
+            return _scriptDetectionStatus;
         }
     }
 }
