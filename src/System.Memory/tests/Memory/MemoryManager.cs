@@ -33,11 +33,6 @@ namespace System.MemoryTests
             int[] a = { 91, 92, -93, 94 };
             CustomMemoryForTest<int> manager = new CustomMemoryForTest<int>(a);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Memory<int>(manager, -1, -1));
-
             Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1));
             Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(0, a.Length + 1));
             Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1, 0));
