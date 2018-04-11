@@ -109,17 +109,7 @@ namespace System.Xml.Linq
                 lock (this)
                 {
                     XHashtableState newState = _state.Resize();
-
-                    // Use memory barrier to ensure that the resized XHashtableState object is fully constructed before it is assigned
-#if !SILVERLIGHT 
-                    Thread.MemoryBarrier();
-#else // SILVERLIGHT
-                    // The MemoryBarrier method usage is probably incorrect and should be removed.
-
-                    // Replacing with Interlocked.CompareExchange for now (with no effect)
-                    //   which will do a very similar thing to MemoryBarrier (it's just slower)
                     System.Threading.Interlocked.CompareExchange<XHashtableState>(ref _state, null, null);
-#endif // SILVERLIGHT
                     _state = newState;
                 }
             }

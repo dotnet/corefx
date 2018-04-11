@@ -5,7 +5,7 @@
     <ProjectGuid>{BAC347A3-9841-44FC-B1E3-2344D1152C23}</ProjectGuid>
     <AssemblyName>System.Private.Xml.Linq</AssemblyName>
     <RootNamespace>System.Xml</RootNamespace>
-    <DefineConstants>$(DefineConstants);SILVERLIGHT</DefineConstants>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
