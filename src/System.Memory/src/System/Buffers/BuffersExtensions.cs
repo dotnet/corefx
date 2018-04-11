@@ -36,20 +36,15 @@ namespace System.Buffers
         private static SequencePosition? PositionOfMultiSegment<T>(in ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
             SequencePosition position = source.Start;
-            SequencePosition result = position;
-            while (source.TryGet(ref position, out ReadOnlyMemory<T> memory))
+            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, trusted: true))
             {
                 int index = memory.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return source.GetPosition(index, result);
-                }
-                else if (position.GetObject() == null)
-                {
-                    break;
+                    return source.GetPosition(index, position);
                 }
 
-                result = position;
+                position = next;
             }
 
             return null;
@@ -76,16 +71,16 @@ namespace System.Buffers
             }
         }
 
-        private static void CopyToMultiSegment<T>(in ReadOnlySequence<T> sequence, Span<T> destination)
+        private static void CopyToMultiSegment<T>(in ReadOnlySequence<T> source, Span<T> destination)
         {
-            SequencePosition position = sequence.Start;
-            while (sequence.TryGet(ref position, out ReadOnlyMemory<T> memory))
+            SequencePosition position = source.Start;
+            while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, trusted: true))
             {
-                ReadOnlySpan<T> span = memory.Span;
-                span.CopyTo(destination);
+                memory.Span.CopyTo(destination);
+                position = next;
                 if (position.GetObject() != null)
                 {
-                    destination = destination.Slice(span.Length);
+                    destination = destination.Slice(memory.Length);
                 }
                 else
                 {

@@ -52,7 +52,7 @@ namespace System.Buffers
         /// <summary>
         /// Gets <see cref="ReadOnlyMemory{T}"/> from the first segment.
         /// </summary>
-        public ReadOnlyMemory<T> First => GetFirstBuffer(_sequenceStart, _sequenceEnd);
+        public ReadOnlyMemory<T> First => GetFirstBuffer();
 
         /// <summary>
         /// A position to the start of the <see cref="ReadOnlySequence{T}"/>.
@@ -361,7 +361,7 @@ namespace System.Buffers
         /// </summary>
         public bool TryGet(ref SequencePosition position, out ReadOnlyMemory<T> memory, bool advance = true)
         {
-            bool result = TryGetBuffer(position, End, out memory, out SequencePosition next);
+            bool result = TryGetBuffer(position, out memory, out SequencePosition next);
             if (advance)
             {
                 position = next;
@@ -386,14 +386,22 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SequenceType GetSequenceType()
+        {
+            // We take high order bits of two indexes and move them
+            // to a first and second position to convert to SequenceType
+            return (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetIndex(in SequencePosition position) => position.GetInteger() & ReadOnlySequence.IndexBitMask;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetTypeAndIndices(int start, int end, out SequenceType sequenceType, out int startIndex, out int endIndex)
         {
             startIndex = start & ReadOnlySequence.IndexBitMask;
             endIndex = end & ReadOnlySequence.IndexBitMask;
-            // We take high order bits of two indexes index and move them
-            // to a first and second position to convert to BufferType
-            // Masking with 2 is required to only keep the second bit of Start.GetInteger()
-            sequenceType = Start.GetObject() == null ? SequenceType.Empty : (SequenceType)((((uint)Start.GetInteger() >> 30) & 2) | (uint)End.GetInteger() >> 31);
+            sequenceType = GetSequenceType();
         }
 
         /// <summary>
@@ -425,12 +433,9 @@ namespace System.Buffers
             /// <returns></returns>
             public bool MoveNext()
             {
-                if (_next.GetObject() == null)
-                {
-                    return false;
-                }
-
-                return _sequence.TryGet(ref _next, out _currentMemory);
+                bool result = _sequence.TryGetBuffer(_next, out _currentMemory, out SequencePosition next, trusted: true);
+                _next = next;
+                return result;
             }
         }
 
@@ -439,8 +444,7 @@ namespace System.Buffers
             MultiSegment = 0x00,
             Array = 0x1,
             MemoryManager = 0x2,
-            String = 0x3,
-            Empty = 0x4
+            String = 0x3
         }
     }
 
