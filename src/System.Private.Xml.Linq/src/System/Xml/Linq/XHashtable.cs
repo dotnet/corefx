@@ -290,17 +290,7 @@ namespace System.Xml.Linq
                 _entries[newEntry].Value = value;
                 _entries[newEntry].HashCode = hashCode;
 
-                // Ensure that all writes to the entry can't be reordered past this barrier (or other threads might see new entry
-                // in list before entry has been initialized!).
-#if !SILVERLIGHT
-                Thread.MemoryBarrier();
-#else // SILVERLIGHT
-                // The MemoryBarrier method usage is probably incorrect and should be removed.
-
-                // Replacing with Interlocked.CompareExchange for now (with no effect)
-                //   which will do a very similar thing to MemoryBarrier (it's just slower)
                 System.Threading.Interlocked.CompareExchange<Entry[]>(ref _entries, null, null);
-#endif // SILVERLIGHT
 
                 // Loop until a matching entry is found, a new entry is added, or linked list is found to be full
                 entryIndex = 0;
