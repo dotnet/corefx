@@ -17,6 +17,24 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SequencePosition? PositionOf<T>(in this ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
+            if (source.IsSingleSegment)
+            {
+                int index = source.First.Span.IndexOf(value);
+                if (index != -1)
+                {
+                    return source.GetPosition(index);
+                }
+
+                return null;
+            }
+            else
+            {
+                return PositionOfMultiSegment(source, value);
+            }
+        }
+
+        private static SequencePosition? PositionOfMultiSegment<T>(in ReadOnlySequence<T> source, T value) where T : IEquatable<T>
+        {
             SequencePosition position = source.Start;
             while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, true))
             {
@@ -42,6 +60,18 @@ namespace System.Buffers
             if (source.Length > destination.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
 
+            if (source.IsSingleSegment)
+            {
+                source.First.Span.CopyTo(destination);
+            }
+            else
+            {
+                CopyToMultiSegment(source, destination);
+            }
+        }
+
+        private static void CopyToMultiSegment<T>(in ReadOnlySequence<T> source, Span<T> destination)
+        {
             SequencePosition position = source.Start;
             while (source.TryGetBuffer(position, out ReadOnlyMemory<T> memory, out SequencePosition next, true))
             {
