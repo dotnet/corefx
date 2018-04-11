@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
@@ -16,8 +15,8 @@ namespace System.Net.Http
     {
         private bool _useProxy = false;
         private bool _scriptDetectionStatus = false;
-        private Timer _autoDetectTimer = null;
-        private const int TimerPeriod = 120000; // Set to 2 minutes.
+        private long _previousTimeStampTicks = DateTime.MinValue.Ticks;
+        private const long TimerPeriod = TimeSpan.TicksPerMinute * 2; // Set to 2 minutes.
 
         public WinInetProxyHelper()
         {
@@ -188,32 +187,38 @@ namespace System.Net.Http
             // Only check WinHttpDetectAutoProxyConfigUrl if auto detect is set.
             if (!AutoDetect) return false;
 
-            if (_autoDetectTimer == null)
+            bool doAutoDetect = false;
+            object executionLock = new object();
+            long currentTimeStamp = DateTime.Now.Ticks;
+
+            lock (executionLock)
             {
-                _autoDetectTimer = new Timer(new TimerCallback(UpdateScriptDetectionStatus));
-                _autoDetectTimer.Change(0, TimerPeriod);
+                doAutoDetect = _previousTimeStampTicks == DateTime.MinValue.Ticks ?
+                    true : (currentTimeStamp - _previousTimeStampTicks > TimerPeriod ? true : false);
+
+                _previousTimeStampTicks = currentTimeStamp;
+            }
+
+            if (doAutoDetect)
+            {
+                WinHttpTraceHelper.Trace("WinInetProxyHelper.AutoDetectScriptSuccess: Start auto discovery.");
+                IntPtr autoProxyUrl = new IntPtr();
+
+                try
+                {
+                    _scriptDetectionStatus = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(
+                        Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DHCP | Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DNS_A,
+                        out autoProxyUrl);
+
+                    WinHttpTraceHelper.Trace("WinInetProxyHelper.AutoDetectScriptSuccess: DetectAutoProxy={0}", _scriptDetectionStatus);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(autoProxyUrl);
+                }
             }
 
             return _scriptDetectionStatus;
-        }
-
-        private void UpdateScriptDetectionStatus(object state)
-        {
-            WinHttpTraceHelper.Trace("WinInetProxyHelper.UpdateScriptDetectionStatus: Start auto discovery.");
-            IntPtr autoProxyUrl = new IntPtr();
-
-            try
-            {
-                _scriptDetectionStatus = Interop.WinHttp.WinHttpDetectAutoProxyConfigUrl(
-                    Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DHCP | Interop.WinHttp.WINHTTP_AUTO_DETECT_TYPE_DNS_A,
-                    out autoProxyUrl);
-
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.UpdateScriptDetectionStatus: DetectAutoProxy={0}", _scriptDetectionStatus);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(autoProxyUrl);
-            }
         }
     }
 }
