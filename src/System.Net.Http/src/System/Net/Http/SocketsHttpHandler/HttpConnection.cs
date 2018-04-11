@@ -263,10 +263,21 @@ namespace System.Net.Http
                         cookiesFromContainer = null;
                     }
 
-                    for (int i = 1; i < header.Value.Length; i++)
+                    // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
+                    if (header.Value.Length > 1)
                     {
-                        await WriteTwoBytesAsync((byte)',', (byte)' ').ConfigureAwait(false);
-                        await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                        HttpHeaderParser parser = header.Key.Parser;
+                        string separator = HttpHeaderParser.DefaultSeparator;
+                        if (parser != null && parser.SupportsMultipleValues)
+                        {
+                            separator = parser.Separator;
+                        }
+
+                        for (int i = 1; i < header.Value.Length; i++)
+                        {
+                            await WriteAsciiStringAsync(separator).ConfigureAwait(false);
+                            await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                        }
                     }
                 }
 
@@ -375,7 +386,18 @@ namespace System.Net.Http
                         // Proxied requests contain full URL
                         Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
                         await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
-                        await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+
+                        // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
+                        // In this case, use uri.Host instead, which will correctly enclose with [].
+                        // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
+                        await WriteAsciiStringAsync(request.RequestUri.HostNameType == UriHostNameType.IPv6 ?
+                            request.RequestUri.Host : request.RequestUri.IdnHost).ConfigureAwait(false);
+
+                        if (!request.RequestUri.IsDefaultPort)
+                        {
+                            await WriteByteAsync((byte)':').ConfigureAwait(false);
+                            await WriteDecimalInt32Async(request.RequestUri.Port).ConfigureAwait(false);
+                        }
                     }
                     await WriteStringAsync(request.RequestUri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.UriEscaped)).ConfigureAwait(false);
                 }

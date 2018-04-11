@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="Span\LastIndexOfSequence.char.cs" />
     <Compile Include="Span\LastIndexOfSequence.T.cs" />
     <Compile Include="Span\Overflow.cs" />
+    <Compile Include="Span\Overlaps.cs" />
     <Compile Include="Span\Reverse.cs" />
     <Compile Include="Span\SequenceCompareTo.bool.cs" />
     <Compile Include="Span\SequenceCompareTo.byte.cs" />
@@ -89,7 +92,7 @@
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadOnlySpan\AsReadOnlySpan.cs" />
+    <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
     <Compile Include="ReadOnlySpan\CompareTo.cs" />
     <Compile Include="ReadOnlySpan\Contains.cs" />
@@ -154,7 +157,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Memory\AsMemory.cs" />
-    <Compile Include="Memory\AsReadOnlyMemory.cs" />
     <Compile Include="Memory\CopyTo.cs" />
     <Compile Include="Memory\CtorArray.cs" />
     <Compile Include="Memory\CtorArrayIntInt.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="MemoryMarshal\AsMemory.cs" />
     <Compile Include="MemoryMarshal\CastReadOnlySpan.cs" />
     <Compile Include="MemoryMarshal\CastSpan.cs" />
+    <Compile Include="MemoryMarshal\CreateFromPinnedArray.cs" />
     <Compile Include="MemoryMarshal\GetReference.cs" />
     <Compile Include="MemoryMarshal\TryGetArray.cs" />
     <Compile Include="MemoryMarshal\TryGetMemoryManager.cs" />
