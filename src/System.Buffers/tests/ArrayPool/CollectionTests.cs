@@ -9,6 +9,7 @@ using System.Linq;
 using Xunit;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Diagnostics.Tracing;
 
 namespace System.Buffers.ArrayPool.Tests
 {
@@ -17,21 +18,12 @@ namespace System.Buffers.ArrayPool.Tests
     {
         // Will make this outer loop before checking in
         // [OuterLoop("This is a long running test (over 60 seconds)")]
-        [Theory,
-            InlineData(true),
-            InlineData(false)]
+        //[Theory,
+        //    InlineData(true),
+        //    InlineData(false)]
         public void BuffersAreCollectedWhenStale(bool trim)
         {
-            RemoteInvokeOptions options = new RemoteInvokeOptions
-            {
-                // This test has to wait for the buffers to go stale (give it three minutes)
-                TimeOut = 3 * 60 * 1000
-            };
-
-            options.StartInfo.UseShellExecute = false;
-            options.StartInfo.EnvironmentVariables.Add(TrimSwitchName, trim.ToString());
-
-            RemoteInvoke((trimString) =>
+            RemoteInvokeWithTrimming((trimString) =>
             {
                 // Check that our environment is as we expect
                 Assert.Equal(trimString, Environment.GetEnvironmentVariable(TrimSwitchName));
@@ -41,10 +33,7 @@ namespace System.Buffers.ArrayPool.Tests
 
                 // Get the pool and check our trim setting
                 var pool = ArrayPool<int>.Shared;
-                Assert.StartsWith("TlsOverPerCoreLockedStacksArrayPool", pool.GetType().Name);
-                bool parsedTrim = bool.Parse(trimString);
-                var trimField = pool.GetType().GetField("s_trimBuffers", BindingFlags.Static | BindingFlags.NonPublic);
-                Assert.Equal(parsedTrim, (bool)trimField.GetValue(null));
+                bool parsedTrim = ValidateTrimState(pool, trimString);
 
                 List<int[]> rentedBuffers = new List<int[]>();
 
@@ -84,16 +73,10 @@ namespace System.Buffers.ArrayPool.Tests
                     }
                 }
 
-                if (parsedTrim)
-                {
-                    Assert.True(foundNewBuffer, "should have found a newly created buffer");
-                }
-                else
-                {
-                    Assert.False(foundNewBuffer, "should not have found a newly created buffer");
-                }
+                // Should only have found a new buffer if we're trimming
+                Assert.Equal(parsedTrim, foundNewBuffer);
                 return SuccessExitCode;
-            }, trim.ToString(), options).Dispose();
+            }, trim, 3 * 60 * 1000); // This test has to wait for the buffers to go stale (give it three minutes)
         }
 
         [Theory,
@@ -101,26 +84,14 @@ namespace System.Buffers.ArrayPool.Tests
             InlineData(false)]
         public unsafe void ThreadLocalIsCollectedUnderHighPressure(bool trim)
         {
-            RemoteInvokeOptions options = new RemoteInvokeOptions
-            {
-                // This test has to fill memory, give it a minute to do so
-                TimeOut = 1 * 60 * 1000
-            };
-
-            options.StartInfo.UseShellExecute = false;
-            options.StartInfo.EnvironmentVariables.Add(TrimSwitchName, trim.ToString());
-
-            RemoteInvoke((trimString) =>
+            RemoteInvokeWithTrimming((trimString) =>
             {
                 // Check that our environment is as we expect
                 Assert.Equal(trimString, Environment.GetEnvironmentVariable(TrimSwitchName));
 
                 // Get the pool and check our trim setting
                 var pool = ArrayPool<byte>.Shared;
-                Assert.StartsWith("TlsOverPerCoreLockedStacksArrayPool", pool.GetType().Name);
-                bool parsedTrim = bool.Parse(trimString);
-                var trimField = pool.GetType().GetField("s_trimBuffers", BindingFlags.Static | BindingFlags.NonPublic);
-                Assert.Equal(parsedTrim, (bool)trimField.GetValue(null));
+                bool parsedTrim = ValidateTrimState(pool, trimString);
 
                 // Create our buffer, return it, re-rent it and ensure we have the same one
                 const int BufferSize = 4097;
@@ -160,7 +131,64 @@ namespace System.Buffers.ArrayPool.Tests
                 }
 
                 return SuccessExitCode;
-            }, trim.ToString(), options).Dispose();
+            }, trim);
+        }
+
+        private static bool ValidateTrimState(object pool, string trimString)
+        {
+            Assert.StartsWith("TlsOverPerCoreLockedStacksArrayPool", pool.GetType().Name);
+            bool parsedTrim = bool.Parse(trimString);
+            var trimField = pool.GetType().GetField("s_trimBuffers", BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.Equal(parsedTrim, (bool)trimField.GetValue(null));
+            return parsedTrim;
+        }
+
+        [Theory,
+            InlineData(true),
+            InlineData(false)]
+        public void PollingEventFires(bool trim)
+        {
+            RemoteInvokeWithTrimming((trimString) =>
+            {
+                var pool = ArrayPool<float>.Shared;
+                bool parsedTrim = ValidateTrimState(pool, trimString);
+                bool pollEventFired = false;
+                var buffer = pool.Rent(10);
+
+                // Polling doesn't start until the thread locals are created for a pool.
+                // Try before the return then after.
+
+                RunWithListener(() =>
+                {
+                    GC.Collect(2);
+                    GC.WaitForPendingFinalizers();
+                },
+                EventLevel.Informational,
+                e =>
+                {
+                    if (e.EventId == EventIds.BufferTrimPoll)
+                        pollEventFired = true;
+                });
+
+                Assert.False(pollEventFired, "collection isn't hooked up until the first item is returned");
+                pool.Return(buffer);
+
+                RunWithListener(() =>
+                {
+                    GC.Collect(2);
+                    GC.WaitForPendingFinalizers();
+                },
+                EventLevel.Informational,
+                e =>
+                {
+                    if (e.EventId == EventIds.BufferTrimPoll)
+                        pollEventFired = true;
+                });
+
+                // Polling events should only fire when trimming is enabled
+                Assert.Equal(parsedTrim, pollEventFired);
+                return SuccessExitCode;
+            }, trim);
         }
     }
 }

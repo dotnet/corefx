@@ -398,28 +398,10 @@ namespace System.Buffers.ArrayPool.Tests
             Assert.Equal(64, pool.Rent(63).Length); // still get original size
         }
 
-        private static int RunWithListener(Action body, EventLevel level, Action<EventWrittenEventArgs> callback)
-        {
-            using (TestEventListener listener = new TestEventListener("System.Buffers.ArrayPoolEventSource", level))
-            {
-                int count = 0;
-                listener.RunWithCallback(e =>
-                {
-                    // Don't bother tracking the GC polling event- it isn't deterministic
-                    if (e.EventId != 5)
-                    {
-                        Interlocked.Increment(ref count);
-                        callback(e);
-                    }
-                }, body);
-                return count;
-            }
-        }
-
         [Fact]
         public static void RentBufferFiresRentedDiagnosticEvent()
         {
-            RunWithCollectionDisabled(() =>
+            RemoteInvokeWithTrimming(() =>
             {
                 ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 1);
 
@@ -439,7 +421,7 @@ namespace System.Buffers.ArrayPool.Tests
         [Fact]
         public static void ReturnBufferFiresDiagnosticEvent()
         {
-            RunWithCollectionDisabled(() =>
+            RemoteInvokeWithTrimming(() =>
             {
                 ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 1);
                 byte[] buffer = pool.Rent(16);
@@ -456,7 +438,7 @@ namespace System.Buffers.ArrayPool.Tests
         [Fact]
         public static void RentingNonExistentBufferFiresAllocatedDiagnosticEvent()
         {
-            RunWithCollectionDisabled(() =>
+            RemoteInvokeWithTrimming(() =>
             {
                 ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 1);
                 Assert.Equal(1, RunWithListener(() => pool.Rent(16), EventLevel.Informational, e => Assert.Equal(2, e.EventId)));
@@ -466,7 +448,7 @@ namespace System.Buffers.ArrayPool.Tests
         [Fact]
         public static void RentingBufferOverConfiguredMaximumSizeFiresDiagnosticEvent()
         {
-            RunWithCollectionDisabled(() =>
+            RemoteInvokeWithTrimming(() =>
             {
                 ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 1);
                 Assert.Equal(1, RunWithListener(() => pool.Rent(64), EventLevel.Informational, e => Assert.Equal(2, e.EventId)));
@@ -476,7 +458,7 @@ namespace System.Buffers.ArrayPool.Tests
         [Fact]
         public static void RentingManyBuffersFiresExpectedDiagnosticEvents()
         {
-            RunWithCollectionDisabled(() =>
+            RemoteInvokeWithTrimming(() =>
             {
                 ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 10);
                 var list = new List<EventWrittenEventArgs>();
