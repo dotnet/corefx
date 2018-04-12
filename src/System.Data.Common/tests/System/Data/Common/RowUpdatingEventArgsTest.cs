@@ -72,7 +72,8 @@ namespace System.Data.Common
         [Fact]
         public void Status_set()
         {
-            var ev = new RowUpdatingEventArgs(null, null, 0, null);
+            var table = new DataTable();
+            var ev = new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Select, new DataTableMapping());
             try
             {
                 ev.Status = (UpdateStatus)666;
