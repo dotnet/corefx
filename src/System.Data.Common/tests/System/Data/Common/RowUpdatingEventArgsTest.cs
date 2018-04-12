@@ -8,52 +8,24 @@ namespace System.Data.Common
         public void ConstructorFail()
         {
             var table = new DataTable();
-            try
-            {
-                new RowUpdatingEventArgs(null, null, StatementType.Select, null);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException ex)
-            {
-                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
-                Assert.Equal(ex.ParamName, "dataRow");
-            }
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new RowUpdatingEventArgs(null, null, StatementType.Select, null));
+            Assert.Equal(typeof(ArgumentNullException), ex.GetType());
+            Assert.Equal(ex.ParamName, "dataRow");
 
-            try
-            {
-                new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Batch, new DataTableMapping());
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Equal(ex.ParamName, nameof(StatementType));
-            }
+            ArgumentOutOfRangeException ex2 = Assert.Throws<ArgumentOutOfRangeException>(() => new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Batch, new DataTableMapping()));
+            Assert.Equal(typeof(ArgumentOutOfRangeException), ex2.GetType());
+            Assert.Equal(ex2.ParamName, nameof(StatementType));
 
-            try
-            {
-                new RowUpdatingEventArgs(table.NewRow(), null, (StatementType)666, new DataTableMapping());
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.True(ex.Message.IndexOf(nameof(StatementType)) != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.Equal(ex.ParamName, nameof(StatementType));
-            }
+            ArgumentOutOfRangeException ex3 = Assert.Throws<ArgumentOutOfRangeException>(() => new RowUpdatingEventArgs(table.NewRow(), null, (StatementType)100, new DataTableMapping()));
+            Assert.Equal(typeof(ArgumentOutOfRangeException), ex3.GetType());
+            Assert.Null(ex3.InnerException);
+            Assert.True(ex3.Message.IndexOf(nameof(StatementType)) != -1);
+            Assert.True(ex3.Message.IndexOf("100") != -1);
+            Assert.Equal(ex3.ParamName, nameof(StatementType));
 
-            try
-            {
-                new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Select, null);
-                Assert.False(true);
-            }
-            catch (ArgumentNullException ex)
-            {
-                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
-                Assert.Equal(ex.ParamName, "tableMapping");
-            }
+            ArgumentNullException ex4 = Assert.Throws<ArgumentNullException>(() => new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Select, null));
+            Assert.Equal(typeof(ArgumentNullException), ex4.GetType());
+            Assert.Equal(ex4.ParamName, "tableMapping");
         }
 
         [Fact]
@@ -74,19 +46,12 @@ namespace System.Data.Common
         {
             var table = new DataTable();
             var ev = new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Select, new DataTableMapping());
-            try
-            {
-                ev.Status = (UpdateStatus)666;
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.True(ex.Message.IndexOf(nameof(UpdateStatus)) != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.Equal(ex.ParamName, nameof(UpdateStatus));
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => ev.Status = (UpdateStatus)100);
+            Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
+            Assert.Null(ex.InnerException);
+            Assert.True(ex.Message.IndexOf(nameof(UpdateStatus)) != -1);
+            Assert.True(ex.Message.IndexOf("100") != -1);
+            Assert.Equal(ex.ParamName, nameof(UpdateStatus));
         }
     }
 }

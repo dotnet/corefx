@@ -7,19 +7,12 @@ namespace System.Data.Common
         [Fact]
         public void ConstructorFail()
         {
-            try
-            {
-                new RowUpdatedEventArgs(null, null, (StatementType)666, null);
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.True(ex.Message.IndexOf(nameof(StatementType)) != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.Equal(ex.ParamName, nameof(StatementType));
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => new RowUpdatedEventArgs(null, null, (StatementType)100, null));
+            Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
+            Assert.Null(ex.InnerException);
+            Assert.True(ex.Message.IndexOf(nameof(StatementType)) != -1);
+            Assert.True(ex.Message.IndexOf("100") != -1);
+            Assert.Equal(ex.ParamName, nameof(StatementType));
         }
 
         [Fact]
@@ -49,19 +42,12 @@ namespace System.Data.Common
         public void Status_set()
         {
             var ev = new RowUpdatedEventArgs(null, null, 0, null);
-            try
-            {
-                ev.Status = (UpdateStatus)666;
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.True(ex.Message.IndexOf(nameof(UpdateStatus)) != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.Equal(ex.ParamName, nameof(UpdateStatus));
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => ev.Status = (UpdateStatus)100);
+            Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
+            Assert.Null(ex.InnerException);
+            Assert.True(ex.Message.IndexOf(nameof(UpdateStatus)) != -1);
+            Assert.True(ex.Message.IndexOf("100") != -1);
+            Assert.Equal(ex.ParamName, nameof(UpdateStatus));
         }
 
         [Fact]
