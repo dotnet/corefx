@@ -15,8 +15,8 @@ namespace System.Net.Http
     {
         private bool _useProxy = false;
         private bool _autoDetectionFailed;
-        private DateTime _lastTimeAutoDetectionFailed;
-        private TimeSpan _recentAutoDetectionInterval = new TimeSpan(0, 2, 0); // 2 minutes.
+        private int _lastTimeAutoDetectionFailed; // Environment.TickCount units (milliseconds).
+        private const int _recentAutoDetectionInterval = 120_000; // 2 minutes in milliseconds.
 
         public WinInetProxyHelper()
         {
@@ -82,24 +82,9 @@ namespace System.Net.Http
 
         public string ProxyBypass { get; set; }
 
-        public bool RecentAutoDetectionFailure
-        {
-            get
-            {
-                if (!_autoDetectionFailed)
-                {
-                    return false;
-                }
-                else if ((DateTime.Now - _lastTimeAutoDetectionFailed) <= _recentAutoDetectionInterval)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+        public bool RecentAutoDetectionFailure =>
+            _autoDetectionFailed &&
+            Environment.TickCount - _lastTimeAutoDetectionFailed <= _recentAutoDetectionInterval;
 
         public bool GetProxyForUrl(
             SafeWinHttpHandle sessionHandle,
@@ -145,6 +130,7 @@ namespace System.Net.Http
             var repeat = false;
             do
             {
+                _autoDetectionFailed = false;
                 if (Interop.WinHttp.WinHttpGetProxyForUrl(
                     sessionHandle,
                     uri.AbsoluteUri,
@@ -153,7 +139,6 @@ namespace System.Net.Http
                 {
                     WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: Using autoconfig proxy settings");
                     useProxy = true;
-                    _autoDetectionFailed = false;
 
                     break;
                 }
@@ -164,7 +149,6 @@ namespace System.Net.Http
 
                     if (lastError == Interop.WinHttp.ERROR_WINHTTP_LOGIN_FAILURE)
                     {
-                        _autoDetectionFailed = false;
                         if (repeat)
                         {
                             // We don't retry more than once.
@@ -181,11 +165,7 @@ namespace System.Net.Http
                         if (lastError == Interop.WinHttp.ERROR_WINHTTP_AUTODETECTION_FAILED)
                         {
                             _autoDetectionFailed = true;
-                            _lastTimeAutoDetectionFailed = DateTime.Now;
-                        }
-                        else
-                        {
-                            _autoDetectionFailed = false;
+                            _lastTimeAutoDetectionFailed = Environment.TickCount;
                         }
 
                         break;
