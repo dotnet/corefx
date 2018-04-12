@@ -148,7 +148,7 @@
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "packages -> dotnet.myget.org",
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "timeoutInMinutes": 0,
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
@@ -170,7 +170,7 @@
       "alwaysRun": false,
       "displayName": "symbol packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",      
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -191,7 +191,7 @@
       "alwaysRun": false,
       "displayName": "Update versions repository",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'versions'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'versions'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -441,7 +441,10 @@
     },
     "PB_PublishType": {
       "value": ""
-    }	     
+    },
+    "PB_SecurityBuild": {
+      "value": "False"
+    }   
   },
   "retentionRules": [
     {
