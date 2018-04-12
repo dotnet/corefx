@@ -18,9 +18,9 @@ namespace System.Buffers.ArrayPool.Tests
     {
         // Will make this outer loop before checking in
         // [OuterLoop("This is a long running test (over 60 seconds)")]
-        //[Theory,
-        //    InlineData(true),
-        //    InlineData(false)]
+        [Theory,
+            InlineData(true),
+            InlineData(false)]
         public void BuffersAreCollectedWhenStale(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>
