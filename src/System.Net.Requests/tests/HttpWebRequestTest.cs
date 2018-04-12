@@ -204,7 +204,7 @@ namespace System.Net.Tests
                     Assert.Contains($"Host: {host}", headers);
                 });
 
-                using (var response = (HttpWebResponse) await getResponse)
+                using (var response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -770,7 +770,7 @@ namespace System.Net.Tests
                 Task<WebResponse> getResponse = request.GetResponseAsync();
                 Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
-                using (HttpWebResponse response = (HttpWebResponse) await getResponse)
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
@@ -1057,8 +1057,8 @@ namespace System.Net.Tests
                 Assert.True(strContent.Contains(RequestBody));
             }
         }
-        
-        [Theory] 
+
+        [Theory]
         [MemberData(nameof(EchoServers))]
         public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
         {
@@ -1386,11 +1386,11 @@ namespace System.Net.Tests
                 BinaryFormatter formatter = new BinaryFormatter();
                 var hwr = HttpWebRequest.CreateHttp("http://localhost");
 
-                // .NET Framework throws 
+                // .NET Framework throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.WebRequest+WebProxyWrapper' in Assembly 'System, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.
-                // While .NET Core throws 
+                // While .NET Core throws
                 // System.Runtime.Serialization.SerializationException:
                 //  Type 'System.Net.HttpWebRequest' in Assembly 'System.Net.Requests, Version=4.0.0.
                 //        0, Culture=neutral, PublicKeyToken=b77a5c561934e089' is not marked as serializable.

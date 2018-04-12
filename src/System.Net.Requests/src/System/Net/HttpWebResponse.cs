@@ -35,14 +35,14 @@ namespace System.Net
         {
             throw new PlatformNotSupportedException();
         }
-     
+
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             throw new PlatformNotSupportedException();
         }
 
         protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        {           
+        {
             throw new PlatformNotSupportedException();
         }
 
@@ -101,7 +101,7 @@ namespace System.Net
                         {
                             builder.Append(',');
                         }
-                        
+
                         builder.Append(value);
                         ndx++;
                     }
@@ -115,7 +115,6 @@ namespace System.Net
             }
         }
 
-     
         public String ContentEncoding
         {
             get
@@ -139,7 +138,7 @@ namespace System.Net
                 _cookies = value;
             }
         }
-      
+
         public DateTime LastModified
         {
             get
@@ -164,11 +163,10 @@ namespace System.Net
         {
             get
             {
-                CheckDisposed();                
-                return string.IsNullOrEmpty( Headers["Server"])?  string.Empty : Headers["Server"];
+                CheckDisposed();
+                return string.IsNullOrEmpty(Headers["Server"]) ? string.Empty : Headers["Server"];
             }
         }
-
 
         // HTTP Version
         /// <devdoc>
@@ -258,12 +256,11 @@ namespace System.Net
         {
             get
             {
-                CheckDisposed();                                
+                CheckDisposed();
                 string contentType = Headers["Content-Type"];
 
                 if (_characterSet == null && !string.IsNullOrWhiteSpace(contentType))
                 {
-
                     //sets characterset so the branch is never executed again.
                     _characterSet = String.Empty;
 
@@ -281,17 +278,14 @@ namespace System.Net
                     int i = srchString.IndexOf(";");
                     if (i > 0)
                     {
-
                         //search the parameters
                         while ((i = srchString.IndexOf("charset", i)) >= 0)
                         {
-
                             i += 7;
 
                             //make sure the word starts with charset
                             if (srchString[i - 8] == ';' || srchString[i - 8] == ' ')
                             {
-
                                 //skip whitespace
                                 while (i < srchString.Length && srchString[i] == ' ')
                                     i++;
@@ -331,7 +325,7 @@ namespace System.Net
             {
                 return true;
             }
-        }       
+        }
 
         public override Stream GetResponseStream()
         {
