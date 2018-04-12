@@ -4029,8 +4029,7 @@
     "System.Security.Cryptography.Xml": {
       "StableVersions": [
         "4.4.0",
-        "4.4.1",
-        "4.4.2"
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
