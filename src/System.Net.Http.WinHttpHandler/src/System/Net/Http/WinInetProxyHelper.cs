@@ -14,6 +14,9 @@ namespace System.Net.Http
     internal class WinInetProxyHelper
     {
         private bool _useProxy = false;
+        private bool _autoDetectionFailed;
+        private DateTime _lastTimeAutoDetectionFailed;
+        private TimeSpan _recentAutoDetectionInterval = new TimeSpan(0, 2, 0); // 2 minutes.
 
         public WinInetProxyHelper()
         {
@@ -79,6 +82,25 @@ namespace System.Net.Http
 
         public string ProxyBypass { get; set; }
 
+        public bool RecentAutoDetectionFailure
+        {
+            get
+            {
+                if (!_autoDetectionFailed)
+                {
+                    return false;
+                }
+                else if ((DateTime.Now - _lastTimeAutoDetectionFailed) <= _recentAutoDetectionInterval)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public bool GetProxyForUrl(
             SafeWinHttpHandle sessionHandle,
             Uri uri,
@@ -131,7 +153,8 @@ namespace System.Net.Http
                 {
                     WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: Using autoconfig proxy settings");
                     useProxy = true;
-                    
+                    _autoDetectionFailed = false;
+
                     break;
                 }
                 else
@@ -141,6 +164,7 @@ namespace System.Net.Http
 
                     if (lastError == Interop.WinHttp.ERROR_WINHTTP_LOGIN_FAILURE)
                     {
+                        _autoDetectionFailed = false;
                         if (repeat)
                         {
                             // We don't retry more than once.
@@ -154,6 +178,16 @@ namespace System.Net.Http
                     }
                     else
                     {
+                        if (lastError == Interop.WinHttp.ERROR_WINHTTP_AUTODETECTION_FAILED)
+                        {
+                            _autoDetectionFailed = true;
+                            _lastTimeAutoDetectionFailed = DateTime.Now;
+                        }
+                        else
+                        {
+                            _autoDetectionFailed = false;
+                        }
+
                         break;
                     }
                 }
