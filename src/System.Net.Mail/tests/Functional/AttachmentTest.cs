@@ -36,16 +36,38 @@ namespace System.Net.Mail.Tests
         public void ConstructorPathName()
         {
             string attachFile = Path.GetTempFileName();
-            try
+            using(var tempFile = new TempFile(attachFile))
             {
-                var fileStream = File.Create(attachFile);
-                fileStream.Close();
-                Attachment attach = new Attachment(attachFile);
-                Assert.Equal(Path.GetFileName(attachFile), attach.Name);
+                Attachment attach = new Attachment(tempFile.Path);
+                Assert.Equal(Path.GetFileName(tempFile.Path), attach.Name);
             }
-            finally
+        }
+
+        [Fact]
+        public void ConstructorPathNameMediaType()
+        {
+            string attachFile = Path.GetTempFileName();
+            using(var tempFile = new TempFile(attachFile))
             {
-                File.Delete(attachFile);
+                const string mediaType = "application/octet-stream";
+                string shortName = Path.GetFileName(tempFile.Path);
+                Attachment attach = new Attachment(tempFile.Path, mediaType);
+                Assert.Equal(shortName, attach.Name);
+                Assert.Equal(mediaType, attach.ContentType.MediaType);
+            }
+        }
+
+        [Fact]
+        public void ConstructorPathNameContentType()
+        {
+            string attachFile = Path.GetTempFileName();
+            using(var tempFile = new TempFile(attachFile))
+            {
+                const string mediaType = "application/octet-stream";
+                string shortName = Path.GetFileName(tempFile.Path);
+                Attachment attach = new Attachment(tempFile.Path, new Mime.ContentType(mediaType));
+                Assert.Equal(shortName, attach.Name);
+                Assert.Equal(mediaType, attach.ContentType.MediaType);
             }
         }
 
