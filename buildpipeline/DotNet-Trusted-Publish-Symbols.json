@@ -218,7 +218,10 @@
     },
     "PB_PublishType": {
       "value": ""
-    }	     
+    },
+    "PB_SecurityBuild": {
+      "value": "false"
+    }
   },
   "retentionRules": [
     {
