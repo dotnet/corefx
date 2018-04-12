@@ -35,39 +35,42 @@ namespace System.Net.Mail.Tests
         [Fact]
         public void ConstructorPathName()
         {
-            string attachFile = Path.GetTempFileName();
-            using(var tempFile = new TempFile(attachFile))
+            using (var tempFile = TempFile.Create(new byte[0]))
             {
-                Attachment attach = new Attachment(tempFile.Path);
-                Assert.Equal(Path.GetFileName(tempFile.Path), attach.Name);
+                using (Attachment attach = new Attachment(tempFile.Path))
+                {
+                    Assert.Equal(Path.GetFileName(tempFile.Path), attach.Name);
+                }
             }
         }
 
         [Fact]
         public void ConstructorPathNameMediaType()
         {
-            string attachFile = Path.GetTempFileName();
-            using(var tempFile = new TempFile(attachFile))
+            using (var tempFile = TempFile.Create(new byte[0]))
             {
                 const string mediaType = "application/octet-stream";
                 string shortName = Path.GetFileName(tempFile.Path);
-                Attachment attach = new Attachment(tempFile.Path, mediaType);
-                Assert.Equal(shortName, attach.Name);
-                Assert.Equal(mediaType, attach.ContentType.MediaType);
+                using (Attachment attach = new Attachment(tempFile.Path, mediaType))
+                {
+                    Assert.Equal(shortName, attach.Name);
+                    Assert.Equal(mediaType, attach.ContentType.MediaType);
+                }
             }
         }
 
         [Fact]
         public void ConstructorPathNameContentType()
         {
-            string attachFile = Path.GetTempFileName();
-            using(var tempFile = new TempFile(attachFile))
+            using (var tempFile = TempFile.Create(new byte[0]))
             {
                 const string mediaType = "application/octet-stream";
                 string shortName = Path.GetFileName(tempFile.Path);
-                Attachment attach = new Attachment(tempFile.Path, new Mime.ContentType(mediaType));
-                Assert.Equal(shortName, attach.Name);
-                Assert.Equal(mediaType, attach.ContentType.MediaType);
+                using (Attachment attach = new Attachment(tempFile.Path, new Mime.ContentType(mediaType)))
+                {
+                    Assert.Equal(shortName, attach.Name);
+                    Assert.Equal(mediaType, attach.ContentType.MediaType);
+                }
             }
         }
 
