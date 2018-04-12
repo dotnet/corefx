@@ -297,15 +297,19 @@ namespace System.Net.Http
 
                 // TODO: #28863 Part 1: Uri.IdnHost should include [] around IPv6 address.
                 // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
-                // In this case, use uri.Host instead, which will correctly enclose with [].
-                // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
-
+                // Uri.Host will correctly enclose with [], but we cannot use it for LLA address, because of:
                 // TODO: #28863 Part 2: Uri.Host LLA (Link-local address) for IPv6 address doesn't contain %number part.
-                // Since scope is mandatory for LLA, we will use uri.IdnHost for IPv6 LLA address.
-                // From RFC 4291, IPv6 LLA has formate like: fe80::/10.
-                await WriteAsciiStringAsync((uri.HostNameType == UriHostNameType.IPv6 &&
-                    uri.IdnHost.IndexOf("fe80") != 0) ?
-                        uri.Host : uri.IdnHost).ConfigureAwait(false);
+                // Since scope is mandatory for LLA, we will use uri.IdnHost for all IPv6 address, and append [] around it.
+                if (uri.HostNameType == UriHostNameType.IPv6)
+                {
+                    await WriteByteAsync((byte)'[').ConfigureAwait(false);
+                    await WriteAsciiStringAsync(uri.IdnHost).ConfigureAwait(false);
+                    await WriteByteAsync((byte)']').ConfigureAwait(false);
+                }
+                else
+                {
+                    await WriteAsciiStringAsync(uri.IdnHost).ConfigureAwait(false);
+                }
 
                 if (!uri.IsDefaultPort)
                 {
@@ -382,11 +386,21 @@ namespace System.Net.Http
                         Debug.Assert(request.RequestUri.Scheme == Uri.UriSchemeHttp);
                         await WriteBytesAsync(s_httpSchemeAndDelimiter).ConfigureAwait(false);
 
+                        // TODO: #28863 Part 1: Uri.IdnHost should include [] around IPv6 address.
                         // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
-                        // In this case, use uri.Host instead, which will correctly enclose with [].
-                        // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
-                        await WriteAsciiStringAsync(request.RequestUri.HostNameType == UriHostNameType.IPv6 ?
-                            request.RequestUri.Host : request.RequestUri.IdnHost).ConfigureAwait(false);
+                        // Uri.Host will correctly enclose with [], but we cannot use it for LLA address, because of:
+                        // TODO: #28863 Part 2: Uri.Host LLA (Link-local address) for IPv6 address doesn't contain %number part.
+                        // Since scope is mandatory for LLA, we will use uri.IdnHost for all IPv6 address, and append [] around it.
+                        if (request.RequestUri.HostNameType == UriHostNameType.IPv6)
+                        {
+                            await WriteByteAsync((byte)'[').ConfigureAwait(false);
+                            await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                            await WriteByteAsync((byte)']').ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await WriteAsciiStringAsync(request.RequestUri.IdnHost).ConfigureAwait(false);
+                        }
 
                         if (!request.RequestUri.IsDefaultPort)
                         {

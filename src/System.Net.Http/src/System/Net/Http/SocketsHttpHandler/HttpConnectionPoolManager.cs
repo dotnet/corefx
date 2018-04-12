@@ -148,21 +148,10 @@ namespace System.Net.Http
         {
             Uri uri = request.RequestUri;
 
-            // TODO: #28863 Part 1: Uri.IdnHost should include [] around IPv6 address.
-            // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
-            // In this case, use uri.Host instead, which will correctly enclose with [].
-            // Note we don't need punycode encoding if it's an IP address, so using uri.Host is fine.
-
-            // TODO: #28863 Part 2: Uri.Host LLA (Link-local address) for IPv6 address doesn't contain %number part.
-            // Since scope is mandatory for LLA, we will use uri.IdnHost for IPv6 LLA address.
-            // From RFC 4291, IPv6 LLA has formate like: fe80::/10.
-            bool isNonLLAIPv6Address = (uri.HostNameType == UriHostNameType.IPv6 &&
-                uri.IdnHost.IndexOf("fe80") != 0);
-
             if (isProxyConnect)
             {
                 Debug.Assert(uri == proxyUri);
-                return new HttpConnectionKey(HttpConnectionKind.ProxyConnect, isNonLLAIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, proxyUri);
+                return new HttpConnectionKey(HttpConnectionKind.ProxyConnect, uri.IdnHost, uri.Port, null, proxyUri);
             }
 
             string sslHostName = null;
@@ -188,7 +177,7 @@ namespace System.Net.Http
                     if (HttpUtilities.IsNonSecureWebSocketScheme(uri.Scheme))
                     {
                         // Non-secure websocket connection through proxy to the destination.
-                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, isNonLLAIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, proxyUri);
+                        return new HttpConnectionKey(HttpConnectionKind.ProxyTunnel, uri.IdnHost, uri.Port, null, proxyUri);
                     }
                     else
                     {
@@ -201,16 +190,16 @@ namespace System.Net.Http
                 else
                 {
                     // Tunnel SSL connection through proxy to the destination.
-                    return new HttpConnectionKey(HttpConnectionKind.SslProxyTunnel, isNonLLAIPv6Address ? uri.Host : uri.IdnHost, uri.Port, sslHostName, proxyUri);
+                    return new HttpConnectionKey(HttpConnectionKind.SslProxyTunnel, uri.IdnHost, uri.Port, sslHostName, proxyUri);
                 }
             }
             else if (sslHostName != null)
             {
-                return new HttpConnectionKey(HttpConnectionKind.Https, isNonLLAIPv6Address ? uri.Host : uri.IdnHost, uri.Port, sslHostName, null);
+                return new HttpConnectionKey(HttpConnectionKind.Https, uri.IdnHost, uri.Port, sslHostName, null);
             }
             else
             {
-                return new HttpConnectionKey(HttpConnectionKind.Http, isNonLLAIPv6Address ? uri.Host : uri.IdnHost, uri.Port, null, null);
+                return new HttpConnectionKey(HttpConnectionKind.Http, uri.IdnHost, uri.Port, null, null);
             }
         }
 
@@ -221,7 +210,14 @@ namespace System.Net.Http
             HttpConnectionPool pool;
             while (!_pools.TryGetValue(key, out pool))
             {
-                pool = new HttpConnectionPool(this, key.Kind, key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
+                // TODO: #28863 Part 1: Uri.IdnHost should include [] around IPv6 address.
+                // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
+                // Uri.Host will correctly enclose with [], but we cannot use it for LLA address, because of:
+                // TODO: #28863 Part 2: Uri.Host LLA (Link-local address) for IPv6 address doesn't contain %number part.
+                // Since scope is mandatory for LLA, we will use uri.IdnHost for all IPv6 address, and append [] around it.
+                bool isNonNullIPv6address = key.Host != null && request.RequestUri.HostNameType == UriHostNameType.IPv6;
+
+                pool = new HttpConnectionPool(this, key.Kind, isNonNullIPv6address ? "[" + key.Host + "]" : key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
                 if (_pools.TryAdd(key, pool) && _cleaningTimer != null)
                 {
                     // We need to ensure the cleanup timer is running if it isn't
