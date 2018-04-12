@@ -6,7 +6,7 @@
       "alwaysRun": false,
       "displayName": "Set up pipeline-specific git repository",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -27,7 +27,7 @@
       "alwaysRun": false,
       "displayName": "sync -ab",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -48,7 +48,7 @@
       "alwaysRun": false,
       "displayName": "Extract symbol packages; if release branch, archive",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -69,7 +69,7 @@
       "alwaysRun": false,
       "displayName": "Publish Symbols to Artifact Services",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'), ne(variables.PB_SecurityBuild, 'True'))",
       "task": {
         "id": "29827cd1-5c33-4ff0-a817-abd46970ffc4",
         "versionSpec": "0.*",
