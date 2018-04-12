@@ -115,27 +115,50 @@ namespace System
 
         /// <summary>
         /// Creates a new memory from a memory manager that provides specific method implementations beginning
+        /// at 0 index and ending at 'end' index (exclusive).
+        /// </summary>
+        /// <param name="manager">The memory manager.</param>
+        /// <param name="length">The number of items in the memory.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="length"/> is negative.
+        /// </exception>
+        /// <remarks>For internal infrastructure only</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Memory(MemoryManager<T> manager, int length)
+        {
+            Debug.Assert(manager != null);
+
+            if (length < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            _object = manager;
+            _index = (1 << 31); // Mark as MemoryManager type
+            // Before using _index, check if _index < 0, then 'and' it with RemoveFlagsBitMask
+            _length = length;
+        }
+
+        /// <summary>
+        /// Creates a new memory from a memory manager that provides specific method implementations beginning
         /// at 'start' index and ending at 'end' index (exclusive).
         /// </summary>
         /// <param name="manager">The memory manager.</param>
         /// <param name="start">The index at which to begin the memory.</param>
         /// <param name="length">The number of items in the memory.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when <paramref name="manager"/> is null.
-        /// </exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> or <paramref name="length"/> is negative.
         /// </exception>
+        /// <remarks>For internal infrastructure only</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Memory(MemoryManager<T> manager, int start, int length)
+        internal Memory(MemoryManager<T> manager, int start, int length)
         {
-            if (manager == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.manager);
-            if ((uint)start > (uint)manager.Length || (uint)length > (uint)(manager.Length - start))
+            Debug.Assert(manager != null);
+
+            if (length < 0 || start < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
 
             _object = manager;
-            _index = start | (1 << 31); // Before using _index, check if _index < 0, then 'and' it with RemoveFlagsBitMask
+            _index = start | (1 << 31); // Mark as MemoryManager type
+            // Before using _index, check if _index < 0, then 'and' it with RemoveFlagsBitMask
             _length = length;
         }
 
@@ -171,7 +194,7 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Memory(object obj, int start, int length)
+        internal Memory(object obj, int start, int length)
         {
             // No validation performed; caller must provide any necessary validation.
             _object = obj;
@@ -353,13 +376,26 @@ namespace System
             }
             else if (_object is T[] array)
             {
-                GCHandle handle = _length < 0 ? default : GCHandle.Alloc(array, GCHandleType.Pinned);
+                // Array is already pre-pinned
+                if (_length < 0)
+                {
 #if FEATURE_PORTABLE_SPAN
-                void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref MemoryMarshal.GetReference<T>(array)), _index);
 #else
-                void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
 #endif // FEATURE_PORTABLE_SPAN
-                return new MemoryHandle(pointer, handle);
+                    return new MemoryHandle(pointer);
+                }
+                else
+                {
+                    GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+#if FEATURE_PORTABLE_SPAN
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
+                    return new MemoryHandle(pointer, handle);
+                }
             }
             return default;
         }
