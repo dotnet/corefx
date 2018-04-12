@@ -5,7 +5,7 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Run Begin.sh",
+      "displayName": "Run begin.sh",
       "timeoutInMinutes": 0,
       "condition": "succeeded()",
       "refName": "TaskRunBegin",
@@ -20,7 +20,7 @@
         "args": "",
         "cwd": "",
         "failOnStandardError": "false",
-        "script": "if [ -f \"Begin.sh\" ]; then ./Begin.sh ; else echo \"Begin.sh script does not exist. Moving on.\" ; fi"
+        "script": "if [ -f \"$AGENTTOOLSPATH/begin.sh\" ]; then $AGENTTOOLSPATH/begin.sh ; else echo \"$AGENTTOOLSPATH/begin.sh script does not exist. Moving on.\" ; fi"
       }
     },
     {
@@ -270,22 +270,22 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Run End.sh",
+      "displayName": "Run end.sh",
       "timeoutInMinutes": 0,
       "condition": "succeeded()",
       "refName": "TaskRunEnd",
       "task": {
-	    "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
-	    "versionSpec": "0.*",
-	    "definitionType": "task"
+        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
+        "versionSpec": "0.*",
+        "definitionType": "task"
       },
       "inputs": {
-	    "type": "InlineScript",
-	    "scriptPath": "",
-	    "args": "",
-	    "cwd": "",
-	    "failOnStandardError": "false",
-	    "script": "if [ -f \"End.sh\" ]; then ./End.sh ; else echo \"End.sh script does not exist. Moving on.\" ; fi"
+        "type": "InlineScript",
+        "scriptPath": "",
+        "args": "",
+        "cwd": "",
+        "failOnStandardError": "false",
+        "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
       }
     }
   ],
@@ -374,6 +374,9 @@
     "PB_CreateHelixArguments": {
       "value": "/t:CloudBuild /p:ArchGroup=x64 /p:ConfigurationGroup=Release /p:\"EnableCloudTest=true /p:\"TestProduct=corefx /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=OSX\" /p:FilterToOSGroup=OSX",
       "allowOverride": true
+    },
+    "AgentToolsPath": {
+        "value": "$(Build.SourcesDirectory)"
     }
   },
   "demands": [
