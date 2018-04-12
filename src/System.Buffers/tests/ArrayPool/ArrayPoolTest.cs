@@ -38,7 +38,7 @@ namespace System.Buffers.ArrayPool.Tests
         protected static void RemoteInvokeWithTrimming(Action action, bool trim = false)
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
-            options.StartInfo.UseShellExecute = trim;
+            options.StartInfo.UseShellExecute = false;
             options.StartInfo.EnvironmentVariables.Add(TrimSwitchName, trim.ToString());
 
             RemoteInvoke(action).Dispose();
@@ -51,7 +51,7 @@ namespace System.Buffers.ArrayPool.Tests
                 TimeOut = timeout
             };
 
-            options.StartInfo.UseShellExecute = trim;
+            options.StartInfo.UseShellExecute = false;
             options.StartInfo.EnvironmentVariables.Add(TrimSwitchName, trim.ToString());
 
             RemoteInvoke(method, trim.ToString(), options).Dispose();
