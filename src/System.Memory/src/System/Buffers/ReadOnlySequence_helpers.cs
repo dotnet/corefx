@@ -97,7 +97,8 @@ namespace System.Buffers
             {
                 if (endIndex >= 0)  // SequenceType.MultiSegment
                 {
-                    ReadOnlyMemory<T> memory = ((ReadOnlySequenceSegment<T>)startObject).Memory;
+                    // TODO: use explicit cast instead of Unsafe.As
+                    ReadOnlyMemory<T> memory = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject).Memory;
                     if (isMultiSegment)
                     {
                         return memory.Slice(startIndex);
@@ -109,7 +110,8 @@ namespace System.Buffers
                     if (isMultiSegment)
                         ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
 
-                    return new ReadOnlyMemory<T>((T[])startObject, startIndex, (endIndex & ReadOnlySequence.IndexBitMask) - startIndex);
+                    // TODO: use explicit cast instead of Unsafe.As
+                    return new ReadOnlyMemory<T>(Unsafe.As<T[]>(startObject), startIndex, (endIndex & ReadOnlySequence.IndexBitMask) - startIndex);
                 }
             }
             else // startIndex < 0
@@ -121,13 +123,15 @@ namespace System.Buffers
                 // the JIT to see when that the code is unreachable and eliminate it.
                 if (typeof(T) == typeof(char) && endIndex < 0)  // SequenceType.String
                 {
+                    // TODO: use explicit cast instead of Unsafe.As
                     // No need to remove the FlagBitMask since (endIndex - startIndex) == (endIndex & ReadOnlySequence.IndexBitMask) - (startIndex & ReadOnlySequence.IndexBitMask)
-                    return (ReadOnlyMemory<T>)(object)((string)startObject).AsMemory((startIndex & ReadOnlySequence.IndexBitMask), endIndex - startIndex);
+                    return (ReadOnlyMemory<T>)(object)(Unsafe.As<string>(startObject)).AsMemory((startIndex & ReadOnlySequence.IndexBitMask), endIndex - startIndex);
                 }
                 else // endIndex >= 0, SequenceType.MemoryManager
                 {
+                    // TODO: use explicit cast instead of Unsafe.As
                     startIndex &= ReadOnlySequence.IndexBitMask;
-                    return ((MemoryManager<T>)startObject).Memory.Slice(startIndex, endIndex - startIndex);
+                    return Unsafe.As<MemoryManager<T>>(startObject).Memory.Slice(startIndex, endIndex - startIndex);
                 }
             }
         }
