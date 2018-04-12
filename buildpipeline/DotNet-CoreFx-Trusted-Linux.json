@@ -5,9 +5,9 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Run begin.sh",
+      "displayName": "run begin.sh",
       "timeoutInMinutes": 0,
-      "condition": "succeeded()",
+      "condition": "always()",
       "refName": "TaskRunBegin",
       "task": {
         "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
@@ -418,7 +418,7 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Run end.sh",
+      "displayName": "run end.sh",
       "timeoutInMinutes": 0,
       "condition": "succeeded()",
       "refName": "TaskRunEnd",
@@ -548,7 +548,8 @@
       "value": "true"
     },
     "AgentToolsPath": {
-        "value": "$(Build.SourcesDirectory)"
+      "value": "",
+      "allowOverride": true
     }
   },
   "demands": [
