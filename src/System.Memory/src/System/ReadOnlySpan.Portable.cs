@@ -137,9 +137,17 @@ namespace System
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public unsafe ref readonly T GetPinnableReference()
-            => ref (_length != 0) ?
-            ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset) :
-            ref Unsafe.AsRef<T>(null);
+        {
+            if (_length != 0)
+            {
+                if (_pinnable == null)
+                {
+                    unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
+                }
+                return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
+            }
+            return ref Unsafe.AsRef<T>(null);
+        }
 
         /// <summary>
         /// Copies the contents of this read-only span into destination span. If the source

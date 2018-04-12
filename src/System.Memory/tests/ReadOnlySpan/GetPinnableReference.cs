@@ -51,7 +51,7 @@ namespace System.SpanTests
         //}
 
         [Fact]
-        public static void GetPinnableReferenceArrayPastEnd()
+        public static unsafe void GetPinnableReferenceArrayPastEnd()
         {
             // The only real difference between GetPinnableReference() and "ref span[0]" is that
             // GetPinnableReference() of a zero-length won't throw an IndexOutOfRange but instead return a null ref.
@@ -59,7 +59,7 @@ namespace System.SpanTests
             int[] a = { 91, 92, 93, 94, 95 };
             ReadOnlySpan<int> span = new ReadOnlySpan<int>(a, a.Length, 0);
             ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
-            ref int expected = ref Unsafe.Add<int>(ref a[a.Length - 1], 1);
+            ref int expected = ref Unsafe.AsRef<int>(null);
             Assert.True(Unsafe.AreSame(ref expected, ref pinnableReference));
         }
 
