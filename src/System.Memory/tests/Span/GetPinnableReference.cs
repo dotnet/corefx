@@ -64,30 +64,24 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void GetPinnableReferencePointer()
+        public static unsafe void GetPinnableReferencePointer()
         {
-            unsafe
-            {
-                int i = 42;
-                Span<int> span = new Span<int>(&i, 1);
-                ref int pinnableReference = ref span.GetPinnableReference();
-                Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
-            }
+            int i = 42;
+            Span<int> span = new Span<int>(&i, 1);
+            ref int pinnableReference = ref span.GetPinnableReference();
+            Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
         }
 
         [Fact]
-        public static void GetPinnableReferenceEmpty()
+        public static unsafe void GetPinnableReferenceEmpty()
         {
-            unsafe
-            {
-                Span<int> span = Span<int>.Empty;
-                ref int pinnableReference = ref span.GetPinnableReference();
-                Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
+            Span<int> span = Span<int>.Empty;
+            ref int pinnableReference = ref span.GetPinnableReference();
+            Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
 
-                span = Array.Empty<int>();
-                pinnableReference = ref span.GetPinnableReference();
-                Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
-            }
+            span = Array.Empty<int>();
+            pinnableReference = ref span.GetPinnableReference();
+            Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
         }
     }
 }

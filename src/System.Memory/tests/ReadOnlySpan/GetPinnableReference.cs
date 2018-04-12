@@ -64,30 +64,24 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void GetPinnableReferencePointer()
+        public static unsafe void GetPinnableReferencePointer()
         {
-            unsafe
-            {
-                int i = 42;
-                ReadOnlySpan<int> span = new ReadOnlySpan<int>(&i, 1);
-                ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
-                Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
-            }
+            int i = 42;
+            ReadOnlySpan<int> span = new ReadOnlySpan<int>(&i, 1);
+            ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
+            Assert.True(Unsafe.AreSame(ref i, ref pinnableReference));
         }
 
         [Fact]
-        public static void GetPinnableReferenceEmpty()
+        public static unsafe void GetPinnableReferenceEmpty()
         {
-            unsafe
-            {
-                ReadOnlySpan<int> span = ReadOnlySpan<int>.Empty;
-                ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
-                Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
+            ReadOnlySpan<int> span = ReadOnlySpan<int>.Empty;
+            ref int pinnableReference = ref Unsafe.AsRef(in span.GetPinnableReference());
+            Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
 
-                ReadOnlySpan<int> spanFromEmptyArray = Array.Empty<int>();
-                pinnableReference = ref Unsafe.AsRef(in spanFromEmptyArray.GetPinnableReference());
-                Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
-            }
+            ReadOnlySpan<int> spanFromEmptyArray = Array.Empty<int>();
+            pinnableReference = ref Unsafe.AsRef(in spanFromEmptyArray.GetPinnableReference());
+            Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(null), ref pinnableReference));
         }
     }
 }
