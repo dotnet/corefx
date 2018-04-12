@@ -3,21 +3,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
+using System.Diagnostics.Tracing;
 using System.Linq;
-using Xunit;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Diagnostics.Tracing;
+using System.Threading;
+using Xunit;
 
 namespace System.Buffers.ArrayPool.Tests
 {
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public class CollectionTests : ArrayPoolTest
     {
-        // Will make this outer loop before checking in
-        // [OuterLoop("This is a long running test (over 60 seconds)")]
+        [OuterLoop("This is a long running test (over 2 minutes)")]
         [Theory,
             InlineData(true),
             InlineData(false)]
@@ -79,6 +77,7 @@ namespace System.Buffers.ArrayPool.Tests
             }, trim, 3 * 60 * 1000); // This test has to wait for the buffers to go stale (give it three minutes)
         }
 
+        [OuterLoop("This test is risky as it allocates a ton of memory (can cause other tests to fail)")]
         [Theory,
             InlineData(true),
             InlineData(false)]
