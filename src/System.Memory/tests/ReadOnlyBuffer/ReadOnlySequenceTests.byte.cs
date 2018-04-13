@@ -305,7 +305,7 @@ namespace System.Memory.Tests
 
         public static TheoryData<Action<ReadOnlySequence<byte>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<byte>>>
         {
-			// negative start	
+            // negative start	
             b => b.Slice(-1), // no length
             b => b.Slice(-1, -1), // negative length
             b => b.Slice(-1, 0), // zero length
@@ -314,16 +314,16 @@ namespace System.Memory.Tests
             b => b.Slice(-1, b.Start), // to start
             b => b.Slice(-1, b.End), // to end
 
-			// zero start
+            // zero start
             b => b.Slice(0, -1), // negative length
             b => b.Slice(0, 101), // after end length
 
-			// end start
+            // end start
             b => b.Slice(100, -1), // negative length
             b => b.Slice(100, 1), // after end length
             b => b.Slice(100, b.Start), // to start
 
-			// After end start
+            // After end start
             b => b.Slice(101), // no length
             b => b.Slice(101, -1), // negative length
             b => b.Slice(101, 0), // zero length
@@ -331,16 +331,16 @@ namespace System.Memory.Tests
             b => b.Slice(101, b.Start), // to start
             b => b.Slice(101, b.End), // to end
 
-			// At Start start
+            // At Start start
             b => b.Slice(b.Start, -1), // negative length
             b => b.Slice(b.Start, 101), // after end length
 
-			// At End start
+            // At End start
             b => b.Slice(b.End, -1), // negative length
             b => b.Slice(b.End, 1), // after end length
             b => b.Slice(b.End, b.Start), // to start
 
-			// Slice at begin
+            // Slice at begin
             b => b.Slice(0, 70).Slice(0, b.End), // to after end
             b => b.Slice(0, 70).Slice(b.Start, b.End), // to after end
             // from after end
@@ -351,7 +351,7 @@ namespace System.Memory.Tests
             b => b.Slice(0, 70).Slice(b.End, b.Start), // to start
             b => b.Slice(0, 70).Slice(b.End, b.End), // to after end
 
-			// Slice at begin
+            // Slice at begin
             b => b.Slice(b.Start, 70).Slice(0, b.End), // to after end
             b => b.Slice(b.Start, 70).Slice(b.Start, b.End), // to after end
             // from after end
@@ -362,7 +362,7 @@ namespace System.Memory.Tests
             b => b.Slice(b.Start, 70).Slice(b.End, b.Start), // to start
             b => b.Slice(b.Start, 70).Slice(b.End, b.End), // to after end
 
-			// Slice at middle
+            // Slice at middle
             b => b.Slice(30, 40).Slice(0, b.Start), // to before start
             b => b.Slice(30, 40).Slice(0, b.End), // to after end
             // from before start
@@ -381,7 +381,7 @@ namespace System.Memory.Tests
             b => b.Slice(30, 40).Slice(b.End, b.Start), // to before start
             b => b.Slice(30, 40).Slice(b.End, b.End), // to after end
 
-			// Slice at end
+            // Slice at end
             b => b.Slice(70, 30).Slice(0, b.Start), // to before start
             // from before start
             b => b.Slice(30, 40).Slice(b.Start),
@@ -394,7 +394,7 @@ namespace System.Memory.Tests
             // from end
             b => b.Slice(70, 30).Slice(b.End, b.Start), // to before start
 
-			// Slice at end
+            // Slice at end
             b => b.Slice(70, 30).Slice(0, b.Start), // to before start
             // from before start
             b => b.Slice(30, 40).Slice(b.Start),

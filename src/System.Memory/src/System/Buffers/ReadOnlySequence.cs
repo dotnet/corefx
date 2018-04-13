@@ -199,7 +199,7 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, long length)
         {
-            // check start before length
+            // Check start before length
             BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, _sequenceEnd);
             if (length < 0)
@@ -254,7 +254,7 @@ namespace System.Buffers
         /// <param name="length">The length of the slice</param>
         public ReadOnlySequence<T> Slice(SequencePosition start, int length)
         {
-			// check start before length
+            // Check start before length
             BoundsCheck(_sequenceStart, start);
             BoundsCheck(start, _sequenceEnd);
             if (length < 0)
