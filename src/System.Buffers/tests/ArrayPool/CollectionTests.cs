@@ -77,8 +77,9 @@ namespace System.Buffers.ArrayPool.Tests
             }, trim, 3 * 60 * 1000); // This test has to wait for the buffers to go stale (give it three minutes)
         }
 
-        [OuterLoop("This test is risky as it allocates a ton of memory (can cause other tests to fail)")]
-        [Theory,
+        // This test can cause problems for other tests run in parallel (from other assemblies) as
+        // it pushes the physical memory usage above 80% temporarily.
+        [ConditionalTheory(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled)),
             InlineData(true),
             InlineData(false)]
         public unsafe void ThreadLocalIsCollectedUnderHighPressure(bool trim)

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace System.Buffers.ArrayPool.Tests
 {
-    public class ArrayPoolTest : RemoteExecutorTestBase
+    public abstract class ArrayPoolTest : RemoteExecutorTestBase
     {
         protected const string TrimSwitchName = "DOTNET_SYSTEM_BUFFERS_ARRAYPOOL_TRIMSHARED";
 
