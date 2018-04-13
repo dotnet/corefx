@@ -18,7 +18,7 @@ namespace System.SpanTests
             Assert.True(Unsafe.AreSame(ref a[1], ref pinnableReference));
         }
 
-        // Enable this test once we use C# 7.3
+        // Enable this test once we use C# 7.3 (https://github.com/dotnet/corefx/issues/29084)
         //[Fact]
         //public static unsafe void UsingSpanInFixed()
         //{
@@ -32,8 +32,7 @@ namespace System.SpanTests
         //        }
         //    }
         //}
-
-        // Enable this test once we use C# 7.3
+        //
         //[Fact]
         //public static unsafe void UsingEmptySpanInFixed()
         //{

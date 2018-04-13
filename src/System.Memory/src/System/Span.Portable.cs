@@ -168,7 +168,7 @@ namespace System
             {
                 if (_pinnable == null)
                 {
-                    unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
+                    return ref Unsafe.AsRef<T>(_byteOffset.ToPointer());
                 }
                 return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
             }
