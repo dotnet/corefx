@@ -5,6 +5,44 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Change permissions to agent folder for cleanup steps",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "sudo",
+        "arguments": "chmod 777 -R .",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Delete files from $(PB_GitDirectory)",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "task": {
+        "id": "b7e8b412-0437-4065-9371-edc5881de25b",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SourceFolder": "$(PB_GitDirectory)",
+        "Contents": "**\n.gitignore\n.editorconfig\n.gitattributes\n.gitmirrorall\n.git/**\n.git"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Local git clone",
       "timeoutInMinutes": 0,
       "task": {
@@ -237,7 +275,7 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": true,
-      "displayName": "Local create container from volume for exposing logs",
+      "displayName": "Local copy logs out of container",
       "timeoutInMinutes": 0,
       "condition": "succeededOrFailed()",
       "task": {
@@ -247,51 +285,9 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run $(PB_DockerCommonRunArgs) echo",
+        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f -name *.log -exec cp {} --target-directory=/docker_logs ;",
         "workingFolder": "",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
-      "alwaysRun": true,
-      "displayName": "Local expose Docker container for publishing",
-      "timeoutInMinutes": 0,
-      "condition": "succeededOrFailed()",
-      "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "filename": "docker",
-        "arguments": "cp -L $(PB_DockerContainerName):$(PB_DockerVolumeName) $(PB_DockerCopyDest)",
-        "workingFolder": "",
-        "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
-      "alwaysRun": true,
-      "displayName": "Local copy log files to: $(PB_DockerCopyDest)\\DockerBuildLogs",
-      "timeoutInMinutes": 0,
-      "condition": "succeededOrFailed()",
-      "task": {
-        "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
-        "versionSpec": "2.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SourceFolder": "$(PB_DockerCopyDest)",
-        "Contents": "**/*.log",
-        "TargetFolder": "$(PB_DockerCopyDest)\\DockerBuildLogs",
-        "CleanTargetFolder": "false",
-        "OverWrite": "false",
-        "flattenFolders": "false"
       }
     },
     {
@@ -308,7 +304,7 @@
         "definitionType": "task"
       },
       "inputs": {
-        "PathtoPublish": "$(Build.StagingDirectory)\\DockerBuildLogs",
+        "PathtoPublish": "$(Build.StagingDirectory)",
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)",
@@ -437,7 +433,8 @@
       "value": "dn-bot"
     },
     "PB_VsoCorefxGitUrl": {
-      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/"
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/",
+      "isSecret": true
     },
     "PB_VsoRepositoryName": {
       "value": "DotNet-CoreFX-Trusted"
@@ -491,7 +488,7 @@
       "reportBuildStatus": "true",
       "fetchDepth": "0",
       "gitLfsSupport": "false",
-      "skipSyncSource": "false",
+      "skipSyncSource": "true",
       "cleanOptions": "3",
       "checkoutNestedSubmodules": "false",
       "labelSourcesFormat": "$(build.buildNumber)"
@@ -501,7 +498,7 @@
     "name": "DotNet-CoreFX-Trusted",
     "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
     "defaultBranch": "refs/heads/master",
-    "clean": "true",
+    "clean": "false",
     "checkoutSubmodules": false
   },
   "processParameters": {},
@@ -532,7 +529,7 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items for Visual Studio and most active DevDiv products are in this account.",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418099070,
+    "revision": 418099111,
     "visibility": "organization"
   }
 }

@@ -5,8 +5,47 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Change permissions to agent folder for cleanup steps",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "sudo",
+        "arguments": "chmod 777 -R .",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Delete files from $(PB_GitDirectory)",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "task": {
+        "id": "b7e8b412-0437-4065-9371-edc5881de25b",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SourceFolder": "$(PB_GitDirectory)",
+        "Contents": "**\n.gitignore\n.editorconfig\n.gitattributes\n.gitmirrorall\n.git/**\n.git"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "Local git clone",
       "timeoutInMinutes": 0,
+      "refName": "Task3",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -26,6 +65,7 @@
       "alwaysRun": false,
       "displayName": "Local git checkout",
       "timeoutInMinutes": 0,
+      "refName": "Task4",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -45,6 +85,7 @@
       "alwaysRun": false,
       "displayName": "Local initialize tools",
       "timeoutInMinutes": 0,
+      "refName": "Task6",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -64,6 +105,7 @@
       "alwaysRun": false,
       "displayName": "Local initialize Docker",
       "timeoutInMinutes": 0,
+      "refName": "Task7",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -123,6 +165,7 @@
       "alwaysRun": false,
       "displayName": "Docker generate version assets",
       "timeoutInMinutes": 0,
+      "refName": "Task8",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -142,6 +185,7 @@
       "alwaysRun": false,
       "displayName": "Docker run sync",
       "timeoutInMinutes": 0,
+      "refName": "Task9",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -161,6 +205,7 @@
       "alwaysRun": false,
       "displayName": "Docker run build.sh",
       "timeoutInMinutes": 0,
+      "refName": "Task10",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -181,6 +226,7 @@
       "displayName": "Docker build tests",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'), ne(variables.PB_SkipTestBuild, 'true'))",
+      "refName": "Task11",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -201,6 +247,7 @@
       "displayName": "Docker create helix test jobs",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'), ne(variables.PB_EnableCloudTest, 'false'))",
+      "refName": "Task12",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -208,7 +255,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/Tools/msbuild.sh $(PB_DockerVolumeName)/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(PB_CloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
+        "arguments": "run --rm -e DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 $(PB_DockerCommonRunArgs) $(PB_DockerVolumeName)/Tools/msbuild.sh $(PB_DockerVolumeName)/src/upload-tests.proj $(PB_CreateHelixArguments) /p:\"CloudDropAccountName=$(PB_CloudDropAccountName)\" /p:\"CloudResultsAccountName=$(PB_CloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(CloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(PB_CloudResultsAccessToken)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:HelixApiEndpoint=$(PB_HelixApiEndPoint) /p:\"Branch=$(SourceBranch)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -220,6 +267,7 @@
       "alwaysRun": false,
       "displayName": "Docker push packages to Azure",
       "timeoutInMinutes": 0,
+      "refName": "Task13",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -237,7 +285,7 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": true,
-      "displayName": "Local create container from volume for exposing logs",
+      "displayName": "Local copy logs out of container",
       "timeoutInMinutes": 0,
       "condition": "succeededOrFailed()",
       "task": {
@@ -247,51 +295,9 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run $(PB_DockerCommonRunArgs) echo",
+        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f -name *.log -exec cp {} --target-directory=/docker_logs ;",
         "workingFolder": "",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
-      "alwaysRun": true,
-      "displayName": "Local expose Docker container for publishing",
-      "timeoutInMinutes": 0,
-      "condition": "succeededOrFailed()",
-      "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "filename": "docker ",
-        "arguments": "cp -L $(PB_DockerContainerName):$(PB_DockerVolumeName) $(PB_DockerCopyDest)",
-        "workingFolder": "",
-        "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
-      "alwaysRun": true,
-      "displayName": "Local copy log files to: $(PB_DockerCopyDest)\\DockerBuildLogs",
-      "timeoutInMinutes": 0,
-      "condition": "succeededOrFailed()",
-      "task": {
-        "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
-        "versionSpec": "2.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SourceFolder": "$(PB_DockerCopyDest)",
-        "Contents": "**/*.log",
-        "TargetFolder": "$(PB_DockerCopyDest)\\DockerBuildLogs",
-        "CleanTargetFolder": "false",
-        "OverWrite": "false",
-        "flattenFolders": "false"
       }
     },
     {
@@ -302,13 +308,14 @@
       "displayName": "Local publish artifact: BuildLogs",
       "timeoutInMinutes": 0,
       "condition": "succeededOrFailed()",
+      "refName": "PublishBuildArtifacts2",
       "task": {
         "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "PathtoPublish": "$(Build.StagingDirectory)\\DockerBuildLogs",
+        "PathtoPublish": "$(Build.StagingDirectory)",
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)",
@@ -324,6 +331,7 @@
       "displayName": "Local cleanup Docker",
       "timeoutInMinutes": 0,
       "condition": "always()",
+      "refName": "Task14",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -448,7 +456,9 @@
       "value": "dn-bot"
     },
     "PB_VsoCorefxGitUrl": {
-      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/"
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/",
+      "isSecret": true
+
     },
     "PB_VsoRepositoryName": {
       "value": "DotNet-CoreFX-Trusted"
@@ -508,7 +518,7 @@
     "name": "DotNet-CoreFX-Trusted",
     "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
     "defaultBranch": "refs/heads/master",
-    "clean": "true",
+    "clean": "false",
     "checkoutSubmodules": false
   },
   "processParameters": {},
@@ -539,7 +549,7 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items for Visual Studio and most active DevDiv products are in this account.",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418099051,
+    "revision": 418099111,
     "visibility": "organization"
   }
 }
