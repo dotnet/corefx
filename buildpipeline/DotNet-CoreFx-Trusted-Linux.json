@@ -1,5 +1,29 @@
 {
-  "build": [
+    "build": [
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Run AgentTools/Begin.sh",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\Begin.sh\") {\n   \"Begin.sh script found. Executing...\"\n   cd $(AgentToolsPath)\n   & $(AgentToolsPath)\\Begin.sh\n} else {\n   \"Begin.sh script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
+    },
     {
       "environment": {},
       "enabled": true,
@@ -307,19 +331,23 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": true,
-      "displayName": "Cleanup VSTS Agent",
+      "displayName": "Run AgentTools/End.sh",
       "timeoutInMinutes": 0,
-      "refName": "Task15",
+      "condition": "succeededOrFailed()",
       "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
-        "versionSpec": "1.*",
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "$(PB_GitDirectory)/Tools/msbuild.sh",
-        "arguments": "cleanupagent.proj /p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
-        "workingFolder": "$(PB_GitDirectory)/Tools/scripts/vstsagent/",
-        "failOnStandardError": "false"
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$(AgentToolsPath)\\End.sh\") {\n   \"End.sh script found. Executing...\"\n   cd $(AgentToolsPath)\n   & $(AgentToolsPath)\\End.sh\n} else {\n   \"End.sh script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
       }
     }
   ],
