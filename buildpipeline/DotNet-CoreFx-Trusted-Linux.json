@@ -7,7 +7,6 @@
       "alwaysRun": false,
       "displayName": "Local git clone",
       "timeoutInMinutes": 0,
-      "refName": "Task3",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -27,7 +26,6 @@
       "alwaysRun": false,
       "displayName": "Local git checkout",
       "timeoutInMinutes": 0,
-      "refName": "Task4",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -47,7 +45,6 @@
       "alwaysRun": false,
       "displayName": "Local initialize tools",
       "timeoutInMinutes": 0,
-      "refName": "Task6",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -67,7 +64,6 @@
       "alwaysRun": false,
       "displayName": "Local initialize Docker",
       "timeoutInMinutes": 0,
-      "refName": "Task7",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -127,7 +123,6 @@
       "alwaysRun": false,
       "displayName": "Docker generate version assets",
       "timeoutInMinutes": 0,
-      "refName": "Task8",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -147,7 +142,6 @@
       "alwaysRun": false,
       "displayName": "Docker run sync",
       "timeoutInMinutes": 0,
-      "refName": "Task9",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -167,7 +161,6 @@
       "alwaysRun": false,
       "displayName": "Docker run build.sh",
       "timeoutInMinutes": 0,
-      "refName": "Task10",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -188,7 +181,6 @@
       "displayName": "Docker build tests",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'), ne(variables.PB_SkipTestBuild, 'true'))",
-      "refName": "Task11",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -209,7 +201,6 @@
       "displayName": "Docker create helix test jobs",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), ne(variables.PB_SkipTests, 'true'), ne(variables.PB_EnableCloudTest, 'false'))",
-      "refName": "Task12",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -229,7 +220,6 @@
       "alwaysRun": false,
       "displayName": "Docker push packages to Azure",
       "timeoutInMinutes": 0,
-      "refName": "Task13",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
@@ -312,7 +302,6 @@
       "displayName": "Local publish artifact: BuildLogs",
       "timeoutInMinutes": 0,
       "condition": "succeededOrFailed()",
-      "refName": "PublishBuildArtifacts2",
       "task": {
         "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
         "versionSpec": "1.*",
@@ -335,7 +324,6 @@
       "displayName": "Local cleanup Docker",
       "timeoutInMinutes": 0,
       "condition": "always()",
-      "refName": "Task14",
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
         "versionSpec": "1.*",
