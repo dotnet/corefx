@@ -230,16 +230,17 @@ namespace System.Buffers
             int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-            SequenceType type = GetSequenceType();
-            if (type == SequenceType.MultiSegment && startObject != endObject)
+            if (startObject != endObject)
             {
+                Debug.Assert(startObject != null);
+                Debug.Assert(endObject != null);
+
                 var startSegment = (ReadOnlySequenceSegment<T>)startObject;
                 var endSegment = (ReadOnlySequenceSegment<T>)endObject;
                 // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
                 return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
             }
 
-            Debug.Assert(startObject == endObject);
             // Single segment length
             return endIndex - startIndex;
         }
