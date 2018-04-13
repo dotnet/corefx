@@ -42,6 +42,8 @@ set DOTNET_CLI_TELEMETRY_OPTOUT=1
 set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 
+set COMPlus_TieredCompilation=1
+
 :: Restore the Tools directory
 call %~dp0init-tools.cmd
 if NOT [%ERRORLEVEL%]==[0] exit /b 1
