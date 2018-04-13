@@ -271,7 +271,6 @@ namespace System.Buffers
             }
             else if (startIndex <= endIndex)
             {
-                Debug.Assert(startObject == endObject);
                 // Single segment in bounds
                 return;
             }
