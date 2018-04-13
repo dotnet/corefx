@@ -57,10 +57,10 @@ namespace System.Memory.Tests
             string firstItems = new string('a', blockSize - 5) + items.Substring(0, 5);
             string secondItems = items.Substring(5) + new string('a', blockSize - (items.Length - 5));
             
-            BufferSegment<char> firstSegment = new BufferSegment<char>(firstItems.AsMemory());
+            var firstSegment = new BufferSegment<char>(firstItems.AsMemory());
             BufferSegment<char> secondSegment = firstSegment.Append(secondItems.AsMemory());
 
-            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(firstSegment, 0, secondSegment, items.Length - 5);
+            var  buffer = new ReadOnlySequence<char>(firstSegment, 0, secondSegment, items.Length - 5);
             Assert.False(buffer.IsSingleSegment);
             ReadOnlySequence<char> helloBuffer = buffer.Slice(blockSize - 5);
             Assert.False(helloBuffer.IsSingleSegment);

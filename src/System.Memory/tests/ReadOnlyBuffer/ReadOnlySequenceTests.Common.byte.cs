@@ -49,10 +49,10 @@ namespace System.Memory.Tests
             byte[] firstItems = Enumerable.Repeat((byte)'a', blockSize - 5).Concat(items.Take(5)).ToArray();
             byte[] secondItems = items.Skip(5).Concat(Enumerable.Repeat((byte)'a', blockSize - (items.Length - 5))).ToArray();
 
-            BufferSegment<byte> firstSegment = new BufferSegment<byte>(firstItems);
+            var firstSegment = new BufferSegment<byte>(firstItems);
             BufferSegment<byte> secondSegment = firstSegment.Append(secondItems);
 
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, items.Length - 5);
+            var buffer = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, items.Length - 5);
             Assert.False(buffer.IsSingleSegment);
             ReadOnlySequence<byte> helloBuffer = buffer.Slice(blockSize - 5);
             Assert.False(helloBuffer.IsSingleSegment);
