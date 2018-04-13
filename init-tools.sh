@@ -112,6 +112,11 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
         echo [ERROR] Failed to copy Tools-Override.
         exit $?
     fi
+    
+    # Replace the binaries restored by the tool runtime script with the portable binaries
+    if [ "$__PKG_RID" == "linux" ]; then
+         cp -r $__DOTNET_PATH/shared/Microsoft.NETCore.App/*/* $__TOOLRUNTIME_DIR
+    fi
 
     touch $__INIT_TOOLS_DONE_MARKER
     echo "Done initializing tools."
