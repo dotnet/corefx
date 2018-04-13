@@ -263,10 +263,21 @@ namespace System.Net.Http
                         cookiesFromContainer = null;
                     }
 
-                    for (int i = 1; i < header.Value.Length; i++)
+                    // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
+                    if (header.Value.Length > 1)
                     {
-                        await WriteTwoBytesAsync((byte)',', (byte)' ').ConfigureAwait(false);
-                        await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                        HttpHeaderParser parser = header.Key.Parser;
+                        string separator = HttpHeaderParser.DefaultSeparator;
+                        if (parser != null && parser.SupportsMultipleValues)
+                        {
+                            separator = parser.Separator;
+                        }
+
+                        for (int i = 1; i < header.Value.Length; i++)
+                        {
+                            await WriteAsciiStringAsync(separator).ConfigureAwait(false);
+                            await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                        }
                     }
                 }
 
@@ -277,7 +288,7 @@ namespace System.Net.Http
             {
                 await WriteAsciiStringAsync(HttpKnownHeaderNames.Cookie).ConfigureAwait(false);
                 await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
-                await WriteAsciiStringAsync(cookiesFromContainer).ConfigureAwait(false);
+                await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
                 await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
             }
         }
@@ -487,7 +498,7 @@ namespace System.Net.Http
                 }
 
                 // Start to read response.
-                _allowedReadLineBytes = _pool.Settings._maxResponseHeadersLength * 1024;
+                _allowedReadLineBytes = (int)Math.Min(int.MaxValue, _pool.Settings._maxResponseHeadersLength * 1024L);
 
                 // We should not have any buffered data here; if there was, it should have been treated as an error
                 // by the previous request handling.  (Note we do not support HTTP pipelining.)
