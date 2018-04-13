@@ -202,6 +202,27 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
+        private static void CheckEndReachable(object startSegment, object endSegment)
+        {
+            Debug.Assert(startSegment != null);
+            Debug.Assert(endSegment != null);
+            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
+
+            var current = (ReadOnlySequenceSegment<T>)startSegment;
+
+            while (current.Next != null)
+            {
+                current = current.Next;
+                if (current == endSegment)
+                {
+                    // Found end
+                    return;
+                }
+            }
+
+            ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
@@ -234,14 +255,15 @@ namespace System.Buffers
             int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-            SequenceType type = GetSequenceType();
-            if (type == SequenceType.MultiSegment && startObject != endObject)
+            if (startObject != endObject)
             {
+                Debug.Assert(startObject != null);
+                Debug.Assert(endObject != null);
                 var startSegment = (ReadOnlySequenceSegment<T>)startObject;
                 var endSegment = (ReadOnlySequenceSegment<T>)endObject;
 
-                // Length >= 0
-                if (endSegment.RunningIndex - startSegment.RunningIndex + endIndex - startIndex >= 0)
+                // start.RunningIndex + startIndex <= end.RunningIndex + endIndex
+                if (startSegment.RunningIndex - endIndex <= endSegment.RunningIndex - startIndex) // Rearranged to avoid overflow
                 {
                     // Mult-segment in bounds
                     return;
