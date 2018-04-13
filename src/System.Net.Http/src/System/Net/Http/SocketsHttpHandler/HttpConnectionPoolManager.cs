@@ -210,11 +210,8 @@ namespace System.Net.Http
             HttpConnectionPool pool;
             while (!_pools.TryGetValue(key, out pool))
             {
-                // TODO: #28863 Part 1: Uri.IdnHost should include [] around IPv6 address.
-                // If the hostname is an IPv6 address, uri.IdnHost will return the address without enclosing [].
-                // Uri.Host will correctly enclose with [], but we cannot use it for LLA address, because of:
-                // TODO: #28863 Part 2: Uri.Host LLA (Link-local address) for IPv6 address doesn't contain %number part.
-                // Since scope is mandatory for LLA, we will use uri.IdnHost for all IPv6 address, and append [] around it.
+                // TODO: #28863 Uri.IdnHost is missing '[', ']' characters around IPv6 address.
+                // So, we need to add them manually for now.
                 bool isNonNullIPv6address = key.Host != null && request.RequestUri.HostNameType == UriHostNameType.IPv6;
 
                 pool = new HttpConnectionPool(this, key.Kind, isNonNullIPv6address ? "[" + key.Host + "]" : key.Host, key.Port, key.SslHostName, key.ProxyUri, _maxConnectionsPerServer);
