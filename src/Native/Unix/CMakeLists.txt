@@ -32,6 +32,12 @@ if (HAVE_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
     add_compile_options(-Wno-zero-as-null-pointer-constant)
 endif()
 
+check_cxx_compiler_flag(-Wunknown-warning-option HAVE_UNKNOWN_WARNING_OPTION_FLAG)
+
+if (HAVE_UNKNOWN_WARNING_OPTION_FLAG)
+    add_compile_options(-Wno-unknown-warning-option)
+endif()
+
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
     add_compile_options(-Wno-unreachable-code)
 endif ()
