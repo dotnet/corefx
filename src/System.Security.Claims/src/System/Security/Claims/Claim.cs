@@ -38,6 +38,12 @@ namespace System.Security.Claims
         private readonly string _value;
         private readonly string _valueType;
 
+        /// <summary>Prevents a default instance of the <see cref="Claim"/> class from being created</summary>
+        /// <remarks>To assist with serialization</remarks>
+        private Claim()
+        {
+        }
+
         /// <summary>
         /// Initializes an instance of <see cref="Claim"/> using a <see cref="BinaryReader"/>.
         /// Normally the <see cref="BinaryReader"/> is constructed using the bytes from <see cref="WriteTo(BinaryWriter)"/> and initialized in the same way as the <see cref="BinaryWriter"/>.
