@@ -3,6 +3,29 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "run begin.sh",
+      "timeoutInMinutes": 0,
+      "condition": "always()",
+      "refName": "TaskRunBegin",
+      "task": {
+        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
+        "versionSpec": "0.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "type": "InlineScript",
+        "scriptPath": "",
+        "args": "",
+        "cwd": "",
+        "failOnStandardError": "false",
+        "script": "if [ -f \"$AGENTTOOLSPATH/begin.sh\" ]; then $AGENTTOOLSPATH/begin.sh ; else echo \"$AGENTTOOLSPATH/begin.sh script does not exist. Moving on.\" ; fi"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Delete files from $(Build.SourcesDirectory)",
@@ -389,6 +412,29 @@
         "workingFolder": "",
         "failOnStandardError": "false"
       }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "run end.sh",
+      "timeoutInMinutes": 0,
+      "condition": "succeeded()",
+      "refName": "TaskRunEnd",
+      "task": {
+        "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
+        "versionSpec": "0.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "type": "InlineScript",
+        "scriptPath": "",
+        "args": "",
+        "cwd": "",
+        "failOnStandardError": "false",
+        "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
+      }
     }
   ],
   "options": [
@@ -500,6 +546,10 @@
     },
     "PB_CleanAgent": {
       "value": "true"
+    },
+    "AgentToolsPath": {
+      "value": "",
+      "allowOverride": true
     }
   },
   "demands": [
