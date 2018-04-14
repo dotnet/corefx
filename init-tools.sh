@@ -50,8 +50,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
                             [ "$__DISTRO_NAME" == 'fedora.24' ] ||
                             [ "$__DISTRO_NAME" == 'fedora.27' ] ||
                             [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
-                            [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
-                            [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
+                            [ "$__DISTRO_NAME" == 'opensuse.42.1' ]; then
                             __PKG_RID=$__DISTRO_NAME
                         fi
                     fi
