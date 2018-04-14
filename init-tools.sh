@@ -46,13 +46,11 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
                         if  [ "$__DISTRO_NAME" == 'ubuntu.16.04' ] ||
                             [ "$__DISTRO_NAME" == 'ubuntu.16.10' ] ||
                             [ "$__DISTRO_NAME" == 'ubuntu.18.04' ] ||
-                            [ "$__DISTRO_NAME" == 'debian.8' ] ||
                             [ "$__DISTRO_NAME" == 'fedora.23' ] ||
                             [ "$__DISTRO_NAME" == 'fedora.24' ] ||
                             [ "$__DISTRO_NAME" == 'fedora.27' ] ||
                             [ "$__DISTRO_NAME" == 'opensuse.13.2' ] ||
-                            [ "$__DISTRO_NAME" == 'opensuse.42.1' ] ||
-                            [ "$__DISTRO_NAME" == 'opensuse.42.3' ] ; then
+                            [ "$__DISTRO_NAME" == 'opensuse.42.1' ]; then
                             __PKG_RID=$__DISTRO_NAME
                         fi
                     fi
@@ -111,6 +109,11 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
     if [ $? -ne 0 ]; then
         echo [ERROR] Failed to copy Tools-Override.
         exit $?
+    fi
+    
+    # Replace the binaries restored by the tool runtime script with the portable binaries
+    if [ "$__PKG_RID" == "linux" ]; then
+         cp -r $__DOTNET_PATH/shared/Microsoft.NETCore.App/*/* $__TOOLRUNTIME_DIR
     fi
 
     touch $__INIT_TOOLS_DONE_MARKER
