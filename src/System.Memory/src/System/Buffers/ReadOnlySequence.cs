@@ -171,6 +171,59 @@ namespace System.Buffers
             return SliceImpl(begin, end);
         }
 
+        private bool InRange(uint value, uint start, uint end)
+        {
+            // _sequenceStart and _sequenceEnd must be well-formed
+            // _sequenceStart and _sequenceEnd must be well-formed
+            Debug.Assert(start <= int.MaxValue);
+            Debug.Assert(end <= int.MaxValue);
+            Debug.Assert(start <= end);
+
+            // The case, value > int.MaxValue, is invalid, and hence it shouldn't be in the range.
+            // If value > int.MaxValue, it is invariably greater than both 'start' and 'end'.
+            // In that case, the experession simplifies to value <= end, which will return false.
+
+            // The case, value < start, is invalid.
+            // In that case, (value - start) would underflow becoming larger than int.MaxValue.
+            // (end - start) can never underflow and hence must be within 0 and int.MaxValue. 
+            // So, we will correctly return false.
+
+            // The case, value > end, is invalid.
+            // In that case, the expression simplifies to value <= end, which will return false.
+            // This is because end > start & value > end implies value > start as well.
+
+            // In all other cases, value is valid, and we return true.
+
+            // Equivalent to: return (start <= value && value <= start)
+            return (value - start) <= (end - start);
+        }
+
+        private bool InRange(ulong value, ulong start, ulong end)
+        {
+            // _sequenceStart and _sequenceEnd must be well-formed
+            Debug.Assert(start <= long.MaxValue);
+            Debug.Assert(end <= long.MaxValue);
+            Debug.Assert(start <= end);
+
+            // The case, value > long.MaxValue, is invalid, and hence it shouldn't be in the range.
+            // If value > long.MaxValue, it is invariably greater than both 'start' and 'end'.
+            // In that case, the experession simplifies to value <= end, which will return false.
+
+            // The case, value < start, is invalid.
+            // In that case, (value - start) would underflow becoming larger than long.MaxValue.
+            // (end - start) can never underflow and hence must be within 0 and long.MaxValue. 
+            // So, we will correctly return false.
+
+            // The case, value > end, is invalid.
+            // In that case, the expression simplifies to value <= end, which will return false.
+            // This is because end > start & value > end implies value > start as well.
+
+            // In all other cases, value is valid, and we return true.
+
+            // Equivalent to: return (start <= value && value <= start)
+            return (value - start) <= (end - start);
+        }
+
         /// <summary>
         /// Forms a slice out of the given <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, ending at <paramref name="end"/> (inclusive).
         /// </summary>
@@ -180,17 +233,104 @@ namespace System.Buffers
         {
             if (start < 0)
                 ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
-            BoundsCheck(_sequenceStart, end);
-            BoundsCheck(end, _sequenceEnd);
 
-            SequencePosition begin = Seek(_sequenceStart, end, start);
-            object beginObject = begin.GetObject();
-            object endObject = end.GetObject();
-            if (beginObject != endObject)
+            uint sliceEndIndex = (uint)GetIndex(end);
+            object sliceEndObject = end.GetObject();
+            
+            uint startIndex = (uint)GetIndex(_sequenceStart);
+            object startObject = _sequenceStart.GetObject();
+
+            uint endIndex = (uint)GetIndex(_sequenceEnd);
+            object endObject = _sequenceEnd.GetObject();
+
+            if (startObject != endObject)
             {
-                CheckEndReachable(beginObject, endObject);
+                // Multi-Segment Sequence
+                var sliceEndSegment = (ReadOnlySequenceSegment<T>)sliceEndObject;
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+                var endSegment = (ReadOnlySequenceSegment<T>)endObject;
+
+                if (!InRange(
+                    (ulong)(sliceEndSegment.RunningIndex + sliceEndIndex),
+                    (ulong)(startSegment.RunningIndex + startIndex),
+                    (ulong)(endSegment.RunningIndex + endIndex)))
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+
+                int currentLength = startSegment.Memory.Length - (int)startIndex;
+
+                // Position in start segment, defer to single segment seek
+                if (currentLength > start)
+                {
+                    CheckEndReachable(startSegment, sliceEndObject);
+
+                    // startIndex + start <= int.MaxValue
+                    Debug.Assert(start <= int.MaxValue - startIndex);
+                    return CreateSequence(startObject, (int)startIndex + (int)start, sliceEndObject, (int)sliceEndIndex);
+                }
+                else
+                {
+                    // End of segment. Move to start of next.
+
+                    long offset = start - currentLength;
+                    ReadOnlySequenceSegment<T> currentSegment = startSegment.Next;
+
+                    Debug.Assert(currentSegment != null);
+                    Debug.Assert(offset >= 0);
+
+                    while (currentSegment != null && currentSegment != sliceEndObject)
+                    {
+                        int memoryLength = currentSegment.Memory.Length;
+
+                        // Fully contained in this segment
+                        if (memoryLength > offset)
+                            goto FoundSegment;
+
+                        // Move to next
+                        offset -= memoryLength;
+                        currentSegment = currentSegment.Next;
+                    }
+
+                    // Hit the end of the segments but didn't reach the count
+                    if (currentSegment == null || sliceEndIndex < offset)
+                        ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+
+                    FoundSegment:
+                    Debug.Assert(offset <= int.MaxValue);
+
+                    if (currentSegment != sliceEndObject)
+                    {
+                        CheckEndReachable(currentSegment, sliceEndObject);
+                    }
+                    return CreateSequence(currentSegment, (int)offset, sliceEndObject, (int)sliceEndIndex);
+                }
             }
-            return SliceImpl(begin, end);
+            else
+            {
+                // Single-Segment Sequence
+                if (!InRange(sliceEndIndex, startIndex, endIndex))
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+
+                if (sliceEndIndex - startIndex < start)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+
+                // startIndex + start <= int.MaxValue
+                Debug.Assert(start <= int.MaxValue - startIndex);
+                return CreateSequence(startObject, (int)startIndex + (int)start, sliceEndObject, (int)sliceEndIndex);
+            }
+        }
+
+        private ReadOnlySequence<T> CreateSequence(object beginObject, int beginInteger, object sliceEndObject, int slicEndInteger)
+        {
+            return new ReadOnlySequence<T>(
+                   beginObject,
+                   beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                   sliceEndObject,
+                   slicEndInteger | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
+               );
         }
 
         /// <summary>
