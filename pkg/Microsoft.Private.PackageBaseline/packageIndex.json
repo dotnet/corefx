@@ -363,6 +363,45 @@
       ],
       "BaselineVersion": "4.3.2"
     },
+    "runtime.debian.9-x64.runtime.native.System": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.debian.9-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.debian.9-x64.runtime.native.System.Net.Http": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.debian.9-x64.runtime.native.System.Net.Security": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.debian.9-x64.runtime.native.System.Security.Cryptography": {
+      "StableVersions": [
+        "1.0.1",
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
     "runtime.fedora.23-x64.runtime.native.System": {
       "StableVersions": [
         "1.0.1",
@@ -2645,6 +2684,14 @@
       ],
       "BaselineVersion": "4.3.2"
     },
+    "runtime.debian.9-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
     "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
@@ -2730,6 +2777,48 @@
       "BaselineVersion": "4.3.2"
     },
     "runtime.fedora.27-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.fedora.28-x64.runtime.native.System.IO.Compression": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.fedora.28-x64.runtime.native.System.Net.Http": {
+      "StableVersions": [
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.fedora.28-x64.runtime.native.System.Net.Security": {
+      "StableVersions": [
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.fedora.28-x64.runtime.native.System": {
+      "StableVersions": [
+        "4.3.0"
+      ],
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.fedora.28-x64.runtime.native.System.Security.Cryptography": {
+      "StableVersions": [
+        "4.3.0",
+        "4.3.1",
+        "4.3.2",
+        "4.3.3"
+      ],
+      "BaselineVersion": "4.3.2"
+    },
+    "runtime.fedora.28-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
       "StableVersions": [
         "4.3.0",
         "4.3.1",

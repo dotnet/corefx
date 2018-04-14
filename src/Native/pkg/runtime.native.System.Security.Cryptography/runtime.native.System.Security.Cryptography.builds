@@ -7,8 +7,12 @@
       <OSGroup>rhel.7</OSGroup>
       <Platform>amd64</Platform>
     </Project>
-    <Project Include="debian\runtime.native.System.Security.Cryptography.pkgproj">
+    <Project Include="debian\8\runtime.native.System.Security.Cryptography.pkgproj">
       <OSGroup>debian.8</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="debian\9\runtime.native.System.Security.Cryptography.pkgproj">
+      <OSGroup>debian.9</OSGroup>
       <Platform>amd64</Platform>
     </Project>
     <Project Include="fedora\23\runtime.native.System.Security.Cryptography.pkgproj">
@@ -20,7 +24,11 @@
       <Platform>amd64</Platform>
     </Project>
     <Project Include="fedora\27\runtime.native.System.Security.Cryptography.pkgproj">
-      <OSGroup>fedora.24</OSGroup>
+      <OSGroup>fedora.27</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="fedora\28\runtime.native.System.Security.Cryptography.pkgproj">
+      <OSGroup>fedora.28</OSGroup>
       <Platform>amd64</Platform>
     </Project>
     <Project Include="ubuntu\14.04\runtime.native.System.Security.Cryptography.pkgproj">

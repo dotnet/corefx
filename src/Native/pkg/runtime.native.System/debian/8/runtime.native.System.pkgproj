@@ -7,9 +7,12 @@
     <PackagePlatforms>x64;</PackagePlatforms>
   </PropertyGroup>
   <ItemGroup>
-    <NativeFile Include="$(DebianNativePath)\System.Net.Security.Native.so">
+    <NativeFile Include="$(Debian8NativePath)System.Native.so">
       <TargetPath>runtimes/$(PackageTargetRuntime)/native</TargetPath>
     </NativeFile>
+    <File Include="$(Debian8NativePath)System.Native.a">
+      <TargetPath>runtimes/$(PackageTargetRuntime)/native</TargetPath>
+    </File>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
