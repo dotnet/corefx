@@ -37,22 +37,12 @@ namespace System
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int GetInteger() => _integer;
 
-        /// <summary>
-        /// Returns true if left and right point at the same segment and have the same index.
-        /// </summary>
-        public static bool operator ==(SequencePosition left, SequencePosition right) => left._integer == right._integer && left._object == right._object;
-
-        /// <summary>
-        /// Returns true if left and right do not point at the same segment and have the same index.
-        /// </summary>
-        public static bool operator !=(SequencePosition left, SequencePosition right) => !(left == right);
-
         /// <inheritdoc />
-        public bool Equals(SequencePosition other) => this == other;
+        public bool Equals(SequencePosition other) => _integer == other._integer && _object == other._object;
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj) => obj is SequencePosition other && this == other;
+        public override bool Equals(object obj) => obj is SequencePosition other && this.Equals(other);
 
         /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
