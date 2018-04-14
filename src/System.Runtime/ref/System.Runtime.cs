@@ -926,7 +926,7 @@ namespace System
         public static System.Decimal operator -(System.Decimal d1, System.Decimal d2) { throw null; }
         public static System.Decimal operator -(System.Decimal d) { throw null; }
         public static System.Decimal operator +(System.Decimal d) { throw null; }
-        public static System.Decimal Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(7), System.IFormatProvider provider = null) { throw null; }
+        public static System.Decimal Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(111), System.IFormatProvider provider = null) { throw null; }
         public static System.Decimal Parse(string s) { throw null; }
         public static System.Decimal Parse(string s, System.Globalization.NumberStyles style) { throw null; }
         public static System.Decimal Parse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider) { throw null; }
@@ -1048,7 +1048,7 @@ namespace System
         public static bool operator !=(System.Double left, System.Double right) { throw null; }
         public static bool operator <(System.Double left, System.Double right) { throw null; }
         public static bool operator <=(System.Double left, System.Double right) { throw null; }
-        public static System.Double Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(7), System.IFormatProvider provider = null) { throw null; }
+        public static System.Double Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(231), System.IFormatProvider provider = null) { throw null; }
         public static System.Double Parse(string s) { throw null; }
         public static System.Double Parse(string s, System.Globalization.NumberStyles style) { throw null; }
         public static System.Double Parse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider) { throw null; }
@@ -1690,7 +1690,6 @@ namespace System
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
-        public Memory(System.Buffers.MemoryManager<T> manager, int start, int length) { throw null; }
         public Memory(T[] array) { throw null; }
         public Memory(T[] array, int start, int length) { throw null; }
         public static System.Memory<T> Empty { get { throw null; } }
@@ -1698,8 +1697,6 @@ namespace System
         public int Length { get { throw null; } }
         public System.Span<T> Span { get { throw null; } }
         public void CopyTo(System.Memory<T> destination) { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        public static System.Memory<T> CreateFromPinnedArray(T[] array, int start, int length) { throw null; }
         public bool Equals(System.Memory<T> other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
@@ -1984,6 +1981,8 @@ namespace System
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         public override int GetHashCode() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public ref readonly T GetPinnableReference() { throw null; }
         public static bool operator ==(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (T[] array) { throw null; }
@@ -2134,7 +2133,7 @@ namespace System
         public static bool operator !=(System.Single left, System.Single right) { throw null; }
         public static bool operator <(System.Single left, System.Single right) { throw null; }
         public static bool operator <=(System.Single left, System.Single right) { throw null; }
-        public static System.Single Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(7), System.IFormatProvider provider = null) { throw null; }
+        public static System.Single Parse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style = (System.Globalization.NumberStyles)(231), System.IFormatProvider provider = null) { throw null; }
         public static System.Single Parse(string s) { throw null; }
         public static System.Single Parse(string s, System.Globalization.NumberStyles style) { throw null; }
         public static System.Single Parse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider) { throw null; }
@@ -2186,6 +2185,8 @@ namespace System
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         public override int GetHashCode() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public ref T GetPinnableReference() { throw null; }
         public static bool operator ==(System.Span<T> left, System.Span<T> right) { throw null; }
         public static implicit operator System.Span<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (System.Span<T> span) { throw null; }
@@ -3738,8 +3739,9 @@ namespace System.Buffers
     public abstract partial class MemoryManager<T> : System.Buffers.IMemoryOwner<T>, System.Buffers.IPinnable, System.IDisposable
     {
         protected MemoryManager() { }
-        public virtual int Length { get { throw null; } }
         public virtual System.Memory<T> Memory { get { throw null; } }
+        protected Memory<T> CreateMemory(int length) { throw null; }
+        protected Memory<T> CreateMemory(int start, int length) { throw null; }
         protected abstract void Dispose(bool disposing);
         public abstract System.Span<T> GetSpan();
         public abstract System.Buffers.MemoryHandle Pin(int elementIndex = 0);

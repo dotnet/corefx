@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />
     <Compile Include="TInt.cs" />
@@ -43,6 +45,7 @@
     <Compile Include="Span\GcReporting.cs" />
     <Compile Include="Span\GetEnumerator.cs" />
     <Compile Include="Span\GetHashCode.cs" />
+    <Compile Include="Span\GetPinnableReference.cs" />
     <Compile Include="Span\ImplicitConversion.cs" />
     <Compile Include="Span\IndexOf.byte.cs" />
     <Compile Include="Span\IndexOf.char.cs" />
@@ -110,6 +113,7 @@
     <Compile Include="ReadOnlySpan\Equals.cs" />
     <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
     <Compile Include="ReadOnlySpan\GetHashCode.cs" />
+    <Compile Include="ReadOnlySpan\GetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\ImplicitConversion.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.char.cs" />
