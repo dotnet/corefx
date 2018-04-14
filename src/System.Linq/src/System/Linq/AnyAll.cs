@@ -15,6 +15,11 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+            if (source is ICollection<TSource> collection)
+            {
+                return collection.Count > 0;
+            }
+
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 return e.MoveNext();
