@@ -32,8 +32,6 @@ namespace System.Buffers
 
             if (type == SequenceType.MultiSegment)
             {
-                Debug.Assert(positionObject is ReadOnlySequenceSegment<T>);
-
                 ReadOnlySequenceSegment<T> startSegment = (ReadOnlySequenceSegment<T>)positionObject;
 
                 if (startSegment != endObject)
@@ -58,20 +56,16 @@ namespace System.Buffers
 
                 if (type == SequenceType.Array)
                 {
-                    Debug.Assert(positionObject is T[]);
-
                     memory = new ReadOnlyMemory<T>((T[])positionObject, startIndex, endIndex - startIndex);
                 }
                 else if (typeof(T) == typeof(char) && type == SequenceType.String)
                 {
-                    Debug.Assert(positionObject is string);
-
-                    memory = (ReadOnlyMemory<T>)(object)((string)positionObject).AsMemory(startIndex, endIndex - startIndex);
+                    ReadOnlyMemory<char> charMemory = ((string)positionObject).AsMemory(startIndex, endIndex - startIndex);
+                    memory = Unsafe.As<ReadOnlyMemory<char>, ReadOnlyMemory<T>>(ref charMemory);
                 }
                 else // type == SequenceType.MemoryManager
                 {
                     Debug.Assert(type == SequenceType.MemoryManager);
-                    Debug.Assert(positionObject is MemoryManager<T>);
 
                     memory = ((MemoryManager<T>)positionObject).Memory.Slice(startIndex, endIndex - startIndex);
                 }
@@ -122,7 +116,8 @@ namespace System.Buffers
                 if (typeof(T) == typeof(char) && endIndex < 0)  // SequenceType.String
                 {
                     // No need to remove the FlagBitMask since (endIndex - startIndex) == (endIndex & ReadOnlySequence.IndexBitMask) - (startIndex & ReadOnlySequence.IndexBitMask)
-                    return (ReadOnlyMemory<T>)(object)((string)startObject).AsMemory((startIndex & ReadOnlySequence.IndexBitMask), endIndex - startIndex);
+                    ReadOnlyMemory<char> charMemory = ((string)startObject).AsMemory(startIndex & ReadOnlySequence.IndexBitMask, endIndex - startIndex);
+                    return Unsafe.As<ReadOnlyMemory<char>, ReadOnlyMemory<T>>(ref charMemory);
                 }
                 else // endIndex >= 0, SequenceType.MemoryManager
                 {
