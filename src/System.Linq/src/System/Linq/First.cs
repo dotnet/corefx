@@ -89,12 +89,28 @@ namespace System.Linq
                 return ordered.TryGetFirst(predicate, out found);
             }
 
-            foreach (TSource element in source)
+
+            if (source is IList<TSource> list)
             {
-                if (predicate(element))
+                for (var i = 0; i < list.Count; i++)
                 {
-                    found = true;
-                    return element;
+                    var element = list[i];
+                    if (predicate(element))
+                    {
+                        found = true;
+                        return element;
+                    }
+                }
+            }
+            else
+            {
+                foreach (TSource element in source)
+                {
+                    if (predicate(element))
+                    {
+                        found = true;
+                        return element;
+                    }
                 }
             }
 
