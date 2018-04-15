@@ -11,31 +11,6 @@ namespace System.Net.Mime.Tests
     public class EncodedStreamFactoryTests
     {
         [Fact]
-        public void EncodedStreamFactory_WhenAskedForEncodedStream_WithQuotedPrintable_ShouldReturnQuotedPrintableStream()
-        {
-            var esf = new EncodedStreamFactory();
-            var stream = new MemoryStream();
-            IEncodableStream test = esf.GetEncoder(TransferEncoding.QuotedPrintable, stream);
-
-            Assert.True(test is QuotedPrintableStream, "Factory returned wrong stream");
-            Assert.True(test.GetStream() != null, "GetStream was null");
-            Assert.True(test.GetStream() is Stream, "GetStream was not a Stream");
-        }
-
-
-        [Fact]
-        public void EncodedStreamFactory_WhenAskedForEncodedStream_WithBase64_ShouldReturnBase64Stream()
-        {
-            var esf = new EncodedStreamFactory();
-            Stream stream = new MemoryStream();
-            IEncodableStream test = esf.GetEncoder(TransferEncoding.Base64, stream);
-
-            Assert.True(test is Base64Stream);
-            Assert.True(test.GetStream() != null);
-            Assert.True(test.GetStream() is Stream);
-        }
-
-        [Fact]
         public void EncodedStreamFactory_WhenAskedForEncodedStream_WithUnknown_ShouldThrow()
         {
             var esf = new EncodedStreamFactory();
