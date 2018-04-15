@@ -313,12 +313,6 @@ namespace System.Buffers
             return true;
         }
 
-        internal bool TryGetReadOnlyMemory(out ReadOnlyMemory<T> memory)
-        {
-            memory = GetFirstBuffer(_sequenceStart, _sequenceEnd);
-            return _sequenceStart.GetObject() == _sequenceEnd.GetObject(); // Can't get ReadOnlyMemory from multi-block segments
-        }
-
         internal bool TryGetString(out string text, out int start, out int length)
         {
             if (typeof(T) != typeof(char) || GetSequenceType() != SequenceType.String)
