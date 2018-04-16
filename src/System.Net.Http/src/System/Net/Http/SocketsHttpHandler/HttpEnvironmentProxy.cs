@@ -150,7 +150,7 @@ namespace System.Net.Http
             if (!string.IsNullOrWhiteSpace(bypassList))
             {
                 string[] list = bypassList.Split(',');
-                List<string> tmpList = new List<string>();
+                List<string> tmpList = new List<string>(list.Length);
 
                 foreach (string value in list)
                 {
@@ -227,7 +227,7 @@ namespace System.Net.Http
             else
             {
                 host = value.Substring(0, separatorIndex);
-                if (!UInt16.TryParse(value.AsSpan().Slice(separatorIndex + 1), out port))
+                if (!UInt16.TryParse(value.AsSpan(separatorIndex + 1), out port))
                 {
                     return null;
                 }

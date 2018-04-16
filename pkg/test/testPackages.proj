@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TestDir>$(PackageOutputPath)test/</TestDir>
+    <TestDir>$(BinDir)testPkg/</TestDir>
     <TestProjectName>test.msbuild</TestProjectName>
     <TestProject>$(TestDir)$(TestProjectName)</TestProject>
     <TestToolsDir>$(TestDir)tools/</TestToolsDir>
@@ -54,7 +54,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <TestSupportFiles Include="$(DotnetCliPath)\**\*.*">
+    <TestSupportFiles Include="$(DotnetCliPath)\**\*.*" Exclude="$(DotnetCliPath)\sdk\NuGetFallbackFolder\**\*.*">
       <DestinationFolder>$(TestToolsDir)%(RecursiveDir)</DestinationFolder>
     </TestSupportFiles>
     <TestSupportFiles Include="$(SourceDir)shims\netfxreference.props">

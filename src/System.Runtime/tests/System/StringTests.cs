@@ -448,7 +448,7 @@ namespace System.Tests
             Assert.Equal(expected, dst);
 
             Span<char> dstSpan = new char[expected.Length];
-            s.AsSpan().Slice(sourceIndex, count).CopyTo(dstSpan.Slice(destinationIndex, count));
+            s.AsSpan(sourceIndex, count).CopyTo(dstSpan.Slice(destinationIndex, count));
             Assert.Equal(expected, dstSpan.ToArray());
         }
 
@@ -1355,6 +1355,7 @@ namespace System.Tests
         [InlineData("!@#$", '#', 0, 4, 2)]
         [InlineData("!@#$", '$', 0, 4, 3)]
         [InlineData("!@#$%^&*", '%', 0, 8, 4)]
+        [InlineData("", 'H', 0, 0, -1)]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
             bool safeForCurrentCulture =
@@ -1417,6 +1418,34 @@ namespace System.Tests
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));
 
                 Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.CurrentCulture));
+            }
+        }
+
+        [Fact]
+        public static void IndexOf_Match_SingleLetter()
+        {
+            Assert.Equal(-1, "".IndexOf('a'));
+            Assert.Equal(-1, "".AsSpan().IndexOf('a'));
+
+            for (int length = 1; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+                string str = new string(a);
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = a[targetIndex];
+                    int idx = str.IndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+
+                    idx = span.IndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
             }
         }
 
@@ -2053,6 +2082,7 @@ namespace System.Tests
         [InlineData("Hello", 'l', 0, 1, -1)]
         [InlineData("Hello", 'x', 3, 4, -1)]
         [InlineData("H" + SoftHyphen + "ello", 'H', 2, 3, 0)]
+        [InlineData("", 'H', 0, 0, -1)]
         public static void LastIndexOf_SingleLetter(string s, char value, int startIndex, int count, int expected)
         {
             if (count == s.Length)
@@ -2071,6 +2101,34 @@ namespace System.Tests
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.CurrentCulture));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.Ordinal));
             Assert.Equal(expected, s.LastIndexOf(value.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void LastIndexOf_Match_SingleLetter()
+        {
+            Assert.Equal(-1, "".LastIndexOf('a'));
+            Assert.Equal(-1, "".AsSpan().LastIndexOf('a'));
+
+            for (int length = 1; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+                string str = new string(a);
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = a[targetIndex];
+                    int idx = str.LastIndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+
+                    idx = span.LastIndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
+            }
         }
 
         [Theory]
@@ -2550,11 +2608,11 @@ namespace System.Tests
             if (startIndex + length == s.Length)
             {
                 Assert.Equal(expected, s.Substring(startIndex));
-                Assert.Equal(expected, s.AsSpan().Slice(startIndex).ToString());
+                Assert.Equal(expected, s.AsSpan(startIndex).ToString());
             }
             Assert.Equal(expected, s.Substring(startIndex, length));
 
-            Assert.Equal(expected, s.AsSpan().Slice(startIndex, length).ToString());
+            Assert.Equal(expected, s.AsSpan(startIndex, length).ToString());
         }
 
         [Fact]
@@ -2608,8 +2666,10 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("HELLO", "hello")]
         [InlineData("hello", "hello")]
+        [InlineData("HELLO", "hello")]
+        [InlineData("hElLo", "hello")]
+        [InlineData("HeLlO", "hello")]
         [InlineData("", "")]
         public static void ToLower(string s, string expected)
         {
@@ -2622,17 +2682,28 @@ namespace System.Tests
 
         private static IEnumerable<object[]> ToLower_Culture_TestData()
         {
-            yield return new object[] { "H\u0049 World", "h\u0131 world", new CultureInfo("tr-TR") };
-            yield return new object[] { "H\u0130 World", "h\u0069 world", new CultureInfo("tr-TR") };
-            yield return new object[] { "H\u0131 World", "h\u0131 world", new CultureInfo("tr-TR") };
+            var tuples = new[]
+            {
+                Tuple.Create('\u0049', '\u0131', new CultureInfo("tr-TR")),
+                Tuple.Create('\u0130', '\u0069', new CultureInfo("tr-TR")),
+                Tuple.Create('\u0131', '\u0131', new CultureInfo("tr-TR")),
 
-            yield return new object[] { "H\u0049 World", "h\u0069 world", new CultureInfo("en-US") };
-            yield return new object[] { "H\u0130 World", "h\u0069 world", new CultureInfo("en-US") };
-            yield return new object[] { "H\u0131 World", "h\u0131 world", new CultureInfo("en-US") };
+                Tuple.Create('\u0049', '\u0069', new CultureInfo("en-US")),
+                Tuple.Create('\u0130', '\u0069', new CultureInfo("en-US")),
+                Tuple.Create('\u0131', '\u0131', new CultureInfo("en-US")),
 
-            yield return new object[] { "H\u0049 World", "h\u0069 world", CultureInfo.InvariantCulture };
-            yield return new object[] { "H\u0130 World", "h\u0130 world", CultureInfo.InvariantCulture };
-            yield return new object[] { "H\u0131 World", "h\u0131 world", CultureInfo.InvariantCulture };
+                Tuple.Create('\u0049', '\u0069', CultureInfo.InvariantCulture),
+                Tuple.Create('\u0130', '\u0130', CultureInfo.InvariantCulture),
+                Tuple.Create('\u0131', '\u0131', CultureInfo.InvariantCulture),
+            };
+
+            foreach (Tuple<char, char, CultureInfo> tuple in tuples)
+            {
+                yield return new object[] { $"{tuple.Item1}Hello World", $"{tuple.Item2}hello world", tuple.Item3 };
+                yield return new object[] { $"HeLlO{tuple.Item1} WORLD", $"hello{tuple.Item2} world", tuple.Item3 };
+                yield return new object[] { $"hello world{tuple.Item1}", $"hello world{tuple.Item2}", tuple.Item3 };
+                yield return new object[] { new string(tuple.Item1, 100), new string(tuple.Item2, 100), tuple.Item3 };
+            }
         }
 
         [Fact]
@@ -2648,19 +2719,21 @@ namespace System.Tests
             }).Dispose();
         }
 
-        private static void ToLower_Culture(string actual, string expected, CultureInfo culture)
+        private static void ToLower_Culture(string input, string expected, CultureInfo culture)
         {
             CultureInfo.CurrentCulture = culture;
-            Assert.True(actual.ToLower().Equals(expected, StringComparison.Ordinal));
+            Assert.True(input.ToLower().Equals(expected, StringComparison.Ordinal), $"Input: {input}, Expected: {expected}, Actual: {input.ToLower()}");
 
-            Span<char> destination = new char[actual.Length];
-            Assert.Equal(actual.Length, actual.AsSpan().ToLower(destination, culture));
+            Span<char> destination = new char[input.Length];
+            Assert.Equal(input.Length, input.AsSpan().ToLower(destination, culture));
             Assert.Equal(expected, destination.ToString());
         }
 
         [Theory]
-        [InlineData("HELLO", "hello")]
         [InlineData("hello", "hello")]
+        [InlineData("HELLO", "hello")]
+        [InlineData("hElLo", "hello")]
+        [InlineData("HeLlO", "hello")]
         [InlineData("", "")]
         public static void ToLowerInvariant(string s, string expected)
         {
@@ -2684,6 +2757,8 @@ namespace System.Tests
         [Theory]
         [InlineData("hello", "HELLO")]
         [InlineData("HELLO", "HELLO")]
+        [InlineData("hElLo", "HELLO")]
+        [InlineData("HeLlO", "HELLO")]
         [InlineData("", "")]
         public static void ToUpper(string s, string expected)
         {
@@ -2694,17 +2769,34 @@ namespace System.Tests
             Assert.Equal(expected, destination.ToString());
         }
 
+        private static IEnumerable<object[]> ToUpper_TurkishI_MemberData(
+            params KeyValuePair<char, char>[] mappings)
+        {
+            foreach (KeyValuePair<char, char> mapping in mappings)
+            {
+                yield return new[] { $"{mapping.Key}", $"{mapping.Value}" };
+                yield return new[] { $"{mapping.Key}a TeSt", $"{mapping.Value}A TEST" };
+                yield return new[] { $"a T{mapping.Key}est", $"A T{mapping.Value}EST" };
+                yield return new[] { $"A test{mapping.Key}", $"A TEST{mapping.Value}" };
+                yield return new[] { new string(mapping.Key, 100), new string(mapping.Value, 100) };
+            }
+        }
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_TurkishCulture_MemberData() =>
+            ToUpper_TurkishI_MemberData(
+                new KeyValuePair<char, char>('\u0069', '\u0130'),
+                new KeyValuePair<char, char>('\u0130', '\u0130'),
+                new KeyValuePair<char, char>('\u0131', '\u0049'));
+
         [Theory]
-        [InlineData("H\u0069 World", "H\u0130 WORLD")]
-        [InlineData("H\u0130 World", "H\u0130 WORLD")]
-        [InlineData("H\u0131 World", "H\u0049 WORLD")]
+        [MemberData(nameof(ToUpper_TurkishI_TurkishCulture_MemberData))]
         public static void ToUpper_TurkishI_TurkishCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
-                Assert.True(str.ToUpper().Equals(expectedString, StringComparison.Ordinal));
+                Assert.True(str.ToUpper().Equals(expectedString, StringComparison.Ordinal), "Actual: " + str.ToUpper());
                 
                 Span<char> destination = new char[str.Length];
                 Assert.Equal(str.Length, str.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
@@ -2714,17 +2806,21 @@ namespace System.Tests
             }, s.ToString(), expected.ToString()).Dispose();
         }
 
+        public static IEnumerable<object[]> ToUpper_TurkishI_EnglishUSCulture_MemberData() =>
+            ToUpper_TurkishI_MemberData(
+                new KeyValuePair<char, char>('\u0069', '\u0049'),
+                new KeyValuePair<char, char>('\u0130', '\u0130'),
+                new KeyValuePair<char, char>('\u0131', '\u0049'));
+
         [Theory]
-        [InlineData("H\u0069 World", "H\u0049 WORLD")]
-        [InlineData("H\u0130 World", "H\u0130 WORLD")]
-        [InlineData("H\u0131 World", "H\u0049 WORLD")]
+        [MemberData(nameof(ToUpper_TurkishI_EnglishUSCulture_MemberData))]
         public static void ToUpper_TurkishI_EnglishUSCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
-                Assert.True(str.ToUpper().Equals(expectedString, StringComparison.Ordinal));
+                Assert.True(str.ToUpper().Equals(expectedString, StringComparison.Ordinal), "Actual: " + str.ToUpper());
 
                 Span<char> destination = new char[str.Length];
                 Assert.Equal(str.Length, str.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
@@ -2734,10 +2830,14 @@ namespace System.Tests
             }, s.ToString(), expected.ToString()).Dispose();
         }
 
+        public static IEnumerable<object[]> ToUpper_TurkishI_InvariantCulture_MemberData() =>
+            ToUpper_TurkishI_MemberData(
+                new KeyValuePair<char, char>('\u0069', '\u0049'),
+                new KeyValuePair<char, char>('\u0130', '\u0130'),
+                new KeyValuePair<char, char>('\u0131', '\u0131'));
+
         [Theory]
-        [InlineData("H\u0069 World", "H\u0049 WORLD")]
-        [InlineData("H\u0130 World", "H\u0130 WORLD")]
-        [InlineData("H\u0131 World", "H\u0131 WORLD")]
+        [MemberData(nameof(ToUpper_TurkishI_InvariantCulture_MemberData))]
         public static void ToUpper_TurkishI_InvariantCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2757,6 +2857,8 @@ namespace System.Tests
         [Theory]
         [InlineData("hello", "HELLO")]
         [InlineData("HELLO", "HELLO")]
+        [InlineData("hElLo", "HELLO")]
+        [InlineData("HeLlO", "HELLO")]
         [InlineData("", "")]
         public static void ToUpperInvariant(string s, string expected)
         {

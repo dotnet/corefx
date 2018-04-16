@@ -187,6 +187,7 @@ namespace System
                 if (_index < 0)
                 {
                     Debug.Assert(_length >= 0);
+                    Debug.Assert(_object != null);
                     return ((MemoryManager<T>)_object).GetSpan().Slice(_index & RemoveFlagsBitMask, _length);
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
@@ -234,13 +235,17 @@ namespace System
 
         /// <summary>
         /// Creates a handle for the memory.
-        /// The GC will not move the array until the returned <see cref="MemoryHandle"/>
+        /// The GC will not move the memory until the returned <see cref="MemoryHandle"/>
         /// is disposed, enabling taking and using the memory's address.
+        /// <exception cref="System.ArgumentException">
+        /// An instance with nonprimitive (non-blittable) members cannot be pinned.
+        /// </exception>
         /// </summary>
         public unsafe MemoryHandle Pin()
         {
             if (_index < 0)
             {
+                Debug.Assert(_object != null);
                 return ((MemoryManager<T>)_object).Pin((_index & RemoveFlagsBitMask));
             }
             else if (typeof(T) == typeof(char) && _object is string s)
@@ -255,13 +260,26 @@ namespace System
             }
             else if (_object is T[] array)
             {
-                GCHandle handle = _length < 0 ? default : GCHandle.Alloc(array, GCHandleType.Pinned);
+                // Array is already pre-pinned
+                if (_length < 0)
+                {
 #if FEATURE_PORTABLE_SPAN
-                void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref MemoryMarshal.GetReference<T>(array)), _index);
 #else
-                void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
 #endif // FEATURE_PORTABLE_SPAN
-                return new MemoryHandle(pointer, handle);
+                    return new MemoryHandle(pointer);
+                }
+                else
+                {
+                    GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+#if FEATURE_PORTABLE_SPAN
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
+                    return new MemoryHandle(pointer, handle);
+                }
             }
             return default;
         }
