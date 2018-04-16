@@ -1246,7 +1246,7 @@ namespace System.Net.Sockets
         {
             if (_nonBlockingSet)
             {
-                errorCode = SocketError.Success;
+                errorCode = SocketError.Success;    // Will be ignored
                 return true;
             }
 
