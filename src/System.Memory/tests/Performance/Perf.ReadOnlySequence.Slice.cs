@@ -54,14 +54,19 @@ namespace System.Buffers.Tests
             public String() : base(ReadOnlySequenceFactoryChar.StringFactory) { }
         }
 
-        public class SingleSegment : Perf_ReadOnlySequence_Slice_Char
+        public class Segments___1 : Perf_ReadOnlySequence_Slice_Char
         {
-            public SingleSegment() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
+            public Segments___1() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
         }
 
-        public class TenSegments : Perf_ReadOnlySequence_Slice_Byte
+        public class Segments__10 : Perf_ReadOnlySequence_Slice_Byte
         {
-            public TenSegments() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+            public Segments__10() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+        }
+
+        public class Segments_100 : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public Segments_100() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(100)) { }
         }
 
     }
@@ -114,7 +119,7 @@ namespace System.Buffers.Tests
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
             List<(long, long)> positions = CookPositionsLongLong(buffer, posCount);
-            Console.WriteLine($"LongLong count {positions.Count}");
+            //Console.WriteLine($"LongLong count {positions.Count}");
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
