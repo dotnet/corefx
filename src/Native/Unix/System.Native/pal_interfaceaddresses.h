@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_maphardwaretype.h"
 #include "pal_types.h"
 
@@ -29,9 +33,11 @@ typedef void (*IPv6AddressFound)(const char* interfaceName, IpAddressInfo* info,
 typedef void (*LinkLayerAddressFound)(const char* interfaceName, LinkLayerAddressInfo* llAddress);
 typedef void (*GatewayAddressFound)(IpAddressInfo* addressInfo);
 
-extern "C" int32_t SystemNative_EnumerateInterfaceAddresses(
+DLLEXPORT  int32_t SystemNative_EnumerateInterfaceAddresses(
     IPv4AddressFound onIpv4Found, IPv6AddressFound onIpv6Found, LinkLayerAddressFound onLinkLayerFound);
 
 #if HAVE_RT_MSGHDR
-extern "C" int32_t SystemNative_EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex, GatewayAddressFound onGatewayFound);
+DLLEXPORT int32_t SystemNative_EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex, GatewayAddressFound onGatewayFound);
 #endif
+
+END_EXTERN_C

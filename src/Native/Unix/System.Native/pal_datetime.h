@@ -8,6 +8,6 @@
 
 BEGIN_EXTERN_C
 
-int64_t SystemNative_GetSystemTimeAsTicks(void);
+DLLEXPORT int64_t SystemNative_GetSystemTimeAsTicks(void);
 
 END_EXTERN_C
