@@ -44,7 +44,7 @@ namespace Tests.System
 
             if (length == source.Length - startIndex)
             {
-                validate(source.SubstringTrim(startIndex));
+                validate(source.SubstringTrim(startIndex, length));
             }
         }
     }
