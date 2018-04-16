@@ -253,7 +253,7 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpSystemProxy.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs</Link>
-    </Compile>  
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\SecurityContextTokenHandle.cs">
       <Link>Common\System\Net\Security\SecurityContextTokenHandle.cs</Link>
     </Compile>
@@ -360,7 +360,7 @@
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'uap'">
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
     <Compile Include="System\Net\Http\HttpClientHandler.netcoreapp.cs" />
-    <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />    
+    <Compile Include="System\Net\Http\HttpClientHandler.Windows.cs" />
   </ItemGroup>
   <!-- Compile the WinHttpHandler implementation into the System.Net.Http.dll binary.  This is a
          temporary solution to remove the cycle dependency between HttpClient and WinHttpHandler.
