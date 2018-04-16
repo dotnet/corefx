@@ -237,6 +237,79 @@ namespace System.Buffers
             ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
         }
 
+        private void BoundsCheck(in SequencePosition start)
+        {
+            uint sliceStartIndex = (uint)GetIndex(start);
+            uint startIndex = (uint)GetIndex(_sequenceStart);
+            uint endIndex = (uint)GetIndex(_sequenceEnd);
+
+            object startObject = _sequenceStart.GetObject();
+            object endObject = _sequenceEnd.GetObject();
+
+            // Single-Segment Sequence
+            if (startObject == endObject)
+            {
+                if (!InRange(sliceStartIndex, startIndex, endIndex))
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+            }
+            else
+            {
+                // Multi-Segment Sequence
+                // Storing this in a local since it is used twice within InRange()
+                ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex);
+                if (!InRange(
+                    (ulong)(((ReadOnlySequenceSegment<T>)start.GetObject()).RunningIndex + sliceStartIndex),
+                    startRange,
+                    (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+            }
+        }
+
+        private void BoundsCheck(uint sliceStartIndex, object sliceStartObject, uint sliceEndIndex, object sliceEndObject)
+        {
+            uint startIndex = (uint)GetIndex(_sequenceStart);
+            uint endIndex = (uint)GetIndex(_sequenceEnd);
+
+            object startObject = _sequenceStart.GetObject();
+            object endObject = _sequenceEnd.GetObject();
+
+            // Single-Segment Sequence
+            if (startObject == endObject)
+            {
+                if (sliceStartObject != sliceEndObject || sliceStartIndex > sliceEndIndex)
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+
+                if (sliceStartIndex < startIndex || sliceEndIndex > endIndex)
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+            }
+            else
+            {
+                // Multi-Segment Sequence
+                // This optimization works because we know sliceStartIndex, sliceEndIndex, startIndex, and endIndex are all >= 0
+                Debug.Assert(sliceStartIndex >= 0 && startIndex >= 0 && endIndex >= 0);
+
+                ulong sliceStartRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex);
+                ulong sliceEndRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex + sliceEndIndex);
+
+                if (sliceStartRange > sliceEndRange)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
+                if (sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex)
+                    || sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
+                {
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                }
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
@@ -260,36 +333,6 @@ namespace System.Buffers
 
             // Single segment length
             return endIndex - startIndex;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void BoundsCheck(in SequencePosition start, in SequencePosition end)
-        {
-            int startIndex = GetIndex(start);
-            int endIndex = GetIndex(end);
-            object startObject = start.GetObject();
-            object endObject = end.GetObject();
-            if (startObject != endObject)
-            {
-                Debug.Assert(startObject != null);
-                Debug.Assert(endObject != null);
-                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
-                var endSegment = (ReadOnlySequenceSegment<T>)endObject;
-
-                // start.RunningIndex + startIndex <= end.RunningIndex + endIndex
-                if (startSegment.RunningIndex - endIndex <= endSegment.RunningIndex - startIndex) // Rearranged to avoid overflow
-                {
-                    // Mult-segment in bounds
-                    return;
-                }
-            }
-            else if (startIndex <= endIndex)
-            {
-                // Single segment in bounds
-                return;
-            }
-
-            ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
         }
 
         internal bool TryGetReadOnlySequenceSegment(out ReadOnlySequenceSegment<T> startSegment, out int startIndex, out ReadOnlySequenceSegment<T> endSegment, out int endIndex)

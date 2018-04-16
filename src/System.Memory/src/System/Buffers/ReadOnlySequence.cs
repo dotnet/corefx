@@ -247,9 +247,8 @@ namespace System.Buffers
             return SliceImpl(begin, end);
         }
 
-        private bool InRange(uint value, uint start, uint end)
+        private static bool InRange(uint value, uint start, uint end)
         {
-            // _sequenceStart and _sequenceEnd must be well-formed
             // _sequenceStart and _sequenceEnd must be well-formed
             Debug.Assert(start <= int.MaxValue);
             Debug.Assert(end <= int.MaxValue);
@@ -274,7 +273,7 @@ namespace System.Buffers
             return (value - start) <= (end - start);
         }
 
-        private bool InRange(ulong value, ulong start, ulong end)
+        private static bool InRange(ulong value, ulong start, ulong end)
         {
             // _sequenceStart and _sequenceEnd must be well-formed
             Debug.Assert(start <= long.MaxValue);
@@ -335,12 +334,13 @@ namespace System.Buffers
 
             // Multi-Segment Sequence
             var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+            ulong startRange = (ulong)(startSegment.RunningIndex + startIndex);
 
             // This optimization works because we know sliceEndIndex, startIndex, and endIndex are all >= 0
             Debug.Assert(sliceEndIndex >= 0 && startIndex >= 0 && endIndex >= 0);
             if (!InRange(
                 (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex + sliceEndIndex),
-                (ulong)(startSegment.RunningIndex + startIndex),
+                startRange,
                 (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -430,12 +430,13 @@ namespace System.Buffers
 
             // Multi-Segment Sequence
             var sliceStartSegment = (ReadOnlySequenceSegment<T>)sliceStartObject;
+            ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex);
 
             // This optimization works because we know sliceStartIndex, startIndex, and endIndex are all >= 0
             Debug.Assert(sliceStartIndex >= 0 && startIndex >= 0 && endIndex >= 0);
             if (!InRange(
                 (ulong)(sliceStartSegment.RunningIndex + sliceStartIndex),
-                (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex),
+                startRange,
                 (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -517,57 +518,11 @@ namespace System.Buffers
         /// </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         /// <param name="end">The ending (inclusive) <see cref="SequencePosition"/> of the slice</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start, SequencePosition end)
         {
-            BoundsCheck(_sequenceStart, start);
-            BoundsCheck(start, end);
-            BoundsCheck(end, _sequenceEnd);
+            BoundsCheck((uint)GetIndex(start), start.GetObject(), (uint)GetIndex(end), end.GetObject());
 
-            uint startIndex = (uint)GetIndex(_sequenceStart);
-            object startObject = _sequenceStart.GetObject();
-
-            uint sliceStartIndex = (uint)GetIndex(start);
-            object sliceStartObject = start.GetObject();
-
-            uint sliceEndIndex = (uint)GetIndex(end);
-            object sliceEndObject = end.GetObject();
-
-            uint endIndex = (uint)GetIndex(_sequenceEnd);
-            object endObject = _sequenceEnd.GetObject();
-
-            // Single-Segment Sequence
-            if (startObject == endObject)
-            {
-                if (sliceStartObject != sliceEndObject || sliceStartIndex > sliceEndIndex)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-
-                Debug.Assert(startObject == sliceStartObject);
-
-                if (!InRange(sliceStartIndex, startIndex, endIndex) || !InRange(sliceEndIndex, startIndex, endIndex))
-                {
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-                }
-
-                goto FoundInFirstSegment;
-            }
-
-            // Multi-Segment Sequence
-            // This optimization works because we know sliceStartIndex, sliceEndIndex, startIndex, and endIndex are all >= 0
-            Debug.Assert(sliceStartIndex >= 0 && startIndex >= 0 && endIndex >= 0);
-
-            ulong sliceStartRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex);
-            ulong sliceEndRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex + sliceEndIndex);
-
-            if (sliceStartRange > sliceEndRange)
-                ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-
-            if (sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex)
-                || sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-            }
-
-        FoundInFirstSegment:
             return SliceImpl(start, end);
         }
 
@@ -575,36 +530,11 @@ namespace System.Buffers
         /// Forms a slice out of the given <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, ending at the existing <see cref="ReadOnlySequence{T}"/>'s end.
         /// </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
-            uint sliceStartIndex = (uint)GetIndex(start);
-            object sliceStartObject = start.GetObject();
-
-            uint startIndex = (uint)GetIndex(_sequenceStart);
-            object startObject = _sequenceStart.GetObject();
-
-            uint endIndex = (uint)GetIndex(_sequenceEnd);
-            object endObject = _sequenceEnd.GetObject();
-
-            if (startObject != endObject)
-            {
-                if (!InRange(
-                    (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex),
-                    (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex),
-                    (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
-                {
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-                }
-            }
-            else
-            {
-                if (!InRange(sliceStartIndex, startIndex, endIndex))
-                {
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-                }
-            }
-
-            return SliceImpl(sliceStartObject, (int)sliceStartIndex);
+            BoundsCheck(start);
+            return SliceImpl(start);
         }
 
         /// <summary>
@@ -719,6 +649,19 @@ namespace System.Buffers
                    beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
                    endObject,
                    endInteger | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
+               );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
+        {
+            // In this method we apply type bits specific for current ReadOnlySequence type
+
+            return new ReadOnlySequence<T>(
+                   start.GetObject(),
+                   start.GetInteger() & ReadOnlySequence.IndexBitMask | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                   _sequenceEnd.GetObject(),
+                   _sequenceEnd.GetInteger()
                );
         }
 
