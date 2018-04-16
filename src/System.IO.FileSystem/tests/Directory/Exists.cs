@@ -375,11 +375,24 @@ namespace System.IO.Tests
             Assert.False(result);
         }
 
+        // Not all drives may be accessible (locked, no rights, etc.), and as such would return false.
+        // eg. Create a new volume, bitlocker it, and lock it. This new volume is no longer accessible
+        // and any attempt to access this drive will return false.
+        // We just care that we can access an accessible drive directly, we don't care which one.
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
-        public void NonExistentDriveAsPath_ReturnsFalse()
+        public void DriveAsPath()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
+            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(drive));
+        }
+
+        [ConditionalFact(nameof(UsingNewNormalization))]
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
+        public void ExtendedDriveAsPath()
+        {
+            Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
+            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
         }
 
         [Fact]

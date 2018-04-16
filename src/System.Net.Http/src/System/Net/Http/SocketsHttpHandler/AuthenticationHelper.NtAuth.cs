@@ -44,6 +44,10 @@ namespace System.Net.Http
             if (!isProxyAuth && connection.UsingProxy && !ProxySupportsConnectionAuth(response))
             {
                 // Proxy didn't indicate that it supports connection-based auth, so we can't proceed.
+                if (NetEventSource.IsEnabled)
+                {
+                    NetEventSource.Error(connection, $"Proxy doesn't support connection-based auth, uri={authUri}");
+                }
                 return response;
             }
 
@@ -62,6 +66,11 @@ namespace System.Net.Http
                         while (true)
                         {
                             string challengeResponse = authContext.GetOutgoingBlob(challengeData);
+                            if (challengeResponse == null)
+                            {
+                                // Response indicated denial even after login, so stop processing and return current response.
+                                break;
+                            }
 
                             await connection.DrainResponseAsync(response).ConfigureAwait(false);
 

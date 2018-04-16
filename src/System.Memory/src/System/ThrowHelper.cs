@@ -80,17 +80,13 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange() { return new ArgumentOutOfRangeException("position"); }
 
-        internal static void ThrowArgumentOutOfRangeException_CountOutOfRange() { throw CreateArgumentOutOfRangeException_CountOutOfRange(); }
+        internal static void ThrowArgumentOutOfRangeException_OffsetOutOfRange() { throw CreateArgumentOutOfRangeException_OffsetOutOfRange(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentOutOfRangeException_CountOutOfRange() { return new ArgumentOutOfRangeException("count"); }
+        private static Exception CreateArgumentOutOfRangeException_OffsetOutOfRange() { return new ArgumentOutOfRangeException(nameof(ExceptionArgument.offset)); }
 
         internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer() { throw CreateObjectDisposedException_ArrayMemoryPoolBuffer(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateObjectDisposedException_ArrayMemoryPoolBuffer() { return new ObjectDisposedException("ArrayMemoryPoolBuffer"); }
-
-        internal static void ThrowObjectDisposedException_MemoryDisposed() { throw CreateObjectDisposedException_MemoryDisposed(); }
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateObjectDisposedException_MemoryDisposed() { return new ObjectDisposedException("OwnedMemory<T>", SR.MemoryDisposed); }
 
         internal static void ThrowFormatException_BadFormatSpecifier() { throw CreateFormatException_BadFormatSpecifier(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -137,6 +133,8 @@ namespace System
                 return CreateArgumentNullException(ExceptionArgument.startSegment);
             else if (endSegment == null)
                 return CreateArgumentNullException(ExceptionArgument.endSegment);
+            else if (startSegment != endSegment && startSegment.RunningIndex > endSegment.RunningIndex)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.endSegment);
             else if ((uint)startSegment.Memory.Length < (uint)startIndex)
                 return CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
             else
@@ -156,18 +154,19 @@ namespace System
                 return CreateArgumentOutOfRangeException(ExceptionArgument.length);
         }
 
-        public static void ThrowArgumentValidationException<T>(OwnedMemory<T> ownedMemory, int start)
-            => throw CreateArgumentValidationException(ownedMemory, start);
+        //
+        // ReadOnlySequence Slice validation Throws coalesced to enable inlining of the Slice
+        //
+        public static void ThrowStartOrEndArgumentValidationException(long start)
+            => throw CreateStartOrEndArgumentValidationException(start);
 
-        private static Exception CreateArgumentValidationException<T>(OwnedMemory<T> ownedMemory, int start)
+        private static Exception CreateStartOrEndArgumentValidationException(long start)
         {
-            if (ownedMemory == null)
-                return CreateArgumentNullException(ExceptionArgument.ownedMemory);
-            else if ((uint)start > (uint)ownedMemory.Length)
+            if (start < 0)
                 return CreateArgumentOutOfRangeException(ExceptionArgument.start);
-            else
-                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+            return CreateArgumentOutOfRangeException(ExceptionArgument.length);
         }
+
     }
 
     //
@@ -178,7 +177,7 @@ namespace System
         length,
         start,
         minimumBufferSize,
-        byteOffset,
+        elementIndex,
         comparable,
         comparer,
         destination,
@@ -188,7 +187,7 @@ namespace System
         startIndex,
         endIndex,
         array,
-        ownedMemory,
-        culture
+        culture,
+        manager
     }
 }

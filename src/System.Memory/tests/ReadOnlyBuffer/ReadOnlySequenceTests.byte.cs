@@ -13,32 +13,32 @@ namespace System.Memory.Tests
     {
         public class Array : ReadOnlySequenceTestsByte
         {
-            public Array() : base(ReadOnlySequenceFactoryByte.ArrayFactory) { }
-        }
-
-        public class OwnedMemory : ReadOnlySequenceTestsByte
-        {
-            public OwnedMemory() : base(ReadOnlySequenceFactoryByte.OwnedMemoryFactory) { }
+            public Array() : base(ReadOnlySequenceFactory<byte>.ArrayFactory) { }
         }
 
         public class Memory : ReadOnlySequenceTestsByte
         {
-            public Memory() : base(ReadOnlySequenceFactoryByte.MemoryFactory) { }
+            public Memory() : base(ReadOnlySequenceFactory<byte>.MemoryFactory) { }
         }
 
         public class SingleSegment : ReadOnlySequenceTestsByte
         {
-            public SingleSegment() : base(ReadOnlySequenceFactoryByte.SingleSegmentFactory) { }
+            public SingleSegment() : base(ReadOnlySequenceFactory<byte>.SingleSegmentFactory) { }
         }
 
         public class SegmentPerByte : ReadOnlySequenceTestsByte
         {
-            public SegmentPerByte() : base(ReadOnlySequenceFactoryByte.SegmentPerByteFactory) { }
+            public SegmentPerByte() : base(ReadOnlySequenceFactory<byte>.SegmentPerItemFactory) { }
         }
 
-        internal ReadOnlySequenceFactoryByte Factory { get; }
+        public class SplitInThreeSegments : ReadOnlySequenceTestsByte
+        {
+            public SplitInThreeSegments() : base(ReadOnlySequenceFactory<byte>.SplitInThree) { }
+        }
 
-        internal ReadOnlySequenceTestsByte(ReadOnlySequenceFactoryByte factory)
+        internal ReadOnlySequenceFactory<byte> Factory { get; }
+
+        internal ReadOnlySequenceTestsByte(ReadOnlySequenceFactory<byte> factory)
         {
             Factory = factory;
         }
@@ -123,112 +123,11 @@ namespace System.Memory.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetPosition(-1, buffer.Start));
         }
 
+        [Fact]
         public void ReadOnlyBufferSlice_ChecksEnd()
         {
             ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Slice(70, buffer.Start));
-        }
-
-        [Fact]
-        public void SegmentStartIsConsideredInBoundsCheck()
-        {
-            // 0               50           100    0             50             100
-            // [                ##############] -> [##############                ]
-            //                         ^c1            ^c2
-            var bufferSegment1 = new BufferSegment<byte>(new byte[49]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[50]);
-
-            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 50);
-
-            SequencePosition c1 = buffer.GetPosition(25); // segment 1 index 75
-            SequencePosition c2 = buffer.GetPosition(55); // segment 2 index 5
-
-            ReadOnlySequence<byte> sliced = buffer.Slice(c1, c2);
-            Assert.Equal(30, sliced.Length);
-
-            c1 = buffer.GetPosition(25, buffer.Start); // segment 1 index 75
-            c2 = buffer.GetPosition(55, buffer.Start); // segment 2 index 5
-
-            sliced = buffer.Slice(c1, c2);
-            Assert.Equal(30, sliced.Length);
-        }
-
-        [Fact]
-        public void GetPositionPrefersNextSegment()
-        {
-            BufferSegment<byte> bufferSegment1 = new BufferSegment<byte>(new byte[50]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[0]);
-
-            ReadOnlySequence<byte> buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 0);
-
-            SequencePosition c1 = buffer.GetPosition(50);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(50, buffer.Start);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-        }
-
-        [Fact]
-        public void GetPositionDoesNotCrossOutsideBuffer()
-        {
-            var bufferSegment1 = new BufferSegment<byte>(new byte[100]);
-            BufferSegment<byte> bufferSegment2 = bufferSegment1.Append(new byte[100]);
-            BufferSegment<byte> bufferSegment3 = bufferSegment2.Append(new byte[0]);
-
-            var buffer = new ReadOnlySequence<byte>(bufferSegment1, 0, bufferSegment2, 100);
-
-            SequencePosition c1 = buffer.GetPosition(200);
-
-            Assert.Equal(100, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(200, buffer.Start);
-
-            Assert.Equal(100, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-        }
-
-        [Fact]
-        public void Create_WorksWithArray()
-        {
-            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 });
-            Assert.Equal(buffer.ToArray(), new byte[] { 1, 2, 3, 4, 5 });
-        }
-
-        [Fact]
-        public void Empty_ReturnsLengthZeroBuffer()
-        {
-            var buffer = ReadOnlySequence<byte>.Empty;
-            Assert.Equal(0, buffer.Length);
-            Assert.Equal(true, buffer.IsSingleSegment);
-            Assert.Equal(0, buffer.First.Length);
-        }
-
-        [Fact]
-        public void Create_WorksWithArrayWithOffset()
-        {
-            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
-            Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
-        }
-
-        [Fact]
-        public void C_WorksWithArrayWithOffset()
-        {
-            var buffer = new ReadOnlySequence<byte>(new byte[] { 1, 2, 3, 4, 5 }, 2, 3);
-            Assert.Equal(buffer.ToArray(), new byte[] { 3, 4, 5 });
-        }
-
-
-        [Fact]
-        public void Create_WorksWithMemory()
-        {
-            var memory = new ReadOnlyMemory<byte>(new byte[] { 1, 2, 3, 4, 5 });
-            var buffer = new ReadOnlySequence<byte>(memory.Slice(2, 3));
-            Assert.Equal(new byte[] { 3, 4, 5 }, buffer.ToArray());
         }
 
         [Fact]
@@ -254,7 +153,7 @@ namespace System.Memory.Tests
         [InlineData("/localhost:5000/PATH/PATH2/ HTTP/1.1", ' ', 27)]
         public void PositionOf_ReturnsPosition(string raw, char searchFor, int expectIndex)
         {
-            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(raw);
+            ReadOnlySequence<byte> buffer = Factory.CreateWithContent(Encoding.ASCII.GetBytes(raw));
             SequencePosition? result = buffer.PositionOf((byte)searchFor);
 
             Assert.NotNull(result);

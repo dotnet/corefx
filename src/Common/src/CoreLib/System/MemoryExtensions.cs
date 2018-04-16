@@ -68,7 +68,6 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the character is removed.</param>
         /// <param name="trimChar">The specified character to look for and remove.</param>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, char trimChar)
         {
             return span.TrimStart(trimChar).TrimEnd(trimChar);
@@ -79,7 +78,6 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the character is removed.</param>
         /// <param name="trimChar">The specified character to look for and remove.</param>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, char trimChar)
         {
             int start = 0;
@@ -246,6 +244,11 @@ namespace System
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
+                    span.Length);
 
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
@@ -366,6 +369,11 @@ namespace System
                 return SpanHelpers.LastIndexOf(
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, char>(ref value),
                     span.Length);
 
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
@@ -1204,7 +1212,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name = "comparable" /> is <see langword="null"/> .
+        /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T>(
@@ -1228,7 +1236,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name = "comparable" /> is <see langword="null"/> .
+        /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparable>(
@@ -1278,7 +1286,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name = "comparable" /> is <see langword="null"/> .
+        /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T>(
@@ -1302,7 +1310,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name = "comparable" /> is <see langword="null"/> .
+        /// <paramref name = "comparable" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparable>(

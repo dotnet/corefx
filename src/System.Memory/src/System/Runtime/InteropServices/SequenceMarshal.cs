@@ -34,15 +34,6 @@ namespace System.Runtime.InteropServices
         }
 
         /// <summary>
-        /// Get <see cref="OwnedMemory{T}"/> from the underlying <see cref="ReadOnlySequence{T}"/>.
-        /// If unable to get the <see cref="OwnedMemory{T}"/>, return false.
-        /// </summary>
-        public static bool TryGetOwnedMemory<T>(ReadOnlySequence<T> sequence, out OwnedMemory<T> ownedMemory, out int start, out int length)
-        {
-            return sequence.TryGetOwnedMemory(out ownedMemory, out start, out length);
-        }
-
-        /// <summary>
         /// Get <see cref="ReadOnlyMemory{T}"/> from the underlying <see cref="ReadOnlySequence{T}"/>.
         /// If unable to get the <see cref="ReadOnlyMemory{T}"/>, return false.
         /// </summary>

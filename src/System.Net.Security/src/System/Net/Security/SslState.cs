@@ -132,7 +132,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void ValidateCreateContext(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
             ThrowIfExceptional();
 
@@ -146,15 +146,11 @@ namespace System.Net.Security
                 throw new InvalidOperationException(SR.net_auth_client_server);
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate == null)
-            {
-                throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
-            }
-
             _exception = null;
+            _sslAuthenticationOptions = sslAuthenticationOptions;
+
             try
             {
-                _sslAuthenticationOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
                 _context = new SecureChannel(_sslAuthenticationOptions);
             }
             catch (Win32Exception e)

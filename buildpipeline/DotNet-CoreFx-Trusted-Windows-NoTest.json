@@ -143,7 +143,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\sync.cmd",
-        "arguments": "$(PB_SyncArguments)",
+        "arguments": "$(PB_SyncArguments) $(PB_OptionalToolingSyncArguments) $(PB_PipelineBuildMSBuildArguments)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -183,7 +183,7 @@
       },
       "inputs": {
         "filename": "$(Build.SourcesDirectory)\\corefx\\build.cmd",
-        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments)",
+        "arguments": "-OfficialBuildId=$(OfficialBuildId) $(PB_BuildArguments) $(PB_PipelineBuildMSBuildArguments)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -295,36 +295,6 @@
       "environment": {},
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": false,
-      "displayName": "Build solution corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
-      "timeoutInMinutes": 0,
-      "condition": "always()",
-      "refName": "Task14",
-      "task": {
-        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "solution": "corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
-        "msbuildLocationMethod": "version",
-        "msbuildVersion": "14.0",
-        "msbuildArchitecture": "x86",
-        "msbuildLocation": "",
-        "platform": "",
-        "configuration": "",
-        "msbuildArguments": "/p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
-        "clean": "false",
-        "maximumCpuCount": "false",
-        "restoreNugetPackages": "false",
-        "logProjectEvents": "false",
-        "createLogFile": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": true,
       "alwaysRun": true,
       "displayName": "Run AgentTools/End.ps1",
       "timeoutInMinutes": 0,
@@ -422,7 +392,8 @@
       "allowOverride": true
     },
     "PB_VsoCorefxGitUrl": {
-      "value": "https://github.com/dotnet/corefx"
+      "value": "https://github.com/dotnet/corefx",
+      "isSecret": true
     },
     "PB_SourceBranch": {
       "value": "master",
@@ -446,6 +417,28 @@
     },
     "PB_BuildArguments": {
       "value": "-buildArch=x64 -Release -- /p:SignType=$(PB_SignType) /p:RuntimeOS=win10",
+      "allowOverride": true
+    },
+    "PB_OptionalToolingSyncArguments": {
+      "value": "/p:OptionalToolSource=$(PB_OptionalToolSource) /p:OptionalToolSourceUser=$(PB_OptionalToolSourceUser);OptionalToolSourcePassword=$(PB_OptionalToolSourcePAT)"
+    },
+    "PB_OptionalToolSource": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_OptionalToolSourcePAT": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_OptionalToolSourceUser": {
+      "value": null,
+      "allowOverride": true,
+      "isSecret": true
+    },
+    "PB_PipelineBuildMSBuildArguments": {
+      "value": "",
       "allowOverride": true
     },
     "PB_SignType": {

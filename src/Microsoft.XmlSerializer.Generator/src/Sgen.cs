@@ -21,6 +21,9 @@ namespace Microsoft.XmlSerializer.Generator
             return sgen.Run(args);
         }
 
+        private static string s_references = string.Empty;
+        private static Dictionary<string, string> s_referencedic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         private int Run(string[] args)
         {
             string assembly = null;
@@ -35,22 +38,13 @@ namespace Microsoft.XmlSerializer.Generator
             bool silent = false;
             bool warnings = false;
 
+            AppDomain.CurrentDomain.AssemblyResolve += SgenAssemblyResolver;
+
             try
             {
                 for (int i = 0; i < args.Length; i++)
                 {
                     string arg = args[i];
-                    string value = string.Empty;
-                    
-                    if (arg.StartsWith("-"))
-                    {
-                        int colonPos = arg.IndexOf(":");
-                        if (colonPos != -1)
-                        {
-                            value = arg.Substring(colonPos + 1).Trim();
-                            arg = arg.Substring(0, colonPos).Trim();
-                        }
-                    }
   
                     if (ArgumentMatch(arg, "help") || ShortNameArgumentMatch(arg, "h"))
                     {
@@ -68,18 +62,26 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "out") || ShortNameArgumentMatch(arg, "o"))
                     {
-                        if (codePath != null)
-                        {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "--out", arg));
+                        i++;
+                        if(i >= args.Length || codePath != null )
+                        {                         
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
-
-                        codePath = value;
+                        else
+                        {
+                            codePath = args[i];
+                        }
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        if (value != string.Empty)
+                        i++;
+                        if (i >= args.Length)
                         {
-                            string[] typelist = value.Split(';');
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
+                        else
+                        {
+                            string[] typelist = args[i].Split(';');
                             foreach (var type in typelist)
                             {
                                 types.Add(type);
@@ -88,12 +90,15 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "assembly") || ShortNameArgumentMatch(arg, "a"))
                     {
-                        if (assembly != null)
+                        i++;
+                        if (i >= args.Length || assembly != null)
                         {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
-
-                        assembly = value;
+                        else
+                        {
+                            assembly = args[i];
+                        }
                     }
                     else if (ArgumentMatch(arg, "quiet"))
                     {
@@ -115,13 +120,29 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         warnings = true;
                     }
+                    else if (ArgumentMatch(arg, "reference"))
+                    {
+                        i++;
+                        if (i >= args.Length)
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
+                        else
+                        {
+                            s_references = args[i];
+                            if (!string.IsNullOrEmpty(s_references))
+                            {
+                                ParseReferences();
+                            }
+                        }                        
+                    }
                     else
                     {
                         if (arg.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase) || arg.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase))
                         {
                             if (assembly != null)
                             {
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "--assembly", arg));
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                             }
 
                             assembly = arg;
@@ -488,6 +509,77 @@ namespace Microsoft.XmlSerializer.Generator
         private static string GetTempAssemblyName(AssemblyName parent, string ns)
         {
             return parent.Name + ".XmlSerializers" + (ns == null || ns.Length == 0 ? "" : "." + ns.GetHashCode());
+        }
+
+        private static void ParseReferences()
+        {
+            var referencelist = new List<string>();
+            if (s_references.Length > 0)
+            {
+                foreach(var entry in s_references.Split(';'))
+                {
+                    string trimentry = entry.Trim();
+                    if (string.IsNullOrEmpty(trimentry))
+                        continue;
+                    referencelist.Add(trimentry);
+                }
+            }
+
+            foreach (var reference in referencelist)
+            {
+                if (reference.EndsWith(".dll") || reference.EndsWith(".exe"))
+                {
+                    if (File.Exists(reference))
+                    {
+                        string filename = Path.GetFileNameWithoutExtension(reference);
+                        if (!string.IsNullOrEmpty(filename))
+                        {
+                            s_referencedic.Add(filename, reference);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private static Assembly SgenAssemblyResolver(object source, ResolveEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Length == 0)
+                {
+                    return null;
+                }
+
+                string assemblyname = e.Name.Split(',')[0];
+                if (string.IsNullOrEmpty(assemblyname))
+                {
+                    return null;
+                }
+
+                if(s_referencedic.ContainsKey(assemblyname))
+                {
+                    string reference = s_referencedic[assemblyname];
+                    if (!string.IsNullOrEmpty(reference))
+                    {
+                        if (File.Exists(reference))
+                        {
+                            return Assembly.LoadFrom(reference);
+                        }
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                if (exp is ThreadAbortException || exp is StackOverflowException || exp is OutOfMemoryException)
+                {
+                    throw;
+                }
+
+                WriteWarning(exp, true);
+            }
+
+            return null;
         }
     }
 }

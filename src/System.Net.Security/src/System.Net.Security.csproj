@@ -23,6 +23,7 @@
     <Compile Include="System\Net\FixedSizeReader.cs" />
     <Compile Include="System\Net\HelperAsyncResults.cs" />
     <Compile Include="System\Net\Logging\NetEventSource.cs" />
+    <Compile Include="System\Net\Security\SniHelper.cs" />
     <Compile Include="System\Net\Security\SslApplicationProtocol.cs" />
     <Compile Include="System\Net\Security\SslAuthenticationOptions.cs" />
     <Compile Include="System\Net\Security\SslClientAuthenticationOptions.cs" />
@@ -76,9 +77,6 @@
     <!-- System.Net common -->
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
-      <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\LazyAsyncResult.cs">
       <Link>Common\System\Net\LazyAsyncResult.cs</Link>
