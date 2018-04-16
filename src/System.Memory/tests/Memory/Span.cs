@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.MemoryTests
@@ -42,6 +43,22 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void SpanFromCtorArrayChar()
+        {
+            char[] a = { '1', '2', '3', '4', '-' };
+            Memory<char> memory;
+
+            memory = new Memory<char>(a);
+            memory.Span.Validate('1', '2', '3', '4', '-');
+
+            memory = new Memory<char>(a, 0, a.Length);
+            memory.Span.Validate('1', '2', '3', '4', '-');
+
+            MemoryManager<char> manager = new CustomMemoryForTest<char>(a);
+            manager.Memory.Span.Validate('1', '2', '3', '4', '-');
+        }
+
+        [Fact]
         public static void SpanFromCtorArrayObject()
         {
             object o1 = new object();
@@ -57,6 +74,19 @@ namespace System.MemoryTests
 
             MemoryManager<object> manager = new CustomMemoryForTest<object>(a);
             manager.Memory.Span.ValidateReferenceType(o1, o2);
+        }
+
+        [Fact]
+        public static void SpanFromStringAsMemory()
+        {
+            string a = "1234-";
+            ReadOnlyMemory<char> memory;
+
+            memory = a.AsMemory();
+            MemoryMarshal.AsMemory(memory).Span.Validate('1', '2', '3', '4', '-');
+
+            memory = a.AsMemory(0, a.Length);
+            MemoryMarshal.AsMemory(memory).Span.Validate('1', '2', '3', '4', '-');
         }
 
         [Fact]
@@ -106,5 +136,28 @@ namespace System.MemoryTests
             Assert.True(spanObject.SequenceEqual(default));
         }
 
+        [Fact]
+        public static void TornMemory_Array_SpanThrowsIfOutOfBounds()
+        {
+            Memory<int> memory;
+
+            memory = TestHelpers.DangerousCreateMemory<int>(new int[4], 0, 5);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+
+            memory = TestHelpers.DangerousCreateMemory<int>(new int[4], 3, 2);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+        }
+
+        [Fact]
+        public static void TornMemory_String_SpanThrowsIfOutOfBounds()
+        {
+            Memory<char> memory;
+
+            memory = TestHelpers.DangerousCreateMemory<char>("1234", 0, 5);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+
+            memory = TestHelpers.DangerousCreateMemory<char>("1234", 3, 2);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+        }
     }
 }

@@ -31,6 +31,7 @@ namespace System.Net.Http.Functional.Tests
         private const string ExpectedContent = "Test content";
         private const string Username = "testuser";
         private const string Password = "password";
+        private const string HttpDefaultPort = "80";
 
         private readonly NetworkCredential _credential = new NetworkCredential(Username, Password);
 
@@ -469,6 +470,157 @@ namespace System.Net.Http.Functional.Tests
                         null);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("[::1234]")]
+        [InlineData("[::1234]:8080")]
+        public async Task GetAsync_IPv6AddressInHostHeader_CorrectlyFormatted(string host)
+        {
+            string ipv6Address = "http://" + host;
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(ipv6Address); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"Host: {host}", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        [Theory]
+        [InlineData("1.2.3.4")]
+        [InlineData("1.2.3.4:8080")]
+        [InlineData("[::1234]")]
+        [InlineData("[::1234]:8080")]
+        public async Task ProxiedIPAddressRequest_NotDefaultPort_CorrectlyFormatted(string host)
+        {
+            string uri = "http://" + host;
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(uri); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"GET {uri}/ HTTP/1.1", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        public static IEnumerable<object[]> DestinationHost_MemberData()
+        {
+            yield return new object[] { Configuration.Http.Host };
+            yield return new object[] { "1.2.3.4" };
+            yield return new object[] { "[::1234]" };
+        }
+
+        [Theory]
+        [OuterLoop] // Test uses azure endpoint.
+        [MemberData(nameof(DestinationHost_MemberData))]
+        public async Task ProxiedRequest_DefaultPort_PortStrippedOffInUri(string host)
+        {
+            string addressUri = $"http://{host}:{HttpDefaultPort}/";
+            string expectedAddressUri = $"http://{host}/";
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    try { await client.GetAsync(addressUri); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"GET {expectedAddressUri} HTTP/1.1", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        [Fact]
+        [OuterLoop] // Test uses azure endpoint.
+        public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
+        {
+            // Https proxy request will use CONNECT tunnel, even the default 443 port is specified, it will not be stripped off.
+            string requestTarget = $"{Configuration.Http.SecureHost}:443";
+            string addressUri = $"https://{requestTarget}/";
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    try { await client.GetAsync(addressUri); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"CONNECT {requestTarget} HTTP/1.1", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
+        public static IEnumerable<object[]> SecureAndNonSecure_IPBasedUri_MemberData() =>
+            from address in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback }
+            from useSsl in new[] { true, false }
+            select new object[] { address, useSsl };
+
+        [Theory]
+        [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
+        public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
+        {
+            var options = new LoopbackServer.Options { Address = address, UseSsl= useSsl };
+            bool connectionAccepted = false;
+            string host = "";
+
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                host = $"{url.Host}:{url.Port}";
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    if (useSsl)
+                    {
+                        handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    }
+                    try { await client.GetAsync(url); } catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"Host: {host}", headers);
+            }), options);
+
+            Assert.True(connectionAccepted);
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -2403,7 +2555,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23768)]
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // takes several seconds
         [Fact]

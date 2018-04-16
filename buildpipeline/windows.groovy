@@ -8,7 +8,7 @@
 // TestOuter - If true, runs outerloop, if false runs just innerloop
 
 def submittedHelixJson = null
-def submitToHelix = (params.TGroup == 'netcoreapp')
+def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'netfx')
 
 simpleNode('Windows_NT','latest') {
     stage ('Checkout source') {
@@ -23,7 +23,6 @@ simpleNode('Windows_NT','latest') {
     else {
         framework = "-framework:${params.TGroup}"
     }
-    def buildTests = (params.TGroup != 'all')
 
     stage ('Initialize tools') {
         // Init tools
@@ -38,20 +37,23 @@ simpleNode('Windows_NT','latest') {
     stage ('Build Product') {
         bat ".\\build.cmd ${framework} -buildArch=${params.AGroup} -${params.CGroup} -- /p:RuntimeOS=win10"
     }
-    if (buildTests) {
-        stage ('Build Tests') {
-            def additionalArgs = ''
-            def archiveTests = 'false'
-            if (params.TestOuter) {
-                additionalArgs += ' -Outerloop'
-            }
-            if (submitToHelix) {
-                archiveTests = 'true'
-            }
-            if (submitToHelix || params.TGroup == 'uap' || params.TGroup == 'uapaot') {
-                additionalArgs += ' -SkipTests'
-            }
+    stage ('Build Tests') {
+        def additionalArgs = ''
+        def archiveTests = 'false'
+        if (params.TestOuter) {
+            additionalArgs += ' -Outerloop'
+        }
+        if (submitToHelix) {
+            archiveTests = 'true'
+        }
+        if (submitToHelix || params.TGroup == 'uap' || params.TGroup == 'uapaot') {
+            additionalArgs += ' -SkipTests'
+        }
+        if (params.TGroup != 'all') {
             bat ".\\build-tests.cmd ${framework} -buildArch=${params.AGroup} -${params.CGroup}${additionalArgs} -- /p:RuntimeOS=win10 /p:ArchiveTests=${archiveTests}"
+        }
+        else {
+            bat ".\\build-tests.cmd ${framework} -${params.CGroup}${additionalArgs}"
         }
     }
     if (submitToHelix) {
@@ -72,11 +74,14 @@ simpleNode('Windows_NT','latest') {
                 {
                     targetHelixQueues = ['Windows.10.Amd64.Open',
                                          'Windows.7.Amd64.Open',
-                                         'Windows.81.Amd64.Open']
+                                         'Windows.81.Amd64.Open',]
                     if (params.AGroup == 'x64') {
                         targetHelixQueues += ['Windows.10.Nano.Amd64.Open']
                     }
-                } else if (params.TGroup == 'uap') {
+                    if (params.TestOuter) {
+                        targetHelixQueues += ['Windows.10.Amd64.ClientRS3.ES.Open']
+                    }
+                } else if (params.TGroup == 'uap' || params.TGroup == 'netfx') {
                     targetHelixQueues = ['Windows.10.Amd64.ClientRS2.Open']
                 }
 
