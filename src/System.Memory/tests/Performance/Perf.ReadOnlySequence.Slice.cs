@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Memory.Tests;
 using System.MemoryTests;
 using Microsoft.Xunit.Performance;
@@ -9,20 +10,84 @@ using Xunit;
 
 namespace System.Buffers.Tests
 {
-    public class Perf_ReadOnlySequence_Slice
+    public abstract class Perf_ReadOnlySequence_Slice_Byte: Perf_ReadOnlySequence_Slice<byte>
     {
+        public Perf_ReadOnlySequence_Slice_Byte(ReadOnlySequenceFactory<byte> factory): base(factory) { }
+
+        public class Array: Perf_ReadOnlySequence_Slice_Byte
+        {
+            public Array(): base(ReadOnlySequenceFactory<byte>.ArrayFactory) { }
+        }
+
+        public class Memory : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public Memory() : base(ReadOnlySequenceFactory<byte>.MemoryFactory) { }
+        }
+
+        public class SingleSegment : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public SingleSegment() : base(ReadOnlySequenceFactory<byte>.SingleSegmentFactory) { }
+        }
+
+        public class TenSegments : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public TenSegments() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+        }
+    }
+
+    public abstract class Perf_ReadOnlySequence_Slice_Char: Perf_ReadOnlySequence_Slice<char>
+    {
+        public Perf_ReadOnlySequence_Slice_Char(ReadOnlySequenceFactory<char> factory): base(factory) { }
+
+        public class Array: Perf_ReadOnlySequence_Slice_Char
+        {
+            public Array(): base(ReadOnlySequenceFactory<char>.ArrayFactory) { }
+        }
+
+        public class Memory : Perf_ReadOnlySequence_Slice_Char
+        {
+            public Memory() : base(ReadOnlySequenceFactory<char>.MemoryFactory) { }
+        }
+
+        public class String : Perf_ReadOnlySequence_Slice_Char
+        {
+            public String() : base(ReadOnlySequenceFactoryChar.StringFactory) { }
+        }
+
+        public class SingleSegment : Perf_ReadOnlySequence_Slice_Char
+        {
+            public SingleSegment() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
+        }
+
+        public class TenSegments : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public TenSegments() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+        }
+
+    }
+
+    public abstract class Perf_ReadOnlySequence_Slice<T>
+    {
+
         private const int InnerCount = 10_000;
         volatile static int _volatileInt = 0;
 
-        #region Byte_Array
+        internal ReadOnlySequenceFactory<T> Factory { get; }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_Long(int bufSize, int bufOffset)
+        public Perf_ReadOnlySequence_Slice(ReadOnlySequenceFactory<T> factory)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 10;
+            Factory = factory;
+        }
 
+        
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 10)]
+        public void Long(int bufSize, int posCount)
+        {
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
+
+            List<long> positions = CookPositionsLong(buffer, posCount);
+            //Console.WriteLine($"Long count {positions.Count}");
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -30,12 +95,36 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
+                        foreach (long startOffset in positions)
                         {
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset);
+                            ReadOnlySequence<T> sliced = buffer.Slice(startOffset);
+                            localInt ^= sliced.Start.GetInteger();
+                        }
+                    }
+                }
+                _volatileInt = localInt;
+            }
+        }
+
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 10)]
+        public void LongLong(int bufSize, int posCount)
+        {
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
+
+            List<(long, long)> positions = CookPositionsLongLong(buffer, posCount);
+            Console.WriteLine($"LongLong count {positions.Count}");
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                int localInt = 0;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        foreach ((long start, long length) in positions)
+                        {
+                            ReadOnlySequence<T> sliced = buffer.Slice(start, length);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -45,12 +134,12 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_LongLong(int bufSize, int bufOffset)
+        [InlineData(10_000, 10)]
+        public void LongPos(int bufSize, int posCount)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 20;
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
+            List<(long, SequencePosition)> positions = CookPositionsLongPos(buffer, posCount);
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -58,12 +147,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
+                        foreach ((long start, SequencePosition end) in positions)
                         {
-                            sliceLen -= 2 * offset;
-                            sliced = sliced.Slice(offset, sliceLen);
+                            ReadOnlySequence<T> sliced = buffer.Slice(start, end);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -73,12 +159,12 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_LongPos(int bufSize, int bufOffset)
+        [InlineData(10_000, 10)]
+        public void Pos(int bufSize, int posCount)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 20;
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
+            List<SequencePosition> positions = CookPositionsPos(buffer, posCount);
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -86,14 +172,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
+                        foreach (SequencePosition start in positions)
                         {
-                            sliceLen -= 2 * offset;
-                            end =  new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(offset, end);
+                            ReadOnlySequence<T> sliced = buffer.Slice(start);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -103,12 +184,12 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_Pos(int bufSize, int bufOffset)
+        [InlineData(10_000, 10)]
+        public void PosLong(int bufSize, int posCount)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 10;
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
+            List<(SequencePosition, long)> positions = CookPositionsPosLong(buffer, posCount);
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -116,14 +197,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
+                        foreach ((SequencePosition start, long length) in positions)
                         {
-                            sliceLen -= offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start);
+                            ReadOnlySequence<T> sliced = buffer.Slice(start, length);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -133,12 +209,12 @@ namespace System.Buffers.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_PosLong(int bufSize, int bufOffset)
+        [InlineData(10_000, 10)]
+        public void PosPos(int bufSize, int posCount)
         {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 20;
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
+            List<(SequencePosition, SequencePosition)> positions = CookPositionsPosPos(buffer, posCount);
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -146,14 +222,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
+                        foreach ((SequencePosition start, SequencePosition end) in positions)
                         {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start, sliceLen);
+                            ReadOnlySequence<T> sliced = buffer.Slice(start, end);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -162,812 +233,102 @@ namespace System.Buffers.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Array_PosPos(int bufSize, int bufOffset)
-        {
-            var buffer = new ReadOnlySequence<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            long offset = buffer.Length / 20;
+        #region  CookPositions
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+        internal static List<long> CookPositionsLong(in ReadOnlySequence<T> buffer, int count)
+        {
+            var result = new List<long>(count);
+
+            long length = buffer.Length;
+            long offset = length / count;
+
+            long start = 0;
+            while (length >= offset)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            end = new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(start, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                start += offset;
+                result.Add(start);
+                length -= offset;
             }
+
+            return result;
         }
 
-        #endregion
-
-        #region Byte_Memory
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_Long(int bufSize, int bufOffset)
+        internal static List<SequencePosition> CookPositionsPos(in ReadOnlySequence<T> buffer, int count)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 10;
+            var result = new List<SequencePosition>(count);
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            List<long> positions = CookPositionsLong(buffer, count);
+            foreach (long startOffset in positions)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                SequencePosition start = buffer.GetPosition(startOffset);
+                result.Add(start);
             }
+
+            return result;
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_LongLong(int bufSize, int bufOffset)
+        internal static List<(long, long)> CookPositionsLongLong(in ReadOnlySequence<T> buffer, int count)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 20;
+            var result = new List<(long, long)>(count);
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            long length = buffer.Length;
+            long offset = length / (2 * count);
+
+            long start = 0, end = length;
+            while (length >= 2 * offset)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            sliced = sliced.Slice(offset, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                start += offset;
+                length -= 2 * offset;
+                result.Add((start, length));
             }
+
+            return result;
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_LongPos(int bufSize, int bufOffset)
+        internal static List<(long, SequencePosition)> CookPositionsLongPos(in ReadOnlySequence<T> buffer, int count)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 20;
+            var result = new List<(long, SequencePosition)>(count);
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
+            foreach ((long startOffset, long sliceLength) in positions)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            end =  new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(offset, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                SequencePosition start = buffer.GetPosition(startOffset);
+                SequencePosition end = buffer.GetPosition(sliceLength, start);
+                result.Add((startOffset, end));
             }
+
+            return result;
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_Pos(int bufSize, int bufOffset)
+        internal static List<(SequencePosition, long)> CookPositionsPosLong(in ReadOnlySequence<T> buffer, int count)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 10;
+            var result = new List<(SequencePosition, long)>(count);
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
+            foreach ((long startOffset, long sliceLength) in positions)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                SequencePosition start = buffer.GetPosition(startOffset);
+                result.Add((start, sliceLength));
             }
+
+            return result;
         }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_PosLong(int bufSize, int bufOffset)
+        internal static List<(SequencePosition, SequencePosition)> CookPositionsPosPos(in ReadOnlySequence<T> buffer, int count)
         {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 20;
+            var result = new List<(SequencePosition, SequencePosition)>(count);
 
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
+            foreach ((long startOffset, long sliceLength) in positions)
             {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
+                SequencePosition start = buffer.GetPosition(startOffset);
+                SequencePosition end = buffer.GetPosition(sliceLength, start);
+                result.Add((start, end));
             }
-        }
 
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_Memory_PosPos(int bufSize, int bufOffset)
-        {
-            var manager = new CustomMemoryForTest<byte>(new byte[bufSize], bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<byte>(manager.Memory);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            end = new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(start, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
+            return result;
         }
 
         #endregion
-
-        #region Byte_SingleSegment
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_Long(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_LongLong(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            sliced = sliced.Slice(offset, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_LongPos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            end =  new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(offset, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_Pos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_PosLong(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_SingleSegment_PosPos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment1, bufSize - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            end = new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(start, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        #endregion
-
-        #region Byte_MultiSegment
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_Long(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_LongLong(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            sliced = sliced.Slice(offset, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_LongPos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            SequencePosition end = sliced.GetPosition(sliceLen);
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_Pos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            SequencePosition start = sliced.GetPosition(offset);
-                            sliced = sliced.Slice(start);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_PosLong(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            SequencePosition start = sliced.GetPosition(offset);
-                            sliced = sliced.Slice(start, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void Byte_MultiSegment_PosPos(int bufSize, int bufOffset)
-        {
-            var segment1 = new BufferSegment<byte>(new byte[bufSize / 10]);
-            BufferSegment<byte> segment2 = segment1;
-            for (int j = 0; j < 10; j++)
-                segment2 = segment2.Append(new byte[bufSize / 10]);
-            var buffer = new ReadOnlySequence<byte>(segment1, bufOffset, segment2, bufSize / 10 - bufOffset);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<byte> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            SequencePosition end = sliced.GetPosition(sliceLen);
-                            SequencePosition start = sliced.GetPosition(offset);
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(start, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        #endregion
-
-        #region String
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_Long(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            sliced = sliced.Slice(offset);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_LongLong(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            sliced = sliced.Slice(offset, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_LongPos(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            end =  new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(offset, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_Pos(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 10;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_PosLong(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            sliced = sliced.Slice(start, sliceLen);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        [Benchmark(InnerIterationCount = InnerCount)]
-        [InlineData(10_000, 100)]
-        private static void String_PosPos(int bufSize, int bufOffset)
-        {
-            ReadOnlyMemory<char> memory = new string('a', bufSize).AsMemory();
-            memory = memory.Slice(bufOffset, bufSize - 2 * bufOffset);
-            var buffer = new ReadOnlySequence<char>(memory);
-            long offset = buffer.Length / 20;
-
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-            {
-                int localInt = 0;
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        ReadOnlySequence<char> sliced = buffer;
-                        long sliceLen = sliced.Length;
-                        SequencePosition start = sliced.GetPosition(0);
-                        SequencePosition end = sliced.GetPosition(0, sliced.End);
-                        while (sliceLen > 0)
-                        {
-                            sliceLen -= 2 * offset;
-                            start = new SequencePosition(start.GetObject(), start.GetInteger() + (int)offset);
-                            end = new SequencePosition(end.GetObject(), end.GetInteger() - (int)offset);
-                            sliced = sliced.Slice(start, end);
-                            localInt ^= sliced.Start.GetInteger();
-                        }
-                    }
-                }
-                _volatileInt = localInt;
-            }
-        }
-
-        #endregion
-
     }
 }
