@@ -135,8 +135,6 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, int offset) => Seek(start, end, (long)offset);
 
-        // SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-        // SequencePosition end = Seek(begin, _sequenceEnd, length);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, long offset)
         {
@@ -201,67 +199,65 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
-        private static void CheckEndReachable(ReadOnlySequenceSegment<T> current, object endSegment)
+        private void CheckEndReachable(ReadOnlySequenceSegment<T> current)
         {
-            Debug.Assert(current != null);
+            object endSegment = _sequenceEnd.GetObject();
             Debug.Assert(endSegment != null);
             Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
 
-            while (current.Next != null)
+            while (current != null)
             {
-                current = current.Next;
                 if (current == endSegment)
                 {
                     // Found end
                     return;
                 }
+                current = current.Next;
             }
 
             ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
         }
 
-        private static void CheckEndReachable(object startSegment, object endSegment)
+        private void CheckEndReachable(ReadOnlySequenceSegment<T> current, object endSegment)
         {
-            Debug.Assert(startSegment != null);
             Debug.Assert(endSegment != null);
             Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
 
-            var current = (ReadOnlySequenceSegment<T>)startSegment;
-
-            while (current.Next != null)
+            while (current != null)
             {
-                current = current.Next;
                 if (current == endSegment)
                 {
                     // Found end
                     return;
                 }
+                current = current.Next;
             }
 
-            ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+            // Unlike the other CheckEndReachable overload, endSegment is provided by the user, and hence the exception is different
+            ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-
+            int startIndex = GetIndex(start);
+            int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-            if (type == SequenceType.MultiSegment && startObject != endObject)
-            {
-                Debug.Assert(startObject != null);
-                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
-                Debug.Assert(endObject != null);
-                Debug.Assert(endObject is ReadOnlySequenceSegment<T>);
 
-                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+            if (startObject == null || endObject == null)
+            {
+                return 0;
+            }
+
+            if (startObject != endObject)
+            {
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+                var endSegment = (ReadOnlySequenceSegment<T>)endObject;
                 // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
                 return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
             }
 
-            Debug.Assert(startObject == endObject);
             // Single segment length
             return endIndex - startIndex;
         }
