@@ -112,7 +112,11 @@ namespace System.Net.Security.Tests
                 return serverCert;
             });
 
-            var validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) => { Assert.Equal(serverCert, certificate); return true; });
+            vvar validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
+            {
+                Assert.Equal(serverCert, certificate);
+                return true; 
+            });
 
             VirtualNetwork vn = new VirtualNetwork();
             using (VirtualNetworkStream serverStream = new VirtualNetworkStream(vn, isServer: true),
