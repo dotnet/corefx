@@ -342,6 +342,8 @@ do
     shift
 done
 
+export COMPlus_TieredCompilation=1
+
 # Compute paths to the binaries if they haven't already been computed
 
 if [ "$Runtime" == "" ]
