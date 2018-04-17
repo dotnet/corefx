@@ -24,15 +24,15 @@ namespace System.Net.Security
             RemoteCertRequired = true;
             RemoteCertificateValidationCallback = sslClientAuthenticationOptions.RemoteCertificateValidationCallback;
             TargetHost = sslClientAuthenticationOptions.TargetHost;
+            CertSelectionDelegate = localCallback;
 
             // Client specific options.
-            CertSelectionDelegate = localCallback;
             CertificateRevocationCheckMode = sslClientAuthenticationOptions.CertificateRevocationCheckMode;
             ClientCertificates = sslClientAuthenticationOptions.ClientCertificates;
             LocalCertificateSelectionCallback = sslClientAuthenticationOptions.LocalCertificateSelectionCallback;
         }
 
-        internal SslAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        internal SslAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions, LocalCertSelectionCallback localCallback)
         {
             // Common options.
             AllowRenegotiation = sslServerAuthenticationOptions.AllowRenegotiation;
@@ -44,6 +44,7 @@ namespace System.Net.Security
             RemoteCertRequired = sslServerAuthenticationOptions.ClientCertificateRequired;
             RemoteCertificateValidationCallback = sslServerAuthenticationOptions.RemoteCertificateValidationCallback;
             TargetHost = string.Empty;
+            CertSelectionDelegate = localCallback;
 
             // Server specific options.
             CertificateRevocationCheckMode = sslServerAuthenticationOptions.CertificateRevocationCheckMode;

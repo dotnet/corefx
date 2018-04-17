@@ -152,17 +152,17 @@ namespace System.Net.Security
 
         private SslAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
         {
-            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback == null)
+            if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback == null && _certSelectionDelegate == null)
             {
                 throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null)
+            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null  && _certSelectionDelegate == null)
             {
                 throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
             }
 
-            var authOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
+            var authOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions, _certSelectionDelegate);
 
             _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
             authOptions.ServerCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
