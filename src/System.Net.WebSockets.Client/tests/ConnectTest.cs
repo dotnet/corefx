@@ -28,7 +28,12 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Assert.Equal(WebSocketError.Success, ex.WebSocketErrorCode);
                 Assert.Equal(WebSocketState.Closed, cws.State);
-                Assert.Equal(exceptionMessage, ex.Message);
+
+                // The .Net Native toolchain optimizes away exception messages.
+                if (!PlatformDetection.IsNetNative)
+                {
+                    Assert.Equal(exceptionMessage, ex.Message);
+                }
             }
         }
 
