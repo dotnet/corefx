@@ -17,6 +17,8 @@ namespace System.IO.Tests
             return Directory.CreateDirectory(path);
         }
 
+        public virtual bool IsDirectoryCreate => true;
+
         #endregion
 
         #region UniversalTests
@@ -40,7 +42,7 @@ namespace System.IO.Tests
             string subdir = Path.GetRandomFileName();
             string fullPath = Path.Combine(TestDirectory, subdir);
             DirectoryInfo info = Create(fullPath);
-            if (PlatformDetection.IsFullFramework)
+            if (PlatformDetection.IsFullFramework && IsDirectoryCreate)
             {
                 // I think this was accidental. In Core we want to be consistent with constructing
                 // an Info manually then calling Create on it.
