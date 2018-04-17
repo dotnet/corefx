@@ -127,8 +127,9 @@ namespace System.Memory.Tests
             foreach(ReadOnlyMemory<T> input in inputs)
             {
                 int length = input.Length;
+                int dataOffset = length / 2;
                 
-                Memory<T> memory = new Memory<T>(new T[length * 2], length / 2, length);
+                Memory<T> memory = new Memory<T>(new T[length * 2], dataOffset, length);
                 input.CopyTo(memory);
                 
                 if (first == null)

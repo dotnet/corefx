@@ -54,19 +54,21 @@ namespace System.Buffers.Tests
             public String() : base(ReadOnlySequenceFactoryChar.StringFactory) { }
         }
 
-        public class Segments___1 : Perf_ReadOnlySequence_Slice_Char
+        // 001 in name for correcter order in log
+        public class Segments001 : Perf_ReadOnlySequence_Slice_Char
         {
-            public Segments___1() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
+            public Segments001() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
         }
 
-        public class Segments__10 : Perf_ReadOnlySequence_Slice_Byte
+        // 010 in name for correcter order in log
+        public class Segments010 : Perf_ReadOnlySequence_Slice_Byte
         {
-            public Segments__10() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+            public Segments010() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
         }
 
-        public class Segments_100 : Perf_ReadOnlySequence_Slice_Byte
+        public class Segments100 : Perf_ReadOnlySequence_Slice_Byte
         {
-            public Segments_100() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(100)) { }
+            public Segments100() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(100)) { }
         }
 
     }
@@ -87,12 +89,12 @@ namespace System.Buffers.Tests
         
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void Long(int bufSize, int posCount)
+        public void Offset(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<long> positions = CookPositionsLong(buffer, posCount);
-            //Console.WriteLine($"Long count {positions.Count}");
+            long[] positions = PreparePositionsOffset(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -100,9 +102,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach (long startOffset in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(startOffset);
+                            ReadOnlySequence<T> sliced = buffer.Slice(positions[j]);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -114,12 +116,12 @@ namespace System.Buffers.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void LongLong(int bufSize, int posCount)
+        public void OffsetLength(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<(long, long)> positions = CookPositionsLongLong(buffer, posCount);
-            //Console.WriteLine($"LongLong count {positions.Count}");
+            (long, long)[] positions = PreparePositionsOffsetLength(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -127,9 +129,10 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach ((long start, long length) in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(start, length);
+                            (long start, long length) startLength = positions[j];
+                            ReadOnlySequence<T> sliced = buffer.Slice(startLength.start, startLength.length);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -140,11 +143,12 @@ namespace System.Buffers.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void LongPos(int bufSize, int posCount)
+        public void OffsetEnd(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<(long, SequencePosition)> positions = CookPositionsLongPos(buffer, posCount);
+            (long, SequencePosition)[] positions = PreparePositionsOffsetEnd(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -152,9 +156,10 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach ((long start, SequencePosition end) in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(start, end);
+                            (long start, SequencePosition end) startEnd = positions[j];
+                            ReadOnlySequence<T> sliced = buffer.Slice(startEnd.start, startEnd.end);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -165,11 +170,12 @@ namespace System.Buffers.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void Pos(int bufSize, int posCount)
+        public void Start(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<SequencePosition> positions = CookPositionsPos(buffer, posCount);
+            SequencePosition[] positions = PreparePositionsStart(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -177,9 +183,9 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach (SequencePosition start in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(start);
+                            ReadOnlySequence<T> sliced = buffer.Slice(positions[j]);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -190,11 +196,12 @@ namespace System.Buffers.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void PosLong(int bufSize, int posCount)
+        public void StartLength(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<(SequencePosition, long)> positions = CookPositionsPosLong(buffer, posCount);
+            (SequencePosition, long)[] positions = PreparePositionsStartLength(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -202,9 +209,10 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach ((SequencePosition start, long length) in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(start, length);
+                            (SequencePosition start, long length) startLength = positions[j];
+                            ReadOnlySequence<T> sliced = buffer.Slice(startLength.start, startLength.length);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -215,11 +223,12 @@ namespace System.Buffers.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
-        public void PosPos(int bufSize, int posCount)
+        public void StartEnd(int bufSize, int posCount)
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
 
-            List<(SequencePosition, SequencePosition)> positions = CookPositionsPosPos(buffer, posCount);
+            (SequencePosition, SequencePosition)[] positions = PreparePositionsStartEnd(buffer, posCount);
+            int indexLast = positions.Length - 1;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 int localInt = 0;
@@ -227,9 +236,10 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        foreach ((SequencePosition start, SequencePosition end) in positions)
+                        for(int j = indexLast; j >= 0; j--)
                         {
-                            ReadOnlySequence<T> sliced = buffer.Slice(start, end);
+                            (SequencePosition start, SequencePosition end) startEnd = positions[j];
+                            ReadOnlySequence<T> sliced = buffer.Slice(startEnd.start, startEnd.end);
                             localInt ^= sliced.Start.GetInteger();
                         }
                     }
@@ -238,97 +248,111 @@ namespace System.Buffers.Tests
             }
         }
 
-        #region  CookPositions
-
-        internal static List<long> CookPositionsLong(in ReadOnlySequence<T> buffer, int count)
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10_000, 10)]
+        public void EmptyLoop(int bufSize, int posCount)
         {
-            var result = new List<long>(count);
+            ReadOnlySequence<T> buffer = Factory.CreateOfSize(bufSize);
+
+            (SequencePosition, SequencePosition)[] positions = PreparePositionsStartEnd(buffer, posCount);
+            int indexLast = positions.Length - 1;
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                int localInt = 0;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        for(int j = indexLast; j >= 0; j--)
+                        {
+                            (SequencePosition start, SequencePosition end) startEnd = positions[j];
+                            localInt ^= startEnd.start.GetInteger();
+                            localInt ^= startEnd.end.GetInteger();
+                        }
+                    }
+                }
+                _volatileInt = localInt;
+            }
+        }
+
+        #region  PreparePositions
+
+        internal static long[] PreparePositionsOffset(in ReadOnlySequence<T> buffer, int count)
+        {
+            var result = new long[count];
 
             long length = buffer.Length;
-            long offset = length / count;
-
-            long start = 0;
-            while (length >= offset)
-            {
-                start += offset;
-                result.Add(start);
-                length -= offset;
-            }
+            for (var i = 0; i < count; i++)
+                result[i] = length * (i + 1) / (count + 1);
 
             return result;
         }
 
-        internal static List<SequencePosition> CookPositionsPos(in ReadOnlySequence<T> buffer, int count)
+        internal static SequencePosition[] PreparePositionsStart(in ReadOnlySequence<T> buffer, int count)
         {
-            var result = new List<SequencePosition>(count);
+            long[] positions = PreparePositionsOffset(buffer, count);
 
-            List<long> positions = CookPositionsLong(buffer, count);
-            foreach (long startOffset in positions)
-            {
-                SequencePosition start = buffer.GetPosition(startOffset);
-                result.Add(start);
-            }
+            var result = new SequencePosition[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
+                result[i] = buffer.GetPosition(positions[i]);
 
             return result;
         }
 
-        internal static List<(long, long)> CookPositionsLongLong(in ReadOnlySequence<T> buffer, int count)
+        internal static (long, long)[] PreparePositionsOffsetLength(in ReadOnlySequence<T> buffer, int count)
         {
-            var result = new List<(long, long)>(count);
+            var result = new (long offset, long length)[count];
 
             long length = buffer.Length;
-            long offset = length / (2 * count);
-
-            long start = 0, end = length;
-            while (length >= 2 * offset)
+            long endStart = length / 2;
+            long endLength = length - endStart;
+            for (var i = 0; i < count; i++)
             {
-                start += offset;
-                length -= 2 * offset;
-                result.Add((start, length));
+                result[i].offset = length * (i + 1) / (count + 1);
+                long endOffset = endLength * (i + 1) / count + endStart;
+                result[i].length = endOffset - result[i].offset;
             }
 
             return result;
         }
 
-        internal static List<(long, SequencePosition)> CookPositionsLongPos(in ReadOnlySequence<T> buffer, int count)
+        internal static (long, SequencePosition)[] PreparePositionsOffsetEnd(in ReadOnlySequence<T> buffer, int count)
         {
-            var result = new List<(long, SequencePosition)>(count);
+            (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
-            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
-            foreach ((long startOffset, long sliceLength) in positions)
+            var result = new (long offset, SequencePosition end)[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
             {
-                SequencePosition start = buffer.GetPosition(startOffset);
-                SequencePosition end = buffer.GetPosition(sliceLength, start);
-                result.Add((startOffset, end));
+                result[i].offset = positions[i].offset;
+                result[i].end = buffer.GetPosition(positions[i].offset + positions[i].length);
             }
 
             return result;
         }
 
-        internal static List<(SequencePosition, long)> CookPositionsPosLong(in ReadOnlySequence<T> buffer, int count)
+        internal static (SequencePosition, long)[] PreparePositionsStartLength(in ReadOnlySequence<T> buffer, int count)
         {
-            var result = new List<(SequencePosition, long)>(count);
+            (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
-            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
-            foreach ((long startOffset, long sliceLength) in positions)
+            var result = new (SequencePosition start, long length)[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
             {
-                SequencePosition start = buffer.GetPosition(startOffset);
-                result.Add((start, sliceLength));
+                result[i].start = buffer.GetPosition(positions[i].offset);
+                result[i].length = positions[i].length;
             }
 
             return result;
         }
 
-        internal static List<(SequencePosition, SequencePosition)> CookPositionsPosPos(in ReadOnlySequence<T> buffer, int count)
+        internal static (SequencePosition, SequencePosition)[] PreparePositionsStartEnd(in ReadOnlySequence<T> buffer, int count)
         {
-            var result = new List<(SequencePosition, SequencePosition)>(count);
+            (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
-            List<(long, long)> positions = CookPositionsLongLong(buffer, count);
-            foreach ((long startOffset, long sliceLength) in positions)
+            var result = new (SequencePosition start, SequencePosition end)[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
             {
-                SequencePosition start = buffer.GetPosition(startOffset);
-                SequencePosition end = buffer.GetPosition(sliceLength, start);
-                result.Add((start, end));
+                result[i].start = buffer.GetPosition(positions[i].offset);
+                result[i].end = buffer.GetPosition(positions[i].offset + positions[i].length);
             }
 
             return result;
