@@ -30,5 +30,27 @@ namespace System.Memory.Tests
             Assert.True(position.Equals((object)position2));
             Assert.Equal(position.GetHashCode(), position2.GetHashCode());
         }
+
+        [Fact]
+        public void ComparisonMembers_IntSegment()
+        {
+            var position = new SequencePosition(2, 2);
+            var position2 = new SequencePosition(2, 2);
+
+            Assert.True(position.Equals(position2));
+            Assert.True(position.Equals((object)position2));
+            Assert.Equal(position.GetHashCode(), position2.GetHashCode());
+        }
+
+        [Fact]
+        public void ComparisonMembers_NotEquals()
+        {
+            var position = new SequencePosition(null, 2);
+            var position2 = new SequencePosition(2, 2);
+
+            Assert.False(position.Equals(position2));
+            Assert.False(position.Equals((object)position2));
+            Assert.NotEqual(position.GetHashCode(), position2.GetHashCode());
+        }
     }
 }
