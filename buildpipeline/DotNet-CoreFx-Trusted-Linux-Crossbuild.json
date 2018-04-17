@@ -6,8 +6,7 @@
       "continueOnError": true,
       "displayName": "run begin.sh",
       "timeoutInMinutes": 0,
-      "condition": "always()",
-      "refName": "TaskRunBegin",
+      "alwaysRun": true,
       "task": {
         "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
         "versionSpec": "0.*",
@@ -389,7 +388,6 @@
       "displayName": "run end.sh",
       "timeoutInMinutes": 0,
       "alwaysRun": true,
-      "refName": "TaskRunEnd",
       "task": {
         "id": "10f1f9a1-74b0-47ab-87bf-e3c9c68e8b0d",
         "versionSpec": "0.*",
