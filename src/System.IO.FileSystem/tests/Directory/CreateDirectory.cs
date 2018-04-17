@@ -38,7 +38,7 @@ namespace System.IO.Tests
         public void FileNameIsToString_FullPath()
         {
             string subdir = Path.GetRandomFileName();
-            string fullPath = Path.Join(TestDirectory, subdir);
+            string fullPath = Path.Combine(TestDirectory, subdir);
             DirectoryInfo info = Create(fullPath);
             if (PlatformDetection.IsFullFramework)
             {
