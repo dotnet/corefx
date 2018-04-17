@@ -19,7 +19,7 @@
         "args": "",
         "cwd": "",
         "failOnStandardError": "false",
-        "script": "if [ -f \"$AGENTTOOLSPATH/begin.sh\" ]; then $AGENTTOOLSPATH/begin.sh ; else echo \"$AGENTTOOLSPATH/begin.sh script does not exist. Moving on.\" ; fi"
+        "script": "if [ -f \"$AGENTTOOLSPATH/begin.sh\" ]; then echo \"$AGENTTOOLSPATH/begin.sh script found. Executing...\"; $AGENTTOOLSPATH/begin.sh ; else echo \"$AGENTTOOLSPATH/begin.sh script does not exist. Moving on.\" ; fi"
       }
     },
     {
@@ -283,7 +283,7 @@
         "args": "",
         "cwd": "",
         "failOnStandardError": "false",
-        "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
+        "script": "if [ -f \"$AGENTTOOLSPATH/end.sh\" ]; then echo \"$AGENTTOOLSPATH/end.sh script found. Executing...\"; $AGENTTOOLSPATH/end.sh ; else echo \"$AGENTTOOLSPATH/end.sh script does not exist. Moving on.\" ; fi"
       }
     }
   ],
