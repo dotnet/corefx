@@ -53,7 +53,7 @@ namespace System.Net.Security.Tests
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackNotSet_UsesLocalCertificateSelection(string hostName)
+        public void SslStream_ServerCallbackSet_UsesServerCallback(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
@@ -100,19 +100,19 @@ namespace System.Net.Security.Tests
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackSet_UsesServerCallback(string hostName)
+        public void SslStream_ServerCallbackNotSet_UsesLocalCertificateSelection(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
             int timesCallbackCalled = 0;
 
-            var selectionCallback = new LocalCertificateSelectionCallback((a, targetHost, c, d, e) =>
+            var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
             {
                 timesCallbackCalled++;
                 return serverCert;
             });
 
-            vvar validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
+            var validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
             {
                 Assert.Equal(serverCert, certificate);
                 return true; 
