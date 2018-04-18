@@ -162,12 +162,13 @@ namespace System.Net.Security
                 throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
             }
 
-            var authOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions, _certSelectionDelegate);
+            var authOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
 
             _userServerCertificateSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
             authOptions.ServerCertSelectionDelegate = _userServerCertificateSelectionCallback == null ? null : new ServerCertSelectionCallback(ServerCertSelectionCallbackWrapper);
 
             authOptions.CertValidationDelegate = _certValidationDelegate;
+            authOptions.CertSelectionDelegate = _certSelectionDelegate;
 
             return authOptions;
         }
