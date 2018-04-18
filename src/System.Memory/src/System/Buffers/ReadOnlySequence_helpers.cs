@@ -236,24 +236,21 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(in SequencePosition start, in SequencePosition end)
         {
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-
+            int startIndex = GetIndex(start);
+            int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-            if (type == SequenceType.MultiSegment && startObject != endObject)
+            if (startObject != endObject)
             {
                 Debug.Assert(startObject != null);
-                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
                 Debug.Assert(endObject != null);
-                Debug.Assert(endObject is ReadOnlySequenceSegment<T>);
 
-                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+                var endSegment = (ReadOnlySequenceSegment<T>)endObject;
                 // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
                 return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
             }
 
-            Debug.Assert(startObject == endObject);
             // Single segment length
             return endIndex - startIndex;
         }
