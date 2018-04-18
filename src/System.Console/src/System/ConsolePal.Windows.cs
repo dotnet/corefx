@@ -609,7 +609,7 @@ namespace System
             }
         }
 
-        public static string Title
+        public unsafe static string Title
         {
             get
             {
@@ -618,7 +618,12 @@ namespace System
 
                 do
                 {
-                    uint result = Interop.Kernel32.GetConsoleTitleW(ref builder.GetPinnableReference(), (uint)builder.Capacity);
+                    uint result = Interop.Errors.ERROR_SUCCESS;
+
+                    fixed (char* c = &builder.GetPinnableReference())
+                    {
+                        result = Interop.Kernel32.GetConsoleTitleW(c, (uint)builder.Capacity);
+                    }
 
                     // The documentation asserts that the console's title is stored in a shared 64KB buffer.
                     // The magic number that used to exist here (24500) is likely related to that.
