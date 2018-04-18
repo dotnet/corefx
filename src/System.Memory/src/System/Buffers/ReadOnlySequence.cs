@@ -188,15 +188,14 @@ namespace System.Buffers
                     startIndex += (int)start;
                     begin = new SequencePosition(startObject, startIndex);
 
-                    currentLength = startSegment.Memory.Length - startIndex;
-
-                    end = currentLength > length ?
-                        new SequencePosition(startObject, startIndex + (int)length) :
-                        SeekMultiSegment(startSegment.Next, endObject, endIndex, length - currentLength);
+                    end = GetEndPosition(startSegment, startObject, startIndex, endObject, endIndex, length);
                 }
                 else
                 {
-                    begin = SeekMultiSegment(startSegment.Next, endObject, endIndex, start - currentLength);
+                    if (currentLength < 0)
+                        ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
+                    begin = SeekMultiSegment(startSegment.Next, endObject, endIndex, start - currentLength, ExceptionArgument.start);
 
                     int beginIndex = GetIndex(begin);
                     object beginObject = begin.GetObject();
@@ -204,18 +203,12 @@ namespace System.Buffers
                     if (beginObject != endObject)
                     {
                         Debug.Assert(beginObject != null);
-                        var beginSegment = (ReadOnlySequenceSegment<T>)beginObject;
-
-                        currentLength = beginSegment.Memory.Length - beginIndex;
-
-                        end = currentLength > length ?
-                            new SequencePosition(beginObject, beginIndex + (int)length) :
-                            SeekMultiSegment(beginSegment.Next, endObject, endIndex, length - currentLength);
+                        end = GetEndPosition((ReadOnlySequenceSegment<T>)beginObject, beginObject, beginIndex, endObject, endIndex, length);
                     }
                     else
                     {
                         if (endIndex - beginIndex < length)
-                            ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+                            ThrowHelper.ThrowStartOrEndArgumentValidationException(0);  // Passing value >= 0 means throw exception on length argument
 
                         end = new SequencePosition(beginObject, beginIndex + (int)length);
                     }
@@ -224,70 +217,18 @@ namespace System.Buffers
             else
             {
                 if (endIndex - startIndex < start)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+                    ThrowHelper.ThrowStartOrEndArgumentValidationException(-1); // Passing value < 0 means throw exception on start argument
 
                 startIndex += (int)start;
                 begin = new SequencePosition(startObject, startIndex);
 
                 if (endIndex - startIndex < length)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+                    ThrowHelper.ThrowStartOrEndArgumentValidationException(0);  // Passing value >= 0 means throw exception on length argument
 
                 end = new SequencePosition(startObject, startIndex + (int)length);
             }
 
             return SliceImpl(begin, end);
-        }
-
-        private static bool InRange(uint value, uint start, uint end)
-        {
-            // _sequenceStart and _sequenceEnd must be well-formed
-            Debug.Assert(start <= int.MaxValue);
-            Debug.Assert(end <= int.MaxValue);
-            Debug.Assert(start <= end);
-
-            // The case, value > int.MaxValue, is invalid, and hence it shouldn't be in the range.
-            // If value > int.MaxValue, it is invariably greater than both 'start' and 'end'.
-            // In that case, the experession simplifies to value <= end, which will return false.
-
-            // The case, value < start, is invalid.
-            // In that case, (value - start) would underflow becoming larger than int.MaxValue.
-            // (end - start) can never underflow and hence must be within 0 and int.MaxValue. 
-            // So, we will correctly return false.
-
-            // The case, value > end, is invalid.
-            // In that case, the expression simplifies to value <= end, which will return false.
-            // This is because end > start & value > end implies value > start as well.
-
-            // In all other cases, value is valid, and we return true.
-
-            // Equivalent to: return (start <= value && value <= start)
-            return (value - start) <= (end - start);
-        }
-
-        private static bool InRange(ulong value, ulong start, ulong end)
-        {
-            // _sequenceStart and _sequenceEnd must be well-formed
-            Debug.Assert(start <= long.MaxValue);
-            Debug.Assert(end <= long.MaxValue);
-            Debug.Assert(start <= end);
-
-            // The case, value > long.MaxValue, is invalid, and hence it shouldn't be in the range.
-            // If value > long.MaxValue, it is invariably greater than both 'start' and 'end'.
-            // In that case, the experession simplifies to value <= end, which will return false.
-
-            // The case, value < start, is invalid.
-            // In that case, (value - start) would underflow becoming larger than long.MaxValue.
-            // (end - start) can never underflow and hence must be within 0 and long.MaxValue. 
-            // So, we will correctly return false.
-
-            // The case, value > end, is invalid.
-            // In that case, the expression simplifies to value <= end, which will return false.
-            // This is because end > start & value > end implies value > start as well.
-
-            // In all other cases, value is valid, and we return true.
-
-            // Equivalent to: return (start <= value && value <= start)
-            return (value - start) <= (end - start);
         }
 
         /// <summary>
@@ -318,7 +259,7 @@ namespace System.Buffers
                 }
 
                 if (sliceEndIndex - startIndex < start)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+                    ThrowHelper.ThrowStartOrEndArgumentValidationException(-1); // Passing value < 0 means throw exception on start argument
 
                 goto FoundInFirstSegment;
             }
@@ -348,15 +289,18 @@ namespace System.Buffers
             // Position in startSegment
             if (currentLength <= start)
             {
+                if (currentLength < 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
                 // End of segment. Move to start of next.
-                SequencePosition begin = SeekMultiSegment(startSegment.Next, sliceEndObject, (int)sliceEndIndex, start - currentLength);
-                return SliceImpl(begin, sliceEndObject, (int)sliceEndIndex);
+                SequencePosition begin = SeekMultiSegment(startSegment.Next, sliceEndObject, (int)sliceEndIndex, start - currentLength, ExceptionArgument.start);
+                return SliceImpl(begin, end);
             }
 
         FoundInFirstSegment:
             // startIndex + start <= int.MaxValue
             Debug.Assert(start <= int.MaxValue - startIndex);
-            return SliceImpl(startObject, (int)startIndex + (int)start, sliceEndObject, (int)sliceEndIndex);
+            return SliceImpl(new SequencePosition(startObject, (int)startIndex + (int)start), end);
         }
 
         /// <summary>
@@ -389,7 +333,7 @@ namespace System.Buffers
                     ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
                 if (endIndex - sliceStartIndex < length)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+                    ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
 
                 goto FoundInFirstSegment;
             }
@@ -421,15 +365,18 @@ namespace System.Buffers
             // Position in startSegment
             if (currentLength <= length)
             {
+                if (currentLength < 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
                 // End of segment. Move to start of next.
-                SequencePosition end = SeekMultiSegment(sliceStartSegment.Next, endObject, (int)endIndex, length - currentLength);
-                return SliceImpl(sliceStartObject, (int)sliceStartIndex, end);
+                SequencePosition end = SeekMultiSegment(sliceStartSegment.Next, endObject, (int)endIndex, length - currentLength, ExceptionArgument.length);
+                return SliceImpl(start, end);
             }
 
         FoundInFirstSegment:
             // sliceStartIndex + length <= int.MaxValue
             Debug.Assert(length <= int.MaxValue - sliceStartIndex);
-            return SliceImpl(sliceStartObject, (int)sliceStartIndex, sliceStartObject, (int)sliceStartIndex + (int)length);
+            return SliceImpl(start, new SequencePosition(sliceStartObject, (int)sliceStartIndex + (int)length));
         }
 
         /// <summary>
@@ -473,7 +420,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
             BoundsCheck(start);
-            return SliceImpl(start);
+            return SliceImpl(start, _sequenceEnd);
         }
 
         /// <summary>
@@ -488,8 +435,8 @@ namespace System.Buffers
             if (start == 0)
                 return this;
 
-            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start);
-            return SliceImpl(begin.GetObject(), begin.GetInteger());
+            SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start, ExceptionArgument.start);
+            return SliceImpl(begin, _sequenceEnd);
         }
 
         /// <inheritdoc />
@@ -544,7 +491,7 @@ namespace System.Buffers
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-            return Seek(origin, _sequenceEnd, offset);
+            return Seek(origin, _sequenceEnd, offset, ExceptionArgument.offset);
         }
 
         /// <summary>
@@ -562,114 +509,6 @@ namespace System.Buffers
 
             return result;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
-        {
-            // In this method we reset high order bits from indices
-            // of positions that were passed in
-            // and apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                start.GetObject(),
-                GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                end.GetObject(),
-                GetIndex(end) | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
-            );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, object endObject, int endInteger)
-        {
-            // In this method we apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                   start.GetObject(),
-                   GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                   endObject,
-                   endInteger | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
-               );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(object beginObject, int beginInteger, in SequencePosition end)
-        {
-            // In this method we apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                   beginObject,
-                   beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                   end.GetObject(),
-                   GetIndex(end) | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
-               );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(object beginObject, int beginInteger, object endObject, int endInteger)
-        {
-            // In this method we apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                   beginObject,
-                   beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                   endObject,
-                   endInteger | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
-               );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
-        {
-            // In this method we apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                   start.GetObject(),
-                   GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                   _sequenceEnd.GetObject(),
-                   _sequenceEnd.GetInteger()
-               );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(object beginObject, int beginInteger)
-        {
-            // In this method we apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                   beginObject,
-                   beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
-                   _sequenceEnd.GetObject(),
-                   _sequenceEnd.GetInteger()
-               );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SequenceType GetSequenceType()
-        {
-            // We take high order bits of two indexes and move them
-            // to a first and second position to convert to SequenceType
-
-            // if (start < 0  and end < 0)
-            // start >> 31 = -1, end >> 31 = -1
-            // 2 * (-1) + (-1) = -3, result = (SequenceType)3
-
-            // if (start < 0  and end >= 0)
-            // start >> 31 = -1, end >> 31 = 0
-            // 2 * (-1) + 0 = -2, result = (SequenceType)2
-
-            // if (start >= 0  and end >= 0)
-            // start >> 31 = 0, end >> 31 = 0
-            // 2 * 0 + 0 = 0, result = (SequenceType)0
-
-            // if (start >= 0  and end < 0)
-            // start >> 31 = 0, end >> 31 = -1
-            // 2 * 0 + (-1) = -1, result = (SequenceType)1
-
-            return (SequenceType)(-(2 * (_sequenceStart.GetInteger() >> 31) + (_sequenceEnd.GetInteger() >> 31)));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetIndex(in SequencePosition position) => position.GetInteger() & ReadOnlySequence.IndexBitMask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetTypeAndIndices(int start, int end, out SequenceType sequenceType, out int startIndex, out int endIndex)
