@@ -26,7 +26,7 @@ namespace System.Net.Security
             TargetHost = sslClientAuthenticationOptions.TargetHost;
 
             // Client specific options.
-            CertSelectionDelegate = localCallback;            
+            CertSelectionDelegate = localCallback;
             CertificateRevocationCheckMode = sslClientAuthenticationOptions.CertificateRevocationCheckMode;
             ClientCertificates = sslClientAuthenticationOptions.ClientCertificates;
             LocalCertificateSelectionCallback = sslClientAuthenticationOptions.LocalCertificateSelectionCallback;
