@@ -6,7 +6,7 @@ add_compile_options(-fvisibility=hidden)
 set(NATIVE_SOURCES
     pal_console.cpp
     pal_errno.c
-    pal_interfaceaddresses.cpp
+    pal_interfaceaddresses.c
     pal_io.c
     pal_maphardwaretype.c
     pal_memory.c
