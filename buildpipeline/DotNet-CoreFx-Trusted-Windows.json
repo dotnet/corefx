@@ -513,6 +513,10 @@
     "PB_PipelineBuildMSBuildArguments": {
       "value": "",
       "allowOverride": true
+    },
+    "AgentToolsPath": {
+      "value": "",
+      "allowOverride": true
     }
   },
   "demands": [

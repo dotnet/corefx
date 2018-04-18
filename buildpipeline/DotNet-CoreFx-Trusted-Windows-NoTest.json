@@ -434,6 +434,10 @@
     "PB_BuildArguments": {
       "value": "-buildArch=x64 -Release -- /p:SignType=test /p:RuntimeOS=win10",
       "allowOverride": true
+    },
+    "AgentToolsPath": {
+      "value": "",
+      "allowOverride": true
     }
   },
   "demands": [
