@@ -24,32 +24,24 @@ namespace Internal.Cryptography.Pal
 
         public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader)
         {
-            SafePkcs12Handle handle = Interop.Crypto.DecodePkcs12(data, data.Length);
+            Exception ignored;
+            return TryRead(data, out pkcs12Reader, out ignored, captureException: false);
+        }
 
-            if (!handle.IsInvalid)
-            {
-                pkcs12Reader = new OpenSslPkcs12Reader(handle);
-                return true;
-            }
-
-            handle.Dispose();
-            pkcs12Reader = null;
-            return false;
+        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException)
+        {
+            return TryRead(data, out pkcs12Reader, out openSslException, captureException: true);
         }
 
         public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader)
         {
-            SafePkcs12Handle p12 = Interop.Crypto.DecodePkcs12FromBio(fileBio);
+            Exception ignored;
+            return TryRead(fileBio, out pkcs12Reader, out ignored, captureException: false);
+        }
 
-            if (!p12.IsInvalid)
-            {
-                pkcs12Reader = new OpenSslPkcs12Reader(p12);
-                return true;
-            }
-
-            p12.Dispose();
-            pkcs12Reader = null;
-            return false;
+        public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException)
+        {
+            return TryRead(fileBio, out pkcs12Reader, out openSslException, captureException: true);
         }
 
         public void Dispose()
@@ -131,6 +123,57 @@ namespace Internal.Cryptography.Pal
             }
 
             return certs;
+        }
+
+        private static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException, bool captureException)
+        {
+            SafePkcs12Handle handle = Interop.Crypto.DecodePkcs12(data, data.Length);
+            openSslException = null;                
+
+            if (!handle.IsInvalid)
+            {
+                pkcs12Reader = new OpenSslPkcs12Reader(handle);
+                return true;
+            }
+
+            handle.Dispose();
+            pkcs12Reader = null;
+            if (captureException)
+            {
+                openSslException = Interop.Crypto.CreateOpenSslCryptographicException();
+            }
+            else
+            {
+                Interop.Crypto.ErrClearError();
+            }
+
+            return false;
+        }
+
+        private static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException, bool captureException)
+        {
+            SafePkcs12Handle p12 = Interop.Crypto.DecodePkcs12FromBio(fileBio);
+            openSslException = null;
+
+            if (!p12.IsInvalid)
+            {
+                pkcs12Reader = new OpenSslPkcs12Reader(p12);
+                openSslException = null;                
+                return true;
+            }
+
+            p12.Dispose();
+            pkcs12Reader = null;
+            if (captureException)
+            {
+                openSslException = Interop.Crypto.CreateOpenSslCryptographicException();
+            }
+            else
+            {
+                Interop.Crypto.ErrClearError();
+            }
+
+            return false;
         }
     }
 }
