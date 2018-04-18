@@ -221,6 +221,10 @@
     },
     "PB_SecurityBuild": {
       "value": "False"
+    },
+    "AgentToolsPath": {
+      "value": "",
+      "allowOverride": true
     }
   },
   "retentionRules": [
