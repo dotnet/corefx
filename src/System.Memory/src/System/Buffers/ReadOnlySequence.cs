@@ -461,14 +461,8 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start, SequencePosition end)
         {
-            uint startIndex = (uint)GetIndex(start);
-            uint endIndex = (uint)GetIndex(end);
-            object startObject = start.GetObject();
-            object endObject = end.GetObject();
-
-            BoundsCheck(startIndex, startObject, endIndex, endObject);
-
-            return SliceImpl(startObject, (int)startIndex, endObject, (int)endIndex);
+            BoundsCheck((uint)GetIndex(start), start.GetObject(), (uint)GetIndex(end), end.GetObject());
+            return SliceImpl(start, end);
         }
 
         /// <summary>
@@ -478,12 +472,8 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
-            uint startIndex = (uint)GetIndex(start);
-            object startObject = start.GetObject();
-
-            BoundsCheck(startIndex, startObject);
-
-            return SliceImpl(startObject, (int)startIndex);
+            BoundsCheck(start);
+            return SliceImpl(start);
         }
 
         /// <summary>
@@ -624,6 +614,19 @@ namespace System.Buffers
                    beginInteger | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
                    endObject,
                    endInteger | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
+               );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
+        {
+            // In this method we apply type bits specific for current ReadOnlySequence type
+
+            return new ReadOnlySequence<T>(
+                   start.GetObject(),
+                   GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                   _sequenceEnd.GetObject(),
+                   _sequenceEnd.GetInteger()
                );
         }
 

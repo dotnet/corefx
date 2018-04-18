@@ -213,8 +213,9 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
-        private void BoundsCheck(uint sliceStartIndex, object sliceStartObject)
+        private void BoundsCheck(in SequencePosition position)
         {
+            uint sliceStartIndex = (uint)GetIndex(position);
             uint startIndex = (uint)GetIndex(_sequenceStart);
             uint endIndex = (uint)GetIndex(_sequenceEnd);
 
@@ -235,7 +236,7 @@ namespace System.Buffers
                 // Storing this in a local since it is used twice within InRange()
                 ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex);
                 if (!InRange(
-                    (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex),
+                    (ulong)(((ReadOnlySequenceSegment<T>)position.GetObject()).RunningIndex + sliceStartIndex),
                     startRange,
                     (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
                 {
@@ -273,9 +274,11 @@ namespace System.Buffers
                 ulong sliceStartRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex);
                 ulong sliceEndRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex + sliceEndIndex);
 
-                if (sliceStartRange > sliceEndRange ||
-                    sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex) ||
-                    sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
+                if (sliceStartRange > sliceEndRange)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
+                if (sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex)
+                    || sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
                 {
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                 }
