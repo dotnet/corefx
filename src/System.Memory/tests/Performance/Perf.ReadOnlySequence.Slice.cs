@@ -24,14 +24,21 @@ namespace System.Buffers.Tests
             public Memory() : base(ReadOnlySequenceFactory<byte>.MemoryFactory) { }
         }
 
-        public class SingleSegment : Perf_ReadOnlySequence_Slice_Byte
+        // 001 in name for correcter order in log
+        public class Segments001 : Perf_ReadOnlySequence_Slice_Byte
         {
-            public SingleSegment() : base(ReadOnlySequenceFactory<byte>.SingleSegmentFactory) { }
+            public Segments001() : base(ReadOnlySequenceFactory<byte>.SingleSegmentFactory) { }
         }
 
-        public class TenSegments : Perf_ReadOnlySequence_Slice_Byte
+        // 010 in name for correcter order in log
+        public class Segments010 : Perf_ReadOnlySequence_Slice_Byte
         {
-            public TenSegments() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+            public Segments010() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+        }
+
+        public class Segments100 : Perf_ReadOnlySequence_Slice_Byte
+        {
+            public Segments100() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(100)) { }
         }
     }
 
@@ -61,21 +68,19 @@ namespace System.Buffers.Tests
         }
 
         // 010 in name for correcter order in log
-        public class Segments010 : Perf_ReadOnlySequence_Slice_Byte
+        public class Segments010 : Perf_ReadOnlySequence_Slice_Char
         {
-            public Segments010() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(10)) { }
+            public Segments010() : base(new ReadOnlySequenceFactory<char>.SegmentsTestSequenceFactory(10)) { }
         }
 
-        public class Segments100 : Perf_ReadOnlySequence_Slice_Byte
+        public class Segments100 : Perf_ReadOnlySequence_Slice_Char
         {
-            public Segments100() : base(new ReadOnlySequenceFactory<byte>.SegmentsTestSequenceFactory(100)) { }
+            public Segments100() : base(new ReadOnlySequenceFactory<char>.SegmentsTestSequenceFactory(100)) { }
         }
-
     }
 
     public abstract class Perf_ReadOnlySequence_Slice<T>
     {
-
         private const int InnerCount = 10_000;
         volatile static int _volatileInt = 0;
 
@@ -85,7 +90,6 @@ namespace System.Buffers.Tests
         {
             Factory = factory;
         }
-
         
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(10_000, 10)]
@@ -102,7 +106,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             ReadOnlySequence<T> sliced = buffer.Slice(positions[j]);
                             localInt ^= sliced.Start.GetInteger();
@@ -129,7 +133,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             (long start, long length) startLength = positions[j];
                             ReadOnlySequence<T> sliced = buffer.Slice(startLength.start, startLength.length);
@@ -156,7 +160,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             (long start, SequencePosition end) startEnd = positions[j];
                             ReadOnlySequence<T> sliced = buffer.Slice(startEnd.start, startEnd.end);
@@ -183,7 +187,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             ReadOnlySequence<T> sliced = buffer.Slice(positions[j]);
                             localInt ^= sliced.Start.GetInteger();
@@ -209,7 +213,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             (SequencePosition start, long length) startLength = positions[j];
                             ReadOnlySequence<T> sliced = buffer.Slice(startLength.start, startLength.length);
@@ -236,7 +240,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             (SequencePosition start, SequencePosition end) startEnd = positions[j];
                             ReadOnlySequence<T> sliced = buffer.Slice(startEnd.start, startEnd.end);
@@ -263,7 +267,7 @@ namespace System.Buffers.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        for(int j = indexLast; j >= 0; j--)
+                        for (int j = indexLast; j >= 0; j--)
                         {
                             (SequencePosition start, SequencePosition end) startEnd = positions[j];
                             localInt ^= startEnd.start.GetInteger();
@@ -282,7 +286,7 @@ namespace System.Buffers.Tests
             var result = new long[count];
 
             long length = buffer.Length;
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
                 result[i] = length * (i + 1) / (count + 1);
 
             return result;
@@ -293,7 +297,7 @@ namespace System.Buffers.Tests
             long[] positions = PreparePositionsOffset(buffer, count);
 
             var result = new SequencePosition[positions.Length];
-            for (var i = 0; i < positions.Length; i++)
+            for (int i = 0; i < positions.Length; i++)
                 result[i] = buffer.GetPosition(positions[i]);
 
             return result;
@@ -306,7 +310,7 @@ namespace System.Buffers.Tests
             long length = buffer.Length;
             long endStart = length / 2;
             long endLength = length - endStart;
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 result[i].offset = length * (i + 1) / (count + 1);
                 long endOffset = endLength * (i + 1) / count + endStart;
@@ -321,7 +325,7 @@ namespace System.Buffers.Tests
             (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
             var result = new (long offset, SequencePosition end)[positions.Length];
-            for (var i = 0; i < positions.Length; i++)
+            for (int i = 0; i < positions.Length; i++)
             {
                 result[i].offset = positions[i].offset;
                 result[i].end = buffer.GetPosition(positions[i].offset + positions[i].length);
@@ -335,7 +339,7 @@ namespace System.Buffers.Tests
             (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
             var result = new (SequencePosition start, long length)[positions.Length];
-            for (var i = 0; i < positions.Length; i++)
+            for (int i = 0; i < positions.Length; i++)
             {
                 result[i].start = buffer.GetPosition(positions[i].offset);
                 result[i].length = positions[i].length;
@@ -349,7 +353,7 @@ namespace System.Buffers.Tests
             (long offset, long length)[] positions = PreparePositionsOffsetLength(buffer, count);
 
             var result = new (SequencePosition start, SequencePosition end)[positions.Length];
-            for (var i = 0; i < positions.Length; i++)
+            for (int i = 0; i < positions.Length; i++)
             {
                 result[i].start = buffer.GetPosition(positions[i].offset);
                 result[i].end = buffer.GetPosition(positions[i].offset + positions[i].length);
