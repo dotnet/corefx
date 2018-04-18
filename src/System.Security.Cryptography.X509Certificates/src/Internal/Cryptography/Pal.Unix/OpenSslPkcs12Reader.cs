@@ -22,27 +22,17 @@ namespace Internal.Cryptography.Pal
             _pkcs12Handle = pkcs12Handle;
         }
 
-        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader)
-        {
-            Exception ignored;
-            return TryRead(data, out pkcs12Reader, out ignored, captureException: false);
-        }
+        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader) =>
+            TryRead(data, out pkcs12Reader, out _, captureException: false);
 
-        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException)
-        {
-            return TryRead(data, out pkcs12Reader, out openSslException, captureException: true);
-        }
+        public static bool TryRead(byte[] data, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException) =>
+            TryRead(data, out pkcs12Reader, out openSslException, captureException: true);
 
-        public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader)
-        {
-            Exception ignored;
-            return TryRead(fileBio, out pkcs12Reader, out ignored, captureException: false);
-        }
+        public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader) =>
+            TryRead(fileBio, out pkcs12Reader, out _, captureException: false);
 
-        public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException)
-        {
-            return TryRead(fileBio, out pkcs12Reader, out openSslException, captureException: true);
-        }
+        public static bool TryRead(SafeBioHandle fileBio, out OpenSslPkcs12Reader pkcs12Reader, out Exception openSslException) =>
+            TryRead(fileBio, out pkcs12Reader, out openSslException, captureException: true);
 
         public void Dispose()
         {
@@ -158,7 +148,6 @@ namespace Internal.Cryptography.Pal
             if (!p12.IsInvalid)
             {
                 pkcs12Reader = new OpenSslPkcs12Reader(p12);
-                openSslException = null;                
                 return true;
             }
 

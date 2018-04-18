@@ -52,9 +52,10 @@ namespace Internal.Cryptography.Pal
                 if (pkcs7.IsInvalid)
                 {
                     Interop.Crypto.ErrClearError();
+                    return false;
                 }
 
-                return !pkcs7.IsInvalid;
+                return true;
             }
         }
 
