@@ -237,9 +237,9 @@ namespace System.Buffers
             ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
         }
 
-        private void BoundsCheck(in SequencePosition start)
+        private void BoundsCheck(in SequencePosition position)
         {
-            uint sliceStartIndex = (uint)GetIndex(start);
+            uint sliceStartIndex = (uint)GetIndex(position);
             uint startIndex = (uint)GetIndex(_sequenceStart);
             uint endIndex = (uint)GetIndex(_sequenceEnd);
 
@@ -260,7 +260,7 @@ namespace System.Buffers
                 // Storing this in a local since it is used twice within InRange()
                 ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex);
                 if (!InRange(
-                    (ulong)(((ReadOnlySequenceSegment<T>)start.GetObject()).RunningIndex + sliceStartIndex),
+                    (ulong)(((ReadOnlySequenceSegment<T>)position.GetObject()).RunningIndex + sliceStartIndex),
                     startRange,
                     (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
                 {
@@ -280,12 +280,11 @@ namespace System.Buffers
             // Single-Segment Sequence
             if (startObject == endObject)
             {
-                if (sliceStartObject != sliceEndObject || sliceStartIndex > sliceEndIndex)
-                {
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-                }
-
-                if (sliceStartIndex < startIndex || sliceEndIndex > endIndex)
+                if (sliceStartObject != sliceEndObject ||
+                    sliceStartObject != startObject ||
+                    sliceStartIndex > sliceEndIndex ||
+                    sliceStartIndex < startIndex ||
+                    sliceEndIndex > endIndex)
                 {
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                 }
@@ -311,24 +310,19 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private long GetLength(in SequencePosition start, in SequencePosition end)
+        private long GetLength()
         {
-            int startIndex = GetIndex(start);
-            int endIndex = GetIndex(end);
-            object startObject = start.GetObject();
-            object endObject = end.GetObject();
-
-            if (startObject == null || endObject == null)
-            {
-                return 0;
-            }
+            int startIndex = GetIndex(_sequenceStart);
+            int endIndex = GetIndex(_sequenceEnd);
+            object startObject = _sequenceStart.GetObject();
+            object endObject = _sequenceEnd.GetObject();
 
             if (startObject != endObject)
             {
                 var startSegment = (ReadOnlySequenceSegment<T>)startObject;
                 var endSegment = (ReadOnlySequenceSegment<T>)endObject;
-                // (end.RunningIndex + endIndex) - (start.RunningIndex + startIndex) // (End offset) - (start offset)
-                return endSegment.RunningIndex - startSegment.RunningIndex - startIndex + endIndex; // Rearranged to avoid overflow
+                // (End offset) - (start offset)
+                return (endSegment.RunningIndex + endIndex) - (startSegment.RunningIndex + startIndex);
             }
 
             // Single segment length

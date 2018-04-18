@@ -33,7 +33,7 @@ namespace System.Buffers
         /// <summary>
         /// Length of the <see cref="ReadOnlySequence{T}"/>.
         /// </summary>
-        public long Length => GetLength(_sequenceStart, _sequenceEnd);
+        public long Length => GetLength();
 
         /// <summary>
         /// Determines if the <see cref="ReadOnlySequence{T}"/> is empty.
@@ -217,9 +217,6 @@ namespace System.Buffers
                         if (endIndex - beginIndex < length)
                             ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-                        // beginIndex + offset <= int.MaxValue
-                        Debug.Assert(length <= int.MaxValue - beginIndex);
-
                         end = new SequencePosition(beginObject, beginIndex + (int)length);
                     }
                 }
@@ -229,17 +226,11 @@ namespace System.Buffers
                 if (endIndex - startIndex < start)
                     ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-                // startIndex + offset <= int.MaxValue
-                Debug.Assert(start <= int.MaxValue - startIndex);
-
                 startIndex += (int)start;
                 begin = new SequencePosition(startObject, startIndex);
 
                 if (endIndex - startIndex < length)
                     ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
-
-                // beginIndex + offset <= int.MaxValue
-                Debug.Assert(length <= int.MaxValue - startIndex);
 
                 end = new SequencePosition(startObject, startIndex + (int)length);
             }
@@ -418,12 +409,12 @@ namespace System.Buffers
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                 }
 
-                if (endIndex - sliceStartIndex < length)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
-
                 if (length < 0)
                     // Passing value >= 0 means throw exception on length argument
                     ThrowHelper.ThrowStartOrEndArgumentValidationException(0);
+
+                if (endIndex - sliceStartIndex < length)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
                 goto FoundInFirstSegment;
             }
@@ -633,9 +624,9 @@ namespace System.Buffers
 
             return new ReadOnlySequence<T>(
                 start.GetObject(),
-                start.GetInteger() & ReadOnlySequence.IndexBitMask | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
                 end.GetObject(),
-                end.GetInteger() & ReadOnlySequence.IndexBitMask | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
+                GetIndex(end) | (_sequenceEnd.GetInteger() & ReadOnlySequence.FlagBitMask)
             );
         }
 
@@ -659,7 +650,7 @@ namespace System.Buffers
 
             return new ReadOnlySequence<T>(
                    start.GetObject(),
-                   start.GetInteger() & ReadOnlySequence.IndexBitMask | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
+                   GetIndex(start) | (_sequenceStart.GetInteger() & ReadOnlySequence.FlagBitMask),
                    _sequenceEnd.GetObject(),
                    _sequenceEnd.GetInteger()
                );
