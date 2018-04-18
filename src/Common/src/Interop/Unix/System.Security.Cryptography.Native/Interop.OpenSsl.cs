@@ -26,6 +26,21 @@ internal static partial class Interop
         private unsafe static readonly Ssl.SslCtxSetAlpnCallback s_alpnServerCallback = AlpnServerSelectCallback;
         private static readonly IdnMapping s_idnMapping = new IdnMapping();
 
+        static OpenSsl()
+        {
+            if (!AppContext.TryGetSwitch("System.Net.Security.SslStream.ForceOpenSslErrorQueueCleanupBeforeEncryptDecrypt", out bool forceErrorQueueCleanup))
+            {
+                // AppContext wasn't used, try the environment variable.
+                string envVar = Environment.GetEnvironmentVariable("DOTNET_FORCE_OPENSSL_ERROR_QUEUE_CLEANUP_BEFORE_ENCRYPT_DECRYPT");
+                forceErrorQueueCleanup = envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1"));
+            }
+
+            if (forceErrorQueueCleanup)
+            {
+                Ssl.ForceOpenSslErrorQueueCleanupBeforeWriteRead();
+            }
+        }
+
         #region internal methods
         internal static SafeChannelBindingHandle QueryChannelBinding(SafeSslHandle context, ChannelBindingKind bindingType)
         {
