@@ -155,15 +155,14 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal SequencePosition Seek(in SequencePosition start, in SequencePosition end, long offset)
         {
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-
+            int startIndex = GetIndex(start);
+            int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-
-            if (type == SequenceType.MultiSegment && startObject != endObject)
+            if (startObject != endObject)
             {
-                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
-                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
+                Debug.Assert(startObject != null);
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
 
                 int currentLength = startSegment.Memory.Length - startIndex;
 
@@ -175,8 +174,6 @@ namespace System.Buffers
                 return SeekMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength);
             }
 
-            Debug.Assert(startObject == endObject);
-
             if (endIndex - startIndex < offset)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
@@ -186,9 +183,8 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static SequencePosition SeekMultiSegment(ReadOnlySequenceSegment<T> currentSegment, object endObject, int endPosition, long offset)
+        private static SequencePosition SeekMultiSegment(ReadOnlySequenceSegment<T> currentSegment, object endObject, int endIndex, long offset)
         {
-            Debug.Assert(currentSegment != null);
             Debug.Assert(offset >= 0);
 
             while (currentSegment != null && currentSegment != endObject)
@@ -205,7 +201,7 @@ namespace System.Buffers
             }
 
             // Hit the end of the segments but didn't reach the count
-            if (currentSegment == null || (currentSegment == endObject && endPosition < offset))
+            if (currentSegment == null || endIndex < offset)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
         FoundSegment:
