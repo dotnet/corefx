@@ -616,7 +616,7 @@ namespace System
                 Span<char> initialBuffer = stackalloc char[256];
                 ValueStringBuilder builder = new ValueStringBuilder(initialBuffer);
 
-                do
+                while (true)
                 {
                     uint result = Interop.Errors.ERROR_SUCCESS;
 
@@ -638,9 +638,10 @@ namespace System
                             case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
                                 // Typically this API truncates but there was a bug in RS2 so we'll make an attempt to handle
                                 builder.EnsureCapacity(builder.Capacity * 2);
-                                break;
+                                continue;
                             case Interop.Errors.ERROR_SUCCESS:
-                                return string.Empty;
+                                // The title is empty.
+                                break;
                             default:
                                 throw Win32Marshal.GetExceptionForWin32Error(error, string.Empty);
                         }
@@ -654,13 +655,14 @@ namespace System
                         // (If we're Windows 10 with a version lie to 7 this will be inefficient so we'll want to remove
                         //  this workaround when we no longer support Windows 7)
                         builder.EnsureCapacity(builder.Capacity * 2);
+                        continue;
                     }
-                    else
-                    {
-                        builder.Length = (int)result;
-                        return builder.ToString();
-                    }
-                } while (true);
+
+                    builder.Length = (int)result;
+                    break;
+                }
+
+                return builder.ToString();
             }
             set
             {
