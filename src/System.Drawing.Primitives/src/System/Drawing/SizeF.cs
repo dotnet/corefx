@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -197,7 +196,7 @@ namespace System.Drawing
 
         public bool Equals(SizeF other) => this == other;
 
-        public override int GetHashCode() => HashHelpers.Combine(Width.GetHashCode(), Height.GetHashCode());
+        public override int GetHashCode() => HashCode.Combine(Width, Height);
 
         public PointF ToPointF() => (PointF)this;
 

@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -648,8 +647,7 @@ namespace System.Drawing
             if (name != null & !IsKnownColor)
                 return name.GetHashCode();
 
-            return HashHelpers.Combine(
-                HashHelpers.Combine(value.GetHashCode(), state.GetHashCode()), knownColor.GetHashCode());
+            return HashCode.Combine(value, state, knownColor);
         }
     }
 }

@@ -10,8 +10,8 @@
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
+using System;
 using System.Globalization;
-using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -507,24 +507,17 @@ namespace System.Numerics
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            int hash = 0;
-
             if (Vector.IsHardwareAccelerated)
             {
-<#    foreach (Type type in supportedTypes)
-    {
-#>
-                <#=GenerateIfStatementHeader(type)#>
+                <#=GenerateIfConditionAllTypes(supportedTypes)#>
                 {
+					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash = HashHelpers.Combine(hash, ((<#=type.Name#>)(object)this[g]).GetHashCode());
+                        hash.Add(this[g]);
                     }
-                    return hash;
+                    return hash.ToHashCode();
                 }
-<#
-        }
-#>
                 else
                 {
                     throw new NotSupportedException(SR.Arg_TypeNotSupported);
@@ -534,18 +527,27 @@ namespace System.Numerics
             {
 <#    foreach (Type type in supportedTypes)
     {
+        int numFields = GetNumFields(type, totalSize);
 #>
                 <#=GenerateIfStatementHeader(type)#>
                 {
-<#
-            for (int g = 0; g < GetNumFields(type, totalSize); g++)
-            {
+<#					if (numFields <= MaximumCombineFields) 
+                    {
 #>
-                    hash = HashHelpers.Combine(hash, this.<#=GetRegisterFieldName(type, g)#>.GetHashCode());
+                    return <#=GenerateFastCombine(type, numFields)#>;
+<#					} else { 
+#>
+                    var hash = new HashCode();
+<#					for (int g = 0; g < GetNumFields(type, totalSize); g++)
+                    {
+#>
+                    hash.Add(this.<#=GetRegisterFieldName(type, g)#>);
 <#
-            }
+                    }
 #>
                     return hash;
+<#					}
+#>
                 }
 <#
         }

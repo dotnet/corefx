@@ -27,14 +27,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(IsTargetingNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
+    <DefineConstants>$(DefineConstants);HASHCODE_INTERNAL</DefineConstants>
+  </PropertyGroup>
   <!-- Shared -->
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
-      <Link>Common\System\Numerics\Hashing\HashHelpers.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Runtime\CompilerServices\IntrinsicAttribute.cs">
       <Link>System\Runtime\CompilerServices\IntrinsicAttribute.cs</Link>
     </Compile>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
   <!-- On .NET Core, Vector<T> is in System.Private.CoreLib -->
   <ItemGroup Condition="'$(IsTargetingNetCoreApp)' != 'true'">
@@ -60,10 +61,13 @@
       <Link>System\Numerics\Vector_Operations.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Carry a copy of MathF where not available -->
+  <!-- Carry a copy of MathF and HashCode where not available -->
   <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
     <Compile Include="$(CommonPath)\System\MathF.netstandard.cs">
       <Link>System\MathF.netstandard.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\CoreLib\System\HashCode.cs">
+      <Link>System\HashCode.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Portable version only -->

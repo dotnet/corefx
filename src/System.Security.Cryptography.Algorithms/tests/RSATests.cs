@@ -192,6 +192,29 @@ namespace System.Security.Cryptography.Algorithms.Tests
             Assert.True(rsa.VerifyData(new MemoryStream(new byte[] { 42 }), new byte[1] { 24 }, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
         }
 
+        [Fact]
+        public void RSAEncryptionPadding_Equality()
+        {
+            var paddingType = typeof(RSAEncryptionPadding);
+
+            var padding0 = RSAEncryptionPadding.Pkcs1;
+            var padding1 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.MD5);
+            var padding2 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.SHA1);
+            var padding3 = RSAEncryptionPadding.CreateOaep(HashAlgorithmName.SHA1);
+
+            Assert.Equal(padding0.GetHashCode(), padding0.GetHashCode());
+            Assert.Equal(padding2.GetHashCode(), padding3.GetHashCode());
+
+            // Don't check for NotEqual(HashCode) as this could randomly fail depending
+            // on the randomly selected seed for HashCode.
+            
+            Assert.Equal(padding0, padding0);
+            Assert.Equal(padding2, padding3);
+            Assert.NotEqual(padding0, padding1);
+            Assert.NotEqual(padding1, padding2);
+            Assert.NotEqual(padding0, padding2);
+        }
+
         private sealed class EmptyRSA : RSA
         {
             public override RSAParameters ExportParameters(bool includePrivateParameters) => throw new NotImplementedException();

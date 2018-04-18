@@ -966,11 +966,16 @@ namespace System.Numerics
             AssertValid();
 
             if (_bits == null)
-                return _sign;
-            int hash = _sign;
+            {
+                // Diffuse bits for collections that depend on this.
+                return HashCode.Combine(_sign);
+            }
+            
+            var hashCode = new HashCode();
+            hashCode.Add(_sign);
             for (int iv = _bits.Length; --iv >= 0;)
-                hash = NumericsHelpers.CombineHash(hash, unchecked((int)_bits[iv]));
-            return hash;
+                hashCode.Add(_bits[iv]);
+            return hashCode.ToHashCode();
         }
 
         public override bool Equals(object obj)

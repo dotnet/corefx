@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -231,7 +230,7 @@ namespace System.Drawing
         ///       Returns a hash code.
         ///    </para>
         /// </summary>
-        public override int GetHashCode() => HashHelpers.Combine(Width, Height);
+        public override int GetHashCode() => HashCode.Combine(Width, Height);
 
         /// <summary>
         ///    <para>

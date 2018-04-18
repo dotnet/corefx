@@ -30,9 +30,6 @@
     <Compile Include="System\Runtime\CompilerServices\TupleElementNamesAttribute.cs" />
     <Compile Include="System\ValueTuple\TupleExtensions.cs" />
     <Compile Include="System\ValueTuple\ValueTuple.cs" />
-    <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
-      <Link>Common\System\Numerics\Hashing\HashHelpers.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetGroup)' != 'portable_net40+sl4+win8+wp8'">
     <!-- The portable_net40+sl4+win8+wp8 PCL profile does not have AllowPartiallyTrustedCallersAttribute -->

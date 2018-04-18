@@ -5,8 +5,8 @@
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
+using System;
 using System.Globalization;
-using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -1336,89 +1336,25 @@ namespace System.Numerics
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            int hash = 0;
-
             if (Vector.IsHardwareAccelerated)
             {
-                if (typeof(T) == typeof(Byte))
+                if ((typeof(T) == typeof(Byte))
+                || (typeof(T) == typeof(SByte))
+                || (typeof(T) == typeof(UInt16))
+                || (typeof(T) == typeof(Int16))
+                || (typeof(T) == typeof(UInt32))
+                || (typeof(T) == typeof(Int32))
+                || (typeof(T) == typeof(UInt64))
+                || (typeof(T) == typeof(Int64))
+                || (typeof(T) == typeof(Single))
+                || (typeof(T) == typeof(Double)))
                 {
+					var hash = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash = HashHelpers.Combine(hash, ((Byte)(object)this[g]).GetHashCode());
+                        hash.Add(this[g]);
                     }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(SByte))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((SByte)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(UInt16))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((UInt16)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(Int16))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((Int16)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(UInt32))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((UInt32)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(Int32))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((Int32)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(UInt64))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((UInt64)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(Int64))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((Int64)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(Single))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((Single)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
-                }
-                else if (typeof(T) == typeof(Double))
-                {
-                    for (int g = 0; g < Count; g++)
-                    {
-                        hash = HashHelpers.Combine(hash, ((Double)(object)this[g]).GetHashCode());
-                    }
-                    return hash;
+                    return hash.ToHashCode();
                 }
                 else
                 {
@@ -1429,109 +1365,77 @@ namespace System.Numerics
             {
                 if (typeof(T) == typeof(Byte))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.byte_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_3.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_4.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_5.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_6.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_7.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_8.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_9.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_10.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_11.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_12.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_13.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_14.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.byte_15.GetHashCode());
+                    var hash = new HashCode();
+                    hash.Add(this.register.byte_0);
+                    hash.Add(this.register.byte_1);
+                    hash.Add(this.register.byte_2);
+                    hash.Add(this.register.byte_3);
+                    hash.Add(this.register.byte_4);
+                    hash.Add(this.register.byte_5);
+                    hash.Add(this.register.byte_6);
+                    hash.Add(this.register.byte_7);
+                    hash.Add(this.register.byte_8);
+                    hash.Add(this.register.byte_9);
+                    hash.Add(this.register.byte_10);
+                    hash.Add(this.register.byte_11);
+                    hash.Add(this.register.byte_12);
+                    hash.Add(this.register.byte_13);
+                    hash.Add(this.register.byte_14);
+                    hash.Add(this.register.byte_15);
                     return hash;
                 }
                 else if (typeof(T) == typeof(SByte))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_3.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_4.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_5.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_6.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_7.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_8.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_9.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_10.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_11.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_12.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_13.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_14.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.sbyte_15.GetHashCode());
+                    var hash = new HashCode();
+                    hash.Add(this.register.sbyte_0);
+                    hash.Add(this.register.sbyte_1);
+                    hash.Add(this.register.sbyte_2);
+                    hash.Add(this.register.sbyte_3);
+                    hash.Add(this.register.sbyte_4);
+                    hash.Add(this.register.sbyte_5);
+                    hash.Add(this.register.sbyte_6);
+                    hash.Add(this.register.sbyte_7);
+                    hash.Add(this.register.sbyte_8);
+                    hash.Add(this.register.sbyte_9);
+                    hash.Add(this.register.sbyte_10);
+                    hash.Add(this.register.sbyte_11);
+                    hash.Add(this.register.sbyte_12);
+                    hash.Add(this.register.sbyte_13);
+                    hash.Add(this.register.sbyte_14);
+                    hash.Add(this.register.sbyte_15);
                     return hash;
                 }
                 else if (typeof(T) == typeof(UInt16))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.uint16_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_3.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_4.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_5.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_6.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint16_7.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.uint16_0, this.register.uint16_1, this.register.uint16_2, this.register.uint16_3, this.register.uint16_4, this.register.uint16_5, this.register.uint16_6, this.register.uint16_7);
                 }
                 else if (typeof(T) == typeof(Int16))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.int16_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_3.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_4.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_5.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_6.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int16_7.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.int16_0, this.register.int16_1, this.register.int16_2, this.register.int16_3, this.register.int16_4, this.register.int16_5, this.register.int16_6, this.register.int16_7);
                 }
                 else if (typeof(T) == typeof(UInt32))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.uint32_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint32_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint32_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint32_3.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.uint32_0, this.register.uint32_1, this.register.uint32_2, this.register.uint32_3);
                 }
                 else if (typeof(T) == typeof(Int32))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.int32_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int32_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int32_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int32_3.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.int32_0, this.register.int32_1, this.register.int32_2, this.register.int32_3);
                 }
                 else if (typeof(T) == typeof(UInt64))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.uint64_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.uint64_1.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.uint64_0, this.register.uint64_1);
                 }
                 else if (typeof(T) == typeof(Int64))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.int64_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.int64_1.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.int64_0, this.register.int64_1);
                 }
                 else if (typeof(T) == typeof(Single))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.single_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.single_1.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.single_2.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.single_3.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.single_0, this.register.single_1, this.register.single_2, this.register.single_3);
                 }
                 else if (typeof(T) == typeof(Double))
                 {
-                    hash = HashHelpers.Combine(hash, this.register.double_0.GetHashCode());
-                    hash = HashHelpers.Combine(hash, this.register.double_1.GetHashCode());
-                    return hash;
+                    return HashCode.Combine(this.register.double_0, this.register.double_1);
                 }
                 else
                 {

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
-using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -43,13 +42,7 @@ namespace System.Numerics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
-        {
-            int hash = this.X.GetHashCode();
-            hash = HashHelpers.Combine(hash, this.Y.GetHashCode());
-            hash = HashHelpers.Combine(hash, this.Z.GetHashCode());
-            return hash;
-        }
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this Vector3 instance.
