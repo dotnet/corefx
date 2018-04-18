@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Text;
 using Xunit;
 
@@ -10,14 +9,6 @@ namespace System.Net.Mime.Tests
 {
     public class EncodedStreamFactoryTests
     {
-        [Fact]
-        public void EncodedStreamFactory_WhenAskedForEncodedStream_WithUnknown_ShouldThrow()
-        {
-            var esf = new EncodedStreamFactory();
-            var stream = new MemoryStream();
-            Assert.Throws<NotSupportedException>(() => esf.GetEncoder(TransferEncoding.Unknown, stream));
-        }
-
         [Fact]
         public void EncodedStreamFactory_WhenAskedForEncodedStreamForHeader_WithBase64_ShouldReturnBase64Stream()
         {
