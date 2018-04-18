@@ -164,9 +164,6 @@ namespace System.Buffers
             if (endIndex - startIndex < offset)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-            // startIndex + offset <= int.MaxValue
-            Debug.Assert(offset <= int.MaxValue - startIndex);
-
         // Single segment Seek
         IsSingleSegment:
             return new SequencePosition(startObject, startIndex + (int)offset);
@@ -199,47 +196,8 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
-        private void CheckEndReachable(ReadOnlySequenceSegment<T> current)
+        private void BoundsCheck(uint sliceStartIndex, object sliceStartObject)
         {
-            object endSegment = _sequenceEnd.GetObject();
-            Debug.Assert(endSegment != null);
-            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
-
-            while (current != null)
-            {
-                if (current == endSegment)
-                {
-                    // Found end
-                    return;
-                }
-                current = current.Next;
-            }
-
-            ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-        }
-
-        private void CheckEndReachable(ReadOnlySequenceSegment<T> current, object endSegment)
-        {
-            Debug.Assert(endSegment != null);
-            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
-
-            while (current != null)
-            {
-                if (current == endSegment)
-                {
-                    // Found end
-                    return;
-                }
-                current = current.Next;
-            }
-
-            // Unlike the other CheckEndReachable overload, endSegment is provided by the user, and hence the exception is different
-            ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
-        }
-
-        private void BoundsCheck(in SequencePosition position)
-        {
-            uint sliceStartIndex = (uint)GetIndex(position);
             uint startIndex = (uint)GetIndex(_sequenceStart);
             uint endIndex = (uint)GetIndex(_sequenceEnd);
 
@@ -260,7 +218,7 @@ namespace System.Buffers
                 // Storing this in a local since it is used twice within InRange()
                 ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex);
                 if (!InRange(
-                    (ulong)(((ReadOnlySequenceSegment<T>)position.GetObject()).RunningIndex + sliceStartIndex),
+                    (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex),
                     startRange,
                     (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex)))
                 {
@@ -298,11 +256,9 @@ namespace System.Buffers
                 ulong sliceStartRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex + sliceStartIndex);
                 ulong sliceEndRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex + sliceEndIndex);
 
-                if (sliceStartRange > sliceEndRange)
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
-
-                if (sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex)
-                    || sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
+                if (sliceStartRange > sliceEndRange ||
+                    sliceStartRange < (ulong)(((ReadOnlySequenceSegment<T>)startObject).RunningIndex + startIndex) ||
+                    sliceEndRange > (ulong)(((ReadOnlySequenceSegment<T>)endObject).RunningIndex + endIndex))
                 {
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
                 }
