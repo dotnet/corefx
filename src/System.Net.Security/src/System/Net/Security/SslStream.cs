@@ -157,7 +157,7 @@ namespace System.Net.Security
                 throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null  && _certSelectionDelegate == null)
+            if (sslServerAuthenticationOptions.ServerCertificate != null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null)
             {
                 throw new InvalidOperationException(SR.Format(SR.net_conflicting_options, nameof(ServerCertificateSelectionCallback)));
             }

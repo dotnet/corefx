@@ -53,7 +53,7 @@ namespace System.Net.Security.Tests
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackSet_UsesServerCallback(string hostName)
+        public void SslStream_ServerCallbackAndLocalCertificateSelectionSet_Throws(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
@@ -61,7 +61,7 @@ namespace System.Net.Security.Tests
 
             var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
             {
-                Assert.True(false, "LocalCertificateSelectionCallback called instead of RemoteCertificateValidationCallback.");
+                Assert.True(false, "LocalCertificateSelectionCallback called when AuthenticateAsServerAsync was expected to fail.");
                 return null;
             });
 
@@ -79,6 +79,7 @@ namespace System.Net.Security.Tests
             {
                 Task clientJob = Task.Run(() => {
                     client.AuthenticateAsClient(hostName);
+                    Assert.True(false, "RemoteCertificateValidationCallback called when AuthenticateAsServerAsync was expected to fail.");
                 });
 
                 SslServerAuthenticationOptions options = DefaultServerOptions();
@@ -91,10 +92,9 @@ namespace System.Net.Security.Tests
                 };
 
                 var cts = new CancellationTokenSource();
-                server.AuthenticateAsServerAsync(options, cts.Token).Wait();
+                Assert.Throws<InvalidOperationException>(() => {server.AuthenticateAsServerAsync(options, cts.Token).Wait();});
 
-                Assert.Equal(1, timesCallbackCalled);
-                clientJob.Wait();
+                Assert.Equal(0, timesCallbackCalled);
             }
         }
 
@@ -108,6 +108,8 @@ namespace System.Net.Security.Tests
 
             var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
             {
+                Assert.Equal(targetHost, string.Empty);
+                Assert.True(localCertificates.Contains(serverCert));
                 timesCallbackCalled++;
                 return serverCert;
             });
@@ -115,7 +117,7 @@ namespace System.Net.Security.Tests
             var validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
             {
                 Assert.Equal(serverCert, certificate);
-                return true; 
+                return true;
             });
 
             VirtualNetwork vn = new VirtualNetwork();
@@ -136,6 +138,43 @@ namespace System.Net.Security.Tests
 
                 Assert.Equal(1, timesCallbackCalled);
                 clientJob.Wait();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(HostNameData))]
+        public void SslStream_ServerCallbackReturnsNull_Throws(string hostName)
+        {
+            X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
+
+            var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
+            {
+                return null;
+            });
+
+            var validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
+            {
+                Assert.True(false, "RemoteCertificateValidationCallback called when AuthenticateAsServerAsync was expected to fail.");
+                return true; 
+            });
+
+            VirtualNetwork vn = new VirtualNetwork();
+            using (VirtualNetworkStream serverStream = new VirtualNetworkStream(vn, isServer: true),
+                                        clientStream = new VirtualNetworkStream(vn, isServer: false))
+            using (SslStream server = new SslStream(serverStream, false, null, selectionCallback),
+                             client = new SslStream(clientStream, leaveInnerStreamOpen: false, validationCallback))
+            {
+                Task clientJob = Task.Run(() => {
+                    client.AuthenticateAsClient(hostName);
+                });
+
+                SslServerAuthenticationOptions options = DefaultServerOptions();
+                options.ServerCertificate = serverCert;
+
+                var cts = new CancellationTokenSource();
+                Assert.Throws<NotSupportedException>(WithAggregateExceptionUnwrapping(() =>
+                    server.AuthenticateAsServerAsync(options, cts.Token).Wait()
+                ));
             }
         }
 

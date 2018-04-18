@@ -632,6 +632,10 @@ namespace System.Net.Security
             X509Certificate localCertificate = null;
             bool cachedCred = false;
 
+            // There are three options for selecting the server certificate. When 
+            // selecting which to use, we prioritize the new ServerCertSelectionDelegate
+            // API. If the new API isn't used we call LocalCertSelectionCallback, and if 
+            // neither is set we fall back to using ServerCertificate.
             if (_sslAuthenticationOptions.ServerCertSelectionDelegate != null)
             {
                 string serverIdentity = SniHelper.GetServerName(clientHello);
@@ -642,7 +646,6 @@ namespace System.Net.Security
                     throw new AuthenticationException(SR.net_ssl_io_no_server_cert);
                 }
             }
-            // This probably never gets called as this is a client options delegate
             else if (_sslAuthenticationOptions.CertSelectionDelegate != null)
             {
                 X509CertificateCollection tempCollection = new X509CertificateCollection();
