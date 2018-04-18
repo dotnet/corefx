@@ -147,9 +147,8 @@ namespace System.Text.RegularExpressions.Tests
                     .GetValue(linkedList);
             }
 
-            string cacheFieldName = PlatformDetection.IsFullFramework ? "cacheSize" : "s_cacheCount";
             return (int)typeof(Regex)
-                .GetField(cacheFieldName, BindingFlags.NonPublic | BindingFlags.Static)
+                .GetField("s_cacheCount", BindingFlags.NonPublic | BindingFlags.Static)
                 .GetValue(null);
         }
     }

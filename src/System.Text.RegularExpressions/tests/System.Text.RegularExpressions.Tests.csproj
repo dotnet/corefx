@@ -37,6 +37,9 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\RegexTests.rd.xml" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="CaptureCollectionTests2.cs" />
     <Compile Include="GroupCollectionTests2.cs" />
