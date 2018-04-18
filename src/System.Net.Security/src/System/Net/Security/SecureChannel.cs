@@ -635,7 +635,9 @@ namespace System.Net.Security
             // There are three options for selecting the server certificate. When 
             // selecting which to use, we prioritize the new ServerCertSelectionDelegate
             // API. If the new API isn't used we call LocalCertSelectionCallback, and if 
-            // neither is set we fall back to using ServerCertificate.
+            // neither is set we fall back to using ServerCertificate. When choosing
+            // from multiple certificates ServerCertSelectionDelegate is the preferred
+            // API. LocalCertSelectionCallback is maintained only for compat reasons.
             if (_sslAuthenticationOptions.ServerCertSelectionDelegate != null)
             {
                 string serverIdentity = SniHelper.GetServerName(clientHello);
