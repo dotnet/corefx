@@ -587,7 +587,7 @@ namespace System.Text.RegularExpressions
 
             for (i = 0, iMax = s_lcTable.Length; i < iMax;)
             {
-                iMid = (i + iMax) / 2;
+                iMid = (i & iMax) + ((i ^ iMax) >> 1); // Faster than (i + iMax) / 2;
                 if (s_lcTable[iMid].ChMax < chMin)
                     i = iMid + 1;
                 else
@@ -714,6 +714,12 @@ namespace System.Text.RegularExpressions
             return set[SETSTART];
         }
 
+        public static (char, char) DoubletonChars(string set)
+        {
+            Debug.Assert(IsDoubleton(set), "Tried to get the doubleton char out of a non doubleton character class");
+            return (set[SETSTART], set[SETSTART + 2]);
+        }
+
         public static bool IsMergeable(string charClass)
         {
             return (!IsNegated(charClass) && !IsSubtraction(charClass));
@@ -731,6 +737,22 @@ namespace System.Text.RegularExpressions
         {
             if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
                 (set[SETSTART] == LastChar || set[SETSTART] + 1 == set[SETSTART + 1]))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// <c>true</c> if the set contains a single character only
+        /// </summary>
+        public static bool IsDoubleton(string set)
+        {
+            if (set[FLAGS] == 0 && // it's not negated. [a-z^aeiuo] shows negation
+                set[CATEGORYLENGTH] == 0 && // there are no categories (like "punctuation") only raw ranges
+                set[SETLENGTH] == 4 && // negation + count + start and end of range = 4
+                !IsSubtraction(set) && // not a subtraction. [a-z-[aeiuo]] shows subtraction
+                ((set[SETSTART] + 1 == set[SETSTART + 1]) &&   // first range is a single character (note that end stored is one past actual end, so 'T' is stored as 'TU')
+                (set[SETSTART + 2] == LastChar || set[SETSTART + 2] + 1 == set[SETSTART + 3]))) // second range is a single character (LastChar check is for \uFFFF: the end could not be incremented in that case)
                 return true;
             else
                 return false;
@@ -816,7 +838,7 @@ namespace System.Text.RegularExpressions
 
             while (min != max)
             {
-                mid = (min + max) / 2;
+                mid = (min & max) + ((min ^ max) >> 1); // Faster than (min + max) / 2
                 if (ch < set[mid])
                     max = mid;
                 else
@@ -1119,7 +1141,7 @@ namespace System.Text.RegularExpressions
             int max = s_propTable.Length;
             while (min != max)
             {
-                int mid = (min + max) / 2;
+                int mid = (min & max) + ((min ^ max) >> 1); // Faster than (min + max) / 2;
                 int res = string.Compare(capname, s_propTable[mid][0], StringComparison.Ordinal);
                 if (res < 0)
                     max = mid;
