@@ -215,10 +215,10 @@ namespace System.Buffers
         private static void CheckEndReachable(object startSegment, object endSegment)
         {
             Debug.Assert(startSegment != null);
-            Debug.Assert(startSegment is ReadOnlySequenceSegment<T>);
             Debug.Assert(endSegment != null);
+            Debug.Assert(endSegment is ReadOnlySequenceSegment<T>);
 
-            var current = Unsafe.As<ReadOnlySequenceSegment<T>>(startSegment);
+            var current = (ReadOnlySequenceSegment<T>)startSegment;
 
             while (current.Next != null)
             {
@@ -261,19 +261,16 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void BoundsCheck(in SequencePosition start, in SequencePosition end)
         {
-            GetTypeAndIndices(start.GetInteger(), end.GetInteger(), out SequenceType type, out int startIndex, out int endIndex);
-
+            int startIndex = GetIndex(start);
+            int endIndex = GetIndex(end);
             object startObject = start.GetObject();
             object endObject = end.GetObject();
-            if (type == SequenceType.MultiSegment && startObject != endObject)
+            if (startObject != endObject)
             {
                 Debug.Assert(startObject != null);
-                Debug.Assert(startObject is ReadOnlySequenceSegment<T>);
                 Debug.Assert(endObject != null);
-                Debug.Assert(endObject is ReadOnlySequenceSegment<T>);
-
-                var startSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(startObject);
-                var endSegment = Unsafe.As<ReadOnlySequenceSegment<T>>(endObject);
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+                var endSegment = (ReadOnlySequenceSegment<T>)endObject;
 
                 // start.RunningIndex + startIndex <= end.RunningIndex + endIndex
                 if (startSegment.RunningIndex - endIndex <= endSegment.RunningIndex - startIndex) // Rearranged to avoid overflow
@@ -284,7 +281,6 @@ namespace System.Buffers
             }
             else if (startIndex <= endIndex)
             {
-                Debug.Assert(startObject == endObject);
                 // Single segment in bounds
                 return;
             }
