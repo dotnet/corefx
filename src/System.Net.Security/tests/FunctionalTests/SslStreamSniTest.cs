@@ -83,7 +83,6 @@ namespace System.Net.Security.Tests
                 });
 
                 SslServerAuthenticationOptions options = DefaultServerOptions();
-                options.ServerCertificate = serverCert;
                 options.ServerCertificateSelectionCallback = (sender, actualHostName) =>
                 {
                     timesCallbackCalled++;
