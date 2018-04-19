@@ -75,10 +75,9 @@ namespace System.Net.Security.Tests
             using (var server = new SslStream(serverStream, false, null, selectionCallback))
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
-                Task t1 = client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
-                Task t2 = server.AuthenticateAsServerAsync(certificate);
-
-                await Assert.ThrowsAsync<NotSupportedException>(async () => await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2));
+                await Assert.ThrowsAsync<NotSupportedException>(async () =>
+                    await TestConfiguration.WhenAllOrAnyFailedWithTimeout(client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false)), server.AuthenticateAsServerAsync(certificate))
+                );
             }
         }
 

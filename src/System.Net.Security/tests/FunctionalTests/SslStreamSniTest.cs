@@ -105,7 +105,7 @@ namespace System.Net.Security.Tests
 
             var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
             {
-                Assert.Equal(targetHost, string.Empty);
+                Assert.Equal(string.Empty, targetHost);
                 Assert.True(localCertificates.Contains(serverCert));
                 timesCallbackCalled++;
                 return serverCert;
