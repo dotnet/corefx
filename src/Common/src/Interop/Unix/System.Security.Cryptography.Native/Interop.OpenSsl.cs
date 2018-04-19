@@ -28,16 +28,16 @@ internal static partial class Interop
 
         static OpenSsl()
         {
-            if (!AppContext.TryGetSwitch("System.Net.Security.SslStream.ForceOpenSslErrorQueueCleanupBeforeEncryptDecrypt", out bool forceErrorQueueCleanup))
+            if (!AppContext.TryGetSwitch("System.Net.Security.SslStream.ForceClearOpenSslErrorQueue", out bool forceErrorQueueCleanup))
             {
                 // AppContext wasn't used, try the environment variable.
-                string envVar = Environment.GetEnvironmentVariable("DOTNET_FORCE_OPENSSL_ERROR_QUEUE_CLEANUP_BEFORE_ENCRYPT_DECRYPT");
+                string envVar = Environment.GetEnvironmentVariable("DOTNET_SYSTEM_NET_SECURITY_SSLSTREAM_FORCECLEAROPENSSLERRORQUEUE");
                 forceErrorQueueCleanup = envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1"));
             }
 
             if (forceErrorQueueCleanup)
             {
-                Ssl.ForceOpenSslErrorQueueCleanupBeforeWriteRead();
+                Ssl.ForceErrorQueueCleanupBeforeWriteRead();
             }
         }
 
