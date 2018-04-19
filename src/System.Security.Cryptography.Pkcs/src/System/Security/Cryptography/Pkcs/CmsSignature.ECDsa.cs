@@ -146,7 +146,16 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     if (key.TrySignHash(dataHash, rented, out bytesWritten))
                     {
-                        signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(rented, 0, bytesWritten));
+                        var signedHash = new ReadOnlySpan<byte>(rented, 0, bytesWritten);
+
+                        if (key != null && !certificate.GetECDsaPublicKey().VerifyHash(dataHash, signedHash))
+                        {
+                            // key did not match certificate
+                            signatureValue = null;
+                            return false;
+                        }
+
+                        signatureValue = DsaIeeeToDer(signedHash);
                         return true;
                     }
                 }

@@ -94,19 +94,6 @@ namespace System.Security.Cryptography.Pkcs
             byte[] signature;
             bool signed = processor.Sign(dataHash, hashAlgorithmName, certificate, key, silent, out oid, out signature);
 
-            if (signed && key != null)
-            {
-                // signatureParameters is used to figure out padding for RSA and ignored for ECDsa and DSA
-                // For RSA we can only get Pkcs1 as Pss does not support signing and null will default to Pkcs1 on RSAPkcs1CmsSignature instance.
-                if (!processor.VerifySignature(dataHash, signature, oid.Value, hashAlgorithmName, signatureParameters: null, certificate))
-                {
-                    // key did not match certificate
-                    oid = null;
-                    signatureValue = default;
-                    return false;
-                }
-            }
-
             signatureValue = signature;
             return signed;
         }

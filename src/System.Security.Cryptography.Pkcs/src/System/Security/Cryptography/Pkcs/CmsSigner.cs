@@ -14,7 +14,7 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class CmsSigner
     {
         private static readonly Oid s_defaultAlgorithm = Oid.FromOidValue(Oids.Sha256, OidGroup.HashAlgorithm);
-        private AsymmetricAlgorithm _key = null;
+        private AsymmetricAlgorithm _key;
 
         public X509Certificate2 Certificate { get; set; }
         public X509Certificate2Collection Certificates { get; set; } = new X509Certificate2Collection();
@@ -204,13 +204,13 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             bool signed = CmsSignature.Sign(
-                    dataHash,
-                    hashAlgorithmName,
-                    Certificate,
-                    _key,
-                    silent,
-                    out Oid signatureAlgorithm,
-                    out ReadOnlyMemory<byte> signatureValue);
+                dataHash,
+                hashAlgorithmName,
+                Certificate,
+                _key,
+                silent,
+                out Oid signatureAlgorithm,
+                out ReadOnlyMemory<byte> signatureValue);
 
             if (!signed)
             {

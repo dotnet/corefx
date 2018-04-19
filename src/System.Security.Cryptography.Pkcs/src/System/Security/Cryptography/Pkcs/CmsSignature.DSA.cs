@@ -129,7 +129,16 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     if (dsa.TryCreateSignature(dataHash, rented, out bytesWritten))
                     {
-                        signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(rented, 0, bytesWritten));
+                        var signature = new ReadOnlySpan<byte>(rented, 0, bytesWritten);
+
+                        if (key != null && !certificate.GetDSAPublicKey().VerifySignature(dataHash, signature))
+                        {
+                            // key did not match certificate
+                            signatureValue = null;
+                            return false;
+                        }
+
+                        signatureValue = DsaIeeeToDer(signature);
                         return true;
                     }
                 }
