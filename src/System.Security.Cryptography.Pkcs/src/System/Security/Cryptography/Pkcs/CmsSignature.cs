@@ -88,6 +88,26 @@ namespace System.Security.Cryptography.Pkcs
             return signed;
         }
 
+        internal static bool Sign(
+#if netcoreapp
+            ReadOnlySpan<byte> dataHash,
+#else
+            byte[] dataHash,
+#endif
+            HashAlgorithmName hashAlgorithmName,
+            AsymmetricSignatureFormatter formatter,
+            X509Certificate2 certificate,
+            bool silent,
+            out Oid oid,
+            out ReadOnlyMemory<byte> signatureValue)
+        {
+            CmsSignature processor = new AsymmetricSignatureFormatterCmsSignature(formatter);
+
+            bool signed = processor.Sign(dataHash, hashAlgorithmName, certificate, silent, out oid, out byte[] signature);
+            signatureValue = signature;
+            return signed;
+        }
+
         private static bool DsaDerToIeee(
             ReadOnlyMemory<byte> derSignature,
             Span<byte> ieeeSignature)

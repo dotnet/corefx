@@ -85,6 +85,7 @@ namespace System.Security.Cryptography.Pkcs
         public CmsSigner() => throw null;
         public CmsSigner(SubjectIdentifierType signerIdentifierType) => throw null;
         public CmsSigner(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
+        public CmsSigner(System.Security.Cryptography.AsymmetricSignatureFormatter formatter, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public CmsSigner(CspParameters parameters) => throw null;
         public CmsSigner(SubjectIdentifierType signerIdentifierType, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;

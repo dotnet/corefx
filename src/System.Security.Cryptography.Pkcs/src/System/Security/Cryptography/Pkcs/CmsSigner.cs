@@ -14,6 +14,7 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class CmsSigner
     {
         private static readonly Oid s_defaultAlgorithm = Oid.FromOidValue(Oids.Sha256, OidGroup.HashAlgorithm);
+        private AsymmetricSignatureFormatter _formatter = null;
 
         public X509Certificate2 Certificate { get; set; }
         public X509Certificate2Collection Certificates { get; set; } = new X509Certificate2Collection();
@@ -36,6 +37,12 @@ namespace System.Security.Cryptography.Pkcs
         public CmsSigner(X509Certificate2 certificate)
             : this(SubjectIdentifierType.IssuerAndSerialNumber, certificate)
         {
+        }
+
+        public CmsSigner(AsymmetricSignatureFormatter formatter, X509Certificate2 certificate)
+            : this(SubjectIdentifierType.IssuerAndSerialNumber, certificate)
+        {
+            _formatter = formatter;
         }
 
         // This can be implemented with netcoreapp20 with the cert creation API.
@@ -197,13 +204,24 @@ namespace System.Security.Cryptography.Pkcs
                 newSignerInfo.UnsignedAttributes = Helpers.NormalizeSet(attrs.ToArray());
             }
 
-            bool signed = CmsSignature.Sign(
-                dataHash,
-                hashAlgorithmName,
-                Certificate,
-                silent,
-                out Oid signatureAlgorithm,
-                out ReadOnlyMemory<byte> signatureValue);
+            Oid signatureAlgorithm;
+            ReadOnlyMemory<byte> signatureValue;
+            bool signed = _formatter == null ?
+                CmsSignature.Sign(
+                    dataHash,
+                    hashAlgorithmName,
+                    Certificate,
+                    silent,
+                    out signatureAlgorithm,
+                    out signatureValue) :
+                CmsSignature.Sign(
+                    dataHash,
+                    hashAlgorithmName,
+                    _formatter,
+                    Certificate,
+                    silent,
+                    out signatureAlgorithm,
+                    out signatureValue);
 
             if (!signed)
             {
