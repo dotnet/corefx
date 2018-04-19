@@ -9,6 +9,13 @@ namespace System.IO.Tests
 {
     public class File_AppendText : File_ReadWriteAllText
     {
+        [Fact]
+        public void hung_test()
+        {
+            while (true)
+                ;
+        }
+
         protected override void Write(string path, string content)
         {
             var writer = File.AppendText(path);
