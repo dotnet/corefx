@@ -22,38 +22,37 @@ namespace System.Net.Security.Tests
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
-            WithVirtualConnection((server, client) =>
-            {
-                Task clientJob = Task.Run(() => {
-                    client.AuthenticateAsClient(hostName);
-                });
-
-                SslServerAuthenticationOptions options = DefaultServerOptions();
-
-                int timesCallbackCalled = 0;
-                options.ServerCertificateSelectionCallback = (sender, actualHostName) =>
+            WithVirtualConnection(async (server, client) =>
                 {
-                    timesCallbackCalled++;
-                    Assert.Equal(hostName, actualHostName);
-                    return serverCert;
-                };
+                    Task clientJob = Task.Run(() => {
+                        client.AuthenticateAsClient(hostName);
+                    });
 
-                var cts = new CancellationTokenSource();
-                server.AuthenticateAsServerAsync(options, cts.Token).Wait();
+                    SslServerAuthenticationOptions options = DefaultServerOptions();
 
-                Assert.Equal(1, timesCallbackCalled);
-                clientJob.Wait();
-            },
-            (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
+                    int timesCallbackCalled = 0;
+                    options.ServerCertificateSelectionCallback = (sender, actualHostName) =>
+                    {
+                        timesCallbackCalled++;
+                        Assert.Equal(hostName, actualHostName);
+                        return serverCert;
+                    };
+
+                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new[] { clientJob, server.AuthenticateAsServerAsync(options, CancellationToken.None) });
+
+                    Assert.Equal(1, timesCallbackCalled);
+                },
+                (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
                 {
                     Assert.Equal(serverCert, certificate);
                     return true;
-                });
+                }
+            );
         }
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackAndLocalCertificateSelectionSet_Throws(string hostName)
+        public async void SslStream_ServerCallbackAndLocalCertificateSelectionSet_Throws(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
@@ -90,8 +89,7 @@ namespace System.Net.Security.Tests
                     return serverCert;
                 };
 
-                var cts = new CancellationTokenSource();
-                Assert.Throws<InvalidOperationException>(() => {server.AuthenticateAsServerAsync(options, cts.Token).Wait();});
+                await Assert.ThrowsAsync<InvalidOperationException>(() => server.AuthenticateAsServerAsync(options, CancellationToken.None));
 
                 Assert.Equal(0, timesCallbackCalled);
             }
@@ -99,7 +97,7 @@ namespace System.Net.Security.Tests
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackNotSet_UsesLocalCertificateSelection(string hostName)
+        public async void SslStream_ServerCallbackNotSet_UsesLocalCertificateSelection(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
@@ -132,17 +130,15 @@ namespace System.Net.Security.Tests
                 SslServerAuthenticationOptions options = DefaultServerOptions();
                 options.ServerCertificate = serverCert;
 
-                var cts = new CancellationTokenSource();
-                server.AuthenticateAsServerAsync(options, cts.Token).Wait();
+                await TaskTimeoutExtensions.WhenAllOrAnyFailed(new[] { clientJob, server.AuthenticateAsServerAsync(options, CancellationToken.None) });
 
                 Assert.Equal(1, timesCallbackCalled);
-                clientJob.Wait();
             }
         }
 
         [Theory]
         [MemberData(nameof(HostNameData))]
-        public void SslStream_ServerCallbackReturnsNull_Throws(string hostName)
+        public async void SslStream_ServerCallbackReturnsNull_Throws(string hostName)
         {
             X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
 
@@ -170,9 +166,8 @@ namespace System.Net.Security.Tests
                 SslServerAuthenticationOptions options = DefaultServerOptions();
                 options.ServerCertificate = serverCert;
 
-                var cts = new CancellationTokenSource();
-                Assert.Throws<NotSupportedException>(WithAggregateExceptionUnwrapping(() =>
-                    server.AuthenticateAsServerAsync(options, cts.Token).Wait()
+                await Assert.ThrowsAsync<NotSupportedException>(WithAggregateExceptionUnwrapping(async () =>
+                    await server.AuthenticateAsServerAsync(options, CancellationToken.None)
                 ));
             }
         }
@@ -180,11 +175,12 @@ namespace System.Net.Security.Tests
         [Fact]
         public void SslStream_NoSniFromClient_CallbackReturnsNull()
         {
-            WithVirtualConnection((server, client) =>
+            WithVirtualConnection(async (server, client) =>
             {
                 Task clientJob = Task.Run(() => {
-                    Assert.Throws<VirtualNetwork.VirtualNetworkConnectionBroken>(()
-                        => client.AuthenticateAsClient("test"));
+                    Assert.Throws<VirtualNetwork.VirtualNetworkConnectionBroken>(() =>
+                        client.AuthenticateAsClient("test")
+                    );
                 });
 
                 int timesCallbackCalled = 0;
@@ -196,8 +192,8 @@ namespace System.Net.Security.Tests
                 };
 
                 var cts = new CancellationTokenSource();
-                Assert.Throws<AuthenticationException>(WithAggregateExceptionUnwrapping(() =>
-                    server.AuthenticateAsServerAsync(options, cts.Token).Wait()
+                await Assert.ThrowsAsync<AuthenticationException>(WithAggregateExceptionUnwrapping(async () =>
+                    await server.AuthenticateAsServerAsync(options, cts.Token)
                 ));
 
                 // to break connection so that client is not waiting
@@ -205,7 +201,7 @@ namespace System.Net.Security.Tests
 
                 Assert.Equal(1, timesCallbackCalled);
 
-                clientJob.Wait();
+                await clientJob;
             },
             (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
             {
@@ -213,12 +209,12 @@ namespace System.Net.Security.Tests
             });
         }
 
-        private static Action WithAggregateExceptionUnwrapping(Action a)
+        private static Func<Task> WithAggregateExceptionUnwrapping(Func<Task> a)
         {
-            return () => {
+            return async () => {
                 try
                 {
-                    a();
+                    await a();
                 }
                 catch (AggregateException e)
                 {
@@ -237,7 +233,7 @@ namespace System.Net.Security.Tests
             };
         }
 
-        private void WithVirtualConnection(Action<SslStream, SslStream> serverClientConnection, RemoteCertificateValidationCallback clientCertValidate)
+        private async void WithVirtualConnection(Func<SslStream, SslStream, Task> serverClientConnection, RemoteCertificateValidationCallback clientCertValidate)
         {
             VirtualNetwork vn = new VirtualNetwork();
             using (VirtualNetworkStream serverStream = new VirtualNetworkStream(vn, isServer: true),
@@ -245,7 +241,7 @@ namespace System.Net.Security.Tests
             using (SslStream server = new SslStream(serverStream, leaveInnerStreamOpen: false),
                              client = new SslStream(clientStream, leaveInnerStreamOpen: false, clientCertValidate))
             {
-                serverClientConnection(server, client);
+                await serverClientConnection(server, client);
             }
         }
 
