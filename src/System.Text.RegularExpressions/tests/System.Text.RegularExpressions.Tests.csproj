@@ -33,12 +33,12 @@
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
     <Compile Include="RegexCompilationHelper.cs" />
+    <Compile Include="..\src\System\Text\RegularExpressions\RegexParseError.cs">
+      <Link>System\Text\RegularExpressions\RegexParseError.cs</Link>
+    </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
-    <Compile Include="RegexParserTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="CaptureCollectionTests2.cs" />
@@ -47,14 +47,10 @@
     <Compile Include="PrecompiledRegexScenarioTest.cs" />
     <Compile Include="RegexCompilationInfoTests.cs" />
     <Compile Include="RegexGroupNameTests.cs" />
+    <Compile Include="RegexParserTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
-    <TargetingPackExclusions Include="System.Text.RegularExpressions" />
-    <ReferenceFromRuntime Include="System.Text.RegularExpressions" />
   </ItemGroup>
   <!-- Automatically added by VS -->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

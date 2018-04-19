@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Linq;
+using System.Reflection;
 using Xunit;
 using Xunit.Sdk;
 
@@ -11,6 +10,9 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexParserTests
     {
+        private static readonly Type s_parseExceptionType = typeof(Regex).Assembly.GetType("System.Text.RegularExpressions.RegexParseException", true);
+        private static readonly FieldInfo s_parseErrorField = s_parseExceptionType.GetField("_error", BindingFlags.NonPublic | BindingFlags.Instance);
+
         [Theory]
         // \d, \D, \s, \S, \w, \W, \P, \p inside character range
         [InlineData(@"cat([a-\d]*)dog", RegexOptions.None, RegexParseError.BadClassInCharRange)]
@@ -990,18 +992,12 @@ namespace System.Text.RegularExpressions.Tests
         {
             if (error != null)
             {
-                Throws(error.Value, () => RegexParser.Parse(stringText, options));
+                Throws(error.Value, () => new Regex(stringText, options));
                 return;
             }
 
-            RegexTree tree = RegexParser.Parse(stringText, options);
-            Assert.NotNull(tree);
-
-            var regex = new Regex(stringText, options);
-            if (tree.CapNumList != null)
-                Assert.True(regex.GetGroupNumbers().OrderBy(v => v).SequenceEqual(tree.CapNumList.OrderBy(v => v)));
-            if (tree.CapNames != null)
-                Assert.True(regex.GetGroupNames().OrderBy(v => v).SequenceEqual(tree.CapNames.Keys.Cast<string>().OrderBy(v => v)));
+            // Nothing to assert here without having access to internals.
+            new Regex(stringText, options);
         }
 
         private static void Throws(RegexParseError error, Action action)
@@ -1010,16 +1006,21 @@ namespace System.Text.RegularExpressions.Tests
             {
                 action();
             }
-            catch (RegexParseException e)
-            {
-                // Success if provided error matches.
-                if (error == e.Error)
-                    return;
-
-                throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {e.Error})");
-            }
             catch (Exception e)
             {
+                // We use reflection to check if the exception is an internal RegexParseException
+                // and extract its error property and compare with the given one.
+                if (e.GetType() == s_parseExceptionType)
+                {
+                    RegexParseError regexParseError = (RegexParseError)s_parseErrorField.GetValue(e);
+
+                    // Success if provided error matches.
+                    if (error == regexParseError)
+                        return;
+
+                    throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {regexParseError})");
+                }
+
                 throw new XunitException($"Expected RegexParseException -> Actual: ({e.GetType()})");
             }
 

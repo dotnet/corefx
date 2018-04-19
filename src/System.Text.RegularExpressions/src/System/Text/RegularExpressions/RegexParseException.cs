@@ -4,49 +4,15 @@
 
 namespace System.Text.RegularExpressions
 {
-    internal enum RegexParseError
-    {
-        TooManyAlternates,
-        IllegalCondition,
-        IncompleteSlashP,
-        MalformedSlashP,
-        UnrecognizedEscape,
-        UnrecognizedControl,
-        MissingControl,
-        TooFewHex,
-        CaptureGroupOutOfRange,
-        UndefinedNameRef,
-        UndefinedBackref,
-        MalformedNameRef,
-        IllegalEndEscape,
-        UnterminatedComment,
-        UnrecognizedGrouping,
-        AlternationCantCapture,
-        AlternationCantHaveComment,
-        MalformedReference,
-        UndefinedReference,
-        InvalidGroupName,
-        CapnumNotZero,
-        UnterminatedBracket,
-        SubtractionMustBeLast,
-        ReversedCharRange,
-        BadClassInCharRange,
-        NotEnoughParens,
-        IllegalRange,
-        InternalError,
-        NestedQuantify,
-        QuantifyAfterNothing,
-        TooManyParens,
-        UnknownProperty // Unicode block, \p{Property}
-    }
-
     internal class RegexParseException : ArgumentException
     {
-        public RegexParseError Error { get; }
+        private readonly RegexParseError _error;
+
+        public RegexParseError Error => _error;
 
         public RegexParseException(RegexParseError error, string message) : base(message)
         {
-            Error = error;
+            _error = error;
         }
 
         public RegexParseException() : base()
