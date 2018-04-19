@@ -3,13 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
-
-using Test.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography.Pkcs.Tests
@@ -63,70 +58,74 @@ namespace System.Security.Cryptography.Pkcs.Tests
             ContentInfo contentInfo = new ContentInfo(contentBytes);
             SignedCms cms = new SignedCms(contentInfo, detached: false);
 
-            (X509Certificate2 cert, MyRSAFormatter formatter) = GetCertAndFormatter();
-            using (cert)
+            (X509Certificate2 cert, MyRSA key) = GetRSACertAndKey();
+            using (key)
             {
-                CmsSigner signer = new CmsSigner(formatter, cert);
+                CmsSigner signer = new CmsSigner(SubjectIdentifierType.SubjectKeyIdentifier, cert, key);
 
                 cms.ComputeSignature(signer);
                 certBytes = cert.Export(X509ContentType.Cert);
 
-                return cms.Encode();
+                byte[] ret = cms.Encode();
+                Assert.True(key.SignHashCalled);
+
+                return ret;
             }
         }
 
-        private static (X509Certificate2 pubCert, MyRSAFormatter formatter) GetCertAndFormatter()
+        private static (X509Certificate2 pubCert, MyRSA key) GetRSACertAndKey()
         {
             using (X509Certificate2 signerCert = Certificates.RSA2048SignatureOnly.TryGetCertificateWithPrivateKey())
             {
                 X509Certificate2 pubCert = new X509Certificate2(signerCert.Export(X509ContentType.Cert));
                 Assert.Null(pubCert.PrivateKey);
 
-                MyRSAFormatter formatter = new MyRSAFormatter(signerCert);
+                MyRSA formatter = new MyRSA((RSA)signerCert.PrivateKey);
                 return (pubCert, formatter);
             }
         }
     }
 
-    class MyRSAFormatter : AsymmetricSignatureFormatter
+    class MyRSA : RSA
     {
-        private RSAPKCS1SignatureFormatter _formatter;
-        private RSAParameters _expectedPublicKey;
-        private RSA _privateKey;
+        public bool SignHashCalled { get; set; } = false;
+        private RSA _key;
 
-        public MyRSAFormatter(X509Certificate2 cert)
+        public MyRSA(RSA key)
         {
-            _formatter = new RSAPKCS1SignatureFormatter(cert.PrivateKey);
-            _expectedPublicKey = ((RSA)cert.PublicKey.Key).ExportParameters(false);
-            _privateKey = (RSA)cert.PrivateKey;
+            _key = key;
         }
 
-        public override byte[] CreateSignature(byte[] rgbHash)
+        public override RSAParameters ExportParameters(bool includePrivateParameters)
         {
-            return _formatter.CreateSignature(rgbHash);
-        }
-
-        public override void SetHashAlgorithm(string strName)
-        {
-            _formatter.SetHashAlgorithm(strName);
-        }
-
-        public override void SetKey(AsymmetricAlgorithm key)
-        {
-            RSAParameters pk = ((RSA)key).ExportParameters(false);
-            if (PublicKeyEquals(pk, _expectedPublicKey))
+            if (includePrivateParameters)
             {
-                _formatter.SetKey(_privateKey);
+                throw new Exception("Not possible");
             }
-            else
-            {
-                throw new Exception("Unknown public key");
-            }
+
+            return _key.ExportParameters(false);
         }
 
-        private bool PublicKeyEquals(RSAParameters a, RSAParameters b)
+        public override void ImportParameters(RSAParameters parameters)
         {
-            return a.Exponent.SequenceEqual(b.Exponent) && a.Modulus.SequenceEqual(b.Modulus);
+            throw new Exception("Not possible");
+        }
+
+        public override bool TrySignHash(ReadOnlySpan<byte> hash, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten)
+        {
+            SignHashCalled = true;
+            return _key.TrySignHash(hash, destination, hashAlgorithm, padding, out bytesWritten);
+        }
+
+        public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+        {
+            SignHashCalled = true;
+            return _key.SignHash(hash, hashAlgorithm, padding);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _key.Dispose();
         }
     }
 }

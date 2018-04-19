@@ -264,7 +264,6 @@
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.ECDsa.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.RSA.cs" />
-    <Compile Include="System\Security\Cryptography\Pkcs\CmsSignature.AsymmetricSignatureFormatterCmsSignature.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\CmsSigner.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignedCms.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignedCms.CtorOverloads.cs" />

@@ -14,7 +14,7 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class CmsSigner
     {
         private static readonly Oid s_defaultAlgorithm = Oid.FromOidValue(Oids.Sha256, OidGroup.HashAlgorithm);
-        private AsymmetricSignatureFormatter _formatter = null;
+        private AsymmetricAlgorithm _key = null;
 
         public X509Certificate2 Certificate { get; set; }
         public X509Certificate2Collection Certificates { get; set; } = new X509Certificate2Collection();
@@ -39,12 +39,6 @@ namespace System.Security.Cryptography.Pkcs
         {
         }
 
-        public CmsSigner(AsymmetricSignatureFormatter formatter, X509Certificate2 certificate)
-            : this(SubjectIdentifierType.IssuerAndSerialNumber, certificate)
-        {
-            _formatter = formatter;
-        }
-
         // This can be implemented with netcoreapp20 with the cert creation API.
         // * Open the parameters as RSACSP (RSA PKCS#1 signature was hard-coded in netfx)
         //   * Which will fail on non-Windows
@@ -56,7 +50,11 @@ namespace System.Security.Cryptography.Pkcs
         // CertCreateSelfSignedCertificate on a split Windows/netstandard implementation.
         public CmsSigner(CspParameters parameters) => throw new PlatformNotSupportedException();
 
-        public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate)
+        public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate) : this(signerIdentifierType, certificate, null)
+        {
+        }
+
+        public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate, AsymmetricAlgorithm key)
         {
             switch (signerIdentifierType)
             {
@@ -84,6 +82,7 @@ namespace System.Security.Cryptography.Pkcs
 
             Certificate = certificate;
             DigestAlgorithm = new Oid(s_defaultAlgorithm);
+            _key = key;
         }
 
         internal void CheckCertificateValue()
@@ -204,24 +203,14 @@ namespace System.Security.Cryptography.Pkcs
                 newSignerInfo.UnsignedAttributes = Helpers.NormalizeSet(attrs.ToArray());
             }
 
-            Oid signatureAlgorithm;
-            ReadOnlyMemory<byte> signatureValue;
-            bool signed = _formatter == null ?
-                CmsSignature.Sign(
+            bool signed = CmsSignature.Sign(
                     dataHash,
                     hashAlgorithmName,
                     Certificate,
+                    _key,
                     silent,
-                    out signatureAlgorithm,
-                    out signatureValue) :
-                CmsSignature.Sign(
-                    dataHash,
-                    hashAlgorithmName,
-                    _formatter,
-                    Certificate,
-                    silent,
-                    out signatureAlgorithm,
-                    out signatureValue);
+                    out Oid signatureAlgorithm,
+                    out ReadOnlyMemory<byte> signatureValue);
 
             if (!signed)
             {
