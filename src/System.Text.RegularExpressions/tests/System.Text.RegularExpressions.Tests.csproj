@@ -33,6 +33,7 @@
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
     <Compile Include="RegexCompilationHelper.cs" />
+    <Compile Include="RegexParserTests.cs" />
     <Compile Include="..\src\System\Text\RegularExpressions\RegexParseError.cs">
       <Link>System\Text\RegularExpressions\RegexParseError.cs</Link>
     </Compile>
@@ -47,7 +48,6 @@
     <Compile Include="PrecompiledRegexScenarioTest.cs" />
     <Compile Include="RegexCompilationInfoTests.cs" />
     <Compile Include="RegexGroupNameTests.cs" />
-    <Compile Include="RegexParserTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>

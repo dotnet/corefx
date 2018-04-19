@@ -359,7 +359,7 @@ namespace System.Text.RegularExpressions
                         break;
 
                     default:
-                        throw MakeException(RegexParseError.InternalError, SR.InternalError_ScanRegex);
+                        throw new InvalidOperationException(SR.InternalError_ScanRegex);
                 }
 
                 ScanBlank();
@@ -423,7 +423,7 @@ namespace System.Text.RegularExpressions
                             break;
 
                         default:
-                            throw MakeException(RegexParseError.InternalError, SR.InternalError_ScanRegex);
+                            throw new InvalidOperationException(SR.InternalError_ScanRegex);
                     }
 
                     ScanBlank();
@@ -539,7 +539,7 @@ namespace System.Text.RegularExpressions
                             {
                                 if (inRange)
                                     throw MakeException(RegexParseError.BadClassInCharRange, SR.Format(SR.BadClassInCharRange, ch.ToString()));
-                                cc.AddDigit(UseOptionE(), ch == 'D', _pattern);
+                                cc.AddDigit(UseOptionE(), ch == 'D', _pattern, _currentPos);
                             }
                             continue;
 
@@ -570,7 +570,7 @@ namespace System.Text.RegularExpressions
                             {
                                 if (inRange)
                                     throw MakeException(RegexParseError.BadClassInCharRange, SR.Format(SR.BadClassInCharRange, ch.ToString()));
-                                cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), caseInsensitive, _pattern);
+                                cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), caseInsensitive, _pattern, _currentPos);
                             }
                             else
                                 ParseProperty();
@@ -1063,7 +1063,7 @@ namespace System.Text.RegularExpressions
                     if (scanOnly)
                         return null;
                     cc = new RegexCharClass();
-                    cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), UseOptionI(), _pattern);
+                    cc.AddCategoryFromName(ParseProperty(), (ch != 'p'), UseOptionI(), _pattern, _currentPos);
                     if (UseOptionI())
                         cc.AddLowercase(_culture);
 
@@ -2293,7 +2293,7 @@ namespace System.Text.RegularExpressions
          */
         private RegexParseException MakeException(RegexParseError error, string message)
         {
-            return new RegexParseException(error, SR.Format(SR.MakeException, _pattern, message));
+            return new RegexParseException(error,_currentPos, SR.Format(SR.MakeException, _pattern, message));
         }
 
         /*

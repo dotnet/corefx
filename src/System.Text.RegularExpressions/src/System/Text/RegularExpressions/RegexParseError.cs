@@ -33,7 +33,6 @@ namespace System.Text.RegularExpressions
         BadClassInCharRange,
         NotEnoughParens,
         IllegalRange,
-        InternalError,
         NestedQuantify,
         QuantifyAfterNothing,
         TooManyParens,
