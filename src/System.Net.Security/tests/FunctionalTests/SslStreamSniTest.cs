@@ -136,42 +136,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(HostNameData))]
-        public async void SslStream_ServerCallbackReturnsNull_Throws(string hostName)
-        {
-            X509Certificate serverCert = Configuration.Certificates.GetSelfSignedServerCertificate();
-
-            var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
-            {
-                return null;
-            });
-
-            var validationCallback = new RemoteCertificateValidationCallback((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
-            {
-                Assert.True(false, "RemoteCertificateValidationCallback called when AuthenticateAsServerAsync was expected to fail.");
-                return true; 
-            });
-
-            VirtualNetwork vn = new VirtualNetwork();
-            using (VirtualNetworkStream serverStream = new VirtualNetworkStream(vn, isServer: true),
-                                        clientStream = new VirtualNetworkStream(vn, isServer: false))
-            using (SslStream server = new SslStream(serverStream, false, null, selectionCallback),
-                             client = new SslStream(clientStream, leaveInnerStreamOpen: false, validationCallback))
-            {
-                Task clientJob = Task.Run(() => {
-                    client.AuthenticateAsClient(hostName);
-                });
-
-                SslServerAuthenticationOptions options = DefaultServerOptions();
-                options.ServerCertificate = serverCert;
-
-                await Assert.ThrowsAsync<NotSupportedException>(WithAggregateExceptionUnwrapping(async () =>
-                    await server.AuthenticateAsServerAsync(options, CancellationToken.None)
-                ));
-            }
-        }
-
         [Fact]
         public void SslStream_NoSniFromClient_CallbackReturnsNull()
         {

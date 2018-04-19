@@ -60,7 +60,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public async Task SslStream_RemoteCertificateValidationCallbackReturnsNull_Throws()
+        public async Task SslStream_ServerLocalCertificateSelectionCallbackReturnsNull_Throw()
         {
             VirtualNetwork network = new VirtualNetwork();
 
