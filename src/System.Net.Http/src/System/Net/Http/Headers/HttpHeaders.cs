@@ -283,16 +283,6 @@ namespace System.Net.Http.Headers
             }
         }
 
-        internal string GetHeaderString(string name)
-        {
-            if (!TryGetHeaderDescriptor(name, out HeaderDescriptor descriptor))
-            {
-                return string.Empty;
-            }
-
-            return GetHeaderString(descriptor);
-        }
-
         internal string GetHeaderString(HeaderDescriptor descriptor, object exclude = null)
         {
             HeaderStoreItemInfo info;
