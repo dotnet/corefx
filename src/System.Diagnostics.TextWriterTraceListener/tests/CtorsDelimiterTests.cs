@@ -100,7 +100,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         {
             string expectedName = string.Empty;
             var target = new DelimitedListTraceListener(string.Empty);
-            AssertExtensions.Throws<ArgumentException>("path", () => target.Writer);
+            Assert.Throws<ArgumentException>(() => target.Writer);
             Assert.Equal(expectedName, target.Name);
         }
 
