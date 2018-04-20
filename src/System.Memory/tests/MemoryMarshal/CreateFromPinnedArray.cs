@@ -35,6 +35,72 @@ namespace System.SpanTests
             pinnedMemory.Validate("94", "95", "96");
         }
 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Re-enable after new coreclr build is available.")]
+        [Fact]
+        public static unsafe void CreateFromPinnedArrayIntSliceRemainsPinned()
+        {
+            int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
+            Memory<int> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(a, 3, 5);
+            pinnedMemory.Validate(93, 94, 95, 96, 97);
+
+            pinnedMemory.GetObjectStartLength(out int start, out int length);
+
+            Memory<int> slice = pinnedMemory.Slice(0);
+            slice.GetObjectStartLength(out int sliceStart, out int sliceLength);
+            Assert.Equal(start, sliceStart);
+            Assert.Equal(length, sliceLength);
+
+            slice = pinnedMemory.Slice(0, pinnedMemory.Length);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start, sliceStart);
+            Assert.Equal(length, sliceLength);
+
+            int expectedLength = length - 1;
+            slice = pinnedMemory.Slice(1);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start + 1, sliceStart);
+            Assert.Equal(expectedLength, sliceLength);
+
+            expectedLength = 2 | (1 << 31);
+            slice = pinnedMemory.Slice(1, 2);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start + 1, sliceStart);
+            Assert.Equal(expectedLength, sliceLength);
+        }
+
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Re-enable after new coreclr build is available.")]
+        [Fact]
+        public static unsafe void CreateFromPinnedArrayIntReadOnlyMemorySliceRemainsPinned()
+        {
+            int[] a = { 90, 91, 92, 93, 94, 95, 96, 97, 98 };
+            ReadOnlyMemory<int> pinnedMemory = MemoryMarshal.CreateFromPinnedArray(a, 3, 5);
+            pinnedMemory.Validate(93, 94, 95, 96, 97);
+
+            pinnedMemory.GetObjectStartLength(out int start, out int length);
+
+            ReadOnlyMemory<int> slice = pinnedMemory.Slice(0);
+            slice.GetObjectStartLength(out int sliceStart, out int sliceLength);
+            Assert.Equal(start, sliceStart);
+            Assert.Equal(length, sliceLength);
+
+            slice = pinnedMemory.Slice(0, pinnedMemory.Length);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start, sliceStart);
+            Assert.Equal(length, sliceLength);
+
+            int expectedLength = length - 1;
+            slice = pinnedMemory.Slice(1);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start + 1, sliceStart);
+            Assert.Equal(expectedLength, sliceLength);
+
+            expectedLength = 2 | (1 << 31);
+            slice = pinnedMemory.Slice(1, 2);
+            slice.GetObjectStartLength(out sliceStart, out sliceLength);
+            Assert.Equal(start + 1, sliceStart);
+            Assert.Equal(expectedLength, sliceLength);
+        }
+
         [Fact]
         public static void CreateFromPinnedArrayWithStartAndLengthRangeExtendsToEndOfArray()
         {

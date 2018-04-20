@@ -437,5 +437,17 @@ namespace System
             return CombineHashCodes(CombineHashCodes(h1, h2), h3);
         }
 
+        /// <summary>Gets the state of the memory as individual fields.</summary>
+        /// <param name="start">The offset.</param>
+        /// <param name="length">The count.</param>
+        /// <returns>The object.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal object GetObjectStartLength(out int start, out int length)
+        {
+            start = _index;
+            length = _length;
+            return _object;
+        }
+
     }
 }

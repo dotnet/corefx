@@ -245,9 +245,11 @@
     <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
       <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
-      <Link>Common\System\MutableDecimal.cs</Link>
-    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <TargetingPackExclusions Include="System.Memory" />
+    <ReferenceFromRuntime Include="System.Memory" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
