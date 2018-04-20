@@ -219,7 +219,7 @@ namespace System.Diagnostics
                 // APIs to throw on encoding errors. Instead, we should provide a "?" replacement fallback  
                 // encoding to substitute illegal chars. For ex, In case of high surrogate character 
                 // D800-DBFF without a following low surrogate character DC00-DFFF
-                // NOTE: We also need to use an encoding that does't emit BOM whic is StreamWriter's default
+                // NOTE: We also need to use an encoding that does't emit BOM which is StreamWriter's default
                 Encoding noBOMwithFallback = GetEncodingWithFallback(new System.Text.UTF8Encoding(false));
 
 
