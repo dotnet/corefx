@@ -241,10 +241,6 @@ namespace System.Diagnostics
                     }
                     catch (IOException)
                     {
-
-                        // Should we do this only for ERROR_SHARING_VIOLATION?
-                        //if (InternalResources.MakeErrorCodeFromHR(Marshal.GetHRForException(ioexc)) == InternalResources.ERROR_SHARING_VIOLATION) {
-
                         fileNameOnly = Guid.NewGuid().ToString() + fileNameOnly;
                         fullPath = Path.Combine(dirPath, fileNameOnly);
                         continue;

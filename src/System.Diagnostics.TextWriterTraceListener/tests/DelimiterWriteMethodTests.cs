@@ -22,6 +22,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
 
         protected override void Dispose(bool disposing)
         {
+            base.Dispose(disposing);
         }
     }
     public class DelimiterWriteMethodTestsCtorStream : DelimiterWriteMethodTestsBase
@@ -40,6 +41,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         protected override void Dispose(bool disposing)
         {
             _stream.Dispose();
+            base.Dispose(disposing);
         }
     }
 
