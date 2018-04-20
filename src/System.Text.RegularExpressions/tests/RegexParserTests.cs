@@ -961,9 +961,14 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("[a-z-[b][", RegexOptions.None, RegexParseError.UnterminatedBracket, false)]
         [InlineData(@"\", RegexOptions.None, RegexParseError.IllegalEndEscape, false)]
         [InlineData("(?()|||||)", RegexOptions.None, RegexParseError.TooManyAlternates, false)]
-        public void Parse(string pattern, RegexOptions options, object error, bool runSubTreeTests)
+        public void Parse(string pattern, RegexOptions options, object errorObj, bool runSubTreeTests)
         {
-            Test(pattern, options, (RegexParseError?)error, runSubTreeTests);
+            RegexParseError? error = (RegexParseError?)errorObj;
+
+            // Parse the main tree and if parsing fails check if the supplied error matches.
+            ParseTree(pattern, options, error);
+
+            // TODO: sub expression check
         }
 
         [Theory]
@@ -983,14 +988,6 @@ namespace System.Text.RegularExpressions.Tests
         public void Parse_NotNetFramework(string pattern, RegexOptions options, object error, bool runSubTreeTests)
         {
             Parse(pattern, options, error, runSubTreeTests);
-        }
-
-        private static void Test(string stringText, RegexOptions options, RegexParseError? error, bool runSubTreeTests)
-        {
-            // Parse the main tree and if parsing fails check if the supplied error matches.
-            ParseTree(stringText, options, error);
-
-            // TODO: sub expression check
         }
 
         private static void ParseTree(string stringText, RegexOptions options, RegexParseError? error)
