@@ -188,7 +188,18 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData("(?(?n))", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
         [InlineData("(?(?N))", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
         [InlineData(" (?(?n))", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
-        // special
+        [InlineData(")", RegexOptions.None, RegexParseError.TooManyParens)]
+        [InlineData("())", RegexOptions.None, RegexParseError.TooManyParens)]
+        [InlineData("[a-z-[aeiuo]", RegexOptions.None, RegexParseError.UnterminatedBracket)]
+        [InlineData("[a-z-[aeiuo", RegexOptions.None, RegexParseError.UnterminatedBracket)]
+        [InlineData("[a-z-[b]", RegexOptions.None, RegexParseError.UnterminatedBracket)]
+        [InlineData("[a-z-[b", RegexOptions.None, RegexParseError.UnterminatedBracket)]
+        [InlineData("[b-a]", RegexOptions.None, RegexParseError.ReversedCharRange)]
+        [InlineData(@"[a-c]{2,1}", RegexOptions.None, RegexParseError.IllegalRange)]
+        [InlineData(@"\d{2147483648}", RegexOptions.None, RegexParseError.CaptureGroupOutOfRange)]
+        [InlineData("[a-z-[b][", RegexOptions.None, RegexParseError.UnterminatedBracket)]
+        [InlineData(@"\", RegexOptions.None, RegexParseError.IllegalEndEscape)]
+        [InlineData("(?()|||||)", RegexOptions.None, RegexParseError.TooManyAlternates)]
         [InlineData("(?<-", RegexOptions.None, RegexParseError.UnrecognizedGrouping)]
         public void ParseSimple_InvalidPattern(string pattern, RegexOptions options, object error)
         {
