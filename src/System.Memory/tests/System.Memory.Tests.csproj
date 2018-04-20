@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
