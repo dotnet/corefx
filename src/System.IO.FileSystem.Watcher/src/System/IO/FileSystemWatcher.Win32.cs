@@ -246,12 +246,11 @@ namespace System.IO
             Debug.Assert(buffer != null);
             Debug.Assert(buffer.Length > 0);
 
-            ReadOnlySpan<char> oldName = ReadOnlySpan<char>.Empty;
-
-            Interop.Kernel32.FILE_NOTIFY_INFORMATION* info;
             fixed (byte* b = buffer)
             {
-                info = (Interop.Kernel32.FILE_NOTIFY_INFORMATION*)b;
+                Interop.Kernel32.FILE_NOTIFY_INFORMATION* info = (Interop.Kernel32.FILE_NOTIFY_INFORMATION*)b;
+
+                ReadOnlySpan<char> oldName = ReadOnlySpan<char>.Empty;
 
                 // Parse each event from the buffer and notify appropriate delegates
                 do
