@@ -117,6 +117,15 @@ namespace System.Memory.Tests
                 ReadOnlySequence<T> sliceStart = buffer.Slice(start);
                 TestSlice(start, buffer.End, sliceStart);
 
+                ReadOnlySequence<T> sliceBufStartLen = buffer.Slice(buffer.Start, i);
+                TestSlice(buffer.Start, start, sliceBufStartLen);
+
+                ReadOnlySequence<T> sliceBufStartLenL = buffer.Slice(buffer.Start, (long)i);
+                TestSlice(buffer.Start, start, sliceBufStartLenL);
+
+                ReadOnlySequence<T> sliceBufStartEnd = buffer.Slice(buffer.Start, start);
+                TestSlice(buffer.Start, start, sliceBufStartEnd);
+
                 for (int j = i; j <= length; j++)
                 {
                     int len = j - i;
@@ -144,6 +153,7 @@ namespace System.Memory.Tests
                     ReadOnlySequence<T> sliceStartEnd = buffer.Slice(start, end);
                     TestSlice(start, end, sliceStartEnd);
                 }
+
             }
         }
 
