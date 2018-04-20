@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
-  <Library Name="System.Text.RegularExpressions.Tests">
-    <Type Name="Regex">
-      <Field Name="s_cacheCount" Dynamic="Required" />
-    </Type>
-  </Library>
-</Directives>
