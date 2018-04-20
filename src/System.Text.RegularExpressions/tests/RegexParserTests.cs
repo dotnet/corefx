@@ -1016,24 +1016,28 @@ namespace System.Text.RegularExpressions.Tests
             {
                 action();
             }
-            catch (ArgumentException) when (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
-            {
-                // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
-                return;
-            }
             catch (Exception e)
             {
-                // We use reflection to check if the exception is an internal RegexParseException
-                // and extract its error property and compare with the given one.
-                if (e.GetType() == s_parseExceptionType)
+                if (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
                 {
-                    RegexParseError regexParseError = (RegexParseError)s_parseErrorField.GetValue(e);
-
-                    // Success if provided error matches.
-                    if (error == regexParseError)
+                    // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
+                    if (e is ArgumentException)
                         return;
+                }
+                else
+                {
+                    // We use reflection to check if the exception is an internal RegexParseException
+                    // and extract its error property and compare with the given one.
+                    if (e.GetType() == s_parseExceptionType)
+                    {
+                        RegexParseError regexParseError = (RegexParseError)s_parseErrorField.GetValue(e);
 
-                    throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {regexParseError})");
+                        // Success if provided error matches.
+                        if (error == regexParseError)
+                            return;
+
+                        throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {regexParseError})");
+                    }
                 }
 
                 throw new XunitException($"Expected RegexParseException -> Actual: ({e.GetType()})");
