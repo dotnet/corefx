@@ -179,7 +179,7 @@ namespace System
             }
 
             // Set the high-bit to match the this._length high bit (1 for pre-pinned, 0 for unpinned).
-            return new ReadOnlyMemory<T>(_object, _index + start, length | (capturedLength << 31));
+            return new ReadOnlyMemory<T>(_object, _index + start, length | (capturedLength & ~RemoveFlagsBitMask));
         }
 
         /// <summary>
