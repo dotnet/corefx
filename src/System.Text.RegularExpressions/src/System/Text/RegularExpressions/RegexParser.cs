@@ -2293,7 +2293,7 @@ namespace System.Text.RegularExpressions
          */
         private RegexParseException MakeException(RegexParseError error, string message)
         {
-            return new RegexParseException(error,_currentPos, SR.Format(SR.MakeException, _pattern, message));
+            return new RegexParseException(error, _currentPos, SR.Format(SR.MakeException, _pattern, _currentPos, message));
         }
 
         /*

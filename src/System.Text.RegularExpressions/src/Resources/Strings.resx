@@ -125,7 +125,7 @@
     <value>Malformed \\p{X} character escape.</value>
   </data>
   <data name="MakeException" xml:space="preserve">
-    <value>parsing '{0}' - {1}</value>
+    <value>Invalid pattern '{0}' at offset {1}. {2}</value>
   </data>
   <data name="MissingControl" xml:space="preserve">
     <value>Missing control character.</value>

@@ -1145,7 +1145,7 @@ namespace System.Text.RegularExpressions
             }
 
             throw new RegexParseException(RegexParseError.UnknownProperty, currentPos,
-                SR.Format(SR.MakeException, pattern, SR.Format(SR.UnknownProperty, capname)));
+                SR.Format(SR.MakeException, pattern, currentPos, SR.Format(SR.UnknownProperty, capname)));
         }
 
 #if DEBUG

@@ -19,12 +19,12 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// The offset in the supplied pattern.
         /// </summary>
-        public int Position { get; }
+        public int Offset { get; }
 
-        public RegexParseException(RegexParseError error, int position, string message) : base(message)
+        public RegexParseException(RegexParseError error, int offset, string message) : base(message)
         {
             _error = error;
-            Position = position;
+            Offset = offset;
         }
 
         public RegexParseException() : base()
