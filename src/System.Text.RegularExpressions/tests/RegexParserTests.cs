@@ -10,8 +10,18 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexParserTests
     {
-        private static readonly Type s_parseExceptionType = typeof(Regex).Assembly.GetType("System.Text.RegularExpressions.RegexParseException", true);
-        private static readonly FieldInfo s_parseErrorField = s_parseExceptionType.GetField("_error", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly Type s_parseExceptionType;
+        private static readonly FieldInfo s_parseErrorField;
+
+        static RegexParserTests()
+        {
+            // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
+            if (!PlatformDetection.IsNetNative && !PlatformDetection.IsFullFramework)
+            {
+                s_parseExceptionType = typeof(Regex).Assembly.GetType("System.Text.RegularExpressions.RegexParseException", true);
+                s_parseErrorField = s_parseExceptionType.GetField("_error", BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+        }
 
         [Theory]
         // \d, \D, \s, \S, \w, \W, \P, \p inside character range
@@ -1005,6 +1015,11 @@ namespace System.Text.RegularExpressions.Tests
             try
             {
                 action();
+            }
+            catch (ArgumentException) when (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
+            {
+                // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
+                return;
             }
             catch (Exception e)
             {
