@@ -104,6 +104,15 @@ namespace System.Memory.Tests
         {
             ReadOnlySequence<T> buffer = Factory.CreateOfSize(length);
 
+            ReadOnlySequence<T> sliceOffsetToStrart = buffer.Slice(0, buffer.Start);
+            TestSlice(buffer.Start, buffer.Start, sliceOffsetToStrart);
+
+            ReadOnlySequence<T> sliceOffsetToStrartÄ = buffer.Slice(0L, buffer.Start);
+            TestSlice(buffer.Start, buffer.Start, sliceOffsetToStrart);
+
+            ReadOnlySequence<T> sliceStartToStart = buffer.Slice(buffer.Start, buffer.Start);
+            TestSlice(buffer.Start, buffer.Start, sliceStartToStart);
+
             for (int i = 0; i <= length; i++)
             {
                 SequencePosition start = buffer.GetPosition(i);

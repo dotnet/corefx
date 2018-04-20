@@ -287,7 +287,7 @@ namespace System.Buffers
             int currentLength = startSegment.Memory.Length - (int)startIndex;
 
             // Position not in startSegment
-            if (currentLength <= start)
+            if (currentLength < start || currentLength == start && startSegment != sliceEndObject)
             {
                 if (currentLength < 0)
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
