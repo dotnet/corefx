@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace System.Text.RegularExpressions
 {
     [Serializable]
-    internal class RegexParseException : ArgumentException
+    internal sealed class RegexParseException : ArgumentException
     {
         private readonly RegexParseError _error;
 
@@ -36,6 +36,11 @@ namespace System.Text.RegularExpressions
         }
 
         public RegexParseException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        private RegexParseException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 
