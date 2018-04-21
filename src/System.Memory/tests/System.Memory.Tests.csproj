@@ -242,7 +242,7 @@
     <Compile Include="Base64\Base64EncoderUnitTests.cs" />
     <Compile Include="Base64\Base64TestHelper.cs" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
       <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
     </Compile>
