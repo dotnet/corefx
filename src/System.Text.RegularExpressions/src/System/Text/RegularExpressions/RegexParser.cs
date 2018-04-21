@@ -315,7 +315,7 @@ namespace System.Text.RegularExpressions
 
                     case ')':
                         if (EmptyStack())
-                            throw MakeException(RegexParseError.TooManyParens, SR.TooManyParens);
+                            throw MakeException(RegexParseError.TooManyParentheses, SR.TooManyParens);
 
                         AddGroup();
                         PopGroup();
@@ -450,7 +450,7 @@ namespace System.Text.RegularExpressions
             ;
 
             if (!EmptyStack())
-                throw MakeException(RegexParseError.NotEnoughParens, SR.NotEnoughParens);
+                throw MakeException(RegexParseError.NotEnoughParentheses, SR.NotEnoughParens);
 
             AddGroup();
 

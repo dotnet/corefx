@@ -31,11 +31,11 @@ namespace System.Text.RegularExpressions
         SubtractionMustBeLast,
         ReversedCharRange,
         BadClassInCharRange,
-        NotEnoughParens,
+        NotEnoughParentheses,
         IllegalRange,
         NestedQuantify,
         QuantifyAfterNothing,
-        TooManyParens,
-        UnknownProperty // Unicode block, \p{Property}
+        TooManyParentheses,
+        UnknownUnicodeProperty
     }
 }
