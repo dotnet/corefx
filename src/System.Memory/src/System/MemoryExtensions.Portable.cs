@@ -139,8 +139,136 @@ namespace System
             {
                 return span.IndexOf<char>(value);
             }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return IndexOfOrdinalIgnoreCase(span, value);
+            }
 
             return span.ToString().IndexOf(value.ToString(), comparisonType);
+        }
+
+        private static unsafe int IndexOfOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+        {
+            // Length of Value
+            int lengthB = strB.Length;
+            // Value is empty, return founded
+            if (lengthB == 0)
+                return 0;
+
+            // Length to last possible index in source
+            int lengthA = strA.Length - lengthB;
+
+            // Source lenth < value length
+            if (lengthA < 0)
+                return -1;
+
+            // Store Length to evaluate offset later
+            int range = lengthA;
+
+            fixed (char* bp = &MemoryMarshal.GetReference(strB))
+            {
+                // Value first char
+                int charB0 = *bp;
+
+                // Value first char is not Unicode
+                if (charB0 <= 0x7F)
+                {
+                    // uppercase of Value first char
+                    if ((uint)(charB0 - 'a') <= 'z' - 'a') charB0 -= 0x20;
+
+                    fixed (char* ap = &MemoryMarshal.GetReference(strA))
+                    {
+                        char* a0 = ap;
+
+                        // Source loop
+                        while (lengthA >= 0)
+                        {
+                            int charA = *a0;
+
+                            // Unicode char in source
+                            if (charA > 0x7F)
+                                break;
+
+                            // uppercase
+                            if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+
+                            // First char not found
+                            if (charA != charB0)
+                            {
+                                a0++;
+                                lengthA--;
+                                continue;
+                            }
+
+                            // First char found evaluate CompareTo with OrdinalIgnoreCase
+
+                            // Pointers to second chars and length of remaining value
+                            char* a = a0 + 1;
+                            char* b = bp + 1;
+                            int length = lengthB - 1;
+
+                            while (length != 0)
+                            {
+                                charA = *a;
+                                int charB = *b;
+
+                                // Chars are equal continue with next
+                                if (charA == charB)
+                                {
+                                    a++; b++;
+                                    length--;
+                                    continue;
+                                }
+
+                                // Unicode char found
+                                if (charA > 0x7F || charB > 0x7F)
+                                    goto Unicode;
+
+                                // uppercase both chars - notice that we need just one compare per char
+                                if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+                                if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
+
+                                // Chars are different exit from CompareTo loop
+                                if (charA != charB)
+                                    break;
+
+                                // Next chars
+                                a++; b++;
+                                length--;
+                            }
+
+                            // if Value is founded in Source, return offset
+                            if (length == 0)
+                                return range - lengthA;
+
+                            // Next Source
+                            a0++;
+                            lengthA--;
+                        }
+
+                        // If all was tested, return not founded
+                        if (lengthA < 0)
+                            return -1;
+                    }
+                }
+            }
+
+            // Unicode char was found, call Unicode version of IndexOf for remaining part
+        Unicode:
+            range -= lengthA; // offset of remaining part
+
+            // Remaining part is full source string
+            if (range == 0)
+                return strA.ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            // Remaining part is part of source string
+            int result = strA.Slice(range).ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            // IndexOf value founded in remaining part, add offset of remaining part
+            if (result >= 0)
+                result += range;
+
+            return result;
         }
 
         /// <summary>
