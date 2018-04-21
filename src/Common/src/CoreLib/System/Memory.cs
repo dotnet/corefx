@@ -174,7 +174,7 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Memory{T}"/>
         /// </summary>
-        public static implicit operator Memory<T>(T[] array) => (array != null) ? new Memory<T>(array) : default;
+        public static implicit operator Memory<T>(T[] array) => new Memory<T>(array);
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Memory{T}"/>
