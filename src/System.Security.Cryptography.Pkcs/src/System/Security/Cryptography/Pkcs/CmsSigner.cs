@@ -97,7 +97,7 @@ namespace System.Security.Cryptography.Pkcs
                 throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
             }
 
-            if (!Certificate.HasPrivateKey)
+            if (_key == null && !Certificate.HasPrivateKey)
             {
                 throw new CryptographicException(SR.Cryptography_Cms_Signing_RequiresPrivateKey);
             }

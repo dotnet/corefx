@@ -43,7 +43,6 @@
     <Compile Include="SignedCms\SignerInfoTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="CmsSignerTests.cs" />
     <Compile Include="Rfc3161\TimestampRequestTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenInfoTests.cs" />
     <Compile Include="Rfc3161\TimestampTokenTestData.cs" />
