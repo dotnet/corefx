@@ -1317,7 +1317,7 @@ namespace System
             this ReadOnlySpan<T> span, TComparable comparable)
             where TComparable : IComparable<T>
         {
-            return SpanHelpers.BinarySearchHelper(span, comparable);
+            return SpanHelpers.BinarySearch(span, comparable);
         }
 
         /// <summary>

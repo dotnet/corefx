@@ -27,6 +27,7 @@
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="TestMemory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Span\AsSpan.cs" />
@@ -241,15 +242,13 @@
     <Compile Include="Base64\Base64EncoderUnitTests.cs" />
     <Compile Include="Base64\Base64TestHelper.cs" />
   </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
       <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
-    <TargetingPackExclusions Include="System.Memory" />
-    <ReferenceFromRuntime Include="System.Memory" />
+    <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
+      <Link>Common\System\MutableDecimal.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
