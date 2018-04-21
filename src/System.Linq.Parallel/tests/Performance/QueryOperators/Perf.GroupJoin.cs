@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xunit.Performance;
 
 namespace System.Linq.Parallel.Tests
@@ -13,36 +14,79 @@ namespace System.Linq.Parallel.Tests
 
     public sealed class GroupJoinPerfTestsUnorderedLeftOrderedRight : GroupJoinPerfTests
     {
-        protected override ParallelQuery<int> Right => base.Right.AsOrdered();
+        protected override ParallelQuery<int> CreateRight(int count) => base.CreateRight(count).AsOrdered();
     }
 
     public sealed class GroupJoinPerfTestsOrderedLeftUnorderedRight : GroupJoinPerfTests
     {
-        protected override ParallelQuery<int> Left => base.Left.AsOrdered();
+        protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).AsOrdered();
     }
 
     public sealed class GroupJoinPerfTestsOrderedLeftOrderedRight : GroupJoinPerfTests
     {
-        protected override ParallelQuery<int> Left => base.Left.AsOrdered();
-        protected override ParallelQuery<int> Right => base.Right.AsOrdered();
+        protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).AsOrdered();
+        protected override ParallelQuery<int> CreateRight(int count) => base.CreateRight(count).AsOrdered();
     }
 
     public abstract class GroupJoinPerfTests
     {
-        const int LeftCount = 75;
-        const int RightsPerLeft = 20;
-        protected virtual ParallelQuery<int> Left => UnorderedSources.Default(LeftCount);
-        protected virtual ParallelQuery<int> Right => UnorderedSources.Default(LeftCount * RightsPerLeft);
+        const int TotalElementCount = 50_000;
+        const int CrossProductInnerIterationCount = 100;
 
-        private ParallelQuery<KeyValuePair<int, int>> CreateQuery()
+        protected virtual ParallelQuery<int> CreateLeft(int count) => UnorderedSources.Default(count);
+        protected virtual ParallelQuery<int> CreateRight(int count) => UnorderedSources.Default(count);
+
+        private ParallelQuery<KeyValuePair<int, int>> CreateQuery(int leftCount, int rightsPerLeft)
         {
-            return Left.GroupJoin(Right, x => x, y => y / RightsPerLeft, (x, y) => KeyValuePair.Create(x, y.Sum()));
+            return CreateLeft(leftCount).GroupJoin(CreateRight(leftCount * rightsPerLeft),
+                x => x, y => y % leftCount, (x, y) => KeyValuePair.Create(x, y.Sum()));
+        }
+
+        [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
+        public void QueryCreation()
+        {
+            QueryCreation(10);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__10()
+        {
+            CrossProduct(10);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__25()
+        {
+            CrossProduct(25);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__50()
+        {
+            CrossProduct(50);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_100()
+        {
+            CrossProduct(100);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_500()
+        {
+            CrossProduct(500);
+        }
+
+        public void QueryCreation(int rightsPerLeft)
+        {
+            Debug.Assert(TotalElementCount % rightsPerLeft == 0);
+            QueryCreation(TotalElementCount / rightsPerLeft, rightsPerLeft);
         }
 
         private static volatile ParallelQuery<KeyValuePair<int, int>> _queryCreationResult;
 
-        [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
-        public void QueryCreation()
+        public void QueryCreation(int leftCount, int rightsPerLeft)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -51,18 +95,23 @@ namespace System.Linq.Parallel.Tests
                 {
                     for (int i = 0; i < iters; i++)
                     {
-                        _queryCreationResult = CreateQuery();
+                        _queryCreationResult = CreateQuery(leftCount, rightsPerLeft);
                     }
                 }
             }
         }
 
+        public void CrossProduct(int rightsPerLeft)
+        {
+            Debug.Assert(TotalElementCount % rightsPerLeft == 0);
+            CrossProduct(TotalElementCount / rightsPerLeft, rightsPerLeft);
+        }
+
         private static volatile int _crossProductResult;
 
-        [Benchmark(InnerIterationCount = 1_000), MeasureGCAllocations]
-        public void CrossProduct()
+        public void CrossProduct(int leftCount, int rightsPerLeft)
         {
-            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery();
+            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery(leftCount, rightsPerLeft);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {

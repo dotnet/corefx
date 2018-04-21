@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xunit.Performance;
 
 namespace System.Linq.Parallel.Tests
@@ -13,24 +14,67 @@ namespace System.Linq.Parallel.Tests
 
     public sealed class GroupByPerfTestsOrdered : GroupByPerfTests
     {
-        protected override ParallelQuery<int> QueryBase => base.QueryBase.AsOrdered();
+        protected override ParallelQuery<int> CreateQueryBase(int count) => base.CreateQueryBase(count).AsOrdered();
     }
 
     public abstract class GroupByPerfTests
     {
-        const int GroupCount = 75;
-        const int ElementsPerGroup = 20;
-        protected virtual ParallelQuery<int> QueryBase => UnorderedSources.Default(GroupCount * ElementsPerGroup);
+        const int TotalElementCount = 50_000;
+        const int CrossProductInnerIterationCount = 100;
 
-        private ParallelQuery<KeyValuePair<int, int>> CreateQuery()
+        protected virtual ParallelQuery<int> CreateQueryBase(int count) => UnorderedSources.Default(count);
+
+        private ParallelQuery<KeyValuePair<int, int>> CreateQuery(int groupCount, int elementsPerGroup)
         {
-            return QueryBase.GroupBy(x => x / ElementsPerGroup, (k, v) => KeyValuePair.Create(k, v.Sum()));
+            return CreateQueryBase(groupCount * elementsPerGroup).GroupBy(x => x % groupCount,
+                (k, v) => KeyValuePair.Create(k, v.Sum()));
+        }
+
+        [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
+        public void QueryCreation()
+        {
+            QueryCreation(10);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__10()
+        {
+            CrossProduct(10);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__25()
+        {
+            CrossProduct(25);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__50()
+        {
+            CrossProduct(50);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_100()
+        {
+            CrossProduct(100);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_500()
+        {
+            CrossProduct(500);
+        }
+
+        public void QueryCreation(int elementsPerGroup)
+        {
+            Debug.Assert(TotalElementCount % elementsPerGroup == 0);
+            QueryCreation(TotalElementCount / elementsPerGroup, elementsPerGroup);
         }
 
         private static volatile ParallelQuery<KeyValuePair<int, int>> _queryCreationResult;
 
-        [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
-        public void QueryCreation()
+        public void QueryCreation(int groupCount, int elementsPerGroup)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
@@ -39,18 +83,23 @@ namespace System.Linq.Parallel.Tests
                 {
                     for (int i = 0; i < iters; i++)
                     {
-                        _queryCreationResult = CreateQuery();
+                        _queryCreationResult = CreateQuery(groupCount, elementsPerGroup);
                     }
                 }
             }
         }
 
+        public void CrossProduct(int elementsPerGroup)
+        {
+            Debug.Assert(TotalElementCount % elementsPerGroup == 0);
+            CrossProduct(TotalElementCount / elementsPerGroup, elementsPerGroup);
+        }
+
         private static volatile int _crossProductResult;
 
-        [Benchmark(InnerIterationCount = 1_000), MeasureGCAllocations]
-        public void CrossProduct()
+        public void CrossProduct(int groupCount, int elementsPerGroup)
         {
-            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery();
+            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery(groupCount, elementsPerGroup);
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
