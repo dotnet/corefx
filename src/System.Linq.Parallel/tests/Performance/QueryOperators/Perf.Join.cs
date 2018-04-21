@@ -22,6 +22,11 @@ namespace System.Linq.Parallel.Tests
         protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).AsOrdered();
     }
 
+    public sealed class JoinPerfTestsShuffledOrderedLeftUnorderedRight : JoinPerfTests
+    {
+        protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).OrderBy(x => x);
+    }
+
     public sealed class JoinPerfTestsOrderedLeftOrderedRight : JoinPerfTests
     {
         protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).AsOrdered();
