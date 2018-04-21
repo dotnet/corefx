@@ -21,13 +21,18 @@ namespace System.Linq.Parallel.Tests
     {
         const int TotalElementCount = 50_000;
         const int CrossProductInnerIterationCount = 100;
+        const int EnumerateGroupInnerIterationCount = 1_000;
 
         protected virtual ParallelQuery<int> CreateQueryBase(int count) => UnorderedSources.Default(count);
 
         private ParallelQuery<KeyValuePair<int, int>> CreateQuery(int groupCount, int elementsPerGroup)
         {
-            return CreateQueryBase(groupCount * elementsPerGroup).GroupBy(x => x % groupCount,
-                (k, v) => KeyValuePair.Create(k, v.Sum()));
+            return CreateQuery(groupCount, elementsPerGroup, (key, vals) => KeyValuePair.Create(key, vals.Sum()));
+        }
+
+        private ParallelQuery<KeyValuePair<int, int>> CreateQuery(int groupCount, int elementsPerGroup, Func<int, IEnumerable<int>, KeyValuePair<int, int>> resultSelector)
+        {
+            return CreateQueryBase(groupCount * elementsPerGroup).GroupBy(x => x % groupCount, resultSelector);
         }
 
         [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
@@ -64,6 +69,36 @@ namespace System.Linq.Parallel.Tests
         public void CrossProduct_500()
         {
             CrossProduct(500);
+        }
+
+        [Benchmark(InnerIterationCount = EnumerateGroupInnerIterationCount), MeasureGCAllocations]
+        public void EnumerateGroup__10()
+        {
+            EnumerateGroup(10);
+        }
+
+        [Benchmark(InnerIterationCount = EnumerateGroupInnerIterationCount), MeasureGCAllocations]
+        public void EnumerateGroup__25()
+        {
+            EnumerateGroup(25);
+        }
+
+        [Benchmark(InnerIterationCount = EnumerateGroupInnerIterationCount), MeasureGCAllocations]
+        public void EnumerateGroup__50()
+        {
+            EnumerateGroup(50);
+        }
+
+        [Benchmark(InnerIterationCount = EnumerateGroupInnerIterationCount), MeasureGCAllocations]
+        public void EnumerateGroup_100()
+        {
+            EnumerateGroup(100);
+        }
+
+        [Benchmark(InnerIterationCount = EnumerateGroupInnerIterationCount), MeasureGCAllocations]
+        public void EnumerateGroup_500()
+        {
+            EnumerateGroup(500);
         }
 
         public void QueryCreation(int elementsPerGroup)
@@ -113,6 +148,44 @@ namespace System.Linq.Parallel.Tests
                         {
                             _crossProductResult += pair.Key * pair.Value;
                         }
+                    }
+                }
+            }
+        }
+
+        public void EnumerateGroup(int elementsPerGroup)
+        {
+            Debug.Assert(TotalElementCount % elementsPerGroup == 0);
+            EnumerateGroup(TotalElementCount / elementsPerGroup, elementsPerGroup);
+        }
+
+        private static volatile int _enumerateGroupResult;
+
+        public void EnumerateGroup(int groupCount, int elementsPerGroup)
+        {
+            int iters = (int)Benchmark.InnerIterationCount;
+
+            ParallelQuery<KeyValuePair<int, int>> values = CreateQuery(groupCount, elementsPerGroup,
+                (key, vals) =>
+                {
+                    int value = 0;
+
+                    for (int i = 0; i < iters; i++)
+                    {
+                        value += vals.Sum();
+                    }
+
+                    return KeyValuePair.Create(key, value / iters);
+                });
+
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    _enumerateGroupResult = 0;
+                    foreach (KeyValuePair<int, int> pair in values)
+                    {
+                        _enumerateGroupResult += pair.Key * pair.Value;
                     }
                 }
             }
