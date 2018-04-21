@@ -968,11 +968,15 @@ namespace System.Text.RegularExpressions.Tests
             // Parse the main tree and if parsing fails check if the supplied error matches.
             ParseTree(pattern, options, error);
 
-            // TODO: sub expression check
+            if (runSubTreeTests)
+            {
+                // Assert that only ArgumentException might be thrown during parsing.
+                ParseSubTrees(pattern, options);
+            }
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "fixes not ported netfx RegexParser")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "fixes not ported to netfx RegexParser")]
         [InlineData(@"@""(?(?N))""", RegexOptions.None, RegexParseError.UnrecognizedGrouping, true)] // OutOfMemoryException
         [InlineData(@"@""(?(?i))""", RegexOptions.None, RegexParseError.UnrecognizedGrouping, true)]
         [InlineData(@"@""(?(?I))""", RegexOptions.None, RegexParseError.UnrecognizedGrouping, true)]
@@ -990,46 +994,96 @@ namespace System.Text.RegularExpressions.Tests
             Parse(pattern, options, error, runSubTreeTests);
         }
 
-        private static void ParseTree(string stringText, RegexOptions options, RegexParseError? error)
+        private static void ParseSubTrees(string pattern, RegexOptions options)
+        {
+            // Trim the input from the right and make sure tree invariants hold
+            var current = pattern;
+            while (current != "@\"\"" && current != "\"\"")
+            {
+                current = current.Substring(0, current.Length - 2) + "\"";
+                ParseSubTree(current, options);
+            }
+
+            // Trim the input from the left and make sure tree invariants hold
+            current = pattern;
+            while (current != "@\"\"" && current != "\"\"")
+            {
+                if (current[0] == '@')
+                {
+                    current = "@\"" + current.Substring(3);
+                }
+                else
+                {
+                    current = "\"" + current.Substring(2);
+                }
+
+                ParseSubTree(current, options);
+            }
+
+            for (int start = pattern[0] == '@' ? 2 : 1; start < pattern.Length - 1; start++)
+            {
+                ParseSubTree(pattern.Substring(0, start) + pattern.Substring(start + 1, pattern.Length - (start + 1)),
+                    options);
+            }
+        }
+
+        private static void ParseTree(string pattern, RegexOptions options, RegexParseError? error)
         {
             if (error != null)
             {
-                Throws(error.Value, () => new Regex(stringText, options));
+                Throws(error.Value, () => new Regex(pattern, options));
                 return;
             }
 
             // Nothing to assert here without having access to internals.
-            new Regex(stringText, options);
+            new Regex(pattern, options);
         }
 
+        private static void ParseSubTree(string pattern, RegexOptions options)
+        {
+            try
+            {
+                new Regex(pattern, options);
+            }
+            catch (ArgumentException)
+            {
+                // We are fine with ArgumentExceptions being thrown during sub expression parsing.
+            }
+        }
+
+        /// <summary>
+        /// Checks if action throws either a RegexParseException or an ArgumentException depending on the
+        /// environment and the supplied error.
+        /// </summary>
+        /// <param name="error">The expected parse error</param>
+        /// <param name="action">The action to invoke.</param>
         private static void Throws(RegexParseError error, Action action)
         {
+            // If no specific error is supplied, or we are running on full framework where RegexParseException
+            // doesn't exist or we are running on uapaot where reflection is blocked we expect an ArgumentException.
+            if (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
+            {
+                Assert.ThrowsAny<ArgumentException>(action);
+                return;
+            }
+
             try
             {
                 action();
             }
             catch (Exception e)
             {
-                if (PlatformDetection.IsNetNative || PlatformDetection.IsFullFramework)
+                // We use reflection to check if the exception is an internal RegexParseException
+                // and extract its error property and compare with the given one.
+                if (e.GetType() == s_parseExceptionType)
                 {
-                    // On Full Framework RegexParseException doesn't exist and on uapaot reflection is blocked.
-                    if (e is ArgumentException)
+                    RegexParseError regexParseError = (RegexParseError)s_parseErrorField.GetValue(e);
+
+                    // Success if provided error matches.
+                    if (error == regexParseError)
                         return;
-                }
-                else
-                {
-                    // We use reflection to check if the exception is an internal RegexParseException
-                    // and extract its error property and compare with the given one.
-                    if (e.GetType() == s_parseExceptionType)
-                    {
-                        RegexParseError regexParseError = (RegexParseError)s_parseErrorField.GetValue(e);
 
-                        // Success if provided error matches.
-                        if (error == regexParseError)
-                            return;
-
-                        throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {regexParseError})");
-                    }
+                    throw new XunitException($"Expected RegexParseException with error: ({error}) -> Actual error: {regexParseError})");
                 }
 
                 throw new XunitException($"Expected RegexParseException -> Actual: ({e.GetType()})");
