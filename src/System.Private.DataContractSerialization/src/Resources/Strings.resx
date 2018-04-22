@@ -123,7 +123,7 @@
   <data name="ArrayExceededSizeAttribute" xml:space="preserve">
     <value>Array length '{0}' provided by Size attribute is not equal to the number of array elements '{1}' from namespace '{2}' found.</value>
   </data>
-  <data name="ArrayTypeIsNotSupported" xml:space="preserve">
+  <data name="ArrayTypeIsNotSupported_GeneratingCode" xml:space="preserve">
     <value>An internal error has occurred. '{0}[]' is not supported when generating code for serialization.</value>
   </data>
   <data name="CannotDeserializeRefAtTopLevel" xml:space="preserve">

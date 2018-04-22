@@ -87,7 +87,7 @@
     <value>Metadata value circularity not possible, use lazy initialization.</value>
   </data>
   <data name="CardinalityMismatch_TooManyExports" xml:space="preserve">
-    <value>"Only one export for the contract '{0}' is allowed, multiple implementations were found."</value>
+    <value>More than one export was found that matches the constraint: {0}</value>
   </data>
   <data name="Diagnostic_ThrowingException" xml:space="preserve">
     <value>Exception Thrown: {0}\r\n</value>

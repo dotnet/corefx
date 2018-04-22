@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
-    <value>Non negative number is required.</value>
+    <value>Non-negative number required.</value>
   </data>
   <data name="IO_FileNotFound" xml:space="preserve">
     <value>Unable to find the specified file.</value>

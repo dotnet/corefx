@@ -418,9 +418,9 @@
   <data name="ADP_NoQuoteChange" xml:space="preserve"><value>The QuotePrefix and QuoteSuffix properties cannot be changed once an Insert, Update, or Delete command has been generated.</value></data>
   <data name="ADP_MissingSourceCommand" xml:space="preserve"><value>The DataAdapter.SelectCommand property needs to be initialized.</value></data>
   <data name="ADP_MissingSourceCommandConnection" xml:space="preserve"><value>The DataAdapter.SelectCommand.Connection property needs to be initialized;</value></data>
-  <data name="ADP_InvalidMultipartName" xml:space="preserve"><value>{0} "{1}".</value></data>
-  <data name="ADP_InvalidMultipartNameQuoteUsage" xml:space="preserve"><value>{0} "{1}", incorrect usage of quotes.</value></data>
-  <data name="ADP_InvalidMultipartNameToManyParts" xml:space="preserve"><value>{0} "{1}", the current limit of "{2}" is insufficient.</value></data>
+  <data name="ADP_InvalidMultipartName" xml:space="preserve"><value>{0} '{1}'.</value></data>
+  <data name="ADP_InvalidMultipartNameQuoteUsage" xml:space="preserve"><value>{0} '{1}', incorrect usage of quotes.</value></data>
+  <data name="ADP_InvalidMultipartNameToManyParts" xml:space="preserve"><value>{0} '{1}', the current limit of '{2}' is insufficient.</value></data>
   <data name="ADP_ColumnSchemaExpression" xml:space="preserve"><value>The column mapping from SourceColumn '{0}' failed because the DataColumn '{1}' is a computed column.</value></data>
   <data name="ADP_ColumnSchemaMismatch" xml:space="preserve"><value>Inconvertible type mismatch between SourceColumn '{0}' of {1} and the DataColumn '{2}' of {3}.</value></data>
   <data name="ADP_ColumnSchemaMissing1" xml:space="preserve"><value>Missing the DataColumn '{0}' for the SourceColumn '{2}'.</value></data>

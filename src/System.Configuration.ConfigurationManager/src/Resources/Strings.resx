@@ -94,10 +94,7 @@
   </data>
   <!--
     other exceptions
-  -->
-  <data name="Argument_AddingDuplicate" xml:space="preserve">
-    <value>An entry with the same key already exists.</value>
-  </data>
+  -->  
   <data name="Config_add_configurationsection_already_added" xml:space="preserve">
     <value>Cannot add a ConfigurationSection that already belongs to the Configuration.</value>
   </data>

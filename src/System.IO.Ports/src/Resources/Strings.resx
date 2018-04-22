@@ -178,7 +178,7 @@
     <value>The timeout must be either a positive number or -1.</value>
   </data>
   <data name="IndexOutOfRange_IORaceCondition" xml:space="preserve">
-    <value>Probable I/O race condition detected while copying memory.  The I/O package is not thread safe by default.  In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods.  This also applies to classes like StreamWriter and StreamReader.</value>
+    <value>Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader.</value>
   </data>
   <data name="IO_OperationAborted" xml:space="preserve">
     <value>The I/O operation has been aborted because of either a thread exit or an application request.</value>

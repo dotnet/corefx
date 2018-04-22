@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Argument_InvalidPathChars" xml:space="preserve">
-    <value>Argument_InvalidPathChars {0}</value>
+    <value>Illegal characters in path '{0}'.</value>
   </data>
   <data name="IO_FileNotFound" xml:space="preserve">
     <value>IO_FileNotFound</value>
