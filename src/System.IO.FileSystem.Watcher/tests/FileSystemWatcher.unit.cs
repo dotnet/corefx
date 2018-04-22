@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -237,13 +234,10 @@ namespace System.IO.Tests
             watcher.Filter = "abc.dll";
             Assert.Equal("abc.dll", watcher.Filter);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || // expect no change for OrdinalIgnoreCase-equal strings
-                RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (!PlatformDetection.IsFullFramework || !PlatformDetection.IsOSX)
             {
-                // expect no change for OrdinalIgnoreCase-equal strings
-                // it's unclear why desktop does this but preserve it for compat
                 watcher.Filter = "ABC.DLL";
-                Assert.Equal("abc.dll", watcher.Filter);
+                Assert.Equal("ABC.DLL", watcher.Filter);
             }
 
             // We can make this setting by first changing to another value then back.
