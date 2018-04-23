@@ -86,7 +86,7 @@ extern "C" int32_t CryptoNative_Asn1OctetStringSet(ASN1_OCTET_STRING* s, const u
         ERR_clear_error();
     }
 
-    return
+    return r;
 }
 
 extern "C" void CryptoNative_Asn1OctetStringFree(ASN1_STRING* a)
