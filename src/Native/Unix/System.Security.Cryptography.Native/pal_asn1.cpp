@@ -80,7 +80,7 @@ extern "C" ASN1_OCTET_STRING* CryptoNative_Asn1OctetStringNew()
 
 extern "C" int32_t CryptoNative_Asn1OctetStringSet(ASN1_OCTET_STRING* s, const uint8_t* data, int32_t len)
 {
-    int32_t r = ASN1_OCTET_STRING_set(s, data, len)
+    int32_t r = ASN1_OCTET_STRING_set(s, data, len);
     if (r == 0)
     {
         ERR_clear_error();
