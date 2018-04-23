@@ -210,7 +210,7 @@ internal static partial class Interop
                     if (sendCount <= 0)
                     {
                         // Make sure we clear out the error that is stored in the queue
-                        Crypto.ErrGetError();
+                        Crypto.ErrClearError();
                         sendBuf = null;
                         sendCount = 0;
                     }
@@ -267,7 +267,7 @@ internal static partial class Interop
                 if (retVal <= 0)
                 {
                     // Make sure we clear out the error that is stored in the queue
-                    Crypto.ErrGetError();
+                    Crypto.ErrClearError();
                 }
             }
 
@@ -505,7 +505,8 @@ internal static partial class Interop
 
         internal static SslException CreateSslException(string message)
         {
-            ulong errorVal = Crypto.ErrGetError();
+            ulong errorVal = Crypto.ErrGetLastError();
+            Crypto.ErrClearError();
             string msg = SR.Format(message, Marshal.PtrToStringAnsi(Crypto.ErrReasonErrorString(errorVal)));
             return new SslException(msg, (int)errorVal);
         }

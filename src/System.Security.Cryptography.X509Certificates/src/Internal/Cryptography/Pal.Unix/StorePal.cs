@@ -120,7 +120,10 @@ namespace Internal.Cryptography.Pal
             // 
             // Use BioSeek directly for the last seek attempt, because any failure here should instead
             // report the already created (but not yet thrown) exception.
-            Interop.Crypto.BioSeek(bio, bioPosition);
+            if (Interop.Crypto.BioSeek(bio, bioPosition) < 0)
+            {
+                Interop.Crypto.ErrClearError();
+            }
             
             Debug.Assert(openSslException != null);
             throw openSslException;

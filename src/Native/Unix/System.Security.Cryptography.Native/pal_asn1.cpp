@@ -67,16 +67,6 @@ extern "C" void CryptoNative_Asn1BitStringFree(ASN1_STRING* a)
     ASN1_BIT_STRING_free(a);
 }
 
-extern "C" ASN1_OCTET_STRING* CryptoNative_DecodeAsn1OctetString(const uint8_t* buf, int32_t len)
-{
-    if (!buf || !len)
-    {
-        return nullptr;
-    }
-
-    return d2i_ASN1_OCTET_STRING(nullptr, &buf, len);
-}
-
 extern "C" ASN1_OCTET_STRING* CryptoNative_Asn1OctetStringNew()
 {
     ASN1_OCTET_STRING *r = ASN1_OCTET_STRING_new();
