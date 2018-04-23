@@ -237,6 +237,7 @@ namespace Microsoft.Win32.SafeHandles
                 readBio.Dispose();
                 writeBio.Dispose();
                 handle.Dispose(); // will make IsInvalid==true if it's not already
+                Interop.Crypto.ErrClearError();
                 return handle;
             }
             handle._isServer = isServer;

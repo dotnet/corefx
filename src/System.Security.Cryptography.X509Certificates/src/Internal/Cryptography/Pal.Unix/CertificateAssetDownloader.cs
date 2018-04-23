@@ -64,6 +64,7 @@ namespace Internal.Cryptography.Pal
                 }
             }
 
+            Interop.Crypto.ErrClearError(); 
             return null;
         }
 

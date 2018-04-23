@@ -79,12 +79,24 @@ extern "C" ASN1_OCTET_STRING* CryptoNative_DecodeAsn1OctetString(const uint8_t* 
 
 extern "C" ASN1_OCTET_STRING* CryptoNative_Asn1OctetStringNew()
 {
-    return ASN1_OCTET_STRING_new();
+    ASN1_OCTET_STRING *r = ASN1_OCTET_STRING_new();
+    if (r == nullptr)
+    {
+        ERR_clear_error();
+    }
+
+    return r;
 }
 
 extern "C" int32_t CryptoNative_Asn1OctetStringSet(ASN1_OCTET_STRING* s, const uint8_t* data, int32_t len)
 {
-    return ASN1_OCTET_STRING_set(s, data, len);
+    int32_t r = ASN1_OCTET_STRING_set(s, data, len)
+    if (r == 0)
+    {
+        ERR_clear_error();
+    }
+
+    return
 }
 
 extern "C" void CryptoNative_Asn1OctetStringFree(ASN1_STRING* a)

@@ -18,7 +18,13 @@ extern "C" BIO* CryptoNative_BioNewFile(const char* filename, const char* mode)
 
 extern "C" int32_t CryptoNative_BioDestroy(BIO* a)
 {
-    return BIO_free(a);
+    int32_t r = BIO_free(a);
+    if (r == 0)
+    {
+        ERR_clear_error();
+    }
+
+    return r;
 }
 
 extern "C" int32_t CryptoNative_BioGets(BIO* b, char* buf, int32_t size)
