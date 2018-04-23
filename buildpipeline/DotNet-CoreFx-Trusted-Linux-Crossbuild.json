@@ -371,7 +371,8 @@
       "value": "arm"
     },
     "PB_AssetRootUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
     },
     "PB_BuildArguments": {
       "value": "-BuildArch=$(PB_Architecture)"
@@ -423,7 +424,12 @@
       "value": "$(Build.BuildNumber)"
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
+    },
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
     },
     "PB_SyncArguments": {
       "value": "-p -- /p:ArchGroup=$(PB_Architecture)",

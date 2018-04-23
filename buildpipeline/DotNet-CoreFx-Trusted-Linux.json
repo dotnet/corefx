@@ -370,7 +370,12 @@
       "allowOverride": true
     },
     "PB_AssetRootUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
+    },
+    "PB_RestoreSource": {
+      "value": "",
+      "isSecret": true
     },
     "PB_BuildArguments": {
       "value": "-buildArch=x64 -Release -stripSymbols",
@@ -427,7 +432,8 @@
       "allowOverride": true
     },
     "PB_PackageVersionPropsUrl": {
-      "value": ""
+      "value": "",
+      "isSecret": true
     },
     "PB_SkipTests": {
       "value": "false",
