@@ -170,56 +170,52 @@ namespace System
                 // Value first char
                 int charB0 = *bp;
 
-                // Value first char is not Unicode
-                if (charB0 <= 0x7F)
+                // Value first char is Unicode
+                if (charB0 > 0x7F)
+                    goto Unicode;
+
+                // uppercase of Value first char
+                if ((uint)(charB0 - 'a') <= 'z' - 'a') charB0 -= 0x20;
+
+                fixed (char* ap = &MemoryMarshal.GetReference(strA))
                 {
-                    // uppercase of Value first char
-                    if ((uint)(charB0 - 'a') <= 'z' - 'a') charB0 -= 0x20;
+                    char* a0 = ap;
 
-                    fixed (char* ap = &MemoryMarshal.GetReference(strA))
+                    // Source loop
+                    while (lengthA >= 0)
                     {
-                        char* a0 = ap;
+                        int charA = *a0;
 
-                        // Source loop
-                        while (lengthA >= 0)
+                        // Unicode char in source
+                        if (charA > 0x7F)
+                            break;
+
+                        // uppercase
+                        if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+
+                        // First char not found
+                        if (charA != charB0)
                         {
-                            int charA = *a0;
+                            a0++;
+                            lengthA--;
+                            continue;
+                        }
 
-                            // Unicode char in source
-                            if (charA > 0x7F)
-                                break;
+                        // First char found evaluate CompareTo with OrdinalIgnoreCase
 
-                            // uppercase
-                            if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+                        // Pointers to second chars and length of remaining value
+                        char* a = a0 + 1;
+                        char* b = bp + 1;
+                        int length = lengthB - 1;
 
-                            // First char not found
-                            if (charA != charB0)
+                        while (length != 0)
+                        {
+                            charA = *a;
+                            int charB = *b;
+
+                            // Chars are different, try compare with ignory case
+                            if (charA != charB)
                             {
-                                a0++;
-                                lengthA--;
-                                continue;
-                            }
-
-                            // First char found evaluate CompareTo with OrdinalIgnoreCase
-
-                            // Pointers to second chars and length of remaining value
-                            char* a = a0 + 1;
-                            char* b = bp + 1;
-                            int length = lengthB - 1;
-
-                            while (length != 0)
-                            {
-                                charA = *a;
-                                int charB = *b;
-
-                                // Chars are equal continue with next
-                                if (charA == charB)
-                                {
-                                    a++; b++;
-                                    length--;
-                                    continue;
-                                }
-
                                 // Unicode char found
                                 if (charA > 0x7F || charB > 0x7F)
                                     goto Unicode;
@@ -228,28 +224,29 @@ namespace System
                                 if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
                                 if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
 
-                                // Chars are different exit from CompareTo loop
+                                // Chars are different, exit to next Source char
                                 if (charA != charB)
-                                    break;
-
-                                // Next chars
-                                a++; b++;
-                                length--;
+                                    goto NextSource;
                             }
 
-                            // if Value is founded in Source, return offset
-                            if (length == 0)
-                                return range - lengthA;
-
-                            // Next Source
-                            a0++;
-                            lengthA--;
+                            // Chars are equal continue with next
+                            a++; b++;
+                            length--;
                         }
 
-                        // If all was tested, return not founded
-                        if (lengthA < 0)
-                            return -1;
+                        // Value is founded in Source, return offset
+                        if (length == 0)
+                            return range - lengthA;
+
+                        // Next Source char
+                    NextSource:
+                        a0++;
+                        lengthA--;
                     }
+
+                    // All char was tested, return not founded
+                    if (lengthA < 0)
+                        return -1;
                 }
             }
 

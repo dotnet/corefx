@@ -89,6 +89,53 @@ namespace System.Memory.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1, StringComparison.CurrentCulture)]
+        [InlineData(1, StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(1, StringComparison.InvariantCulture)]
+        [InlineData(1, StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData(1, StringComparison.Ordinal)]
+        [InlineData(1, StringComparison.OrdinalIgnoreCase)]
+        [InlineData(10, StringComparison.CurrentCulture)]
+        [InlineData(10, StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(10, StringComparison.InvariantCulture)]
+        [InlineData(10, StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData(10, StringComparison.Ordinal)]
+        [InlineData(10, StringComparison.OrdinalIgnoreCase)]
+        [InlineData(100, StringComparison.CurrentCulture)]
+        [InlineData(100, StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(100, StringComparison.InvariantCulture)]
+        [InlineData(100, StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData(100, StringComparison.Ordinal)]
+        [InlineData(100, StringComparison.OrdinalIgnoreCase)]
+        [InlineData(1000, StringComparison.CurrentCulture)]
+        [InlineData(1000, StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(1000, StringComparison.InvariantCulture)]
+        [InlineData(1000, StringComparison.InvariantCultureIgnoreCase)]
+        [InlineData(1000, StringComparison.Ordinal)]
+        [InlineData(1000, StringComparison.OrdinalIgnoreCase)]
+        public void IndexOf_StringComparison(int size, StringComparison comparisonType)
+        {
+            string str = new string('0', size / 2) + "5";
+            if (size > 1)
+            {
+                str += new string('0', size / 2 - 1);
+            }
+
+            int index = 0;
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        index |= str.IndexOf("5", comparisonType);
+                    }
+                }
+            }
+            Assert.Equal(size / 2, index);
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
