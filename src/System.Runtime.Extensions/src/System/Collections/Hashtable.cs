@@ -1236,11 +1236,11 @@ namespace System.Collections
 
             if (serKeys == null)
             {
-                throw new SerializationException(SR.Serialization_MissingKeys);
+                throw new SerializationException(SR.Serialization_MissingKeys_Hashtable);
             }
             if (serValues == null)
             {
-                throw new SerializationException(SR.Serialization_MissingValues);
+                throw new SerializationException(SR.Serialization_MissingValues_Hashtable);
             }
             if (serKeys.Length != serValues.Length)
             {

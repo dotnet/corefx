@@ -349,7 +349,7 @@
     <value>Stream does not support writing.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Can not access a closed Stream.</value>
+    <value>Cannot access a closed Stream.</value>
   </data>
   <data name="net_http_libcurl_callback_notsupported_sslbackend" xml:space="preserve">
     <value>The handler does not support custom handling of certificates with this combination of libcurl ({0}) and its SSL backend ("{1}"). An SSL backend based on "{2}" is required. Consider using System.Net.Http.SocketsHttpHandler.</value>

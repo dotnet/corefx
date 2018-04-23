@@ -68,10 +68,10 @@
     <value>Index is less than zero.</value>
   </data>
   <data name="InvalidOperation_EnumFailedVersion" xml:space="preserve">
-    <value>Collection was modified after the enumerator was instantiated.</value>
+    <value>Collection was modified; enumeration operation may not execute.</value>
   </data>
   <data name="InvalidOperation_EnumOpCantHappen" xml:space="preserve">
-    <value>Enumerator is positioned before the first element or after the last element of the collection.</value>
+    <value>Enumeration has either not started or has already finished.</value>
   </data>
   <data name="Arg_MultiRank" xml:space="preserve">
     <value>Multi dimension array is not supported on this operation.</value>

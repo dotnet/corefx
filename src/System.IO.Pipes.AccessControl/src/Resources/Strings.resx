@@ -65,7 +65,7 @@
     <value>This flag may not be set on a pipe.</value>
   </data>
   <data name="InvalidOperation_PipeNotYetConnected" xml:space="preserve">
-    <value>Pipe is not connected.</value>
+    <value>Pipe hasn't been connected yet.</value>
   </data>
   <data name="IO_IO_PipeBroken" xml:space="preserve">
     <value>Pipe is broken.</value>
