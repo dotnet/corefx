@@ -314,13 +314,11 @@ namespace System.Tests
             VerifyConvert(time3, s_strTonga, s_strGMT, time3.AddHours(-12));
 
             // Iran has Utc offset 4:30 during the DST and 3:30 during standard time.
-            var time4 = new DateTime(2018, 4, 20, 7, 0, 0, DateTimeKind.Utc);
-            var time5 = new DateTime(2018, 4, 20, 11, 30, 0, DateTimeKind.Unspecified); // DST time
-            VerifyConvert(time4, s_strIran, time5);
+            time3 = new DateTime(2018, 4, 20, 7, 0, 0, DateTimeKind.Utc);
+            VerifyConvert(time3, s_strIran, time3.AddHours(4.5), DateTimeKind.Unspecified); // DST time
 
-            time4 = new DateTime(2018, 1, 20, 7, 0, 0, DateTimeKind.Utc);
-            time5 = new DateTime(2018, 1, 20, 10, 30, 0, DateTimeKind.Unspecified); // Standard time
-            VerifyConvert(time4, s_strIran, time5);
+            time3 = new DateTime(2018, 1, 20, 7, 0, 0, DateTimeKind.Utc);
+            VerifyConvert(time3, s_strIran, time3.AddHours(3.5), DateTimeKind.Unspecified); // DST time
         }
 
         [Fact]
