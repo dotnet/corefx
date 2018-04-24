@@ -28,12 +28,14 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnNullable()
         {
             TestRefReturnInvokeNullable<int>(42);
         }
 
         [Fact]
+        [ActiveIssue("TFS 603305 - Bring Project N up to sync", TargetFrameworkMonikers.UapAot)]
         public static void TestRefReturnNullableNoValue()
         {
             TestRefReturnInvokeNullable<int>(default(int?));
