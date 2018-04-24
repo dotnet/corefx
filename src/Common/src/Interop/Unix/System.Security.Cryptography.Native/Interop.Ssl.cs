@@ -82,6 +82,9 @@ internal static partial class Interop
             out int dataKeySize,
             out int hashKeySize);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ForceErrorQueueCleanupBeforeWriteRead")]
+        internal static extern void ForceErrorQueueCleanupBeforeWriteRead();
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslWrite")]
         internal static extern unsafe int SslWrite(SafeSslHandle ssl, byte* buf, int num);
 
@@ -317,6 +320,12 @@ namespace Microsoft.Win32.SafeHandles
             {
                 // Do a bi-directional shutdown.
                 retVal = Interop.Ssl.SslShutdown(handle);
+            }
+
+            if (retVal < 0)
+            {
+                // Clean up the errors
+                Interop.Crypto.ErrClearError();
             }
         }
 
