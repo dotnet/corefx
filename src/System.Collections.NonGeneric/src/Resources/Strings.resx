@@ -61,6 +61,9 @@
   <data name="Argument_AddingDuplicate" xml:space="preserve">
     <value>An item with the same key has already been added. Key: {0}</value>
   </data>
+  <data name="Argument_AddingDuplicate_OldAndNewKeys " xml:space="preserve">
+    <value>Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'</value>
+  </data>
   <data name="Argument_ImplementIComparable" xml:space="preserve">
     <value>At least one object must implement IComparable.</value>
   </data>

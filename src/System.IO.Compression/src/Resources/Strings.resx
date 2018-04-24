@@ -157,7 +157,7 @@
     <value>Cannot access a closed stream.</value>
   </data>
   <data name="UnknownBlockType" xml:space="preserve">
-    <value>Unknown block type. stream might be corrupted.</value>
+    <value>Unknown block type. Stream might be corrupted.</value>
   </data>
   <data name="UnknownState" xml:space="preserve">
     <value>Decoder is in some unknown state. This might be caused by corrupted data.</value>
