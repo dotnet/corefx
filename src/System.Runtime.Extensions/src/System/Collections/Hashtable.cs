@@ -953,7 +953,7 @@ namespace System.Collections
                 {
                     if (add)
                     {
-                        throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate__, _buckets[bucketNumber].key, key));
+                        throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
                     }
                     _isWriterInProgress = true;
                     _buckets[bucketNumber].val = nvalue;

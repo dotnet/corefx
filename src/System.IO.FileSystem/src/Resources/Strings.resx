@@ -274,7 +274,7 @@
     <value>Access to the path '{0}' is denied.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Cannot access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
   </data>
   <data name="PlatformNotSupported_FileEncryption" xml:space="preserve">
     <value>File encryption is not supported on this platform.</value>

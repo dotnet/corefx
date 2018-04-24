@@ -1,6 +1,6 @@
 ﻿Write-Host "Running..."
 $currentPath = Get-Location
-$resouces = New-Object 'System.Collections.Generic.Dictionary[String,Collections.Generic.List[string]]'
+$resouces = New-Object 'System.Collections.Generic.Dictionary[String,Collections.Generic.List[ResouceRecord]]'
 foreach ($resourceFile in Get-ChildItem $currentPath  -recurse -include Strings.resx)
 {
     if ($resourceFile -like "*\tests\*")
@@ -15,10 +15,15 @@ foreach ($resourceFile in Get-ChildItem $currentPath  -recurse -include Strings.
     {
         if(!$resouces.ContainsKey($resource.name))
         {
-            $resourceList = New-Object Collections.Generic.List[string]
+            $resourceList = New-Object Collections.Generic.List[ResouceRecord]            
             $resouces.Add($resource.name,$resourceList)
-        }        
-        $resouces[$resource.name].Add($resource.value);
+        }    
+            
+        $record = New-Object ResouceRecord
+        $record.value = $resource.value
+        $record.fileName = $resourceFile
+
+        $resouces[$resource.name].Add($record);
     }                       
 }
 
@@ -26,12 +31,20 @@ $duplicates = New-Object 'Collections.Generic.List[string]'
 
 foreach($resouce in $resouces.GetEnumerator())
 {
-    $count = ($resouce.value | Get-Unique).count
-    if($count -gt 1)
-    {       
-        foreach($value in $resouce.value.GetEnumerator())
+    $values = New-Object Collections.Generic.List[string]       
+
+    foreach($value in $resouce.Value)
+    {
+        $values.Add($value.value);        
+    }
+
+    $count = ($values | Get-Unique).count
+
+    if ($count -gt 1)
+    {
+         foreach($value in $resouce.value.GetEnumerator())
         {
-            $duplicates.Add("$($resouce.key) $($value)")
+            $duplicates.Add("Name: '$($resouce.key)' value: '$($value.value)' relative path: '$($value.fileName.Replace($currentPath,[string]::Empty))'")
         }
     }
 }
@@ -46,5 +59,10 @@ if($duplicates.Count -gt 0)
 else
 {
     Write-Host "No duplicates found."
-}            
+}          
    
+class ResouceRecord
+{
+    [String]$value
+    [String]$fileName
+}

@@ -136,7 +136,7 @@
     <value>serverName cannot be an empty string.  Use \\\".\\\" for current machine.</value>
   </data>
   <data name="Argument_InvalidHandle" xml:space="preserve">
-    <value>'handle' has been disposed or is an invalid handle.</value>
+    <value>Handle has been disposed or is invalid.</value>
   </data>
   <data name="ArgumentNull_Buffer" xml:space="preserve">
     <value>Buffer cannot be null.</value>
@@ -271,7 +271,7 @@
     <value>The name of a pipe on this platform must be a valid file name or a valid absolute path to a file name.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Cannot access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
   </data>
   <data name="PlatformNotSupported_OperatingSystemError" xml:space="preserve">
     <value>The operating system returned error '{0}' indicating that the operation is not supported.</value>

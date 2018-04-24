@@ -107,7 +107,7 @@
     <value>Default credentials cannot be supplied for the {0} authentication scheme.</value>
   </data>
   <data name="InvalidOperation_EnumFailedVersion" xml:space="preserve">
-    <value>Collection was modified; enumeration operation may not execute.</value>
+    <value>Collection was modified after the enumerator was instantiated.</value>
   </data>
   <data name="InvalidOperation_EnumOpCantHappen" xml:space="preserve">
     <value>Enumeration has either not started or has already finished.</value>

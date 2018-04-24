@@ -275,10 +275,7 @@
   </data>
   <data name="ArgumentOutOfRange_SmallCapacity" xml:space="preserve">
     <value>capacity was less than the current size.</value>
-  </data>
-  <data name="Argument_AddingDuplicate__" xml:space="preserve">
-    <value>Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'</value>
-  </data>
+  </data>  
   <data name="Argument_InvalidOffLen" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
@@ -295,7 +292,7 @@
     <value>Enumeration already finished.</value>
   </data>
   <data name="InvalidOperation_EnumFailedVersion" xml:space="preserve">
-    <value>Collection was modified; enumeration operation may not execute.</value>
+    <value>Collection was modified after the enumerator was instantiated.</value>
   </data>
   <data name="InvalidOperation_EnumNotStarted" xml:space="preserve">
     <value>Enumeration has not started. Call MoveNext.</value>
@@ -355,7 +352,7 @@
     <value>Stream does not support writing.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Cannot access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
   </data>
   <data name="Argument_EmptyPath" xml:space="preserve">
     <value>Empty path name is not legal.</value>
