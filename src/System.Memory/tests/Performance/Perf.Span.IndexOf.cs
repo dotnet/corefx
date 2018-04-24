@@ -132,7 +132,8 @@ namespace System.Memory.Tests
                 str += new string('b', size / 2 - 1);
             }
             str += new string('z', 10);
-            ReadOnlySpan<char> span = str.AsSpan(10, size);
+            ReadOnlySpan<char> spanSource = str.AsSpan(10, size);
+            ReadOnlySpan<char> spanValue = "z".AsSpan();
 
             int index = 0;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -141,7 +142,7 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        index |= span.IndexOf("z", comparisonType);
+                        index |= spanSource.IndexOf(spanValue, comparisonType);
                     }
                 }
             }
@@ -192,7 +193,8 @@ namespace System.Memory.Tests
                 str += new string('ă', size / 2 - 1);
             }
             str += new string('ž', 10);
-            ReadOnlySpan<char> span = str.AsSpan(10, size);
+            ReadOnlySpan<char> spanSource = str.AsSpan(10, size);
+            ReadOnlySpan<char> spanValue = "ž".AsSpan();
 
             int index = 0;
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
@@ -201,7 +203,7 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        index |= span.IndexOf("ž", comparisonType);
+                        index |= spanSource.IndexOf(spanValue, comparisonType);
                     }
                 }
             }
