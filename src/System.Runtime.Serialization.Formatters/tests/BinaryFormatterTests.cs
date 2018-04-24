@@ -133,6 +133,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RegexExceptionSerializable()
         {
             try
@@ -141,7 +142,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
             catch (ArgumentException ex)
             {
-                BinaryFormatterHelpers.Clone(ex);
+                Assert.Equal(ex.GetType().Name, "RegexParseException");
+                ArgumentException clone = BinaryFormatterHelpers.Clone(ex);
+                Assert.IsType<ArgumentException>(clone);
             }
         }
 
