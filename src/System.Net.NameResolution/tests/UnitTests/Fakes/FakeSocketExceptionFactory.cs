@@ -10,7 +10,7 @@ namespace System.Net.Internals
     {
         public static SocketException CreateSocketException(SocketError socketError, int nativeErrorCode)
         {
-            return new ExtendedSocketException(socketError, nativeErrorCode);
+            return new SocketException(nativeErrorCode);
         }
     }
 }
