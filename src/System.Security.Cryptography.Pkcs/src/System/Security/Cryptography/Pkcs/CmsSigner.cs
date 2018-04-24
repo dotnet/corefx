@@ -14,9 +14,8 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class CmsSigner
     {
         private static readonly Oid s_defaultAlgorithm = Oid.FromOidValue(Oids.Sha256, OidGroup.HashAlgorithm);
-        private AsymmetricAlgorithm _key;
-
         public X509Certificate2 Certificate { get; set; }
+        public AsymmetricAlgorithm PrivateKey { get; set; }
         public X509Certificate2Collection Certificates { get; set; } = new X509Certificate2Collection();
         public Oid DigestAlgorithm { get; set; }
         public X509IncludeOption IncludeOption { get; set; }
@@ -54,7 +53,7 @@ namespace System.Security.Cryptography.Pkcs
         {
         }
 
-        public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate, AsymmetricAlgorithm key)
+        public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate, AsymmetricAlgorithm privateKey)
         {
             switch (signerIdentifierType)
             {
@@ -82,7 +81,7 @@ namespace System.Security.Cryptography.Pkcs
 
             Certificate = certificate;
             DigestAlgorithm = new Oid(s_defaultAlgorithm);
-            _key = key;
+            PrivateKey = privateKey;
         }
 
         internal void CheckCertificateValue()
@@ -97,7 +96,7 @@ namespace System.Security.Cryptography.Pkcs
                 throw new PlatformNotSupportedException(SR.Cryptography_Cms_NoSignerCert);
             }
 
-            if (_key == null && !Certificate.HasPrivateKey)
+            if (PrivateKey == null && !Certificate.HasPrivateKey)
             {
                 throw new CryptographicException(SR.Cryptography_Cms_Signing_RequiresPrivateKey);
             }
@@ -207,7 +206,7 @@ namespace System.Security.Cryptography.Pkcs
                 dataHash,
                 hashAlgorithmName,
                 Certificate,
-                _key,
+                PrivateKey,
                 silent,
                 out Oid signatureAlgorithm,
                 out ReadOnlyMemory<byte> signatureValue);
