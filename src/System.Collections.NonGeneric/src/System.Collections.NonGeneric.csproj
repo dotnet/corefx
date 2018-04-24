@@ -21,8 +21,8 @@
     <Compile Include="System\Collections\SortedList.cs" />
     <Compile Include="System\Collections\Stack.cs" />
     <Compile Include="System\Collections\Specialized\CollectionsUtil.cs" />
-    <Compile Include="$(CommonPath)\System\Collections\CompatibleComparer.cs">
-      <Link>Common\System\Collections\CompatibleComparer.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\KeyValuePairs.cs">
+      <Link>Common\System\Collections\KeyValuePairs.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
