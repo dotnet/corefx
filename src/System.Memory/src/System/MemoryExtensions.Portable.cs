@@ -256,7 +256,7 @@ namespace System
             if (range == 0)
                 return strA.ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
 
-            // Remaining part is part of source string
+            // Remaining part of source string
             int result = strA.Slice(range).ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
 
             // IndexOf value founded in remaining part, add offset of remaining part
@@ -365,7 +365,7 @@ namespace System
             if (idxA0 == 0)
                 return strA.ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
 
-            // Remaining part is part of source string
+            // Remaining of source string
             int result = strA.Slice(idxA0).ToString().IndexOf(strB.ToString(), StringComparison.OrdinalIgnoreCase);
 
             // IndexOf value founded in remaining part, add offset of remaining part
