@@ -4,8 +4,7 @@
 
 using System.Buffers;
 using System.Collections.Generic;
-using System.MemoryTests;
-using System.Text;
+using System.Linq;
 
 namespace System.Memory.Tests
 {
@@ -15,7 +14,7 @@ namespace System.Memory.Tests
         public static ReadOnlySequenceFactory<T> MemoryFactory { get; } = new MemoryTestSequenceFactory();
         public static ReadOnlySequenceFactory<T> SingleSegmentFactory { get; } = new SingleSegmentTestSequenceFactory();
         public static ReadOnlySequenceFactory<T> SegmentPerItemFactory { get; } = new BytePerSegmentTestSequenceFactory();
-        public static ReadOnlySequenceFactory<T> SplitInThree { get; } = new SplitInThreeSegmentsTestSequenceFactory();
+        public static ReadOnlySequenceFactory<T> SplitInThree { get; } = new SegmentsTestSequenceFactory(3);
 
         public abstract ReadOnlySequence<T> CreateOfSize(int size);
         public abstract ReadOnlySequence<T> CreateWithContent(T[] data);
@@ -47,6 +46,35 @@ namespace System.Memory.Tests
                 var startSegment = new T[data.Length + 20];
                 Array.Copy(data, 0, startSegment, 10, data.Length);
                 return new ReadOnlySequence<T>(new Memory<T>(startSegment, 10, data.Length));
+            }
+        }
+
+        internal class SegmentsTestSequenceFactory : ReadOnlySequenceFactory<T>
+        {
+            public SegmentsTestSequenceFactory(int segmentsCount)
+            {
+                SegmentsCount = segmentsCount;
+            }
+
+            public int SegmentsCount { get; }
+
+            public override ReadOnlySequence<T> CreateOfSize(int size)
+            {
+                return CreateWithContent(new T[size]);
+            }
+
+            public override ReadOnlySequence<T> CreateWithContent(T[] data)
+            {
+                var inputs = new List<ReadOnlyMemory<T>>(SegmentsCount);
+                int start = 0;
+                for (int i = 1; i <= SegmentsCount; i++)
+                {
+                    int end = (int)((long)data.Length * i / SegmentsCount);
+                    inputs.Add(data.AsMemory(start, end - start));
+                    start = end;
+                }
+
+                return CreateSegments(inputs);
             }
         }
 
@@ -85,50 +113,25 @@ namespace System.Memory.Tests
             }
         }
 
-        internal class SplitInThreeSegmentsTestSequenceFactory : ReadOnlySequenceFactory<T>
+        public static ReadOnlySequence<T> CreateSegments(params T[][] inputs) => CreateSegments(inputs.Select(input => (ReadOnlyMemory<T>)input.AsMemory()));
+
+        public static ReadOnlySequence<T> CreateSegments(IEnumerable<ReadOnlyMemory<T>> inputs)
         {
-            public override ReadOnlySequence<T> CreateOfSize(int size)
-            {
-                return CreateWithContent(new T[size]);
-            }
-
-            public override ReadOnlySequence<T> CreateWithContent(T[] data)
-            {
-                var third = data.Length / 3;
-
-                return CreateSegments(
-                    data.AsSpan(0, third).ToArray(),
-                    data.AsSpan(third, third).ToArray(),
-                    data.AsSpan(2 * third, data.Length - 2 * third).ToArray());
-            }
-        }
-
-        public static ReadOnlySequence<T> CreateSegments(params T[][] inputs)
-        {
-            if (inputs == null || inputs.Length == 0)
+            if (inputs == null || inputs.Count() == 0)
             {
                 throw new InvalidOperationException();
             }
 
-            int i = 0;
-
             BufferSegment<T> last = null;
             BufferSegment<T> first = null;
-
-            do
+            foreach(ReadOnlyMemory<T> input in inputs)
             {
-                T[] s = inputs[i];
-                int length = s.Length;
-                int dataOffset = length;
-                var chars = new T[length * 2];
-
-                for (int j = 0; j < length; j++)
-                {
-                    chars[dataOffset + j] = s[j];
-                }
-
-                Memory<T> memory = new Memory<T>(chars).Slice(length, length);
-
+                int length = input.Length;
+                int dataOffset = length / 2;
+                
+                Memory<T> memory = new Memory<T>(new T[length * 2], dataOffset, length);
+                input.CopyTo(memory);
+                
                 if (first == null)
                 {
                     first = new BufferSegment<T>(memory);
@@ -138,8 +141,7 @@ namespace System.Memory.Tests
                 {
                     last = last.Append(memory);
                 }
-                i++;
-            } while (i < inputs.Length);
+            }
 
             return new ReadOnlySequence<T>(first, 0, last, last.Memory.Length);
         }
