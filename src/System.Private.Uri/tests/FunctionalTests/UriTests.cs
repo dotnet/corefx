@@ -898,6 +898,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This test depends on a fix that has not yet made it to .NET Framework.")]
         public static void Uri_ColonInLongRelativeUri_SchemeSuccessfullyParsed()
         {
             Uri absolutePart = new Uri("http://www.contoso.com");
