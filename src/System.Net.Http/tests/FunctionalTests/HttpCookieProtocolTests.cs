@@ -36,6 +36,14 @@ namespace System.Net.Http.Functional.Tests
 
         private static string GetCookieHeaderValue(string cookieName, string cookieValue) => $"{cookieName}={cookieValue}";
 
+        [Fact]
+        public void HttpClientHandler_SetNullCookieContainer_ThrowsArgumentNullException()
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                Assert.Throws<ArgumentNullException>(() => handler.CookieContainer = null);
+            }
+        }
 
         [Fact]
         public async Task GetAsync_DefaultCoookieContainer_NoCookieSent()

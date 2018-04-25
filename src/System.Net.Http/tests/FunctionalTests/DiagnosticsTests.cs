@@ -514,9 +514,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             // Forces a synchronous exception for WinHttpHandler
                             handler.UseCookies = true;
-                            handler.CookieContainer = null;
-
-                            Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync($"http://{Guid.NewGuid()}.com")).Wait();
+                            Assert.Throws<ArgumentNullException>(() => handler.CookieContainer = null);
                         }
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
