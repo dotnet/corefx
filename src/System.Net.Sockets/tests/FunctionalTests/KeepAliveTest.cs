@@ -1,0 +1,59 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Threading;
+using Xunit;
+
+namespace System.Net.Sockets.Tests
+{
+    public class KeepAliveTest : IDisposable
+    {
+        private const bool enabled = true;
+        private const int retryCount = 60;
+        private const int time = 5;
+        private const int interval = 2;
+
+        private readonly Socket socket;
+        
+        public KeepAliveTest()
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        }
+
+        [Fact]
+        public void Socket_KeepAlive_Disabled_By_Default()
+        {
+            Assert.False(IsKeepAliveEnabled(socket), "Keep-alive was turned on by default!");
+        }
+
+        [Fact]
+        public void Socket_KeepAlive_Enable_Success()
+        {
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            Assert.True(IsKeepAliveEnabled(socket));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void Socket_KeepAliveState_Set_Success_AnyUnix()
+        {
+            socket.KeepAliveState = new KeepAliveOption(enabled, retryCount, time, interval);
+
+            Assert.Equal<bool>(enabled, socket.KeepAliveState.Enabled);
+            Assert.Equal<int>(retryCount, socket.KeepAliveState.RetryCount);
+            Assert.Equal<int>(time, socket.KeepAliveState.Time);
+            Assert.Equal<int>(interval, socket.KeepAliveState.Interval);
+        }
+
+        public void Dispose()
+        {
+            socket.Dispose();
+        }
+
+        private bool IsKeepAliveEnabled(Socket socket)
+        {
+            return (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
+        }
+    }
+}

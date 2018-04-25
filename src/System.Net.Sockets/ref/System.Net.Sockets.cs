@@ -69,6 +69,14 @@ namespace System.Net.Sockets
         public System.Net.IPAddress Group { get { throw null; } set { } }
         public long InterfaceIndex { get { throw null; } set { } }
     }
+    public partial class KeepAliveOption
+    {
+        public KeepAliveOption(bool enable, int retryCount, int time, int interval) { }
+        public bool Enabled { get { throw null; } set { } }
+        public int RetryCount { get { throw null; } set { } }
+        public int Time { get { throw null; } set { } }
+        public int Interval { get { throw null; } set { } }
+    }
     public partial class LingerOption
     {
         public LingerOption(bool enable, int seconds) { }
@@ -217,6 +225,7 @@ namespace System.Net.Sockets
         public bool ExclusiveAddressUse { get { throw null; } set { } }
         public IntPtr Handle { get { throw null; } }
         public bool IsBound { get { throw null; } }
+        public System.Net.Sockets.KeepAliveOption KeepAliveState { get { throw null; } set { } }
         public System.Net.Sockets.LingerOption LingerState { get { throw null; } set { } }
         public System.Net.EndPoint LocalEndPoint { get { throw null; } }
         public bool MulticastLoopback { get { throw null; } set { } }
@@ -455,6 +464,9 @@ namespace System.Net.Sockets
         SendBuffer = 4097,
         SendLowWater = 4099,
         SendTimeout = 4101,
+        TcpKeepAliveRetryCount = 16,
+        TcpKeepAliveTime = 3,
+        TcpKeepAliveInterval = 17,
         Type = 4104,
         TypeOfService = 3,
         UnblockSource = 18,
@@ -537,6 +549,7 @@ namespace System.Net.Sockets
         public System.Net.Sockets.Socket Client { get { throw null; } set { } }
         public bool Connected { get { throw null; } }
         public bool ExclusiveAddressUse { get { throw null; } set { } }
+        public System.Net.Sockets.KeepAliveOption KeepAliveState { get { throw null; } set { } }
         public System.Net.Sockets.LingerOption LingerState { get { throw null; } set { } }
         public bool NoDelay { get { throw null; } set { } }
         public int ReceiveBufferSize { get { throw null; } set { } }

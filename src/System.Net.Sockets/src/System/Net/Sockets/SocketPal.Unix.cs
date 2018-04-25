@@ -16,6 +16,25 @@ namespace System.Net.Sockets
     {
         public const bool SupportsMultipleConnectAttempts = false;
         private static readonly bool SupportsDualModeIPv4PacketInfo = GetPlatformSupportsDualModeIPv4PacketInfo();
+        private static readonly IDictionary<SocketOptionName, SocketOptionName> keepAliveOsSpecificOptionNames;
+
+        static SocketPal()
+        {
+            keepAliveOsSpecificOptionNames =
+                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ?
+                new Dictionary<SocketOptionName, SocketOptionName>
+                {
+                    { SocketOptionName.TcpKeepAliveRetryCount, (SocketOptionName)0x6 },   // TCP_KEEPCNT
+                    { SocketOptionName.TcpKeepAliveTime, (SocketOptionName)0x4 },         // TCP_KEEPIDLE
+                    { SocketOptionName.TcpKeepAliveInterval, (SocketOptionName)0x5 }      // TCP_KEEPINTVL
+                } :
+                new Dictionary<SocketOptionName, SocketOptionName>
+                {
+                    { SocketOptionName.TcpKeepAliveRetryCount, (SocketOptionName)0x102 }, // TCP_KEEPCNT
+                    { SocketOptionName.TcpKeepAliveTime, (SocketOptionName)0x10 },        // TCP_KEEPALIVE: https://www.winehq.org/pipermail/wine-devel/2015-July/108583.html
+                    { SocketOptionName.TcpKeepAliveInterval, (SocketOptionName)0x101 }    // TCP_KEEPINTVL
+                }
+        }
 
         private static bool GetPlatformSupportsDualModeIPv4PacketInfo()
         {
@@ -25,6 +44,26 @@ namespace System.Net.Sockets
         public static void Initialize()
         {
             // nop.  No initialization required.
+        }
+
+        public static KeepAliveOption GetKeepAliveState(Socket socket)
+        {
+            bool enabled = (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
+            int retryCount = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount);
+            int time = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime);
+            int interval = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval);
+            return new KeepAliveOption(enabled, retryCount, time, interval);
+        }
+
+        public static void SetKeepAliveState(Socket socket, KeepAliveOption keepAliveOption)
+        {
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, keepAliveOption.Enabled);
+            if (!keepAliveOption.Enabled)
+                return;
+
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, keepAliveOption.RetryCount);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, keepAliveOption.Time);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, keepAliveOption.Interval);
         }
 
         public static SocketError GetSocketErrorForErrorCode(Interop.Error errorCode)
@@ -1127,6 +1166,15 @@ namespace System.Net.Sockets
                         err = Interop.Sys.SetIPv4MulticastOption(handle, Interop.Sys.MulticastOption.MULTICAST_IF, &opt);
                         return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                     }
+                }
+            }
+            else if (optionLevel == SocketOptionLevel.Tcp)
+            {
+                if (optionName == SocketOptionName.TcpKeepAliveRetryCount || 
+                    optionName == SocketOptionName.TcpKeepAliveTime || 
+                    optionName == SocketOptionName.TcpKeepAliveInterval)
+                {
+                    optionName = keepAliveOsSpecificOptionNames[optionName];
                 }
             }
 

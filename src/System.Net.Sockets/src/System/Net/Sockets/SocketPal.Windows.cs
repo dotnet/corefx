@@ -31,6 +31,47 @@ namespace System.Net.Sockets
             Dns.GetHostName();
         }
 
+        public static KeepAliveOption GetKeepAliveState(Socket socket)
+        {
+            bool enabled = (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
+
+            // TcpKeepAliveRetryCount is 10 on Windows versions supported by .NET Core (Win 7 SP1 and later):
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/ee470551.aspx
+            // It can be managed via *SocketOption starting from Windows 10 version 1703
+            Version version = Environment.OSVersion.Version;
+            bool isBelowWin10V1703 = version.Major < 10 || version.Major == 10 && version.Build < 15063;
+            int retryCount = isBelowWin10V1703 ? 10 : (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount);
+
+            // TcpKeepAliveTime and TcpKeepAliveInterval can be managed via *SocketOption starting from Windows 10 version 1709
+            int time = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime);
+            int interval = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval);
+
+            return new KeepAliveOption(enabled, retryCount, time, interval);
+        }
+
+        public static void SetKeepAliveState(Socket socket, KeepAliveOption keepAliveOption)
+        {
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, keepAliveOption.Enabled);
+            if (!keepAliveOption.Enabled)
+                return;
+
+            // TcpKeepAliveRetryCount can be managed via *SocketOption starting from Windows 10 version 1703
+            // TcpKeepAliveTime and TcpKeepAliveInterval can be managed via *SocketOption starting from Windows 10 version 1709
+            Version version = Environment.OSVersion.Version;
+            bool isWin10V1703OrLater = version.Major > 10 || version.Major == 10 && version.Build >= 15063;
+            if (isWin10V1703OrLater)
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, keepAliveOption.RetryCount);
+            
+            bool isBelowWin10V1709 = version.Major < 10 || version.Major == 10 && version.Build < 16299;
+            if (isBelowWin10V1709)
+            {
+                socket.IOControl(IOControlCode.KeepAliveValues, new IOControlKeepAliveValues(keepAliveOption).ToArray(), null);
+                return;
+            }
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, keepAliveOption.Time);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, keepAliveOption.Interval);
+        }
+
         public static SocketError GetLastSocketError()
         {
             int win32Error = Marshal.GetLastWin32Error();
