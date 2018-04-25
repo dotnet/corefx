@@ -896,5 +896,14 @@ namespace System.PrivateUri.Tests
             Uri u = new Uri(new Uri("http://example.com/", UriKind.Absolute), new Uri("C(B:G", UriKind.Relative));
             Assert.Equal("http://example.com/C(B:G", u.ToString());
         }
+
+        [Fact]
+        public static void Uri_ColonInLongRelativeUri_SchemeSuccessfullyParsed()
+        {
+            Uri absolutePart = new Uri("http://www.contoso.com");
+            string relativePart = "a/" + new String('a', 1024) + ":";
+            Uri u = new Uri(absolutePart, relativePart);
+            Assert.Equal("http", u.Scheme);
+        }
     }
 }

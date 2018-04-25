@@ -3732,17 +3732,10 @@ namespace System
                 return 0;
             }
 
-            // Here could be a possibly valid, and not well-known scheme
-            // Finds the scheme delimiter
-            // we don;t work with the schemes names > c_MaxUriSchemeName (should be ~1k)
-            if ((end - idx) > c_MaxUriSchemeName)
-            {
-                err = ParsingError.SchemeLimit;
-                return 0;
-            }
-
-            //Check the syntax, canonicalize  and avoid a GC call
+            // This appears to be an unknown but potentially valid scheme.
+            // Check the syntax, canonicalize and avoid a GC call.
             err = CheckSchemeSyntax(new ReadOnlySpan<char>(uriString + idx, end - idx), ref syntax);
+
             if (err != ParsingError.None)
             {
                 return 0;
@@ -3927,6 +3920,11 @@ namespace System
             else if ((uint)(firstLower - 'a') > 'z' - 'a')
             {
                 return ParsingError.BadScheme;
+            }
+
+            if(length > c_MaxUriSchemeName)
+            {
+                return ParsingError.SchemeLimit;
             }
 
             // Special-case common and known schemes to avoid allocations and dictionary lookups in these cases.
