@@ -10,11 +10,11 @@ using System.Xml.Linq;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class XNodeReaderErrorConditionsFunctionalTests : TestModule
     {
-        public partial class XNodeReaderTests : XLinqTestCase
+        public class XNodeReaderTests : XLinqTestCase
         {
-            public partial class ErrorConditions : BridgeHelpers
+            public class ErrorConditions : BridgeHelpers
             {
                 //[Variation(Desc = "Move to Attribute using []")]
                 public void Variation1()

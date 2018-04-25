@@ -9,13 +9,13 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class ReadToDescendantFunctionalTests : TestModule
     {
 
-        public partial class XNodeReaderTests : XLinqTestCase
+        public class XNodeReaderTests : XLinqTestCase
         {
             //[TestCase(Name = "ReadToDescendant", Desc = "ReadToDescendant")]
-            public partial class TCReadToDescendant : BridgeHelpers
+            public class TCReadToDescendant : BridgeHelpers
             {
                 #region XMLSTR
                 private string _xmlStr = @"<?xml version='1.0'?>

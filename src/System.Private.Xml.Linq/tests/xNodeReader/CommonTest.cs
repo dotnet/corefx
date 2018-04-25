@@ -10,12 +10,12 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class CommonTestFunctionalTests : TestModule
     {
 
-        public partial class XNodeReaderTests : XLinqTestCase
+        public class XNodeReaderTests : XLinqTestCase
         {
-            public partial class TCDispose : BridgeHelpers
+            public class TCDispose : BridgeHelpers
             {
                 //[Variation("Test Integrity of all values after Dispose")]
                 public void Variation1()

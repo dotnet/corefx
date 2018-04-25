@@ -9,11 +9,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class ErrorConditionsFunctionalTests : TestModule
     {
-        public partial class XNodeBuilderTests : XLinqTestCase
+        public class XNodeBuilderTests : XLinqTestCase
         {
-            public partial class XObjectBuilderTest : BridgeHelpers
+            public class XObjectBuilderTest : BridgeHelpers
             {
                 //[Variation(Priority = 2, Desc = "LookupPrefix(null)")]
                 public void var_1()

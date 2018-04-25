@@ -8,10 +8,10 @@ using System.Xml;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class IntegrityTestFunctionalTests : TestModule
     {
 
-        public partial class XNodeReaderTests : XLinqTestCase
+        public class XNodeReaderTests : XLinqTestCase
         {
             public enum EINTEGRITY
             {
@@ -32,7 +32,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "XMLIntegrityBase", Desc = "XMLIntegrityBase")]
-            public partial class TCXMLIntegrityBase : BridgeHelpers
+            public class TCXMLIntegrityBase : BridgeHelpers
             {
                 private EINTEGRITY _eEIntegrity;
 

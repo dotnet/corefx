@@ -10,11 +10,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public class XNodeReaderAPIFunctionalTests : TestModule
     {
-        public partial class XNodeReaderTests : XLinqTestCase
+        public class XNodeReaderTests : XLinqTestCase
         {
-            public partial class XNodeReaderAPI : XLinqTestCase
+            public class XNodeReaderAPI : XLinqTestCase
             {
                 // open on different node types, scoping
                 // namespaces ...
