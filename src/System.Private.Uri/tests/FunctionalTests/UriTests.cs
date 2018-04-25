@@ -901,7 +901,7 @@ namespace System.PrivateUri.Tests
         public static void Uri_ColonInLongRelativeUri_SchemeSuccessfullyParsed()
         {
             Uri absolutePart = new Uri("http://www.contoso.com");
-            string relativePart = "a/" + new String('a', 1024) + ":";
+            string relativePart = "a/" + new String('a', 1024) + ":";// 1024 is the maximum scheme length supported by System.Uri.
             Uri u = new Uri(absolutePart, relativePart);
             Assert.Equal("http", u.Scheme);
         }
