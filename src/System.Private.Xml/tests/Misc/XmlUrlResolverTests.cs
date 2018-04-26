@@ -46,13 +46,9 @@ namespace System.Xml.Tests
             // Base URI as null is the default for internal Xml operation.
             var baseUris = new List<Uri> { null };
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // The case below does not work on Unix, the '#' ends up treated as a fragment and the path is cut there.
-                var currDirWithDirSeparator = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
-                baseUris.Add(new Uri(currDirWithDirSeparator, UriKind.Absolute));
-                baseUris.Add(new Uri(string.Empty, UriKind.RelativeOrAbsolute));
-            }
+            var currDirWithDirSeparator = Environment.CurrentDirectory + Path.DirectorySeparatorChar;
+            baseUris.Add(new Uri(currDirWithDirSeparator, UriKind.Absolute));
+            baseUris.Add(new Uri(string.Empty, UriKind.RelativeOrAbsolute));
 
             foreach (Uri baseUri in baseUris)
             {
