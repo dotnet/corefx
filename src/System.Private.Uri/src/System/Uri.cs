@@ -1029,7 +1029,7 @@ namespace System
 
                 return new string(result, 0, count);
             }
-            else if (IsUnixPath)
+            else if (IsUnixPath && IsImplicitFile)
             {
                 return GetUnescapedParts(UriComponents.Path | UriComponents.Query | UriComponents.Fragment | UriComponents.KeepDelimiter, UriFormat.Unescaped);
             }

@@ -19,6 +19,10 @@ namespace System.PrivateUri.Tests
                     yield return new object[] { @"file:///path1%5Cpath2\path3", @"/path1/path2/path3", @"/path1/path2/path3", @"file:///path1/path2/path3", ""};
                     yield return new object[] { @"file://localhost/path1\path2/path3\path4\", @"/path1/path2/path3/path4/", @"\\localhost\path1\path2\path3\path4\", @"file://localhost/path1/path2/path3/path4/", "localhost"};
                     yield return new object[] { @"file://randomhost/path1%5Cpath2\path3", @"/path1/path2/path3", @"\\randomhost\path1\path2\path3", @"file://randomhost/path1/path2/path3", "randomhost"};
+                    yield return new object[] { @"c:\path1\path2\path3#path4", @"c:/path1/path2/path3%23path4", @"c:\path1\path2\path3#path4", @"file:///c:/path1/path2/path3%23path4", "" };
+                    yield return new object[] { @"c:\path1\path2\path3?path4", @"c:/path1/path2/path3%3Fpath4", @"c:\path1\path2\path3?path4", @"file:///c:/path1/path2/path3%3Fpath4", "" };
+                    yield return new object[] { @"c:\path1\path2?path3#path4", @"c:/path1/path2%3Fpath3%23path4", @"c:\path1\path2?path3#path4", @"file:///c:/path1/path2%3Fpath3%23path4", "" };
+                    yield return new object[] { @"c:\path1\path2#path3?path4", @"c:/path1/path2%23path3%3Fpath4", @"c:\path1\path2#path3?path4", @"file:///c:/path1/path2%23path3%3Fpath4", "" };
                 }
                 else
                 {
@@ -26,11 +30,15 @@ namespace System.PrivateUri.Tests
                     yield return new object[] { @"file:///path1%5Cpath2\path3", @"/path1%5Cpath2%5Cpath3", @"/path1\path2\path3", @"file:///path1%5Cpath2%5Cpath3", ""};
                     yield return new object[] { @"file://localhost/path1\path2/path3\path4\", @"/path1%5Cpath2/path3%5Cpath4%5C", @"\\localhost\path1\path2\path3\path4\", @"file://localhost/path1%5Cpath2/path3%5Cpath4%5C", "localhost"};
                     yield return new object[] { @"file://randomhost/path1%5Cpath2\path3", @"/path1%5Cpath2%5Cpath3", @"\\randomhost\path1\path2\path3", @"file://randomhost/path1%5Cpath2%5Cpath3", "randomhost"};
-                    yield return new object[] { @"file:///path1/path2/path3#path4", @"/path1/path2/path3", @"/path1/path2/path3#path4", @"file:///path1/path2/path3#path4", "" };
-                    yield return new object[] { @"file:///path1/path2/path3?path4", @"/path1/path2/path3", @"/path1/path2/path3?path4", @"file:///path1/path2/path3?path4", "" };
-                    yield return new object[] { @"file:///path1/path2?path3#path4", @"/path1/path2", @"/path1/path2?path3#path4", @"file:///path1/path2?path3#path4", "" };
-                    yield return new object[] { @"file:///path1/path2#path3?path4", @"/path1/path2", @"/path1/path2#path3?path4", @"file:///path1/path2#path3?path4", "" };
+                    yield return new object[] { @"/path1/path2/path3#path4", @"/path1/path2/path3%23path4", @"/path1/path2/path3#path4", @"file:///path1/path2/path3%23path4", "" };
+                    yield return new object[] { @"/path1/path2/path3?path4", @"/path1/path2/path3%3Fpath4", @"/path1/path2/path3?path4", @"file:///path1/path2/path3%3Fpath4", "" };
+                    yield return new object[] { @"/path1/path2?path3#path4", @"/path1/path2%3Fpath3%23path4", @"/path1/path2?path3#path4", @"file:///path1/path2%3Fpath3%23path4", "" };
+                    yield return new object[] { @"/path1/path2#path3?path4", @"/path1/path2%23path3%3Fpath4", @"/path1/path2#path3?path4", @"file:///path1/path2%23path3%3Fpath4", "" };
                 }
+                yield return new object[] { @"file:///path1/path2/path3#path4", @"/path1/path2/path3", @"/path1/path2/path3", @"file:///path1/path2/path3#path4", "" };
+                yield return new object[] { @"file:///path1/path2/path3?path4", @"/path1/path2/path3", @"/path1/path2/path3", @"file:///path1/path2/path3?path4", "" };
+                yield return new object[] { @"file:///path1/path2?path3#path4", @"/path1/path2", @"/path1/path2", @"file:///path1/path2?path3#path4", "" };
+                yield return new object[] { @"file:///path1/path2#path3?path4", @"/path1/path2", @"/path1/path2", @"file:///path1/path2#path3?path4", "" };
             }
         }
 
