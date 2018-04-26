@@ -172,14 +172,14 @@
       <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
       <NuGetTargetMoniker>.NETCoreApp,Version=v2.1</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>netcoreapp2.1</NuGetTargetMonikerShort>
-      <Imports>netcoreapp2.1</Imports>
+      <Imports>netcoreapp;netcoreapp2.1</Imports>
       <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="netcoreappaot">
       <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
       <NuGetTargetMoniker>.NETCoreApp,Version=v2.1</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>netcoreapp2.1</NuGetTargetMonikerShort>
-      <Imports>netcoreapp2.1</Imports>
+      <Imports>netcoreapp;netcoreapp2.1</Imports>
       <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="net45">
