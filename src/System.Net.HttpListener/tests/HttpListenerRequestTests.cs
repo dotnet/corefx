@@ -82,7 +82,24 @@ namespace System.Net.Tests
             yield return new object[] { "Content-Type:application.json;charset=,", Encoding.Default };
             yield return new object[] { "Content-Type:application.json;charset=\"unicode", Encoding.Default };
             yield return new object[] { "Content-Type:application/json;charset=NoSuchEncoding", Encoding.Default };
-            yield return new object[] { "Content-Type:application/json;charset=unicode; boundary=something", Encoding.Default };
+
+            yield return new object[] { "Content-Type:application/json;charset=unicode; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;charset=unicode   ; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;charset=unicode ; ; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something;charset=unicode   ", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something;charset=unicode   ;", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;   ", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode ;", Encoding.Unicode };
+
+            yield return new object[] { "Content-Type:application.json;charset=\"unicode\";", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application.json; charset=\"unicode;\"", Encoding.Default };
+            yield return new object[] { "Content-Type:application/json;charset=\"unicode\" ; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json; charset=\"unicode;\";boundary=something", Encoding.Default };
+            yield return new object[] { "Content-Type:application/json;charset=\" unicode \"; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json; charset=\"unicode ;\"; boundary=something", Encoding.Default };
+            yield return new object[] { "Content-Type:application/json;charset=\" unicode ;\"; boundary=something", Encoding.Default };
 
             yield return new object[] { "Unknown-Header: Test", Encoding.Default };
         }

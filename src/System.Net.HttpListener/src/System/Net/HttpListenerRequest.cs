@@ -92,7 +92,7 @@ namespace System.Net
                 {
                     if (ContentType != null)
                     {
-                        string charSet = Helpers.GetAttributeFromHeader(ContentType, "charset");
+                        string charSet = Helpers.GetCharSetValueFromHeader(ContentType);
                         if (charSet != null)
                         {
                             try
@@ -290,8 +290,10 @@ namespace System.Net
             //
             // Get attribute off header value
             //
-            internal static string GetAttributeFromHeader(string headerValue, string attrName)
+            internal static string GetCharSetValueFromHeader(string headerValue)
             {
+                string attrName = "charset";
+
                 if (headerValue == null)
                     return null;
 
@@ -351,7 +353,7 @@ namespace System.Net
                 {
                     for (j = i; j < l; j++)
                     {
-                        if (headerValue[j] == ' ' || headerValue[j] == ',')
+                        if (headerValue[j] == ';')
                             break;
                     }
 
