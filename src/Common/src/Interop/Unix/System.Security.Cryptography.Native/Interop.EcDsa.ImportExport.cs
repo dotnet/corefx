@@ -34,7 +34,12 @@ internal static partial class Interop
             if (rc == -1)
             {
                 if (key != null)
+                {
                     key.Dispose();
+                }
+
+                Interop.Crypto.ErrClearError();
+                
                 throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, oid));
             }
             return key;
