@@ -3733,9 +3733,8 @@ namespace System
             }
 
             // This appears to be an unknown but potentially valid scheme.
-            // Check the syntax, canonicalize and avoid a GC call.
+            // Check for illegal characters, canonicalize, and check the length.
             err = CheckSchemeSyntax(new ReadOnlySpan<char>(uriString + idx, end - idx), ref syntax);
-
             if (err != ParsingError.None)
             {
                 return 0;
@@ -3922,7 +3921,7 @@ namespace System
                 return ParsingError.BadScheme;
             }
 
-            if(length > c_MaxUriSchemeName)
+            if (length > c_MaxUriSchemeName)
             {
                 return ParsingError.SchemeLimit;
             }
