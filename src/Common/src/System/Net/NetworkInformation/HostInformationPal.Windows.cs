@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -16,6 +17,12 @@ namespace System.Net.NetworkInformation
         private static Interop.IpHlpApi.FIXED_INFO s_fixedInfo;
         private static bool s_fixedInfoInitialized;
         private static object s_syncObject = new object();
+
+        public static string GetHostName()
+        {
+            EnsureFixedInfo();
+            return s_fixedInfo.hostName;
+        }
 
         public static string GetDomainName()
         {

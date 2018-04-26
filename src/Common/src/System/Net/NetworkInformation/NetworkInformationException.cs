@@ -44,6 +44,14 @@ namespace System.Net.NetworkInformation
         {
         }
 
+        internal NetworkInformationException(string message) : base(message)
+        {
+        }
+
+        internal NetworkInformationException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>

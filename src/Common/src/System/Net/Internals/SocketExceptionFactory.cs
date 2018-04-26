@@ -18,6 +18,12 @@ namespace System.Net.Internals
                 _endPoint = endPoint;
             }
 
+            public ExtendedSocketException(SocketError socketError, int platformError)
+                : base((int)socketError)
+            {
+                HResult = platformError;
+            }
+
             public override string Message => 
                 (_endPoint == null) ? base.Message : base.Message + " " + _endPoint.ToString();
         }

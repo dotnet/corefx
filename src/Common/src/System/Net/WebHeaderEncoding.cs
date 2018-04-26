@@ -75,5 +75,14 @@ namespace System.Net
                 }
             }
         }
+        internal static unsafe byte[] GetBytes(string myString)
+        {
+            byte[] bytes = new byte[myString.Length];
+            if (myString.Length != 0)
+            {
+                GetBytes(myString, 0, myString.Length, bytes, 0);
+            }
+            return bytes;
+        }
     }
 }

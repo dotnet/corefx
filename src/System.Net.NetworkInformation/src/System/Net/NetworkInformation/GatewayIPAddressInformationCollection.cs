@@ -15,6 +15,11 @@ namespace System.Net.NetworkInformation
             _addresses = new List<GatewayIPAddressInformation>();
         }
 
+        internal GatewayIPAddressInformationCollection(List<GatewayIPAddressInformation> addresses)
+        {
+            _addresses = addresses;
+        }
+
         public virtual void CopyTo(GatewayIPAddressInformation[] array, int offset)
         {
             _addresses.CopyTo(array, offset);

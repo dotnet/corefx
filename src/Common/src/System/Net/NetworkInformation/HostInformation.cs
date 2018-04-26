@@ -6,6 +6,15 @@ namespace System.Net.NetworkInformation
 {
     internal class HostInformation
     {
+        // Specifies the host name for the local computer.
+        internal static string HostName
+        {
+            get
+            {
+                return HostInformationPal.GetHostName();
+            }
+        }
+
         // Specifies the domain in which the local computer is registered.
         internal static string DomainName
         {
