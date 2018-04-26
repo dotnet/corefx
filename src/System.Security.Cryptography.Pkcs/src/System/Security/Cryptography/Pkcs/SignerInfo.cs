@@ -108,6 +108,89 @@ namespace System.Security.Cryptography.Pkcs
 
         public Oid SignatureAlgorithm => new Oid(_signatureAlgorithm);
 
+        public void AddUnsignedAttribute(CryptographicAttributeObject attribute)
+        {
+            int myIdx = _document.SignerInfos.FindIndexForSigner(this);
+
+            if (myIdx < 0)
+            {
+                throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
+            }
+
+            AttributeAsn newUnsignedAttr;
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                writer.PushSetOf();
+                foreach (AsnEncodedData objectValue in attribute.Values)
+                {
+                    writer.WriteEncodedValue(objectValue.RawData);
+                }
+                writer.PopSetOf();
+
+                newUnsignedAttr = new AttributeAsn
+                {
+                    AttrType = new Oid(Oids.CounterSigner, Oids.CounterSigner),
+                    AttrValues = writer.Encode(),
+                };
+            }
+
+            ref SignedDataAsn signedData = ref _document.GetRawData();
+            ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
+
+            int newExtensionIdx;
+
+            if (mySigner.UnsignedAttributes == null)
+            {
+                mySigner.UnsignedAttributes = new AttributeAsn[1];
+                newExtensionIdx = 0;
+            }
+            else
+            {
+                newExtensionIdx = mySigner.UnsignedAttributes.Length;
+                Array.Resize(ref mySigner.UnsignedAttributes, newExtensionIdx + 1);
+            }
+
+            mySigner.UnsignedAttributes[newExtensionIdx] = newUnsignedAttr;
+
+            // Re-normalize the document
+            _document.Reencode();
+        }
+
+        private static void RemoveAtNoBoundariesCheck<T>(ref T[] arr, int index)
+        {
+            int newLength = arr.Length - 1;
+            for (int i = index; i < newLength; i++)
+            {
+                arr[i] = arr[i + 1];
+            }
+
+            Array.Resize(ref arr, newLength);
+        }
+
+        public void RemoveUnsignedAttribute(int index)
+        {
+            int myIdx = _document.SignerInfos.FindIndexForSigner(this);
+
+            if (myIdx < 0)
+            {
+                throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
+            }
+
+            ref SignedDataAsn signedData = ref _document.GetRawData();
+            ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
+
+            if (mySigner.UnsignedAttributes == null || index < 0 || index >= mySigner.UnsignedAttributes.Length)
+            {
+                throw new CryptographicException(SR.ArgumentOutOfRange_Index);
+            }
+
+            RemoveAtNoBoundariesCheck(ref mySigner.UnsignedAttributes, index);
+
+            // Re-normalize the document
+            _document.Reencode();
+        }
+
         private SignerInfoCollection GetCounterSigners(AttributeAsn[] unsignedAttrs)
         {
             // Since each "attribute" can have multiple "attribute values" there's no real
