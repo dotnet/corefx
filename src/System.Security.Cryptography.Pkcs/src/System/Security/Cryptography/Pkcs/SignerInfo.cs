@@ -157,17 +157,6 @@ namespace System.Security.Cryptography.Pkcs
             _document.Reencode();
         }
 
-        private static void RemoveAtNoBoundariesCheck<T>(ref T[] arr, int index)
-        {
-            int newLength = arr.Length - 1;
-            for (int i = index; i < newLength; i++)
-            {
-                arr[i] = arr[i + 1];
-            }
-
-            Array.Resize(ref arr, newLength);
-        }
-
         public void RemoveUnsignedAttribute(int index)
         {
             int myIdx = _document.SignerInfos.FindIndexForSigner(this);
@@ -185,7 +174,7 @@ namespace System.Security.Cryptography.Pkcs
                 throw new CryptographicException(SR.ArgumentOutOfRange_Index);
             }
 
-            RemoveAtNoBoundariesCheck(ref mySigner.UnsignedAttributes, index);
+            Helpers.RemoveAt(ref mySigner.UnsignedAttributes, index);
 
             // Re-normalize the document
             _document.Reencode();

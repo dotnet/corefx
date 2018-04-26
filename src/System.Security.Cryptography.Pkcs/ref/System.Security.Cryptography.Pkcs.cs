@@ -255,6 +255,8 @@ namespace System.Security.Cryptography.Pkcs
         public void CheckSignature(bool verifySignatureOnly) => throw null;
         public void CheckSignature(System.Security.Cryptography.X509Certificates.X509Certificate2Collection extraStore, bool verifySignatureOnly) => throw null;
         public void CheckHash() => throw null;
+        public void AddCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
+        public void RemoveCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) => throw null;
     }
     public sealed partial class SignerInfo
     {

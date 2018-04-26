@@ -470,5 +470,58 @@ namespace System.Security.Cryptography.Pkcs
         {
             return ref _signedData;
         }
+
+        public void AddCertificate(X509Certificate2 certificate)
+        {
+            int existingLength = _signedData.CertificateSet?.Length ?? 0;
+
+            if (existingLength > 0)
+            {
+                var certs = new HashSet<X509Certificate2>(Certificates.OfType<X509Certificate2>());
+
+                if (!certs.Add(certificate))
+                {
+                    return;
+                }
+            }
+
+            if (_signedData.CertificateSet == null)
+            {
+                _signedData.CertificateSet = new CertificateChoiceAsn[1];
+            }
+            else
+            {
+                Array.Resize(ref _signedData.CertificateSet, existingLength + 1);
+            }
+
+            _signedData.CertificateSet[existingLength] = new CertificateChoiceAsn
+            {
+                Certificate = certificate.RawData
+            };
+
+            Reencode();
+        }
+
+        public void RemoveCertificate(X509Certificate2 certificate)
+        {
+            int existingLength = _signedData.CertificateSet?.Length ?? 0;
+
+            if (existingLength == 0)
+            {
+                return;
+            }
+
+            int idx = 0;
+            foreach (CertificateChoiceAsn cert in _signedData.CertificateSet)
+            {
+                if (certificate.Equals(new X509Certificate2(cert.Certificate.Value.ToArray())))
+                {
+                    Helpers.RemoveAt(ref _signedData.CertificateSet, idx);
+                    Reencode();
+                    return;
+                }
+                idx++;
+            }
+        }
     }
 }
