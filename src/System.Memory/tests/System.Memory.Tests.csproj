@@ -249,6 +249,9 @@
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.Span.cs">
+      <Link>Span\StringTests.Span.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
