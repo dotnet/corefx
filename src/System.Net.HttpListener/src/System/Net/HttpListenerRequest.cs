@@ -292,20 +292,20 @@ namespace System.Net
             //
             internal static string GetCharSetValueFromHeader(string headerValue)
             {
-                string attrName = "charset";
+                const string AttrName = "charset";
 
                 if (headerValue == null)
                     return null;
 
                 int l = headerValue.Length;
-                int k = attrName.Length;
+                int k = AttrName.Length;
 
                 // find properly separated attribute name
                 int i = 1; // start searching from 1
 
                 while (i < l)
                 {
-                    i = CultureInfo.InvariantCulture.CompareInfo.IndexOf(headerValue, attrName, i, CompareOptions.IgnoreCase);
+                    i = CultureInfo.InvariantCulture.CompareInfo.IndexOf(headerValue, AttrName, i, CompareOptions.IgnoreCase);
                     if (i < 0)
                         break;
                     if (i + k >= l)
