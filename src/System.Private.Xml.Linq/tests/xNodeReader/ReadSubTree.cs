@@ -9,11 +9,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ReadSubTreeFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class TCReadSubtree : BridgeHelpers
+            public partial class TCReadSubtree : BridgeHelpers
             {
                 //[Variation("ReadSubtree only works on Element Node")]
                 public void ReadSubtreeOnlyWorksOnElementNode()

@@ -15,11 +15,11 @@ using XmlCoreTest.Common;
 
 namespace CoreXml.Test.XLinq
 {
-    public class OmitDuplicatesAnnotationFunctionalTests : TestModule
+    public partial class XNodeBuilderFunctionalTests : TestModule
     {
-        public class XNodeBuilderTests : XLinqTestCase
+        public partial class XNodeBuilderTests : XLinqTestCase
         {
-            public class OmitAnotation : XLinqTestCase
+            public partial class OmitAnotation : XLinqTestCase
             {
                 private static string s_MyPath = Path.Combine(FilePathUtil.GetTestDataPath(), @"Xlinq\DuplicateNamespaces");
 

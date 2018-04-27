@@ -15,9 +15,9 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ImplicitConversionsRoundTripFunctionalTests : TestModule
+    public partial class PropertiesFunctionalTests : TestModule
     {
-        public class PropertiesTests : XLinqTestCase
+        public partial class PropertiesTests : XLinqTestCase
         {
             public static object Explicit(Type ret, XAttribute data)
             {
@@ -169,7 +169,7 @@ namespace CoreXml.Test.XLinq
             //[TestCase(Name = "XAttribute - value conversion round trip (SetValue)", Params = new object[] { typeof(XAttribute), ExplicitCastTestType.RoundTrip, NodeCreateType.SetValue })]
             //[TestCase(Name = "XElement - XmlConvert conformance        (SetValue)", Params = new object[] { typeof(XElement), ExplicitCastTestType.XmlConvert, NodeCreateType.SetValue })]
             //[TestCase(Name = "XAttribute - XmlConvert conformance      (SetValue)", Params = new object[] { typeof(XAttribute), ExplicitCastTestType.XmlConvert, NodeCreateType.SetValue })]
-            public class XElement_Op_Eplicit : XLinqTestCase
+            public partial class XElement_Op_Eplicit : XLinqTestCase
             {
                 private object[] _data = new object[] {
                     // bool
@@ -395,7 +395,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class ExplicitCastVariation : TestVariation
+            public partial class ExplicitCastVariation : TestVariation
             {
                 private object _data;
                 private Type _nodeType;
@@ -521,7 +521,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class XElement_Op_Eplicit_Null : XLinqTestCase
+            public partial class XElement_Op_Eplicit_Null : XLinqTestCase
             {
                 protected override void DetermineChildren()
                 {
@@ -538,7 +538,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class ExplicitCastNullVariation : TestVariation
+            public partial class ExplicitCastNullVariation : TestVariation
             {
                 private Type _nodeType, _retType;
                 private bool _shouldThrow;

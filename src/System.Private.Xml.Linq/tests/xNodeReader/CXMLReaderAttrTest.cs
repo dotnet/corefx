@@ -9,11 +9,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class CXMLReaderAttrTestFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class TCAttributeAccess : BridgeHelpers
+            public partial class TCAttributeAccess : BridgeHelpers
             {
                 //[Variation("Attribute Access test using ordinal (Ascending Order)", Priority = 0)]
                 public void TestAttributeAccess1()
@@ -236,7 +236,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCThisName : BridgeHelpers
+            public partial class TCThisName : BridgeHelpers
             {
                 //[Variation("This[Name] Verify with GetAttribute(Name)", Priority = 0)]
                 public void ThisWithName1()
@@ -452,7 +452,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCMoveToAttributeReader : BridgeHelpers
+            public partial class TCMoveToAttributeReader : BridgeHelpers
             {
                 //[Variation("MoveToAttribute(String.Empty)")]
                 public void MoveToAttributeWithName1()
@@ -474,7 +474,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "GetAttributeOrdinal", Desc = "GetAttributeOrdinal")]
-            public class TCGetAttributeOrdinal : BridgeHelpers
+            public partial class TCGetAttributeOrdinal : BridgeHelpers
             {
                 //[Variation("GetAttribute(i) Verify with This[i] - Double Quote", Priority = 0)]
                 public void GetAttributeWithGetAttrDoubleQ()
@@ -562,7 +562,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "GetAttributeName", Desc = "GetAttributeName")]
-            public class TCGetAttributeName : BridgeHelpers
+            public partial class TCGetAttributeName : BridgeHelpers
             {
                 //[Variation("GetAttribute(Name) Verify with This[Name]", Priority = 0)]
                 public void GetAttributeWithName1()
@@ -758,7 +758,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ThisOrdinal", Desc = "ThisOrdinal")]
-            public class TCThisOrdinal : BridgeHelpers
+            public partial class TCThisOrdinal : BridgeHelpers
             {
                 //[Variation("This[i] Verify with GetAttribute[i] - Double Quote", Priority = 0)]
                 public void OrdinalWithGetAttrDoubleQ()
@@ -846,7 +846,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "MoveToAttributeOrdinal", Desc = "MoveToAttributeOrdinal")]
-            public class TCMoveToAttributeOrdinal : BridgeHelpers
+            public partial class TCMoveToAttributeOrdinal : BridgeHelpers
             {
                 //[Variation("MoveToAttribute(i) Verify with This[i] - Double Quote", Priority = 0)]
                 public void MoveToAttributeWithGetAttrDoubleQ()
@@ -968,7 +968,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "MoveToFirstAttribute", Desc = "MoveToFirstAttribute")]
-            public class TCMoveToFirstAttribute : BridgeHelpers
+            public partial class TCMoveToFirstAttribute : BridgeHelpers
             {
                 //[Variation("MoveToFirstAttribute() When AttributeCount=0, <EMPTY1/> ", Priority = 0)]
                 public void MoveToFirstAttribute1()
@@ -1075,7 +1075,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCMoveToNextAttribute : BridgeHelpers
+            public partial class TCMoveToNextAttribute : BridgeHelpers
             {
                 //[Variation("MoveToNextAttribute() When AttributeCount=0, <EMPTY1/> ", Priority = 0)]
                 public void MoveToNextAttribute1()
@@ -1205,7 +1205,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCAttributeTest : BridgeHelpers
+            public partial class TCAttributeTest : BridgeHelpers
             {
                 //[Variation("Attribute Test On None")]
                 public void TestAttributeTestNodeType_None()
@@ -1355,7 +1355,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ReadURI", Desc = "Read URI")]
-            public class TATextReaderDocType : BridgeHelpers
+            public partial class TATextReaderDocType : BridgeHelpers
             {
                 //[Variation("Valid URI reference as SystemLiteral")]
                 public void TATextReaderDocType_1()
@@ -1387,7 +1387,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCXmlns : BridgeHelpers
+            public partial class TCXmlns : BridgeHelpers
             {
                 private string _ST_ENS1 = "EMPTY_NAMESPACE1";
                 private string _ST_NS2 = "NAMESPACE2";
@@ -1483,7 +1483,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCXmlnsPrefix : BridgeHelpers
+            public partial class TCXmlnsPrefix : BridgeHelpers
             {
                 private string _ST_ENS1 = "EMPTY_NAMESPACE1";
                 private string _ST_NS2 = "NAMESPACE2";

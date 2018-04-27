@@ -12,11 +12,11 @@ using System.IO;
 
 namespace CoreXml.Test.XLinq
 {
-    public class OmitDuplicateNamespaceDeclFunctionalTests : TestModule
+    public partial class XNodeBuilderFunctionalTests : TestModule
     {
-        public class XNodeBuilderTests : XLinqTestCase
+        public partial class XNodeBuilderTests : XLinqTestCase
         {
-            public class NamespacehandlingWriterSanity : XLinqTestCase
+            public partial class NamespacehandlingWriterSanity : XLinqTestCase
             {
                 #region helpers
                 private string SaveXElementUsingXmlWriter(XElement elem, NamespaceHandling nsHandling)

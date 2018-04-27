@@ -10,12 +10,12 @@ using XmlCoreTest.Common;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ReadValueFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
             //[TestCase(Name = "ReadValue", Desc = "ReadValue")]
-            public class TCReadValue : BridgeHelpers
+            public partial class TCReadValue : BridgeHelpers
             {
                 private bool VerifyInvalidReadValue(int iBufferSize, int iIndex, int iCount, Type exceptionType)
                 {

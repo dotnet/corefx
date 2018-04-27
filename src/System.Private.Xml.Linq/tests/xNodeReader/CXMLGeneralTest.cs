@@ -9,11 +9,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class CXMLGeneralTestFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class TCDepth : BridgeHelpers
+            public partial class TCDepth : BridgeHelpers
             {
                 //[Variation("XmlReader Depth at the Root", Priority = 0)]
                 public void TestDepth1()
@@ -65,7 +65,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCNamespace : BridgeHelpers
+            public partial class TCNamespace : BridgeHelpers
             {
                 public static string pNONAMESPACE = "NONAMESPACE";
 
@@ -234,7 +234,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCLookupNamespace : BridgeHelpers
+            public partial class TCLookupNamespace : BridgeHelpers
             {
                 //[Variation("LookupNamespace test within EmptyTag")]
                 public void LookupNamespace1()
@@ -490,7 +490,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCHasValue : BridgeHelpers
+            public partial class TCHasValue : BridgeHelpers
             {
                 //[Variation("HasValue On None")]
                 public void TestHasValueNodeType_None()
@@ -691,7 +691,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCIsEmptyElement2 : BridgeHelpers
+            public partial class TCIsEmptyElement2 : BridgeHelpers
             {
                 //[Variation("Set and Get an element that ends with />", Priority = 0)]
                 public void TestEmpty1()
@@ -883,7 +883,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCXmlSpace : BridgeHelpers
+            public partial class TCXmlSpace : BridgeHelpers
             {
                 //[Variation("XmlSpace test within EmptyTag")]
                 public void TestXmlSpace1()
@@ -985,7 +985,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCXmlLang : BridgeHelpers
+            public partial class TCXmlLang : BridgeHelpers
             {
                 //[Variation("XmlLang test within EmptyTag")]
                 public void TestXmlLang1()
@@ -1137,7 +1137,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCSkip : BridgeHelpers
+            public partial class TCSkip : BridgeHelpers
             {
                 public bool VerifySkipOnNodeType(XmlNodeType testNodeType)
                 {
@@ -1371,11 +1371,11 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCIsDefault : BridgeHelpers
+            public partial class TCIsDefault : BridgeHelpers
             {
             }
 
-            public class TCBaseURI : BridgeHelpers
+            public partial class TCBaseURI : BridgeHelpers
             {
                 //[Variation("BaseURI for element node", Priority = 0)]
                 public void TestBaseURI1()

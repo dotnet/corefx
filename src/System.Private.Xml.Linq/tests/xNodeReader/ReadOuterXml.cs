@@ -9,12 +9,12 @@ using Xunit;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ReadOuterXmlFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
 
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class TCReadOuterXml : BridgeHelpers
+            public partial class TCReadOuterXml : BridgeHelpers
             {
                 // Element names to test ReadOuterXml on
                 private static string s_EMP1 = "EMPTY1";

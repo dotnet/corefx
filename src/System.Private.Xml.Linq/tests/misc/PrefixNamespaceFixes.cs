@@ -10,11 +10,11 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class PrefixNamespaceFixesFunctionalTests : TestModule
+    public partial class MiscFunctionalTests : TestModule
     {
-        public class MiscTests : XLinqTestCase
+        public partial class MiscTests : XLinqTestCase
         {
-            public class PrefixImprovements : XLinqTestCase
+            public partial class PrefixImprovements : XLinqTestCase
             {
                 void CompareStringThroughXmlReader(string xml1, string xml2)
                 {

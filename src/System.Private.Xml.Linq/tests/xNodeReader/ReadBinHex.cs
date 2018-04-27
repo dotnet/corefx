@@ -10,11 +10,11 @@ using System.Xml;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ReadBinHexFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class TCReadContentAsBinHex : BridgeHelpers
+            public partial class TCReadContentAsBinHex : BridgeHelpers
             {
                 public const string ST_ELEM_NAME1 = "ElemAll";
                 public const string ST_ELEM_NAME2 = "ElemEmpty";
@@ -479,7 +479,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ReadElementContentAsBinHex", Desc = "ReadElementContentAsBinHex")]
-            public class TCReadElementContentAsBinHex : BridgeHelpers
+            public partial class TCReadElementContentAsBinHex : BridgeHelpers
             {
                 public const string ST_ELEM_NAME1 = "ElemAll";
                 public const string ST_ELEM_NAME2 = "ElemEmpty";

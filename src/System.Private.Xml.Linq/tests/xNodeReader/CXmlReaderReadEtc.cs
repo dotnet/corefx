@@ -10,12 +10,12 @@ using Xunit;
 
 namespace CoreXml.Test.XLinq
 {
-    public class CXmlReaderReadEtcFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
             //[TestCase(Name = "ReadState", Desc = "ReadState")]
-            public class TCReadState : BridgeHelpers
+            public partial class TCReadState : BridgeHelpers
             {
                 //[Variation("XmlReader ReadState Initial", Priority = 0)]
                 public void ReadState1()
@@ -83,7 +83,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ReadInnerXml", Desc = "ReadInnerXml")]
-            public class TCReadInnerXml : BridgeHelpers
+            public partial class TCReadInnerXml : BridgeHelpers
             {
                 void VerifyNextNode(XmlReader DataReader, XmlNodeType nt, string name, string value)
                 {
@@ -338,7 +338,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "MoveToContent", Desc = "MoveToContent")]
-            public class TCMoveToContent : BridgeHelpers
+            public partial class TCMoveToContent : BridgeHelpers
             {
                 public const String ST_TEST_NAME1 = "GOTOCONTENT";
                 public const String ST_TEST_NAME2 = "SKIPCONTENT";
@@ -424,7 +424,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "IsStartElement", Desc = "IsStartElement")]
-            public class TCIsStartElement : BridgeHelpers
+            public partial class TCIsStartElement : BridgeHelpers
             {
                 private const String ST_TEST_ELEM = "DOCNAMESPACE";
                 private const String ST_TEST_EMPTY_ELEM = "NOSPACE";
@@ -565,7 +565,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ReadStartElement", Desc = "ReadStartElement")]
-            public class TCReadStartElement : BridgeHelpers
+            public partial class TCReadStartElement : BridgeHelpers
             {
                 private const String ST_TEST_ELEM = "DOCNAMESPACE";
                 private const String ST_TEST_EMPTY_ELEM = "NOSPACE";
@@ -836,7 +836,7 @@ namespace CoreXml.Test.XLinq
             }
 
             //[TestCase(Name = "ReadEndElement", Desc = "ReadEndElement")]
-            public class TCReadEndElement : BridgeHelpers
+            public partial class TCReadEndElement : BridgeHelpers
             {
                 private const String ST_TEST_ELEM = "DOCNAMESPACE";
                 private const String ST_TEST_EMPTY_ELEM = "NOSPACE";
@@ -1041,7 +1041,7 @@ namespace CoreXml.Test.XLinq
                 }
             }
 
-            public class TCMoveToElement : BridgeHelpers
+            public partial class TCMoveToElement : BridgeHelpers
             {
                 //[Variation("Attribute node")]
                 public void v1()

@@ -14,11 +14,11 @@ using Xunit;
 
 namespace CoreXml.Test.XLinq
 {
-    public class SaveOptions_OmitDuplicateNamespaceFunctionalTests : TestModule
+    public partial class XNodeBuilderFunctionalTests : TestModule
     {
-        public class XNodeBuilderTests : XLinqTestCase
+        public partial class XNodeBuilderTests : XLinqTestCase
         {
-            public class NamespacehandlingSaveOptions : XLinqTestCase
+            public partial class NamespacehandlingSaveOptions : XLinqTestCase
             {
                 private string _mode;
                 private Type _type;

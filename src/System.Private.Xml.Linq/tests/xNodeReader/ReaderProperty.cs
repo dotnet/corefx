@@ -8,12 +8,12 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public class ReaderPropertyFunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
 
-        public class XNodeReaderTests : XLinqTestCase
+        public partial class XNodeReaderTests : XLinqTestCase
         {
-            public class CReaderTestModule : BridgeHelpers
+            public partial class CReaderTestModule : BridgeHelpers
             {
                 //[Variation("Reader Property empty doc", Priority = 0)]
                 public void v1()
