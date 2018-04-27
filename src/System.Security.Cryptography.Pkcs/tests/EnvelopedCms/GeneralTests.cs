@@ -139,9 +139,17 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
                 SubjectIdentifierType.IssuerAndSerialNumber,
                 recipientInfos[0].RecipientIdentifier.Type);
 
+            string expectedContentHex = "CEE8A7E4765371906D8C25123E57FA1D";
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                // .NET Framework over-counts encrypted content.
+                expectedContentHex += "000000000000";
+            }
+
             // Still encrypted.
             Assert.Equal(
-                "CEE8A7E4765371906D8C25123E57FA1D",
+                expectedContentHex,
                 cms.ContentInfo.Content.ByteArrayToHex());
         }
 
