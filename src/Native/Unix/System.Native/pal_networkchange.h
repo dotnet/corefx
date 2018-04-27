@@ -24,7 +24,6 @@ enum NetworkChangeKind
 typedef void (*NetworkChangeEvent)(int32_t sock, enum NetworkChangeKind notificationKind);
 
 DLLEXPORT void SystemNative_ReadEvents(int32_t sock, NetworkChangeEvent onNetworkChange);
-NetworkChangeKind ReadNewLinkMessage(nlmsghdr* hdr);
 
 DLLEXPORT Error SystemNative_CreateNetworkChangeListenerSocket(int32_t* retSocket);
 
