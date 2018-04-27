@@ -154,7 +154,7 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        public static void NotifyCountOnObjectValueChange()
+        public static async Task NotifyCountOnObjectValueChange()
         {
             var obj0 = new object();
             var obj1 = new object();
