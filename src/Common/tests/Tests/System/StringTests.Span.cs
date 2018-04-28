@@ -337,6 +337,23 @@ namespace System.Tests
             Assert.False("test".AsSpan().EndsWith("\0st".AsSpan(), comparison));
         }
 
+        // NOTE: This is by design. Unix ignores the null characters (i.e. null characters have no weights for the string comparison).
+        // For desired behavior, use ordinal comparison instead of linguistic comparison.
+        // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [InlineData(StringComparison.CurrentCulture)]
+        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(StringComparison.InvariantCulture)]
+        [InlineData(StringComparison.InvariantCultureIgnoreCase)]
+        public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
+        {
+            Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.True("te\0st".AsSpan().EndsWith("e\0st".AsSpan(), comparison));
+            Assert.False("te\0st".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test\0".AsSpan().EndsWith("test".AsSpan(), comparison));
+            Assert.False("test".AsSpan().EndsWith("\0st".AsSpan(), comparison));
+        }
 
         [Theory]
         // CurrentCulture
@@ -697,7 +714,7 @@ namespace System.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                 string s = "Turkish I \u0131s TROUBL\u0130NG!";
-                string value = "\u0130";                
+                string value = "\u0130";
 
                 ReadOnlySpan<char> span = s.AsSpan();
                 Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
@@ -1037,6 +1054,31 @@ namespace System.Tests
             Assert.Equal(expected, s.AsSpan(startIndex, length).ToString());
         }
 
+        [Fact]
+        public static void ToLower()
+        {
+            var expectedSource = new char[3] { 'a', 'B', 'c' };
+            var expectedDestination = new char[3] { 'a', 'b', 'c' };
+
+            {
+                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+
+            {
+                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
         [Theory]
         [InlineData("hello", "hello")]
         [InlineData("HELLO", "hello")]
@@ -1077,6 +1119,31 @@ namespace System.Tests
         public static void ToString(string s)
         {
             Assert.Equal(s, s.AsSpan().ToString());
+        }
+
+        [Fact]
+        public static void ToUpper()
+        {
+            var expectedSource = new char[3] { 'a', 'B', 'c' };
+            var expectedDestination = new char[3] { 'A', 'B', 'C' };
+
+            {
+                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+
+            {
+                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
         }
 
         [Theory]
@@ -1312,6 +1379,6 @@ namespace System.Tests
             Assert.Equal(lowerForm, lowerForm.AsSpan().ToString());
             Assert.Equal(upperForm, upperForm.AsSpan().ToString());
         }
-        
+
     }
 }
