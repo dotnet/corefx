@@ -705,7 +705,7 @@ namespace System.Tests
                 Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
                 Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
 
-                value = "\u0131";                
+                value = "\u0131";
                 Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
                 Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
@@ -714,5 +714,604 @@ namespace System.Tests
                 return SuccessExitCode;
             }).Dispose();
         }
+
+        [Fact]
+        public static void IndexOf_TurkishI_InvariantCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+                string value = "\u0130";
+
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                value = "\u0131";
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_TurkishI_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                string s = "Turkish I \u0131s TROUBL\u0130NG!";
+                string value = "\u0130";
+
+                value = "\u0130";
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                value = "\u0131";
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_HungarianDoubleCompression_HungarianCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string source = "dzsdzs";
+                string target = "ddzs";
+
+                CultureInfo.CurrentCulture = new CultureInfo("hu-HU");
+                /*
+                 There are differences between Windows and ICU regarding contractions.
+                 Windows has equal contraction collation weights, including case (target="Ddzs" same behavior as "ddzs").
+                 ICU has different contraction collation weights, depending on locale collation rules.
+                 If CurrentCultureIgnoreCase is specified, ICU will use 'secondary' collation rules
+                 which ignore the contraction collation weights (defined as 'tertiary' rules)
+                */
+                ReadOnlySpan<char> span = source.AsSpan();
+
+                Assert.Equal(PlatformDetection.IsWindows ? 0 : -1, span.IndexOf(target.AsSpan(), StringComparison.CurrentCulture));
+
+                Assert.Equal(0, span.IndexOf(target.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(-1, span.IndexOf(target.AsSpan(), StringComparison.Ordinal));
+                Assert.Equal(-1, span.IndexOf(target.AsSpan(), StringComparison.OrdinalIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_HungarianDoubleCompression_InvariantCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string source = "dzsdzs";
+                string target = "ddzs";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                ReadOnlySpan<char> span = source.AsSpan();
+                Assert.Equal(-1, span.IndexOf(target.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(-1, span.IndexOf(target.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_EquivalentDiacritics_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
+
+                value = "a\u0300"; // this diacritic combines with preceding character                
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_EquivalentDiacritics_InvariantCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Exhibit a\u0300\u00C0";
+                string value = "\u00C0";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                value = "a\u0300"; // this diacritic combines with preceding character                
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_CyrillicE_EnglishUSCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
+
+                value = "bar";
+                Assert.Equal(-1, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(4, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+                Assert.Equal(-1, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
+                Assert.Equal(4, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void IndexOf_CyrillicE_InvariantCulture()
+        {
+            RemoteInvoke(() =>
+            {
+                string s = "Foo\u0400Bar";
+                string value = "\u0400";
+
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+                ReadOnlySpan<char> span = s.AsSpan();
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(3, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                value = "bar";
+                Assert.Equal(-1, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
+                Assert.Equal(4, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
+
+                return SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Theory]
+        [InlineData(null, true)]
+        [InlineData("", true)]
+        [InlineData("foo", false)]
+        [InlineData("   ", false)]
+        public static void IsNullOrEmpty(string value, bool expected)
+        {
+            Assert.Equal(expected, value.AsSpan().IsEmpty);
+        }
+
+        [Fact]
+        public static void LastIndexOf_Match_SingleLetter()
+        {
+            Assert.Equal(-1, "".AsSpan().LastIndexOf('a'));
+
+            for (int length = 1; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+                string str = new string(a);
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = a[targetIndex];
+                    int idx = span.LastIndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
+            }
+        }
+
+        [Theory]
+        // CurrentCulture
+        [InlineData("Hello", "Hel", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "HELLO", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "Abc", StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.CurrentCulture, true)]
+        [InlineData("", "", StringComparison.CurrentCulture, true)]
+        [InlineData("", "hello", StringComparison.CurrentCulture, false)]
+        // CurrentCultureIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.CurrentCultureIgnoreCase, false)]
+        // InvariantCulture
+        [InlineData("Hello", "Hel", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "HELLO", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "Abc", StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.InvariantCulture, true)]
+        [InlineData("", "", StringComparison.InvariantCulture, true)]
+        [InlineData("", "hello", StringComparison.InvariantCulture, false)]
+        // InvariantCultureIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.InvariantCultureIgnoreCase, false)]
+        // Ordinal
+        [InlineData("Hello", "H", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hel", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "Hello Larger", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "", StringComparison.Ordinal, true)]
+        [InlineData("Hello", "HEL", StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Abc", StringComparison.Ordinal, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.Ordinal, false)]
+        [InlineData("", "", StringComparison.Ordinal, true)]
+        [InlineData("", "hello", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwx", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklm", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "ab_defghijklmnopqrstu", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdef_hijklmn", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghij_lmn", StringComparison.Ordinal, false)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "a", StringComparison.Ordinal, true)]
+        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", StringComparison.Ordinal, false)]
+        // OrdinalIgnoreCase
+        [InlineData("Hello", "Hel", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Hello Larger", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "HEL", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("Hello", "Abc", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", SoftHyphen + "Hel", StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
+        [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
+        public static void StartsWith(string s, string value, StringComparison comparisonType, bool expected)
+        {
+            if (comparisonType == StringComparison.CurrentCulture)
+            {
+                Assert.Equal(expected, s.StartsWith(value));
+            }
+            Assert.Equal(expected, s.AsSpan().StartsWith(value.AsSpan(), comparisonType));
+        }
+
+        [Theory]
+        [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
+        [InlineData(StringComparison.CurrentCulture)]
+        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
+        [InlineData(StringComparison.Ordinal)]
+        [InlineData(StringComparison.OrdinalIgnoreCase)]
+        public static void StartsWith_NullInStrings(StringComparison comparison)
+        {
+            Assert.False("\0test".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.False("te\0st".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.True("te\0st".AsSpan().StartsWith("te\0s".AsSpan(), comparison));
+            Assert.True("test\0".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.False("test".AsSpan().StartsWith("te\0".AsSpan(), comparison));
+        }
+
+        [Theory]
+        [InlineData("Hello", 0, 5, "Hello")]
+        [InlineData("Hello", 0, 3, "Hel")]
+        [InlineData("Hello", 2, 3, "llo")]
+        [InlineData("Hello", 5, 0, "")]
+        [InlineData("", 0, 0, "")]
+        public static void Substring(string s, int startIndex, int length, string expected)
+        {
+            if (startIndex + length == s.Length)
+            {
+                Assert.Equal(expected, s.Substring(startIndex));
+                Assert.Equal(expected, s.AsSpan(startIndex).ToString());
+            }
+            Assert.Equal(expected, s.AsSpan(startIndex, length).ToString());
+        }
+
+        [Theory]
+        [InlineData("hello", "hello")]
+        [InlineData("HELLO", "hello")]
+        [InlineData("hElLo", "hello")]
+        [InlineData("HeLlO", "hello")]
+        [InlineData("", "")]
+        public static void ToLower(string s, string expected)
+        {
+            Span<char> destination = new char[s.Length];
+            Assert.Equal(s.Length, s.AsSpan().ToLower(destination, CultureInfo.CurrentCulture));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        private static void ToLower_Culture(string input, string expected, CultureInfo culture)
+        {
+            CultureInfo.CurrentCulture = culture;
+            Span<char> destination = new char[input.Length];
+            Assert.Equal(input.Length, input.AsSpan().ToLower(destination, culture));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        [Theory]
+        [InlineData("hello", "hello")]
+        [InlineData("HELLO", "hello")]
+        [InlineData("hElLo", "hello")]
+        [InlineData("HeLlO", "hello")]
+        [InlineData("", "")]
+        public static void ToLowerInvariant(string s, string expected)
+        {
+            Span<char> destination = new char[s.Length];
+            Assert.Equal(s.Length, s.AsSpan().ToLowerInvariant(destination));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("hello")]
+        public static void ToString(string s)
+        {
+            Assert.Equal(s, s.AsSpan().ToString());
+        }
+
+        [Theory]
+        [InlineData("hello", "HELLO")]
+        [InlineData("HELLO", "HELLO")]
+        [InlineData("hElLo", "HELLO")]
+        [InlineData("HeLlO", "HELLO")]
+        [InlineData("", "")]
+        public static void ToUpper(string s, string expected)
+        {
+            Span<char> destination = new char[s.Length];
+            Assert.Equal(s.Length, s.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        private static IEnumerable<object[]> ToUpper_TurkishI_MemberData(
+            params KeyValuePair<char, char>[] mappings)
+        {
+            foreach (KeyValuePair<char, char> mapping in mappings)
+            {
+                yield return new[] { $"{mapping.Key}", $"{mapping.Value}" };
+                yield return new[] { $"{mapping.Key}a TeSt", $"{mapping.Value}A TEST" };
+                yield return new[] { $"a T{mapping.Key}est", $"A T{mapping.Value}EST" };
+                yield return new[] { $"A test{mapping.Key}", $"A TEST{mapping.Value}" };
+                yield return new[] { new string(mapping.Key, 100), new string(mapping.Value, 100) };
+            }
+        }
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_TurkishCulture_MemberData() =>
+          ToUpper_TurkishI_MemberData(
+              new KeyValuePair<char, char>('\u0069', '\u0130'),
+              new KeyValuePair<char, char>('\u0130', '\u0130'),
+              new KeyValuePair<char, char>('\u0131', '\u0049'));
+
+        [Theory]
+        [MemberData(nameof(ToUpper_TurkishI_TurkishCulture_MemberData))]
+        public static void ToUpper_TurkishI_TurkishCulture(string s, string expected)
+        {
+            RemoteInvoke((str, expectedString) =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
+
+                Span<char> destination = new char[str.Length];
+                Assert.Equal(str.Length, str.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedString, destination.ToString());
+
+                return SuccessExitCode;
+            }, s.ToString(), expected.ToString()).Dispose();
+        }
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_EnglishUSCulture_MemberData() =>
+           ToUpper_TurkishI_MemberData(
+               new KeyValuePair<char, char>('\u0069', '\u0049'),
+               new KeyValuePair<char, char>('\u0130', '\u0130'),
+               new KeyValuePair<char, char>('\u0131', '\u0049'));
+
+        [Theory]
+        [MemberData(nameof(ToUpper_TurkishI_EnglishUSCulture_MemberData))]
+        public static void ToUpper_TurkishI_EnglishUSCulture(string s, string expected)
+        {
+            RemoteInvoke((str, expectedString) =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                Span<char> destination = new char[str.Length];
+                Assert.Equal(str.Length, str.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedString, destination.ToString());
+
+                return SuccessExitCode;
+            }, s.ToString(), expected.ToString()).Dispose();
+        }
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_InvariantCulture_MemberData() =>
+        ToUpper_TurkishI_MemberData(
+            new KeyValuePair<char, char>('\u0069', '\u0049'),
+            new KeyValuePair<char, char>('\u0130', '\u0130'),
+            new KeyValuePair<char, char>('\u0131', '\u0131'));
+
+        [Theory]
+        [MemberData(nameof(ToUpper_TurkishI_InvariantCulture_MemberData))]
+        public static void ToUpper_TurkishI_InvariantCulture(string s, string expected)
+        {
+            RemoteInvoke((str, expectedString) =>
+            {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                Span<char> destination = new char[str.Length];
+                Assert.Equal(str.Length, str.AsSpan().ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedString, destination.ToString());
+
+                return SuccessExitCode;
+            }, s.ToString(), expected.ToString()).Dispose();
+        }
+
+        [Theory]
+        [InlineData("hello", "HELLO")]
+        [InlineData("HELLO", "HELLO")]
+        [InlineData("hElLo", "HELLO")]
+        [InlineData("HeLlO", "HELLO")]
+        [InlineData("", "")]
+        public static void ToUpperInvariant(string s, string expected)
+        {
+            Span<char> destination = new char[s.Length];
+            Assert.Equal(s.Length, s.AsSpan().ToUpperInvariant(destination));
+            Assert.Equal(expected, destination.ToString());
+        }
+
+        [Fact]
+        public static void ToLowerToUpperInvariant_ASCII()
+        {
+            var asciiChars = new char[128];
+            var asciiCharsUpper = new char[128];
+            var asciiCharsLower = new char[128];
+
+            for (int i = 0; i < asciiChars.Length; i++)
+            {
+                char c = (char)i;
+                asciiChars[i] = c;
+
+                // Purposefully avoiding char.ToUpper/ToLower here so as not  to use the same thing we're testing.
+                asciiCharsLower[i] = (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c;
+                asciiCharsUpper[i] = (c >= 'a' && c <= 'z') ? (char)(c - 'a' + 'A') : c;
+            }
+
+            var ascii = new string(asciiChars);
+
+            Span<char> destinationLower = new char[ascii.Length];
+            Span<char> destinationUpper = new char[ascii.Length];
+
+            Assert.Equal(ascii.Length, ascii.AsSpan().ToLowerInvariant(destinationLower));
+            Assert.Equal(ascii.Length, ascii.AsSpan().ToUpperInvariant(destinationUpper));
+
+            Assert.Equal(ascii.ToLowerInvariant(), destinationLower.ToString());
+            Assert.Equal(ascii.ToUpperInvariant(), destinationUpper.ToString());
+
+            Assert.Equal(ascii, ascii.AsSpan().ToString());
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "Hello")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello")]
+        [InlineData("  Hello  ", null, "Hello")]
+        [InlineData("  Hello  ", new char[0], "Hello")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        public static void Trim(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.AsSpan().Trim().ToString());
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.AsSpan().Trim(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.AsSpan().Trim(trimChars).ToString());
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "  Hello")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, ".  Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, ".  Hello")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "123abcHello")]
+        [InlineData("  Hello  ", null, "  Hello")]
+        [InlineData("  Hello  ", new char[0], "  Hello")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        public static void TrimEnd(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.AsSpan().TrimEnd().ToString());
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.AsSpan().TrimEnd(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.AsSpan().TrimEnd(trimChars).ToString());
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ..")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello  ..")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello123abc")]
+        [InlineData("  Hello  ", null, "Hello  ")]
+        [InlineData("  Hello  ", new char[0], "Hello  ")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        public static void TrimStart(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.AsSpan().TrimStart().ToString());
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.AsSpan().TrimStart(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.AsSpan().TrimStart(trimChars).ToString());
+        }
+
+        public static IEnumerable<object[]> UpperLowerCasing_TestData()
+        {
+            //                          lower                upper          Culture
+            yield return new object[] { "abcd", "ABCD", "en-US" };
+            yield return new object[] { "latin i", "LATIN I", "en-US" };
+            yield return new object[] { "turky \u0131", "TURKY I", "tr-TR" };
+            yield return new object[] { "turky i", "TURKY \u0130", "tr-TR" };
+            yield return new object[] { "\ud801\udc29", PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
+        }
+
+        [Theory]
+        [MemberData(nameof(UpperLowerCasing_TestData))]
+        public static void CasingTest(string lowerForm, string upperForm, string cultureName)
+        {
+            CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+
+            Span<char> destinationLower = new char[upperForm.Length];
+            Span<char> destinationUpper = new char[lowerForm.Length];
+
+            Assert.Equal(upperForm.Length, upperForm.AsSpan().ToLower(destinationLower, ci));
+            Assert.Equal(lowerForm.Length, lowerForm.AsSpan().ToUpper(destinationUpper, ci));
+
+            Assert.Equal(lowerForm, lowerForm.AsSpan().ToString());
+            Assert.Equal(upperForm, upperForm.AsSpan().ToString());
+        }
+        
     }
 }
