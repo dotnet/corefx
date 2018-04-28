@@ -267,8 +267,8 @@ namespace System.Security.Cryptography.Pkcs
         public Oid DigestAlgorithm => throw null;
         public CryptographicAttributeObjectCollection SignedAttributes => throw null;
         public CryptographicAttributeObjectCollection UnsignedAttributes => throw null;
-        public void AddUnsignedAttribute(CryptographicAttributeObject attribute) => throw null;
-        public void RemoveUnsignedAttribute(int index) => throw null;
+        public void AddUnsignedAttribute(System.Security.Cryptography.AsnEncodedData asnEncodedData) => throw null;
+        public void RemoveUnsignedAttribute(System.Security.Cryptography.AsnEncodedData asnEncodedData) => throw null;
         public SignerInfoCollection CounterSignerInfos => throw null;
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public void ComputeCounterSignature() => throw null;

@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Pkcs.Tests
 {
-    public static class SignerInfoTests
+    public static partial class SignerInfoTests
     {
         [Fact]
         public static void SignerInfo_SignedAttributes_Cached_WhenEmpty()
