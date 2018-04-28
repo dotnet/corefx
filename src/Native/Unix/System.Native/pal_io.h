@@ -334,21 +334,21 @@ enum NotifyEvents
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_FStat(intptr_t fd, struct FileStatus* output);
+int32_t SystemNative_FStat2(intptr_t fd, struct FileStatus* output);
 
 /**
  * Get file status from a full path. Implemented as shim to stat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_Stat(const char* path, struct FileStatus* output);
+int32_t SystemNative_Stat2(const char* path, struct FileStatus* output);
 
 /**
  * Get file stats from a full path. Implemented as shim to lstat(2).
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
-int32_t SystemNative_LStat(const char* path, struct FileStatus* output);
+int32_t SystemNative_LStat2(const char* path, struct FileStatus* output);
 
 /**
  * Open or create a file or device. Implemented as shim to open(2).

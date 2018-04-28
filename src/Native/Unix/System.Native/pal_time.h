@@ -32,3 +32,7 @@ extern "C" int32_t SystemNative_GetTimestampResolution(uint64_t* resolution);
  * Returns 1 on success; otherwise, 0 on failure.
  */
 extern "C" int32_t SystemNative_GetTimestamp(uint64_t* timestamp);
+
+extern "C" int32_t SystemNative_GetAbsoluteTime(uint64_t* timestamp);
+
+extern "C" int32_t SystemNative_GetTimebaseInfo(uint32_t* numer, uint32_t* denom);

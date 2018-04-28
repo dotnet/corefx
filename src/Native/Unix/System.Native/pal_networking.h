@@ -332,6 +332,9 @@ int32_t SystemNative_SetIPv4Address(uint8_t* socketAddress, int32_t socketAddres
 int32_t SystemNative_GetIPv6Address(
     const uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t* scopeId);
 
+int32_t SystemNative_SetIPv6Address(
+    uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t scopeId);
+
 int32_t SystemNative_GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6);
 
 int32_t
