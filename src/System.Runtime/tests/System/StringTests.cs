@@ -177,8 +177,7 @@ namespace System.Tests
         [InlineData("\0", 0, '\0')]
         public static void Item_Get(string s, int index, char expected)
         {
-            Assert.Equal(expected, s[index]);
-            Assert.Equal(expected, s.AsSpan()[index]);
+            Assert.Equal(expected, s[index]);            
         }
 
         [Fact]
@@ -187,10 +186,6 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => "Hello"[-1]); // Index < 0
             Assert.Throws<IndexOutOfRangeException>(() => "Hello"[5]); // Index >= string.Length
             Assert.Throws<IndexOutOfRangeException>(() => ""[0]); // Index >= string.Length
-
-            Assert.Throws<IndexOutOfRangeException>(() => "Hello".AsSpan()[-1]); // Index < 0
-            Assert.Throws<IndexOutOfRangeException>(() => "Hello".AsSpan()[5]); // Index >= string.Length
-            Assert.Throws<IndexOutOfRangeException>(() => "".AsSpan()[0]); // Index >= string.Length
         }
 
         [Theory]
@@ -200,8 +195,7 @@ namespace System.Tests
         [InlineData("hello", 5)]
         public static void Length(string s, int expected)
         {
-            Assert.Equal(expected, s.Length);
-            Assert.Equal(expected, s.AsSpan().Length);
+            Assert.Equal(expected, s.Length);            
         }
 
         public static IEnumerable<object[]> Concat_Strings_TestData()
@@ -446,10 +440,6 @@ namespace System.Tests
             char[] dst = new char[expected.Length];
             s.CopyTo(sourceIndex, dst, destinationIndex, count);
             Assert.Equal(expected, dst);
-
-            Span<char> dstSpan = new char[expected.Length];
-            s.AsSpan(sourceIndex, count).CopyTo(dstSpan.Slice(destinationIndex, count));
-            Assert.Equal(expected, dstSpan.ToArray());
         }
 
         [Fact]
@@ -670,22 +660,7 @@ namespace System.Tests
                 Assert.Equal(expected, Math.Sign(string.CompareOrdinal(strA, indexA, strB, indexB, length)));
             }
             // Use Compare(string, int, string, int, int, StringComparison)
-            Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, comparisonType)));
-
-            if (indexA >= 0 && indexB >= 0 && length >= 0)
-            {
-                // Comparing spans from null strings gives different results since span doesn't special case null and treats it the same as an empty string.
-                if (strA == null && strB != null)
-                    expected = -1;
-                if (strA != null && strB == null)
-                    expected = 1;
-                if (length == 0)
-                    expected = 0;
-
-                ReadOnlySpan<char> span = length <= (strA.AsSpan().Length - indexA) ? strA.AsSpan(indexA, length) : strA.AsSpan(indexA);
-                ReadOnlySpan<char> value = length <= (strB.AsSpan().Length - indexB) ? strB.AsSpan(indexB, length) : strB.AsSpan(indexB);
-                Assert.Equal(expected, Math.Sign(span.CompareTo(value, comparisonType)));
-            }
+            Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, comparisonType)));            
         }
 
         [Fact]
@@ -762,9 +737,6 @@ namespace System.Tests
                 " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
 
             int result = string.Compare("{Policy_PS_Nothing}", 0, veryLongString, 4380, 19, StringComparison.Ordinal);
-            Assert.True(result < 0);
-
-            result = "{Policy_PS_Nothing}".AsSpan().CompareTo(veryLongString.AsSpan(4380, 19), StringComparison.Ordinal);
             Assert.True(result < 0);
         }
 
@@ -940,9 +912,6 @@ namespace System.Tests
                 Assert.Equal(expected, s.EndsWith(value));
             }
             Assert.Equal(expected, s.EndsWith(value, comparisonType));
-
-            // Cannot use implicit cast from string to ReadOnlySpan for other runtimes, like netfx. Therefore, explicitly call AsSpan.
-            Assert.Equal(expected, s.AsSpan().EndsWith(value.AsSpan(), comparisonType));
         }
 
         [Theory]
@@ -957,13 +926,7 @@ namespace System.Tests
             Assert.True("te\0st".EndsWith("e\0st", comparison));
             Assert.False("te\0st".EndsWith("test", comparison));
             Assert.False("test\0".EndsWith("test", comparison));
-            Assert.False("test".EndsWith("\0st", comparison));
-
-            Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
-            Assert.True("te\0st".AsSpan().EndsWith("e\0st".AsSpan(), comparison));
-            Assert.False("te\0st".AsSpan().EndsWith("test".AsSpan(), comparison));
-            Assert.False("test\0".AsSpan().EndsWith("test".AsSpan(), comparison));
-            Assert.False("test".AsSpan().EndsWith("\0st".AsSpan(), comparison));
+            Assert.False("test".EndsWith("\0st", comparison));            
         }
 
         [Fact]
@@ -1200,9 +1163,7 @@ namespace System.Tests
             if (s1 != null)
             {
                 Assert.Equal(s1.GetHashCode(), s1.GetHashCode());
-            }
-
-            Assert.Equal(expected, s1.AsSpan().Equals(s2.AsSpan(), comparisonType));
+            }            
         }
 
         public static IEnumerable<object[]> Equals_EncyclopaediaData()
@@ -1229,9 +1190,7 @@ namespace System.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("se-SE");
                 StringComparison comparisonType = (StringComparison)Enum.Parse(typeof(StringComparison), comparisonString);
                 Assert.Equal(bool.Parse(expectedString), string.Equals(source, target, comparisonType));
-
-                Assert.Equal(bool.Parse(expectedString), source.AsSpan().Equals(target.AsSpan(), comparisonType));
-
+                
                 return SuccessExitCode;
             }, comparison.ToString(), expected.ToString()).Dispose();
         }
@@ -1361,14 +1320,10 @@ namespace System.Tests
             bool safeForCurrentCulture =
                 IsSafeForCurrentCultureComparisons(s)
                 && IsSafeForCurrentCultureComparisons(target.ToString());
-
-            ReadOnlySpan<char> span = s.AsSpan();
+            
             var charArray = new char[1];
-            charArray[0] = target;
-            ReadOnlySpan<char> targetSpan = charArray;
-
-            int expectedFromSpan = expected == -1 ? expected : expected - startIndex;
-
+            charArray[0] = target;            
+            
             if (count + startIndex == s.Length)
             {
                 if (startIndex == 0)
@@ -1376,48 +1331,33 @@ namespace System.Tests
                     Assert.Equal(expected, s.IndexOf(target));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.Ordinal));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.OrdinalIgnoreCase));
-
-                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.Ordinal));
-                    Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
-
+                    
                     // To be safe we only want to run CurrentCulture comparisons if
                     // we know the results will not vary depending on location
                     if (safeForCurrentCulture)
                     {
                         Assert.Equal(expected, s.IndexOf(target.ToString()));
-                        Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));
-
-                        Assert.Equal(expectedFromSpan, span.IndexOf(targetSpan, StringComparison.CurrentCulture));
+                        Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));                        
                     }
                 }
                 Assert.Equal(expected, s.IndexOf(target, startIndex));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.Ordinal));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.OrdinalIgnoreCase));
-
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.Ordinal));
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
-
+                
                 if (safeForCurrentCulture)
                 {
                     Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex));
-                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));
-
-                    Assert.Equal(expectedFromSpan, span.Slice(startIndex).IndexOf(targetSpan, StringComparison.CurrentCulture));
+                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));                    
                 }
             }
             Assert.Equal(expected, s.IndexOf(target, startIndex, count));
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.Ordinal));
-            Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
-
-            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.Ordinal));
-            Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));            
 
             if (safeForCurrentCulture)
             {
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count));
-                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));
-
-                Assert.Equal(expectedFromSpan, span.Slice(startIndex, count).IndexOf(targetSpan, StringComparison.CurrentCulture));
+                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));                
             }
         }
 
@@ -1425,8 +1365,7 @@ namespace System.Tests
         public static void IndexOf_Match_SingleLetter()
         {
             Assert.Equal(-1, "".IndexOf('a'));
-            Assert.Equal(-1, "".AsSpan().IndexOf('a'));
-
+           
             for (int length = 1; length < 32; length++)
             {
                 char[] a = new char[length];
@@ -1434,17 +1373,13 @@ namespace System.Tests
                 {
                     a[i] = (char)(i + 1);
                 }
-                string str = new string(a);
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                string str = new string(a);                
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
                     char target = a[targetIndex];
                     int idx = str.IndexOf(target);
-                    Assert.Equal(targetIndex, idx);
-
-                    idx = span.IndexOf(target);
-                    Assert.Equal(targetIndex, idx);
+                    Assert.Equal(targetIndex, idx);                    
                 }
             }
         }
@@ -1476,8 +1411,7 @@ namespace System.Tests
         [InlineData("Hello", "l\0o", -1)]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
-            Assert.Equal(expected, s.IndexOf(value));
-            Assert.Equal(expected, s.AsSpan().IndexOf(value.AsSpan(), StringComparison.Ordinal));
+            Assert.Equal(expected, s.IndexOf(value));            
         }
 
         [Theory]
@@ -1488,32 +1422,25 @@ namespace System.Tests
 
             // First find the substring.  We should be able to with all comparison types.
             Assert.Equal(startIndex, s.IndexOf(value, comparison)); // in the whole string
-            Assert.Equal(startIndex, s.IndexOf(value, startIndex, comparison)); // starting at substring
-            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison)); // in the whole string
-            Assert.Equal(0, s.AsSpan(startIndex).IndexOf(value.AsSpan(), comparison)); // starting at substring
+            Assert.Equal(startIndex, s.IndexOf(value, startIndex, comparison)); // starting at substring            
 
             if (startIndex > 0)
             {
-                Assert.Equal(startIndex, s.IndexOf(value, startIndex - 1, comparison)); // starting just before substring
-                Assert.Equal(1, s.AsSpan(startIndex - 1).IndexOf(value.AsSpan(), comparison)); // starting just before substring
-            }
-            Assert.Equal(-1, s.AsSpan(startIndex + 1).IndexOf(value.AsSpan(), comparison)); // starting just after start of substring
+                Assert.Equal(startIndex, s.IndexOf(value, startIndex - 1, comparison)); // starting just before substring                
+            }            
             Assert.Equal(-1, s.IndexOf(value, startIndex + 1, comparison)); // starting just after start of substring
 
             // Shouldn't be able to find the substring if the count is less than substring's length
-            Assert.Equal(-1, s.IndexOf(value, 0, value.Length - 1, comparison));
-            Assert.Equal(-1, s.AsSpan(0, value.Length - 1).IndexOf(value.AsSpan(), comparison));
+            Assert.Equal(-1, s.IndexOf(value, 0, value.Length - 1, comparison));            
 
             // Now double the source.  Make sure we find the first copy of the substring.
             int halfLen = s.Length;
             s += s;
-            Assert.Equal(startIndex, s.IndexOf(value, comparison));
-            Assert.Equal(startIndex, s.AsSpan().IndexOf(value.AsSpan(), comparison));
+            Assert.Equal(startIndex, s.IndexOf(value, comparison));            
 
             // Now change the case of a letter.
             s = s.ToUpperInvariant();
-            Assert.Equal(ignoringCase ? startIndex : -1, s.IndexOf(value, comparison));
-            Assert.Equal(ignoringCase ? startIndex : -1, s.AsSpan().IndexOf(value.AsSpan(), comparison));
+            Assert.Equal(ignoringCase ? startIndex : -1, s.IndexOf(value, comparison));            
         }
 
         [Fact]
@@ -1530,24 +1457,13 @@ namespace System.Tests
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-
-                ReadOnlySpan<char> span = s.AsSpan();
-                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
-                Assert.Equal(4, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
-                Assert.Equal(19, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
-
+                
                 value = "\u0131";
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-
-                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.CurrentCulture));
-                Assert.Equal(8, span.IndexOf(value.AsSpan(), StringComparison.CurrentCultureIgnoreCase));
-                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.Ordinal));
-                Assert.Equal(10, span.IndexOf(value.AsSpan(), StringComparison.OrdinalIgnoreCase));
-
+                
                 return SuccessExitCode;
             }).Dispose();
         }

@@ -250,7 +250,7 @@
       <Link>Common\System\MutableDecimal.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.Span.cs">
-      <Link>Span\StringTests.Span.cs</Link>
+      <Link>ReadOnlySpan\StringTests.Span.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
