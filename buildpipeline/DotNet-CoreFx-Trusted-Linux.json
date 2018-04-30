@@ -508,10 +508,6 @@
     "VsoPassword": {
       "value": null,
       "isSecret": true
-    },
-    "AgentToolsPath": {
-      "value": "",
-      "allowOverride": true
     }
   },
   "demands": [
