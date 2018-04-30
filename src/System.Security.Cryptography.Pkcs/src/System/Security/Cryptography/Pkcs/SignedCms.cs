@@ -475,13 +475,16 @@ namespace System.Security.Cryptography.Pkcs
         {
             int existingLength = _signedData.CertificateSet?.Length ?? 0;
 
+            byte[] rawData = certificate.RawData;
+
             if (existingLength > 0)
             {
-                var certs = new HashSet<X509Certificate2>(Certificates.OfType<X509Certificate2>());
-
-                if (!certs.Add(certificate))
+                foreach (CertificateChoiceAsn cert in _signedData.CertificateSet)
                 {
-                    return;
+                    if (cert.Certificate.Value.Span.SequenceEqual(rawData))
+                    {
+                        throw new CryptographicException(SR.Cryptography_Cms_CertificateAlreadyInCollection);
+                    }
                 }
             }
 
@@ -506,22 +509,24 @@ namespace System.Security.Cryptography.Pkcs
         {
             int existingLength = _signedData.CertificateSet?.Length ?? 0;
 
-            if (existingLength == 0)
+            if (existingLength != 0)
             {
-                return;
+                int idx = 0;
+                byte[] rawData = certificate.RawData;
+                foreach (CertificateChoiceAsn cert in _signedData.CertificateSet)
+                {
+                    if (cert.Certificate.Value.Span.SequenceEqual(rawData))
+                    {
+                        Helpers.RemoveAt(ref _signedData.CertificateSet, idx);
+                        Reencode();
+                        return;
+                    }
+
+                    idx++;
+                }
             }
 
-            int idx = 0;
-            foreach (CertificateChoiceAsn cert in _signedData.CertificateSet)
-            {
-                if (certificate.Equals(new X509Certificate2(cert.Certificate.Value.ToArray())))
-                {
-                    Helpers.RemoveAt(ref _signedData.CertificateSet, idx);
-                    Reencode();
-                    return;
-                }
-                idx++;
-            }
+            throw new CryptographicException(SR.Cryptography_Cms_NoCertificateFound);
         }
     }
 }
