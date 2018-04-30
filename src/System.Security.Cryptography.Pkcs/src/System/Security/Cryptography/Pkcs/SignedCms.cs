@@ -499,7 +499,7 @@ namespace System.Security.Cryptography.Pkcs
 
             _signedData.CertificateSet[existingLength] = new CertificateChoiceAsn
             {
-                Certificate = certificate.RawData
+                Certificate = rawData
             };
 
             Reencode();
@@ -513,6 +513,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 int idx = 0;
                 byte[] rawData = certificate.RawData;
+
                 foreach (CertificateChoiceAsn cert in _signedData.CertificateSet)
                 {
                     if (cert.Certificate.Value.Span.SequenceEqual(rawData))
