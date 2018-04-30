@@ -3921,11 +3921,6 @@ namespace System
                 return ParsingError.BadScheme;
             }
 
-            if (length > c_MaxUriSchemeName)
-            {
-                return ParsingError.SchemeLimit;
-            }
-
             // Special-case common and known schemes to avoid allocations and dictionary lookups in these cases.
             const int wsMask = 'w' << 8 | 's';
             const int ftpMask = 'f' << 16 | 't' << 8 | 'p';
@@ -3993,6 +3988,11 @@ namespace System
                 {
                     return ParsingError.BadScheme;
                 }
+            }
+
+            if (span.Length > c_MaxUriSchemeName)
+            {
+                return ParsingError.SchemeLimit;
             }
 
             // Then look up the syntax in a string-based table.
