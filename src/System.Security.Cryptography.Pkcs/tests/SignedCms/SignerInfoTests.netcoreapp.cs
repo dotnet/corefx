@@ -26,24 +26,30 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.SignerInfos[0].AddUnsignedAttribute(attribute1);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             ReReadSignedCms(ref cms);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             AsnEncodedData attribute2 = CreateTimestampToken(2);
 
             cms.SignerInfos[0].AddUnsignedAttribute(attribute2);
 
-            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[1], attribute2);
 
             ReReadSignedCms(ref cms);
 
-            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[1], attribute2);
         }
 
         [Fact]
@@ -147,6 +153,31 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(numberOfAttributes, cms.SignerInfos[0].UnsignedAttributes.Count);
         }
 
+        [Fact]
+        public static void SignerInfo_RemoveUnsignedAttributes_MultipleAttributeValues()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.RsaPkcs1OneSignerIssuerAndSerialNumber);
+
+            Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
+
+            AsnEncodedData attribute1 = CreateTimestampToken(1);
+            AsnEncodedData attribute2 = CreateTimestampToken(2);
+            cms.SignerInfos[0].AddUnsignedAttribute(attribute1);
+            cms.SignerInfos[0].AddUnsignedAttribute(attribute2);
+            
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+
+            cms.SignerInfos[0].RemoveUnsignedAttribute(attribute1);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.True(AsnEncodedDataEqual(attribute2, cms.SignerInfos[0].UnsignedAttributes[0].Values[0]));
+
+            cms.SignerInfos[0].RemoveUnsignedAttribute(attribute2);
+            Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
+        }
+
         private static void VerifyAttributesContainsAll(CryptographicAttributeObjectCollection attributes, List<AsnEncodedData> expectedAttributes)
         {
             var indices = new HashSet<int>();
@@ -167,7 +198,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             for (int i = 0; i < array.Count; i++)
             {
-                if (AsnEncodingDataEqual(array[i], data))
+                if (AsnEncodedDataEqual(array[i], data))
                 {
                     return i;
                 }
@@ -190,7 +221,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             return ret;
         }
 
-        private static bool AsnEncodingDataEqual(AsnEncodedData a, AsnEncodedData b)
+        private static bool AsnEncodedDataEqual(AsnEncodedData a, AsnEncodedData b)
         {
             return a.Oid.Value == b.Oid.Value && a.RawData.SequenceEqual(b.RawData);
         }

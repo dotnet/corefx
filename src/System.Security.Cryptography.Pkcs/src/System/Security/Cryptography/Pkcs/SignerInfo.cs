@@ -117,37 +117,72 @@ namespace System.Security.Cryptography.Pkcs
                 throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
             }
 
-            AttributeAsn newUnsignedAttr;
-            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
-            {
-                writer.PushSetOf();
-                writer.WriteEncodedValue(unsignedAttribute.RawData);
-                writer.PopSetOf();
-
-                newUnsignedAttr = new AttributeAsn
-                {
-                    AttrType = new Oid(unsignedAttribute.Oid),
-                    AttrValues = writer.Encode(),
-                };
-            }
-
             ref SignedDataAsn signedData = ref _document.GetRawData();
             ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
 
-            int newAttributeIdx;
+            int existingAttribute = mySigner.UnsignedAttributes == null ? -1 : FindAttributeIndexByOid(mySigner.UnsignedAttributes, unsignedAttribute.Oid);
 
-            if (mySigner.UnsignedAttributes == null)
+            if (existingAttribute == -1)
             {
-                newAttributeIdx = 0;
-                mySigner.UnsignedAttributes = new AttributeAsn[1];
+                // create a new attribute
+                AttributeAsn newUnsignedAttr;
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                {
+                    writer.PushSetOf();
+                    writer.WriteEncodedValue(unsignedAttribute.RawData);
+                    writer.PopSetOf();
+
+                    newUnsignedAttr = new AttributeAsn
+                    {
+                        AttrType = new Oid(unsignedAttribute.Oid),
+                        AttrValues = writer.Encode(),
+                    };
+                }
+
+                int newAttributeIdx;
+
+                if (mySigner.UnsignedAttributes == null)
+                {
+                    newAttributeIdx = 0;
+                    mySigner.UnsignedAttributes = new AttributeAsn[1];
+                }
+                else
+                {
+                    newAttributeIdx = mySigner.UnsignedAttributes.Length;
+                    Array.Resize(ref mySigner.UnsignedAttributes, newAttributeIdx + 1);
+                }
+
+                mySigner.UnsignedAttributes[newAttributeIdx] = newUnsignedAttr;
             }
             else
             {
-                newAttributeIdx = mySigner.UnsignedAttributes.Length;
-                Array.Resize(ref mySigner.UnsignedAttributes, newAttributeIdx + 1);
-            }
+                // merge with existing attribute
+                ref AttributeAsn modifiedAttr = ref mySigner.UnsignedAttributes[existingAttribute];
 
-            mySigner.UnsignedAttributes[newAttributeIdx] = newUnsignedAttr;
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                {
+                    writer.PushSetOf();
+
+                    AsnReader reader = new AsnReader(modifiedAttr.AttrValues, AsnEncodingRules.BER);
+                    AsnReader collReader = reader.ReadSetOf();
+
+                    if (reader.HasData)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+
+                    // re-add old values
+                    while (collReader.HasData)
+                    {
+                        writer.WriteEncodedValue(collReader.GetEncodedValue());
+                    }
+
+                    writer.WriteEncodedValue(unsignedAttribute.RawData);
+
+                    writer.PopSetOf();
+                    modifiedAttr.AttrValues = writer.Encode();
+                }
+            }
 
             // Re-normalize the document
             _document.Reencode();
@@ -782,12 +817,18 @@ namespace System.Security.Cryptography.Pkcs
                 writer.PushSetOf();
 
                 AsnReader reader = new AsnReader(modifiedAttr.AttrValues, writer.RuleSet);
+                AsnReader collReader = reader.ReadSetOf();
+
+                if (reader.HasData)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
 
                 int i = 0;
 
-                while (reader.HasData)
+                while (collReader.HasData)
                 {
-                    ReadOnlyMemory<byte> encodedValue = reader.GetEncodedValue();
+                    ReadOnlyMemory<byte> encodedValue = collReader.GetEncodedValue();
 
                     if (i != removeValueIndex)
                     {
