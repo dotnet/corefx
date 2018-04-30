@@ -387,6 +387,24 @@ namespace System.Diagnostics.Tests
             Assert.Throws<Win32Exception>(() => p.Start());
         }
 
+        [Fact]
+        public void TestExitCodeKilledChild()
+        {
+            using (Process p = CreateProcessLong())
+            {
+                p.Start();
+                p.Kill();
+                p.WaitForExit();
+
+                Assert.True(p.ExitCode > 128, "Exit code should be 128 + SIGKILL.");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    const int SIGKILL = 9;
+                    Assert.Equal(128 + SIGKILL, p.ExitCode);
+                }
+            }
+        }
+
         /// <summary>
         /// Tests when running as a normal user and starting a new process as the same user
         /// works as expected.
