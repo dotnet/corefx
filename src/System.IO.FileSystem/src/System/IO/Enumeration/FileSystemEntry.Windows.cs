@@ -25,6 +25,21 @@ namespace System.IO.Enumeration
         internal unsafe Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
 
         /// <summary>
+        /// The full path of the directory this entry resides in.
+        /// </summary>
+        public ReadOnlySpan<char> Directory { get; private set; }
+
+        /// <summary>
+        /// The full path of the root directory used for the enumeration.
+        /// </summary>
+        public ReadOnlySpan<char> RootDirectory { get; private set; }
+
+        /// <summary>
+        /// The root directory for the enumeration as specified in the constructor.
+        /// </summary>
+        public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
+
+        /// <summary>
         /// The file name for this entry.
         /// </summary>
         public ReadOnlySpan<char> FileName => _info->FileName;
