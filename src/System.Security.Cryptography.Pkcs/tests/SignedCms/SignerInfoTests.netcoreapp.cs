@@ -220,19 +220,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
             return new AsnEncodedData(tokenOid, tokenInfo.Encode());
         }
 
-        private static byte Read8BitSerial(ReadOnlySpan<byte> serial)
-        {
-            // serial is big endian integer but we expect value in range 0-255
-            byte x = 0;
-            foreach (byte b in serial)
-            {
-                Assert.Equal(0, x);
-                x = b;
-            }
-
-            return x;
-        }
-
         private static void VerifyAttributesAreEqual(AsnEncodedData actual, AsnEncodedData expected)
         {
             Assert.NotSame(expected.Oid, actual.Oid);
@@ -246,13 +233,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Rfc3161TimestampTokenInfo actualToken;
             Assert.True(Rfc3161TimestampTokenInfo.TryDecode(actual.RawData, out actualToken, out _));
 
-            // serial number can be equivalent but not identical (i.e. serial = 4 can be encoded as [0, 4] or [4])
-            byte expectedSerial = Read8BitSerial(expectedToken.GetSerialNumber().Span);
-            byte actualSerial = Read8BitSerial(actualToken.GetSerialNumber().Span);
-            Assert.Equal(expectedSerial, actualSerial);
-
+            Assert.True(expectedToken.GetSerialNumber().Span.SequenceEqual(actualToken.GetSerialNumber().Span));
             Assert.Equal(expectedToken.Timestamp, actualToken.Timestamp);
-
             Assert.Equal(expectedToken.HashAlgorithmId.Value, Oids.Sha256);
             Assert.Equal(expectedToken.HashAlgorithmId.Value, actualToken.HashAlgorithmId.Value);
         }
