@@ -170,8 +170,9 @@ namespace System.Threading.Tests
 
             Action<AsyncLocalValueChangedArgs<object>> onAsyncLocal0Changed = e =>
             {
-                Assert.Null(e.PreviousValue);
-                Assert.Same(obj0, e.CurrentValue);
+                Assert.True(e.PreviousValue == null || e.CurrentValue == null);
+                object nonNullValue = e.PreviousValue ?? e.CurrentValue;
+                Assert.Same(obj0, nonNullValue);
                 ++asyncLocal0ChangeCount;
             };
             VerifyChangeCounts(0, 0);
@@ -183,14 +184,9 @@ namespace System.Threading.Tests
 
             Action<AsyncLocalValueChangedArgs<object>> onAsyncLocal1Changed = e =>
             {
-                if (e.PreviousValue == null)
-                {
-                    Assert.True(e.CurrentValue == obj1 || e.CurrentValue == obj2);
-                }
-                else
-                {
-                    Assert.Null(e.CurrentValue);
-                }
+                Assert.True(e.PreviousValue == null || e.CurrentValue == null);
+                object nonNullValue = e.PreviousValue ?? e.CurrentValue;
+                Assert.True(nonNullValue == obj1 || nonNullValue == obj2);
                 ++asyncLocal1ChangeCount;
             };
             VerifyChangeCounts(1, 0);
