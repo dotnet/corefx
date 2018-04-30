@@ -26,24 +26,24 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.SignerInfos[0].AddUnsignedAttribute(attribute1);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            CheckSignerHasUnsignedAttribute(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             cms = ReReadSignedCms(cms);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            CheckSignerHasUnsignedAttribute(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             AsnEncodedData attribute2 = CreateTimestampToken(2);
 
             cms.SignerInfos[0].AddUnsignedAttribute(attribute2);
 
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
-            CheckSignerHasUnsignedAttribute(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
 
             cms = ReReadSignedCms(cms);
 
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
-            CheckSignerHasUnsignedAttribute(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
+            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
         }
 
         [Fact]
@@ -234,7 +234,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             return x;
         }
 
-        private static void CheckSignerHasUnsignedAttribute(AsnEncodedData actual, AsnEncodedData expected)
+        private static void VerifyAttributesAreEqual(AsnEncodedData actual, AsnEncodedData expected)
         {
             Assert.NotSame(expected.Oid, actual.Oid);
             Assert.Equal(expected.Oid.Value, actual.Oid.Value);
