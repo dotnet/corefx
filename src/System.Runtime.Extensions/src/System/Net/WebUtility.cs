@@ -169,7 +169,6 @@ namespace System.Net
         {
             Debug.Assert(output != null);
 
-            ReadOnlySpan<char> valueSpan = value.AsSpan();
             int l = value.Length;
             for (int i = 0; i < l; i++)
             {
@@ -197,11 +196,11 @@ namespace System.Net
                             uint parsedValue;
                             if (value[entityOffset + 1] == 'x' || value[entityOffset + 1] == 'X')
                             {
-                                parsedSuccessfully = uint.TryParse(valueSpan.Slice(entityOffset + 2, entityLength - 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out parsedValue);
+                                parsedSuccessfully = uint.TryParse(value.AsSpan(entityOffset + 2, entityLength - 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out parsedValue);
                             }
                             else
                             {
-                                parsedSuccessfully = uint.TryParse(valueSpan.Slice(entityOffset + 1, entityLength - 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
+                                parsedSuccessfully = uint.TryParse(value.AsSpan(entityOffset + 1, entityLength - 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
                             }
 
                             if (parsedSuccessfully)
@@ -232,7 +231,7 @@ namespace System.Net
                         }
                         else
                         {
-                            ReadOnlySpan<char> entity = valueSpan.Slice(entityOffset, entityLength);
+                            ReadOnlySpan<char> entity = value.AsSpan(entityOffset, entityLength);
                             i = index; // already looked at everything until semicolon
 
                             char entityChar = HtmlEntities.Lookup(entity);
@@ -774,285 +773,271 @@ namespace System.Net
             private const int Count = 253;
 
             // maps entity strings => unicode chars
-            private static readonly LowLevelDictionary<ulong, char> s_lookupTable =
-                new LowLevelDictionary<ulong, char>(Count)
+            private static readonly Dictionary<ulong, char> s_lookupTable =
+                new Dictionary<ulong, char>(Count)
                 {
-                    [1953461617] = '\x0022', // "quot"
-                    [7368033] = '\x0026', // "amp"
-                    [1936683105] = '\x0027', // "apos"
-                    [29804] = '\x003c', // "lt"
-                    [29799] = '\x003e', // "gt"
-                    [1886610030] = '\x00a0', // "nbsp"
-                    [465525302633] = '\x00a1', // "iexcl"
-                    [1953391971] = '\x00a2', // "cent"
-                    [431349919600] = '\x00a3', // "pound"
-                    [121381990856035] = '\x00a4', // "curren"
-                    [7234937] = '\x00a5', // "yen"
-                    [125762589323874] = '\x00a6', // "brvbar"
-                    [1952671091] = '\x00a7', // "sect"
-                    [7105909] = '\x00a8', // "uml"
-                    [2037411683] = '\x00a9', // "copy"
-                    [1717858927] = '\x00aa', // "ordf"
-                    [478711734636] = '\x00ab', // "laquo"
-                    [7630702] = '\x00ac', // "not"
-                    [7956595] = '\x00ad', // "shy"
-                    [6776178] = '\x00ae', // "reg"
-                    [1919115629] = '\x00af', // "macr"
-                    [6776164] = '\x00b0', // "deg"
-                    [121416367565936] = '\x00b1', // "plusmn"
-                    [846230899] = '\x00b2', // "sup2"
-                    [863008115] = '\x00b3', // "sup3"
-                    [435745547105] = '\x00b4', // "acute"
-                    [478660487533] = '\x00b5', // "micro"
-                    [1634886000] = '\x00b6', // "para"
-                    [128021774494061] = '\x00b7', // "middot"
-                    [465624655203] = '\x00b8', // "cedil"
-                    [829453683] = '\x00b9', // "sup1"
-                    [1835299439] = '\x00ba', // "ordm"
-                    [478711734642] = '\x00bb', // "raquo"
-                    [57386725372518] = '\x00bc', // "frac14"
-                    [55187702116966] = '\x00bd', // "frac12"
-                    [57395315307110] = '\x00be', // "frac34"
-                    [128038972256617] = '\x00bf', // "iquest"
-                    [111559115433793] = '\x00c0', // "Agrave"
-                    [111550860058945] = '\x00c1', // "Aacute"
-                    [427121271617] = '\x00c2', // "Acirc"
-                    [111481989985345] = '\x00c3', // "Atilde"
-                    [1819112769] = '\x00c4', // "Auml"
-                    [444234035777] = '\x00c5', // "Aring"
-                    [444150334785] = '\x00c6', // "AElig"
-                    [119199911732035] = '\x00c7', // "Ccedil"
-                    [111559115433797] = '\x00c8', // "Egrave"
-                    [111550860058949] = '\x00c9', // "Eacute"
-                    [427121271621] = '\x00ca', // "Ecirc"
-                    [1819112773] = '\x00cb', // "Euml"
-                    [111559115433801] = '\x00cc', // "Igrave"
-                    [111550860058953] = '\x00cd', // "Iacute"
-                    [427121271625] = '\x00ce', // "Icirc"
-                    [1819112777] = '\x00cf', // "Iuml"
-                    [4740165] = '\x00d0', // "ETH"
-                    [111481989985358] = '\x00d1', // "Ntilde"
-                    [111559115433807] = '\x00d2', // "Ograve"
-                    [111550860058959] = '\x00d3', // "Oacute"
-                    [427121271631] = '\x00d4', // "Ocirc"
-                    [111481989985359] = '\x00d5', // "Otilde"
-                    [1819112783] = '\x00d6', // "Ouml"
-                    [495622908276] = '\x00d7', // "times"
-                    [114844765025103] = '\x00d8', // "Oslash"
-                    [111559115433813] = '\x00d9', // "Ugrave"
-                    [111550860058965] = '\x00da', // "Uacute"
-                    [427121271637] = '\x00db', // "Ucirc"
-                    [1819112789] = '\x00dc', // "Uuml"
-                    [111550860058969] = '\x00dd', // "Yacute"
-                    [336388376660] = '\x00de', // "THORN"
-                    [444150348403] = '\x00df', // "szlig"
-                    [111559115433825] = '\x00e0', // "agrave"
-                    [111550860058977] = '\x00e1', // "aacute"
-                    [427121271649] = '\x00e2', // "acirc"
-                    [111481989985377] = '\x00e3', // "atilde"
-                    [1819112801] = '\x00e4', // "auml"
-                    [444234035809] = '\x00e5', // "aring"
-                    [444150343009] = '\x00e6', // "aelig"
-                    [119199911732067] = '\x00e7', // "ccedil"
-                    [111559115433829] = '\x00e8', // "egrave"
-                    [111550860058981] = '\x00e9', // "eacute"
-                    [427121271653] = '\x00ea', // "ecirc"
-                    [1819112805] = '\x00eb', // "euml"
-                    [111559115433833] = '\x00ec', // "igrave"
-                    [111550860058985] = '\x00ed', // "iacute"
-                    [427121271657] = '\x00ee', // "icirc"
-                    [1819112809] = '\x00ef', // "iuml"
-                    [6845541] = '\x00f0', // "eth"
-                    [111481989985390] = '\x00f1', // "ntilde"
-                    [111559115433839] = '\x00f2', // "ograve"
-                    [111550860058991] = '\x00f3', // "oacute"
-                    [427121271663] = '\x00f4', // "ocirc"
-                    [111481989985391] = '\x00f5', // "otilde"
-                    [1819112815] = '\x00f6', // "ouml"
-                    [111481940502884] = '\x00f7', // "divide"
-                    [114844765025135] = '\x00f8', // "oslash"
-                    [111559115433845] = '\x00f9', // "ugrave"
-                    [111550860058997] = '\x00fa', // "uacute"
-                    [427121271669] = '\x00fb', // "ucirc"
-                    [1819112821] = '\x00fc', // "uuml"
-                    [111550860059001] = '\x00fd', // "yacute"
-                    [474366306420] = '\x00fe', // "thorn"
-                    [1819112825] = '\x00ff', // "yuml"
-                    [444150334799] = '\x0152', // "OElig"
-                    [444150343023] = '\x0153', // "oelig"
-                    [121424939410259] = '\x0160', // "Scaron"
-                    [121424939410291] = '\x0161', // "scaron"
-                    [1819112793] = '\x0178', // "Yuml"
-                    [1718578790] = '\x0192', // "fnof"
-                    [1668442467] = '\x02c6', // "circ"
-                    [435476523380] = '\x02dc', // "tilde"
-                    [418364025921] = '\x0391', // "Alpha"
-                    [1635018050] = '\x0392', // "Beta"
-                    [418447712583] = '\x0393', // "Gamma"
-                    [418565088580] = '\x0394', // "Delta"
-                    [31084758854496325] = '\x0395', // "Epsilon"
-                    [1635018074] = '\x0396', // "Zeta"
-                    [6386757] = '\x0397', // "Eta"
-                    [418564630612] = '\x0398', // "Theta"
-                    [1635020617] = '\x0399', // "Iota"
-                    [418498240843] = '\x039a', // "Kappa"
-                    [107083775959372] = '\x039b', // "Lambda"
-                    [30029] = '\x039c', // "Mu"
-                    [30030] = '\x039d', // "Nu"
-                    [26968] = '\x039e', // "Xi"
-                    [31084784522980687] = '\x039f', // "Omicron"
-                    [26960] = '\x03a0', // "Pi"
-                    [7301202] = '\x03a1', // "Rho"
-                    [418447321427] = '\x03a3', // "Sigma"
-                    [7692628] = '\x03a4', // "Tau"
-                    [31084758854496341] = '\x03a5', // "Upsilon"
-                    [6907984] = '\x03a6', // "Phi"
-                    [6907971] = '\x03a7', // "Chi"
-                    [6910800] = '\x03a8', // "Psi"
-                    [418346528079] = '\x03a9', // "Omega"
-                    [418364025953] = '\x03b1', // "alpha"
-                    [1635018082] = '\x03b2', // "beta"
-                    [418447712615] = '\x03b3', // "gamma"
-                    [418565088612] = '\x03b4', // "delta"
-                    [31084758854496357] = '\x03b5', // "epsilon"
-                    [1635018106] = '\x03b6', // "zeta"
-                    [6386789] = '\x03b7', // "eta"
-                    [418564630644] = '\x03b8', // "theta"
-                    [1635020649] = '\x03b9', // "iota"
-                    [418498240875] = '\x03ba', // "kappa"
-                    [107083775959404] = '\x03bb', // "lambda"
-                    [30061] = '\x03bc', // "mu"
-                    [30062] = '\x03bd', // "nu"
-                    [27000] = '\x03be', // "xi"
-                    [31084784522980719] = '\x03bf', // "omicron"
-                    [26992] = '\x03c0', // "pi"
-                    [7301234] = '\x03c1', // "rho"
-                    [112568633354611] = '\x03c2', // "sigmaf"
-                    [418447321459] = '\x03c3', // "sigma"
-                    [7692660] = '\x03c4', // "tau"
-                    [31084758854496373] = '\x03c5', // "upsilon"
-                    [6908016] = '\x03c6', // "phi"
-                    [6908003] = '\x03c7', // "chi"
-                    [6910832] = '\x03c8', // "psi"
-                    [418346528111] = '\x03c9', // "omega"
-                    [7888463084717959284] = '\x03d1', // "thetasym"
-                    [448445771893] = '\x03d2', // "upsih"
-                    [7760240] = '\x03d6', // "piv"
-                    [1886613093] = '\x2002', // "ensp"
-                    [1886612837] = '\x2003', // "emsp"
-                    [123641075951732] = '\x2009', // "thinsp"
-                    [1785624442] = '\x200c', // "zwnj"
-                    [6977402] = '\x200d', // "zwj"
-                    [7172716] = '\x200e', // "lrm"
-                    [7171186] = '\x200f', // "rlm"
-                    [448612361326] = '\x2013', // "ndash"
-                    [448612361325] = '\x2014', // "mdash"
-                    [478711739244] = '\x2018', // "lsquo"
-                    [478711739250] = '\x2019', // "rsquo"
-                    [478711734899] = '\x201a', // "sbquo"
-                    [478711735404] = '\x201c', // "ldquo"
-                    [478711735410] = '\x201d', // "rdquo"
-                    [478711735394] = '\x201e', // "bdquo"
-                    [125779852091748] = '\x2020', // "dagger"
-                    [125779852091716] = '\x2021', // "Dagger"
-                    [1819047266] = '\x2022', // "bull"
-                    [123598092920168] = '\x2026', // "hellip"
-                    [119200063579504] = '\x2030', // "permil"
-                    [435627324016] = '\x2032', // "prime"
-                    [435627323984] = '\x2033', // "Prime"
-                    [122550204068716] = '\x2039', // "lsaquo"
-                    [122550204068722] = '\x203a', // "rsaquo"
-                    [435644099695] = '\x203e', // "oline"
-                    [465792234086] = '\x2044', // "frasl"
-                    [1869772133] = '\x20ac', // "euro"
-                    [435526135145] = '\x2111', // "image"
-                    [123636629988727] = '\x2118', // "weierp"
-                    [1818322290] = '\x211c', // "real"
-                    [435475804788] = '\x2122', // "trade"
-                    [30814309007584353] = '\x2135', // "alefsym"
-                    [1920098668] = '\x2190', // "larr"
-                    [1920098677] = '\x2191', // "uarr"
-                    [1920098674] = '\x2192', // "rarr"
-                    [1920098660] = '\x2193', // "darr"
-                    [1920098664] = '\x2194', // "harr"
-                    [491545260643] = '\x21b5', // "crarr"
-                    [1920090476] = '\x21d0', // "lArr"
-                    [1920090485] = '\x21d1', // "uArr"
-                    [1920090482] = '\x21d2', // "rArr"
-                    [1920090468] = '\x21d3', // "dArr"
-                    [1920090472] = '\x21d4', // "hArr"
-                    [119212747157350] = '\x2200', // "forall"
-                    [1953653104] = '\x2202', // "part"
-                    [500152498277] = '\x2203', // "exist"
-                    [521644567909] = '\x2205', // "empty"
-                    [418430214510] = '\x2207', // "nabla"
-                    [1852404585] = '\x2208', // "isin"
-                    [474215640942] = '\x2209', // "notin"
-                    [26990] = '\x220b', // "ni"
-                    [1685025392] = '\x220f', // "prod"
-                    [7173491] = '\x2211', // "sum"
-                    [495891409261] = '\x2212', // "minus"
-                    [128038905278316] = '\x2217', // "lowast"
-                    [426969948530] = '\x221a', // "radic"
-                    [1886351984] = '\x221d', // "prop"
-                    [474214723177] = '\x221e', // "infin"
-                    [6778465] = '\x2220', // "ang"
-                    [6581857] = '\x2227', // "and"
-                    [29295] = '\x2228', // "or"
-                    [7364963] = '\x2229', // "cap"
-                    [7370083] = '\x222a', // "cup"
-                    [7630441] = '\x222b', // "int"
-                    [57610315589748] = '\x2234', // "there4"
-                    [7170419] = '\x223c', // "sim"
-                    [1735290723] = '\x2245', // "cong"
-                    [482873013089] = '\x2248', // "asymp"
-                    [25966] = '\x2260', // "ne"
-                    [508575445349] = '\x2261', // "equiv"
-                    [25964] = '\x2264', // "le"
-                    [25959] = '\x2265', // "ge"
-                    [6452595] = '\x2282', // "sub"
-                    [7370099] = '\x2283', // "sup"
-                    [1651864430] = '\x2284', // "nsub"
-                    [1700951411] = '\x2286', // "sube"
-                    [1701868915] = '\x2287', // "supe"
-                    [495891279983] = '\x2295', // "oplus"
-                    [126879464518767] = '\x2297', // "otimes"
-                    [1886545264] = '\x22a5', // "perp"
-                    [1953457267] = '\x22c5', // "sdot"
-                    [465624720236] = '\x2308', // "lceil"
-                    [465624720242] = '\x2309', // "rceil"
-                    [125822936311404] = '\x230a', // "lfloor"
-                    [125822936311410] = '\x230b', // "rfloor"
-                    [1735287148] = '\x2329', // "lang"
-                    [1735287154] = '\x232a', // "rang"
-                    [8023916] = '\x25ca', // "loz"
-                    [126879312998515] = '\x2660', // "spades"
-                    [495573101667] = '\x2663', // "clubs"
-                    [126943972386152] = '\x2665', // "hearts"
-                    [495756339556] = '\x2666', // "diams"
-                    // To compute the key for new entries, use:
-                    // string entity = "diams"; ulong key = 0; for (int i = 0; i < entity.Length; i++) key |= (ulong)entity[i] << 8 * i; Console.WriteLine(key);
+                    [ToUInt64Key("quot")] = '\x0022',
+                    [ToUInt64Key("amp")] = '\x0026',
+                    [ToUInt64Key("apos")] = '\x0027',
+                    [ToUInt64Key("lt")] = '\x003c',
+                    [ToUInt64Key("gt")] = '\x003e',
+                    [ToUInt64Key("nbsp")] = '\x00a0',
+                    [ToUInt64Key("iexcl")] = '\x00a1',
+                    [ToUInt64Key("cent")] = '\x00a2',
+                    [ToUInt64Key("pound")] = '\x00a3',
+                    [ToUInt64Key("curren")] = '\x00a4',
+                    [ToUInt64Key("yen")] = '\x00a5',
+                    [ToUInt64Key("brvbar")] = '\x00a6',
+                    [ToUInt64Key("sect")] = '\x00a7',
+                    [ToUInt64Key("uml")] = '\x00a8',
+                    [ToUInt64Key("copy")] = '\x00a9',
+                    [ToUInt64Key("ordf")] = '\x00aa',
+                    [ToUInt64Key("laquo")] = '\x00ab',
+                    [ToUInt64Key("not")] = '\x00ac',
+                    [ToUInt64Key("shy")] = '\x00ad',
+                    [ToUInt64Key("reg")] = '\x00ae',
+                    [ToUInt64Key("macr")] = '\x00af',
+                    [ToUInt64Key("deg")] = '\x00b0',
+                    [ToUInt64Key("plusmn")] = '\x00b1',
+                    [ToUInt64Key("sup2")] = '\x00b2',
+                    [ToUInt64Key("sup3")] = '\x00b3',
+                    [ToUInt64Key("acute")] = '\x00b4',
+                    [ToUInt64Key("micro")] = '\x00b5',
+                    [ToUInt64Key("para")] = '\x00b6',
+                    [ToUInt64Key("middot")] = '\x00b7',
+                    [ToUInt64Key("cedil")] = '\x00b8',
+                    [ToUInt64Key("sup1")] = '\x00b9',
+                    [ToUInt64Key("ordm")] = '\x00ba',
+                    [ToUInt64Key("raquo")] = '\x00bb',
+                    [ToUInt64Key("frac14")] = '\x00bc',
+                    [ToUInt64Key("frac12")] = '\x00bd',
+                    [ToUInt64Key("frac34")] = '\x00be',
+                    [ToUInt64Key("iquest")] = '\x00bf',
+                    [ToUInt64Key("Agrave")] = '\x00c0',
+                    [ToUInt64Key("Aacute")] = '\x00c1',
+                    [ToUInt64Key("Acirc")] = '\x00c2',
+                    [ToUInt64Key("Atilde")] = '\x00c3',
+                    [ToUInt64Key("Auml")] = '\x00c4',
+                    [ToUInt64Key("Aring")] = '\x00c5',
+                    [ToUInt64Key("AElig")] = '\x00c6',
+                    [ToUInt64Key("Ccedil")] = '\x00c7',
+                    [ToUInt64Key("Egrave")] = '\x00c8',
+                    [ToUInt64Key("Eacute")] = '\x00c9',
+                    [ToUInt64Key("Ecirc")] = '\x00ca',
+                    [ToUInt64Key("Euml")] = '\x00cb',
+                    [ToUInt64Key("Igrave")] = '\x00cc',
+                    [ToUInt64Key("Iacute")] = '\x00cd',
+                    [ToUInt64Key("Icirc")] = '\x00ce',
+                    [ToUInt64Key("Iuml")] = '\x00cf',
+                    [ToUInt64Key("ETH")] = '\x00d0',
+                    [ToUInt64Key("Ntilde")] = '\x00d1',
+                    [ToUInt64Key("Ograve")] = '\x00d2',
+                    [ToUInt64Key("Oacute")] = '\x00d3',
+                    [ToUInt64Key("Ocirc")] = '\x00d4',
+                    [ToUInt64Key("Otilde")] = '\x00d5',
+                    [ToUInt64Key("Ouml")] = '\x00d6',
+                    [ToUInt64Key("times")] = '\x00d7',
+                    [ToUInt64Key("Oslash")] = '\x00d8',
+                    [ToUInt64Key("Ugrave")] = '\x00d9',
+                    [ToUInt64Key("Uacute")] = '\x00da',
+                    [ToUInt64Key("Ucirc")] = '\x00db',
+                    [ToUInt64Key("Uuml")] = '\x00dc',
+                    [ToUInt64Key("Yacute")] = '\x00dd',
+                    [ToUInt64Key("THORN")] = '\x00de',
+                    [ToUInt64Key("szlig")] = '\x00df',
+                    [ToUInt64Key("agrave")] = '\x00e0',
+                    [ToUInt64Key("aacute")] = '\x00e1',
+                    [ToUInt64Key("acirc")] = '\x00e2',
+                    [ToUInt64Key("atilde")] = '\x00e3',
+                    [ToUInt64Key("auml")] = '\x00e4',
+                    [ToUInt64Key("aring")] = '\x00e5',
+                    [ToUInt64Key("aelig")] = '\x00e6',
+                    [ToUInt64Key("ccedil")] = '\x00e7',
+                    [ToUInt64Key("egrave")] = '\x00e8',
+                    [ToUInt64Key("eacute")] = '\x00e9',
+                    [ToUInt64Key("ecirc")] = '\x00ea',
+                    [ToUInt64Key("euml")] = '\x00eb',
+                    [ToUInt64Key("igrave")] = '\x00ec',
+                    [ToUInt64Key("iacute")] = '\x00ed',
+                    [ToUInt64Key("icirc")] = '\x00ee',
+                    [ToUInt64Key("iuml")] = '\x00ef',
+                    [ToUInt64Key("eth")] = '\x00f0',
+                    [ToUInt64Key("ntilde")] = '\x00f1',
+                    [ToUInt64Key("ograve")] = '\x00f2',
+                    [ToUInt64Key("oacute")] = '\x00f3',
+                    [ToUInt64Key("ocirc")] = '\x00f4',
+                    [ToUInt64Key("otilde")] = '\x00f5',
+                    [ToUInt64Key("ouml")] = '\x00f6',
+                    [ToUInt64Key("divide")] = '\x00f7',
+                    [ToUInt64Key("oslash")] = '\x00f8',
+                    [ToUInt64Key("ugrave")] = '\x00f9',
+                    [ToUInt64Key("uacute")] = '\x00fa',
+                    [ToUInt64Key("ucirc")] = '\x00fb',
+                    [ToUInt64Key("uuml")] = '\x00fc',
+                    [ToUInt64Key("yacute")] = '\x00fd',
+                    [ToUInt64Key("thorn")] = '\x00fe',
+                    [ToUInt64Key("yuml")] = '\x00ff',
+                    [ToUInt64Key("OElig")] = '\x0152',
+                    [ToUInt64Key("oelig")] = '\x0153',
+                    [ToUInt64Key("Scaron")] = '\x0160',
+                    [ToUInt64Key("scaron")] = '\x0161',
+                    [ToUInt64Key("Yuml")] = '\x0178',
+                    [ToUInt64Key("fnof")] = '\x0192',
+                    [ToUInt64Key("circ")] = '\x02c6',
+                    [ToUInt64Key("tilde")] = '\x02dc',
+                    [ToUInt64Key("Alpha")] = '\x0391',
+                    [ToUInt64Key("Beta")] = '\x0392',
+                    [ToUInt64Key("Gamma")] = '\x0393',
+                    [ToUInt64Key("Delta")] = '\x0394',
+                    [ToUInt64Key("Epsilon")] = '\x0395',
+                    [ToUInt64Key("Zeta")] = '\x0396',
+                    [ToUInt64Key("Eta")] = '\x0397',
+                    [ToUInt64Key("Theta")] = '\x0398',
+                    [ToUInt64Key("Iota")] = '\x0399',
+                    [ToUInt64Key("Kappa")] = '\x039a',
+                    [ToUInt64Key("Lambda")] = '\x039b',
+                    [ToUInt64Key("Mu")] = '\x039c',
+                    [ToUInt64Key("Nu")] = '\x039d',
+                    [ToUInt64Key("Xi")] = '\x039e',
+                    [ToUInt64Key("Omicron")] = '\x039f',
+                    [ToUInt64Key("Pi")] = '\x03a0',
+                    [ToUInt64Key("Rho")] = '\x03a1',
+                    [ToUInt64Key("Sigma")] = '\x03a3',
+                    [ToUInt64Key("Tau")] = '\x03a4',
+                    [ToUInt64Key("Upsilon")] = '\x03a5',
+                    [ToUInt64Key("Phi")] = '\x03a6',
+                    [ToUInt64Key("Chi")] = '\x03a7',
+                    [ToUInt64Key("Psi")] = '\x03a8',
+                    [ToUInt64Key("Omega")] = '\x03a9',
+                    [ToUInt64Key("alpha")] = '\x03b1',
+                    [ToUInt64Key("beta")] = '\x03b2',
+                    [ToUInt64Key("gamma")] = '\x03b3',
+                    [ToUInt64Key("delta")] = '\x03b4',
+                    [ToUInt64Key("epsilon")] = '\x03b5',
+                    [ToUInt64Key("zeta")] = '\x03b6',
+                    [ToUInt64Key("eta")] = '\x03b7',
+                    [ToUInt64Key("theta")] = '\x03b8',
+                    [ToUInt64Key("iota")] = '\x03b9',
+                    [ToUInt64Key("kappa")] = '\x03ba',
+                    [ToUInt64Key("lambda")] = '\x03bb',
+                    [ToUInt64Key("mu")] = '\x03bc',
+                    [ToUInt64Key("nu")] = '\x03bd',
+                    [ToUInt64Key("xi")] = '\x03be',
+                    [ToUInt64Key("omicron")] = '\x03bf',
+                    [ToUInt64Key("pi")] = '\x03c0',
+                    [ToUInt64Key("rho")] = '\x03c1',
+                    [ToUInt64Key("sigmaf")] = '\x03c2',
+                    [ToUInt64Key("sigma")] = '\x03c3',
+                    [ToUInt64Key("tau")] = '\x03c4',
+                    [ToUInt64Key("upsilon")] = '\x03c5',
+                    [ToUInt64Key("phi")] = '\x03c6',
+                    [ToUInt64Key("chi")] = '\x03c7',
+                    [ToUInt64Key("psi")] = '\x03c8',
+                    [ToUInt64Key("omega")] = '\x03c9',
+                    [ToUInt64Key("thetasym")] = '\x03d1',
+                    [ToUInt64Key("upsih")] = '\x03d2',
+                    [ToUInt64Key("piv")] = '\x03d6',
+                    [ToUInt64Key("ensp")] = '\x2002',
+                    [ToUInt64Key("emsp")] = '\x2003',
+                    [ToUInt64Key("thinsp")] = '\x2009',
+                    [ToUInt64Key("zwnj")] = '\x200c',
+                    [ToUInt64Key("zwj")] = '\x200d',
+                    [ToUInt64Key("lrm")] = '\x200e',
+                    [ToUInt64Key("rlm")] = '\x200f',
+                    [ToUInt64Key("ndash")] = '\x2013',
+                    [ToUInt64Key("mdash")] = '\x2014',
+                    [ToUInt64Key("lsquo")] = '\x2018',
+                    [ToUInt64Key("rsquo")] = '\x2019',
+                    [ToUInt64Key("sbquo")] = '\x201a',
+                    [ToUInt64Key("ldquo")] = '\x201c',
+                    [ToUInt64Key("rdquo")] = '\x201d',
+                    [ToUInt64Key("bdquo")] = '\x201e',
+                    [ToUInt64Key("dagger")] = '\x2020',
+                    [ToUInt64Key("Dagger")] = '\x2021',
+                    [ToUInt64Key("bull")] = '\x2022',
+                    [ToUInt64Key("hellip")] = '\x2026',
+                    [ToUInt64Key("permil")] = '\x2030',
+                    [ToUInt64Key("prime")] = '\x2032',
+                    [ToUInt64Key("Prime")] = '\x2033',
+                    [ToUInt64Key("lsaquo")] = '\x2039',
+                    [ToUInt64Key("rsaquo")] = '\x203a',
+                    [ToUInt64Key("oline")] = '\x203e',
+                    [ToUInt64Key("frasl")] = '\x2044',
+                    [ToUInt64Key("euro")] = '\x20ac',
+                    [ToUInt64Key("image")] = '\x2111',
+                    [ToUInt64Key("weierp")] = '\x2118',
+                    [ToUInt64Key("real")] = '\x211c',
+                    [ToUInt64Key("trade")] = '\x2122',
+                    [ToUInt64Key("alefsym")] = '\x2135',
+                    [ToUInt64Key("larr")] = '\x2190',
+                    [ToUInt64Key("uarr")] = '\x2191',
+                    [ToUInt64Key("rarr")] = '\x2192',
+                    [ToUInt64Key("darr")] = '\x2193',
+                    [ToUInt64Key("harr")] = '\x2194',
+                    [ToUInt64Key("crarr")] = '\x21b5',
+                    [ToUInt64Key("lArr")] = '\x21d0',
+                    [ToUInt64Key("uArr")] = '\x21d1',
+                    [ToUInt64Key("rArr")] = '\x21d2',
+                    [ToUInt64Key("dArr")] = '\x21d3',
+                    [ToUInt64Key("hArr")] = '\x21d4',
+                    [ToUInt64Key("forall")] = '\x2200',
+                    [ToUInt64Key("part")] = '\x2202',
+                    [ToUInt64Key("exist")] = '\x2203',
+                    [ToUInt64Key("empty")] = '\x2205',
+                    [ToUInt64Key("nabla")] = '\x2207',
+                    [ToUInt64Key("isin")] = '\x2208',
+                    [ToUInt64Key("notin")] = '\x2209',
+                    [ToUInt64Key("ni")] = '\x220b',
+                    [ToUInt64Key("prod")] = '\x220f',
+                    [ToUInt64Key("sum")] = '\x2211',
+                    [ToUInt64Key("minus")] = '\x2212',
+                    [ToUInt64Key("lowast")] = '\x2217',
+                    [ToUInt64Key("radic")] = '\x221a',
+                    [ToUInt64Key("prop")] = '\x221d',
+                    [ToUInt64Key("infin")] = '\x221e',
+                    [ToUInt64Key("ang")] = '\x2220',
+                    [ToUInt64Key("and")] = '\x2227',
+                    [ToUInt64Key("or")] = '\x2228',
+                    [ToUInt64Key("cap")] = '\x2229',
+                    [ToUInt64Key("cup")] = '\x222a',
+                    [ToUInt64Key("int")] = '\x222b',
+                    [ToUInt64Key("there4")] = '\x2234',
+                    [ToUInt64Key("sim")] = '\x223c',
+                    [ToUInt64Key("cong")] = '\x2245',
+                    [ToUInt64Key("asymp")] = '\x2248',
+                    [ToUInt64Key("ne")] = '\x2260',
+                    [ToUInt64Key("equiv")] = '\x2261',
+                    [ToUInt64Key("le")] = '\x2264',
+                    [ToUInt64Key("ge")] = '\x2265',
+                    [ToUInt64Key("sub")] = '\x2282',
+                    [ToUInt64Key("sup")] = '\x2283',
+                    [ToUInt64Key("nsub")] = '\x2284',
+                    [ToUInt64Key("sube")] = '\x2286',
+                    [ToUInt64Key("supe")] = '\x2287',
+                    [ToUInt64Key("oplus")] = '\x2295',
+                    [ToUInt64Key("otimes")] = '\x2297',
+                    [ToUInt64Key("perp")] = '\x22a5',
+                    [ToUInt64Key("sdot")] = '\x22c5',
+                    [ToUInt64Key("lceil")] = '\x2308',
+                    [ToUInt64Key("rceil")] = '\x2309',
+                    [ToUInt64Key("lfloor")] = '\x230a',
+                    [ToUInt64Key("rfloor")] = '\x230b',
+                    [ToUInt64Key("lang")] = '\x2329',
+                    [ToUInt64Key("rang")] = '\x232a',
+                    [ToUInt64Key("loz")] = '\x25ca',
+                    [ToUInt64Key("spades")] = '\x2660',
+                    [ToUInt64Key("clubs")] = '\x2663',
+                    [ToUInt64Key("hearts")] = '\x2665',
+                    [ToUInt64Key("diams")] = '\x2666',
                 };
 
             public static char Lookup(ReadOnlySpan<char> entity)
             {
                 // To avoid an allocation, keys of type "ulong" are used in the lookup table.
                 // Since all entity strings comprise 8 characters or less and are ASCII-only, they "fit" into an ulong (8 bytes).
-                // The ulong key is the reversed single-byte character representation of the actual entity string.
                 if (entity.Length <= 8)
                 {
-                    ulong key = 0;
-                    for (int i = 0; i < entity.Length; i++)
-                    {
-                        if (entity[i] > 0xFF)
-                        {
-                            return default;
-                        }
-
-                        key |= (ulong)entity[i] << 8 * i;
-                    }
-
-                    s_lookupTable.TryGetValue(key, out char result);
+                    s_lookupTable.TryGetValue(ToUInt64Key(entity), out char result);
                     return result;
                 }
                 else
@@ -1060,6 +1045,23 @@ namespace System.Net
                     // Currently, there are no entities that are longer than 8 characters.
                     return default;
                 } 
+            }
+
+            private static ulong ToUInt64Key(ReadOnlySpan<char> entity)
+            {
+                // The ulong key is the reversed single-byte character representation of the actual entity string.
+                ulong key = 0;
+                for (int i = 0; i < entity.Length; i++)
+                {
+                    if (entity[i] > 0xFF)
+                    {
+                        return default;
+                    }
+
+                    key = (key << 8) | entity[i];
+                }
+
+                return key;
             }
         }
     }
