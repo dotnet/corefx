@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
-            cms = ReReadSignedCms(cms);
+            ReReadSignedCms(ref cms);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
@@ -40,7 +40,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
 
-            cms = ReReadSignedCms(cms);
+            ReReadSignedCms(ref cms);
 
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[1].Values[0], attribute2);
@@ -62,7 +62,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
             Assert.Equal(secondSignerCounterSignature, cms.SignerInfos[0].CounterSignerInfos[0].GetSignature());
 
-            cms = ReReadSignedCms(cms);
+            ReReadSignedCms(ref cms);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
             Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
@@ -87,7 +87,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, attributes);
 
-                cms = ReReadSignedCms(cms);
+                ReReadSignedCms(ref cms);
                 VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, attributes);
             }
         }
@@ -110,7 +110,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, attributes);
 
-                cms = ReReadSignedCms(cms);
+                ReReadSignedCms(ref cms);
                 VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, attributes);
             }
         }
@@ -195,13 +195,12 @@ namespace System.Security.Cryptography.Pkcs.Tests
             return a.Oid.Value == b.Oid.Value && a.RawData.SequenceEqual(b.RawData);
         }
 
-        private static SignedCms ReReadSignedCms(SignedCms cms)
+        private static void ReReadSignedCms(ref SignedCms cms)
         {
             byte[] bytes = cms.Encode();
 
             cms = new SignedCms();
             cms.Decode(bytes);
-            return cms;
         }
 
         private static AsnEncodedData CreateTimestampToken(byte serial)
