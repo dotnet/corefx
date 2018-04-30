@@ -397,11 +397,10 @@ namespace System.Diagnostics.Tests
                 p.WaitForExit();
 
                 Assert.True(p.ExitCode > 128, "Exit code should be 128 + SIGKILL.");
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    const int SIGKILL = 9;
-                    Assert.Equal(128 + SIGKILL, p.ExitCode);
-                }
+
+                // SIGKILL may change per platform
+                const int SIGKILL = 9; // Linux, macOS, FreeBSD, ...
+                Assert.Equal(128 + SIGKILL, p.ExitCode);
             }
         }
 
