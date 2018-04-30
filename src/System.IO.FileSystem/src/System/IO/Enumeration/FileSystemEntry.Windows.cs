@@ -7,7 +7,7 @@ namespace System.IO.Enumeration
     /// <summary>
     /// Lower level view of FileSystemInfo used for processing and filtering find results.
     /// </summary>
-    public unsafe ref struct FileSystemEntry
+    public unsafe ref partial struct FileSystemEntry
     {
         internal static void Initialize(
             ref FileSystemEntry entry,
@@ -23,21 +23,6 @@ namespace System.IO.Enumeration
         }
 
         internal unsafe Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
-
-        /// <summary>
-        /// The full path of the directory this entry resides in.
-        /// </summary>
-        public ReadOnlySpan<char> Directory { get; private set; }
-
-        /// <summary>
-        /// The full path of the root directory used for the enumeration.
-        /// </summary>
-        public ReadOnlySpan<char> RootDirectory { get; private set; }
-
-        /// <summary>
-        /// The root directory for the enumeration as specified in the constructor.
-        /// </summary>
-        public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
         /// <summary>
         /// The file name for this entry.
@@ -74,34 +59,6 @@ namespace System.IO.Enumeration
 
         public FileSystemInfo ToFileSystemInfo()
             => FileSystemInfo.Create(Path.Join(Directory, FileName), ref this);
-
-        /// <summary>
-        /// Returns the full path for find results, based on the initially provided path.
-        /// </summary>
-        public string ToSpecifiedFullPath()
-        {
-            // We want to provide the enumerated segment of the path appended to the originally specified path. This is
-            // the behavior of the various Directory APIs that return a list of strings.
-            //
-            // RootDirectory has the final separator trimmed, OriginalRootDirectory does not. Our legacy behavior would
-            // effectively account for this by appending subdirectory names as it recursed. As such we need to trim one
-            // separator when combining with the relative path (Directory.Slice(RootDirectory.Length)).
-            //
-            //   Original  =>  Root   => Directory    => FileName => relativePath => Specified
-            //   C:\foo        C:\foo    C:\foo          bar         ""              C:\foo\bar
-            //   C:\foo\       C:\foo    C:\foo          bar         ""              C:\foo\bar
-            //   C:\foo/       C:\foo    C:\foo          bar         ""              C:\foo/bar
-            //   C:\foo\\      C:\foo    C:\foo          bar         ""              C:\foo\\bar
-            //   C:\foo        C:\foo    C:\foo\bar      jar         "bar"           C:\foo\bar\jar
-            //   C:\foo\       C:\foo    C:\foo\bar      jar         "bar"           C:\foo\bar\jar
-            //   C:\foo/       C:\foo    C:\foo\bar      jar         "bar"           C:\foo/bar\jar
-
-            ReadOnlySpan<char> relativePath = Directory.Slice(RootDirectory.Length);
-            if (PathInternal.EndsInDirectorySeparator(OriginalRootDirectory) && PathInternal.StartsWithDirectorySeparator(relativePath))
-                relativePath = relativePath.Slice(1);
-
-            return Path.Join(OriginalRootDirectory, relativePath, FileName);
-        }
 
         /// <summary>
         /// Returns the full path of the find result.
