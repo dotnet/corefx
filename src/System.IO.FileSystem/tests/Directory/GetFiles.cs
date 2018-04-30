@@ -147,6 +147,8 @@ namespace System.IO.Tests
 
     public class Directory_GetFiles_str_str_so : Directory_GetFileSystemEntries_str_str_so
     {
+        public virtual bool IsDirectoryInfo => false;
+
         protected override bool TestFiles { get { return true; } }
         protected override bool TestDirectories { get { return false; } }
 
@@ -163,6 +165,25 @@ namespace System.IO.Tests
         public override string[] GetEntries(string path, string searchPattern, SearchOption option)
         {
             return Directory.GetFiles(path, searchPattern, option);
+        }
+
+        [Theory, MemberData(nameof(TrailingSeparators))]
+        public void DirectoryWithTrailingSeparators(string trailing)
+        {
+            // When getting strings back we should retain the root path as specified for Directory.
+            // DirectoryInfo returns the normalized full path in all cases.
+
+            string root = GetTestFilePath() + (IsDirectoryInfo ? "" : trailing);
+            string rootFile = Path.Combine(root, GetTestFileName());
+            string subDirectory = Path.Combine(root, GetTestFileName());
+            string nestedFile = Path.Combine(subDirectory, GetTestFileName());
+
+            Directory.CreateDirectory(subDirectory);
+            File.Create(rootFile).Dispose();
+            File.Create(nestedFile).Dispose();
+
+            string[] files = GetEntries(root + (!IsDirectoryInfo ? "" : trailing), "*", SearchOption.AllDirectories);
+            FSAssert.EqualWhenOrdered(new string[] { rootFile, nestedFile }, files);
         }
     }
 }
