@@ -3732,7 +3732,7 @@ namespace System
                 return 0;
             }
 
-            // This appears to be an unknown but potentially valid scheme.
+            // This is a potentially valid scheme, but we have not identified it yet.
             // Check for illegal characters, canonicalize, and check the length.
             err = CheckSchemeSyntax(new ReadOnlySpan<char>(uriString + idx, end - idx), ref syntax);
             if (err != ParsingError.None)
