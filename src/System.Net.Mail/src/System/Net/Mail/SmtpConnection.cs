@@ -2,11 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
+using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Threading;
 
 namespace System.Net.Mail
@@ -224,10 +231,13 @@ namespace System.Net.Mail
 
             if (_enableSsl)
             {
-                // Either TLS is already established or server does not support TLS
-                if (!(_networkStream is TlsStream))
+                if (!_serverSupportsStartTls)
                 {
-                    throw new SmtpException(SR.MailServerDoesNotSupportStartTls);
+                    // Either TLS is already established or server does not support TLS
+                    if (!(_networkStream is TlsStream))
+                    {
+                        throw new SmtpException(SR.MailServerDoesNotSupportStartTls);
+                    }
                 }
 
                 StartTlsCommand.Send(this);
@@ -415,8 +425,7 @@ namespace System.Net.Mail
 
             internal void GetConnection()
             {
-                if (NetEventSource.IsEnabled)
-                    NetEventSource.Enter(this);
+                if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
                 if (_connection._isConnected)
                 {
                     throw new InvalidOperationException(SR.SmtpAlreadyConnected);
@@ -433,8 +442,7 @@ namespace System.Net.Mail
                     try
                     {
                         _connection.EndInitializeConnection(result);
-                        if (NetEventSource.IsEnabled)
-                            NetEventSource.Info(this, "Connect returned");
+                        if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Connect returned");
 
                         Handshake();
                     }
@@ -453,8 +461,7 @@ namespace System.Net.Mail
                     try
                     {
                         thisPtr._connection.EndInitializeConnection(result);
-                        if (NetEventSource.IsEnabled)
-                            NetEventSource.Info(null, $"Connect returned {thisPtr}");
+                        if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"Connect returned {thisPtr}");
 
                         thisPtr.Handshake();
                     }
@@ -551,10 +558,13 @@ namespace System.Net.Mail
 
                     if (_connection.EnableSsl)
                     {
-                        // Either TLS is already established or server does not support TLS
-                        if (!(_connection._networkStream is TlsStream))
+                        if (!_connection._serverSupportsStartTls)
                         {
-                            throw new SmtpException(SR.Format(SR.MailServerDoesNotSupportStartTls));
+                            // Either TLS is already established or server does not support TLS
+                            if (!(_connection._networkStream is TlsStream))
+                            {
+                                throw new SmtpException(SR.Format(SR.MailServerDoesNotSupportStartTls));
+                            }
                         }
 
                         SendStartTls();
@@ -607,10 +617,13 @@ namespace System.Net.Mail
 
                         if (thisPtr._connection.EnableSsl)
                         {
-                            // Either TLS is already established or server does not support TLS
-                            if (!(thisPtr._connection._networkStream is TlsStream))
+                            if (!thisPtr._connection._serverSupportsStartTls)
                             {
-                                throw new SmtpException(SR.MailServerDoesNotSupportStartTls);
+                                // Either TLS is already established or server does not support TLS
+                                if (!(thisPtr._connection._networkStream is TlsStream))
+                                {
+                                    throw new SmtpException(SR.MailServerDoesNotSupportStartTls);
+                                }
                             }
 
                             thisPtr.SendStartTls();
@@ -807,7 +820,7 @@ namespace System.Net.Mail
 
             private bool AuthenticateContinue()
             {
-                for (; ; )
+                for (;;)
                 {
                     // We don't need credential on the continued auth assuming they were captured on the first call.
                     // That should always work, otherwise what if a new credential has been returned?

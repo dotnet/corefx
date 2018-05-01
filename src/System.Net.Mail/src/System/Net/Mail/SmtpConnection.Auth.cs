@@ -16,6 +16,9 @@ namespace System.Net.Mail
     {
         private bool _serverSupportsEai;
         private bool _dsnEnabled;
+#pragma warning disable CS0414      // Field is not used in test project
+        private bool _serverSupportsStartTls;
+#pragma warning restore CS0414
         private bool _sawNegotiate;
         private SupportedAuth _supportedAuth = SupportedAuth.None;
         private readonly ISmtpAuthenticationModule[] _authenticationModules;
@@ -69,6 +72,10 @@ namespace System.Net.Mail
                 else if (string.Compare(extension, 0, "dsn ", 0, 3, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     _dsnEnabled = true;
+                }
+                else if (string.Compare(extension, 0, "STARTTLS", 0, 8, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    _serverSupportsStartTls = true;
                 }
                 else if (string.Compare(extension, 0, "SMTPUTF8", 0, 8, StringComparison.OrdinalIgnoreCase) == 0)
                 {
