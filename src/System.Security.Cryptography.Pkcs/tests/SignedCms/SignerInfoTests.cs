@@ -343,6 +343,20 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 () => signerInfo.RemoveCounterSignature(signerInfo));
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        public static void RemoveCounterSignature_EncodedInSingleAttribute(int indexToRemove)
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.RsaPkcs1TwoCounterSignaturesInSingleAttribute);
+            SignerInfo signerInfo = cms.SignerInfos[0];
+
+            Assert.Equal(2, signerInfo.CounterSignerInfos.Count);
+            signerInfo.RemoveCounterSignature(indexToRemove);
+            Assert.Equal(1, signerInfo.CounterSignerInfos.Count);
+        }
+
         [Fact]
         public static void RemoveCounterSignature_Null()
         {
