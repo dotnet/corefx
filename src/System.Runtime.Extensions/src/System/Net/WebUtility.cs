@@ -1043,19 +1043,21 @@ namespace System.Net
                 else
                 {
                     // Currently, there are no entities that are longer than 8 characters.
-                    return default;
+                    return (char)0;
                 } 
             }
 
             private static ulong ToUInt64Key(ReadOnlySpan<char> entity)
             {
                 // The ulong key is the reversed single-byte character representation of the actual entity string.
+                Debug.Assert(entity.Length <= 8);
+
                 ulong key = 0;
                 for (int i = 0; i < entity.Length; i++)
                 {
                     if (entity[i] > 0xFF)
                     {
-                        return default;
+                        return 0;
                     }
 
                     key = (key << 8) | entity[i];
