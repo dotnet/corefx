@@ -72,6 +72,11 @@ namespace System.Drawing
             }
         }
 
+        /// <summary>
+        /// Determines if we need to dispose of the Context when this is disposed - unused on Unix.
+        /// </summary>
+        internal bool DisposeContext { get; set; }
+
         public void Dispose()
         {
             Dispose(true);

@@ -8,7 +8,6 @@ namespace System.Drawing.Tests
 {
     public class BufferedGraphicsContextTests
     {
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Fact]
         public void Ctor_Default()
         {
@@ -192,7 +191,6 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -204,7 +202,6 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
