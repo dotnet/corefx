@@ -110,8 +110,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.HandleTypes.cs">
       <Link>Common\Interop\Windows\Interop.HandleTypes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs">
-      <Link>Common\Interop\Windows\Interop.MultiByteToWideChar.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.MultiByteToWideChar.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.PeekConsoleInput.cs">
       <Link>Common\Interop\Windows\Interop.PeekConsoleInput.cs</Link>
