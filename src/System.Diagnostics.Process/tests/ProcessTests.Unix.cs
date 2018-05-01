@@ -396,8 +396,6 @@ namespace System.Diagnostics.Tests
                 p.Kill();
                 p.WaitForExit();
 
-                Assert.True(p.ExitCode > 128, "Exit code should be 128 + SIGKILL.");
-
                 // SIGKILL may change per platform
                 const int SIGKILL = 9; // Linux, macOS, FreeBSD, ...
                 Assert.Equal(128 + SIGKILL, p.ExitCode);
