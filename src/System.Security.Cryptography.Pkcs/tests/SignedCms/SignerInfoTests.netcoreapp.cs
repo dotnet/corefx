@@ -39,17 +39,19 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             cms.SignerInfos[0].AddUnsignedAttribute(attribute2);
 
+            var expectedAttributes = new List<AsnEncodedData>();
+            expectedAttributes.Add(attribute1);
+            expectedAttributes.Add(attribute2);
+
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[1], attribute2);
+            VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, expectedAttributes);
 
             ReReadSignedCms(ref cms);
 
             Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[1], attribute2);
+            VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, expectedAttributes);
         }
 
         [Fact]
@@ -178,6 +180,47 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
         }
 
+        [Fact]
+        public static void SignerInfo_AddRemoveUnsignedAttributes_JoinCounterSignaturesAttributesIntoOne()
+        {
+            byte[] message = { 1, 2, 3, 4, 5 };
+            ContentInfo content = new ContentInfo(message);
+            SignedCms cms = new SignedCms(content);
+
+            using (X509Certificate2 signerCert = Certificates.RSA2048SignatureOnly.TryGetCertificateWithPrivateKey())
+            {
+                CmsSigner signer = new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber, signerCert);
+                cms.ComputeSignature(signer);
+            }
+
+            using (X509Certificate2 counterSigner1cert = Certificates.Dsa1024.TryGetCertificateWithPrivateKey())
+            {
+                CmsSigner counterSigner = new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber, counterSigner1cert);
+                counterSigner.IncludeOption = X509IncludeOption.EndCertOnly;
+                counterSigner.DigestAlgorithm = new Oid(Oids.Sha1, Oids.Sha1);
+                cms.SignerInfos[0].ComputeCounterSignature(counterSigner);
+            }
+
+            using (X509Certificate2 counterSigner2cert = Certificates.ECDsaP256Win.TryGetCertificateWithPrivateKey())
+            {
+                CmsSigner counterSigner = new CmsSigner(SubjectIdentifierType.IssuerAndSerialNumber, counterSigner2cert);
+                cms.SignerInfos[0].ComputeCounterSignature(counterSigner);
+            }
+
+            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[1].Values.Count);
+            cms.CheckSignature(true);
+
+            AsnEncodedData counterSignature = cms.SignerInfos[0].UnsignedAttributes[0].Values[0];
+            cms.SignerInfos[0].RemoveUnsignedAttribute(counterSignature);
+            cms.SignerInfos[0].AddUnsignedAttribute(counterSignature);
+
+            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            cms.CheckSignature(true);
+        }
+
         private static void VerifyAttributesContainsAll(CryptographicAttributeObjectCollection attributes, List<AsnEncodedData> expectedAttributes)
         {
             var indices = new HashSet<int>();
@@ -263,6 +306,11 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             Rfc3161TimestampTokenInfo actualToken;
             Assert.True(Rfc3161TimestampTokenInfo.TryDecode(actual.RawData, out actualToken, out _));
+
+            if (!expectedToken.GetSerialNumber().Span.SequenceEqual(actualToken.GetSerialNumber().Span))
+            {
+                Assert.False(true, $"Serial numbers differ: expected: {expectedToken.GetSerialNumber().Span.ToArray().ByteArrayToHex()} actual: {actualToken.GetSerialNumber().Span.ToArray().ByteArrayToHex()}");
+            }
 
             Assert.True(expectedToken.GetSerialNumber().Span.SequenceEqual(actualToken.GetSerialNumber().Span));
             Assert.Equal(expectedToken.Timestamp, actualToken.Timestamp);

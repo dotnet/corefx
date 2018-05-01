@@ -126,7 +126,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 // create a new attribute
                 AttributeAsn newUnsignedAttr;
-                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
                 {
                     writer.PushSetOf();
                     writer.WriteEncodedValue(unsignedAttribute.RawData);
@@ -159,7 +159,7 @@ namespace System.Security.Cryptography.Pkcs
                 // merge with existing attribute
                 ref AttributeAsn modifiedAttr = ref mySigner.UnsignedAttributes[existingAttribute];
 
-                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
                 {
                     writer.PushSetOf();
 
@@ -783,7 +783,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
             }
 
-            isOnlyValue = default;
+            isOnlyValue = false;
             return -1;
         }
 
@@ -805,7 +805,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
             }
 
-            isOnlyValue = default;
+            isOnlyValue = false;
             return (-1, -1);
         }
 
