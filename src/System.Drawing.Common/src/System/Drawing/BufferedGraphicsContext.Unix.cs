@@ -38,12 +38,7 @@ namespace System.Drawing
     {
         private BufferedGraphics AllocBuffer(Graphics targetGraphics, IntPtr targetDC, Rectangle targetRectangle)
         {
-            if (targetDC != IntPtr.Zero)
-            {
-                throw new NotImplementedException();
-            }
-
-            BufferedGraphics graphics = new BufferedGraphics(targetGraphics, targetRectangle);
+            BufferedGraphics graphics = new BufferedGraphics(targetGraphics, targetDC, targetRectangle);
             return graphics;
         }
 
