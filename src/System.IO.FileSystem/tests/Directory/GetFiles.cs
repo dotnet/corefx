@@ -173,6 +173,10 @@ namespace System.IO.Tests
             // When getting strings back we should retain the root path as specified for Directory.
             // DirectoryInfo returns the normalized full path in all cases.
 
+            // Add the trailing separator up front for Directory as we want to validate against
+            // the path _with_ the separator on it. Creation doesn't care about trailing, and
+            // Path.Combine doesn't change the existing separators, it just adds the canonical
+            // separator if needed.
             string root = GetTestFilePath() + (IsDirectoryInfo ? "" : trailing);
             string rootFile = Path.Combine(root, GetTestFileName());
             string subDirectory = Path.Combine(root, GetTestFileName());
@@ -182,7 +186,11 @@ namespace System.IO.Tests
             File.Create(rootFile).Dispose();
             File.Create(nestedFile).Dispose();
 
-            string[] files = GetEntries(root + (!IsDirectoryInfo ? "" : trailing), "*", SearchOption.AllDirectories);
+            // Add the trailing separator if we haven't (for DI) so we can validate that we
+            // either retain (D) or don't retain (DI) the separators as we specified them.
+            // Note that some of the cases actually match canonical (one standard separator)
+            // so they never change.
+            string[] files = GetEntries(root + (IsDirectoryInfo ? trailing : ""), "*", SearchOption.AllDirectories);
             FSAssert.EqualWhenOrdered(new string[] { rootFile, nestedFile }, files);
         }
     }
