@@ -355,6 +355,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(2, signerInfo.CounterSignerInfos.Count);
             signerInfo.RemoveCounterSignature(indexToRemove);
             Assert.Equal(1, signerInfo.CounterSignerInfos.Count);
+
+            cms.CheckSignature(true);
         }
 
         [Fact]
