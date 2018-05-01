@@ -542,10 +542,6 @@
     },
     "PB_CleanAgent": {
       "value": "true"
-    },
-    "AgentToolsPath": {
-      "value": "",
-      "allowOverride": true
     }
   },
   "demands": [
