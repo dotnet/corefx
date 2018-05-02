@@ -28,6 +28,9 @@
     <!-- no targeting pack was ever shipped for net463 -->
     <TargetFrameworksToExclude Include="net463" />
     <TargetFrameworksToExclude Include="net47" />
+    
+    <!-- exclude netcoreapp2.2 in release branch for 2.1 -->
+    <TargetFrameworksToExclude Include="netcoreapp2.2" />
   </ItemGroup>
 
   <PropertyGroup>
