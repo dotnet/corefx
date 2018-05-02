@@ -467,13 +467,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         [Fact]
         public static void DecryptUsingCertificateWithSameSubjectKeyIdentifierButDifferentKeyPair()
         {
-            using (X509Certificate2 recipientCert = Certificates.CorrectSubjectKeyIdentifier.GetCertificate())
-            using (X509Certificate2 fakeRecipientCert = Certificates.FakeSubjectKeyIdentifier.TryGetCertificateWithPrivateKey())
-            using (X509Certificate2 realRecipientCert = Certificates.CorrectSubjectKeyIdentifier.TryGetCertificateWithPrivateKey())
+            using (X509Certificate2 recipientCert = Certificates.RSAKeyTransfer4_ExplicitSki.GetCertificate())
+            using (X509Certificate2 otherRecipientWithSameSki = Certificates.RSAKeyTransfer5_ExplicitSkiOfRSAKeyTransfer4.TryGetCertificateWithPrivateKey())
+            using (X509Certificate2 realRecipientCert = Certificates.RSAKeyTransfer4_ExplicitSki.TryGetCertificateWithPrivateKey())
             {
                 Assert.Equal(recipientCert, realRecipientCert);
-                Assert.NotEqual(recipientCert, fakeRecipientCert);
-                Assert.Equal(GetSubjectKeyIdentifier(recipientCert), GetSubjectKeyIdentifier(fakeRecipientCert));
+                Assert.NotEqual(recipientCert, otherRecipientWithSameSki);
+                Assert.Equal(GetSubjectKeyIdentifier(recipientCert), GetSubjectKeyIdentifier(otherRecipientWithSameSki));
 
                 byte[] plainText = new byte[] { 1, 3, 7, 9 };
 
@@ -487,7 +487,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 ecms = new EnvelopedCms();
                 ecms.Decode(encoded);
 
-                Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(new X509Certificate2Collection(fakeRecipientCert)));
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(new X509Certificate2Collection(otherRecipientWithSameSki)));
                 ecms.Decrypt(new X509Certificate2Collection(realRecipientCert));
 
                 Assert.Equal(plainText, ecms.ContentInfo.Content);
