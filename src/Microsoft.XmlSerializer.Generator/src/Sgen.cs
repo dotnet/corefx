@@ -296,6 +296,19 @@ namespace Microsoft.XmlSerializer.Generator
 
                 bool gac = assembly.GlobalAssemblyCache;
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
+
+                if (!Directory.Exists(outputDirectory))
+                {
+                    if (outputDirectory.EndsWith("\""))
+                    {
+                        outputDirectory = outputDirectory.Remove(outputDirectory.Length - 1);
+                        if (!Directory.Exists(outputDirectory))
+                        {
+                            throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, outputDirectory));
+                        }
+                    }
+                }
+
                 string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
 
@@ -308,11 +321,6 @@ namespace Microsoft.XmlSerializer.Generator
                 if (Directory.Exists(codePath))
                 {
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, codePath));
-                }
-
-                if (!Directory.Exists(outputDirectory))
-                {
-                    throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
                 bool success = false;
