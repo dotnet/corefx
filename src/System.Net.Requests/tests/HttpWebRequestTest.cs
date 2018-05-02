@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Cache;
@@ -65,7 +66,7 @@ namespace System.Net.Tests
 
                 foreach (var format in zero_formats.Concat(offset_formats))
                 {
-                    var formatted = date.ToString(format);
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
                     yield return new object[] { formatted, expected };
                 }
             }
@@ -74,7 +75,7 @@ namespace System.Net.Tests
             {
                 foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
                 {
-                    var formatted = date.ToString(format);
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
                     var expected = date.LocalDateTime;
                     yield return new object[] { formatted, expected };
                     yield return new object[] { formatted.ToLowerInvariant(), expected };

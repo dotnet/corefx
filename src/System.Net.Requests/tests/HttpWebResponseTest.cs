@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Test.Common;
@@ -51,7 +52,7 @@ namespace System.Net.Tests
 
                 foreach (var format in zero_formats.Concat(offset_formats))
                 {
-                    var formatted = date.ToString(format);
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
                     yield return new object[] { formatted, expected };
                 }
             }
@@ -60,7 +61,7 @@ namespace System.Net.Tests
             {
                 foreach (var date in dates.SelectMany(d => new[] { d.ToOffset(TimeSpan.FromHours(5)), d.ToOffset(TimeSpan.FromHours(-5)) }))
                 {
-                    var formatted = date.ToString(format);
+                    var formatted = date.ToString(format, CultureInfo.InvariantCulture);
                     var expected = date.LocalDateTime;
                     yield return new object[] { formatted, expected };
                     yield return new object[] { formatted.ToLowerInvariant(), expected };
