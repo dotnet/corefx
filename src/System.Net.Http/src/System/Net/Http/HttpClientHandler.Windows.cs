@@ -98,7 +98,7 @@ namespace System.Net.Http
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 if (_winHttpHandler != null)
