@@ -344,6 +344,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Theory]
+        [ActiveIssue("https://devdiv.visualstudio.com/DevDiv/_workitems/edit/609554", TargetFrameworkMonikers.NetFramework)]
         [InlineData(0)]
         [InlineData(1)]
         public static void RemoveCounterSignature_EncodedInSingleAttribute(int indexToRemove)
