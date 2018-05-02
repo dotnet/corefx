@@ -311,6 +311,14 @@ namespace System.Net.Test.Common
             $"0\r\n" +
             $"\r\n";
 
+        public static string GetConnectionCloseResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+            $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            "Connection: close\r\n" +
+            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+            additionalHeaders +
+            "\r\n" +
+            content;
+
         public class Options
         {
             public IPAddress Address { get; set; } = IPAddress.Loopback;
