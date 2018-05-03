@@ -468,14 +468,11 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
+        [ActiveIssue(29482)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_ExpectedDiagnosticSynchronousExceptionActivityLogging()
         {
-            // For PlatformHandler (WinHttpHandler & CurlHandler), there is no easy way to force a
-            // synchronous exception during SendAsync.
-            if (!UseSocketsHttpHandler) return;
-
             RemoteInvoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
@@ -506,11 +503,22 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString))
                     using (HttpClient client = new HttpClient(handler))
                     {
-                        // Forces a synchronous exception for SocketsHttpHandler.
-                        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"http://{Guid.NewGuid()}.com");
-                        request.Version = new Version(0, 0);
+                        if (bool.Parse(useSocketsHttpHandlerString))
+                        {
+                            // Forces a synchronous exception for SocketsHttpHandler
+                            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"http://{Guid.NewGuid()}.com");
+                            request.Version = new Version(0, 0);
 
-                        Assert.ThrowsAsync<NotSupportedException>(() => client.SendAsync(request)).Wait();
+                            Assert.ThrowsAsync<NotSupportedException>(() => client.SendAsync(request)).Wait();
+                        }
+                        else
+                        {
+                            // Forces a synchronous exception for WinHttpHandler
+                            handler.UseCookies = true;
+                            handler.CookieContainer = null;
+
+                            Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync($"http://{Guid.NewGuid()}.com")).Wait();
+                        }
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
                     WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1),
