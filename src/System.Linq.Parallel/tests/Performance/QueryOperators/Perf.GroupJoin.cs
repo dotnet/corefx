@@ -15,6 +15,24 @@ namespace System.Linq.Parallel.Tests
     public sealed class GroupJoinPerfTestsUnorderedLeftOrderedRight : GroupJoinPerfTests
     {
         protected override ParallelQuery<int> CreateRight(int count) => base.CreateRight(count).AsOrdered();
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__1000()
+        {
+            CrossProduct(1000);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__2000()
+        {
+            CrossProduct(2000);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_10000()
+        {
+            CrossProduct(10000);
+        }
     }
 
     public sealed class GroupJoinPerfTestsOrderedLeftUnorderedRight : GroupJoinPerfTests
@@ -26,12 +44,30 @@ namespace System.Linq.Parallel.Tests
     {
         protected override ParallelQuery<int> CreateLeft(int count) => base.CreateLeft(count).AsOrdered();
         protected override ParallelQuery<int> CreateRight(int count) => base.CreateRight(count).AsOrdered();
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__1000()
+        {
+            CrossProduct(1000);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct__2000()
+        {
+            CrossProduct(2000);
+        }
+
+        [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
+        public void CrossProduct_10000()
+        {
+            CrossProduct(10000);
+        }
     }
 
     public abstract class GroupJoinPerfTests
     {
         const int TotalElementCount = 50_000;
-        const int CrossProductInnerIterationCount = 100;
+        protected const int CrossProductInnerIterationCount = 100;
 
         protected virtual ParallelQuery<int> CreateLeft(int count) => UnorderedSources.Default(count);
         protected virtual ParallelQuery<int> CreateRight(int count) => UnorderedSources.Default(count);
@@ -49,31 +85,31 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
-        public void CrossProduct__10()
+        public void CrossProduct____10()
         {
             CrossProduct(10);
         }
 
         [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
-        public void CrossProduct__25()
+        public void CrossProduct____25()
         {
             CrossProduct(25);
         }
 
         [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
-        public void CrossProduct__50()
+        public void CrossProduct____50()
         {
             CrossProduct(50);
         }
 
         [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
-        public void CrossProduct_100()
+        public void CrossProduct___100()
         {
             CrossProduct(100);
         }
 
         [Benchmark(InnerIterationCount = CrossProductInnerIterationCount), MeasureGCAllocations]
-        public void CrossProduct_500()
+        public void CrossProduct___500()
         {
             CrossProduct(500);
         }
