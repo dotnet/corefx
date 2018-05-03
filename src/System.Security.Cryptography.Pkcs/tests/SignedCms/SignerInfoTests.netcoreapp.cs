@@ -79,7 +79,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
         [Theory]
         [MemberData(nameof(SignedDocumentsWithAttributesTestData))]
-        public static void SignerInfo_RemoveUnsignedAttributes_RemoveAllAttributesFromBegining(byte[] document)
+        public static void SignerInfo_RemoveUnsignedAttributes_RemoveAllAttributesFromBeginning(byte[] document)
         {
             SignedCms cms = new SignedCms();
             cms.Decode(document);
@@ -307,12 +307,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Rfc3161TimestampTokenInfo actualToken;
             Assert.True(Rfc3161TimestampTokenInfo.TryDecode(actual.RawData, out actualToken, out _));
 
-            if (!expectedToken.GetSerialNumber().Span.SequenceEqual(actualToken.GetSerialNumber().Span))
-            {
-                Assert.False(true, $"Serial numbers differ: expected: {expectedToken.GetSerialNumber().Span.ToArray().ByteArrayToHex()} actual: {actualToken.GetSerialNumber().Span.ToArray().ByteArrayToHex()}");
-            }
-
-            Assert.True(expectedToken.GetSerialNumber().Span.SequenceEqual(actualToken.GetSerialNumber().Span));
+            Assert.Equal(expectedToken.GetSerialNumber().ByteArrayToHex(), actualToken.GetSerialNumber().ByteArrayToHex());
             Assert.Equal(expectedToken.Timestamp, actualToken.Timestamp);
             Assert.Equal(expectedToken.HashAlgorithmId.Value, Oids.Sha256);
             Assert.Equal(expectedToken.HashAlgorithmId.Value, actualToken.HashAlgorithmId.Value);
