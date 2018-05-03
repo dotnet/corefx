@@ -16,6 +16,7 @@ namespace System.Net
         private const int ClientSendCompletedId = ContentNullId + 1;
         private const int HeadersInvalidValueId = ClientSendCompletedId + 1;
         private const int HandlerMessageId = HeadersInvalidValueId + 1;
+        private const int SelectAuthenticationId = HandlerMessageId + 1;
 
         [NonEvent]
         public static void UriBaseAddress(object obj, Uri baseAddress)
@@ -64,6 +65,19 @@ namespace System.Net
         public void HandlerMessage(int handlerId, int workerId, int requestId, string memberName, string message) =>
             WriteEvent(HandlerMessageId, handlerId, workerId, requestId, memberName, message);
             //Console.WriteLine($"{handlerId}/{workerId}/{requestId}: ({memberName}): {message}");  // uncomment for debugging only
+
+        [NonEvent]
+        public static void AuthenticationInfo(Uri uri, string message)
+        {
+            if (IsEnabled)
+            {
+                Log.AuthenticationInfo(uri?.ToString(), message);
+            }
+        }
+
+        [Event(SelectAuthenticationId, Keywords = Keywords.Debug, Level = EventLevel.Verbose)]
+        public void AuthenticationInfo(string uri, string message) =>
+            WriteEvent(SelectAuthenticationId, uri, message);
 
         [NonEvent]
         private unsafe void WriteEvent(int eventId, int arg1, int arg2, int arg3, string arg4, string arg5)
