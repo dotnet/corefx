@@ -989,7 +989,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BeginConnect_EndPoint_AddressFamily_Throws_NotSupported()
         {
-            // Unlike other tests that reuse a static Socket instance, this tests avoids doing so
+            // Unlike other tests that reuse a static Socket instance, this test avoids doing so
             // to work around a behavior of .NET 4.7.2. See https://github.com/dotnet/corefx/issues/29481
             // for more details.
 
