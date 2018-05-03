@@ -14,14 +14,14 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandler_Asynchrony_Test : HttpClientTestBase
     {
+        public static IEnumerable<object[]> ResponseHeadersRead_SynchronizationContextNotUsedByHandler_MemberData() =>
+            from responseHeadersRead in new[] { false, true }
+            from contentMode in Enum.GetValues(typeof(LoopbackServer.ContentMode)).Cast<LoopbackServer.ContentMode>()
+            select new object[] { responseHeadersRead, contentMode };
+
         [Theory]
-        [InlineData(false, null)]
-        [InlineData(false, false)]
-        [InlineData(false, true)]
-        [InlineData(true, null)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
-        public async Task ResponseHeadersRead_SynchronizationContextNotUsedByHandler(bool responseHeadersRead, bool? chunked)
+        [MemberData(nameof(ResponseHeadersRead_SynchronizationContextNotUsedByHandler_MemberData))]
+        public async Task ResponseHeadersRead_SynchronizationContextNotUsedByHandler(bool responseHeadersRead, LoopbackServer.ContentMode contentMode)
         {
             await Task.Run(async delegate // escape xunit's sync ctx
             {
@@ -56,24 +56,11 @@ namespace System.Net.Http.Functional.Tests
                     await server.AcceptConnectionAsync(async connection =>
                     {
                         await connection.ReadRequestHeaderAsync();
-
-                        string responseData = string.Concat(Enumerable.Repeat('s', 10_000));
-                        string response;
-                        switch (chunked)
-                        {
-                            case false:
-                                response = LoopbackServer.GetBytePerChunkHttpResponse(content: responseData);
-                                break;
-
-                            case true:
-                                response = LoopbackServer.GetHttpResponse(content: responseData);
-                                break;
-
-                            default:
-                                response = LoopbackServer.GetConnectionCloseResponse(content: responseData);
-                                break;
-                        }
-                        await connection.Writer.WriteAsync(response);
+                        await connection.Writer.WriteAsync(
+                            LoopbackServer.GetContentModeResponse(
+                                contentMode,
+                                string.Concat(Enumerable.Repeat('s', 10_000)),
+                                connectionClose: true));
                     });
                 }, new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) });
             });

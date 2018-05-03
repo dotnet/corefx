@@ -3,15 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace System.Net.Test.Common
 {
@@ -276,6 +275,33 @@ namespace System.Net.Test.Common
                     return "Insufficient Storage";
             }
             return null;
+        }
+
+        public enum ContentMode
+        {
+            ContentLength,
+            SingleChunk,
+            BytePerChunk,
+            ConnectionClose
+        }
+
+        public static string GetContentModeResponse(ContentMode mode, string content, bool connectionClose = false)
+        {
+            switch (mode)
+            {
+                case ContentMode.ContentLength:
+                    return GetHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.SingleChunk:
+                    return GetSingleChunkHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.BytePerChunk:
+                    return GetBytePerChunkHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.ConnectionClose:
+                    Assert.True(connectionClose);
+                    return GetConnectionCloseResponse(content: content);
+                default:
+                    Assert.True(false, $"Unknown content mode: {mode}");
+                    return null;
+            }
         }
 
         public static string GetHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
