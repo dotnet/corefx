@@ -307,6 +307,10 @@ namespace Microsoft.XmlSerializer.Generator
                             throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, outputDirectory));
                         }
                     }
+                    else
+                    {
+                        throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, outputDirectory));
+                    }
                 }
 
                 string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
