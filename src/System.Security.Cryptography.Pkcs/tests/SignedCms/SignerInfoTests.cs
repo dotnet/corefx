@@ -451,6 +451,53 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 () => signer.RemoveCounterSignature(0));
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug")]
+        public static void RemoveCounterSignature_EncodedInSingleAttribute_ByIndex(int indexToRemove)
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.RsaPkcs1TwoCounterSignaturesInSingleAttribute);
+            SignerInfo signerInfo = cms.SignerInfos[0];
+
+            Assert.Equal(2, signerInfo.CounterSignerInfos.Count);
+            signerInfo.RemoveCounterSignature(indexToRemove);
+            Assert.Equal(1, signerInfo.CounterSignerInfos.Count);
+
+            cms.CheckSignature(true);
+
+            byte[] encoded = cms.Encode();
+            cms.Decode(encoded);
+
+            Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
+            cms.CheckSignature(true);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug")]
+        public static void RemoveCounterSignature_EncodedInSingleAttribute_BySignerInfo(int indexToRemove)
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.RsaPkcs1TwoCounterSignaturesInSingleAttribute);
+            SignerInfo signerInfo = cms.SignerInfos[0];
+
+            SignerInfoCollection counterSigners = signerInfo.CounterSignerInfos;
+            Assert.Equal(2, counterSigners.Count);
+            signerInfo.RemoveCounterSignature(counterSigners[indexToRemove]);
+            Assert.Equal(1, signerInfo.CounterSignerInfos.Count);
+
+            cms.CheckSignature(true);
+
+            byte[] encoded = cms.Encode();
+            cms.Decode(encoded);
+
+            Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
+            cms.CheckSignature(true);
+        }
+
         [Fact]
         public static void AddCounterSigner_DuplicateCert_RSA()
         {
