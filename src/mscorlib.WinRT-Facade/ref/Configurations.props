@@ -3,6 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       uap;
+      netcoreapp-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
