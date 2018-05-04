@@ -173,7 +173,7 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.AuthenticationInfo(authUri, $"Unable to find 'Digest' authentication token when authenticating with {(isProxyAuth ? "proxy" : "server")}");
+                    NetEventSource.AuthenticationInfo(request.RequestUri, $"Unable to find 'Digest' authentication token when authenticating with {(isProxyAuth ? "proxy" : "server")}");
                 }
                 return false;
             }
