@@ -46,7 +46,7 @@ namespace System.IO.IsolatedStorage
             }
 
             if (string.IsNullOrEmpty(s_userRootDirectory))
-                s_userRootDirectory = GetRandomDirectory(GetDataDirectory(scope, Environment.SpecialFolderOption.Create), scope);
+                s_userRootDirectory = GetRandomDirectory(GetDataDirectory(scope), scope);
 
             return s_userRootDirectory;
         }
