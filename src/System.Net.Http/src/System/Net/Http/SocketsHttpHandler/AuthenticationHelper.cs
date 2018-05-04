@@ -297,6 +297,11 @@ namespace System.Net.Http
                 }
             }
 
+            if (NetEventSource.IsEnabled && response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                NetEventSource.AuthenticationInfo(authUri, $"{(isProxyAuth ? "Proxy" : "Server")} authentication failed.");
+            }
+
             return response;
         }
 
