@@ -55,7 +55,7 @@ namespace System.Tests
                 // The address of a fixed byte[] should always be even
                 Debug.Assert(unchecked((int)pBytes) % 2 == 0);
                 char* pCh = (char*)(pBytes + 1);
-                
+
                 // This should handle the odd address when trying to get
                 // the length of the string to allocate
                 string actual = new string(pCh);
@@ -177,7 +177,7 @@ namespace System.Tests
         [InlineData("\0", 0, '\0')]
         public static void Item_Get(string s, int index, char expected)
         {
-            Assert.Equal(expected, s[index]);            
+            Assert.Equal(expected, s[index]);
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace System.Tests
         [InlineData("hello", 5)]
         public static void Length(string s, int expected)
         {
-            Assert.Equal(expected, s.Length);            
+            Assert.Equal(expected, s.Length);
         }
 
         public static IEnumerable<object[]> Concat_Strings_TestData()
@@ -429,12 +429,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 0, 0, 5, new char[] { 'H', 'e', 'l', 'l', 'o' })]
-        [InlineData("Hello", 1, 5, 3, new char[] { '\0', '\0', '\0', '\0', '\0', 'e', 'l', 'l', '\0', '\0' })]
-        [InlineData("Hello", 2, 0, 3, new char[] { 'l', 'l', 'o', '\0', '\0', '\0', '\0', '\0', '\0', '\0' })]
-        [InlineData("Hello", 0, 7, 3, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', 'H', 'e', 'l' })]
-        [InlineData("Hello", 5, 10, 0, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' })]
-        [InlineData("H" + SoftHyphen + "ello", 0, 0, 3, new char[] { 'H', '\u00AD', 'e' })]
+        [MemberData("CopyTo_TestData", MemberType = typeof(StringTestsSpan))]
         public static void CopyTo(string s, int sourceIndex, int destinationIndex, int count, char[] expected)
         {
             char[] dst = new char[expected.Length];
@@ -464,133 +459,7 @@ namespace System.Tests
         }
 
         [Theory]
-        // CurrentCulture
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.CurrentCulture, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCulture, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCulture, -1)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.CurrentCulture, 1)]
-        [InlineData("hello", 2, "HELLO", 2, 3, StringComparison.CurrentCulture, -1)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.CurrentCulture, 0)]
-        [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCulture, -1)]
-        [InlineData("A", 0, "B", 0, 1, StringComparison.CurrentCulture, -1)]
-        [InlineData("B", 0, "A", 0, 1, StringComparison.CurrentCulture, 1)]
-        [InlineData(null, 0, null, 0, 0, StringComparison.CurrentCulture, 0)]
-        [InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCulture, 1)]
-        [InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCulture, -1)]
-        [InlineData(null, -1, null, -1, -1, StringComparison.CurrentCulture, 0)]
-        [InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCulture, 1)]
-        [InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCulture, -1)]
-        // CurrentCultureIgnoreCase
-        [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Yellow", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCultureIgnoreCase, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, -1)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCultureIgnoreCase, -1)]
-        [InlineData(null, 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 1)]
-        [InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCultureIgnoreCase, -1)]
-        [InlineData(null, -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 0)]
-        [InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 1)]
-        [InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCultureIgnoreCase, -1)]
-        // InvariantCulture
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.InvariantCulture, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCulture, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.InvariantCulture, 1)]
-        [InlineData("hello", 2, "HELLO", 2, 3, StringComparison.InvariantCulture, -1)]
-        [InlineData(null, 0, null, 0, 0, StringComparison.InvariantCulture, 0)]
-        [InlineData("Hello", 0, null, 0, 5, StringComparison.InvariantCulture, 1)]
-        [InlineData(null, 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1)]
-        // InvariantCultureIgnoreCase
-        [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Yellow", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCultureIgnoreCase, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.InvariantCultureIgnoreCase, -1)]
-        [InlineData(null, 0, null, 0, 0, StringComparison.InvariantCultureIgnoreCase, 0)]
-        [InlineData("Hello", 0, null, 0, 5, StringComparison.InvariantCultureIgnoreCase, 1)]
-        [InlineData(null, 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1)]
-        // Ordinal
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.Ordinal, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.Ordinal, -1)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.Ordinal, -1)]
-        [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.Ordinal, -1)]
-        [InlineData("Hello", 0, "Hello", 0, 0, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 3, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, "He" + SoftHyphen + "llo", 0, 5, StringComparison.Ordinal, -1)]
-        [InlineData("Hello", 0, "-=<Hello>=-", 3, 5, StringComparison.Ordinal, 0)]
-        [InlineData("\uD83D\uDD53Hello\uD83D\uDD50", 1, "\uD83D\uDD53Hello\uD83D\uDD54", 1, 7, StringComparison.Ordinal, 0)] // Surrogate split
-        [InlineData("Hello", 0, "Hello123", 0, int.MaxValue, StringComparison.Ordinal, -1)]           // Recalculated length, second string longer
-        [InlineData("Hello123", 0, "Hello", 0, int.MaxValue, StringComparison.Ordinal, 1)]            // Recalculated length, first string longer
-        [InlineData("---aaaaaaaaaaa", 3, "+++aaaaaaaaaaa", 3, 100, StringComparison.Ordinal, 0)]      // Equal long alignment 2, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 3, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 2, different compare at n=1
-        [InlineData("-aaaaaaaaaaaaa", 1, "+aaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, 0)]      // Equal long alignment 6, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 1, "axaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 6, different compare at n=1
-        [InlineData("aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, 0)]      // Equal long alignment 4, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 0, "xaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 4, different compare at n=1
-        [InlineData("aaaaaaaaaaaaaa", 0, "axaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 4, different compare at n=2
-        [InlineData("--aaaaaaaaaaaa", 2, "++aaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, 0)]      // Equal long alignment 0, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 2, "aaxaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 0, different compare at n=1
-        [InlineData("aaaaaaaaaaaaaa", 2, "aaaxaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 0, different compare at n=2
-        [InlineData("aaaaaaaaaaaaaa", 2, "aaaaxaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 0, different compare at n=3
-        [InlineData("aaaaaaaaaaaaaa", 2, "aaaaaxaaaaaaaa", 2, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 0, different compare at n=4
-        [InlineData("aaaaaaaaaaaaaa", 2, "aaaaaaxaaaaaaa", 2, 100, StringComparison.Ordinal, -1)]     // Equal long alignment 0, different compare at n=5
-        [InlineData("aaaaaaaaaaaaaa", 0, "+aaaaaaaaaaaaa", 1, 13, StringComparison.Ordinal, 0)]       // Different int alignment, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaax", 1, 100, StringComparison.Ordinal, -1)]     // Different int alignment
-        [InlineData("aaaaaaaaaaaaaa", 1, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1)]     // Different long alignment, abs of 4, one of them is 2, different at n=1
-        [InlineData("-aaaaaaaaaaaaa", 1, "++++aaaaaaaaaa", 4, 10, StringComparison.Ordinal, 0)]       // Different long alignment, equal compare
-        [InlineData("aaaaaaaaaaaaaa", 1, "aaaaaaaaaaaaax", 4, 100, StringComparison.Ordinal, -1)]     // Different long alignment
-        [InlineData("\0", 0, "", 0, 1, StringComparison.Ordinal, 1)]                                  // Same memory layout, except for m_stringLength (m_firstChars are both 0)
-        [InlineData("\0\0", 0, "", 0, 2, StringComparison.Ordinal, 1)]                                // Same as above, except m_stringLength for one is 2
-        [InlineData("", 0, "\0b", 0, 2, StringComparison.Ordinal, -1)]                                // strA's second char != strB's second char codepath
-        [InlineData("", 0, "b", 0, 1, StringComparison.Ordinal, -1)]                                  // Should hit strA.m_firstChar != strB.m_firstChar codepath
-        [InlineData("abcxxxxxxxxxxxxxxxxxxxxxx", 0, "abdxxxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: first long compare is different
-        [InlineData("abcdefgxxxxxxxxxxxxxxxxxx", 0, "abcdefhxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: second long compare is different
-        [InlineData("abcdefghijkxxxxxxxxxxxxxx", 0, "abcdefghijlxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: third long compare is different
-        [InlineData("abcdexxxxxxxxxxxxxxxxxxxx", 0, "abcdfxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: second int compare is different
-        [InlineData("abcdefghixxxxxxxxxxxxxxxx", 0, "abcdefghjxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: fourth int compare is different
-        [InlineData(null, 0, null, 0, 0, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, null, 0, 5, StringComparison.Ordinal, 1)]
-        [InlineData(null, 0, "Hello", 0, 5, StringComparison.Ordinal, -1)]
-        [InlineData(null, -1, null, -1, -1, StringComparison.Ordinal, 0)]
-        [InlineData("foo", -1, null, -1, -1, StringComparison.Ordinal, 1)]
-        [InlineData(null, -1, "foo", -1, -1, StringComparison.Ordinal, -1)]
-        // OrdinalIgnoreCase
-        [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Yellow", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1)]
-        [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.OrdinalIgnoreCase, -1)]
-        [InlineData("A", 0, "x", 0, 1, StringComparison.OrdinalIgnoreCase, -1)]
-        [InlineData("a", 0, "X", 0, 1, StringComparison.OrdinalIgnoreCase, -1)]
-        [InlineData("[", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("[", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("\\", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("\\", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("]", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("]", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("^", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("^", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("_", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("_", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("`", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData("`", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData(null, 0, null, 0, 0, StringComparison.OrdinalIgnoreCase, 0)]
-        [InlineData("Hello", 0, null, 0, 5, StringComparison.OrdinalIgnoreCase, 1)]
-        [InlineData(null, 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1)]
+        [MemberData("Compare_TestData", MemberType = typeof(StringTestsSpan))]
         public static void Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType, int expected)
         {
             bool hasNullInputs = (strA == null || strB == null);
@@ -660,7 +529,7 @@ namespace System.Tests
                 Assert.Equal(expected, Math.Sign(string.CompareOrdinal(strA, indexA, strB, indexB, length)));
             }
             // Use Compare(string, int, string, int, int, StringComparison)
-            Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, comparisonType)));            
+            Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, comparisonType)));
         }
 
         [Fact]
@@ -846,65 +715,7 @@ namespace System.Tests
         }
 
         [Theory]
-        // CurrentCulture
-        [InlineData("", "Foo", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "llo", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "HELLO", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "Abc", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.CurrentCulture, true)]
-        [InlineData("", "", StringComparison.CurrentCulture, true)]
-        [InlineData("", "a", StringComparison.CurrentCulture, false)]
-        // CurrentCultureIgnoreCase
-        [InlineData("Hello", "llo", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "LLO", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("", "a", StringComparison.CurrentCultureIgnoreCase, false)]
-        // InvariantCulture
-        [InlineData("", "Foo", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "llo", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "HELLO", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "Abc", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.InvariantCulture, true)]
-        [InlineData("", "", StringComparison.InvariantCulture, true)]
-        [InlineData("", "a", StringComparison.InvariantCulture, false)]
-        // InvariantCultureIgnoreCase
-        [InlineData("Hello", "llo", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "LLO", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("", "a", StringComparison.InvariantCultureIgnoreCase, false)]
-        // Ordinal
-        [InlineData("Hello", "o", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "llo", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "Larger Hello", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "LLO", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "Abc", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.Ordinal, false)]
-        [InlineData("", "", StringComparison.Ordinal, true)]
-        [InlineData("", "a", StringComparison.Ordinal, false)]
-        // OrdinalIgnoreCase
-        [InlineData("Hello", "llo", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Larger Hello", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "LLO", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", "llo" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("", "a", StringComparison.OrdinalIgnoreCase, false)]
+        [MemberData("EndsWith_TestData", MemberType = typeof(StringTestsSpan))]
         public static void EndsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
             if (comparisonType == StringComparison.CurrentCulture)
@@ -916,17 +727,28 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [InlineData(StringComparison.CurrentCulture)]
-        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
-        [InlineData(StringComparison.Ordinal)]
-        [InlineData(StringComparison.OrdinalIgnoreCase)]
+        [MemberData("EndsWith_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
         public static void EndsWith_NullInStrings(StringComparison comparison)
         {
             Assert.True("\0test".EndsWith("test", comparison));
             Assert.True("te\0st".EndsWith("e\0st", comparison));
             Assert.False("te\0st".EndsWith("test", comparison));
             Assert.False("test\0".EndsWith("test", comparison));
-            Assert.False("test".EndsWith("\0st", comparison));            
+            Assert.False("test".EndsWith("\0st", comparison));
+        }
+
+        // NOTE: This is by design. Unix ignores the null characters (i.e. null characters have no weights for the string comparison).
+        // For desired behavior, use ordinal comparison instead of linguistic comparison.
+        // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
+        [Theory]
+        [MemberData("EndsWith_NullInStrings_NonOrdinal_TestData", MemberType = typeof(StringTestsSpan))]
+        public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
+        {
+            Assert.True("\0test".EndsWith("test", comparison));
+            Assert.True("te\0st".EndsWith("e\0st", comparison));
+            Assert.False("te\0st".EndsWith("test", comparison));
+            Assert.False("test\0".EndsWith("test", comparison));
+            Assert.False("test".EndsWith("\0st", comparison));
         }
 
         [Fact]
@@ -1163,7 +985,7 @@ namespace System.Tests
             if (s1 != null)
             {
                 Assert.Equal(s1.GetHashCode(), s1.GetHashCode());
-            }            
+            }
         }
 
         public static IEnumerable<object[]> Equals_EncyclopaediaData()
@@ -1190,7 +1012,7 @@ namespace System.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("se-SE");
                 StringComparison comparisonType = (StringComparison)Enum.Parse(typeof(StringComparison), comparisonString);
                 Assert.Equal(bool.Parse(expectedString), string.Equals(source, target, comparisonType));
-                
+
                 return SuccessExitCode;
             }, comparison.ToString(), expected.ToString()).Dispose();
         }
@@ -1320,10 +1142,10 @@ namespace System.Tests
             bool safeForCurrentCulture =
                 IsSafeForCurrentCultureComparisons(s)
                 && IsSafeForCurrentCultureComparisons(target.ToString());
-            
+
             var charArray = new char[1];
-            charArray[0] = target;            
-            
+            charArray[0] = target;
+
             if (count + startIndex == s.Length)
             {
                 if (startIndex == 0)
@@ -1331,33 +1153,33 @@ namespace System.Tests
                     Assert.Equal(expected, s.IndexOf(target));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.Ordinal));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.OrdinalIgnoreCase));
-                    
+
                     // To be safe we only want to run CurrentCulture comparisons if
                     // we know the results will not vary depending on location
                     if (safeForCurrentCulture)
                     {
                         Assert.Equal(expected, s.IndexOf(target.ToString()));
-                        Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));                        
+                        Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));
                     }
                 }
                 Assert.Equal(expected, s.IndexOf(target, startIndex));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.Ordinal));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (safeForCurrentCulture)
                 {
                     Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex));
-                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));                    
+                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));
                 }
             }
             Assert.Equal(expected, s.IndexOf(target, startIndex, count));
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.Ordinal));
-            Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));            
+            Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
 
             if (safeForCurrentCulture)
             {
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count));
-                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));                
+                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));
             }
         }
 
@@ -1365,7 +1187,7 @@ namespace System.Tests
         public static void IndexOf_Match_SingleLetter()
         {
             Assert.Equal(-1, "".IndexOf('a'));
-           
+
             for (int length = 1; length < 32; length++)
             {
                 char[] a = new char[length];
@@ -1373,13 +1195,13 @@ namespace System.Tests
                 {
                     a[i] = (char)(i + 1);
                 }
-                string str = new string(a);                
+                string str = new string(a);
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
                     char target = a[targetIndex];
                     int idx = str.IndexOf(target);
-                    Assert.Equal(targetIndex, idx);                    
+                    Assert.Equal(targetIndex, idx);
                 }
             }
         }
@@ -1411,7 +1233,7 @@ namespace System.Tests
         [InlineData("Hello", "l\0o", -1)]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
-            Assert.Equal(expected, s.IndexOf(value));            
+            Assert.Equal(expected, s.IndexOf(value));
         }
 
         [Theory]
@@ -1427,20 +1249,20 @@ namespace System.Tests
             if (startIndex > 0)
             {
                 Assert.Equal(startIndex, s.IndexOf(value, startIndex - 1, comparison)); // starting just before substring                
-            }            
+            }
             Assert.Equal(-1, s.IndexOf(value, startIndex + 1, comparison)); // starting just after start of substring
 
             // Shouldn't be able to find the substring if the count is less than substring's length
-            Assert.Equal(-1, s.IndexOf(value, 0, value.Length - 1, comparison));            
+            Assert.Equal(-1, s.IndexOf(value, 0, value.Length - 1, comparison));
 
             // Now double the source.  Make sure we find the first copy of the substring.
             int halfLen = s.Length;
             s += s;
-            Assert.Equal(startIndex, s.IndexOf(value, comparison));            
+            Assert.Equal(startIndex, s.IndexOf(value, comparison));
 
             // Now change the case of a letter.
             s = s.ToUpperInvariant();
-            Assert.Equal(ignoringCase ? startIndex : -1, s.IndexOf(value, comparison));            
+            Assert.Equal(ignoringCase ? startIndex : -1, s.IndexOf(value, comparison));
         }
 
         [Fact]
@@ -1457,13 +1279,13 @@ namespace System.Tests
                 Assert.Equal(4, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-                
+
                 value = "\u0131";
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
-                
+
                 return SuccessExitCode;
             }).Dispose();
         }
@@ -1477,7 +1299,7 @@ namespace System.Tests
 
                 string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 string value = "\u0130";
-                
+
                 Assert.Equal(19, s.IndexOf(value));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
@@ -2093,7 +1915,7 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
-                
+
                 return SuccessExitCode;
             }).Dispose();
         }
@@ -2927,9 +2749,9 @@ namespace System.Tests
         [MemberData(nameof(StartEndWith_TestData))]
         public static void StartEndWithTest(string source, string start, string end, string cultureName, bool ignoreCase, bool expected)
         {
-             CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
-             Assert.Equal(expected, source.StartsWith(start, ignoreCase, ci));
-             Assert.Equal(expected, source.EndsWith(end, ignoreCase, ci));
+            CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+            Assert.Equal(expected, source.StartsWith(start, ignoreCase, ci));
+            Assert.Equal(expected, source.EndsWith(end, ignoreCase, ci));
         }
 
         [Fact]
@@ -3025,7 +2847,7 @@ namespace System.Tests
         public static unsafe void InternTest()
         {
             String s1 = "MyTest";
-            String s2 = new StringBuilder().Append("My").Append("Test").ToString(); 
+            String s2 = new StringBuilder().Append("My").Append("Test").ToString();
             String s3 = String.Intern(s2);
 
             Assert.Equal(s1, s2);
@@ -3070,7 +2892,7 @@ namespace System.Tests
             string normalized = s.Normalize(); // FormC
             Assert.True(normalized.IsNormalized(), "Expected to have the normalized string with default form FormC");
             Assert.True(normalized.IsNormalized(NormalizationForm.FormC), "Expected to have the normalized string with FormC");
-            
+
             normalized = s.Normalize(NormalizationForm.FormC);
             Assert.True(normalized.IsNormalized(), "Expected to have the normalized string with default form FormC when using NormalizationForm.FormC");
             Assert.True(normalized.IsNormalized(NormalizationForm.FormC), "Expected to have the normalized string with FormC when using NormalizationForm.FormC");
@@ -3104,7 +2926,7 @@ namespace System.Tests
             foreach (char c in s)
             {
                 Assert.True(chEnum.MoveNext(), "expect to have characters to enumerate in the string");
-                Assert.Equal(c, chEnum.Current); 
+                Assert.Equal(c, chEnum.Current);
             }
 
             Assert.False(chEnum.MoveNext(), "expect to not having any characters to enumerate");
