@@ -741,6 +741,7 @@ namespace System.Tests
         // For desired behavior, use ordinal comparison instead of linguistic comparison.
         // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
         [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [MemberData("EndsWith_NullInStrings_NonOrdinal_TestData", MemberType = typeof(StringTestsSpan))]
         public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
         {

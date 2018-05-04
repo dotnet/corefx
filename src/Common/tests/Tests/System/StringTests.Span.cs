@@ -1185,6 +1185,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Compare_TestData()
         {
+            // CurrentCulture
             yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCulture, 1 };
             yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCulture, -1 };
             yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.CurrentCulture, 1 };
