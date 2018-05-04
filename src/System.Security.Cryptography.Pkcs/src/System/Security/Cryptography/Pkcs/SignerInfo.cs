@@ -312,7 +312,9 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     writer.PushSetOf();
 
-                    AsnReader reader = new AsnReader(modifiedAttr.AttrValues, writer.RuleSet);
+                    AsnReader outerReader = new AsnReader(modifiedAttr.AttrValues, writer.RuleSet);
+                    AsnReader reader = outerReader.ReadSetOf();
+                    outerReader.ThrowIfNotEmpty();
 
                     int i = 0;
 
