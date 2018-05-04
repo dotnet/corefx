@@ -17,7 +17,77 @@ namespace System.Tests
 {
     public partial class StringTestsSpan : RemoteExecutorTestBase
     {
-        private const string SoftHyphen = "\u00AD";
+        public const string SoftHyphen = "\u00AD";
+
+        public const string VeryLongString =
+               "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionS" +
+               "et\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust" +
+               "\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022" +
+               "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everyth" +
+               "ing\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022" +
+               "System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VE" +
+               "RSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+               " Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissi" +
+               "ons.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicK" +
+               "eyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+               "/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib" +
+               ", Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022versi" +
+               "on=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.S" +
+               "ecurity.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=n" +
+               "eutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=" +
+               "\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.Reflection" +
+               "Permission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+               "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission " +
+               "class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={V" +
+               "ERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+               " Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence" +
+               ", ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, " +
+               "ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/" +
+               "><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Ver" +
+               "sion={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+               "1\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.Socke" +
+               "tPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c56" +
+               "1934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission " +
+               "class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral" +
+               ", PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022" +
+               "true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={" +
+               "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+               " Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permiss" +
+               "ions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, Publi" +
+               "cKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
+               "/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorl" +
+               "ib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022ver" +
+               "sion=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022Syste" +
+               "m.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Cultur" +
+               "e=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestrict" +
+               "ed=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermiss" +
+               "ion, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089" +
+               "\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022" +
+               "System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=" +
+               "neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricte" +
+               "d=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCount" +
+               "erPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
+               "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission" +
+               " class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, " +
+               "Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unr" +
+               "estricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlCl" +
+               "ientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=" +
+               "b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPe" +
+               "rmission class=\u0022System.Security.Permissions.DataProtectionPermission, Syste" +
+               "m.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022" +
+               " version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><Permissio" +
+               "nSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 N" +
+               "ame=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><Permission" +
+               "Set class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Na" +
+               "me=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permissi" +
+               "on class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version" +
+               "={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
+               "1\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022" +
+               "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVer" +
+               "ification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission" +
+               " class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={" +
+               "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
+               " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
 
         [Theory]
         [MemberData(nameof(CopyTo_TestData))]
@@ -51,77 +121,7 @@ namespace System.Tests
         [Fact]
         public static void Compare_LongString()
         {
-            string veryLongString =
-                "<NamedPermissionSets><PermissionSet class=\u0022System.Security.NamedPermissionS" +
-                "et\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022 Name=\u0022FullTrust" +
-                "\u0022 Description=\u0022{Policy_PS_FullTrust}\u0022/><PermissionSet class=\u0022" +
-                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022Everyth" +
-                "ing\u0022 Description=\u0022{Policy_PS_Everything}\u0022><Permission class=\u0022" +
-                "System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version={VE" +
-                "RSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
-                " Unrestricted=\u0022true\u0022/><Permission class=\u0022System.Security.Permissi" +
-                "ons.EnvironmentPermission, mscorlib, Version={VERSION}, Culture=neutral, PublicK" +
-                "eyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
-                "/><Permission class=\u0022System.Security.Permissions.FileIOPermission, mscorlib" +
-                ", Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022versi" +
-                "on=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission class=\u0022System.S" +
-                "ecurity.Permissions.FileDialogPermission, mscorlib, Version={VERSION}, Culture=n" +
-                "eutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=" +
-                "\u0022true\u0022/><Permission class=\u0022System.Security.Permissions.Reflection" +
-                "Permission, mscorlib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
-                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><Permission " +
-                "class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={V" +
-                "ERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
-                " Flags=\u0022Assertion, UnmanagedCode, Execution, ControlThread, ControlEvidence" +
-                ", ControlPolicy, ControlAppDomain, SerializationFormatter, ControlDomainPolicy, " +
-                "ControlPrincipal, RemotingConfiguration, Infrastructure, BindingRedirects\u0022/" +
-                "><Permission class=\u0022System.Security.Permissions.UIPermission, mscorlib, Ver" +
-                "sion={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
-                "1\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Net.Socke" +
-                "tPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c56" +
-                "1934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission " +
-                "class=\u0022System.Net.WebPermission, System, Version={VERSION}, Culture=neutral" +
-                ", PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022" +
-                "true\u0022/><IPermission class=\u0022System.Net.DnsPermission, System, Version={" +
-                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
-                " Unrestricted=\u0022true\u0022/><IPermission class=\u0022System.Security.Permiss" +
-                "ions.KeyContainerPermission, mscorlib, Version={VERSION}, Culture=neutral, Publi" +
-                "cKeyToken=b77a5c561934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022" +
-                "/><Permission class=\u0022System.Security.Permissions.RegistryPermission, mscorl" +
-                "ib, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022ver" +
-                "sion=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022Syste" +
-                "m.Drawing.Printing.PrintingPermission, System.Drawing, Version={VERSION}, Cultur" +
-                "e=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022version=\u00221\u0022 Unrestrict" +
-                "ed=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.EventLogPermiss" +
-                "ion, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089" +
-                "\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission class=\u0022" +
-                "System.Security.Permissions.StorePermission, System, Version={VERSION}, Culture=" +
-                "neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricte" +
-                "d=\u0022true\u0022/><IPermission class=\u0022System.Diagnostics.PerformanceCount" +
-                "erPermission, System, Version={VERSION}, Culture=neutral, PublicKeyToken=b77a5c5" +
-                "61934e089\u0022version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPermission" +
-                " class=\u0022System.Data.OleDb.OleDbPermission, System.Data, Version={VERSION}, " +
-                "Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022 version=\u00221\u0022 Unr" +
-                "estricted=\u0022true\u0022/><IPermission class=\u0022System.Data.SqlClient.SqlCl" +
-                "ientPermission, System.Data, Version={VERSION}, Culture=neutral, PublicKeyToken=" +
-                "b77a5c561934e089\u0022 version=\u00221\u0022 Unrestricted=\u0022true\u0022/><IPe" +
-                "rmission class=\u0022System.Security.Permissions.DataProtectionPermission, Syste" +
-                "m.Security, Version={VERSION}, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\u0022" +
-                " version=\u00221\u0022 Unrestricted=\u0022true\u0022/></PermissionSet><Permissio" +
-                "nSet class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 N" +
-                "ame=\u0022Nothing\u0022 Description=\u0022{Policy_PS_Nothing}\u0022/><Permission" +
-                "Set class=\u0022System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Na" +
-                "me=\u0022Execution\u0022 Description=\u0022{Policy_PS_Execution}\u0022><Permissi" +
-                "on class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version" +
-                "={VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u0022" +
-                "1\u0022 Flags=\u0022Execution\u0022/></PermissionSet><PermissionSet class=\u0022" +
-                "System.Security.NamedPermissionSet\u0022version=\u00221\u0022 Name=\u0022SkipVer" +
-                "ification\u0022 Description=\u0022{Policy_PS_SkipVerification}\u0022><Permission" +
-                " class=\u0022System.Security.Permissions.SecurityPermission, mscorlib, Version={" +
-                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
-                " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
-
-            int result = "{Policy_PS_Nothing}".AsSpan().CompareTo(veryLongString.AsSpan(4380, 19), StringComparison.Ordinal);
+            int result = "{Policy_PS_Nothing}".AsSpan().CompareTo(VeryLongString.AsSpan(4380, 19), StringComparison.Ordinal);
             Assert.True(result < 0);
         }
 
@@ -161,88 +161,7 @@ namespace System.Tests
         }
 
         [Theory]
-        // CurrentCulture
-        [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "hello", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "Helloo", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "Hell", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", null, StringComparison.CurrentCulture, false)]
-        [InlineData(null, "Hello", StringComparison.CurrentCulture, false)]
-        [InlineData(null, null, StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCulture, false)]
-        [InlineData("", "Hello", StringComparison.CurrentCulture, false)]
-        [InlineData("", "", StringComparison.CurrentCulture, true)]
-        [InlineData("123", 123, StringComparison.CurrentCulture, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCulture, false)]
-        // CurrentCultureIgnoreCase
-        [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "hello", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "helloo", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("Hello", "hell", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("Hello", null, StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData(null, "Hello", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData(null, null, StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("", "Hello", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("123", 123, StringComparison.CurrentCultureIgnoreCase, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCultureIgnoreCase, false)]
-        // InvariantCulture
-        [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "hello", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "Helloo", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "Hell", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", null, StringComparison.InvariantCulture, false)]
-        [InlineData(null, "Hello", StringComparison.InvariantCulture, false)]
-        [InlineData(null, null, StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCulture, false)]
-        [InlineData("", "Hello", StringComparison.InvariantCulture, false)]
-        [InlineData("", "", StringComparison.InvariantCulture, true)]
-        [InlineData("123", 123, StringComparison.InvariantCulture, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCulture, false)]
-        // InvariantCultureIgnoreCase
-        [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "hello", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Helloo", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("Hello", "Hell", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("Hello", null, StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData(null, "Hello", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData(null, null, StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("", "Hello", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("123", 123, StringComparison.InvariantCultureIgnoreCase, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCultureIgnoreCase, false)]
-        // Ordinal
-        [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "hello", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "Helloo", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "Hell", StringComparison.Ordinal, false)]
-        [InlineData("Hello", null, StringComparison.Ordinal, false)]
-        [InlineData(null, "Hello", StringComparison.Ordinal, false)]
-        [InlineData(null, null, StringComparison.Ordinal, true)]
-        [InlineData("Hello", "", StringComparison.Ordinal, false)]
-        [InlineData("", "Hello", StringComparison.Ordinal, false)]
-        [InlineData("", "", StringComparison.Ordinal, true)]
-        [InlineData("123", 123, StringComparison.Ordinal, false)] // Not a string
-        // OridinalIgnoreCase
-        [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("HELLO", "hello", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Helloo", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", "Hell", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("\u1234\u5678", "\u1234\u5678", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("\u1234\u5678", "\u1234\u5679", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("\u1234\u5678", "\u1235\u5678", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("\u1234\u5678", "\u1234", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("\u1234\u5678", "\u1234\u56789\u1234", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", null, StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData(null, "Hello", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData(null, null, StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("", "Hello", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("123", 123, StringComparison.OrdinalIgnoreCase, false)] // Not a string
-        [InlineData("\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.OrdinalIgnoreCase, false)]
+        [MemberData(nameof(Equals_TestData))]
         public static void Equals(string s1, object obj, StringComparison comparisonType, bool expected)
         {
             string s2 = obj as string;
@@ -283,57 +202,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 'l', 0, 5, 2)]
-        [InlineData("Hello", 'x', 0, 5, -1)]
-        [InlineData("Hello", 'l', 1, 4, 2)]
-        [InlineData("Hello", 'l', 3, 2, 3)]
-        [InlineData("Hello", 'l', 4, 1, -1)]
-        [InlineData("Hello", 'x', 1, 4, -1)]
-        [InlineData("Hello", 'l', 3, 0, -1)]
-        [InlineData("Hello", 'l', 0, 2, -1)]
-        [InlineData("Hello", 'l', 0, 3, 2)]
-        [InlineData("Hello", 'l', 4, 1, -1)]
-        [InlineData("Hello", 'x', 1, 4, -1)]
-        [InlineData("Hello", 'o', 5, 0, -1)]
-        [InlineData("H" + SoftHyphen + "ello", 'e', 0, 3, 2)]
-        // For some reason, this is failing on *nix with ordinal comparisons.
-        // Possibly related issue: dotnet/coreclr#2051
-        // [InlineData("Hello", '\0', 0, 5, -1)] // .NET strings are terminated with a null character, but they should not be included as part of the string
-        [InlineData("\ud800\udfff", '\ud800', 0, 1, 0)] // Surrogate characters
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17)]
-        [InlineData("________\u8080\u8080\u8080________", '\u0080', 0, 19, -1)]
-        [InlineData("________\u8000\u8000\u8000________", '\u0080', 0, 19, -1)]
-        [InlineData("__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4)]
-        [InlineData("__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6)]
-        [InlineData("__________________________________", '\ufffd', 0, 34, -1)]
-        [InlineData("____________________________\ufffd", '\ufffd', 0, 29, 28)]
-        [InlineData("ABCDEFGHIJKLM", 'M', 0, 13, 12)]
-        [InlineData("ABCDEFGHIJKLMN", 'N', 0, 14, 13)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1)]
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1)]
-        [InlineData("_____________\u807f", '\u007f', 0, 14, -1)]
-        [InlineData("_____________\u807f__", '\u007f', 0, 16, -1)]
-        [InlineData("_____________\u807f\u007f_", '\u007f', 0, 16, 14)]
-        [InlineData("__\u807f_______________", '\u007f', 0, 18, -1)]
-        [InlineData("__\u807f___\u007f___________", '\u007f', 0, 18, 6)]
-        [InlineData("ABCDEFGHIJKLMN", 'N', 2, 11, -1)]
-        [InlineData("!@#$%^&", '%', 0, 7, 4)]
-        [InlineData("!@#$", '!', 0, 4, 0)]
-        [InlineData("!@#$", '@', 0, 4, 1)]
-        [InlineData("!@#$", '#', 0, 4, 2)]
-        [InlineData("!@#$", '$', 0, 4, 3)]
-        [InlineData("!@#$%^&*", '%', 0, 8, 4)]
-        [InlineData("", 'H', 0, 0, -1)]
+        [MemberData(nameof(IndexOf_SingleLetter_TestData))]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
             bool safeForCurrentCulture =
@@ -405,26 +274,14 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [InlineData("He\0lo", "He\0lo", 0)]
-        [InlineData("He\0lo", "He\0", 0)]
-        [InlineData("He\0lo", "\0", 2)]
-        [InlineData("He\0lo", "\0lo", 2)]
-        [InlineData("He\0lo", "lo", 3)]
-        [InlineData("Hello", "lo\0", -1)]
-        [InlineData("Hello", "\0lo", -1)]
-        [InlineData("Hello", "l\0o", -1)]
+        [MemberData(nameof(IndexOf_NullInStrings_TestData))]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
             Assert.Equal(expected, s.AsSpan().IndexOf(value.AsSpan(), StringComparison.Ordinal));
         }
 
         [Theory]
-        [InlineData("Hello", 0, 'H')]
-        [InlineData("Hello", 1, 'e')]
-        [InlineData("Hello", 2, 'l')]
-        [InlineData("Hello", 3, 'l')]
-        [InlineData("Hello", 4, 'o')]
-        [InlineData("\0", 0, '\0')]
+        [MemberData(nameof(Item_Get_TestData))]
         public static void Item_Get(string s, int index, char expected)
         {
             Assert.Equal(expected, s.AsSpan()[index]);
@@ -1402,5 +1259,167 @@ namespace System.Tests
             yield return new object[] { StringComparison.InvariantCultureIgnoreCase };
         }
 
+        public static IEnumerable<object[]> Equals_TestData()
+        {
+            // CurrentCulture
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", null, StringComparison.CurrentCulture, false };
+            yield return new object[] { null, "Hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { null, null, StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, false };
+            yield return new object[] { "", "Hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "123", 123, StringComparison.CurrentCulture, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCulture, false };
+            // CurrentCultureIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "helloo", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "hell", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.CurrentCultureIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCultureIgnoreCase, false };
+            // InvariantCulture
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", null, StringComparison.InvariantCulture, false };
+            yield return new object[] { null, "Hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { null, null, StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, false };
+            yield return new object[] { "", "Hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "123", 123, StringComparison.InvariantCulture, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCulture, false };
+            // InvariantCultureIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.InvariantCultureIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCultureIgnoreCase, false };
+            // Ordinal
+            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "hello", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", null, StringComparison.Ordinal, false };
+            yield return new object[] { null, "Hello", StringComparison.Ordinal, false };
+            yield return new object[] { null, null, StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "", StringComparison.Ordinal, false };
+            yield return new object[] { "", "Hello", StringComparison.Ordinal, false };
+            yield return new object[] { "", "", StringComparison.Ordinal, true };
+            yield return new object[] { "123", 123, StringComparison.Ordinal, false }; // Not a string
+            // OridinalIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "HELLO", "hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Helloo", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234\u5678", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "\u1234\u5678", "\u1234\u5679", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1235\u5678", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234\u56789\u1234", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.OrdinalIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.OrdinalIgnoreCase, false };
+        }
+
+        public static IEnumerable<object[]> IndexOf_SingleLetter_TestData()
+        {
+            yield return new object[] { "Hello", 'l', 0, 5, 2 };
+            yield return new object[] { "Hello", 'x', 0, 5, -1 };
+            yield return new object[] { "Hello", 'l', 1, 4, 2 };
+            yield return new object[] { "Hello", 'l', 3, 2, 3 };
+            yield return new object[] { "Hello", 'l', 4, 1, -1 };
+            yield return new object[] { "Hello", 'x', 1, 4, -1 };
+            yield return new object[] { "Hello", 'l', 3, 0, -1 };
+            yield return new object[] { "Hello", 'l', 0, 2, -1 };
+            yield return new object[] { "Hello", 'l', 0, 3, 2 };
+            yield return new object[] { "Hello", 'l', 4, 1, -1 };
+            yield return new object[] { "Hello", 'x', 1, 4, -1 };
+            yield return new object[] { "Hello", 'o', 5, 0, -1 };
+            yield return new object[] { "H" + SoftHyphen + "ello", 'e', 0, 3, 2 };
+            // For some reason, this is failing on *nix with ordinal comparisons.
+            // Possibly related issue: dotnet/coreclr#2051
+            // yield return new object[] {"Hello", '\0', 0, 5, -1}; // .NET strings are terminated with a null character, but they should not be included as part of the string
+            yield return new object[] { "\ud800\udfff", '\ud800', 0, 1, 0 }; // Surrogate characters
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17 };
+            yield return new object[] { "________\u8080\u8080\u8080________", '\u0080', 0, 19, -1 };
+            yield return new object[] { "________\u8000\u8000\u8000________", '\u0080', 0, 19, -1 };
+            yield return new object[] { "__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4 };
+            yield return new object[] { "__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6 };
+            yield return new object[] { "__________________________________", '\ufffd', 0, 34, -1 };
+            yield return new object[] { "____________________________\ufffd", '\ufffd', 0, 29, 28 };
+            yield return new object[] { "ABCDEFGHIJKLM", 'M', 0, 13, 12 };
+            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 0, 14, 13 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1 };
+            yield return new object[] { "_____________\u807f", '\u007f', 0, 14, -1 };
+            yield return new object[] { "_____________\u807f__", '\u007f', 0, 16, -1 };
+            yield return new object[] { "_____________\u807f\u007f_", '\u007f', 0, 16, 14 };
+            yield return new object[] { "__\u807f_______________", '\u007f', 0, 18, -1 };
+            yield return new object[] { "__\u807f___\u007f___________", '\u007f', 0, 18, 6 };
+            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 2, 11, -1 };
+            yield return new object[] { "!@#$%^&", '%', 0, 7, 4 };
+            yield return new object[] { "!@#$", '!', 0, 4, 0 };
+            yield return new object[] { "!@#$", '@', 0, 4, 1 };
+            yield return new object[] { "!@#$", '#', 0, 4, 2 };
+            yield return new object[] { "!@#$", '$', 0, 4, 3 };
+            yield return new object[] { "!@#$%^&*", '%', 0, 8, 4 };
+            yield return new object[] { "", 'H', 0, 0, -1 };
+        }
+
+        public static IEnumerable<object[]> IndexOf_NullInStrings_TestData()
+        {
+            yield return new object[] { "He\0lo", "He\0lo", 0 };
+            yield return new object[] { "He\0lo", "He\0", 0 };
+            yield return new object[] { "He\0lo", "\0", 2 };
+            yield return new object[] { "He\0lo", "\0lo", 2 };
+            yield return new object[] { "He\0lo", "lo", 3 };
+            yield return new object[] { "Hello", "lo\0", -1 };
+            yield return new object[] { "Hello", "\0lo", -1 };
+            yield return new object[] { "Hello", "l\0o", -1 };
+        }
+
+        public static IEnumerable<object[]> Item_Get_TestData()
+        {
+            yield return new object[] { "Hello", 0, 'H' };
+            yield return new object[] { "Hello", 1, 'e' };
+            yield return new object[] { "Hello", 2, 'l' };
+            yield return new object[] { "Hello", 3, 'l' };
+            yield return new object[] { "Hello", 4, 'o' };
+            yield return new object[] { "\0", 0, '\0' };
+        }
     }
 }
