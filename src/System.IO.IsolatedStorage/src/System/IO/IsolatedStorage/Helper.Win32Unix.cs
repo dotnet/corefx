@@ -10,7 +10,7 @@ namespace System.IO.IsolatedStorage
 {
     internal static partial class Helper
     {
-        internal static string GetDataDirectory(IsolatedStorageScope scope)
+        internal static string GetDataDirectory(IsolatedStorageScope scope, Environment.SpecialFolderOption option = Environment.SpecialFolderOption.None)
         {
             // This is the relevant special folder for the given scope plus "IsolatedStorage".
             // It is meant to replicate the behavior of the VM ComIsolatedStorage::GetRootDir().
@@ -32,7 +32,7 @@ namespace System.IO.IsolatedStorage
             else
             {
                 // SpecialFolder.LocalApplicationData -> C:\Users\Joe\AppData\Local
-                dataDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                dataDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, option);
             }
 
             dataDirectory = Path.Combine(dataDirectory, IsolatedStorageDirectoryName);
