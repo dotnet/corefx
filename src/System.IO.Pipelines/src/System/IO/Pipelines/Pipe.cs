@@ -154,6 +154,39 @@ namespace System.IO.Pipelines
             return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
         }
 
+        internal Span<byte> GetSpan(int sizeHint)
+        {
+            if (_writerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
+            }
+
+            if (sizeHint < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
+            }
+
+            lock (_sync)
+            {
+                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(sizeHint);
+
+                int bytesLeftInBuffer = segment.WritableBytes;
+
+                // If inadequate bytes left or if the segment is readonly
+                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint || segment.ReadOnly)
+                {
+                    BufferSegment nextSegment = CreateSegmentUnsynchronized();
+                    nextSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
+
+                    segment.SetNext(nextSegment);
+
+                    _writingHead = nextSegment;
+                }
+            }
+
+            return _writingHead.AvailableMemory.Span.Slice(_writingHead.End, _writingHead.WritableBytes);
+        }
+
         private BufferSegment AllocateWriteHeadUnsynchronized(int sizeHint)
         {
             BufferSegment segment = null;
@@ -167,15 +200,13 @@ namespace System.IO.Pipelines
                 {
                     // Free tail space of the right amount, use that
                     segment = _commitHead;
+                    goto Done;
                 }
             }
 
-            if (segment == null)
-            {
-                // No free tail space, allocate a new segment
-                segment = CreateSegmentUnsynchronized();
-                segment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
-            }
+            // No free tail space, allocate a new segment
+            segment = CreateSegmentUnsynchronized();
+            segment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
             if (_commitHead == null)
             {
@@ -189,6 +220,7 @@ namespace System.IO.Pipelines
                 _commitHead.SetNext(segment);
             }
 
+        Done:
             // Set write head to assigned segment
             _writingHead = segment;
 
@@ -198,9 +230,16 @@ namespace System.IO.Pipelines
         private int GetSegmentSize(int sizeHint)
         {
             // First we need to handle case where hint is smaller than minimum segment size
-            var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, sizeHint);
+            if (_minimumSegmentSize >= sizeHint)
+                sizeHint = _minimumSegmentSize;
+        
             // After that adjust it to fit into pools max buffer size
-            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+            int adjustedToMaximumSize = 0;
+            if (_pool.MaxBufferSize <= sizeHint)
+                adjustedToMaximumSize = _pool.MaxBufferSize;
+            else
+                adjustedToMaximumSize = sizeHint;
+
             return adjustedToMaximumSize;
         }
 
