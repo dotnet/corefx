@@ -4,9 +4,7 @@
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
-// IProducerConsumerCollection.cs
 //
-
 //
 // A common interface for all concurrent collections.
 //
@@ -77,13 +75,12 @@ namespace System.Collections.Concurrent
         T[] ToArray();
     }
 
-
     /// <summary>
     /// A debugger view of the IProducerConsumerCollection that makes it simple to browse the
     /// collection's contents at a point in time.
     /// </summary>
     /// <typeparam name="T">The type of elements stored within.</typeparam>
-    internal sealed class IProducerConsumerCollectionDebugView<T>
+    public sealed class IProducerConsumerCollectionDebugView<T>
     {
         private readonly IProducerConsumerCollection<T> _collection; // The collection being viewed.
 
@@ -95,7 +92,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException(nameof(collection));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
             }
 
             _collection = collection;

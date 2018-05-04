@@ -19,7 +19,7 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
-    public partial class ConcurrentQueue<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
+    public class ConcurrentQueue<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
         // This implementation provides an unbounded, multi-producer multi-consumer queue
         // that supports the standard Enqueue/TryDequeue operations, as well as support for
@@ -54,9 +54,9 @@ namespace System.Collections.Concurrent
         /// </summary>
         private object _crossSegmentLock;
         /// <summary>The current tail segment.</summary>
-        private volatile Segment _tail;
+        private volatile Segment<T> _tail;
         /// <summary>The current head segment.</summary>
-        private volatile Segment _head;
+        private volatile Segment<T> _head;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
@@ -64,7 +64,7 @@ namespace System.Collections.Concurrent
         public ConcurrentQueue()
         {
             _crossSegmentLock = new object();
-            _tail = _head = new Segment(InitialSegmentLength);
+            _tail = _head = new Segment<T>(InitialSegmentLength);
         }
 
         /// <summary>
@@ -86,12 +86,12 @@ namespace System.Collections.Concurrent
                 int count = c.Count;
                 if (count > length)
                 {
-                    length = Math.Min(Segment.RoundUpToPowerOf2(count), MaxSegmentLength);
+                    length = Math.Min(Segment<T>.RoundUpToPowerOf2(count), MaxSegmentLength);
                 }
             }
 
             // Initialize the segment and add all of the data to it.
-            _tail = _head = new Segment(length);
+            _tail = _head = new Segment<T>(length);
             foreach (T item in collection)
             {
                 Enqueue(item);
@@ -110,7 +110,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException(nameof(collection));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
             }
 
             InitializeFromCollection(collection);
@@ -153,7 +153,7 @@ namespace System.Collections.Concurrent
             // Validate arguments.
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
             // Otherwise, fall back to the slower path that first copies the contents
@@ -175,7 +175,7 @@ namespace System.Collections.Concurrent
         /// cref="ICollection"/>. This property is not supported.
         /// </summary>
         /// <exception cref="NotSupportedException">The SyncRoot property is not supported.</exception>
-        object ICollection.SyncRoot { get { throw new NotSupportedException(SR.ConcurrentCollection_SyncRoot_NotSupported); } }
+        object ICollection.SyncRoot { get { ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported); return default(object); } }
 
         /// <summary>Returns an enumerator that iterates through a collection.</summary>
         /// <returns>An <see cref="IEnumerator"/> that can be used to iterate through the collection.</returns>
@@ -239,7 +239,7 @@ namespace System.Collections.Concurrent
         public T[] ToArray()
         {
             // Snap the current contents for enumeration.
-            Segment head, tail;
+            Segment<T> head, tail;
             int headHead, tailTail;
             SnapForObservation(out head, out headHead, out tail, out tailTail);
 
@@ -276,7 +276,7 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                Segment head, tail;
+                Segment<T> head, tail;
                 int headHead, headTail, tailHead, tailTail;
                 var spinner = new SpinWait();
                 while (true)
@@ -337,7 +337,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>Computes the number of items in a segment based on a fixed head and tail in that segment.</summary>
-        private static int GetCount(Segment s, int head, int tail)
+        private static int GetCount(Segment<T> s, int head, int tail)
         {
             if (head != tail && head != tail - s.FreezeOffset)
             {
@@ -349,7 +349,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>Gets the number of items in snapped region.</summary>
-        private static long GetCount(Segment head, int headHead, Segment tail, int tailTail)
+        private static long GetCount(Segment<T> head, int headHead, Segment<T> tail, int tailTail)
         {
             // All of the segments should have been both frozen for enqueues and preserved for observation.
             // Validate that here for head and tail; we'll validate it for intermediate segments later.
@@ -385,7 +385,7 @@ namespace System.Collections.Concurrent
                 // Since there were segments before these, for our purposes we consider them to start at
                 // the 0th element, and since there is at least one segment after each, each was frozen
                 // by the time we snapped it, so we can iterate until each's frozen tail.
-                for (Segment s = head._nextSegment; s != tail; s = s._nextSegment)
+                for (Segment<T> s = head._nextSegment; s != tail; s = s._nextSegment)
                 {
                     Debug.Assert(s._preservedForObservation);
                     Debug.Assert(s._frozenForEnqueues);
@@ -427,15 +427,15 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), SR.Collection_CopyTo_ArgumentOutOfRangeException);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
             }
 
             // Snap for enumeration
-            Segment head, tail;
+            Segment<T> head, tail;
             int headHead, tailTail;
             SnapForObservation(out head, out headHead, out tail, out tailTail);
 
@@ -443,7 +443,7 @@ namespace System.Collections.Concurrent
             long count = GetCount(head, headHead, tail, tailTail);
             if (index > array.Length - count)
             {
-                throw new ArgumentException(SR.Collection_CopyTo_TooManyElems);
+                ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
 
             // Copy the items to the target array
@@ -469,7 +469,7 @@ namespace System.Collections.Concurrent
         /// </remarks>
         public IEnumerator<T> GetEnumerator()
         {
-            Segment head, tail;
+            Segment<T> head, tail;
             int headHead, tailTail;
             SnapForObservation(out head, out headHead, out tail, out tailTail);
             return Enumerate(head, headHead, tail, tailTail);
@@ -480,7 +480,7 @@ namespace System.Collections.Concurrent
         /// After this call returns, the specified region can be enumerated any number
         /// of times and will not change.
         /// </summary>
-        private void SnapForObservation(out Segment head, out int headHead, out Segment tail, out int tailTail)
+        private void SnapForObservation(out Segment<T> head, out int headHead, out Segment<T> tail, out int tailTail)
         {
             lock (_crossSegmentLock) // _head and _tail may only change while the lock is held.
             {
@@ -493,7 +493,7 @@ namespace System.Collections.Concurrent
 
                 // Mark them and all segments in between as preserving, and ensure no additional items
                 // can be added to the tail.
-                for (Segment s = head; ; s = s._nextSegment)
+                for (Segment<T> s = head; ; s = s._nextSegment)
                 {
                     s._preservedForObservation = true;
                     if (s == tail) break;
@@ -510,7 +510,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>Gets the item stored in the <paramref name="i"/>th entry in <paramref name="segment"/>.</summary>
-        private T GetItemWhenAvailable(Segment segment, int i)
+        private T GetItemWhenAvailable(Segment<T> segment, int i)
         {
             Debug.Assert(segment._preservedForObservation);
 
@@ -532,7 +532,7 @@ namespace System.Collections.Concurrent
             return segment._slots[i].Item;
         }
 
-        private IEnumerator<T> Enumerate(Segment head, int headHead, Segment tail, int tailTail)
+        private IEnumerator<T> Enumerate(Segment<T> head, int headHead, Segment<T> tail, int tailTail)
         {
             Debug.Assert(head._preservedForObservation);
             Debug.Assert(head._frozenForEnqueues);
@@ -565,7 +565,7 @@ namespace System.Collections.Concurrent
             {
                 // Each segment between head and tail, not including head and tail.  Since there were
                 // segments before these, for our purposes we consider it to start at the 0th element.
-                for (Segment s = head._nextSegment; s != tail; s = s._nextSegment)
+                for (Segment<T> s = head._nextSegment; s != tail; s = s._nextSegment)
                 {
                     Debug.Assert(s._preservedForObservation, "Would have had to been preserved as a segment part of enumeration");
                     Debug.Assert(s._frozenForEnqueues, "Would have had to be frozen for enqueues as it's intermediate");
@@ -608,7 +608,7 @@ namespace System.Collections.Concurrent
         {
             while (true)
             {
-                Segment tail = _tail;
+                Segment<T> tail = _tail;
 
                 // Try to append to the existing tail.
                 if (tail.TryEnqueue(item))
@@ -636,7 +636,7 @@ namespace System.Collections.Concurrent
                         // this will help to avoid wasted memory, and if they're not, we'll
                         // relatively quickly grow again to a larger size.
                         int nextSize = tail._preservedForObservation ? InitialSegmentLength : Math.Min(tail.Capacity * 2, MaxSegmentLength);
-                        var newTail = new Segment(nextSize);
+                        var newTail = new Segment<T>(nextSize);
 
                         // Hook up the new tail.
                         tail._nextSegment = newTail;
@@ -668,7 +668,7 @@ namespace System.Collections.Concurrent
             while (true)
             {
                 // Get the current head
-                Segment head = _head;
+                Segment<T> head = _head;
 
                 // Try to take.  If we're successful, we're done.
                 if (head.TryDequeue(out item))
@@ -726,19 +726,19 @@ namespace System.Collections.Concurrent
 
         /// <summary>Attempts to retrieve the value for the first element in the queue.</summary>
         /// <param name="result">The value of the first element, if found.</param>
-        /// <param name="resultUsed">true if the result is neede; otherwise false if only the true/false outcome is needed.</param>
+        /// <param name="resultUsed">true if the result is needed; otherwise false if only the true/false outcome is needed.</param>
         /// <returns>true if an element was found; otherwise, false.</returns>
         private bool TryPeek(out T result, bool resultUsed)
         {
             // Starting with the head segment, look through all of the segments
             // for the first one we can find that's not empty.
-            Segment s = _head;
+            Segment<T> s = _head;
             while (true)
             {
                 // Grab the next segment from this one, before we peek.
                 // This is to be able to see whether the value has changed
                 // during the peek operation.
-                Segment next = Volatile.Read(ref s._nextSegment);
+                Segment<T> next = Volatile.Read(ref s._nextSegment);
 
                 // Peek at the segment.  If we find an element, we're done.
                 if (s.TryPeek(out result, resultUsed))
@@ -795,8 +795,17 @@ namespace System.Collections.Concurrent
                 // be dropped, we first freeze it; that'll force enqueuers to take
                 // this lock to synchronize and see the new tail.
                 _tail.EnsureFrozenForEnqueues();
-                _tail = _head = new Segment(InitialSegmentLength);
+                _tail = _head = new Segment<T>(InitialSegmentLength);
             }
         }
+    }
+
+    /// <summary>Padded head and tail indices, to avoid false sharing between producers and consumers.</summary>
+    [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]
+    [StructLayout(LayoutKind.Explicit, Size = 384)] // padding before/between/after fields based on worst case cache line size of 128
+    internal struct PaddedHeadAndTail
+    {
+        [FieldOffset(128)] public int Head;
+        [FieldOffset(256)] public int Tail;
     }
 }

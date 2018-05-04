@@ -80,7 +80,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException(nameof(collection));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
             }
             InitializeFromCollection(collection);
         }
@@ -183,7 +183,8 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                throw new NotSupportedException(SR.ConcurrentCollection_SyncRoot_NotSupported);
+                ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported);
+                return default(object);
             }
         }
 
@@ -229,7 +230,7 @@ namespace System.Collections.Concurrent
             // Validate arguments.
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -263,7 +264,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -315,7 +316,7 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException(nameof(items));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.items);
             }
             PushRange(items, 0, items.Length);
         }
@@ -404,7 +405,7 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException(nameof(items));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.items);
             }
             if (count < 0)
             {
@@ -517,7 +518,7 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException(nameof(items));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.items);
             }
 
             return TryPopRange(items, 0, items.Length);

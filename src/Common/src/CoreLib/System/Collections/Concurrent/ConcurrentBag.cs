@@ -54,7 +54,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException(nameof(collection), SR.ConcurrentBag_Ctor_ArgumentNullException);
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
             }
 
             _locals = new ThreadLocal<WorkStealingQueue>();
@@ -235,11 +235,11 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), SR.Collection_CopyTo_ArgumentOutOfRangeException);
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
             }
 
             // Short path if the bag is empty
@@ -257,7 +257,7 @@ namespace System.Collections.Concurrent
                 int count = DangerousCount;
                 if (index > array.Length - count)
                 {
-                    throw new ArgumentException(SR.Collection_CopyTo_TooManyElems, nameof(index));
+                    ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
                 }
 
                 // Do the copy
@@ -331,7 +331,7 @@ namespace System.Collections.Concurrent
             // and then relying on its CopyTo to copy to the target Array.
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
             ToArray().CopyTo(array, index);
         }
