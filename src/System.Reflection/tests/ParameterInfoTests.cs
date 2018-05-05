@@ -56,6 +56,8 @@ namespace System.Reflection.Tests
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault2", 0, true)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault3", 0, true)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault4", 0, true)]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, true)]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultNullableDateTime", 0, true)]
         [InlineData(typeof(GenericClass<int>), "GenericMethodWithDefault", 1, true)]
         [InlineData(typeof(ParameterInfoMetadata), "Method1", 1, false)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithRefParameter", 0, false)]
@@ -109,6 +111,8 @@ namespace System.Reflection.Tests
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault2", 0, "abc")]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault3", 0, false)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault4", 0, '\0')]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, null)]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultNullableDateTime", 0, null)]
         public void DefaultValue(Type type, string name, int index, object expected)
         {
             ParameterInfo parameterInfo = GetParameterInfo(type, name, index);
@@ -234,6 +238,9 @@ namespace System.Reflection.Tests
             public int MethodWithDefault2(string str = "abc") { return 1; }
             public int MethodWithDefault3(bool result = false) { return 1; }
             public int MethodWithDefault4(char c = '\0') { return 1; }
+
+            public void MethodWithDefaultDateTime(DateTime arg = default(DateTime)) { }
+            public void MethodWithDefaultNullableDateTime(DateTime? arg = default(DateTime?)) { }
 
             public int MethodWithOptionalAndNoDefault([Optional] object o) { return 1; }
             public int MethodWithOptionalDefaultOutInMarshalParam([MarshalAs(UnmanagedType.LPWStr)][Out][In] string str = "") { return 1; }
