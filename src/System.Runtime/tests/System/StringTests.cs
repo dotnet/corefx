@@ -183,10 +183,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("", 0)]
-        [InlineData("\0", 1)]
-        [InlineData("abc", 3)]
-        [InlineData("hello", 5)]
+        [MemberData("Length_TestData", MemberType = typeof(StringTestsSpan))]
         public static void Length(string s, int expected)
         {
             Assert.Equal(expected, s.Length);
@@ -690,8 +687,7 @@ namespace System.Tests
 
 
         [Theory]
-        [InlineData("abc")]
-        [InlineData("")]
+        [MemberData("GetEnumerator_TestData", MemberType = typeof(StringTestsSpan))]
         public static void GetEnumerator_NonGeneric(string s)
         {
             IEnumerable enumerable = s;
@@ -750,8 +746,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("abc")]
-        [InlineData("")]
+        [MemberData("GetEnumerator_TestData", MemberType = typeof(StringTestsSpan))]
         public static void GetEnumerator_Generic(string s)
         {
             IEnumerable<char> enumerable = s;
@@ -1388,10 +1383,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(null, true)]
-        [InlineData("", true)]
-        [InlineData("foo", false)]
-        [InlineData("   ", false)]
+        [MemberData("IsNullOrEmpty_TestData", MemberType = typeof(StringTestsSpan))]
         public static void IsNullOrEmpty(string value, bool expected)
         {
             Assert.Equal(expected, string.IsNullOrEmpty(value));
@@ -1589,14 +1581,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [InlineData("He\0lo", "He\0lo", 0)]
-        [InlineData("He\0lo", "He\0", 0)]
-        [InlineData("He\0lo", "\0", 2)]
-        [InlineData("He\0lo", "\0lo", 2)]
-        [InlineData("He\0lo", "lo", 3)]
-        [InlineData("Hello", "lo\0", -1)]
-        [InlineData("Hello", "\0lo", -1)]
-        [InlineData("Hello", "l\0o", -1)]
+        [MemberData("LastIndexOf_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
         public static void LastIndexOf_NullInStrings(string s, string value, int expected)
         {
             Assert.Equal(expected, s.LastIndexOf(value));
@@ -1939,71 +1924,7 @@ namespace System.Tests
         }
 
         [Theory]
-        // CurrentCulture
-        [InlineData("Hello", "Hel", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "Hello", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "HELLO", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", "Abc", StringComparison.CurrentCulture, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.CurrentCulture, true)]
-        [InlineData("", "", StringComparison.CurrentCulture, true)]
-        [InlineData("", "hello", StringComparison.CurrentCulture, false)]
-        // CurrentCultureIgnoreCase
-        [InlineData("Hello", "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "HEL", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("", "hello", StringComparison.CurrentCultureIgnoreCase, false)]
-        // InvariantCulture
-        [InlineData("Hello", "Hel", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "Hello", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "HELLO", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", "Abc", StringComparison.InvariantCulture, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.InvariantCulture, true)]
-        [InlineData("", "", StringComparison.InvariantCulture, true)]
-        [InlineData("", "hello", StringComparison.InvariantCulture, false)]
-        // InvariantCultureIgnoreCase
-        [InlineData("Hello", "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "HEL", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("", "hello", StringComparison.InvariantCultureIgnoreCase, false)]
-        // Ordinal
-        [InlineData("Hello", "H", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "Hel", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "Hello", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "Hello Larger", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "HEL", StringComparison.Ordinal, false)]
-        [InlineData("Hello", "Abc", StringComparison.Ordinal, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.Ordinal, false)]
-        [InlineData("", "", StringComparison.Ordinal, true)]
-        [InlineData("", "hello", StringComparison.Ordinal, false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", StringComparison.Ordinal, true)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwx", StringComparison.Ordinal, true)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklm", StringComparison.Ordinal, true)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "ab_defghijklmnopqrstu", StringComparison.Ordinal, false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdef_hijklmn", StringComparison.Ordinal, false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghij_lmn", StringComparison.Ordinal, false)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "a", StringComparison.Ordinal, true)]
-        [InlineData("abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", StringComparison.Ordinal, false)]
-        // OrdinalIgnoreCase
-        [InlineData("Hello", "Hel", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Hello", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Hello Larger", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "HEL", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "Abc", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", StringTestsSpan.SoftHyphen + "Hel", StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
+        [MemberData("StartsWith_TestData", MemberType = typeof(StringTestsSpan))]
         public static void StartsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
             if (comparisonType == StringComparison.CurrentCulture)
@@ -2015,10 +1936,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [InlineData(StringComparison.CurrentCulture)]
-        [InlineData(StringComparison.CurrentCultureIgnoreCase)]
-        [InlineData(StringComparison.Ordinal)]
-        [InlineData(StringComparison.OrdinalIgnoreCase)]
+        [MemberData("StartsWith_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
         public static void StartsWith_NullInStrings(StringComparison comparison)
         {
             Assert.False("\0test".StartsWith("test", comparison));
@@ -2046,11 +1964,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 0, 5, "Hello")]
-        [InlineData("Hello", 0, 3, "Hel")]
-        [InlineData("Hello", 2, 3, "llo")]
-        [InlineData("Hello", 5, 0, "")]
-        [InlineData("", 0, 0, "")]
+        [MemberData("Substring_TestData", MemberType = typeof(StringTestsSpan))]
         public static void Substring(string s, int startIndex, int length, string expected)
         {
             if (startIndex + length == s.Length)
@@ -2111,11 +2025,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("hello", "hello")]
-        [InlineData("HELLO", "hello")]
-        [InlineData("hElLo", "hello")]
-        [InlineData("HeLlO", "hello")]
-        [InlineData("", "")]
+        [MemberData("ToLower_TestData", MemberType = typeof(StringTestsSpan))]
         public static void ToLower(string s, string expected)
         {
             Assert.Equal(expected, s.ToLower());
@@ -2167,56 +2077,28 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("hello", "hello")]
-        [InlineData("HELLO", "hello")]
-        [InlineData("hElLo", "hello")]
-        [InlineData("HeLlO", "hello")]
-        [InlineData("", "")]
+        [MemberData("ToLowerInvariant_TestData", MemberType = typeof(StringTestsSpan))]
         public static void ToLowerInvariant(string s, string expected)
         {
             Assert.Equal(expected, s.ToLowerInvariant());
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData("hello")]
+        [MemberData("ToString_TestData", MemberType = typeof(StringTestsSpan))]
         public static void ToString(string s)
         {
             Assert.Same(s, s.ToString());
         }
 
         [Theory]
-        [InlineData("hello", "HELLO")]
-        [InlineData("HELLO", "HELLO")]
-        [InlineData("hElLo", "HELLO")]
-        [InlineData("HeLlO", "HELLO")]
-        [InlineData("", "")]
+        [MemberData("ToUpper_TestData", MemberType = typeof(StringTestsSpan))]
         public static void ToUpper(string s, string expected)
         {
             Assert.Equal(expected, s.ToUpper());
         }
-
-        private static IEnumerable<object[]> ToUpper_TurkishI_MemberData(
-            params KeyValuePair<char, char>[] mappings)
-        {
-            foreach (KeyValuePair<char, char> mapping in mappings)
-            {
-                yield return new[] { $"{mapping.Key}", $"{mapping.Value}" };
-                yield return new[] { $"{mapping.Key}a TeSt", $"{mapping.Value}A TEST" };
-                yield return new[] { $"a T{mapping.Key}est", $"A T{mapping.Value}EST" };
-                yield return new[] { $"A test{mapping.Key}", $"A TEST{mapping.Value}" };
-                yield return new[] { new string(mapping.Key, 100), new string(mapping.Value, 100) };
-            }
-        }
-
-        public static IEnumerable<object[]> ToUpper_TurkishI_TurkishCulture_MemberData() =>
-            ToUpper_TurkishI_MemberData(
-                new KeyValuePair<char, char>('\u0069', '\u0130'),
-                new KeyValuePair<char, char>('\u0130', '\u0130'),
-                new KeyValuePair<char, char>('\u0131', '\u0049'));
-
+       
         [Theory]
-        [MemberData(nameof(ToUpper_TurkishI_TurkishCulture_MemberData))]
+        [MemberData("ToUpper_TurkishI_TurkishCulture_MemberData", MemberType = typeof(StringTestsSpan))]
         public static void ToUpper_TurkishI_TurkishCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2229,14 +2111,8 @@ namespace System.Tests
             }, s.ToString(), expected.ToString()).Dispose();
         }
 
-        public static IEnumerable<object[]> ToUpper_TurkishI_EnglishUSCulture_MemberData() =>
-            ToUpper_TurkishI_MemberData(
-                new KeyValuePair<char, char>('\u0069', '\u0049'),
-                new KeyValuePair<char, char>('\u0130', '\u0130'),
-                new KeyValuePair<char, char>('\u0131', '\u0049'));
-
         [Theory]
-        [MemberData(nameof(ToUpper_TurkishI_EnglishUSCulture_MemberData))]
+        [MemberData("ToUpper_TurkishI_EnglishUSCulture_MemberData", MemberType = typeof(StringTestsSpan))]        
         public static void ToUpper_TurkishI_EnglishUSCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2249,14 +2125,8 @@ namespace System.Tests
             }, s.ToString(), expected.ToString()).Dispose();
         }
 
-        public static IEnumerable<object[]> ToUpper_TurkishI_InvariantCulture_MemberData() =>
-            ToUpper_TurkishI_MemberData(
-                new KeyValuePair<char, char>('\u0069', '\u0049'),
-                new KeyValuePair<char, char>('\u0130', '\u0130'),
-                new KeyValuePair<char, char>('\u0131', '\u0131'));
-
         [Theory]
-        [MemberData(nameof(ToUpper_TurkishI_InvariantCulture_MemberData))]
+        [MemberData("ToUpper_TurkishI_InvariantCulture_MemberData", MemberType = typeof(StringTestsSpan))]        
         public static void ToUpper_TurkishI_InvariantCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2270,11 +2140,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("hello", "HELLO")]
-        [InlineData("HELLO", "HELLO")]
-        [InlineData("hElLo", "HELLO")]
-        [InlineData("HeLlO", "HELLO")]
-        [InlineData("", "")]
+        [MemberData("ToUpperInvariant_TestData", MemberType = typeof(StringTestsSpan))]
         public static void ToUpperInvariant(string s, string expected)
         {
             Assert.Equal(expected, s.ToUpperInvariant());
@@ -2306,14 +2172,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "Hello")]
-        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ")]
-        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello")]
-        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello")]
-        [InlineData("  Hello  ", null, "Hello")]
-        [InlineData("  Hello  ", new char[0], "Hello")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
+        [MemberData("Trim_TestData", MemberType = typeof(StringTestsSpan))]
         public static void Trim(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
@@ -2330,14 +2189,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "  Hello")]
-        [InlineData(".  Hello  ..", new char[] { '.' }, ".  Hello  ")]
-        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, ".  Hello")]
-        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "123abcHello")]
-        [InlineData("  Hello  ", null, "  Hello")]
-        [InlineData("  Hello  ", new char[0], "  Hello")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
+        [MemberData("TrimEnd_TestData", MemberType = typeof(StringTestsSpan))]
         public static void TrimEnd(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
@@ -2354,14 +2206,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "Hello  ")]
-        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ..")]
-        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello  ..")]
-        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello123abc")]
-        [InlineData("  Hello  ", null, "Hello  ")]
-        [InlineData("  Hello  ", new char[0], "Hello  ")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
+        [MemberData("TrimStart_TestData", MemberType = typeof(StringTestsSpan))]
         public static void TrimStart(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
