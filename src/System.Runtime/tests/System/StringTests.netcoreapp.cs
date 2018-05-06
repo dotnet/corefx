@@ -161,8 +161,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.CurrentCulture, true)]
         [InlineData("", "hello", StringComparison.CurrentCulture, false)]
         [InlineData("Hello", "", StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.CurrentCulture, true)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.CurrentCulture, false)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.CurrentCulture, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.CurrentCulture, false)]
         // CurrentCultureIgnoreCase
         [InlineData("Hello", "ello", StringComparison.CurrentCultureIgnoreCase, true)]
         [InlineData("Hello", "ELL", StringComparison.CurrentCultureIgnoreCase, true)]
@@ -172,8 +172,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.CurrentCultureIgnoreCase, true)]
         [InlineData("", "hello", StringComparison.CurrentCultureIgnoreCase, false)]
         [InlineData("Hello", "", StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true)]
         // InvariantCulture
         [InlineData("Hello", "ello", StringComparison.InvariantCulture, true)]
         [InlineData("Hello", "ELL", StringComparison.InvariantCulture, false)]
@@ -183,8 +183,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.InvariantCulture, true)]
         [InlineData("", "hello", StringComparison.InvariantCulture, false)]
         [InlineData("Hello", "", StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.InvariantCulture, true)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.InvariantCulture, false)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.InvariantCulture, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.InvariantCulture, false)]
         // InvariantCultureIgnoreCase
         [InlineData("Hello", "ello", StringComparison.InvariantCultureIgnoreCase, true)]
         [InlineData("Hello", "ELL", StringComparison.InvariantCultureIgnoreCase, true)]
@@ -194,8 +194,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.InvariantCultureIgnoreCase, true)]
         [InlineData("", "hello", StringComparison.InvariantCultureIgnoreCase, false)]
         [InlineData("Hello", "", StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true)]
         // Ordinal
         [InlineData("Hello", "ello", StringComparison.Ordinal, true)]
         [InlineData("Hello", "ELL", StringComparison.Ordinal, false)]
@@ -205,8 +205,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.Ordinal, true)]
         [InlineData("", "hello", StringComparison.Ordinal, false)]
         [InlineData("Hello", "", StringComparison.Ordinal, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.Ordinal, false)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.Ordinal, false)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.Ordinal, false)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.Ordinal, false)]
         // OrdinalIgnoreCase
         [InlineData("Hello", "ello", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("Hello", "ELL", StringComparison.OrdinalIgnoreCase, true)]
@@ -216,8 +216,8 @@ namespace System.Tests
         [InlineData("", "", StringComparison.OrdinalIgnoreCase, true)]
         [InlineData("", "hello", StringComparison.OrdinalIgnoreCase, false)]
         [InlineData("Hello", "", StringComparison.OrdinalIgnoreCase, true)]
-        [InlineData("Hello", "ell" + StringTestsSpan.SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
-        [InlineData("Hello", "Ell" + StringTestsSpan.SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "ell" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
+        [InlineData("Hello", "Ell" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false)]
         public static void Contains(string s, string value, StringComparison comparisonType, bool expected)
         {
             Assert.Equal(expected, s.Contains(value, comparisonType));
@@ -392,7 +392,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.CurrentCulture, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.CurrentCulture, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.CurrentCulture, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.CurrentCulture, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.CurrentCulture, "def" };
 
             yield return new object[] { "abc", "abc", "def", StringComparison.CurrentCultureIgnoreCase, "def" };
             yield return new object[] { "abc", "ABC", "def", StringComparison.CurrentCultureIgnoreCase, "def" };
@@ -400,7 +400,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.CurrentCultureIgnoreCase, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.CurrentCultureIgnoreCase, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.CurrentCultureIgnoreCase, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.CurrentCultureIgnoreCase, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.CurrentCultureIgnoreCase, "def" };
 
             yield return new object[] { "abc", "abc", "def", StringComparison.Ordinal, "def" };
             yield return new object[] { "abc", "ABC", "def", StringComparison.Ordinal, "abc" };
@@ -408,7 +408,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.Ordinal, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.Ordinal, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.Ordinal, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.Ordinal, "abc" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.Ordinal, "abc" };
 
             yield return new object[] { "abc", "abc", "def", StringComparison.OrdinalIgnoreCase, "def" };
             yield return new object[] { "abc", "ABC", "def", StringComparison.OrdinalIgnoreCase, "def" };
@@ -416,7 +416,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.OrdinalIgnoreCase, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.OrdinalIgnoreCase, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.OrdinalIgnoreCase, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.OrdinalIgnoreCase, "abc" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.OrdinalIgnoreCase, "abc" };
 
             yield return new object[] { "abc", "abc", "def", StringComparison.InvariantCulture, "def" };
             yield return new object[] { "abc", "ABC", "def", StringComparison.InvariantCulture, "abc" };
@@ -424,7 +424,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.InvariantCulture, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.InvariantCulture, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.InvariantCulture, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.InvariantCulture, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.InvariantCulture, "def" };
 
             yield return new object[] { "abc", "abc", "def", StringComparison.InvariantCultureIgnoreCase, "def" };
             yield return new object[] { "abc", "ABC", "def", StringComparison.InvariantCultureIgnoreCase, "def" };
@@ -432,7 +432,7 @@ namespace System.Tests
             yield return new object[] { "abc", "b", "LONG", StringComparison.InvariantCultureIgnoreCase, "aLONGc" };
             yield return new object[] { "abc", "b", "d", StringComparison.InvariantCultureIgnoreCase, "adc" };
             yield return new object[] { "abc", "b", null, StringComparison.InvariantCultureIgnoreCase, "ac" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", StringComparison.InvariantCultureIgnoreCase, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", StringComparison.InvariantCultureIgnoreCase, "def" };
 
             string turkishSource = "\u0069\u0130";
 
@@ -495,10 +495,10 @@ namespace System.Tests
             yield return new object[] { "abc", "abc", "def", true, CultureInfo.InvariantCulture, "def" };
             yield return new object[] { "abc", "ABC", "def", true, CultureInfo.InvariantCulture, "def" };
 
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", false, null, "def" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", true, null, "def" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", false, CultureInfo.InvariantCulture, "def" };
-            yield return new object[] { "abc", "abc" + StringTestsSpan.SoftHyphen, "def", true, CultureInfo.InvariantCulture, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", false, null, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", true, null, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", false, CultureInfo.InvariantCulture, "def" };
+            yield return new object[] { "abc", "abc" + SoftHyphen, "def", true, CultureInfo.InvariantCulture, "def" };
 
             yield return new object[] { "\u0069\u0130", "\u0069", "a", false, new CultureInfo("tr-TR"), "a\u0130" };
             yield return new object[] { "\u0069\u0130", "\u0069", "a", true, new CultureInfo("tr-TR"), "aa" };

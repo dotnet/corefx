@@ -526,7 +526,7 @@ namespace System.Tests
         [Fact]
         public static void Compare_LongString()
         {           
-            int result = string.Compare("{Policy_PS_Nothing}", 0, StringTestsSpan.VeryLongString, 4380, 19, StringComparison.Ordinal);
+            int result = string.Compare("{Policy_PS_Nothing}", 0, VeryLongString, 4380, 19, StringComparison.Ordinal);
             Assert.True(result < 0);
         }
 
@@ -1296,7 +1296,7 @@ namespace System.Tests
         [InlineData("Hello", new char[] { 'd', 'e', 'f' }, 1, 3, 1)]
         [InlineData("Hello", new char[] { 'a', 'b', 'c' }, 2, 3, -1)]
         [InlineData("Hello", new char[0], 2, 3, -1)]
-        [InlineData("H" + StringTestsSpan.SoftHyphen + "ello", new char[] { 'a', '\u00AD', 'c' }, 0, 2, 1)]
+        [InlineData("H" + SoftHyphen + "ello", new char[] { 'a', '\u00AD', 'c' }, 0, 2, 1)]
         [InlineData("", new char[] { 'd', 'e', 'f' }, 0, 0, -1)]
         [InlineData("Hello", new char[] { 'o', 'l' }, 0, 5, 2)]
         [InlineData("Hello", new char[] { 'e', 'H' }, 0, 0, -1)]
@@ -1522,7 +1522,7 @@ namespace System.Tests
         [InlineData("Hello", 'l', 4, 3, 3)]
         [InlineData("Hello", 'l', 0, 1, -1)]
         [InlineData("Hello", 'x', 3, 4, -1)]
-        [InlineData("H" + StringTestsSpan.SoftHyphen + "ello", 'H', 2, 3, 0)]
+        [InlineData("H" + SoftHyphen + "ello", 'H', 2, 3, 0)]
         [InlineData("", 'H', 0, 0, -1)]
         public static void LastIndexOf_SingleLetter(string s, char value, int startIndex, int count, int expected)
         {
@@ -1739,7 +1739,7 @@ namespace System.Tests
         [InlineData("Hello", new char[] { 'd', 'e', 'f' }, 2, 3, 1)]
         [InlineData("Hello", new char[] { 'a', 'b', 'c' }, 2, 3, -1)]
         [InlineData("Hello", new char[0], 2, 3, -1)]
-        [InlineData("H" + StringTestsSpan.SoftHyphen + "ello", new char[] { 'a', '\u00AD', 'c' }, 2, 3, 1)]
+        [InlineData("H" + SoftHyphen + "ello", new char[] { 'a', '\u00AD', 'c' }, 2, 3, 1)]
         [InlineData("", new char[] { 'd', 'e', 'f' }, -1, -1, -1)]
         public static void LastIndexOfAny(string s, char[] anyOf, int startIndex, int count, int expected)
         {
