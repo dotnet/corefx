@@ -15,7 +15,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public partial class StringTests : RemoteExecutorTestBase
+    public partial class StringTests : StringTests_TestData
     {
        
         [Theory]
@@ -168,7 +168,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Item_Get_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Item_Get_TestData))]
         public static void Item_Get(string s, int index, char expected)
         {
             Assert.Equal(expected, s[index]);
@@ -183,7 +183,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Length_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Length_TestData))]
         public static void Length(string s, int expected)
         {
             Assert.Equal(expected, s.Length);
@@ -420,7 +420,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("CopyTo_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(CopyTo_TestData))]
         public static void CopyTo(string s, int sourceIndex, int destinationIndex, int count, char[] expected)
         {
             char[] dst = new char[expected.Length];
@@ -450,7 +450,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Compare_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Compare_TestData))]
         public static void Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType, int expected)
         {
             bool hasNullInputs = (strA == null || strB == null);
@@ -636,7 +636,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("EndsWith_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(EndsWith_TestData))]
         public static void EndsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
             if (comparisonType == StringComparison.CurrentCulture)
@@ -648,7 +648,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [MemberData("EndsWith_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(NullInStrings_TestData))]
         public static void EndsWith_NullInStrings(StringComparison comparison)
         {
             Assert.True("\0test".EndsWith("test", comparison));
@@ -663,7 +663,7 @@ namespace System.Tests
         // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [MemberData("EndsWith_NullInStrings_NonOrdinal_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(NullInStrings_TestData))]
         public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
         {
             Assert.True("\0test".EndsWith("test", comparison));
@@ -687,7 +687,7 @@ namespace System.Tests
 
 
         [Theory]
-        [MemberData("GetEnumerator_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(GetEnumerator_TestData))]
         public static void GetEnumerator_NonGeneric(string s)
         {
             IEnumerable enumerable = s;
@@ -746,7 +746,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("GetEnumerator_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(GetEnumerator_TestData))]
         public static void GetEnumerator_Generic(string s)
         {
             IEnumerable<char> enumerable = s;
@@ -793,7 +793,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Equals_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Equals_TestData))]
         public static void Equals(string s1, object obj, StringComparison comparisonType, bool expected)
         {
             string s2 = obj as string;
@@ -825,19 +825,7 @@ namespace System.Tests
             {
                 Assert.Equal(s1.GetHashCode(), s1.GetHashCode());
             }
-        }
-
-        public static IEnumerable<object[]> Equals_EncyclopaediaData()
-        {
-            yield return new object[] { StringComparison.CurrentCulture, false };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { StringComparison.Ordinal, false };
-            yield return new object[] { StringComparison.OrdinalIgnoreCase, false };
-
-            // Windows and ICU disagree about how these strings compare in the default locale.
-            yield return new object[] { StringComparison.InvariantCulture, PlatformDetection.IsWindows };
-            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, PlatformDetection.IsWindows };
-        }
+        }       
 
         [Theory]
         [MemberData(nameof(Equals_EncyclopaediaData))]
@@ -925,7 +913,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("IndexOf_SingleLetter_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(IndexOf_SingleLetter_TestData))]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
             bool safeForCurrentCulture =
@@ -1012,7 +1000,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [MemberData("IndexOf_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(IndexOf_NullInStrings_TestData))]
         public static void IndexOf_NullInStrings(string s, string value, int expected)
         {
             Assert.Equal(expected, s.IndexOf(value));
@@ -1383,7 +1371,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("IsNullOrEmpty_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(IsNullOrEmpty_TestData))]
         public static void IsNullOrEmpty(string value, bool expected)
         {
             Assert.Equal(expected, string.IsNullOrEmpty(value));
@@ -1581,7 +1569,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [MemberData("LastIndexOf_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(LastIndexOf_NullInStrings_TestData))]
         public static void LastIndexOf_NullInStrings(string s, string value, int expected)
         {
             Assert.Equal(expected, s.LastIndexOf(value));
@@ -1924,7 +1912,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("StartsWith_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(StartsWith_TestData))]
         public static void StartsWith(string s, string value, StringComparison comparisonType, bool expected)
         {
             if (comparisonType == StringComparison.CurrentCulture)
@@ -1936,7 +1924,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [MemberData("StartsWith_NullInStrings_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(StartsWith_NullInStrings_TestData))]
         public static void StartsWith_NullInStrings(StringComparison comparison)
         {
             Assert.False("\0test".StartsWith("test", comparison));
@@ -1964,7 +1952,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Substring_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Substring_TestData))]
         public static void Substring(string s, int startIndex, int length, string expected)
         {
             if (startIndex + length == s.Length)
@@ -2025,7 +2013,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("ToLower_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToLower_TestData))]
         public static void ToLower(string s, string expected)
         {
             Assert.Equal(expected, s.ToLower());
@@ -2077,28 +2065,28 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("ToLowerInvariant_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToLowerInvariant_TestData))]
         public static void ToLowerInvariant(string s, string expected)
         {
             Assert.Equal(expected, s.ToLowerInvariant());
         }
 
         [Theory]
-        [MemberData("ToString_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToString_TestData))]
         public static void ToString(string s)
         {
             Assert.Same(s, s.ToString());
         }
 
         [Theory]
-        [MemberData("ToUpper_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToUpper_TestData))]
         public static void ToUpper(string s, string expected)
         {
             Assert.Equal(expected, s.ToUpper());
         }
        
         [Theory]
-        [MemberData("ToUpper_TurkishI_TurkishCulture_MemberData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToUpper_TurkishI_TurkishCulture_MemberData))]
         public static void ToUpper_TurkishI_TurkishCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2112,7 +2100,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("ToUpper_TurkishI_EnglishUSCulture_MemberData", MemberType = typeof(StringTestsSpan))]        
+        [MemberData(nameof(ToUpper_TurkishI_EnglishUSCulture_MemberData))]        
         public static void ToUpper_TurkishI_EnglishUSCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2126,7 +2114,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("ToUpper_TurkishI_InvariantCulture_MemberData", MemberType = typeof(StringTestsSpan))]        
+        [MemberData(nameof(ToUpper_TurkishI_InvariantCulture_MemberData))]        
         public static void ToUpper_TurkishI_InvariantCulture(string s, string expected)
         {
             RemoteInvoke((str, expectedString) =>
@@ -2140,7 +2128,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("ToUpperInvariant_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(ToUpperInvariant_TestData))]
         public static void ToUpperInvariant(string s, string expected)
         {
             Assert.Equal(expected, s.ToUpperInvariant());
@@ -2172,7 +2160,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Trim_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(Trim_TestData))]
         public static void Trim(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
@@ -2189,7 +2177,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("TrimEnd_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(TrimEnd_TestData))]
         public static void TrimEnd(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
@@ -2206,7 +2194,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("TrimStart_TestData", MemberType = typeof(StringTestsSpan))]
+        [MemberData(nameof(TrimStart_TestData))]
         public static void TrimStart(string s, char[] trimChars, string expected)
         {
             if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
@@ -2235,29 +2223,7 @@ namespace System.Tests
             Assert.False(s1 == s2);
             Assert.True(s1 != s2);
         }
-
-        public static IEnumerable<object[]> AllSubstringsAndComparisons(string source)
-        {
-            var comparisons = new StringComparison[]
-            {
-            StringComparison.CurrentCulture,
-            StringComparison.CurrentCultureIgnoreCase,
-            StringComparison.Ordinal,
-            StringComparison.OrdinalIgnoreCase
-            };
-
-            foreach (StringComparison comparison in comparisons)
-            {
-                for (int i = 0; i <= source.Length; i++)
-                {
-                    for (int subLen = source.Length - i; subLen > 0; subLen--)
-                    {
-                        yield return new object[] { source, source.Substring(i, subLen), i, comparison };
-                    }
-                }
-            }
-        }
-
+        
         private class ObjectWithNullToString
         {
             public override string ToString() => null;
@@ -2276,29 +2242,19 @@ namespace System.Tests
             }
         }
 
-        public static IEnumerable<object[]> Compare_TestData()
+        public static IEnumerable<object[]> StringCompare_TestData()
         {
             //                           str1               str2          culture  ignorecase   expected
-            yield return new object[] { "abcd",             "ABcd",       "en-US",    false,       -1  };
-            yield return new object[] { "ABcd",             "abcd",       "en-US",    false,        1  };
-            yield return new object[] { "abcd",             "ABcd",       "en-US",    true,         0  };
-            yield return new object[] { "latin i",         "Latin I",     "tr-TR",    false,        1  };
-            yield return new object[] { "latin i",         "Latin I",     "tr-TR",    true,         1  };
-            yield return new object[] { "turkish \u0130",   "Turkish i",  "tr-TR",    true,         0  };
-            yield return new object[] { "turkish \u0131",   "Turkish I",  "tr-TR",    true,         0  };
-            yield return new object[] { null,               null,         "en-us",    true,         0  };
-            yield return new object[] { null,               "",           "en-us",    true,        -1  };
-            yield return new object[] { "",                 null,         "en-us",    true,         1  };
-        }
-
-        public static IEnumerable<object[]> UpperLowerCasing_TestData()
-        {
-            //                          lower                upper          Culture
-            yield return new object[] { "abcd",             "ABCD",         "en-US" };
-            yield return new object[] { "latin i",          "LATIN I",      "en-US" };
-            yield return new object[] { "turky \u0131",     "TURKY I",      "tr-TR" };
-            yield return new object[] { "turky i",          "TURKY \u0130", "tr-TR" };
-            yield return new object[] { "\ud801\udc29",     PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
+            yield return new object[] { "abcd", "ABcd", "en-US", false, -1 };
+            yield return new object[] { "ABcd", "abcd", "en-US", false, 1 };
+            yield return new object[] { "abcd", "ABcd", "en-US", true, 0 };
+            yield return new object[] { "latin i", "Latin I", "tr-TR", false, 1 };
+            yield return new object[] { "latin i", "Latin I", "tr-TR", true, 1 };
+            yield return new object[] { "turkish \u0130", "Turkish i", "tr-TR", true, 0 };
+            yield return new object[] { "turkish \u0131", "Turkish I", "tr-TR", true, 0 };
+            yield return new object[] { null, null, "en-us", true, 0 };
+            yield return new object[] { null, "", "en-us", true, -1 };
+            yield return new object[] { "", null, "en-us", true, 1 };
         }
 
         public static IEnumerable<object[]> StartEndWith_TestData()
@@ -2314,7 +2270,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Compare_TestData))]
+        [MemberData(nameof(StringCompare_TestData))]
         public static void CompareTest(string aS1, string aS2, string aCultureName, bool aIgnoreCase, int aExpected)
         {
             const string nullPlaceholder = "<null>";

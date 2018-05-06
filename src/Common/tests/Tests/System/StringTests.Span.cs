@@ -2,20 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Tests
 {
-    public partial class StringTestsSpan : RemoteExecutorTestBase
+    public abstract class StringTests_TestData : RemoteExecutorTestBase
     {
         public const string SoftHyphen = "\u00AD";
 
@@ -89,6 +86,722 @@ namespace System.Tests
                "VERSION}, Culture=neutral, PublicKeyToken=b77a5c561934e089\u0022version=\u00221\u0022" +
                " Flags=\u0022SkipVerification\u0022/></PermissionSet></NamedPermissionSets>";
 
+        //
+        // { text, start, length } triplets. A "-1" in start or length means "test the overload that doesn't have that parameter."
+        //
+        public static IEnumerable<object[]> StringSlice2ArgTestOutOfRangeData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1 };
+                    yield return new object[] { text, int.MinValue };
+
+                    yield return new object[] { text, text.Length + 1 };
+                    yield return new object[] { text, int.MaxValue };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> StringSlice3ArgTestOutOfRangeData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1, 0 };
+                    yield return new object[] { text, int.MinValue, 0 };
+
+                    yield return new object[] { text, text.Length + 1, 0 };
+                    yield return new object[] { text, int.MaxValue, 0 };
+
+                    yield return new object[] { text, 0, -1 };
+                    yield return new object[] { text, 0, int.MinValue };
+
+                    yield return new object[] { text, 0, text.Length + 1 };
+                    yield return new object[] { text, 0, int.MaxValue };
+
+                    yield return new object[] { text, 1, text.Length };
+                    yield return new object[] { text, 1, int.MaxValue };
+
+                    yield return new object[] { text, text.Length - 1, 2 };
+                    yield return new object[] { text, text.Length - 1, int.MaxValue };
+
+                    yield return new object[] { text, text.Length, 1 };
+                    yield return new object[] { text, text.Length, int.MaxValue };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> StringSliceTestData
+        {
+            get
+            {
+                foreach (string text in new string[] { string.Empty, "012" })
+                {
+                    yield return new object[] { text, -1, -1 };
+                    for (int start = 0; start <= text.Length; start++)
+                    {
+                        yield return new object[] { text, start, -1 };
+
+                        for (int length = 0; length <= text.Length - start; length++)
+                        {
+                            yield return new object[] { text, start, length };
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> Equals_EncyclopaediaData()
+        {
+            yield return new object[] { StringComparison.CurrentCulture, false };
+            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { StringComparison.Ordinal, false };
+            yield return new object[] { StringComparison.OrdinalIgnoreCase, false };
+
+            // Windows and ICU disagree about how these strings compare in the default locale.
+            yield return new object[] { StringComparison.InvariantCulture, PlatformDetection.IsWindows };
+            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, PlatformDetection.IsWindows };
+        }
+
+        public static IEnumerable<object[]> AllSubstringsAndComparisons(string source)
+        {
+            var comparisons = new StringComparison[]
+            {
+            StringComparison.CurrentCulture,
+            StringComparison.CurrentCultureIgnoreCase,
+            StringComparison.Ordinal,
+            StringComparison.OrdinalIgnoreCase
+            };
+
+            foreach (StringComparison comparison in comparisons)
+            {
+                for (int i = 0; i <= source.Length; i++)
+                {
+                    for (int subLen = source.Length - i; subLen > 0; subLen--)
+                    {
+                        yield return new object[] { source, source.Substring(i, subLen), i, comparison };
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<object[]> ToUpper_TurkishI_MemberData(params KeyValuePair<char, char>[] mappings)
+        {
+            foreach (KeyValuePair<char, char> mapping in mappings)
+            {
+                yield return new[] { $"{mapping.Key}", $"{mapping.Value}" };
+                yield return new[] { $"{mapping.Key}a TeSt", $"{mapping.Value}A TEST" };
+                yield return new[] { $"a T{mapping.Key}est", $"A T{mapping.Value}EST" };
+                yield return new[] { $"A test{mapping.Key}", $"A TEST{mapping.Value}" };
+                yield return new[] { new string(mapping.Key, 100), new string(mapping.Value, 100) };
+            }
+        }
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_TurkishCulture_MemberData() => ToUpper_TurkishI_MemberData(
+              new KeyValuePair<char, char>('\u0069', '\u0130'),
+              new KeyValuePair<char, char>('\u0130', '\u0130'),
+              new KeyValuePair<char, char>('\u0131', '\u0049'));
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_EnglishUSCulture_MemberData() =>
+           ToUpper_TurkishI_MemberData(
+               new KeyValuePair<char, char>('\u0069', '\u0049'),
+               new KeyValuePair<char, char>('\u0130', '\u0130'),
+               new KeyValuePair<char, char>('\u0131', '\u0049'));
+
+        public static IEnumerable<object[]> ToUpper_TurkishI_InvariantCulture_MemberData() =>
+        ToUpper_TurkishI_MemberData(
+            new KeyValuePair<char, char>('\u0069', '\u0049'),
+            new KeyValuePair<char, char>('\u0130', '\u0130'),
+            new KeyValuePair<char, char>('\u0131', '\u0131'));
+
+        public static IEnumerable<object[]> UpperLowerCasing_TestData()
+        {
+            //                          lower                upper          Culture
+            yield return new object[] { "abcd", "ABCD", "en-US" };
+            yield return new object[] { "latin i", "LATIN I", "en-US" };
+            yield return new object[] { "turky \u0131", "TURKY I", "tr-TR" };
+            yield return new object[] { "turky i", "TURKY \u0130", "tr-TR" };
+            yield return new object[] { "\ud801\udc29", PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
+        }
+
+        public static IEnumerable<object[]> Compare_TestData()
+        {
+            // CurrentCulture
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCulture, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCulture, -1 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.CurrentCulture, 1 };
+            yield return new object[] { "hello", 2, "HELLO", 2, 3, StringComparison.CurrentCulture, -1 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.CurrentCulture, 0 };
+            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCulture, -1 };
+            yield return new object[] { "A", 0, "B", 0, 1, StringComparison.CurrentCulture, -1 };
+            yield return new object[] { "B", 0, "A", 0, 1, StringComparison.CurrentCulture, 1 };
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.CurrentCulture, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 0, StringComparison.CurrentCulture, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 0, StringComparison.CurrentCulture, -1 };
+            yield return new object[] { null, -1, null, -1, -1, StringComparison.CurrentCulture, 0 };
+            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.CurrentCulture, 1 };
+            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.CurrentCulture, -1 };
+            // CurrentCultureIgnoreCase
+            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCultureIgnoreCase, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, -1 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCultureIgnoreCase, -1 };
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 0, StringComparison.CurrentCultureIgnoreCase, -1 };
+            yield return new object[] { null, -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 0 };
+            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 1 };
+            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.CurrentCultureIgnoreCase, -1 };
+            // InvariantCulture
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.InvariantCulture, 0 };
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCulture, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.InvariantCulture, 1 };
+            yield return new object[] { "hello", 2, "HELLO", 2, 3, StringComparison.InvariantCulture, -1 };
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.InvariantCulture, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.InvariantCulture, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1 };
+            // InvariantCultureIgnoreCase
+            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCultureIgnoreCase, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.InvariantCultureIgnoreCase, -1 };
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.InvariantCultureIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.InvariantCultureIgnoreCase, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1 };
+            // Ordinal
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.Ordinal, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.Ordinal, -1 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.Ordinal, -1 };
+            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.Ordinal, -1 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 0, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 3, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 0, "He" + SoftHyphen + "llo", 0, 5, StringComparison.Ordinal, -1 };
+            yield return new object[] { "Hello", 0, "-=<Hello>=-", 3, 5, StringComparison.Ordinal, 0 };
+            yield return new object[] { "\uD83D\uDD53Hello\uD83D\uDD50", 1, "\uD83D\uDD53Hello\uD83D\uDD54", 1, 7, StringComparison.Ordinal, 0 }; // Surrogate split
+            yield return new object[] { "Hello", 0, "Hello123", 0, int.MaxValue, StringComparison.Ordinal, -1 };           // Recalculated length, second string longer
+            yield return new object[] { "Hello123", 0, "Hello", 0, int.MaxValue, StringComparison.Ordinal, 1 };            // Recalculated length, first string longer
+            yield return new object[] { "---aaaaaaaaaaa", 3, "+++aaaaaaaaaaa", 3, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 2, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 3, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 2, different compare at n=1
+            yield return new object[] { "-aaaaaaaaaaaaa", 1, "+aaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 6, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 1, "axaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 6, different compare at n=1
+            yield return new object[] { "aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 4, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 0, "xaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 4, different compare at n=1
+            yield return new object[] { "aaaaaaaaaaaaaa", 0, "axaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 4, different compare at n=2
+            yield return new object[] { "--aaaaaaaaaaaa", 2, "++aaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 0, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaxaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=1
+            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaxaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=2
+            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaxaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=3
+            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaaxaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=4
+            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaaaxaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=5
+            yield return new object[] { "aaaaaaaaaaaaaa", 0, "+aaaaaaaaaaaaa", 1, 13, StringComparison.Ordinal, 0 };       // Different int alignment, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaax", 1, 100, StringComparison.Ordinal, -1 };     // Different int alignment
+            yield return new object[] { "aaaaaaaaaaaaaa", 1, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1 };     // Different long alignment, abs of 4, one of them is 2, different at n=1
+            yield return new object[] { "-aaaaaaaaaaaaa", 1, "++++aaaaaaaaaa", 4, 10, StringComparison.Ordinal, 0 };       // Different long alignment, equal compare
+            yield return new object[] { "aaaaaaaaaaaaaa", 1, "aaaaaaaaaaaaax", 4, 100, StringComparison.Ordinal, -1 };     // Different long alignment
+            yield return new object[] { "\0", 0, "", 0, 1, StringComparison.Ordinal, 1 };                                  // Same memory layout, except for m_stringLength (m_firstChars are both 0)
+            yield return new object[] { "\0\0", 0, "", 0, 2, StringComparison.Ordinal, 1 };                                // Same as above, except m_stringLength for one is 2
+            yield return new object[] { "", 0, "\0b", 0, 2, StringComparison.Ordinal, -1 };                                // strA's second char != strB's second char codepath
+            yield return new object[] { "", 0, "b", 0, 1, StringComparison.Ordinal, -1 };                                  // Should hit strA.m_firstChar != strB.m_firstChar codepath
+            yield return new object[] { "abcxxxxxxxxxxxxxxxxxxxxxx", 0, "abdxxxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: first long compare is different
+            yield return new object[] { "abcdefgxxxxxxxxxxxxxxxxxx", 0, "abcdefhxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: second long compare is different
+            yield return new object[] { "abcdefghijkxxxxxxxxxxxxxx", 0, "abcdefghijlxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: third long compare is different
+            yield return new object[] { "abcdexxxxxxxxxxxxxxxxxxxx", 0, "abcdfxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 32-bit: second int compare is different
+            yield return new object[] { "abcdefghixxxxxxxxxxxxxxxx", 0, "abcdefghjxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 32-bit: fourth int compare is different
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.Ordinal, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.Ordinal, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.Ordinal, -1 };
+            yield return new object[] { null, -1, null, -1, -1, StringComparison.Ordinal, 0 };
+            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.Ordinal, 1 };
+            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.Ordinal, -1 };
+            // OrdinalIgnoreCase
+            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1 };
+            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.OrdinalIgnoreCase, -1 };
+            yield return new object[] { "A", 0, "x", 0, 1, StringComparison.OrdinalIgnoreCase, -1 };
+            yield return new object[] { "a", 0, "X", 0, 1, StringComparison.OrdinalIgnoreCase, -1 };
+            yield return new object[] { "[", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "[", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "\\", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "\\", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "]", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "]", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "^", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "^", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "_", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "_", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "`", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { "`", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { null, 0, null, 0, 0, StringComparison.OrdinalIgnoreCase, 0 };
+            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.OrdinalIgnoreCase, 1 };
+            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1 };
+        }
+
+        public static IEnumerable<object[]> CopyTo_TestData()
+        {
+            yield return new object[] { "Hello", 0, 0, 5, new char[] { 'H', 'e', 'l', 'l', 'o' } };
+            yield return new object[] { "Hello", 1, 5, 3, new char[] { '\0', '\0', '\0', '\0', '\0', 'e', 'l', 'l', '\0', '\0' } };
+            yield return new object[] { "Hello", 2, 0, 3, new char[] { 'l', 'l', 'o', '\0', '\0', '\0', '\0', '\0', '\0', '\0' } };
+            yield return new object[] { "Hello", 0, 7, 3, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', 'H', 'e', 'l' } };
+            yield return new object[] { "Hello", 5, 10, 0, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' } };
+            yield return new object[] { "H" + SoftHyphen + "ello", 0, 0, 3, new char[] { 'H', '\u00AD', 'e' } };
+        }
+
+        public static IEnumerable<object[]> EndsWith_TestData()
+        {
+            // CurrentCulture
+            yield return new object[] { "", "Foo", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "llo", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "HELLO", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.CurrentCulture, true };
+            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "", "a", StringComparison.CurrentCulture, false };
+            // CurrentCultureIgnoreCase
+            yield return new object[] { "Hello", "llo", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "LLO", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "", "a", StringComparison.CurrentCultureIgnoreCase, false };
+            // InvariantCulture
+            yield return new object[] { "", "Foo", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "llo", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "HELLO", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.InvariantCulture, true };
+            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "", "a", StringComparison.InvariantCulture, false };
+            // InvariantCultureIgnoreCase
+            yield return new object[] { "Hello", "llo", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "LLO", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "", "a", StringComparison.InvariantCultureIgnoreCase, false };
+            // Ordinal
+            yield return new object[] { "Hello", "o", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "llo", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "Larger Hello", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "LLO", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.Ordinal, false };
+            yield return new object[] { "", "", StringComparison.Ordinal, true };
+            yield return new object[] { "", "a", StringComparison.Ordinal, false };
+            // OrdinalIgnoreCase
+            yield return new object[] { "Hello", "llo", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Larger Hello", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "LLO", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "", "a", StringComparison.OrdinalIgnoreCase, false };
+        }
+
+        public static IEnumerable<object[]> NullInStrings_TestData()
+        {
+            yield return new object[] { StringComparison.CurrentCulture };
+            yield return new object[] { StringComparison.CurrentCultureIgnoreCase };
+            yield return new object[] { StringComparison.Ordinal };
+            yield return new object[] { StringComparison.OrdinalIgnoreCase };
+        }
+
+        public static IEnumerable<object[]> Equals_TestData()
+        {
+            // CurrentCulture
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", null, StringComparison.CurrentCulture, false };
+            yield return new object[] { null, "Hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { null, null, StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, false };
+            yield return new object[] { "", "Hello", StringComparison.CurrentCulture, false };
+            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "123", 123, StringComparison.CurrentCulture, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCulture, false };
+            // CurrentCultureIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "helloo", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "hell", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.CurrentCultureIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCultureIgnoreCase, false };
+            // InvariantCulture
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", null, StringComparison.InvariantCulture, false };
+            yield return new object[] { null, "Hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { null, null, StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, false };
+            yield return new object[] { "", "Hello", StringComparison.InvariantCulture, false };
+            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "123", 123, StringComparison.InvariantCulture, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCulture, false };
+            // InvariantCultureIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.InvariantCultureIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCultureIgnoreCase, false };
+            // Ordinal
+            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "hello", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Helloo", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", null, StringComparison.Ordinal, false };
+            yield return new object[] { null, "Hello", StringComparison.Ordinal, false };
+            yield return new object[] { null, null, StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "", StringComparison.Ordinal, false };
+            yield return new object[] { "", "Hello", StringComparison.Ordinal, false };
+            yield return new object[] { "", "", StringComparison.Ordinal, true };
+            yield return new object[] { "123", 123, StringComparison.Ordinal, false }; // Not a string
+            // OridinalIgnoreCase
+            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "HELLO", "hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Helloo", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", "Hell", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234\u5678", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "\u1234\u5678", "\u1234\u5679", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1235\u5678", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "\u1234\u5678", "\u1234\u56789\u1234", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", null, StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { null, "Hello", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { null, null, StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "Hello", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "123", 123, StringComparison.OrdinalIgnoreCase, false }; // Not a string
+            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.OrdinalIgnoreCase, false };
+        }
+
+        public static IEnumerable<object[]> IndexOf_SingleLetter_TestData()
+        {
+            yield return new object[] { "Hello", 'l', 0, 5, 2 };
+            yield return new object[] { "Hello", 'x', 0, 5, -1 };
+            yield return new object[] { "Hello", 'l', 1, 4, 2 };
+            yield return new object[] { "Hello", 'l', 3, 2, 3 };
+            yield return new object[] { "Hello", 'l', 4, 1, -1 };
+            yield return new object[] { "Hello", 'x', 1, 4, -1 };
+            yield return new object[] { "Hello", 'l', 3, 0, -1 };
+            yield return new object[] { "Hello", 'l', 0, 2, -1 };
+            yield return new object[] { "Hello", 'l', 0, 3, 2 };
+            yield return new object[] { "Hello", 'l', 4, 1, -1 };
+            yield return new object[] { "Hello", 'x', 1, 4, -1 };
+            yield return new object[] { "Hello", 'o', 5, 0, -1 };
+            yield return new object[] { "H" + SoftHyphen + "ello", 'e', 0, 3, 2 };
+            // For some reason, this is failing on *nix with ordinal comparisons.
+            // Possibly related issue: dotnet/coreclr#2051
+            // yield return new object[] {"Hello", '\0', 0, 5, -1}; // .NET strings are terminated with a null character, but they should not be included as part of the string
+            yield return new object[] { "\ud800\udfff", '\ud800', 0, 1, 0 }; // Surrogate characters
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17 };
+            yield return new object[] { "________\u8080\u8080\u8080________", '\u0080', 0, 19, -1 };
+            yield return new object[] { "________\u8000\u8000\u8000________", '\u0080', 0, 19, -1 };
+            yield return new object[] { "__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4 };
+            yield return new object[] { "__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6 };
+            yield return new object[] { "__________________________________", '\ufffd', 0, 34, -1 };
+            yield return new object[] { "____________________________\ufffd", '\ufffd', 0, 29, 28 };
+            yield return new object[] { "ABCDEFGHIJKLM", 'M', 0, 13, 12 };
+            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 0, 14, 13 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1 };
+            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1 };
+            yield return new object[] { "_____________\u807f", '\u007f', 0, 14, -1 };
+            yield return new object[] { "_____________\u807f__", '\u007f', 0, 16, -1 };
+            yield return new object[] { "_____________\u807f\u007f_", '\u007f', 0, 16, 14 };
+            yield return new object[] { "__\u807f_______________", '\u007f', 0, 18, -1 };
+            yield return new object[] { "__\u807f___\u007f___________", '\u007f', 0, 18, 6 };
+            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 2, 11, -1 };
+            yield return new object[] { "!@#$%^&", '%', 0, 7, 4 };
+            yield return new object[] { "!@#$", '!', 0, 4, 0 };
+            yield return new object[] { "!@#$", '@', 0, 4, 1 };
+            yield return new object[] { "!@#$", '#', 0, 4, 2 };
+            yield return new object[] { "!@#$", '$', 0, 4, 3 };
+            yield return new object[] { "!@#$%^&*", '%', 0, 8, 4 };
+            yield return new object[] { "", 'H', 0, 0, -1 };
+        }
+
+        public static IEnumerable<object[]> IndexOf_NullInStrings_TestData()
+        {
+            yield return new object[] { "He\0lo", "He\0lo", 0 };
+            yield return new object[] { "He\0lo", "He\0", 0 };
+            yield return new object[] { "He\0lo", "\0", 2 };
+            yield return new object[] { "He\0lo", "\0lo", 2 };
+            yield return new object[] { "He\0lo", "lo", 3 };
+            yield return new object[] { "Hello", "lo\0", -1 };
+            yield return new object[] { "Hello", "\0lo", -1 };
+            yield return new object[] { "Hello", "l\0o", -1 };
+        }
+
+        public static IEnumerable<object[]> Item_Get_TestData()
+        {
+            yield return new object[] { "Hello", 0, 'H' };
+            yield return new object[] { "Hello", 1, 'e' };
+            yield return new object[] { "Hello", 2, 'l' };
+            yield return new object[] { "Hello", 3, 'l' };
+            yield return new object[] { "Hello", 4, 'o' };
+            yield return new object[] { "\0", 0, '\0' };
+        }
+
+        public static IEnumerable<object[]> Length_TestData()
+        {
+            yield return new object[] { "", 0 };
+            yield return new object[] { "\0", 1 };
+            yield return new object[] { "abc", 3 };
+            yield return new object[] { "hello", 5 };
+        }
+
+        public static IEnumerable<object[]> IsNullOrEmpty_TestData()
+        {
+            yield return new object[] { null, true };
+            yield return new object[] { "", true };
+            yield return new object[] { "foo", false };
+            yield return new object[] { "   ", false };
+        }
+
+        public static IEnumerable<object[]> StartsWith_TestData()
+        {
+            // CurrentCulture
+            yield return new object[] { "Hello", "Hel", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "Hello", "HELLO", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCulture, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.CurrentCulture, true };
+            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
+            yield return new object[] { "", "hello", StringComparison.CurrentCulture, false };
+            // CurrentCultureIgnoreCase
+            yield return new object[] { "Hello", "Hel", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "HEL", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
+            yield return new object[] { "", "hello", StringComparison.CurrentCultureIgnoreCase, false };
+            // InvariantCulture
+            yield return new object[] { "Hello", "Hel", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "Hello", "HELLO", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCulture, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.InvariantCulture, true };
+            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
+            yield return new object[] { "", "hello", StringComparison.InvariantCulture, false };
+            // InvariantCultureIgnoreCase
+            yield return new object[] { "Hello", "Hel", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "HEL", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
+            yield return new object[] { "", "hello", StringComparison.InvariantCultureIgnoreCase, false };
+            // Ordinal
+            yield return new object[] { "Hello", "H", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "Hel", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "Hello Larger", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "", StringComparison.Ordinal, true };
+            yield return new object[] { "Hello", "HEL", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", "Abc", StringComparison.Ordinal, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.Ordinal, false };
+            yield return new object[] { "", "", StringComparison.Ordinal, true };
+            yield return new object[] { "", "hello", StringComparison.Ordinal, false };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", StringComparison.Ordinal, true };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwx", StringComparison.Ordinal, true };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklm", StringComparison.Ordinal, true };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "ab_defghijklmnopqrstu", StringComparison.Ordinal, false };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdef_hijklmn", StringComparison.Ordinal, false };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghij_lmn", StringComparison.Ordinal, false };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "a", StringComparison.Ordinal, true };
+            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", StringComparison.Ordinal, false };
+            // OrdinalIgnoreCase
+            yield return new object[] { "Hello", "Hel", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Hello Larger", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "HEL", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "Hello", "Abc", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.OrdinalIgnoreCase, false };
+            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
+            yield return new object[] { "", "hello", StringComparison.OrdinalIgnoreCase, false };
+        }
+
+        public static IEnumerable<object[]> StartsWith_NullInStrings_TestData()
+        {
+            yield return new object[] { StringComparison.CurrentCulture };
+            yield return new object[] { StringComparison.CurrentCultureIgnoreCase };
+            yield return new object[] { StringComparison.Ordinal };
+            yield return new object[] { StringComparison.OrdinalIgnoreCase };
+        }
+
+        public static IEnumerable<object[]> Substring_TestData()
+        {
+            yield return new object[] { "Hello", 0, 5, "Hello" };
+            yield return new object[] { "Hello", 0, 3, "Hel" };
+            yield return new object[] { "Hello", 2, 3, "llo" };
+            yield return new object[] { "Hello", 5, 0, "" };
+            yield return new object[] { "", 0, 0, "" };
+        }
+
+        public static IEnumerable<object[]> ToLower_TestData()
+        {
+            yield return new object[] { "hello", "hello" };
+            yield return new object[] { "HELLO", "hello" };
+            yield return new object[] { "hElLo", "hello" };
+            yield return new object[] { "HeLlO", "hello" };
+            yield return new object[] { "", "" };
+        }
+
+        public static IEnumerable<object[]> ToLowerInvariant_TestData()
+        {
+            yield return new object[] { "hello", "hello" };
+            yield return new object[] { "HELLO", "hello" };
+            yield return new object[] { "hElLo", "hello" };
+            yield return new object[] { "HeLlO", "hello" };
+            yield return new object[] { "", "" };
+        }
+
+        public static IEnumerable<object[]> ToString_TestData()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "hello" };
+        }
+
+        public static IEnumerable<object[]> ToUpper_TestData()
+        {
+            yield return new object[] { "hello", "HELLO" };
+            yield return new object[] { "HELLO", "HELLO" };
+            yield return new object[] { "hElLo", "HELLO" };
+            yield return new object[] { "HeLlO", "HELLO" };
+            yield return new object[] { "", "" };
+        }
+
+        public static IEnumerable<object[]> ToUpperInvariant_TestData()
+        {
+            yield return new object[] { "hello", "HELLO" };
+            yield return new object[] { "HELLO", "HELLO" };
+            yield return new object[] { "hElLo", "HELLO" };
+            yield return new object[] { "HeLlO", "HELLO" };
+            yield return new object[] { "", "" };
+        }
+
+        public static IEnumerable<object[]> Trim_TestData()
+        {
+            yield return new object[] { "  Hello  ", new char[] { ' ' }, "Hello" };
+            yield return new object[] { ".  Hello  ..", new char[] { '.' }, "  Hello  " };
+            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, "Hello" };
+            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello" };
+            yield return new object[] { "  Hello  ", null, "Hello" };
+            yield return new object[] { "  Hello  ", new char[0], "Hello" };
+            yield return new object[] { "      \t      ", null, "" };
+            yield return new object[] { "", null, "" };
+        }
+
+        public static IEnumerable<object[]> TrimEnd_TestData()
+        {
+            yield return new object[] { "  Hello  ", new char[] { ' ' }, "  Hello" };
+            yield return new object[] { ".  Hello  ..", new char[] { '.' }, ".  Hello  " };
+            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, ".  Hello" };
+            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "123abcHello" };
+            yield return new object[] { "  Hello  ", null, "  Hello" };
+            yield return new object[] { "  Hello  ", new char[0], "  Hello" };
+            yield return new object[] { "      \t      ", null, "" };
+            yield return new object[] { "", null, "" };
+        }
+
+        public static IEnumerable<object[]> TrimStart_TestData()
+        {
+            yield return new object[] { "  Hello  ", new char[] { ' ' }, "Hello  " };
+            yield return new object[] { ".  Hello  ..", new char[] { '.' }, "  Hello  .." };
+            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, "Hello  .." };
+            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello123abc" };
+            yield return new object[] { "  Hello  ", null, "Hello  " };
+            yield return new object[] { "  Hello  ", new char[0], "Hello  " };
+            yield return new object[] { "      \t      ", null, "" };
+            yield return new object[] { "", null, "" };
+        }
+
+        public static IEnumerable<object[]> GetEnumerator_TestData()
+        {
+            yield return new object[] { "abc" };
+            yield return new object[] { "" };
+        }
+
+        public static IEnumerable<object[]> LastIndexOf_NullInStrings_TestData()
+        {
+            yield return new object[] { "He\0lo", "He\0lo", 0 };
+            yield return new object[] { "He\0lo", "He\0", 0 };
+            yield return new object[] { "He\0lo", "\0", 2 };
+            yield return new object[] { "He\0lo", "\0lo", 2 };
+            yield return new object[] { "He\0lo", "lo", 3 };
+            yield return new object[] { "Hello", "lo\0", -1 };
+            yield return new object[] { "Hello", "\0lo", -1 };
+            yield return new object[] { "Hello", "l\0o", -1 };
+        }
+    }
+
+    public partial class StringTestsSpan : StringTests_TestData
+    {      
         [Theory]
         [MemberData(nameof(GetEnumerator_TestData))]
         public static void GetEnumerator(string s)
@@ -187,7 +900,7 @@ namespace System.Tests
 
         [Theory]
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/2051", TestPlatforms.AnyUnix)]
-        [MemberData(nameof(EndsWith_NullInStrings_TestData))]
+        [MemberData(nameof(NullInStrings_TestData))]
         public static void EndsWith_NullInStrings(StringComparison comparison)
         {
             Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
@@ -202,7 +915,7 @@ namespace System.Tests
         // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [MemberData(nameof(EndsWith_NullInStrings_NonOrdinal_TestData))]
+        [MemberData(nameof(NullInStrings_TestData))]
         public static void EndsWith_NullInStrings_NonOrdinal(StringComparison comparison)
         {
             Assert.True("\0test".AsSpan().EndsWith("test".AsSpan(), comparison));
@@ -653,6 +1366,260 @@ namespace System.Tests
             Assert.False("test".AsSpan().StartsWith("te\0".AsSpan(), comparison));
         }
 
+        [Fact]
+        public static void ZeroLengthStartsWith_StringComparison()
+        {
+            var a = new char[3];
+
+            var span = new ReadOnlySpan<char>(a);
+            var slice = new ReadOnlySpan<char>(a, 2, 0);
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+
+            span = ReadOnlySpan<char>.Empty;
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void SameSpanStartsWith_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a);
+            Assert.True(span.StartsWith(span, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(span, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void LengthMismatchStartsWith_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 0, 2);
+            var slice = new ReadOnlySpan<char>(a, 0, 3);
+            Assert.False(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void StartsWithMatch_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 0, 3);
+            var slice = new ReadOnlySpan<char>(a, 0, 2);
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void StartsWithMatchDifferentSpans_StringComparison()
+        {
+            char[] a = { '4', '5', '6', '7' };
+            char[] b = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 0, 3);
+            var slice = new ReadOnlySpan<char>(b, 0, 3);
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void StartsWithNoMatch_StringComparison()
+        {
+            for (int length = 1; length < 150; length++)
+            {
+                for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)
+                {
+                    var first = new char[length];
+                    var second = new char[length];
+                    for (int i = 0; i < length; i++)
+                    {
+                        first[i] = second[i] = (char)(i + 1);
+                    }
+
+                    second[mismatchIndex] = (char)(second[mismatchIndex] + 1);
+
+                    var firstSpan = new ReadOnlySpan<char>(first);
+                    var secondSpan = new ReadOnlySpan<char>(second);
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.Ordinal));
+
+                    Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.OrdinalIgnoreCase));
+
+                    // Different behavior depending on OS
+                    Assert.Equal(
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
+                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCulture));
+                    Assert.Equal(
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.CurrentCultureIgnoreCase),
+                        firstSpan.StartsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
+                    Assert.Equal(
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.InvariantCulture),
+                        firstSpan.StartsWith(secondSpan, StringComparison.InvariantCulture));
+                    Assert.Equal(
+                        firstSpan.ToString().StartsWith(secondSpan.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                        firstSpan.StartsWith(secondSpan, StringComparison.InvariantCultureIgnoreCase));
+                }
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoStartsWithChecksGoOutOfRange_StringComparison()
+        {
+            for (int length = 0; length < 100; length++)
+            {
+                var first = new char[length + 2];
+                first[0] = (char)99;
+                first[length + 1] = (char)99;
+                var second = new char[length + 2];
+                second[0] = (char)100;
+                second[length + 1] = (char)100;
+                var span1 = new ReadOnlySpan<char>(first, 1, length);
+                var span2 = new ReadOnlySpan<char>(second, 1, length);
+                Assert.True(span1.StartsWith(span2, StringComparison.Ordinal));
+
+                Assert.True(span1.StartsWith(span2, StringComparison.CurrentCulture));
+                Assert.True(span1.StartsWith(span2, StringComparison.CurrentCultureIgnoreCase));
+                Assert.True(span1.StartsWith(span2, StringComparison.InvariantCulture));
+                Assert.True(span1.StartsWith(span2, StringComparison.InvariantCultureIgnoreCase));
+                Assert.True(span1.StartsWith(span2, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        [Fact]
+        public static void StartsWithUnknownComparisonType_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a);
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.CurrentCulture - 1));
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, (StringComparison)6));
+        }
+
+        [Fact]
+        public static void StartsWithMatchNonOrdinal_StringComparison()
+        {
+            ReadOnlySpan<char> span = new char[] { 'a', 'b', 'c', 'd' };
+            ReadOnlySpan<char> value = new char[] { 'a', 'B', 'c' };
+            Assert.False(span.StartsWith(value, StringComparison.Ordinal));
+            Assert.True(span.StartsWith(value, StringComparison.OrdinalIgnoreCase));
+
+            CultureInfo backupCulture = CultureInfo.CurrentCulture;
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("el-GR");
+
+            span = new char[] { '\u03b1', '\u03b2', '\u03b3', '\u03b4' };  // ????
+            value = new char[] { '\u03b1', '\u03b2', '\u03b3' }; // ???
+
+            Assert.True(span.StartsWith(value, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            value = new char[] { '\u03b1', '\u0392', '\u03b3' }; // ???
+            Assert.False(span.StartsWith(value, StringComparison.CurrentCulture));
+            Assert.True(span.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            Thread.CurrentThread.CurrentCulture = backupCulture;
+
+            span = new char[] { '\u0069', '\u00df', '\u0049', '\u03b4' }; // iﬂI?
+            value = new char[] { '\u0069', '\u0073', '\u0073', '\u0049' }; // issI
+
+            Assert.False(span.StartsWith(value, StringComparison.Ordinal));
+            // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().StartsWith(value.ToString(), StringComparison.InvariantCulture),
+                span.StartsWith(value, StringComparison.InvariantCulture));
+            Assert.Equal(
+                span.ToString().StartsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+
+            value = new char[] { '\u0049', '\u0073', '\u0073', '\u0049' }; // IssI
+            Assert.False(span.StartsWith(value, StringComparison.OrdinalIgnoreCase));
+            Assert.False(span.StartsWith(value, StringComparison.InvariantCulture));
+            // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().StartsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        [Fact]
+        public static void StartsWithNoMatchNonOrdinal_StringComparison()
+        {
+            ReadOnlySpan<char> span = new char[] { 'a', 'b', 'c', 'd' };
+            ReadOnlySpan<char> value = new char[] { 'a', 'D', 'c' };
+            Assert.False(span.StartsWith(value, StringComparison.Ordinal));
+            Assert.False(span.StartsWith(value, StringComparison.OrdinalIgnoreCase));
+
+            CultureInfo backupCulture = CultureInfo.CurrentCulture;
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("el-GR");
+
+            span = new char[] { '\u03b1', '\u03b2', '\u03b3', '\u03b4' }; // ????
+            value = new char[] { '\u03b1', '\u03b4', '\u03b3' }; // ???
+
+            Assert.False(span.StartsWith(value, StringComparison.CurrentCulture));
+            Assert.False(span.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            value = new char[] { '\u03b1', '\u0394', '\u03b3' }; // ???
+            Assert.False(span.StartsWith(value, StringComparison.CurrentCulture));
+            Assert.False(span.StartsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            Thread.CurrentThread.CurrentCulture = backupCulture;
+
+            span = new char[] { '\u0069', '\u00df', '\u0049', '\u03b4' }; // iﬂI?
+            value = new char[] { '\u0069', '\u03b4', '\u03b4', '\u0049' };  // i??I
+
+            Assert.False(span.StartsWith(value, StringComparison.Ordinal));
+            Assert.False(span.StartsWith(value, StringComparison.InvariantCulture));
+            Assert.False(span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+
+            value = new char[] { '\u0049', '\u03b4', '\u03b4', '\u0049' }; // I??I
+            Assert.False(span.StartsWith(value, StringComparison.OrdinalIgnoreCase));
+            Assert.False(span.StartsWith(value, StringComparison.InvariantCulture));
+            Assert.False(span.StartsWith(value, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        // NOTE: This is by design. Unix ignores the null characters (i.e. null characters have no weights for the string comparison).
+        // For desired behavior, use ordinal comparison instead of linguistic comparison.
+        // This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [MemberData(nameof(NullInStrings_TestData))]
+        public static void StartsWith_NullInStrings_NonOrdinal(StringComparison comparison)
+        {
+            Assert.False("\0test".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.False("te\0st".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.True("te\0st".AsSpan().StartsWith("te\0s".AsSpan(), comparison));
+            Assert.True("test\0".AsSpan().StartsWith("test".AsSpan(), comparison));
+            Assert.False("test".AsSpan().StartsWith("te\0".AsSpan(), comparison));
+        }
+
         [Theory]
         [MemberData(nameof(Substring_TestData))]
         public static void Substring(string s, int startIndex, int length, string expected)
@@ -912,658 +1879,391 @@ namespace System.Tests
             Assert.Equal(upperForm, upperForm.AsSpan().ToString());
         }
 
-        public static IEnumerable<object[]> Equals_EncyclopaediaData()
+        [Fact]
+        public static void ZeroLengthEndsWith_StringComparison()
         {
-            yield return new object[] { StringComparison.CurrentCulture, false };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { StringComparison.Ordinal, false };
-            yield return new object[] { StringComparison.OrdinalIgnoreCase, false };
+            var a = new char[3];
 
-            // Windows and ICU disagree about how these strings compare in the default locale.
-            yield return new object[] { StringComparison.InvariantCulture, PlatformDetection.IsWindows };
-            yield return new object[] { StringComparison.InvariantCultureIgnoreCase, PlatformDetection.IsWindows };
+            var span = new ReadOnlySpan<char>(a);
+            var slice = new ReadOnlySpan<char>(a, 2, 0);
+            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+
+            span = ReadOnlySpan<char>.Empty;
+            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static IEnumerable<object[]> AllSubstringsAndComparisons(string source)
+        [Fact]
+        public static void SameSpanEndsWith_StringComparison()
         {
-            var comparisons = new StringComparison[]
-            {
-            StringComparison.CurrentCulture,
-            StringComparison.CurrentCultureIgnoreCase,
-            StringComparison.Ordinal,
-            StringComparison.OrdinalIgnoreCase
-            };
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a);
+            Assert.True(span.EndsWith(span, StringComparison.Ordinal));
 
-            foreach (StringComparison comparison in comparisons)
+            Assert.True(span.EndsWith(span, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(span, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(span, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(span, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(span, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void LengthMismatchEndsWith_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 0, 2);
+            var slice = new ReadOnlySpan<char>(a, 0, 3);
+            Assert.False(span.EndsWith(slice, StringComparison.Ordinal));
+
+            Assert.False(span.EndsWith(slice, StringComparison.CurrentCulture));
+            Assert.False(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.False(span.EndsWith(slice, StringComparison.InvariantCulture));
+            Assert.False(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void EndsWithMatch_StringComparison()
+        {
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 0, 3);
+            var slice = new ReadOnlySpan<char>(a, 1, 2);
+            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void EndsWithMatchDifferentSpans_StringComparison()
+        {
+            char[] a = { '7', '4', '5', '6' };
+            char[] b = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a, 1, 3);
+            var slice = new ReadOnlySpan<char>(b, 0, 3);
+            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public static void EndsWithNoMatch_StringComparison()
+        {
+            for (int length = 1; length < 150; length++)
             {
-                for (int i = 0; i <= source.Length; i++)
+                for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)
                 {
-                    for (int subLen = source.Length - i; subLen > 0; subLen--)
+                    var first = new char[length];
+                    var second = new char[length];
+                    for (int i = 0; i < length; i++)
                     {
-                        yield return new object[] { source, source.Substring(i, subLen), i, comparison };
+                        first[i] = second[i] = (char)(i + 1);
                     }
+
+                    second[mismatchIndex] = (char)(second[mismatchIndex] + 1);
+
+                    var firstSpan = new ReadOnlySpan<char>(first);
+                    var secondSpan = new ReadOnlySpan<char>(second);
+                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.Ordinal));
+
+                    Assert.False(firstSpan.EndsWith(secondSpan, StringComparison.OrdinalIgnoreCase));
+
+                    // Different behavior depending on OS
+                    Assert.Equal(
+                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.CurrentCulture),
+                        firstSpan.EndsWith(secondSpan, StringComparison.CurrentCulture));
+                    Assert.Equal(
+                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.CurrentCultureIgnoreCase),
+                        firstSpan.EndsWith(secondSpan, StringComparison.CurrentCultureIgnoreCase));
+                    Assert.Equal(
+                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.InvariantCulture),
+                        firstSpan.EndsWith(secondSpan, StringComparison.InvariantCulture));
+                    Assert.Equal(
+                        firstSpan.ToString().EndsWith(secondSpan.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                        firstSpan.EndsWith(secondSpan, StringComparison.InvariantCultureIgnoreCase));
                 }
             }
         }
 
-        private static IEnumerable<object[]> ToUpper_TurkishI_MemberData(params KeyValuePair<char, char>[] mappings)
+        [Fact]
+        public static void MakeSureNoEndsWithChecksGoOutOfRange_StringComparison()
         {
-            foreach (KeyValuePair<char, char> mapping in mappings)
+            for (int length = 0; length < 100; length++)
             {
-                yield return new[] { $"{mapping.Key}", $"{mapping.Value}" };
-                yield return new[] { $"{mapping.Key}a TeSt", $"{mapping.Value}A TEST" };
-                yield return new[] { $"a T{mapping.Key}est", $"A T{mapping.Value}EST" };
-                yield return new[] { $"A test{mapping.Key}", $"A TEST{mapping.Value}" };
-                yield return new[] { new string(mapping.Key, 100), new string(mapping.Value, 100) };
+                var first = new char[length + 2];
+                first[0] = (char)99;
+                first[length + 1] = (char)99;
+                var second = new char[length + 2];
+                second[0] = (char)100;
+                second[length + 1] = (char)100;
+                var span1 = new ReadOnlySpan<char>(first, 1, length);
+                var span2 = new ReadOnlySpan<char>(second, 1, length);
+                Assert.True(span1.EndsWith(span2, StringComparison.Ordinal));
+
+                Assert.True(span1.EndsWith(span2, StringComparison.CurrentCulture));
+                Assert.True(span1.EndsWith(span2, StringComparison.CurrentCultureIgnoreCase));
+                Assert.True(span1.EndsWith(span2, StringComparison.InvariantCulture));
+                Assert.True(span1.EndsWith(span2, StringComparison.InvariantCultureIgnoreCase));
+                Assert.True(span1.EndsWith(span2, StringComparison.OrdinalIgnoreCase));
             }
         }
 
-        public static IEnumerable<object[]> ToUpper_TurkishI_TurkishCulture_MemberData() => ToUpper_TurkishI_MemberData(
-              new KeyValuePair<char, char>('\u0069', '\u0130'),
-              new KeyValuePair<char, char>('\u0130', '\u0130'),
-              new KeyValuePair<char, char>('\u0131', '\u0049'));
-
-        public static IEnumerable<object[]> ToUpper_TurkishI_EnglishUSCulture_MemberData() =>
-           ToUpper_TurkishI_MemberData(
-               new KeyValuePair<char, char>('\u0069', '\u0049'),
-               new KeyValuePair<char, char>('\u0130', '\u0130'),
-               new KeyValuePair<char, char>('\u0131', '\u0049'));
-
-        public static IEnumerable<object[]> ToUpper_TurkishI_InvariantCulture_MemberData() =>
-        ToUpper_TurkishI_MemberData(
-            new KeyValuePair<char, char>('\u0069', '\u0049'),
-            new KeyValuePair<char, char>('\u0130', '\u0130'),
-            new KeyValuePair<char, char>('\u0131', '\u0131'));
-
-        public static IEnumerable<object[]> UpperLowerCasing_TestData()
+        [Fact]
+        public static void EndsWithUnknownComparisonType_StringComparison()
         {
-            //                          lower                upper          Culture
-            yield return new object[] { "abcd", "ABCD", "en-US" };
-            yield return new object[] { "latin i", "LATIN I", "en-US" };
-            yield return new object[] { "turky \u0131", "TURKY I", "tr-TR" };
-            yield return new object[] { "turky i", "TURKY \u0130", "tr-TR" };
-            yield return new object[] { "\ud801\udc29", PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
+            char[] a = { '4', '5', '6' };
+            var span = new ReadOnlySpan<char>(a);
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.CurrentCulture - 1));
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
+            StringTestSpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, (StringComparison)6));
         }
 
-        public static IEnumerable<object[]> Compare_TestData()
+        [Fact]
+        public static void EndsWithMatchNonOrdinal_StringComparison()
         {
-            // CurrentCulture
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCulture, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCulture, -1 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.CurrentCulture, 1 };
-            yield return new object[] { "hello", 2, "HELLO", 2, 3, StringComparison.CurrentCulture, -1 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.CurrentCulture, 0 };
-            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCulture, -1 };
-            yield return new object[] { "A", 0, "B", 0, 1, StringComparison.CurrentCulture, -1 };
-            yield return new object[] { "B", 0, "A", 0, 1, StringComparison.CurrentCulture, 1 };
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.CurrentCulture, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 0, StringComparison.CurrentCulture, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 0, StringComparison.CurrentCulture, -1 };
-            yield return new object[] { null, -1, null, -1, -1, StringComparison.CurrentCulture, 0 };
-            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.CurrentCulture, 1 };
-            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.CurrentCulture, -1 };
-            // CurrentCultureIgnoreCase
-            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCultureIgnoreCase, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, -1 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.CurrentCultureIgnoreCase, -1 };
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 0, StringComparison.CurrentCultureIgnoreCase, -1 };
-            yield return new object[] { null, -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 0 };
-            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 1 };
-            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.CurrentCultureIgnoreCase, -1 };
-            // InvariantCulture
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.InvariantCulture, 0 };
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCulture, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.InvariantCulture, 1 };
-            yield return new object[] { "hello", 2, "HELLO", 2, 3, StringComparison.InvariantCulture, -1 };
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.InvariantCulture, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.InvariantCulture, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.InvariantCulture, -1 };
-            // InvariantCultureIgnoreCase
-            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.InvariantCultureIgnoreCase, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.InvariantCultureIgnoreCase, -1 };
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.InvariantCultureIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.InvariantCultureIgnoreCase, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.InvariantCultureIgnoreCase, -1 };
-            // Ordinal
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.Ordinal, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.Ordinal, -1 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.Ordinal, -1 };
-            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.Ordinal, -1 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 0, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 3, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 0, "He" + SoftHyphen + "llo", 0, 5, StringComparison.Ordinal, -1 };
-            yield return new object[] { "Hello", 0, "-=<Hello>=-", 3, 5, StringComparison.Ordinal, 0 };
-            yield return new object[] { "\uD83D\uDD53Hello\uD83D\uDD50", 1, "\uD83D\uDD53Hello\uD83D\uDD54", 1, 7, StringComparison.Ordinal, 0 }; // Surrogate split
-            yield return new object[] { "Hello", 0, "Hello123", 0, int.MaxValue, StringComparison.Ordinal, -1 };           // Recalculated length, second string longer
-            yield return new object[] { "Hello123", 0, "Hello", 0, int.MaxValue, StringComparison.Ordinal, 1 };            // Recalculated length, first string longer
-            yield return new object[] { "---aaaaaaaaaaa", 3, "+++aaaaaaaaaaa", 3, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 2, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 3, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 2, different compare at n=1
-            yield return new object[] { "-aaaaaaaaaaaaa", 1, "+aaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 6, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 1, "axaaaaaaaaaaaa", 1, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 6, different compare at n=1
-            yield return new object[] { "aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 4, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 0, "xaaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 4, different compare at n=1
-            yield return new object[] { "aaaaaaaaaaaaaa", 0, "axaaaaaaaaaaaa", 0, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 4, different compare at n=2
-            yield return new object[] { "--aaaaaaaaaaaa", 2, "++aaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, 0 };      // Equal long alignment 0, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaxaaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=1
-            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaxaaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=2
-            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaxaaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=3
-            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaaxaaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=4
-            yield return new object[] { "aaaaaaaaaaaaaa", 2, "aaaaaaxaaaaaaa", 2, 100, StringComparison.Ordinal, -1 };     // Equal long alignment 0, different compare at n=5
-            yield return new object[] { "aaaaaaaaaaaaaa", 0, "+aaaaaaaaaaaaa", 1, 13, StringComparison.Ordinal, 0 };       // Different int alignment, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 0, "aaaaaaaaaaaaax", 1, 100, StringComparison.Ordinal, -1 };     // Different int alignment
-            yield return new object[] { "aaaaaaaaaaaaaa", 1, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1 };     // Different long alignment, abs of 4, one of them is 2, different at n=1
-            yield return new object[] { "-aaaaaaaaaaaaa", 1, "++++aaaaaaaaaa", 4, 10, StringComparison.Ordinal, 0 };       // Different long alignment, equal compare
-            yield return new object[] { "aaaaaaaaaaaaaa", 1, "aaaaaaaaaaaaax", 4, 100, StringComparison.Ordinal, -1 };     // Different long alignment
-            yield return new object[] { "\0", 0, "", 0, 1, StringComparison.Ordinal, 1 };                                  // Same memory layout, except for m_stringLength (m_firstChars are both 0)
-            yield return new object[] { "\0\0", 0, "", 0, 2, StringComparison.Ordinal, 1 };                                // Same as above, except m_stringLength for one is 2
-            yield return new object[] { "", 0, "\0b", 0, 2, StringComparison.Ordinal, -1 };                                // strA's second char != strB's second char codepath
-            yield return new object[] { "", 0, "b", 0, 1, StringComparison.Ordinal, -1 };                                  // Should hit strA.m_firstChar != strB.m_firstChar codepath
-            yield return new object[] { "abcxxxxxxxxxxxxxxxxxxxxxx", 0, "abdxxxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: first long compare is different
-            yield return new object[] { "abcdefgxxxxxxxxxxxxxxxxxx", 0, "abcdefhxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: second long compare is different
-            yield return new object[] { "abcdefghijkxxxxxxxxxxxxxx", 0, "abcdefghijlxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 64-bit: third long compare is different
-            yield return new object[] { "abcdexxxxxxxxxxxxxxxxxxxx", 0, "abcdfxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 32-bit: second int compare is different
-            yield return new object[] { "abcdefghixxxxxxxxxxxxxxxx", 0, "abcdefghjxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1 }; // 32-bit: fourth int compare is different
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.Ordinal, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.Ordinal, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.Ordinal, -1 };
-            yield return new object[] { null, -1, null, -1, -1, StringComparison.Ordinal, 0 };
-            yield return new object[] { "foo", -1, null, -1, -1, StringComparison.Ordinal, 1 };
-            yield return new object[] { null, -1, "foo", -1, -1, StringComparison.Ordinal, -1 };
-            // OrdinalIgnoreCase
-            yield return new object[] { "HELLO", 0, "hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Yellow", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, "Goodbye", 0, 5, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "Goodbye", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1 };
-            yield return new object[] { "HELLO", 2, "hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 2, "Goodbye", 2, 3, StringComparison.OrdinalIgnoreCase, -1 };
-            yield return new object[] { "A", 0, "x", 0, 1, StringComparison.OrdinalIgnoreCase, -1 };
-            yield return new object[] { "a", 0, "X", 0, 1, StringComparison.OrdinalIgnoreCase, -1 };
-            yield return new object[] { "[", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "[", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "\\", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "\\", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "]", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "]", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "^", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "^", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "_", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "_", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "`", 0, "A", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { "`", 0, "a", 0, 1, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { null, 0, null, 0, 0, StringComparison.OrdinalIgnoreCase, 0 };
-            yield return new object[] { "Hello", 0, null, 0, 5, StringComparison.OrdinalIgnoreCase, 1 };
-            yield return new object[] { null, 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1 };
+            ReadOnlySpan<char> span = new char[] { 'd', 'a', 'b', 'c' };
+            ReadOnlySpan<char> value = new char[] { 'a', 'B', 'c' };
+            Assert.False(span.EndsWith(value, StringComparison.Ordinal));
+            Assert.True(span.EndsWith(value, StringComparison.OrdinalIgnoreCase));
+
+            CultureInfo backupCulture = CultureInfo.CurrentCulture;
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("el-GR");
+
+            span = new char[] { '\u03b4', '\u03b1', '\u03b2', '\u03b3' }; // ????
+            value = new char[] { '\u03b1', '\u03b2', '\u03b3' }; // ???
+
+            Assert.True(span.EndsWith(value, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            value = new char[] { '\u03b1', '\u0392', '\u03b3' }; // ???
+            Assert.False(span.EndsWith(value, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            Thread.CurrentThread.CurrentCulture = backupCulture;
+
+            span = new char[] { '\u03b4', '\u0069', '\u00df', '\u0049' }; // ?iﬂI
+            value = new char[] { '\u0069', '\u0073', '\u0073', '\u0049' }; // issI
+
+            Assert.False(span.EndsWith(value, StringComparison.Ordinal));
+            // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCulture),
+                span.EndsWith(value, StringComparison.InvariantCulture));
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
+
+            value = new char[] { '\u0049', '\u0073', '\u0073', '\u0049' }; // IssI
+            Assert.False(span.EndsWith(value, StringComparison.OrdinalIgnoreCase));
+            Assert.False(span.EndsWith(value, StringComparison.InvariantCulture));
+            // Different behavior depending on OS - True on Windows, False on Unix
+            Assert.Equal(
+                span.ToString().EndsWith(value.ToString(), StringComparison.InvariantCultureIgnoreCase),
+                span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public static IEnumerable<object[]> CopyTo_TestData()
+        [Fact]
+        public static void EndsWithNoMatchNonOrdinal_StringComparison()
         {
-            yield return new object[] { "Hello", 0, 0, 5, new char[] { 'H', 'e', 'l', 'l', 'o' } };
-            yield return new object[] { "Hello", 1, 5, 3, new char[] { '\0', '\0', '\0', '\0', '\0', 'e', 'l', 'l', '\0', '\0' } };
-            yield return new object[] { "Hello", 2, 0, 3, new char[] { 'l', 'l', 'o', '\0', '\0', '\0', '\0', '\0', '\0', '\0' } };
-            yield return new object[] { "Hello", 0, 7, 3, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', 'H', 'e', 'l' } };
-            yield return new object[] { "Hello", 5, 10, 0, new char[] { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' } };
-            yield return new object[] { "H" + SoftHyphen + "ello", 0, 0, 3, new char[] { 'H', '\u00AD', 'e' } };
+            ReadOnlySpan<char> span = new char[] { 'd', 'a', 'b', 'c' };
+            ReadOnlySpan<char> value = new char[] { 'a', 'D', 'c' };
+            Assert.False(span.EndsWith(value, StringComparison.Ordinal));
+            Assert.False(span.EndsWith(value, StringComparison.OrdinalIgnoreCase));
+
+            CultureInfo backupCulture = CultureInfo.CurrentCulture;
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("el-GR");
+
+            span = new char[] { '\u03b4', '\u03b1', '\u03b2', '\u03b3' }; // ????
+            value = new char[] { '\u03b1', '\u03b4', '\u03b3' }; // ???
+
+            Assert.False(span.EndsWith(value, StringComparison.CurrentCulture));
+            Assert.False(span.EndsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            value = new char[] { '\u03b1', '\u0394', '\u03b3' }; // ???
+            Assert.False(span.EndsWith(value, StringComparison.CurrentCulture));
+            Assert.False(span.EndsWith(value, StringComparison.CurrentCultureIgnoreCase));
+
+            Thread.CurrentThread.CurrentCulture = backupCulture;
+
+            span = new char[] { '\u03b4', '\u0069', '\u00df', '\u0049' }; // ?iﬂI
+            value = new char[] { '\u0069', '\u03b4', '\u03b4', '\u0049' }; // i??I
+
+            Assert.False(span.EndsWith(value, StringComparison.Ordinal));
+            Assert.False(span.EndsWith(value, StringComparison.InvariantCulture));
+            Assert.False(span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
+
+            value = new char[] { '\u0049', '\u03b4', '\u03b4', '\u0049' }; // I??I
+            Assert.False(span.EndsWith(value, StringComparison.OrdinalIgnoreCase));
+            Assert.False(span.EndsWith(value, StringComparison.InvariantCulture));
+            Assert.False(span.EndsWith(value, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public static IEnumerable<object[]> EndsWith_TestData()
+        [Fact]
+        public static void StringAsSpanNullary()
         {
-            // CurrentCulture
-            yield return new object[] { "", "Foo", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "llo", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "HELLO", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.CurrentCulture, true };
-            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
-            yield return new object[] { "", "a", StringComparison.CurrentCulture, false };
-            // CurrentCultureIgnoreCase
-            yield return new object[] { "Hello", "llo", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "LLO", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "", "a", StringComparison.CurrentCultureIgnoreCase, false };
-            // InvariantCulture
-            yield return new object[] { "", "Foo", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "llo", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "HELLO", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.InvariantCulture, true };
-            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
-            yield return new object[] { "", "a", StringComparison.InvariantCulture, false };
-            // InvariantCultureIgnoreCase
-            yield return new object[] { "Hello", "llo", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "LLO", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "", "a", StringComparison.InvariantCultureIgnoreCase, false };
-            // Ordinal
-            yield return new object[] { "Hello", "o", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "llo", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "Larger Hello", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "LLO", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.Ordinal, false };
-            yield return new object[] { "", "", StringComparison.Ordinal, true };
-            yield return new object[] { "", "a", StringComparison.Ordinal, false };
-            // OrdinalIgnoreCase
-            yield return new object[] { "Hello", "llo", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Larger Hello", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "LLO", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", "llo" + SoftHyphen, StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "", "a", StringComparison.OrdinalIgnoreCase, false };
+            string s = "Hello";
+            ReadOnlySpan<char> span = s.AsSpan();
+            char[] expected = s.ToCharArray();
+            span.Validate(expected);
         }
 
-        public static IEnumerable<object[]> EndsWith_NullInStrings_TestData()
+        [Fact]
+        public static void StringAsSpanEmptyString()
         {
-            yield return new object[] { StringComparison.CurrentCulture };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase };
-            yield return new object[] { StringComparison.Ordinal };
-            yield return new object[] { StringComparison.OrdinalIgnoreCase };
+            string s = "";
+            ReadOnlySpan<char> span = s.AsSpan();
+            span.ValidateNonNullEmpty();
         }
 
-        public static IEnumerable<object[]> EndsWith_NullInStrings_NonOrdinal_TestData()
+        [Fact]
+        public static void StringAsSpanNullChecked()
         {
-            yield return new object[] { StringComparison.CurrentCulture };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase };
-            yield return new object[] { StringComparison.InvariantCulture };
-            yield return new object[] { StringComparison.InvariantCultureIgnoreCase };
+            string s = null;
+            ReadOnlySpan<char> span = s.AsSpan();
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0);
+            span.Validate();
+            Assert.True(span == default);
+
+            span = s.AsSpan(0, 0);
+            span.Validate();
+            Assert.True(span == default);
         }
 
-        public static IEnumerable<object[]> Equals_TestData()
+        [Fact]
+        public static void StringAsSpanNullNonZeroStartAndLength()
         {
-            // CurrentCulture
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "hello", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "Helloo", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "Hell", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", null, StringComparison.CurrentCulture, false };
-            yield return new object[] { null, "Hello", StringComparison.CurrentCulture, false };
-            yield return new object[] { null, null, StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, false };
-            yield return new object[] { "", "Hello", StringComparison.CurrentCulture, false };
-            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
-            yield return new object[] { "123", 123, StringComparison.CurrentCulture, false }; // Not a string
-            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCulture, false };
-            // CurrentCultureIgnoreCase
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "hello", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "helloo", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "Hello", "hell", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "Hello", null, StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { null, "Hello", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { null, null, StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "", "Hello", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "123", 123, StringComparison.CurrentCultureIgnoreCase, false }; // Not a string
-            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.CurrentCultureIgnoreCase, false };
-            // InvariantCulture
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "hello", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", null, StringComparison.InvariantCulture, false };
-            yield return new object[] { null, "Hello", StringComparison.InvariantCulture, false };
-            yield return new object[] { null, null, StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, false };
-            yield return new object[] { "", "Hello", StringComparison.InvariantCulture, false };
-            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
-            yield return new object[] { "123", 123, StringComparison.InvariantCulture, false }; // Not a string
-            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCulture, false };
-            // InvariantCultureIgnoreCase
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "hello", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Helloo", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "Hello", "Hell", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "Hello", null, StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { null, "Hello", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { null, null, StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "", "Hello", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "123", 123, StringComparison.InvariantCultureIgnoreCase, false }; // Not a string
-            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.InvariantCultureIgnoreCase, false };
-            // Ordinal
-            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "hello", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "Helloo", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "Hell", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", null, StringComparison.Ordinal, false };
-            yield return new object[] { null, "Hello", StringComparison.Ordinal, false };
-            yield return new object[] { null, null, StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "", StringComparison.Ordinal, false };
-            yield return new object[] { "", "Hello", StringComparison.Ordinal, false };
-            yield return new object[] { "", "", StringComparison.Ordinal, true };
-            yield return new object[] { "123", 123, StringComparison.Ordinal, false }; // Not a string
-            // OridinalIgnoreCase
-            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "HELLO", "hello", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Helloo", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", "Hell", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "\u1234\u5678", "\u1234\u5678", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "\u1234\u5678", "\u1234\u5679", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "\u1234\u5678", "\u1235\u5678", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "\u1234\u5678", "\u1234", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "\u1234\u5678", "\u1234\u56789\u1234", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", null, StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { null, "Hello", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { null, null, StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "", "Hello", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "123", 123, StringComparison.OrdinalIgnoreCase, false }; // Not a string
-            yield return new object[] { "\0AAAAAAAAA", "\0BBBBBBBBBBBB", StringComparison.OrdinalIgnoreCase, false };
+            string str = null;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1).DontBox());
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(0, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 0).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(1, 1).DontBox());
+            Assert.Throws<ArgumentOutOfRangeException>(() => str.AsSpan(-1, -1).DontBox());
         }
 
-        public static IEnumerable<object[]> IndexOf_SingleLetter_TestData()
+        [Theory]
+        [MemberData(nameof(StringSliceTestData))]
+        public static unsafe void AsSpan_StartAndLength(string text, int start, int length)
         {
-            yield return new object[] { "Hello", 'l', 0, 5, 2 };
-            yield return new object[] { "Hello", 'x', 0, 5, -1 };
-            yield return new object[] { "Hello", 'l', 1, 4, 2 };
-            yield return new object[] { "Hello", 'l', 3, 2, 3 };
-            yield return new object[] { "Hello", 'l', 4, 1, -1 };
-            yield return new object[] { "Hello", 'x', 1, 4, -1 };
-            yield return new object[] { "Hello", 'l', 3, 0, -1 };
-            yield return new object[] { "Hello", 'l', 0, 2, -1 };
-            yield return new object[] { "Hello", 'l', 0, 3, 2 };
-            yield return new object[] { "Hello", 'l', 4, 1, -1 };
-            yield return new object[] { "Hello", 'x', 1, 4, -1 };
-            yield return new object[] { "Hello", 'o', 5, 0, -1 };
-            yield return new object[] { "H" + SoftHyphen + "ello", 'e', 0, 3, 2 };
-            // For some reason, this is failing on *nix with ordinal comparisons.
-            // Possibly related issue: dotnet/coreclr#2051
-            // yield return new object[] {"Hello", '\0', 0, 5, -1}; // .NET strings are terminated with a null character, but they should not be included as part of the string
-            yield return new object[] { "\ud800\udfff", '\ud800', 0, 1, 0 }; // Surrogate characters
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17 };
-            yield return new object[] { "________\u8080\u8080\u8080________", '\u0080', 0, 19, -1 };
-            yield return new object[] { "________\u8000\u8000\u8000________", '\u0080', 0, 19, -1 };
-            yield return new object[] { "__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4 };
-            yield return new object[] { "__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6 };
-            yield return new object[] { "__________________________________", '\ufffd', 0, 34, -1 };
-            yield return new object[] { "____________________________\ufffd", '\ufffd', 0, 29, 28 };
-            yield return new object[] { "ABCDEFGHIJKLM", 'M', 0, 13, 12 };
-            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 0, 14, 13 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1 };
-            yield return new object[] { "ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1 };
-            yield return new object[] { "_____________\u807f", '\u007f', 0, 14, -1 };
-            yield return new object[] { "_____________\u807f__", '\u007f', 0, 16, -1 };
-            yield return new object[] { "_____________\u807f\u007f_", '\u007f', 0, 16, 14 };
-            yield return new object[] { "__\u807f_______________", '\u007f', 0, 18, -1 };
-            yield return new object[] { "__\u807f___\u007f___________", '\u007f', 0, 18, 6 };
-            yield return new object[] { "ABCDEFGHIJKLMN", 'N', 2, 11, -1 };
-            yield return new object[] { "!@#$%^&", '%', 0, 7, 4 };
-            yield return new object[] { "!@#$", '!', 0, 4, 0 };
-            yield return new object[] { "!@#$", '@', 0, 4, 1 };
-            yield return new object[] { "!@#$", '#', 0, 4, 2 };
-            yield return new object[] { "!@#$", '$', 0, 4, 3 };
-            yield return new object[] { "!@#$%^&*", '%', 0, 8, 4 };
-            yield return new object[] { "", 'H', 0, 0, -1 };
+            ReadOnlySpan<char> span;
+            if (start == -1)
+            {
+                start = 0;
+                length = text.Length;
+                span = text.AsSpan();
+            }
+            else if (length == -1)
+            {
+                length = text.Length - start;
+                span = text.AsSpan(start);
+            }
+            else
+            {
+                span = text.AsSpan(start, length);
+            }
+
+            Assert.Equal(length, span.Length);
+
+            fixed (char* pText = text)
+            {
+                char* expected = pText + start;
+                void* actual = Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
+                Assert.Equal((IntPtr)expected, (IntPtr)actual);
+            }
         }
 
-        public static IEnumerable<object[]> IndexOf_NullInStrings_TestData()
+        [Theory]
+        [MemberData(nameof(StringSlice2ArgTestOutOfRangeData))]
+        public static unsafe void AsSpan_2Arg_OutOfRange(string text, int start)
         {
-            yield return new object[] { "He\0lo", "He\0lo", 0 };
-            yield return new object[] { "He\0lo", "He\0", 0 };
-            yield return new object[] { "He\0lo", "\0", 2 };
-            yield return new object[] { "He\0lo", "\0lo", 2 };
-            yield return new object[] { "He\0lo", "lo", 3 };
-            yield return new object[] { "Hello", "lo\0", -1 };
-            yield return new object[] { "Hello", "\0lo", -1 };
-            yield return new object[] { "Hello", "l\0o", -1 };
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start).DontBox());
         }
 
-        public static IEnumerable<object[]> Item_Get_TestData()
+        [Theory]
+        [MemberData(nameof(StringSlice3ArgTestOutOfRangeData))]
+        public static unsafe void AsSpan_3Arg_OutOfRange(string text, int start, int length)
         {
-            yield return new object[] { "Hello", 0, 'H' };
-            yield return new object[] { "Hello", 1, 'e' };
-            yield return new object[] { "Hello", 2, 'l' };
-            yield return new object[] { "Hello", 3, 'l' };
-            yield return new object[] { "Hello", 4, 'o' };
-            yield return new object[] { "\0", 0, '\0' };
-        }
-
-        public static IEnumerable<object[]> Length_TestData()
-        {
-            yield return new object[] { "", 0 };
-            yield return new object[] { "\0", 1 };
-            yield return new object[] { "abc", 3 };
-            yield return new object[] { "hello", 5 };
-        }
-
-        public static IEnumerable<object[]> IsNullOrEmpty_TestData()
-        {
-            yield return new object[] { null, true };
-            yield return new object[] { "", true };
-            yield return new object[] { "foo", false };
-            yield return new object[] { "   ", false };
-        }
-
-        public static IEnumerable<object[]> StartsWith_TestData()
-        {
-            // CurrentCulture
-            yield return new object[] { "Hello", "Hel", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCulture, true };
-            yield return new object[] { "Hello", "HELLO", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCulture, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.CurrentCulture, true };
-            yield return new object[] { "", "", StringComparison.CurrentCulture, true };
-            yield return new object[] { "", "hello", StringComparison.CurrentCulture, false };
-            // CurrentCultureIgnoreCase
-            yield return new object[] { "Hello", "Hel", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "HEL", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.CurrentCultureIgnoreCase, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "", "", StringComparison.CurrentCultureIgnoreCase, true };
-            yield return new object[] { "", "hello", StringComparison.CurrentCultureIgnoreCase, false };
-            // InvariantCulture
-            yield return new object[] { "Hello", "Hel", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCulture, true };
-            yield return new object[] { "Hello", "HELLO", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCulture, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.InvariantCulture, true };
-            yield return new object[] { "", "", StringComparison.InvariantCulture, true };
-            yield return new object[] { "", "hello", StringComparison.InvariantCulture, false };
-            // InvariantCultureIgnoreCase
-            yield return new object[] { "Hello", "Hel", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "HEL", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.InvariantCultureIgnoreCase, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "", "", StringComparison.InvariantCultureIgnoreCase, true };
-            yield return new object[] { "", "hello", StringComparison.InvariantCultureIgnoreCase, false };
-            // Ordinal
-            yield return new object[] { "Hello", "H", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "Hel", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "Hello Larger", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "", StringComparison.Ordinal, true };
-            yield return new object[] { "Hello", "HEL", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", "Abc", StringComparison.Ordinal, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.Ordinal, false };
-            yield return new object[] { "", "", StringComparison.Ordinal, true };
-            yield return new object[] { "", "hello", StringComparison.Ordinal, false };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", StringComparison.Ordinal, true };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwx", StringComparison.Ordinal, true };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklm", StringComparison.Ordinal, true };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "ab_defghijklmnopqrstu", StringComparison.Ordinal, false };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdef_hijklmn", StringComparison.Ordinal, false };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghij_lmn", StringComparison.Ordinal, false };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "a", StringComparison.Ordinal, true };
-            yield return new object[] { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyza", StringComparison.Ordinal, false };
-            // OrdinalIgnoreCase
-            yield return new object[] { "Hello", "Hel", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Hello Larger", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", "", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "HEL", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "Hello", "Abc", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "Hello", SoftHyphen + "Hel", StringComparison.OrdinalIgnoreCase, false };
-            yield return new object[] { "", "", StringComparison.OrdinalIgnoreCase, true };
-            yield return new object[] { "", "hello", StringComparison.OrdinalIgnoreCase, false };
-        }
-
-        public static IEnumerable<object[]> StartsWith_NullInStrings_TestData()
-        {
-            yield return new object[] { StringComparison.CurrentCulture };
-            yield return new object[] { StringComparison.CurrentCultureIgnoreCase };
-            yield return new object[] { StringComparison.Ordinal };
-            yield return new object[] { StringComparison.OrdinalIgnoreCase };
-        }
-
-        public static IEnumerable<object[]> Substring_TestData()
-        {
-            yield return new object[] { "Hello", 0, 5, "Hello" };
-            yield return new object[] { "Hello", 0, 3, "Hel" };
-            yield return new object[] { "Hello", 2, 3, "llo" };
-            yield return new object[] { "Hello", 5, 0, "" };
-            yield return new object[] { "", 0, 0, "" };
-        }
-
-        public static IEnumerable<object[]> ToLower_TestData()
-        {
-            yield return new object[] { "hello", "hello" };
-            yield return new object[] { "HELLO", "hello" };
-            yield return new object[] { "hElLo", "hello" };
-            yield return new object[] { "HeLlO", "hello" };
-            yield return new object[] { "", "" };
-        }
-
-        public static IEnumerable<object[]> ToLowerInvariant_TestData()
-        {
-            yield return new object[] { "hello", "hello" };
-            yield return new object[] { "HELLO", "hello" };
-            yield return new object[] { "hElLo", "hello" };
-            yield return new object[] { "HeLlO", "hello" };
-            yield return new object[] { "", "" };
-        }
-
-        public static IEnumerable<object[]> ToString_TestData()
-        {
-            yield return new object[] { "" };
-            yield return new object[] { "hello" };
-        }
-
-        public static IEnumerable<object[]> ToUpper_TestData()
-        {
-            yield return new object[] { "hello", "HELLO" };
-            yield return new object[] { "HELLO", "HELLO" };
-            yield return new object[] { "hElLo", "HELLO" };
-            yield return new object[] { "HeLlO", "HELLO" };
-            yield return new object[] { "", "" };
-        }
-
-        public static IEnumerable<object[]> ToUpperInvariant_TestData()
-        {
-            yield return new object[] { "hello", "HELLO" };
-            yield return new object[] { "HELLO", "HELLO" };
-            yield return new object[] { "hElLo", "HELLO" };
-            yield return new object[] { "HeLlO", "HELLO" };
-            yield return new object[] { "", "" };
-        }
-
-        public static IEnumerable<object[]> Trim_TestData()
-        {
-            yield return new object[] { "  Hello  ", new char[] { ' ' }, "Hello" };
-            yield return new object[] { ".  Hello  ..", new char[] { '.' }, "  Hello  " };
-            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, "Hello" };
-            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello" };
-            yield return new object[] { "  Hello  ", null, "Hello" };
-            yield return new object[] { "  Hello  ", new char[0], "Hello" };
-            yield return new object[] { "      \t      ", null, "" };
-            yield return new object[] { "", null, "" };
-        }
-
-        public static IEnumerable<object[]> TrimEnd_TestData()
-        {
-            yield return new object[] { "  Hello  ", new char[] { ' ' }, "  Hello" };
-            yield return new object[] { ".  Hello  ..", new char[] { '.' }, ".  Hello  " };
-            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, ".  Hello" };
-            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "123abcHello" };
-            yield return new object[] { "  Hello  ", null, "  Hello" };
-            yield return new object[] { "  Hello  ", new char[0], "  Hello" };
-            yield return new object[] { "      \t      ", null, "" };
-            yield return new object[] { "", null, "" };
-        }
-
-        public static IEnumerable<object[]> TrimStart_TestData()
-        {
-            yield return new object[] { "  Hello  ", new char[] { ' ' }, "Hello  " };
-            yield return new object[] { ".  Hello  ..", new char[] { '.' }, "  Hello  .." };
-            yield return new object[] { ".  Hello  ..", new char[] { '.', ' ' }, "Hello  .." };
-            yield return new object[] { "123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello123abc" };
-            yield return new object[] { "  Hello  ", null, "Hello  " };
-            yield return new object[] { "  Hello  ", new char[0], "Hello  " };
-            yield return new object[] { "      \t      ", null, "" };
-            yield return new object[] { "", null, "" };
-        }
-
-        public static IEnumerable<object[]> GetEnumerator_TestData()
-        {
-            yield return new object[] { "abc" };
-            yield return new object[] { "" };
-        }
-
-        public static IEnumerable<object[]> LastIndexOf_NullInStrings_TestData()
-        {
-            yield return new object[] { "He\0lo", "He\0lo", 0 };
-            yield return new object[] { "He\0lo", "He\0", 0 };
-            yield return new object[] { "He\0lo", "\0", 2 };
-            yield return new object[] { "He\0lo", "\0lo", 2 };
-            yield return new object[] { "He\0lo", "lo", 3 };
-            yield return new object[] { "Hello", "lo\0", -1 };
-            yield return new object[] { "Hello", "\0lo", -1 };
-            yield return new object[] { "Hello", "l\0o", -1 };
-        }
-
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("start", () => text.AsSpan(start, length).DontBox());
+        }        
     }
+
+    public static class StringTestSpanTestHelpers
+    {
+        public delegate void AssertThrowsActionReadOnly<T>(ReadOnlySpan<T> span);
+
+        // Cannot use standard Assert.Throws() when testing Span - Span and closures don't get along.
+        public static void AssertThrows<E, T>(ReadOnlySpan<T> span, AssertThrowsActionReadOnly<T> action) where E : Exception
+        {
+            try
+            {
+                action(span);
+                Assert.False(true, "Expected exception: " + typeof(E).GetType());
+            }
+            catch (E)
+            {
+            }
+            catch (Exception wrongException)
+            {
+                Assert.False(true, "Wrong exception thrown: Expected " + typeof(E).GetType() + ": Actual: " + wrongException.GetType());
+            }
+        }
+
+        public static void Validate<T>(this ReadOnlySpan<T> span, params T[] expected) where T : struct, IEquatable<T>
+        {
+            Assert.True(span.SequenceEqual(expected));
+        }
+        
+        public static unsafe void ValidateNonNullEmpty<T>(this ReadOnlySpan<T> span)
+        {
+            Assert.True(span.IsEmpty);
+
+            // Validate that empty Span is not normalized to null
+            Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
+        }
+
+        // 
+        // The innocent looking construct:
+        //
+        //    Assert.Throws<E>( () => new Span() );
+        //
+        // generates a hidden box of the Span as the return value of the lambda. This makes the IL illegal and unloadable on 
+        // runtimes that enforce the actual Span rules (never mind that we expect never to reach the box instruction...)
+        //
+        // The workaround is to code it like this:
+        //
+        //    Assert.Throws<E>( () => new Span().DontBox() );
+        // 
+        // which turns the lambda return type back to "void" and eliminates the troublesome box instruction.
+        //
+        public static void DontBox<T>(this ReadOnlySpan<T> span)
+        {
+            // This space intentionally left blank.
+        }
+    }
+
 }
