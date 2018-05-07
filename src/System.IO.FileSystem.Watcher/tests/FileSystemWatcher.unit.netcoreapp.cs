@@ -183,21 +183,20 @@ namespace System.IO.Tests
 
                 watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
-                Action cleanup = () => Directory.Delete(dirName);
                 Action action = () => Directory.CreateDirectory(dirName);
+                Action cleanup = () => Directory.Delete(dirName);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
 
-                cleanup = () => Directory.Delete(dirNameSecond);
                 action = () => Directory.CreateDirectory(dirNameSecond);
+                cleanup = () => Directory.Delete(dirNameSecond);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
 
-                cleanup = () => Directory.Delete(dirNameThird);
                 action = () => Directory.CreateDirectory(dirNameThird);
+                cleanup = () => Directory.Delete(dirNameThird);
 
                 Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
-
             }
         }
 
@@ -215,21 +214,20 @@ namespace System.IO.Tests
                 watcher.Filters.Add(Path.GetFileName(dirName));
                 watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
-                Action cleanup = () => Directory.Delete(dirName);
                 Action action = () => Directory.CreateDirectory(dirName);
+                Action cleanup = () => Directory.Delete(dirName);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
 
-                cleanup = () => Directory.Delete(dirNameSecond);
                 action = () => Directory.CreateDirectory(dirNameSecond);
+                cleanup = () => Directory.Delete(dirNameSecond);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
 
-                cleanup = () => Directory.Delete(dirNameThird);
                 action = () => Directory.CreateDirectory(dirNameThird);
+                cleanup = () => Directory.Delete(dirNameThird);
 
                 Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
-
             }
         }
 

@@ -98,7 +98,7 @@ namespace System.IO
         {
             CheckPathValidity(path);
             _directory = path;
-            Filter = filter ?? throw new ArgumentNullException(nameof(filter));
+            Filters.Add(filter); // ?? throw new ArgumentNullException(nameof(filter));
         }
 
         /// <devdoc>
