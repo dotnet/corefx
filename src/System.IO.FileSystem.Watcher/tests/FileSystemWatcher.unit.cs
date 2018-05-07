@@ -94,11 +94,12 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
                 // Null filter
-                AssertExtensions.Throws<ArgumentNullException>("filter", () => new FileSystemWatcher(testDirectory.Path, null));
+                Assert.Throws<ArgumentNullException>("filter", () => new FileSystemWatcher(testDirectory.Path, null));
 
                 // Null path
-                AssertExtensions.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null));
-                AssertExtensions.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, "*"));
+                Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, null));
+                Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null));
+                Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, "*"));
             }
         }
 

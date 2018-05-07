@@ -44,7 +44,8 @@ namespace System.IO.Tests
         public void RemoveFilterFromFilters()
         {
             var watcher = new FileSystemWatcher();
-            Setup(watcher);
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
 
             watcher.Filters.Remove("*.pdb");
             Assert.DoesNotContain(watcher.Filters, t => t == "*.pdb");
@@ -55,42 +56,234 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void AddNullOrEmptyStringToFilters()
+        public void AddEmptyStringToFilters()
         {
             var watcher = new FileSystemWatcher();
-            Setup(watcher);
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
 
             watcher.Filters.Add(string.Empty);
-            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
 
-            Setup(watcher);
-            Assert.Equal(2, watcher.Filters.Count);
+        [Fact]
+        public void AddNullToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
             watcher.Filters.Add(null);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void SetEmptyStringToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters[0] = string.Empty;
+            Assert.Equal(2, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filters[0]);
+            EqualItems(new Collection<string> { "*", "*.dll"}, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveEmptyStringToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.Equal(3, watcher.Filters.Count);
+            watcher.Filters.Remove(string.Empty);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveAtFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            watcher.Filters.RemoveAt(0);
+            Assert.Equal(1, watcher.Filters.Count);
+            Assert.Equal("*.dll", watcher.Filter);
+            EqualItems(new Collection<string> {"*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveAtEmptyFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+
+            watcher.Filters.RemoveAt(0);
             Assert.Equal(0, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filter);
             EqualItems(new Collection<string> { }, watcher.Filters);
         }
 
         [Fact]
-        public void SetNullOrEmptyStringToFilters()
+        public void SetNullToFilters()
         {
             var watcher = new FileSystemWatcher();
-            Setup(watcher);
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
 
-            watcher.Filters[0] = string.Empty;
-            Assert.Equal(0, watcher.Filters.Count);
-
-            Setup(watcher);
-            Assert.Equal(2, watcher.Filters.Count);
             watcher.Filters[0] = null;
-            Assert.Equal(0, watcher.Filters.Count);
-            EqualItems(new Collection<string> { }, watcher.Filters);
+            Assert.Equal(2, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filters[0]);
+            EqualItems(new Collection<string> { "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void ContainsEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.False(watcher.Filters.Contains(string.Empty));
+            Assert.True(watcher.Filters.Contains("*"));
+        }
+
+        [Fact]
+        public void ContainsNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(null);
+
+            Assert.False(watcher.Filters.Contains(null));
+            Assert.True(watcher.Filters.Contains("*"));
+        }
+
+        [Fact]
+        public void ContainsFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            Assert.True(watcher.Filters.Contains("*.pdb"));
+        }
+
+        [Fact]
+        public void InsertEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, string.Empty);
+
+            Assert.Equal("*", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, null);
+
+            Assert.Equal("*", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, "foo");
+
+            Assert.Equal("foo", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "*.pdb", "foo", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertAtZero()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(0, "foo");
+
+            Assert.Equal("foo", watcher.Filters[0]);
+            Assert.Equal("foo", watcher.Filter);
+            Assert.Equal(3, watcher.Filters.Count);
+            EqualItems(new Collection<string> { "foo", "*.pdb", "*.dll" }, watcher.Filters);
+        }
+        [Fact]
+        public void IndexOfEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.Equal(-1, watcher.Filters.IndexOf(string.Empty));
+        }
+
+        [Fact]
+        public void IndexOfNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(null);
+
+            Assert.Equal(-1, watcher.Filters.IndexOf(null));
+        }
+
+        [Fact]
+        public void IndexOfFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            Assert.Equal(-1, watcher.Filters.IndexOf("foo"));
+            Assert.Equal(0, watcher.Filters.IndexOf("*.pdb"));
+        }
+
+        [Fact]
+        public void ToStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            Assert.Equal(new Collection<string>().ToString(), watcher.Filters.ToString());
+        }
+
+        [Fact]
+        public void GetTypeFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            Assert.IsAssignableFrom<Collection<string>>(watcher.Filters);
         }
 
         [Fact]
         public void ClearFilters()
         {
             var watcher = new FileSystemWatcher();
-            Setup(watcher);
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
 
             watcher.Filters.Clear();
             Assert.Equal(0, watcher.Filters.Count);
@@ -103,7 +296,8 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
                 var watcher = new FileSystemWatcher(testDirectory.Path);
-                Setup(watcher);
+                watcher.Filters.Add("*.pdb");
+                watcher.Filters.Add("*.dll");
 
                 watcher.Filters.Clear();
                 Assert.Equal("*", watcher.Filter);
@@ -117,7 +311,8 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
                 var watcher = new FileSystemWatcher(testDirectory.Path);
-                Setup(watcher);
+                watcher.Filters.Add("*.pdb");
+                watcher.Filters.Add("*.dll");
 
                 watcher.Filters.Clear();
                 Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters[0]);
@@ -131,7 +326,8 @@ namespace System.IO.Tests
         public void InvalidOperationsOnFilters()
         {
             var watcher = new FileSystemWatcher();
-            Setup(watcher);
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
 
             Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters.Insert(4, "*"));            
             watcher.Filters.Clear();
@@ -319,14 +515,6 @@ namespace System.IO.Tests
             {
                 Assert.True(firstCollection[i] == secondCollection[i], $"The collections varies at {i} poistion\nExpected Value: {firstCollection[i]}\nActual Value: {secondCollection[i]} ");
             }
-        }
-
-        private void Setup(FileSystemWatcher watcher)
-        {
-            watcher.Filters.Add("*.pdb");
-            watcher.Filters.Add("*.dll");
-            Assert.Equal(2, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*.dll" }, watcher.Filters);
         }
     }
 }

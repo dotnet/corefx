@@ -98,7 +98,7 @@ namespace System.IO
         {
             CheckPathValidity(path);
             _directory = path;
-            Filters.Add(filter); // ?? throw new ArgumentNullException(nameof(filter));
+            Filter = filter ?? throw new ArgumentNullException(nameof(filter));
         }
 
         /// <devdoc>
@@ -167,7 +167,7 @@ namespace System.IO
         {
             get
             {
-                return Filters.Count == 0 ? "*" : Filters[0] ;
+                return Filters.Count == 0 ? "*" : Filters[0];
             }
             set
             {
@@ -700,24 +700,17 @@ namespace System.IO
         {
             protected override void InsertItem(int index, string item)
             {
-                if (string.IsNullOrEmpty(item))
-                {
-                    ClearItems();
-                    return;
-                }
-
-                base.InsertItem(index, item == "*.*" ? "*" : item);
+                base.InsertItem(index, string.IsNullOrEmpty(item) || item == "*.*" ? "*" : item);
             }
 
             protected override void SetItem(int index, string item)
             {
-                if (string.IsNullOrEmpty(item))
-                {
-                    ClearItems();
-                    return;
-                }
+                base.SetItem(index, string.IsNullOrEmpty(item) || item == "*.*" ? "*" : item);
+            }
 
-                base.SetItem(index, item == "*.*" ? "*" : item);
+            public override string ToString()
+            {
+                return "System.Collections.ObjectModel.Collection`1[System.String]";
             }
         }
     }
