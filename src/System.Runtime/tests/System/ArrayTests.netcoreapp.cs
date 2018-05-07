@@ -121,14 +121,9 @@ namespace System.Tests
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
         }
-
-        [Fact]
-        public static void Reverse_Generic_NegativeLength_ThrowsArgumentOutOfRangeException()
-        {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
-        }
-
+        
         [Theory]
+        [InlineData(0, 0, -1)]
         [InlineData(0, 0, 1)]
         [InlineData(3, 4, 0)]
         [InlineData(3, 3, 1)]
@@ -137,7 +132,17 @@ namespace System.Tests
         [InlineData(3, 0, 4)]
         public static void Reverse_Generic_InvalidOffsetPlusLength_ThrowsArgumentException(int arrayLength, int index, int length)
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => Array.Reverse(new string[arrayLength], index, length));
+            Assert.ThrowsAny<ArgumentException>(() => Array.Reverse(new string[arrayLength], index, length));
+        }
+
+        [Fact]
+        public static void Reverse_NonSZArrayWithMinValueLowerBound()
+        {
+            Array array = NonZeroLowerBoundArray(new int[] { 1, 2, 3 }, int.MinValue);
+
+            Reverse(array, int.MinValue, 0, new int[] { 1, 2, 3 });
+            Reverse(array, int.MinValue, 1, new int[] { 1, 2, 3 });
+            Reverse(array, int.MinValue, 2, new int[] { 2, 1, 3 });
         }
 
         [Fact]
