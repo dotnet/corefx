@@ -67,9 +67,6 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
       <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LowLevelDictionary.cs">
-      <Link>Common\System\Collections\Generic\LowLevelDictionary.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
@@ -78,27 +75,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <!-- TODO: Remove these lines when a new uapaot build is ingested into corefx. -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Hashtable.cs">
-      <Link>Common\System\Collections\Hashtable.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\IHashCodeProvider.cs">
-      <Link>Common\System\Collections\IHashCodeProvider.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\CompatibleComparer.cs">
-      <Link>Common\System\Collections\CompatibleComparer.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\HashHelpers.cs">
-      <Link>Common\System\Collections\HashHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\HashHelpers.SerializationInfoTable.cs">
-      <Link>Common\System\Collections\HashHelpers.SerializationInfoTable.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\KeyValuePairs.cs">
-      <Link>Common\System\Collections\KeyValuePairs.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
@@ -214,8 +190,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
       <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>

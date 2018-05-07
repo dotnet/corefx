@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-internal static partial class Interop
-{
-    internal static partial class Kernel32
-    {
-        internal const uint CP_ACP = 0;
-        internal const uint WC_NO_BEST_FIT_CHARS = 0x00000400;
-    }
-}
+#pragma once
+
+#include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
+DLLEXPORT int64_t SystemNative_GetSystemTimeAsTicks(void);
+
+END_EXTERN_C

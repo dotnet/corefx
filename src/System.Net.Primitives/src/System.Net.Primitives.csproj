@@ -100,9 +100,6 @@
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-      <Link>Common\System\Net\InternalException.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
@@ -132,9 +129,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtStatus.cs">
-      <Link>Common\Interop\Windows\NtDll\Interop.NtStatus.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
@@ -166,8 +160,8 @@
     <Compile Include="$(CommonPath)\System\Net\Sockets\SocketErrorPal.Unix.cs">
       <Link>Common\System\Net\Sockets\SocketErrorPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
