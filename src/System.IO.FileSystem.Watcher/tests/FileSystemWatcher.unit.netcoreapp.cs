@@ -174,27 +174,30 @@ namespace System.IO.Tests
         public void FileSystemWatcher_Directory_Create()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, IO.Path.GetRandomFileName())))
-            using (var fsw = new FileSystemWatcher(dir.Path, "*.exe"))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(Path.Combine(testDirectory.Path, "dirtest"))))
             {
-                fsw.Filters.Add("*.doc");
-                AutoResetEvent are = WatchCreated(fsw);
-                fsw.EnableRaisingEvents = true;
+                string dirName = Path.Combine(testDirectory.Path, "dirtest");
+                string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
+                string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
+                string[] expectedPaths = new string[] { dirName, dirNameSecond,dirNameThird };
 
-                using (var temp = new TempDirectory(Path.Combine(dir.Path, "foo.exe")))
-                {
-                    ExpectEvent(are, "created");
-                }
+                watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
-                using (var temp = new TempDirectory(Path.Combine(dir.Path, "foo.doc")))
-                {
-                    ExpectEvent(are, "created");
-                }
+                Action cleanup = () => Directory.Delete(dirName);
+                Action action = () => Directory.CreateDirectory(dirName);
 
-                using (var temp = new TempDirectory(Path.Combine(dir.Path, "foo.pdb")))
-                {
-                    Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(are, "created"));
-                }
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+
+                cleanup = () => Directory.Delete(dirNameSecond);
+                action = () => Directory.CreateDirectory(dirNameSecond);
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+
+                cleanup = () => Directory.Delete(dirNameThird);
+                action = () => Directory.CreateDirectory(dirNameThird);
+
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
+
             }
         }
 
@@ -202,24 +205,31 @@ namespace System.IO.Tests
         public void FileSystemWatcher_Directory_Create_Empty_Ctor()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, IO.Path.GetRandomFileName())))
-            using (var fsw = new FileSystemWatcher(dir.Path))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(Path.Combine(testDirectory.Path))))
             {
-                AutoResetEvent are = WatchCreated(fsw);
-                fsw.EnableRaisingEvents = true;
+                string dirName = Path.Combine(testDirectory.Path, "dirtest");
+                string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
+                string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
+                string[] expectedPaths = new string[] { dirName, dirNameSecond,dirNameThird };
 
-                using (var temp = new TempDirectory(Path.Combine(dir.Path, "foo.pdb")))
-                {
-                    ExpectEvent(are, "created");
-                }
+                watcher.Filters.Add(Path.GetFileName(dirName));
+                watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
-                fsw.Filters.Add("*.exe");
-                Assert.Equal(1, fsw.Filters.Count);
+                Action cleanup = () => Directory.Delete(dirName);
+                Action action = () => Directory.CreateDirectory(dirName);
 
-                using (var temp = new TempDirectory(Path.Combine(dir.Path, "foo.pdb")))
-                {
-                    Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(are, "created"));
-                }
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+
+                cleanup = () => Directory.Delete(dirNameSecond);
+                action = () => Directory.CreateDirectory(dirNameSecond);
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+
+                cleanup = () => Directory.Delete(dirNameThird);
+                action = () => Directory.CreateDirectory(dirNameThird);
+
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
+
             }
         }
 
