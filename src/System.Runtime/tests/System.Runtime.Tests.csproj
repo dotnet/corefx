@@ -49,6 +49,9 @@
     <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
       <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.Span.cs">
+      <Link>System\StringTests.Span.cs</Link>
+    </Compile>
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttributeTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />

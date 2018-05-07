@@ -96,7 +96,6 @@
     <Compile Include="ReadOnlyBuffer\SequencePosition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
     <Compile Include="ReadOnlySpan\CompareTo.cs" />
     <Compile Include="ReadOnlySpan\Contains.cs" />
@@ -108,7 +107,6 @@
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.char.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.long.cs" />
-    <Compile Include="ReadOnlySpan\EndsWith.StringComparison.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\Equals.cs" />
@@ -118,7 +116,6 @@
     <Compile Include="ReadOnlySpan\ImplicitConversion.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.char.cs" />
-    <Compile Include="ReadOnlySpan\IndexOf.charSpan.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.T.cs" />
@@ -150,7 +147,6 @@
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.char.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.long.cs" />
-    <Compile Include="ReadOnlySpan\StartsWith.StringComparison.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
     <Compile Include="ReadOnlySpan\ToLower.cs" />
@@ -249,6 +245,13 @@
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.Span.cs">
+      <Link>ReadOnlySpan\StringTests.Span.cs</Link>
+    </Compile>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

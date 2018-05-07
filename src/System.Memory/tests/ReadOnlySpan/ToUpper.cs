@@ -110,31 +110,6 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void ToUpper()
-        {
-            var expectedSource = new char[3] { 'a', 'B', 'c' };
-            var expectedDestination = new char[3] { 'A', 'B', 'C' };
-
-            {
-                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
-                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
-
-                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
-            }
-
-            {
-                ReadOnlySpan<char> source = new char[3] { 'a', 'B', 'c' };
-                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
-
-                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
-            }
-        }
-
-        [Fact]
         public static void MakeSureNoToUpperChecksGoOutOfRange()
         {
             for (int length = 0; length < 100; length++)
@@ -194,19 +169,7 @@ namespace System.SpanTests
             {
                 Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
             }
-        }
-
-        [Theory]
-        [InlineData("hello", "HELLO")]
-        [InlineData("HELLO", "HELLO")]
-        [InlineData("", "")]
-        public static void ToUpper(string s, string expected)
-        {
-            ReadOnlySpan<char> source = s.AsSpan();
-            Span<char> destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-            Assert.Equal(expected, destination.ToString());
-        }
+        }        
 
         private static IEnumerable<object[]> ToUpper_Culture_TestData()
         {
@@ -232,98 +195,6 @@ namespace System.SpanTests
             Assert.Equal(source.Length, source.ToUpper(destination, culture));
             Assert.Equal(expected, destination.ToString());
         }
-
-        [Fact]
-        public static void ToUpper_TurkishI_TurkishCulture()
-        {
-            CultureInfo culture = new CultureInfo("tr-TR");
-
-            string s = "H\u0069 World";
-            string expected = "H\u0130 WORLD";
-            ReadOnlySpan<char> source = s.AsSpan();
-            Span<char> destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0130 World";
-            expected = "H\u0130 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0131 World";
-            expected = "H\u0049 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-        }
-
-        [Fact]
-        public static void ToUpper_TurkishI_EnglishUSCulture()
-        {
-            CultureInfo culture = new CultureInfo("en-US");
-
-            string s = "H\u0069 World";
-            string expected = "H\u0049 WORLD";
-            ReadOnlySpan<char> source = s.AsSpan();
-            Span<char> destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0130 World";
-            expected = "H\u0130 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0131 World";
-            expected = "H\u0049 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-        }
-
-        [Fact]
-        public static void ToUpper_TurkishI_InvariantCulture()
-        {
-            CultureInfo culture = CultureInfo.InvariantCulture;
-
-            string s = "H\u0069 World";
-            string expected = "H\u0049 WORLD";
-            ReadOnlySpan<char> source = s.AsSpan();
-            Span<char> destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0130 World";
-            expected = "H\u0130 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-
-            s = "H\u0131 World";
-            expected = "H\u0131 WORLD";
-            source = s.AsSpan();
-            destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpper(destination, culture));
-            Assert.Equal(expected, destination.ToString());
-        }
-
-        [Theory]
-        [InlineData("hello", "HELLO")]
-        [InlineData("HELLO", "HELLO")]
-        [InlineData("", "")]
-        public static void ToUpperInvariant(string s, string expected)
-        {
-            ReadOnlySpan<char> source = s.AsSpan();
-            Span<char> destination = new char[source.Length];
-            Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-            Assert.Equal(expected, destination.ToString());
-        }
+                      
     }
 }
