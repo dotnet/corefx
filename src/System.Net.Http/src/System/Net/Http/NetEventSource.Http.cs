@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Net.Http;
 
@@ -16,15 +17,14 @@ namespace System.Net
         private const int ClientSendCompletedId = ContentNullId + 1;
         private const int HeadersInvalidValueId = ClientSendCompletedId + 1;
         private const int HandlerMessageId = HeadersInvalidValueId + 1;
-        private const int SelectAuthenticationId = HandlerMessageId + 1;
+        private const int AuthenticationInfoId = HandlerMessageId + 1;
+        private const int AuthenticationErrorId = AuthenticationInfoId + 1;
 
         [NonEvent]
         public static void UriBaseAddress(object obj, Uri baseAddress)
         {
-            if (IsEnabled)
-            {
-                Log.UriBaseAddress(baseAddress?.ToString(), IdOf(obj), GetHashCode(obj));
-            }
+            Debug.Assert(IsEnabled);
+            Log.UriBaseAddress(baseAddress?.ToString(), IdOf(obj), GetHashCode(obj));
         }
 
         [Event(UriBaseAddressId, Keywords = Keywords.Debug, Level = EventLevel.Informational)]
@@ -34,10 +34,8 @@ namespace System.Net
         [NonEvent]
         public static void ContentNull(object obj)
         {
-            if (IsEnabled)
-            {
-                Log.ContentNull(IdOf(obj), GetHashCode(obj));
-            }
+            Debug.Assert(IsEnabled);
+            Log.ContentNull(IdOf(obj), GetHashCode(obj));
         }
 
         [Event(ContentNullId, Keywords = Keywords.Debug, Level = EventLevel.Informational)]
@@ -47,17 +45,15 @@ namespace System.Net
         [NonEvent]
         public static void ClientSendCompleted(HttpClient httpClient, HttpResponseMessage response, HttpRequestMessage request)
         {
-            if (IsEnabled)
-            {
-                Log.ClientSendCompleted(response?.ToString(), GetHashCode(request), GetHashCode(response), GetHashCode(httpClient));
-            }
+            Debug.Assert(IsEnabled);
+            Log.ClientSendCompleted(response?.ToString(), GetHashCode(request), GetHashCode(response), GetHashCode(httpClient));
         }
 
         [Event(ClientSendCompletedId, Keywords = Keywords.Debug, Level = EventLevel.Verbose)]
         private void ClientSendCompleted(string responseString, int httpRequestMessageHash, int httpResponseMessageHash, int httpClientHash) =>
             WriteEvent(ClientSendCompletedId, responseString, httpRequestMessageHash, httpResponseMessageHash, httpClientHash);
 
-        [Event(HeadersInvalidValueId, Keywords = Keywords.Debug, Level = EventLevel.Verbose)]
+        [Event(HeadersInvalidValueId, Keywords = Keywords.Debug, Level = EventLevel.Error)]
         public void HeadersInvalidValue(string name, string rawValue) =>
             WriteEvent(HeadersInvalidValueId, name, rawValue);
 
@@ -69,15 +65,24 @@ namespace System.Net
         [NonEvent]
         public static void AuthenticationInfo(Uri uri, string message)
         {
-            if (IsEnabled)
-            {
-                Log.AuthenticationInfo(uri?.ToString(), message);
-            }
+            Debug.Assert(IsEnabled);
+            Log.AuthenticationInfo(uri?.ToString(), message);
         }
 
-        [Event(SelectAuthenticationId, Keywords = Keywords.Debug, Level = EventLevel.Verbose)]
+        [Event(AuthenticationInfoId, Keywords = Keywords.Debug, Level = EventLevel.Verbose)]
         public void AuthenticationInfo(string uri, string message) =>
-            WriteEvent(SelectAuthenticationId, uri, message);
+            WriteEvent(AuthenticationInfoId, uri, message);
+
+        [NonEvent]
+        public static void AuthenticationError(Uri uri, string message)
+        {
+            Debug.Assert(IsEnabled);
+            Log.AuthenticationError(uri?.ToString(), message);
+        }
+
+        [Event(AuthenticationErrorId, Keywords = Keywords.Debug, Level = EventLevel.Error)]
+        public void AuthenticationError(string uri, string message) =>
+            WriteEvent(AuthenticationErrorId, uri, message);
 
         [NonEvent]
         private unsafe void WriteEvent(int eventId, int arg1, int arg2, int arg3, string arg4, string arg5)

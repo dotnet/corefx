@@ -173,7 +173,7 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.AuthenticationInfo(request.RequestUri, $"Unable to find 'Digest' authentication token when authenticating with {(isProxyAuth ? "proxy" : "server")}");
+                    NetEventSource.AuthenticationError(request.RequestUri, $"Unable to find 'Digest' authentication token when authenticating with {(isProxyAuth ? "proxy" : "server")}");
                 }
                 return false;
             }
@@ -249,7 +249,7 @@ namespace System.Net.Http
                         {
                             if (NetEventSource.IsEnabled)
                             {
-                                NetEventSource.AuthenticationInfo(authUri, $"Pre-authentication with {(isProxyAuth ? "proxy" : "server")} failed.");
+                                NetEventSource.AuthenticationError(authUri, $"Pre-authentication with {(isProxyAuth ? "proxy" : "server")} failed.");
                             }
                             break;
                         }
@@ -266,7 +266,7 @@ namespace System.Net.Http
                                 case HttpStatusCode.Unauthorized:
                                     if (NetEventSource.IsEnabled)
                                     {
-                                        NetEventSource.AuthenticationInfo(authUri, $"Pre-authentication with {(isProxyAuth ? "proxy" : "server")} failed.");
+                                        NetEventSource.AuthenticationError(authUri, $"Pre-authentication with {(isProxyAuth ? "proxy" : "server")} failed.");
                                     }
                                     break;
 
@@ -299,7 +299,7 @@ namespace System.Net.Http
 
             if (NetEventSource.IsEnabled && response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                NetEventSource.AuthenticationInfo(authUri, $"{(isProxyAuth ? "Proxy" : "Server")} authentication failed.");
+                NetEventSource.AuthenticationError(authUri, $"{(isProxyAuth ? "Proxy" : "Server")} authentication failed.");
             }
 
             return response;
