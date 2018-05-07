@@ -32,7 +32,7 @@
     <Compile Include="FileSystemWatcher.InternalBufferSize.cs" />
     <Compile Include="FileSystemWatcher.WaitForChanged.cs" />
     <Compile Include="FileSystemWatcher.unit.cs" />
-    <Compile Condition="$(IsNetCoreApp) == 'true'" Include="FileSystemWatcher.unit.netcoreapp.cs" />
+    <Compile Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'" Include="FileSystemWatcher.unit.netcoreapp.cs" />
     <!-- Helpers -->
     <Compile Include="Utility\TestFileSystemWatcher.cs">
       <SubType>Component</SubType>
