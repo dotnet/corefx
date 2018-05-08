@@ -56,7 +56,6 @@ namespace System.Reflection.Tests
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault2", 0, true)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault3", 0, true)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault4", 0, true)]
-        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, true)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultNullableDateTime", 0, true)]
         [InlineData(typeof(GenericClass<int>), "GenericMethodWithDefault", 1, true)]
         [InlineData(typeof(ParameterInfoMetadata), "Method1", 1, false)]
@@ -64,6 +63,15 @@ namespace System.Reflection.Tests
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithOutParameter", 1, false)]
         [InlineData(typeof(GenericClass<int>), "GenericMethod", 0, false)]
         public void HasDefaultValue(Type type, string name, int index, bool expected)
+        {
+            ParameterInfo parameterInfo = GetParameterInfo(type, name, index);
+            Assert.Equal(expected, parameterInfo.HasDefaultValue);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Querying HasDefaultValue of optional DateTime parameter may throw exception on NETFX")]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, true)]
+        public void HasDefaultValue_broken_on_NETFX(Type type, string name, int index, bool expected)
         {
             ParameterInfo parameterInfo = GetParameterInfo(type, name, index);
             Assert.Equal(expected, parameterInfo.HasDefaultValue);
@@ -111,9 +119,17 @@ namespace System.Reflection.Tests
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault2", 0, "abc")]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault3", 0, false)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefault4", 0, '\0')]
-        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, null)]
         [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultNullableDateTime", 0, null)]
         public void DefaultValue(Type type, string name, int index, object expected)
+        {
+            ParameterInfo parameterInfo = GetParameterInfo(type, name, index);
+            Assert.Equal(expected, parameterInfo.DefaultValue);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Querying DefaultValue of optional DateTime parameter may throw exception on NETFX")]
+        [InlineData(typeof(ParameterInfoMetadata), "MethodWithDefaultDateTime", 0, null)]
+        public void DefaultValue_broken_on_NETFX(Type type, string name, int index, object expected)
         {
             ParameterInfo parameterInfo = GetParameterInfo(type, name, index);
             Assert.Equal(expected, parameterInfo.DefaultValue);
