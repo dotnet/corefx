@@ -54,6 +54,11 @@ namespace System.Net.Http
                 // Clear the authorization header.
                 request.Headers.Authorization = null;
 
+                if (NetEventSource.IsEnabled)
+                {
+                    NetEventSource.Info(this, $"Redirecting from {request.RequestUri} to {redirectUri} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
+                }
+
                 // Set up for the redirect
                 request.RequestUri = redirectUri;
                 if (RequestRequiresForceGet(response.StatusCode, request.Method))
@@ -61,6 +66,10 @@ namespace System.Net.Http
                     request.Method = HttpMethod.Get;
                     request.Content = null;
                     request.Headers.TransferEncodingChunked = false;
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(this, $"Modified request from {request.Method} to GET in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
+                    }
                 }
 
                 // Issue the redirected request.
