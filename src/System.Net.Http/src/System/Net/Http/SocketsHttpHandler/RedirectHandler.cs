@@ -63,13 +63,13 @@ namespace System.Net.Http
                 request.RequestUri = redirectUri;
                 if (RequestRequiresForceGet(response.StatusCode, request.Method))
                 {
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(this, $"Modified request from {request.Method} to {HttpMethod.Get} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
+                    }
                     request.Method = HttpMethod.Get;
                     request.Content = null;
                     request.Headers.TransferEncodingChunked = false;
-                    if (NetEventSource.IsEnabled)
-                    {
-                        NetEventSource.Info(this, $"Modified request from {request.Method} to GET in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
-                    }
                 }
 
                 // Issue the redirected request.
