@@ -274,7 +274,7 @@ extern "C" uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                   nullptr,
                                                   nullptr,
                                                   &gssBuffer,
-                                                  0,
+                                                  nullptr,
                                                   nullptr,
                                                   nullptr);
 

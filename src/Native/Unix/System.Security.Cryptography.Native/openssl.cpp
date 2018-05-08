@@ -78,7 +78,7 @@ extern "C" int32_t CryptoNative_GetX509Thumbprint(X509* x509, uint8_t* pBuf, int
         return -SHA_DIGEST_LENGTH;
     }
 
-    if (!X509_digest(x509, EVP_sha1(), pBuf, NULL))
+    if (!X509_digest(x509, EVP_sha1(), pBuf, nullptr))
     {
         return 0;
     }
@@ -104,7 +104,7 @@ extern "C" ASN1_TIME* CryptoNative_GetX509NotBefore(X509* x509)
         return x509->cert_info->validity->notBefore;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -125,7 +125,7 @@ extern "C" ASN1_TIME* CryptoNative_GetX509NotAfter(X509* x509)
         return x509->cert_info->validity->notAfter;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -146,7 +146,7 @@ extern "C" ASN1_TIME* CryptoNative_GetX509CrlNextUpdate(X509_CRL* crl)
         return X509_CRL_get_nextUpdate(crl);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -192,7 +192,7 @@ extern "C" ASN1_OBJECT* CryptoNative_GetX509PublicKeyAlgorithm(X509* x509)
         return x509->cert_info->key->algor->algorithm;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -213,7 +213,7 @@ extern "C" ASN1_OBJECT* CryptoNative_GetX509SignatureAlgorithm(X509* x509)
         return x509->sig_alg->algorithm;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -241,10 +241,10 @@ extern "C" int32_t CryptoNative_GetX509PublicKeyParameterBytes(X509* x509, uint8
     {
         // If pBuf is NULL we're asking for the length, so return 0 (which is negative-zero)
         // If pBuf is non-NULL we're asking to fill the data, in which case we return 1.
-        return pBuf != NULL;
+        return pBuf != nullptr;
     }
     
-    int len = i2d_ASN1_TYPE(parameter, NULL);
+    int len = i2d_ASN1_TYPE(parameter, nullptr);
 
     if (cBuf < len)
     {
@@ -280,7 +280,7 @@ extern "C" ASN1_BIT_STRING* CryptoNative_GetX509PublicKeyBytes(X509* x509)
         return x509->cert_info->key->public_key;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -439,7 +439,7 @@ extern "C" BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32
 
     if (!x509 || !x509->cert_info || nameType < NAME_TYPE_SIMPLE || nameType > NAME_TYPE_URL)
     {
-        return NULL;
+        return nullptr;
     }
 
     // Algorithm behaviors (pseudocode).  When forIssuer is true, replace "Subject" with "Issuer" and
@@ -458,11 +458,11 @@ extern "C" BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32
 
         if (name)
         {
-            ASN1_STRING* cn = NULL;
-            ASN1_STRING* ou = NULL;
-            ASN1_STRING* o = NULL;
-            ASN1_STRING* e = NULL;
-            ASN1_STRING* firstRdn = NULL;
+            ASN1_STRING* cn = nullptr;
+            ASN1_STRING* ou = nullptr;
+            ASN1_STRING* o = nullptr;
+            ASN1_STRING* e = nullptr;
+            ASN1_STRING* firstRdn = nullptr;
 
             // Walk the list backwards because it is stored in stack order
             for (int i = X509_NAME_entry_count(name) - 1; i >= 0; --i)
@@ -564,7 +564,7 @@ extern "C" BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32
         }
 
         STACK_OF(GENERAL_NAME)* altNames = static_cast<STACK_OF(GENERAL_NAME)*>(
-            X509_get_ext_d2i(x509, forIssuer ? NID_issuer_alt_name : NID_subject_alt_name, NULL, NULL));
+            X509_get_ext_d2i(x509, forIssuer ? NID_issuer_alt_name : NID_subject_alt_name, nullptr, nullptr));
 
         if (altNames)
         {
@@ -576,7 +576,7 @@ extern "C" BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32
 
                 if (altName && altName->type == expectedType)
                 {
-                    ASN1_STRING* str = NULL;
+                    ASN1_STRING* str = nullptr;
 
                     switch (nameType)
                     {
@@ -674,7 +674,7 @@ extern "C" BIO* CryptoNative_GetX509NameInfo(X509* x509, int32_t nameType, int32
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -820,7 +820,7 @@ extern "C" int32_t CryptoNative_CheckX509Hostname(X509* x509, const char* hostna
     int subjectNid = NID_commonName;
     int sanGenType = GEN_DNS;
     GENERAL_NAMES* san = static_cast<GENERAL_NAMES*>(
-        X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL));
+        X509_get_ext_d2i(x509, NID_subject_alt_name, nullptr, nullptr));
     char readSubject = 1;
     int success = 0;
 
@@ -908,7 +908,7 @@ extern "C" int32_t CryptoNative_CheckX509IpAddress(
 
     int subjectNid = NID_commonName;
     int sanGenType = GEN_IPADD;
-    GENERAL_NAMES* san = static_cast<GENERAL_NAMES*>(X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL));
+    GENERAL_NAMES* san = static_cast<GENERAL_NAMES*>(X509_get_ext_d2i(x509, NID_subject_alt_name, nullptr, nullptr));
     int success = 0;
 
     if (san)
@@ -1069,7 +1069,7 @@ otherwise NULL.
 */
 extern "C" X509* CryptoNative_ReadX509AsDerFromBio(BIO* bio)
 {
-    return d2i_X509_bio(bio, NULL);
+    return d2i_X509_bio(bio, nullptr);
 }
 
 /*
@@ -1342,7 +1342,7 @@ extern "C" int32_t CryptoNative_EnsureOpenSslInitialized()
     // Initialize each of the locks
     for (locksInitialized = 0; locksInitialized < numLocks; locksInitialized++)
     {
-        if (pthread_mutex_init(&g_locks[locksInitialized], NULL) != 0)
+        if (pthread_mutex_init(&g_locks[locksInitialized], nullptr) != 0)
         {
             ret = 3;
             goto done;
@@ -1383,7 +1383,7 @@ done:
                 pthread_mutex_destroy(&g_locks[i]); // ignore failures
             }
             delete[] g_locks;
-            g_locks = NULL;
+            g_locks = nullptr;
         }
     }
 

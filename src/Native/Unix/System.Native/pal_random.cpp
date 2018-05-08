@@ -91,7 +91,7 @@ extern "C" void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* b
 
     if (!sInitializedMRand)
     {
-        srand48(time(NULL));
+        srand48(time(nullptr));
         sInitializedMRand = true;
     }
 
