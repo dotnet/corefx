@@ -121,9 +121,14 @@ namespace System.Tests
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => Array.Reverse(new string[0], -1, 0));
         }
-        
+
+        [Fact]
+        public static void Reverse_Generic_NegativeLength_ThrowsArgumentOutOfRangeException()
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => Array.Reverse(new string[0], 0, -1));
+        }
+
         [Theory]
-        [InlineData(0, 0, -1)]
         [InlineData(0, 0, 1)]
         [InlineData(3, 4, 0)]
         [InlineData(3, 3, 1)]
@@ -132,7 +137,7 @@ namespace System.Tests
         [InlineData(3, 0, 4)]
         public static void Reverse_Generic_InvalidOffsetPlusLength_ThrowsArgumentException(int arrayLength, int index, int length)
         {
-            Assert.ThrowsAny<ArgumentException>(() => Array.Reverse(new string[arrayLength], index, length));
+            AssertExtensions.Throws<ArgumentException>(null, () => Array.Reverse(new string[arrayLength], index, length));
         }
 
         [Fact]
