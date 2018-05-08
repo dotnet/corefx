@@ -67,6 +67,7 @@ namespace System.Net.Http
                     {
                         NetEventSource.Info(this, $"Modified request from {request.Method} to {HttpMethod.Get} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
                     }
+
                     request.Method = HttpMethod.Get;
                     request.Content = null;
                     request.Headers.TransferEncodingChunked = false;
