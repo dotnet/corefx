@@ -707,11 +707,6 @@ namespace System.IO
             {
                 base.SetItem(index, string.IsNullOrEmpty(item) || item == "*.*" ? "*" : item);
             }
-
-            public override string ToString()
-            {
-                return "System.Collections.ObjectModel.Collection`1[System.String]";
-            }
         }
     }
 }

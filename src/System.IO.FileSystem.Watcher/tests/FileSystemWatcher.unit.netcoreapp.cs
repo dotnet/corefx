@@ -17,7 +17,7 @@ namespace System.IO.Tests
             Assert.Equal(0, watcher.Filters.Count);
             Assert.Empty(watcher.Filters);
             Assert.NotNull(watcher.Filters);
-            EqualItems(new Collection<string> { }, watcher.Filters);
+            Assert.Equal(new string[] { }, watcher.Filters);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
             Assert.Equal(2, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace System.IO.Tests
 
             watcher.Filters.Remove("*.pdb");
             Assert.DoesNotContain(watcher.Filters, t => t == "*.pdb");
-            EqualItems(new Collection<string> { "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.dll" }, watcher.Filters);
 
             // No Exception is thrown while removing an item which is not present in the list.
             watcher.Filters.Remove("*.pdb");
@@ -64,7 +64,7 @@ namespace System.IO.Tests
 
             watcher.Filters.Add(string.Empty);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace System.IO.Tests
 
             watcher.Filters.Add(null);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace System.IO.Tests
             watcher.Filters[0] = string.Empty;
             Assert.Equal(2, watcher.Filters.Count);
             Assert.Equal("*", watcher.Filters[0]);
-            EqualItems(new Collection<string> { "*", "*.dll"}, watcher.Filters);
+            Assert.Equal(new string[] { "*", "*.dll"}, watcher.Filters);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.IO.Tests
             Assert.Equal(3, watcher.Filters.Count);
             watcher.Filters.Remove(string.Empty);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*.dll", "*" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace System.IO.Tests
             watcher.Filters.RemoveAt(0);
             Assert.Equal(1, watcher.Filters.Count);
             Assert.Equal("*.dll", watcher.Filter);
-            EqualItems(new Collection<string> {"*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] {"*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace System.IO.Tests
             watcher.Filters.RemoveAt(0);
             Assert.Equal(0, watcher.Filters.Count);
             Assert.Equal("*", watcher.Filter);
-            EqualItems(new Collection<string> { }, watcher.Filters);
+            Assert.Equal(new string[] { }, watcher.Filters);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace System.IO.Tests
             watcher.Filters[0] = null;
             Assert.Equal(2, watcher.Filters.Count);
             Assert.Equal("*", watcher.Filters[0]);
-            EqualItems(new Collection<string> { "*", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*", "*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace System.IO.Tests
 
             Assert.Equal("*", watcher.Filters[1]);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*", "*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace System.IO.Tests
 
             Assert.Equal("*", watcher.Filters[1]);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "*", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "*", "*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -215,7 +215,7 @@ namespace System.IO.Tests
 
             Assert.Equal("foo", watcher.Filters[1]);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "*.pdb", "foo", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "*.pdb", "foo", "*.dll" }, watcher.Filters);
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace System.IO.Tests
             Assert.Equal("foo", watcher.Filters[0]);
             Assert.Equal("foo", watcher.Filter);
             Assert.Equal(3, watcher.Filters.Count);
-            EqualItems(new Collection<string> { "foo", "*.pdb", "*.dll" }, watcher.Filters);
+            Assert.Equal(new string[] { "foo", "*.pdb", "*.dll" }, watcher.Filters);
         }
         [Fact]
         public void IndexOfEmptyStringFilters()
@@ -265,13 +265,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void ToStringFilters()
-        {
-            var watcher = new FileSystemWatcher();
-            Assert.Equal(new Collection<string>().ToString(), watcher.Filters.ToString());
-        }
-
-        [Fact]
         public void GetTypeFilters()
         {
             var watcher = new FileSystemWatcher();
@@ -287,7 +280,7 @@ namespace System.IO.Tests
 
             watcher.Filters.Clear();
             Assert.Equal(0, watcher.Filters.Count);
-            EqualItems(new Collection<string> { }, watcher.Filters);
+            Assert.Equal(new string[] { }, watcher.Filters) ;
         }
 
         [Fact]
@@ -301,7 +294,7 @@ namespace System.IO.Tests
 
                 watcher.Filters.Clear();
                 Assert.Equal("*", watcher.Filter);
-                EqualItems(new Collection<string> { }, watcher.Filters);
+                Assert.Equal(new string[] { }, watcher.Filters);
             }
         }
 
@@ -342,13 +335,13 @@ namespace System.IO.Tests
                 var watcher = new FileSystemWatcher(testDirectory.Path, "*.pdb");
                 watcher.Filters.Add("foo");
                 Assert.Equal(2, watcher.Filters.Count);
-                EqualItems(new Collection<string> { "*.pdb", "foo" }, watcher.Filters);
+                Assert.Equal(new string[] { "*.pdb", "foo" }, watcher.Filters);
 
                 watcher.Filter = "*.doc";
                 Assert.Equal(1, watcher.Filters.Count);
                 Assert.Equal("*.doc", watcher.Filter);
                 Assert.Equal("*.doc", watcher.Filters[0]);
-                EqualItems(new Collection<string> { "*.doc" }, watcher.Filters);
+                Assert.Equal(new string[] { "*.doc" }, watcher.Filters);
 
                 watcher.Filters.Clear();
                 Assert.Equal("*", watcher.Filter);
@@ -362,7 +355,7 @@ namespace System.IO.Tests
             {
                 var watcher = new FileSystemWatcher(testDirectory.Path, "*.pdb");
                 watcher.Filters.Add("foo");
-                EqualItems(new Collection<string> { "*.pdb", "foo" }, watcher.Filters);
+                Assert.Equal(new string[] { "*.pdb", "foo" }, watcher.Filters);
             }
         }
 
@@ -504,16 +497,6 @@ namespace System.IO.Tests
                 cleanup();
 
                 ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, expectedPaths);
-            }
-        }
-
-        private void EqualItems(Collection<string> firstCollection, Collection<string> secondCollection)
-        {
-            Assert.True(firstCollection.Count == secondCollection.Count, $"The collections vary in the count\nExpected Count: {firstCollection.Count}\nActual Value: {secondCollection.Count}");
-
-            for (int i = 0; i < firstCollection.Count; i++)
-            {
-                Assert.True(firstCollection[i] == secondCollection[i], $"The collections varies at {i} poistion\nExpected Value: {firstCollection[i]}\nActual Value: {secondCollection[i]} ");
             }
         }
     }
