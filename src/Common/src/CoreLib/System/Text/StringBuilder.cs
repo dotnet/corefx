@@ -1867,10 +1867,18 @@ namespace System.Text
         [CLSCompliant(false)]
         public unsafe StringBuilder Append(char* value, int valueCount)
         {
-            // We don't check null value as this case will throw null reference exception anyway
             if (valueCount < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(valueCount), SR.ArgumentOutOfRange_NegativeCount);
+            }
+
+            if (value == null)
+            {
+                if (valueCount == 0)
+                {
+                    return this;
+                }
+                throw new ArgumentNullException(nameof(value));
             }
 
             // this is where we can check if the valueCount will put us over m_MaxCapacity
