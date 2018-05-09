@@ -15,8 +15,6 @@ namespace System.Drawing
         private Size _maximumBuffer;
         private Size _bufferSize = Size.Empty;
 
-        private static TraceSwitch s_doubleBuffering;
-
         /// <summary>
         /// Basic constructor.
         /// </summary>
@@ -25,22 +23,6 @@ namespace System.Drawing
             // By defualt, the size of our maxbuffer will be 3 x standard button size.
             _maximumBuffer.Width = 75 * 3;
             _maximumBuffer.Height = 32 * 3;
-        }
-
-        /// <summary>
-        /// Internal trace switch for debugging
-        /// </summary>
-        internal static TraceSwitch DoubleBuffering
-        {
-            get
-            {
-                if (s_doubleBuffering == null)
-                {
-                    s_doubleBuffering = new TraceSwitch("DoubleBuffering", "Output information about double buffering");
-                }
-
-                return s_doubleBuffering;
-            }
         }
 
         /// <summary>
@@ -79,7 +61,6 @@ namespace System.Drawing
         {
             if (ShouldUseTempManager(targetRectangle))
             {
-                Debug.WriteLineIf(DoubleBuffering.TraceWarning, "Too big of buffer requested (" + targetRectangle.Width + " x " + targetRectangle.Height + ") ... allocating temp buffer manager");
                 return AllocBufferInTempManager(targetGraphics, IntPtr.Zero, targetRectangle);
             }
 
@@ -93,7 +74,6 @@ namespace System.Drawing
         {
             if (ShouldUseTempManager(targetRectangle))
             {
-                Debug.WriteLineIf(DoubleBuffering.TraceWarning, "Too big of buffer requested (" + targetRectangle.Width + " x " + targetRectangle.Height + ") ... allocating temp buffer manager");
                 return AllocBufferInTempManager(null, targetDC, targetRectangle);
             }
 
