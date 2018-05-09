@@ -1,0 +1,4 @@
+<Project>
+  <!-- Workaround since Microsoft.AspNetCore.All hasn't updated their package targets to support netcoreapp2.2 -->
+  <Target Name="EnsureTFMCompatibility" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" />
+</Project>
