@@ -146,6 +146,40 @@ namespace System.IO.Tests
         }
 
         /// <summary>
+        /// Does verification that the given watcher will throw exactly/only the events in "expectedEvents" when
+        /// "action" is executed.
+        /// </summary>
+        /// <param name="watcher">The FileSystemWatcher to test</param>
+        /// <param name="expectedEvents">All of the events that are expected to be raised by this action</param>
+        /// <param name="action">The Action that will trigger events.</param>
+        /// <param name="cleanup">Optional. Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
+        /// <param name="expectedPath">Optional. Adds path verification to all expected events.</param>
+        /// <param name="attempts">Optional. Number of times the test should be executed if it's failing.</param>
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string[] expectedPaths = null, int attempts = DefaultAttemptsForExpectedEvent, int timeout = WaitForExpectedEventTimeout)
+        {
+            int attemptsCompleted = 0;
+            bool result = false;
+            FileSystemWatcher newWatcher = watcher;
+            while (!result && attemptsCompleted++ < attempts)
+            {
+                if (attemptsCompleted > 1)
+                {
+                    // Re-create the watcher to get a clean iteration.
+                    newWatcher = RecreateWatcher(newWatcher);
+                    // Most intermittent failures in FSW are caused by either a shortage of resources (e.g. inotify instances)
+                    // or by insufficient time to execute (e.g. CI gets bogged down). Immediately re-running a failed test
+                    // won't resolve the first issue, so we wait a little while hoping that things clear up for the next run.
+                    Thread.Sleep(500);
+                }
+
+                result = ExecuteAndVerifyEvents(newWatcher, expectedEvents, action, attemptsCompleted == attempts, expectedPaths, timeout);
+
+                if (cleanup != null)
+                    cleanup();
+            }
+        }
+
+        /// <summary>
         /// Helper for the ExpectEvent function. 
         /// </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
@@ -205,7 +239,7 @@ namespace System.IO.Tests
             if (verifyRenamed)
             {
                 bool Renamed_expected = ((expectedEvents & WatcherChangeTypes.Renamed) > 0);
-                bool Renamed_actual = renamed.WaitOne(verifyChanged || verifyCreated  || verifyDeleted? SubsequentExpectedWait : timeout);
+                bool Renamed_actual = renamed.WaitOne(verifyChanged || verifyCreated || verifyDeleted ? SubsequentExpectedWait : timeout);
                 result = result && Renamed_expected == Renamed_actual;
                 if (assertExpected)
                     Assert.True(Renamed_expected == Renamed_actual, "Renamed event did not occur as expected");
@@ -366,7 +400,7 @@ namespace System.IO.Tests
             foreach (NotifyFilters filter in Enum.GetValues(typeof(NotifyFilters)))
                 yield return new object[] { filter };
         }
-        
+
         // Linux and OSX systems have less precise filtering systems than Windows, so most
         // metadata filters are effectively equivalent to each other on those systems. For example
         // there isn't a way to filter only LastWrite events on either system; setting
