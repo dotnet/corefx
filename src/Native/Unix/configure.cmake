@@ -125,7 +125,7 @@ check_symbol_exists(
 
 check_symbol_exists(
     getmntinfo
-    mount.h
+    sys/mount.h
     HAVE_MNTINFO)
 
 check_symbol_exists(
