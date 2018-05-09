@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace System.Net.Http
                     // then just return the 3xx response.
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Error(this, $"Exceeded max number of redirects. Redirect from {request.RequestUri} to {redirectUri} blocked.");
+                        TraceError($"Exceeded max number of redirects. Redirect from {request.RequestUri} to {redirectUri} blocked.", request.GetHashCode());
                     }
 
                     break;
@@ -56,7 +57,7 @@ namespace System.Net.Http
 
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.Info(this, $"Redirecting from {request.RequestUri} to {redirectUri} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
+                    Trace($"Redirecting from {request.RequestUri} to {redirectUri} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.", request.GetHashCode());
                 }
 
                 // Set up for the redirect
@@ -65,7 +66,7 @@ namespace System.Net.Http
                 {
                     if (NetEventSource.IsEnabled)
                     {
-                        NetEventSource.Info(this, $"Modified request from {request.Method} to {HttpMethod.Get} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.");
+                        Trace($"Modified request from {request.Method} to {HttpMethod.Get} in response to status code {(int)response.StatusCode} '{response.StatusCode}'.", request.GetHashCode());
                     }
 
                     request.Method = HttpMethod.Get;
@@ -126,7 +127,7 @@ namespace System.Net.Http
             {
                 if (NetEventSource.IsEnabled)
                 {
-                    NetEventSource.Error(this, $"Insecure https to http redirect from '{requestUri}' to '{location}' blocked.");
+                    TraceError($"Insecure https to http redirect from '{requestUri}' to '{location}' blocked.", response.RequestMessage.GetHashCode());
                 }
 
                 return null;
@@ -159,6 +160,12 @@ namespace System.Net.Http
 
             base.Dispose(disposing);
         }
+
+        internal void Trace(string message, int requestId, [CallerMemberName] string memberName = null) =>
+            NetEventSource.Log.HandlerMessage(0, 0, requestId, memberName, ToString() + ": " + message);
+
+        internal void TraceError(string message, int requestId, [CallerMemberName] string memberName = null) =>
+            NetEventSource.Log.HandlerMessageError(0, 0, requestId, memberName, ToString() + ": " + message);
     }
 }
 
