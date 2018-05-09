@@ -153,8 +153,9 @@ check_function_exists(
     sched_setaffinity
     HAVE_SCHED_SETAFFINITY)
 
-check_function_exists(
+check_symbol_exists(
     arc4random
+    "stdlib.h"
     HAVE_ARC4RANDOM)
 
 check_symbol_exists(
@@ -335,8 +336,9 @@ check_function_exists(
     accept4
     HAVE_ACCEPT4)
 
-check_function_exists(
+check_symbol_exists(
     kqueue
+    "sys/event.h"
     HAVE_KQUEUE)
 
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
