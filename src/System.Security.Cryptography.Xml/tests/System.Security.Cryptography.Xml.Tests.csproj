@@ -21,7 +21,6 @@
     <Compile Include="EncryptedXmlTests.cs" />
     <Compile Include="EncryptionPropertyCollectionTest.cs" />
     <Compile Include="EncryptionPropertyTest.cs" />
-    <Compile Include="KeyInfo_ArbitraryElements.cs" />
     <Compile Include="SignedXml_Helpers.cs" />
     <Compile Include="KeyInfoNameTest.cs" />
     <Compile Include="KeyInfoNodeTest.cs" />
@@ -29,7 +28,6 @@
     <Compile Include="KeyInfoTest.cs" />
     <Compile Include="KeyInfoTests.cs" />
     <Compile Include="KeyInfoX509DataTest.cs" />
-    <Compile Include="Reference_ArbitraryElements.cs" />
     <Compile Include="ReferenceTest.cs" />
     <Compile Include="RSAKeyValueTest.cs" />
     <Compile Include="Samples\EncryptingDecryptingSymmetricKeyWrap.cs" />
@@ -38,19 +36,14 @@
     <Compile Include="Samples\SigningVerifyingX509Cert.cs" />
     <Compile Include="Samples\SigningVerifying.cs" />
     <Compile Include="Samples\EncryptingDecryptingSymmetric.cs" />
-    <Compile Include="Signature_ArbitraryElements.cs" />
     <Compile Include="SignatureTest.cs" />
-    <Compile Include="SignedInfo_ArbitraryElements.cs" />
     <Compile Include="SignedInfoTest.cs" />
     <Compile Include="SignedXmlTest.cs" />
     <Compile Include="SignedXmlTests.cs" />
-    <Compile Include="SignedXml_SignatureMethodAlgorithm.cs" />
-    <Compile Include="SignedXml_Limits.cs" />
     <Compile Include="SymmetricAlgorithmFactory.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TransformChainTest.cs" />
     <Compile Include="TransformTest.cs" />
-    <Compile Include="XmlDecryptionTransformTest.cs" />
     <Compile Include="XmlDsigBase64TransformTest.cs" />
     <Compile Include="XmlDsigC14NTransformTest.cs" />
     <Compile Include="XmlDsigC14NWithCommentsTransformTest.cs" />
@@ -68,6 +61,15 @@
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="KeyInfo_ArbitraryElements.cs" />
+    <Compile Include="Reference_ArbitraryElements.cs" />
+    <Compile Include="Signature_ArbitraryElements.cs" />
+    <Compile Include="SignedInfo_ArbitraryElements.cs" />
+    <Compile Include="SignedXml_Limits.cs" />
+    <Compile Include="SignedXml_SignatureMethodAlgorithm.cs" />
+    <Compile Include="XmlDecryptionTransformTest.cs" />
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EncryptedXmlSample3.xml" />
     <EmbeddedResource Include="EncryptedXmlSample2.xml" />
@@ -77,6 +79,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
