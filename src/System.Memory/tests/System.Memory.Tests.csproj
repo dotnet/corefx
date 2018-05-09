@@ -30,6 +30,10 @@
     <Compile Include="TestMemory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
     <Compile Include="Span\AsSpan.cs" />
     <Compile Include="Span\Fill.cs" />
     <Compile Include="Span\Clear.cs" />
@@ -84,6 +88,9 @@
     <Compile Include="Span\StartsWith.T.cs" />
     <Compile Include="Span\ToArray.cs" />
     <Compile Include="Span\ToString.cs" />
+    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
+      <Link>Span\StringTests.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />

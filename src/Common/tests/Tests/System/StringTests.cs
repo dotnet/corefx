@@ -15,6 +15,7 @@ using Xunit;
 
 namespace System.Tests
 {
+    //When add new tests make sure to add checks for both string and span APIs where relevant.
     public partial class StringTests : RemoteExecutorTestBase
     {
         private const string SoftHyphen = "\u00AD";

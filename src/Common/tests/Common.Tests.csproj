@@ -14,6 +14,10 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
@@ -78,6 +82,7 @@
     <Compile Include="Tests\System\Security\IdentityHelperTests.cs" />
     <Compile Include="Tests\System\Text\ValueStringBuilderTests.cs" />
     <Compile Include="Tests\System\StringExtensions.Tests.cs" />
+    <Compile Include="Tests\System\StringTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\ArrayBuilderTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\LargeArrayBuilderTests.cs" />
     <Compile Include="Tests\System\IO\RowConfigReaderTests.cs" />
