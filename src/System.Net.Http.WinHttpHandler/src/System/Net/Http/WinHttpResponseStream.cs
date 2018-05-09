@@ -319,6 +319,8 @@ namespace System.Net.Http
                     if (NetEventSource.IsEnabled) NetEventSource.Info("after dispose");
                 }
             }
+
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }        
     }
 }
