@@ -19,7 +19,6 @@ namespace System.IO.Tests
                 InternalBufferSize = watcher.InternalBufferSize
             };
 
-            // Adding the multiple filters.
             foreach (string filter in watcher.Filters)
             {
                 newWatcher.Filters.Add(filter);
