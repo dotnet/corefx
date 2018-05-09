@@ -24,6 +24,27 @@
       }
     },
     {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Install Signing Plugin",
+      "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), in(variables.PB_SignType, 'real', 'test'))",
+      "task": {
+        "id": "30666190-6959-11e5-9f96-f56098202fef",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "signType": "real",
+        "zipSources": "true",
+        "version": "",
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
+        "esrpSigning": "$(PB_UseEsrpSigning)"
+      }
+    },
+    {
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
@@ -140,6 +161,26 @@
         "inlineScript": "param($OfficialBuildId)\n  msbuild build.proj /t:CreateOrUpdateCurrentVersionFile /p:OfficialBuildId=$OfficialBuildId /p:BuildVersionFile=bin\\obj\\BuildVersion-$OfficialBuildId.props",
         "workingFolder": "$(Pipeline.SourcesDirectory)",
         "failOnStandardError": "true"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Sign Packages",
+      "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), in(variables.PB_SignType, 'real', 'test'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "msbuild",
+        "arguments": "src\\publish.proj /t:SignPackages /p:SignType=$(PB_SignType) /p:ConfigurationGroup=$(PB_ConfigurationGroup)",
+        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "failOnStandardError": "false"
       }
     },
     {
