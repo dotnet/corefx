@@ -235,9 +235,10 @@ else ()
 endif ()
 
 set(CMAKE_EXTRA_INCLUDE_FILES ${STATFS_INCLUDES})
+
 check_symbol_exists(
-    "statfs",
-    STATFS_INCLUDES,
+    "statfs"
+    STATFS_INCLUDES
     HAVE_STATFS
 )
 
