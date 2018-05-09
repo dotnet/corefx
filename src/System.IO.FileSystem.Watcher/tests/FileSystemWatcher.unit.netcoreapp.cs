@@ -360,6 +360,35 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void FileSystemWatcher_File_Delete()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            {
+                string fileName = Path.Combine(testDirectory.Path, "file");
+                string secondFileName = Path.Combine(testDirectory.Path, "Secondfile");
+
+                // Adding Multiple Filters to the watcher.
+                watcher.Filters.Add(Path.GetFileName(fileName));
+                watcher.Filters.Add(Path.GetFileName(secondFileName));
+
+                // Creating an action for the files matching the first filter.
+                Action action = () => File.Delete(fileName);
+                File.Create(fileName).Dispose();
+
+                // Running the action and checking whether the event has been raised for first filter.
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
+
+                // Creating the action for the files matching the second filter.
+                Action action2 = () => File.Delete(secondFileName);
+                File.Create(secondFileName).Dispose();
+
+                // Running the action and checking whether the event has been raised for second filter.
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action2, null);
+            }
+        }
+
+        [Fact]
         public void FileSystemWatcher_Directory_Create()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -368,24 +397,20 @@ namespace System.IO.Tests
                 string dirName = Path.Combine(testDirectory.Path, "dirtest");
                 string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
                 string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
-                string[] expectedPaths = new string[] { dirName, dirNameSecond,dirNameThird };
 
                 watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
                 Action action = () => Directory.CreateDirectory(dirName);
-                Action cleanup = () => Directory.Delete(dirName);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
 
                 action = () => Directory.CreateDirectory(dirNameSecond);
-                cleanup = () => Directory.Delete(dirNameSecond);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
 
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
-
+                // Creating an action for the files not matching any of the filters in the Filters property.
                 action = () => Directory.CreateDirectory(dirNameThird);
-                cleanup = () => Directory.Delete(dirNameThird);
 
-                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
+                // Running the action and checking whether the event has not been raised.
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, null));
             }
         }
 
@@ -398,25 +423,18 @@ namespace System.IO.Tests
                 string dirName = Path.Combine(testDirectory.Path, "dirtest");
                 string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
                 string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
-                string[] expectedPaths = new string[] { dirName, dirNameSecond,dirNameThird };
 
                 watcher.Filters.Add(Path.GetFileName(dirName));
                 watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
                 Action action = () => Directory.CreateDirectory(dirName);
-                Action cleanup = () => Directory.Delete(dirName);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
 
                 action = () => Directory.CreateDirectory(dirNameSecond);
-                cleanup = () => Directory.Delete(dirNameSecond);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
 
                 action = () => Directory.CreateDirectory(dirNameThird);
-                cleanup = () => Directory.Delete(dirNameThird);
-
-                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths));
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, null));
             }
         }
 
@@ -428,22 +446,19 @@ namespace System.IO.Tests
             {
                 string dirName = Path.Combine(testDirectory.Path, "dirtest");
                 string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
-                string[] expectedPaths = new string[] { dirName, dirNameSecond };
 
                 watcher.Filters.Add(Path.GetFileName(dirName));
                 watcher.Filters.Add(Path.GetFileName(dirNameSecond));
 
                 Action action = () => Directory.Delete(dirName);
-                Action cleanup = () => Directory.CreateDirectory(dirName);
-                cleanup();
+                Directory.CreateDirectory(dirName);
 
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
 
                 action = () => Directory.Delete(dirNameSecond);
-                cleanup = () => Directory.CreateDirectory(dirNameSecond);
-                cleanup();
+                Directory.CreateDirectory(dirNameSecond);
 
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
             }
         }
 
@@ -455,48 +470,15 @@ namespace System.IO.Tests
             {
                 string fileName = Path.Combine(testDirectory.Path, "file");
                 string secondFileName = Path.Combine(testDirectory.Path, "Secondfile");
-                string[] expectedPaths = new string[] { fileName, secondFileName };
 
                 watcher.Filters.Add(Path.GetFileName(fileName));
                 watcher.Filters.Add(Path.GetFileName(secondFileName));
 
                 Action action = () => File.Create(fileName).Dispose();
-                Action cleanup = () => File.Delete(fileName);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
 
                 action = () => File.Create(secondFileName).Dispose();
-                cleanup = () => File.Delete(secondFileName);
-                cleanup();
-
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, cleanup, expectedPaths);
-            }
-        }
-
-        [Fact]
-        public void FileSystemWatcher_File_Delete()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                string fileName = Path.Combine(testDirectory.Path, "file");
-                string secondFileName = Path.Combine(testDirectory.Path, "Secondfile");
-                string[] expectedPaths = new string[] { fileName, secondFileName };
-
-                watcher.Filters.Add(Path.GetFileName(fileName));
-                watcher.Filters.Add(Path.GetFileName(secondFileName));
-
-                Action action = () => File.Delete(fileName);
-                Action cleanup = () => File.Create(fileName).Dispose();
-                cleanup();
-
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, expectedPaths);
-
-                action = () => File.Delete(secondFileName);
-                cleanup = () => File.Create(secondFileName).Dispose();
-                cleanup();
-
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, expectedPaths);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
             }
         }
     }
