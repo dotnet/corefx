@@ -360,125 +360,98 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileSystemWatcher_File_Delete()
+        public void FileSystemWatcher_File_Delete_MultipleFilters()
         {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            // Check delete events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileTwo = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            fileOne.Create().Dispose();
+            fileTwo.Create().Dispose();
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
             {
-                string fileName = Path.Combine(testDirectory.Path, "file");
-                string secondFileName = Path.Combine(testDirectory.Path, "Secondfile");
+                watcher.Filters.Add(fileOne.Name);
+                watcher.Filters.Add(fileTwo.Name);
 
-                // Adding Multiple Filters to the watcher.
-                watcher.Filters.Add(Path.GetFileName(fileName));
-                watcher.Filters.Add(Path.GetFileName(secondFileName));
-
-                // Creating an action for the files matching the first filter.
-                Action action = () => File.Delete(fileName);
-                File.Create(fileName).Dispose();
-
-                // Running the action and checking whether the event has been raised for first filter.
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
-
-                // Creating the action for the files matching the second filter.
-                Action action2 = () => File.Delete(secondFileName);
-                File.Create(secondFileName).Dispose();
-
-                // Running the action and checking whether the event has been raised for second filter.
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action2, null);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileOne.Delete(), cleanup: null);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileTwo.Delete(), cleanup: null);
             }
         }
 
         [Fact]
-        public void FileSystemWatcher_Directory_Create()
+        public void FileSystemWatcher_Directory_Create_MultipleFilters()
         {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(Path.Combine(testDirectory.Path, "dirtest"))))
+            // Check create events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            string directoryOne = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryTwo = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryThree = Path.Combine(directory.FullName, GetTestFileName());
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
             {
-                string dirName = Path.Combine(testDirectory.Path, "dirtest");
-                string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
-                string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
+                watcher.Filters.Add(Path.GetFileName(directoryOne));
+                watcher.Filters.Add(Path.GetFileName(directoryTwo));
 
-                watcher.Filters.Add(Path.GetFileName(dirNameSecond));
-
-                Action action = () => Directory.CreateDirectory(dirName);
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
-
-                action = () => Directory.CreateDirectory(dirNameSecond);
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
-
-                // Creating an action for the files not matching any of the filters in the Filters property.
-                action = () => Directory.CreateDirectory(dirNameThird);
-
-                // Running the action and checking whether the event has not been raised.
-                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, null));
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null);
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null));
             }
         }
 
         [Fact]
-        public void FileSystemWatcher_Directory_Create_Empty_Ctor()
+        public void FileSystemWatcher_Directory_Create_Filter_Ctor()
         {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(Path.Combine(testDirectory.Path))))
+            // Check create events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            string directoryOne = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryTwo = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryThree = Path.Combine(directory.FullName, GetTestFileName());
+
+            using (var watcher = new FileSystemWatcher(directory.FullName, Path.GetFileName(directoryOne)))
             {
-                string dirName = Path.Combine(testDirectory.Path, "dirtest");
-                string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
-                string dirNameThird = Path.Combine(testDirectory.Path, "dirtfoo");
+                watcher.Filters.Add(Path.GetFileName(directoryTwo));
 
-                watcher.Filters.Add(Path.GetFileName(dirName));
-                watcher.Filters.Add(Path.GetFileName(dirNameSecond));
-
-                Action action = () => Directory.CreateDirectory(dirName);
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
-
-                action = () => Directory.CreateDirectory(dirNameSecond);
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
-
-                action = () => Directory.CreateDirectory(dirNameThird);
-                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, action, null));
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null);
+                Assert.Throws<Xunit.Sdk.TrueException>(() => ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null));
             }
         }
 
         [Fact]
-        public void FileSystemWatcher_Directory_Delete()
+        public void FileSystemWatcher_Directory_Delete_MultipleFilters()
         {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo directoryOne = Directory.CreateDirectory(Path.Combine(directory.FullName, GetTestFileName()));
+            DirectoryInfo directoryTwo = Directory.CreateDirectory(Path.Combine(directory.FullName, GetTestFileName()));
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
             {
-                string dirName = Path.Combine(testDirectory.Path, "dirtest");
-                string dirNameSecond = Path.Combine(testDirectory.Path, "dirfoo");
+                watcher.Filters.Add(Path.GetFileName(directoryOne.FullName));
+                watcher.Filters.Add(Path.GetFileName(directoryTwo.FullName));
 
-                watcher.Filters.Add(Path.GetFileName(dirName));
-                watcher.Filters.Add(Path.GetFileName(dirNameSecond));
-
-                Action action = () => Directory.Delete(dirName);
-                Directory.CreateDirectory(dirName);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
-
-                action = () => Directory.Delete(dirNameSecond);
-                Directory.CreateDirectory(dirNameSecond);
-
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, null);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryOne.Delete(), cleanup: null);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryTwo.Delete(), cleanup: null);
             }
         }
 
         [Fact]
-        public void FileSystemWatcher_File_Create()
+        public void FileSystemWatcher_File_Create_MultipleFilters()
         {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileTwo = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
             {
-                string fileName = Path.Combine(testDirectory.Path, "file");
-                string secondFileName = Path.Combine(testDirectory.Path, "Secondfile");
+                watcher.Filters.Add(fileOne.Name);
+                watcher.Filters.Add(fileTwo.Name);
 
-                watcher.Filters.Add(Path.GetFileName(fileName));
-                watcher.Filters.Add(Path.GetFileName(secondFileName));
-
-                Action action = () => File.Create(fileName).Dispose();
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
-
-                action = () => File.Create(secondFileName).Dispose();
-                ExpectEvent(watcher, WatcherChangeTypes.Created, action, null);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileOne.Create().Dispose(), cleanup: null);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileTwo.Create().Dispose(), cleanup: null);
             }
         }
     }
