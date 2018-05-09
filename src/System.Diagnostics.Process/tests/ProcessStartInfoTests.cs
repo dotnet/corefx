@@ -985,12 +985,14 @@ namespace System.Diagnostics.Tests
                                                     nameof(PlatformDetection.IsNotWindows8x))] // https://github.com/dotnet/corefx/issues/20388
         [OuterLoop("Launches notepad")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        // Re-enabling with extra diagnostic info
-        // [ActiveIssue("https://github.com/dotnet/corefx/issues/20388")]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20388", TargetFrameworkMonikers.NetFramework)]
         // We don't have the ability yet for UseShellExecute in UAP
         [ActiveIssue("https://github.com/dotnet/corefx/issues/20204", TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)]
         public void StartInfo_TextFile_ShellExecute()
         {
+            if (Thread.CurrentThread.CurrentCulture.ToString() != "en-US")
+                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/28953)]
+
             string tempFile = GetTestFilePath() + ".txt";
             File.WriteAllText(tempFile, $"StartInfo_TextFile_ShellExecute");
 

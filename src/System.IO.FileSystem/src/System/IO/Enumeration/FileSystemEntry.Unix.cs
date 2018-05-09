@@ -9,7 +9,7 @@ namespace System.IO.Enumeration
     /// <summary>
     /// Lower level view of FileSystemInfo used for processing and filtering find results.
     /// </summary>
-    public unsafe ref struct FileSystemEntry
+    public unsafe ref partial struct FileSystemEntry
     {
         private const int FileNameBufferSize = 256;
         internal Interop.Sys.DirectoryEntry _directoryEntry;
@@ -44,10 +44,11 @@ namespace System.IO.Enumeration
                 // We know it's a directory.
                 isDirectory = true;
             }
-            else if ((directoryEntry.InodeType == Interop.Sys.NodeType.DT_LNK)
+            else if ((directoryEntry.InodeType == Interop.Sys.NodeType.DT_LNK
+                || directoryEntry.InodeType == Interop.Sys.NodeType.DT_UNKNOWN)
                 && Interop.Sys.Stat(entry.FullPath, out Interop.Sys.FileStatus targetStatus) >= 0)
             {
-                // It's a symlink: stat to it to see if we can resolve it to a directory.
+                // Symlink or unknown: Stat to it to see if we can resolve it to a directory.
                 isDirectory = (targetStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
             }
 
@@ -136,12 +137,6 @@ namespace System.IO.Enumeration
             string fullPath = ToFullPath();
             return FileSystemInfo.Create(fullPath, new string(FileName), ref _status);
         }
-
-        /// <summary>
-        /// Returns the full path for find results, based on the initially provided path.
-        /// </summary>
-        public string ToSpecifiedFullPath() =>
-            Path.Join(OriginalRootDirectory, Directory.Slice(RootDirectory.Length), FileName);
 
         /// <summary>
         /// Returns the full path of the find result.

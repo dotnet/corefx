@@ -3,6 +3,29 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "displayName": "run begin.ps1",
+      "timeoutInMinutes": 0,
+      "alwaysRun": true,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$Env:AgentToolsPath\\begin.ps1\") {\n   \"$Env:AgentToolsPath\\begin.ps1 script found. Executing...\"\n    & $Env:AgentToolsPath\\begin.ps1\n} else {\n   \"$Env:AgentToolsPath\\begin.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Install Signing Plugin",
@@ -129,6 +152,26 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
+      "displayName": "Sign Packages",
+      "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), in(variables.PB_SignType, 'real', 'test'), eq(variables.PB_ConfigurationGroup, 'Release'))",
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "msbuild",
+        "arguments": "src\\publish.proj /t:SignPackages /p:SignType=$(PB_SignType) /p:ConfigurationGroup=$(PB_ConfigurationGroup)",
+        "workingFolder": "$(Pipeline.SourcesDirectory)",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
       "displayName": "packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
       "condition": "and(succeeded(), contains(variables.PB_PublishType, 'myget'), eq(variables.PB_ConfigurationGroup, 'Release'))",
@@ -247,6 +290,29 @@
         "definitionType": "task"
       },
       "inputs": {}
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
+      "displayName": "run end.ps1",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$Env:AgentToolsPath\\end.ps1\") {\n   \"$Env:AgentToolsPath\\end.ps1 script found. Executing...\"\n    & $Env:AgentToolsPath\\end.ps1\n} else {\n   \"$Env:AgentToolsPath\\end.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
     }
   ],
   "options": [

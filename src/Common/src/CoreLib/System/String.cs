@@ -21,7 +21,7 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed partial class String : IComparable, IEnumerable, IEnumerable<char>, IComparable<String>, IEquatable<String>, IConvertible, ICloneable
+    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<String>, IEquatable<String>, ICloneable
     {
         // String constructors
         // These are special. The implementation methods for these have a different signature from the
@@ -438,7 +438,13 @@ namespace System
         [NonVersionable]
         public static bool IsNullOrEmpty(string value)
         {
-            return (value == null || value.Length == 0);
+            // Using 0u >= (uint)value.Length rather than
+            // value.Length == 0 as it will elide the bounds check to
+            // the first char: value[0] if that is performed following the test
+            // for the same test cost.
+            // Ternary operator returning true/false prevents redundant asm generation:
+            // https://github.com/dotnet/coreclr/issues/914
+            return (value == null || 0u >= (uint)value.Length) ? true : false;
         }
 
         public static bool IsNullOrWhiteSpace(string value)

@@ -147,13 +147,16 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<T> Slice(int start)
         {
-            int actualLength = _length & RemoveFlagsBitMask;
+            // Used to maintain the high-bit which indicates whether the Memory has been pre-pinned or not.
+            int capturedLength = _length;
+            int actualLength = capturedLength & RemoveFlagsBitMask;
             if ((uint)start > (uint)actualLength)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
             }
 
-            return new ReadOnlyMemory<T>(_object, _index + start, actualLength - start);
+            // It is expected for (capturedLength - start) to be negative if the memory is already pre-pinned.
+            return new ReadOnlyMemory<T>(_object, _index + start, capturedLength - start);
         }
 
         /// <summary>
@@ -167,13 +170,16 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<T> Slice(int start, int length)
         {
+            // Used to maintain the high-bit which indicates whether the Memory has been pre-pinned or not.
+            int capturedLength = _length;
             int actualLength = _length & RemoveFlagsBitMask;
             if ((uint)start > (uint)actualLength || (uint)length > (uint)(actualLength - start))
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
             }
 
-            return new ReadOnlyMemory<T>(_object, _index + start, length);
+            // Set the high-bit to match the this._length high bit (1 for pre-pinned, 0 for unpinned).
+            return new ReadOnlyMemory<T>(_object, _index + start, length | (capturedLength & ~RemoveFlagsBitMask));
         }
 
         /// <summary>
@@ -235,8 +241,11 @@ namespace System
 
         /// <summary>
         /// Creates a handle for the memory.
-        /// The GC will not move the array until the returned <see cref="MemoryHandle"/>
+        /// The GC will not move the memory until the returned <see cref="MemoryHandle"/>
         /// is disposed, enabling taking and using the memory's address.
+        /// <exception cref="System.ArgumentException">
+        /// An instance with nonprimitive (non-blittable) members cannot be pinned.
+        /// </exception>
         /// </summary>
         public unsafe MemoryHandle Pin()
         {
@@ -257,13 +266,26 @@ namespace System
             }
             else if (_object is T[] array)
             {
-                GCHandle handle = _length < 0 ? default : GCHandle.Alloc(array, GCHandleType.Pinned);
+                // Array is already pre-pinned
+                if (_length < 0)
+                {
 #if FEATURE_PORTABLE_SPAN
-                void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref MemoryMarshal.GetReference<T>(array)), _index);
 #else
-                void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
 #endif // FEATURE_PORTABLE_SPAN
-                return new MemoryHandle(pointer, handle);
+                    return new MemoryHandle(pointer);
+                }
+                else
+                {
+                    GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+#if FEATURE_PORTABLE_SPAN
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
+                    return new MemoryHandle(pointer, handle);
+                }
             }
             return default;
         }
