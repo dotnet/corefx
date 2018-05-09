@@ -28,7 +28,7 @@ static int32_t GetMountInfo(MountPointFound onFound)
 {
 #if HAVE_MNTINFO
     // getmntinfo returns pointers to OS-internal structs, so we don't need to worry about free'ing the object
-#if defined(HAVE_STATFS_SIZE)
+#if defined(HAVE_STATFS)
     struct statfs* mounts = NULL;
 #else
     struct statvfs* mounts = NULL;
@@ -78,7 +78,7 @@ int32_t SystemNative_GetSpaceInfoForMountPoint(const char* name, MountPointInfor
     assert(name != NULL);
     assert(mpi != NULL);
 
-#if defined(HAVE_STATFS_SIZE)
+#if defined(HAVE_STATFS)
     struct statfs stats;
     memset(&stats, 0, sizeof(struct statfs));
 
@@ -117,7 +117,7 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
     assert((formatNameBuffer != NULL) && (formatType != NULL));
     assert(bufferLength > 0);
 
-#if defined(HAVE_STATFS_SIZE)
+#if defined(HAVE_STATFS)
     struct statfs stats;
     int result = statfs(name, &stats);
 #else
@@ -142,7 +142,7 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
             SafeStringCopy(formatNameBuffer, Int32ToSizeT(bufferLength), stats.f_fstypename);
             *formatType = -1;
         }
-#elif defined(HAVE_STATFS_SIZE)
+#elif defined(HAVE_STATFS)
         assert(formatType != nullptr);
         *formatType = SignedCast(stats.f_type);
         SafeStringCopy(formatNameBuffer, bufferLength, "");

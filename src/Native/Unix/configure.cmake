@@ -235,6 +235,12 @@ else ()
 endif ()
 
 set(CMAKE_EXTRA_INCLUDE_FILES ${STATFS_INCLUDES})
+check_symbol_exists(
+    "statfs",
+    STATFS_INCLUDES,
+    HAVE_STATFS
+)
+
 check_type_size(
     "struct statfs"
     STATFS_SIZE
