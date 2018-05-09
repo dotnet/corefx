@@ -458,8 +458,8 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Compares the existing value for the specified <paramref name="key"/> with <paramref name="comparisonValue"/>, and if they're equal,
-        /// updates the key with <paramref name="newValue"/>.
+        /// Updates the value associated with <paramref name="key"/> to <paramref name="newValue"/> if the existing value is equal
+        /// to <paramref name="comparisonValue"/>.
         /// </summary>
         /// <param name="key">The key whose value is compared with <paramref name="comparisonValue"/> and
         /// possibly replaced.</param>
@@ -479,8 +479,8 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Compares the existing value for the specified <paramref name="key"/> with <paramref name="comparisonValue"/>, and if they're equal,
-        /// updates the key with <paramref name="newValue"/>.
+        /// Updates the value associated with <paramref name="key"/> to <paramref name="newValue"/> if the existing value is equal
+        /// to <paramref name="comparisonValue"/>.
         /// </summary>
         /// <param name="key">The key whose value is compared with <paramref name="comparisonValue"/> and
         /// possibly replaced.</param>
