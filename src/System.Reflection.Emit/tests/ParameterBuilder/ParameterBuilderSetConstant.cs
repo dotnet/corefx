@@ -57,8 +57,20 @@ namespace System.Reflection.Emit.Tests
         [Theory]
         [MemberData(nameof(SetConstant_ReferenceTypes_TestData))]
         [MemberData(nameof(SetConstant_NullableValueTypes_TestData))]
+        public void SetConstant_Null_fully_supported(Type parameterType)
+        {
+            SetConstant_Null(parameterType);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Passing null for SetConstant on value types not supported on NETFX")]
         [MemberData(nameof(SetConstant_ValueTypes_TestData))]
-        public void SetConstant_Null(Type parameterType)
+        public void SetConstant_Null_not_supported_on_NETFX(Type parameterType)
+        {
+            SetConstant_Null(parameterType);
+        }
+
+        private void SetConstant_Null(Type parameterType)
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Interface | TypeAttributes.Abstract);
             MethodBuilder method = type.DefineMethod("TestMethod", MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual, typeof(void), new Type[] { parameterType });
