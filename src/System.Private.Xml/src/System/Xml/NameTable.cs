@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Xml
@@ -176,11 +177,7 @@ namespace System.Xml
             return null;
         }
 
-        //
-        // Private methods
-        //
-
-        private string AddEntry(string str, int hashCode)
+        internal string AddEntry(string str, int hashCode)
         {
             int index = hashCode & _mask;
             Entry e = new Entry(str, hashCode, _entries[index]);
@@ -191,6 +188,10 @@ namespace System.Xml
             }
             return e.str;
         }
+
+        //
+        // Private methods
+        //
 
         private void Grow()
         {
@@ -233,12 +234,14 @@ namespace System.Xml
             return true;
         }
 
-        private static int ComputeHash32(string key)
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int ComputeHash32(string key)
         {
             ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan());
             return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
         }
 
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int ComputeHash32(char[] key, int start, int len)
         {
             ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(start, len));
