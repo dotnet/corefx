@@ -25,6 +25,11 @@ namespace System.IO.Tests
         public const int DefaultAttemptsForExpectedEvent = 3;       // Number of times an expected event should be retried if failing.
         public const int DefaultAttemptsForUnExpectedEvent = 2;     // Number of times an unexpected event should be retried if failing.
 
+        public static FileSystemEventHandler changeHandler;
+        public static FileSystemEventHandler deleteHandler;
+        public static FileSystemEventHandler createHandler;
+        public static RenamedEventHandler renameHandler;
+
         /// <summary>
         /// Watches the Changed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Changed event is thrown by the watcher.
@@ -33,7 +38,7 @@ namespace System.IO.Tests
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            watcher.Changed += (o, e) =>
+            changeHandler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Changed, e.ChangeType);
                 if (expectedPaths != null)
@@ -43,6 +48,7 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
+            watcher.Changed += changeHandler;
             return eventOccurred;
         }
 
@@ -54,7 +60,7 @@ namespace System.IO.Tests
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            watcher.Created += (o, e) =>
+            createHandler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
                 if (expectedPaths != null)
@@ -64,6 +70,7 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
+            watcher.Created += createHandler;
             return eventOccurred;
         }
 
@@ -74,7 +81,7 @@ namespace System.IO.Tests
         public static AutoResetEvent WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
-            watcher.Deleted += (o, e) =>
+            deleteHandler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Deleted, e.ChangeType);
                 if (expectedPaths != null)
@@ -84,6 +91,7 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
+            watcher.Deleted += deleteHandler;
             return eventOccurred;
         }
 
@@ -95,7 +103,7 @@ namespace System.IO.Tests
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            watcher.Renamed += (o, e) =>
+            renameHandler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Renamed, e.ChangeType);
                 if (expectedPaths != null)
@@ -105,6 +113,7 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
+            watcher.Renamed += renameHandler;
             return eventOccurred;
         }
 
@@ -177,6 +186,24 @@ namespace System.IO.Tests
                 if (cleanup != null)
                     cleanup();
             }
+        }
+
+        /// <summary>
+        /// Does verification that the given watcher will not throw exactly/only the events in "expectedEvents" when
+        /// "action" is executed.
+        /// </summary>
+        /// <param name="watcher">The FileSystemWatcher to test</param>
+        /// <param name="expectedEvents">All of the events that are expected to be raised by this action</param>
+        /// <param name="action">The Action that will trigger events.</param>
+        /// <param name="cleanup">Optional. Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
+        /// <param name="expectedPath">Optional. Adds path verification to all expected events.</param>
+        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string expectedPath = null, int timeout = WaitForExpectedEventTimeout)
+        {
+            bool result = ExecuteAndVerifyEvents(watcher, expectedEvents, action, false, new string[] { expectedPath }, timeout);
+            Assert.False(result, "Expected Event occured");
+
+            if (cleanup != null)
+                cleanup();
         }
 
         /// <summary>
