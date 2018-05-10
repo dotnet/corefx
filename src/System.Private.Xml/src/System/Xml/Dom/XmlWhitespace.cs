@@ -21,7 +21,7 @@ namespace System.Xml
         {
             get
             {
-                return OwnerDocument.strNonSignificantWhitespaceName;
+                return XmlDocument.NonSignificantWhitespaceName;
             }
         }
 
@@ -30,7 +30,7 @@ namespace System.Xml
         {
             get
             {
-                return OwnerDocument.strNonSignificantWhitespaceName;
+                return XmlDocument.NonSignificantWhitespaceName;
             }
         }
 

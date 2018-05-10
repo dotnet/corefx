@@ -23,7 +23,7 @@ namespace System.Xml
         {
             get
             {
-                return OwnerDocument.strTextName;
+                return XmlDocument.TextName;
             }
         }
 
@@ -32,7 +32,7 @@ namespace System.Xml
         {
             get
             {
-                return OwnerDocument.strTextName;
+                return XmlDocument.TextName;
             }
         }
 

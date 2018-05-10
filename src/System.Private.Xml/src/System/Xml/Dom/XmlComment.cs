@@ -17,13 +17,13 @@ namespace System.Xml
         // Gets the name of the node.
         public override String Name
         {
-            get { return OwnerDocument.strCommentName; }
+            get { return XmlDocument.CommentName; }
         }
 
         // Gets the name of the current node without the namespace prefix.
         public override String LocalName
         {
-            get { return OwnerDocument.strCommentName; }
+            get { return XmlDocument.CommentName; }
         }
 
         // Gets the type of the current node.

@@ -81,20 +81,20 @@ namespace System.Xml
 
         // special name strings for
         // internal string strDocumentName;
-        internal string strDocumentFragmentName;
-        internal string strCommentName;
-        internal string strTextName;
-        internal string strCDataSectionName;
+        // internal string strDocumentFragmentName;
+        // internal string strCommentName;
+        // internal string strTextName;
+        // internal string strCDataSectionName;
         // internal string strEntityName;
         // internal string strID;
         internal string strXmlns;
         internal string strXml;
-        internal string strSpace;
-        internal string strLang;
-        //internal string strEmpty;
+        // internal string strSpace;
+        // internal string strLang;
+        // internal string strEmpty;
 
-        internal string strNonSignificantWhitespaceName;
-        internal string strSignificantWhitespaceName;
+        // internal string strNonSignificantWhitespaceName;
+        // internal string strSignificantWhitespaceName;
         internal string strReservedXmlns;
         internal string strReservedXml;
 
@@ -128,20 +128,20 @@ namespace System.Xml
             _domNameTable = new DomNameTable(this);
 
             // strDocumentName = DocumentName;
-            strDocumentFragmentName = DocumentFragmentName;
-            strCommentName = CommentName;
-            strTextName = TextName;
-            strCDataSectionName = CDataSectionName;
+            // strDocumentFragmentName = DocumentFragmentName;
+            // strCommentName = CommentName;
+            // strTextName = TextName;
+            // strCDataSectionName = CDataSectionName;
             // strEntityName = EntityName;
             // strID = ID;
             strXmlns = Xmlns;
             strXml = Xml;
-            strSpace = Space;
-            strLang = Lang;
+            // strSpace = Space;
+            // strLang = Lang;
             // strEmpty = string.Empty;
 
-            strNonSignificantWhitespaceName = NonSignificantWhitespaceName;
-            strSignificantWhitespaceName = SignificantWhitespaceName;
+            // strNonSignificantWhitespaceName = NonSignificantWhitespaceName;
+            // strSignificantWhitespaceName = SignificantWhitespaceName;
             strReservedXmlns = XmlReservedNs.NsXmlNs;
             strReservedXml = XmlReservedNs.NsXml;
             baseURI = String.Empty;
