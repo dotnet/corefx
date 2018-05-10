@@ -309,7 +309,7 @@ namespace Internal.Cryptography.Pal
                         return string.Empty;
 
                     int spanLength = (cbData + 1) / 2;
-                    Span<char> buffer = spanLength <= 128 ? stackalloc char[spanLength] : new char[spanLength];
+                    Span<char> buffer = spanLength <= 256 ? stackalloc char[spanLength] : new char[spanLength];
                     fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
                     {
                         if (!Interop.crypt32.CertGetCertificateContextPropertyString(_certContext, CertContextPropId.CERT_FRIENDLY_NAME_PROP_ID, (byte*)ptr, ref cbData))
@@ -398,7 +398,7 @@ namespace Internal.Cryptography.Pal
                 _certContext,
                 MapNameType(nameType),
                 forIssuer ? CertNameFlags.CERT_NAME_ISSUER_FLAG : CertNameFlags.None,
-                (int)(CertNameStrTypeAndFlags.CERT_X500_NAME_STR | CertNameStrTypeAndFlags.CERT_NAME_STR_REVERSE_FLAG));
+                CertNameStringType.CERT_X500_NAME_STR | CertNameStringType.CERT_NAME_STR_REVERSE_FLAG);
 
         public void AppendPrivateKeyInfo(StringBuilder sb)
         {
@@ -528,7 +528,7 @@ namespace Internal.Cryptography.Pal
                 _certContext,
                 CertNameType.CERT_NAME_RDN_TYPE,
                 issuer ? CertNameFlags.CERT_NAME_ISSUER_FLAG : CertNameFlags.None,
-                (int)(CertNameStringType.CERT_X500_NAME_STR | CertNameStringType.CERT_NAME_STR_REVERSE_FLAG));
+                CertNameStringType.CERT_X500_NAME_STR | CertNameStringType.CERT_NAME_STR_REVERSE_FLAG);
 
         private CertificatePal(CertificatePal copyFrom)
         {

@@ -93,7 +93,7 @@ internal static partial class Interop
             SafeCertContextHandle certContext,
             CertNameType certNameType,
             CertNameFlags certNameFlags,
-            int strType) // CertNameStringType or CertNameStrTypeAndFlags
+            CertNameStringType strType)
         {
             int cchCount = CertGetNameString(certContext, certNameType, certNameFlags, strType, null, 0);
             if (cchCount == 0)
@@ -101,7 +101,7 @@ internal static partial class Interop
                 throw Marshal.GetLastWin32Error().ToCryptographicException();
             }
 
-            Span<char> buffer = cchCount <= 128 ? stackalloc char[cchCount] : new char[cchCount];
+            Span<char> buffer = cchCount <= 256 ? stackalloc char[cchCount] : new char[cchCount];
             fixed (char* ptr = &MemoryMarshal.GetReference(buffer))
             {
                 if (CertGetNameString(certContext, certNameType, certNameFlags, strType, ptr, cchCount) == 0)
@@ -115,7 +115,7 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CertGetNameStringW")]
-        private static extern unsafe int CertGetNameString(SafeCertContextHandle pCertContext, CertNameType dwType, CertNameFlags dwFlags, in int pvTypePara, char* pszNameString, int cchNameString);
+        private static extern unsafe int CertGetNameString(SafeCertContextHandle pCertContext, CertNameType dwType, CertNameFlags dwFlags, in CertNameStringType pvTypePara, char* pszNameString, int cchNameString);
 
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern SafeCertContextHandle CertDuplicateCertificateContext(IntPtr pCertContext);

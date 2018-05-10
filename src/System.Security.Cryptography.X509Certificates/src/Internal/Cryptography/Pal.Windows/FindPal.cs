@@ -391,7 +391,7 @@ namespace Internal.Cryptography.Pal
                 pCertContext,
                 dwNameType,
                 dwNameFlags,
-                (int)(CertNameStringType.CERT_X500_NAME_STR | CertNameStringType.CERT_NAME_STR_REVERSE_FLAG));
+                CertNameStringType.CERT_X500_NAME_STR | CertNameStringType.CERT_NAME_STR_REVERSE_FLAG);
         }
     }
 }
