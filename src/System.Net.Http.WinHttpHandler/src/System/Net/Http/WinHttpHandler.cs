@@ -709,7 +709,7 @@ namespace System.Net.Http
                             accessType = Interop.WinHttp.WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
                         }
 
-                        if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"proxy accessType={accessType}");
+                        if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Proxy accessType={accessType}");
 
                         sessionHandle = Interop.WinHttp.WinHttpOpen(
                             IntPtr.Zero,
@@ -721,7 +721,7 @@ namespace System.Net.Http
                         if (sessionHandle.IsInvalid)
                         {
                             int lastError = Marshal.GetLastWin32Error();
-                            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"error={lastError}");
+                            if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"error={lastError}");
                             if (lastError != Interop.WinHttp.ERROR_INVALID_PARAMETER)
                             {
                                 ThrowOnInvalidHandle(sessionHandle, nameof(Interop.WinHttp.WinHttpOpen));

@@ -39,7 +39,7 @@ namespace System.Net.Http
                 {
                     foreach (X509Certificate cert in remoteCertificateStore)
                     {
-                        NetEventSource.Info(remoteCertificateStore, $"adding cert to ExtraStore: {cert.Subject}");
+                        NetEventSource.Info(remoteCertificateStore, $"Adding cert to ExtraStore: {cert.Subject}");
                     }
                 }
 
