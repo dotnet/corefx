@@ -73,6 +73,20 @@ namespace System
             return false;
         }
 
+        static Lazy<bool> s_largeArrayIsNotSupported = new Lazy<bool>(() => {
+            try
+            {
+                var tmp = new byte[int.MaxValue];
+                return false;
+            }
+            catch (OutOfMemoryException)
+            {
+                return true;
+            }
+        });
+
+        public static bool IsNotIntMaxValueArrayIndexSupported => s_largeArrayIsNotSupported.Value;
+
         public static bool IsNonZeroLowerBoundArraySupported
         {
             get

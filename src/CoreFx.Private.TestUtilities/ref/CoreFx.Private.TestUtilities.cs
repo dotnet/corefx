@@ -59,6 +59,7 @@ namespace System
         public static bool IsNetfx471OrNewer { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
+        public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
