@@ -242,7 +242,7 @@ endfunction()
 
 include(configure.cmake)
 
-if (!CLR_CMAKE_PLATFORM_WASM)
+if (NOT CLR_CMAKE_PLATFORM_WASM)
     add_subdirectory(System.IO.Compression.Native)
 	add_subdirectory(System.IO.Ports.Native)
 endif()
@@ -251,7 +251,7 @@ add_compile_options(-Weverything)
 
 add_subdirectory(System.Native)
 
-if (!CLR_CMAKE_PLATFORM_WASM)
+if (NOT CLR_CMAKE_PLATFORM_WASM)
     add_subdirectory(System.Net.Http.Native)
     add_subdirectory(System.Net.Security.Native)
     add_subdirectory(System.Security.Cryptography.Native)
