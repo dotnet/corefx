@@ -19,8 +19,8 @@ namespace System.Drawing
         // 0 - reserved for "not a known color"
 
         // "System" colors
-        /*
         ActiveBorder = 1,
+        FirstColor = ActiveBorder,
         ActiveCaption,
         ActiveCaptionText,
         AppWorkspace,
@@ -46,11 +46,9 @@ namespace System.Drawing
         Window,
         WindowFrame,
         WindowText,
-        */
 
         // "Web" Colors
-        FirstColor = 0,
-        Transparent = FirstColor,
+        Transparent,
         AliceBlue,
         AntiqueWhite,
         Aqua,
@@ -191,11 +189,8 @@ namespace System.Drawing
         WhiteSmoke,
         Yellow,
         YellowGreen,
-        LastColor = YellowGreen
 
         // NEW ADDITIONS IN WHIDBEY - DO NOT MOVE THESE UP OR IT WILL BE A BREAKING CHANGE
-
-        /*
         ButtonFace,
         ButtonHighlight,
         ButtonShadow,
@@ -203,6 +198,6 @@ namespace System.Drawing
         GradientInactiveCaption,
         MenuBar,
         MenuHighlight,
-        */
+        LastColor = MenuHighlight
     }
 }
