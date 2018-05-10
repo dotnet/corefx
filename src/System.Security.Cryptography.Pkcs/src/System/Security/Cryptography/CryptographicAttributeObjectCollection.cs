@@ -106,7 +106,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return ((ICollection)_list).IsSynchronized;
+                return false;
             }
         }
 
