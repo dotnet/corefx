@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Xml
@@ -234,14 +232,12 @@ namespace System.Xml
             return true;
         }
 
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int ComputeHash32(string key)
         {
             ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan());
             return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
         }
 
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int ComputeHash32(char[] key, int start, int len)
         {
             ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(start, len));

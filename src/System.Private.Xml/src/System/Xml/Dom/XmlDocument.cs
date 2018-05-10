@@ -80,21 +80,8 @@ namespace System.Xml
         private bool _isLoading;
 
         // special name strings for
-        // internal string strDocumentName;
-        // internal string strDocumentFragmentName;
-        // internal string strCommentName;
-        // internal string strTextName;
-        // internal string strCDataSectionName;
-        // internal string strEntityName;
-        // internal string strID;
         internal string strXmlns;
         internal string strXml;
-        // internal string strSpace;
-        // internal string strLang;
-        // internal string strEmpty;
-
-        // internal string strNonSignificantWhitespaceName;
-        // internal string strSignificantWhitespaceName;
         internal string strReservedXmlns;
         internal string strReservedXml;
 
@@ -127,21 +114,8 @@ namespace System.Xml
             _implementation = imp;
             _domNameTable = new DomNameTable(this);
 
-            // strDocumentName = DocumentName;
-            // strDocumentFragmentName = DocumentFragmentName;
-            // strCommentName = CommentName;
-            // strTextName = TextName;
-            // strCDataSectionName = CDataSectionName;
-            // strEntityName = EntityName;
-            // strID = ID;
             strXmlns = Xmlns;
             strXml = Xml;
-            // strSpace = Space;
-            // strLang = Lang;
-            // strEmpty = string.Empty;
-
-            // strNonSignificantWhitespaceName = NonSignificantWhitespaceName;
-            // strSignificantWhitespaceName = SignificantWhitespaceName;
             strReservedXmlns = XmlReservedNs.NsXmlNs;
             strReservedXml = XmlReservedNs.NsXml;
             baseURI = String.Empty;
@@ -154,21 +128,6 @@ namespace System.Xml
                 {
                    nt.AddEntry(s_nameTableSeeds[i].key, s_nameTableSeeds[i].hash);
                 }
-                // nt.AddEntry(s_nameTableSeeds[0].key, s_nameTableSeeds[0].hash);
-                // strDocumentFragmentName = nt.AddEntry(s_nameTableSeeds[1].key, s_nameTableSeeds[1].hash);
-                // strCommentName = nt.AddEntry(s_nameTableSeeds[2].key, s_nameTableSeeds[2].hash);
-                // strTextName = nt.AddEntry(s_nameTableSeeds[3].key, s_nameTableSeeds[3].hash);
-                // strCDataSectionName = nt.AddEntry(s_nameTableSeeds[4].key, s_nameTableSeeds[4].hash);
-                // nt.AddEntry(s_nameTableSeeds[5].key, s_nameTableSeeds[5].hash);
-                // nt.AddEntry(s_nameTableSeeds[6].key, s_nameTableSeeds[6].hash);
-                // strXmlns = nt.AddEntry(s_nameTableSeeds[7].key, s_nameTableSeeds[7].hash);
-                // strXml = nt.AddEntry(s_nameTableSeeds[8].key, s_nameTableSeeds[8].hash);
-                // strSpace = nt.AddEntry(s_nameTableSeeds[9].key, s_nameTableSeeds[9].hash);
-                // strLang = nt.AddEntry(s_nameTableSeeds[10].key, s_nameTableSeeds[10].hash);
-                // strNonSignificantWhitespaceName = nt.AddEntry(s_nameTableSeeds[11].key, s_nameTableSeeds[11].hash);
-                // strSignificantWhitespaceName = nt.AddEntry(s_nameTableSeeds[12].key, s_nameTableSeeds[12].hash);
-                // strReservedXmlns = nt.AddEntry(s_nameTableSeeds[13].key, s_nameTableSeeds[13].hash);
-                // strReservedXml = nt.AddEntry(s_nameTableSeeds[14].key, s_nameTableSeeds[14].hash);
             }
             else
             {
