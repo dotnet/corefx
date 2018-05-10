@@ -866,6 +866,7 @@ namespace System.Tests
         public static void Contains(string s, string value, bool expected)
         {
             Assert.Equal(expected, s.Contains(value));
+            Assert.Equal(expected, s.AsSpan().Contains(value.AsSpan(), StringComparison.Ordinal));
         }
 
         [Fact]
