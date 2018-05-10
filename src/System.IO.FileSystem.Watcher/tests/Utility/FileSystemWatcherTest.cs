@@ -25,20 +25,15 @@ namespace System.IO.Tests
         public const int DefaultAttemptsForExpectedEvent = 3;       // Number of times an expected event should be retried if failing.
         public const int DefaultAttemptsForUnExpectedEvent = 2;     // Number of times an unexpected event should be retried if failing.
 
-        public static FileSystemEventHandler changeHandler;
-        public static FileSystemEventHandler deleteHandler;
-        public static FileSystemEventHandler createHandler;
-        public static RenamedEventHandler renameHandler;
-
         /// <summary>
         /// Watches the Changed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Changed event is thrown by the watcher.
         /// </summary>
-        public static AutoResetEvent WatchChanged(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent, FileSystemEventHandler) WatchChanged(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            changeHandler = (o, e) =>
+            FileSystemEventHandler changeHandler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Changed, e.ChangeType);
                 if (expectedPaths != null)
@@ -49,18 +44,18 @@ namespace System.IO.Tests
             };
 
             watcher.Changed += changeHandler;
-            return eventOccurred;
+            return (eventOccurred, changeHandler);
         }
 
         /// <summary>
         /// Watches the Created WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Created event is thrown by the watcher.
         /// </summary>
-        public static AutoResetEvent WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent, FileSystemEventHandler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            createHandler = (o, e) =>
+            FileSystemEventHandler handler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
                 if (expectedPaths != null)
@@ -70,18 +65,18 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
-            watcher.Created += createHandler;
-            return eventOccurred;
+            watcher.Created += handler;
+            return (eventOccurred, handler);
         }
 
         /// <summary>
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static AutoResetEvent WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent, FileSystemEventHandler) WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
-            deleteHandler = (o, e) =>
+            FileSystemEventHandler handler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Deleted, e.ChangeType);
                 if (expectedPaths != null)
@@ -91,19 +86,19 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
-            watcher.Deleted += deleteHandler;
-            return eventOccurred;
+            watcher.Deleted += handler;
+            return (eventOccurred, handler);
         }
 
         /// <summary>
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static AutoResetEvent WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent, RenamedEventHandler) WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
-            renameHandler = (o, e) =>
+            RenamedEventHandler handler = (o, e) =>
             {
                 Assert.Equal(WatcherChangeTypes.Renamed, e.ChangeType);
                 if (expectedPaths != null)
@@ -113,8 +108,8 @@ namespace System.IO.Tests
                 eventOccurred.Set();
             };
 
-            watcher.Renamed += renameHandler;
-            return eventOccurred;
+            watcher.Renamed += handler;
+            return (eventOccurred, handler);
         }
 
         /// <summary>
@@ -219,15 +214,17 @@ namespace System.IO.Tests
         {
             bool result = true, verifyChanged = true, verifyCreated = true, verifyDeleted = true, verifyRenamed = true;
             AutoResetEvent changed = null, created = null, deleted = null, renamed = null;
+            FileSystemEventHandler createHandler = null, changeHandler = null, deleteHandler = null;
+            RenamedEventHandler renameHandler = null;
 
             if (verifyChanged = ((expectedEvents & WatcherChangeTypes.Changed) > 0))
-                changed = WatchChanged(watcher, expectedPaths);
+                (changed, changeHandler) = WatchChanged(watcher, expectedPaths);
             if (verifyCreated = ((expectedEvents & WatcherChangeTypes.Created) > 0))
-                created = WatchCreated(watcher, expectedPaths);
+                (created, createHandler) = WatchCreated(watcher, expectedPaths);
             if (verifyDeleted = ((expectedEvents & WatcherChangeTypes.Deleted) > 0))
-                deleted = WatchDeleted(watcher, expectedPaths);
+                (deleted, deleteHandler) = WatchDeleted(watcher, expectedPaths);
             if (verifyRenamed = ((expectedEvents & WatcherChangeTypes.Renamed) > 0))
-                renamed = WatchRenamed(watcher, expectedPaths);
+                (renamed , renameHandler) = WatchRenamed(watcher, expectedPaths);
 
             watcher.EnableRaisingEvents = true;
             action();
@@ -238,6 +235,7 @@ namespace System.IO.Tests
                 bool Changed_expected = ((expectedEvents & WatcherChangeTypes.Changed) > 0);
                 bool Changed_actual = changed.WaitOne(timeout);
                 result = Changed_expected == Changed_actual;
+                watcher.Changed -= changeHandler;
                 if (assertExpected)
                     Assert.True(Changed_expected == Changed_actual, "Changed event did not occur as expected");
             }
@@ -248,6 +246,7 @@ namespace System.IO.Tests
                 bool Created_expected = ((expectedEvents & WatcherChangeTypes.Created) > 0);
                 bool Created_actual = created.WaitOne(verifyChanged ? SubsequentExpectedWait : timeout);
                 result = result && Created_expected == Created_actual;
+                watcher.Created -= createHandler;
                 if (assertExpected)
                     Assert.True(Created_expected == Created_actual, "Created event did not occur as expected");
             }
@@ -258,6 +257,7 @@ namespace System.IO.Tests
                 bool Deleted_expected = ((expectedEvents & WatcherChangeTypes.Deleted) > 0);
                 bool Deleted_actual = deleted.WaitOne(verifyChanged || verifyCreated ? SubsequentExpectedWait : timeout);
                 result = result && Deleted_expected == Deleted_actual;
+                watcher.Deleted -= deleteHandler;
                 if (assertExpected)
                     Assert.True(Deleted_expected == Deleted_actual, "Deleted event did not occur as expected");
             }
@@ -268,6 +268,7 @@ namespace System.IO.Tests
                 bool Renamed_expected = ((expectedEvents & WatcherChangeTypes.Renamed) > 0);
                 bool Renamed_actual = renamed.WaitOne(verifyChanged || verifyCreated || verifyDeleted ? SubsequentExpectedWait : timeout);
                 result = result && Renamed_expected == Renamed_actual;
+                watcher.Renamed -= renameHandler;
                 if (assertExpected)
                     Assert.True(Renamed_expected == Renamed_actual, "Renamed event did not occur as expected");
             }

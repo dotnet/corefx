@@ -464,7 +464,7 @@ namespace System.IO.Tests
             using (var file = new TempFile(Path.Combine(dir.Path, "file")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
-                AutoResetEvent eventOccurred = WatchRenamed(fsw);
+                AutoResetEvent eventOccurred = WatchRenamed(fsw).Item1;
 
                 string newPath = Path.Combine(dir.Path, "newPath");
 
@@ -615,7 +615,7 @@ namespace System.IO.Tests
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
-                AutoResetEvent are = WatchCreated(fsw);
+                AutoResetEvent are = WatchCreated(fsw).Item1;
 
                 fsw.Filter = "*";
                 fsw.EnableRaisingEvents = true;

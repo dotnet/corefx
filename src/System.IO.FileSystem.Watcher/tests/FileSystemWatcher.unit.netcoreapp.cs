@@ -378,9 +378,7 @@ namespace System.IO.Tests
                 watcher.Filters.Add(fileTwo.Name);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileOne.Delete(), cleanup: null, expectedPath : fileOne.FullName);
-                watcher.Deleted -= deleteHandler;
                 ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileTwo.Delete(), cleanup: null, expectedPath: fileTwo.FullName );
-                watcher.Deleted -= deleteHandler;
                 ExpectNoEvent(watcher, WatcherChangeTypes.Deleted, () => fileThree.Delete(), cleanup: null, expectedPath: fileThree.FullName);
             }
         }
@@ -401,9 +399,7 @@ namespace System.IO.Tests
                 watcher.Filters.Add(Path.GetFileName(directoryTwo));
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null, expectedPath: directoryOne);
-                watcher.Created -= createHandler;
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null, expectedPath: directoryTwo);
-                watcher.Created -= createHandler;
                 ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null, expectedPath: directoryThree);
             }
         }
@@ -423,9 +419,7 @@ namespace System.IO.Tests
                 watcher.Filters.Add(Path.GetFileName(directoryTwo));
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null, expectedPath: directoryOne);
-                watcher.Created -= createHandler;
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null, expectedPath: directoryTwo);
-                watcher.Created -= createHandler;
                 ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null, expectedPath: directoryThree);
             }
         }
@@ -444,9 +438,7 @@ namespace System.IO.Tests
                 watcher.Filters.Add(Path.GetFileName(directoryTwo.FullName));
 
                 ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryOne.Delete(), cleanup: null, expectedPath: directoryOne.FullName);
-                watcher.Deleted -= deleteHandler;
                 ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryTwo.Delete(), cleanup: null, expectedPath: directoryTwo.FullName);
-                watcher.Deleted -= deleteHandler;
                 ExpectNoEvent(watcher, WatcherChangeTypes.Deleted, () => directoryThree.Delete(), cleanup: null, expectedPath: directoryThree.FullName);
             }
         }
@@ -465,11 +457,8 @@ namespace System.IO.Tests
                 watcher.Filters.Add(fileTwo.Name);
 
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileOne.Create().Dispose(), cleanup: null, expectedPath: fileOne.FullName);
-                watcher.Created -= createHandler;
                 ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileTwo.Create().Dispose(), cleanup: null, expectedPath: fileTwo.FullName);
-                watcher.Created -= createHandler;
                 ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => fileThree.Create().Dispose(), cleanup: null, expectedPath: fileThree.FullName);
-
             }
         }
     }
