@@ -5,67 +5,55 @@ namespace System.Data.Common
     public class RowUpdatedEventArgsTest
     {
         [Fact]
-        public void ConstructorFail()
+        public void Ctor_InvalidStatementType_ThrowsArgumentOutOfRangeException()
         {
-            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => new RowUpdatedEventArgs(null, null, (StatementType)100, null));
-            Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-            Assert.Null(ex.InnerException);
-            Assert.True(ex.Message.IndexOf(nameof(StatementType)) != -1);
-            Assert.True(ex.Message.IndexOf("100") != -1);
-            Assert.Equal(ex.ParamName, nameof(StatementType));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(StatementType), () => new RowUpdatedEventArgs(null, null, (StatementType)100, null));
         }
 
         [Fact]
-        public void ConstructorPass()
+        public void Ctor_AssignsCorrectPropertyValues()
         {
-            var ev = new RowUpdatedEventArgs(null, null, 0, null);
-            Assert.NotNull(ev);
-            Assert.Null(ev.Row);
-            Assert.Null(ev.Command);
-            Assert.Null(ev.TableMapping);
-            Assert.Equal(ev.StatementType, (StatementType)0);
-            Assert.Equal(ev.RowCount, 0);
-            Assert.Equal(ev.RecordsAffected, 0);
+            var argsEmpty = new RowUpdatedEventArgs(null, null, 0, null);
+            Assert.Null(argsEmpty.Row);
+            Assert.Null(argsEmpty.Command);
+            Assert.Null(argsEmpty.TableMapping);
+            Assert.Equal((StatementType)0, argsEmpty.StatementType);
+            Assert.Equal(0, argsEmpty.RowCount);
+            Assert.Equal(0, argsEmpty.RecordsAffected);
 
             var table = new DataTable();
-            var ev2 = new RowUpdatedEventArgs(table.NewRow(), null, StatementType.Update, new DataTableMapping());
-            Assert.NotNull(ev2);
-            Assert.NotNull(ev2.Row);
-            Assert.Equal(ev2.Row.Table, table);
-            Assert.Equal(ev2.RowCount, 1);
-            Assert.Null(ev2.Command);
-            Assert.Equal(ev2.StatementType, StatementType.Update);
-            Assert.NotNull(ev2.TableMapping);
+            var args = new RowUpdatedEventArgs(table.NewRow(), null, StatementType.Update, new DataTableMapping());
+            Assert.NotNull(args.Row);
+            Assert.Equal(table, args.Row.Table);
+            Assert.Equal(1, args.RowCount);
+            Assert.Null(args.Command);
+            Assert.Equal(StatementType.Update, args.StatementType);
+            Assert.NotNull(args.TableMapping);
         }
 
         [Fact]
-        public void Status_set()
+        public void Status_SetInvalidUpdateStatus_ThrowsArgumentOutOfRangeException()
         {
-            var ev = new RowUpdatedEventArgs(null, null, 0, null);
-            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => ev.Status = (UpdateStatus)100);
-            Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-            Assert.Null(ex.InnerException);
-            Assert.True(ex.Message.IndexOf(nameof(UpdateStatus)) != -1);
-            Assert.True(ex.Message.IndexOf("100") != -1);
-            Assert.Equal(ex.ParamName, nameof(UpdateStatus));
+            var args = new RowUpdatedEventArgs(null, null, 0, null);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(UpdateStatus), () => args.Status = (UpdateStatus)100);
         }
 
         [Fact]
         public void CopyToRows()
         {
             var table = new DataTable();
-            var ev = new RowUpdatedEventArgs(table.NewRow(), null, StatementType.Update, null);
+            var args = new RowUpdatedEventArgs(table.NewRow(), null, StatementType.Update, null);
 
-            Assert.Throws<ArgumentNullException>(() => ev.CopyToRows(null));
+            Assert.Throws<ArgumentNullException>(() => args.CopyToRows(null));
 
             var newRows = new DataRow[2];
 
-            ev.CopyToRows(newRows, 1);
+            args.CopyToRows(newRows, 1);
             Assert.Null(newRows[0]);
             Assert.NotNull(newRows[1]);
             Assert.Equal(newRows[1].Table, table);
 
-            Assert.Throws<IndexOutOfRangeException>(() => ev.CopyToRows(newRows, 2));
+            Assert.Throws<IndexOutOfRangeException>(() => args.CopyToRows(newRows, 2));
         }
     }
 }
