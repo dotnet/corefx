@@ -7,7 +7,7 @@
     <DefineConstants>$(DefineConstants);DRAWING_NAMESPACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningsNotAsErrors>CS0618</WarningsNotAsErrors>
-    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;FEATURE_SYSTEM_EVENTS</DefineConstants>
+    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;FEATURE_SYSTEM_EVENTS;NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);CORECLR;NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants);netcoreapp20</DefineConstants>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
