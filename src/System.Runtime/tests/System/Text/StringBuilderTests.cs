@@ -582,7 +582,7 @@ namespace System.Text.Tests
         public static unsafe void Append_CharPointer_Null_ThrowsNullReferenceException()
         {
             var builder = new StringBuilder();
-            Assert.Throws<NullReferenceException>(() => builder.Append(null, 2));
+            Assert.Throws<ArgumentNullException>(() => builder.Append(null, 2));
         }
 
         [Fact]
