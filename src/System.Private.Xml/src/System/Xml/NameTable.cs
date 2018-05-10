@@ -187,6 +187,12 @@ namespace System.Xml
             return e.str;
         }
 
+        internal static int ComputeHash32(string key)
+        {
+            ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan());
+            return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
+        }
+
         //
         // Private methods
         //
@@ -231,13 +237,6 @@ namespace System.Xml
             }
             return true;
         }
-
-        internal static int ComputeHash32(string key)
-        {
-            ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan());
-            return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
-        }
-
         private static int ComputeHash32(char[] key, int start, int len)
         {
             ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(start, len));
