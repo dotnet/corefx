@@ -25,6 +25,9 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueue_Segment.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueue_Segment.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Internal\Padding.cs">
+      <Link>Common\CoreLib\Internal\Padding.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
