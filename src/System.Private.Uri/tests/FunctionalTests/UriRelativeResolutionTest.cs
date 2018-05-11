@@ -22,7 +22,7 @@ namespace System.PrivateUri.Tests
         private const string FullBaseUriGetLeftPart_Authority = "http://user:psw@host:9090";
         private const string FullBaseUriGetLeftPart_Query = "http://user:psw@host:9090/path1/path2/path3/fileA?query";
 
-        // A few of these tests depend on bugfixes made in .NET Framework 4.7.1 and must be skipped on older versions.
+        // A few of these tests depend on bugfixes made in .NET Framework 4.7.2 and must be skipped on older versions.
         public static bool IsNetCoreOrIsNetfx472OrLater => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx472OrNewer;
 
         [Fact]
