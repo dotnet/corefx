@@ -107,6 +107,28 @@ namespace System.Reflection.Metadata.Tests
         #endregion
 
         [Fact]
+        public unsafe void CalculateMemberRefTreatmentAndRowIdTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+
+            int nameIndex = IndexOf(peImage, new byte[] { 0x00, 0x3C, 0x43, 0x4C, 0x52, 0x3E, 0x43, 0x6C, 0x61, 0x73 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, nameIndex);
+
+            Array.Copy(Encoding.ASCII.GetBytes("Windows.Foundation"), 0, peImage, headers.MetadataStartOffset + nameIndex + 694, Encoding.ASCII.GetBytes("Windows.Foundation").Length);
+            peImage[headers.MetadataStartOffset + nameIndex + 694 + 18] = 0;
+
+            Array.Copy(Encoding.ASCII.GetBytes("IClosable"), 0, peImage, headers.MetadataStartOffset + nameIndex + 892, Encoding.ASCII.GetBytes("IClosable").Length);
+            peImage[headers.MetadataStartOffset + nameIndex + 892 + 9] = 0;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.True(reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.IsVirtual);
+        }
+
+        [Fact]
         public unsafe void CalculateFieldDefTreatmentAndRowIdTest()
         {
             byte[] peImage = (byte[])WinRT.Lib.Clone();
