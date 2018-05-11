@@ -107,6 +107,55 @@ namespace System.Reflection.Metadata.Tests
         #endregion
 
         [Fact]
+        public unsafe void ImplementsRedirectedInterfaceTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+            
+            int parentIndex = IndexOf(peImage, new byte[] { 0x09, 0x00, 0xE2, 0x02, 0x01, 0x00, 0x19, 0x00, 0x9E, 0x02, 0x05, 0x00, 0x21 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, parentIndex);
+
+            peImage[headers.MetadataStartOffset + parentIndex] = 8;
+
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(738, reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.GetHeapOffset());
+
+            //38688266055 is the presenttable index
+            int presentTablesIndex = IndexOf(peImage, BitConverter.GetBytes(38688266055), headers.MetadataStartOffset);
+            Assert.NotEqual(presentTablesIndex, -1);
+
+            //38788929351 gives a value to the type spec table row count and removes it from the row count after it.
+            Array.Copy(BitConverter.GetBytes((ulong)38788929351), 0, peImage, presentTablesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)38788929351).Length);
+
+            peImage[headers.MetadataStartOffset + parentIndex] = 12;
+
+            int mscorlibIndex = IndexOf(peImage, new byte[] { 0x00, 0x3C, 0x43, 0x4C, 0x52, 0x3E, 0x43, 0x6C, 0x61, 0x73, 0x73, 0x31, 0x00, 0x3C, 0x4D }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, mscorlibIndex);
+
+            Array.Copy(Encoding.ASCII.GetBytes("mscorlib"), 0, peImage, headers.MetadataStartOffset + mscorlibIndex + 255, Encoding.ASCII.GetBytes("mscorlib").Length);
+            peImage[headers.MetadataStartOffset + mscorlibIndex + 255 + 8] = 0;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(738, reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.GetHeapOffset());
+
+            int sigIndex = IndexOf(peImage, new byte[] { 0x00, 0x01, 0x03, 0x20, 0x00, 0x0E, 0x04, 0x20, 0x01, 0x01, 0x08, 0x05, 0x20, 0x01, 0x01, 0x11, 0x1D }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, sigIndex);
+
+            peImage[headers.MetadataStartOffset + sigIndex] = 21;
+            peImage[headers.MetadataStartOffset + sigIndex + 1] = 18;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(738, reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.GetHeapOffset());
+
+            peImage[headers.MetadataStartOffset + sigIndex + 2] = 5;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal(738, reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.GetHeapOffset());
+        }
+
+        [Fact]
         public unsafe void CalculateMemberRefTreatmentAndRowIdTest()
         {
             byte[] peImage = (byte[])WinRT.Lib.Clone();
