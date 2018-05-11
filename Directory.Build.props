@@ -276,9 +276,9 @@
     <TestPath Condition="'$(TestPath)' == ''">$(TestWorkingDir)$(MSBuildProjectName)/$(BuildConfiguration)/</TestPath>
     <RefRootPath>$(BinDir)ref/</RefRootPath>
     <BuildConfigurationRefPath>$(RefRootPath)$(_bc_TargetGroup)/</BuildConfigurationRefPath>
-    <BuildConfigurationRefPath Condition="'$(_bc_TargetGroup)'=='uapaot'">$(RefRootPath)$(_bc_TargetGroup.TrimEnd('t').TrimEnd('o').TrimEnd('a'))/</BuildConfigurationRefPath>
+    <BuildConfigurationRefPath Condition="'$(PackageTargetRuntimeSuffix)'=='aot'">$(RefRootPath)$(_bc_TargetGroup.TrimEnd('t').TrimEnd('o').TrimEnd('a'))/</BuildConfigurationRefPath>
     <RefPath>$(RefRootPath)$(TargetGroup)/</RefPath>
-    <RefPath Condition="'$(TargetGroup)'=='uapaot'">$(RefRootPath)$(TargetGroup.TrimEnd('t').TrimEnd('o').TrimEnd('a'))/</RefPath>
+    <RefPath Condition="'$(PackageTargetRuntimeSuffix)'=='aot'">$(RefRootPath)$(TargetGroup.TrimEnd('t').TrimEnd('o').TrimEnd('a'))/</RefPath>
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
 
