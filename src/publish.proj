@@ -8,6 +8,15 @@
     <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)**\*.nupkg</PublishPattern>
   </PropertyGroup>
 
+   <PropertyGroup>
+     <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
+     <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
+     <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
+     <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    <!-- The SignFiles target needs OutDir to be defined -->
+    <OutDir>$(PackageDownloadDirectory)</OutDir>
+  </PropertyGroup>
+
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
   </ItemGroup>
@@ -18,6 +27,20 @@
     <PropertyGroup>
       <ContainerName>corefx-$(PreReleaseLabel)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="GetPackagesToSign">
+    <ItemGroup>
+      <FilesToSign Include="$(FinalPublishPattern)" Exclude="$(FinalPublishPrivatePattern);$(FinalSymbolsPackagesPattern)">
+        <Authenticode>NuGet</Authenticode>
+      </FilesToSign>
+    </ItemGroup>
+    <Message Importance="High" Text="Attempting to sign package '%(FilesToSign.Identity)'" />
+  </Target>
+
+  <Target Name="SignPackages"
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
+          DependsOnTargets="GetPackagesToSign;SignFiles">
   </Target>
 
   <Target Name="Build" DependsOnTargets="CreateContainerName">
