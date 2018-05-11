@@ -407,7 +407,7 @@ void* SignalHandlerLoop(void* arg)
                 if (reinterpret_cast<void*>(g_origSigIntHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
                 {
                     UninitializeConsole();
-                    sigaction(SIGINT, &g_origSigIntHandler, NULL);
+                    sigaction(SIGINT, &g_origSigIntHandler, nullptr);
                     kill(getpid(), SIGINT);
                 }
             } 
@@ -416,7 +416,7 @@ void* SignalHandlerLoop(void* arg)
                 if (reinterpret_cast<void*>(g_origSigQuitHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
                 {
                     UninitializeConsole();
-                    sigaction(SIGQUIT, &g_origSigQuitHandler, NULL);
+                    sigaction(SIGQUIT, &g_origSigQuitHandler, nullptr);
                     kill(getpid(), SIGQUIT);
                 }
             }

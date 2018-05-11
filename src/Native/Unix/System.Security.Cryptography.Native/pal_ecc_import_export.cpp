@@ -134,7 +134,7 @@ extern "C" int32_t CryptoNative_GetECKeyParameters(
 
 error:
     *cbQx = *cbQy = 0;
-    *qx = *qy = 0;
+    *qx = *qy = nullptr;
     if (d) *d = nullptr;
     if (cbD) *cbD = 0;
     if (xBn) BN_free(xBn);
@@ -246,13 +246,13 @@ extern "C" int32_t CryptoNative_GetECCurveParameters(
 #if HAVE_OPENSSL_EC2M
     if (API_EXISTS(EC_POINT_get_affine_coordinates_GF2m) && (*curveType == ECCurveType::Characteristic2))
     {
-        if (!EC_POINT_get_affine_coordinates_GF2m(group, G, xBn, yBn, NULL)) 
+        if (!EC_POINT_get_affine_coordinates_GF2m(group, G, xBn, yBn, nullptr)) 
             goto error;
     }
     else
 #endif
     {
-        if (!EC_POINT_get_affine_coordinates_GFp(group, G, xBn, yBn, NULL)) 
+        if (!EC_POINT_get_affine_coordinates_GFp(group, G, xBn, yBn, nullptr)) 
             goto error;
     }
 
@@ -268,7 +268,7 @@ extern "C" int32_t CryptoNative_GetECCurveParameters(
     if (EC_GROUP_get0_seed(group))
     {
         seedBn = BN_bin2bn(EC_GROUP_get0_seed(group), 
-            static_cast<int>(EC_GROUP_get_seed_len(group)), NULL);
+            static_cast<int>(EC_GROUP_get_seed_len(group)), nullptr);
         
         *seed = seedBn;
         *cbSeed = BN_num_bytes(seedBn);
@@ -406,7 +406,7 @@ extern "C" EC_KEY* CryptoNative_EcKeyCreateByExplicitParameters(
     {
         // qx, qy, d and seed are optional
         assert(false);
-        return 0;
+        return nullptr;
     }
 
     EC_KEY* key = nullptr;
