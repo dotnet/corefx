@@ -27,7 +27,7 @@ namespace System.Collections.Concurrent
     /// concurrently from multiple threads.
     /// </para>
     /// </remarks>
-    [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
+    [DebuggerTypeProxy(typeof(ProducerConsumerCollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class ConcurrentBag<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {

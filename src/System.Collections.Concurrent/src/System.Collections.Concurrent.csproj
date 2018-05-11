@@ -17,16 +17,18 @@
     <Compile Include="System\Collections\Concurrent\ConcurrentBag.cs" />
     <Compile Include="System\Collections\Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="System\Collections\Concurrent\ConcurrentStack.cs" />
-    <Compile Include="System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs" />
     <Compile Include="System\Collections\Concurrent\OrderablePartitioner.cs" />
     <Compile Include="System\Collections\Concurrent\Partitioner.cs" />
     <Compile Include="System\Collections\Concurrent\PartitionerStatic.cs" />
     <Compile Include="System\Collections\Concurrent\PlatformHelper.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\Internal\Padding.cs">
+      <Link>Common\CoreLib\Internal\Padding.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueue_Segment.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueue_Segment.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Internal\Padding.cs">
-      <Link>Common\CoreLib\Internal\Padding.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ProducerConsumerCollectionDebugView.cs">
+      <Link>Common\CoreLib\System\Collections\Concurrent\ProducerConsumerCollectionDebugView.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
