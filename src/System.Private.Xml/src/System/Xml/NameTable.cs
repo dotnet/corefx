@@ -175,16 +175,17 @@ namespace System.Xml
             return null;
         }
 
-        internal string AddEntry(string str, int hashCode)
+        internal string GetOrAddEntry(string str, int hashCode)
         {
-            int index = hashCode & _mask;
-            Entry e = new Entry(str, hashCode, _entries[index]);
-            _entries[index] = e;
-            if (_count++ == _mask)
+            for (Entry e = _entries[hashCode & _mask]; e != null; e = e.next)
             {
-                Grow();
+                if (e.hashCode == hashCode && e.str.Equals(str))
+                {
+                    return e.str;
+                }
             }
-            return e.str;
+
+            return AddEntry(str, hashCode);
         }
 
         internal static int ComputeHash32(string key)
@@ -196,6 +197,18 @@ namespace System.Xml
         //
         // Private methods
         //
+
+        private string AddEntry(string str, int hashCode)
+        {
+            int index = hashCode & _mask;
+            Entry e = new Entry(str, hashCode, _entries[index]);
+            _entries[index] = e;
+            if (_count++ == _mask)
+            {
+                Grow();
+            }
+            return e.str;
+        }
 
         private void Grow()
         {

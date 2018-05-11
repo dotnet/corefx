@@ -717,7 +717,7 @@ namespace System.Xml
                             mgr.AddNamespace(String.Empty, attr.Value);
                             bHasDefXmlnsAttr = true;
                         }
-                        else if (spaceMode == XmlSpace.None && attr.Prefix == _doc.strXml && attr.LocalName == XmlDocument.Space)
+                        else if (spaceMode == XmlSpace.None && attr.Prefix == _doc.strXml && attr.LocalName == _doc.strSpace)
                         {
                             // Save xml:space context
                             if (attr.Value == "default")
@@ -725,7 +725,7 @@ namespace System.Xml
                             else if (attr.Value == "preserve")
                                 spaceMode = XmlSpace.Preserve;
                         }
-                        else if (lang == null && attr.Prefix == _doc.strXml && attr.LocalName == XmlDocument.Lang)
+                        else if (lang == null && attr.Prefix == _doc.strXml && attr.LocalName == _doc.strLang)
                         {
                             // Save xml:lag context
                             lang = attr.Value;

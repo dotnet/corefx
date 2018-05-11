@@ -20,7 +20,7 @@ namespace System.Xml
         {
             get
             {
-                return XmlDocument.CDataSectionName;
+                return OwnerDocument.strCDataSectionName;
             }
         }
 
@@ -29,7 +29,7 @@ namespace System.Xml
         {
             get
             {
-                return XmlDocument.CDataSectionName;
+                return OwnerDocument.strCDataSectionName;
             }
         }
 

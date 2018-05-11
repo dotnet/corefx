@@ -18,20 +18,39 @@ namespace System.Xml
     // Represents an entire document. An XmlDocument contains XML data.
     public class XmlDocument : XmlNode
     {
-        internal const string DocumentName = "#document";
-        internal const string DocumentFragmentName = "#document-fragment";
-        internal const string CommentName = "#comment";
-        internal const string TextName = "#text";
-        internal const string CDataSectionName = "#cdata-section";
-        internal const string EntityName = "#entity";
-        internal const string ID = "id";
-        internal const string Xmlns = "xmlns";
-        internal const string Xml = "xml";
-        internal const string Space = "space";
-        internal const string Lang = "lang";
-        internal const string NonSignificantWhitespaceName = "#whitespace";
-        internal const string SignificantWhitespaceName = "#significant-whitespace";
+        private const string DocumentName = "#document";
+        private const string DocumentFragmentName = "#document-fragment";
+        private const string CommentName = "#comment";
+        private const string TextName = "#text";
+        private const string CDataSectionName = "#cdata-section";
+        private const string EntityName = "#entity";
+        private const string ID = "id";
+        private const string Xmlns = "xmlns";
+        private const string Xml = "xml";
+        private const string Space = "space";
+        private const string Lang = "lang";
+        private const string NonSignificantWhitespaceName = "#whitespace";
+        private const string SignificantWhitespaceName = "#significant-whitespace";
 
+        // The seed index below requires that the constant strings above and the seed array below are 
+        // kept in the same order.
+        private const int DocumentNameSeedIndex = 0;
+        private const int DocumentFragmentNameSeedIndex = 1;
+        private const int CommentNameSeedIndex = 2;
+        private const int TextNameSeedIndex = 3;
+        private const int CDataSectionNameSeedIndex = 4;
+        private const int EntityNameSeedIndex = 5;
+        private const int IDSeedIndex = 6;
+        private const int XmlnsSeedIndex = 7;
+        private const int XmlSeedIndex = 8;
+        private const int SpaceSeedIndex = 9;
+        private const int LangSeedIndex = 10;
+        private const int NonSignificantWhitespaceNameSeedIndex = 11;
+        private const int SignificantWhitespaceNameSeedIndex = 12;
+        private const int NsXmlNsSeedIndex = 13;
+        private const int NsXmlSeedIndex = 14;
+
+        // If changing the array below ensure that the seed indexes before match
         private static readonly (string key, int hash)[] s_nameTableSeeds = new []
             {
                 (DocumentName, System.Xml.NameTable.ComputeHash32(DocumentName)),
@@ -80,8 +99,20 @@ namespace System.Xml
         private bool _isLoading;
 
         // special name strings for
+        internal string strDocumentName;
+        internal string strDocumentFragmentName;
+        internal string strCommentName;
+        internal string strTextName;
+        internal string strCDataSectionName;
+        internal string strEntityName;
+        internal string strID;
         internal string strXmlns;
         internal string strXml;
+        internal string strSpace;
+        internal string strLang;
+
+        internal string strNonSignificantWhitespaceName;
+        internal string strSignificantWhitespaceName;
         internal string strReservedXmlns;
         internal string strReservedXml;
 
@@ -121,21 +152,44 @@ namespace System.Xml
             baseURI = String.Empty;
             objLock = new object();
 
-            NameTable nt = imp.NameTable as NameTable;
-            if (nt != null)
+            // If the implementation is using the framework NameTable avoid re-computing the hash codes. If not fallback
+            // we have to use the Add method exposed via XmlNameTable abstract class.
+            if (imp.NameTable is NameTable nt)
             {
-                for (uint i = 0; i < s_nameTableSeeds.Length; ++i)
-                {
-                   nt.AddEntry(s_nameTableSeeds[i].key, s_nameTableSeeds[i].hash);
-                }
+                strDocumentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentNameSeedIndex].key, s_nameTableSeeds[DocumentNameSeedIndex].hash);
+                strDocumentFragmentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentFragmentNameSeedIndex].key, s_nameTableSeeds[DocumentFragmentNameSeedIndex].hash);
+                strCommentName = nt.GetOrAddEntry(s_nameTableSeeds[CommentNameSeedIndex].key, s_nameTableSeeds[CommentNameSeedIndex].hash);
+                strTextName = nt.GetOrAddEntry(s_nameTableSeeds[TextNameSeedIndex].key, s_nameTableSeeds[TextNameSeedIndex].hash);
+                strCDataSectionName = nt.GetOrAddEntry(s_nameTableSeeds[CDataSectionNameSeedIndex].key, s_nameTableSeeds[CDataSectionNameSeedIndex].hash);
+                strEntityName = nt.GetOrAddEntry(s_nameTableSeeds[EntityNameSeedIndex].key, s_nameTableSeeds[EntityNameSeedIndex].hash);
+                strID = nt.GetOrAddEntry(s_nameTableSeeds[IDSeedIndex].key, s_nameTableSeeds[IDSeedIndex].hash);
+                strNonSignificantWhitespaceName = nt.GetOrAddEntry(s_nameTableSeeds[NonSignificantWhitespaceNameSeedIndex].key, s_nameTableSeeds[NonSignificantWhitespaceNameSeedIndex].hash);
+                strSignificantWhitespaceName = nt.GetOrAddEntry(s_nameTableSeeds[SignificantWhitespaceNameSeedIndex].key, s_nameTableSeeds[SignificantWhitespaceNameSeedIndex].hash);
+                strXmlns = nt.GetOrAddEntry(s_nameTableSeeds[XmlnsSeedIndex].key, s_nameTableSeeds[XmlnsSeedIndex].hash);
+                strXml = nt.GetOrAddEntry(s_nameTableSeeds[XmlSeedIndex].key, s_nameTableSeeds[XmlSeedIndex].hash);
+                strSpace = nt.GetOrAddEntry(s_nameTableSeeds[SpaceSeedIndex].key, s_nameTableSeeds[SpaceSeedIndex].hash);
+                strLang = nt.GetOrAddEntry(s_nameTableSeeds[LangSeedIndex].key, s_nameTableSeeds[LangSeedIndex].hash);
+                strReservedXmlns = nt.GetOrAddEntry(s_nameTableSeeds[NsXmlNsSeedIndex].key, s_nameTableSeeds[NsXmlNsSeedIndex].hash);
+                strReservedXml = nt.GetOrAddEntry(s_nameTableSeeds[NsXmlSeedIndex].key, s_nameTableSeeds[NsXmlSeedIndex].hash);
             }
             else
             {
                 XmlNameTable customNameTable = imp.NameTable;
-                for (uint i = 0; i < s_nameTableSeeds.Length; ++i)
-                {
-                    customNameTable.Add(s_nameTableSeeds[i].key);
-                }
+                strDocumentName = customNameTable.Add(DocumentName);
+                strDocumentFragmentName = customNameTable.Add(DocumentFragmentName);
+                strCommentName = customNameTable.Add(CommentName);
+                strTextName = customNameTable.Add(TextName);
+                strCDataSectionName = customNameTable.Add(CDataSectionName);
+                strEntityName = customNameTable.Add(EntityName);
+                strID = customNameTable.Add(ID);
+                strNonSignificantWhitespaceName = customNameTable.Add(NonSignificantWhitespaceName);
+                strSignificantWhitespaceName = customNameTable.Add(SignificantWhitespaceName);
+                strXmlns = customNameTable.Add(Xmlns);
+                strXml = customNameTable.Add(Xml);
+                strSpace = customNameTable.Add(Space);
+                strLang = customNameTable.Add(Lang);
+                strReservedXmlns = customNameTable.Add(XmlReservedNs.NsXmlNs);
+                strReservedXml = customNameTable.Add(XmlReservedNs.NsXml);
             }
         }
 
@@ -186,7 +240,7 @@ namespace System.Xml
                 object oPrefix = xmlName.Prefix;
                 object oNamespaceURI = xmlName.NamespaceURI;
                 object oLocalName = xmlName.LocalName;
-                if ((oPrefix == (object)strXmlns || (oPrefix == (object)string.Empty && oLocalName == (object)strXmlns)) ^ (oNamespaceURI == (object)strReservedXmlns))
+                if ((oPrefix == (object)strXmlns || (xmlName.Prefix.Length == 0 && oLocalName == (object)strXmlns)) ^ (oNamespaceURI == (object)strReservedXmlns))
                     throw new ArgumentException(SR.Format(SR.Xdom_Attr_Reserved_XmlNS, namespaceURI));
             }
             return xmlName;
@@ -333,13 +387,13 @@ namespace System.Xml
         // Gets the name of the node.
         public override String Name
         {
-            get { return DocumentName; }
+            get { return strDocumentName; }
         }
 
         // Gets the name of the current node without the namespace prefix.
         public override String LocalName
         {
-            get { return DocumentName; }
+            get { return strDocumentName; }
         }
 
         // Gets the root XmlElement for the document.

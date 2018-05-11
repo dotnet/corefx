@@ -21,7 +21,7 @@ namespace System.Xml
         {
             get
             {
-                return XmlDocument.SignificantWhitespaceName;
+                return OwnerDocument.strSignificantWhitespaceName;
             }
         }
 
@@ -30,7 +30,7 @@ namespace System.Xml
         {
             get
             {
-                return XmlDocument.SignificantWhitespaceName;
+                return OwnerDocument.strSignificantWhitespaceName;
             }
         }
 
