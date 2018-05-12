@@ -110,11 +110,22 @@ namespace System.Security.Cryptography.Encoding.Tests
             byte[] inputBytes = Text.Encoding.ASCII.GetBytes(data);
             byte[] outputBytes = new byte[100];
 
+            // Verify read mode
             using (var ms = new MemoryStream(inputBytes))
             using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Read))
             {
                 int bytesRead = cs.Read(outputBytes, 0, outputBytes.Length);
                 string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesRead);
+                Assert.Equal(expected, outputString);
+            }
+
+            // Verify write mode
+            using (var ms = new MemoryStream(outputBytes))
+            using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Write))
+            {
+                cs.Write(inputBytes, 0, inputBytes.Length);
+                cs.FlushFinalBlock();
+                string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, (int)ms.Position);
                 Assert.Equal(expected, outputString);
             }
         }
