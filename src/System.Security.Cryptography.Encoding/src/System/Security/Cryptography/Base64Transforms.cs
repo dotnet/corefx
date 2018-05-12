@@ -116,17 +116,17 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            int effectiveCount;
-            byte[] temp = GetTempBuffer(inputBuffer, inputOffset, inputCount, out effectiveCount);
+            var (effectiveBuffer, effectiveOffset, effectiveCount) =
+                DiscardWhiteSpacesIfNecessary(inputBuffer, inputOffset, inputCount);
 
             if (effectiveCount + _inputIndex < 4)
             {
-                Buffer.BlockCopy(temp, 0, _inputBuffer, _inputIndex, effectiveCount);
+                Buffer.BlockCopy(effectiveBuffer, effectiveOffset, _inputBuffer, _inputIndex, effectiveCount);
                 _inputIndex += effectiveCount;
                 return 0;
             }
 
-            byte[] result = ConvertFromBase64(temp, effectiveCount);
+            byte[] result = ConvertFromBase64(effectiveBuffer, effectiveOffset, effectiveCount);
 
             Buffer.BlockCopy(result, 0, outputBuffer, outputOffset, result.Length);
 
@@ -138,8 +138,8 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            int effectiveCount;
-            byte[] temp = GetTempBuffer(inputBuffer, inputOffset, inputCount, out effectiveCount);
+            var (effectiveBuffer, effectiveOffset, effectiveCount) =
+                DiscardWhiteSpacesIfNecessary(inputBuffer, inputOffset, inputCount);
 
             if (effectiveCount + _inputIndex < 4)
             {
@@ -147,7 +147,7 @@ namespace System.Security.Cryptography
                 return Array.Empty<byte>();
             }
 
-            byte[] result = ConvertFromBase64(temp, effectiveCount);
+            byte[] result = ConvertFromBase64(effectiveBuffer, effectiveOffset, effectiveCount);
 
             // reinitialize the transform
             Reset();
@@ -155,44 +155,30 @@ namespace System.Security.Cryptography
             return result;
         }
 
-        private byte[] GetTempBuffer(byte[] inputBuffer, int inputOffset, int inputCount, out int effectiveCount)
-        {
-            byte[] temp;
-
-            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-            {
-                temp = DiscardWhiteSpaces(inputBuffer, inputOffset, inputCount);
-                effectiveCount = temp.Length;
-            }
-            else
-            {
-                temp = new byte[inputCount];
-                Buffer.BlockCopy(inputBuffer, inputOffset, temp, 0, inputCount);
-                effectiveCount = inputCount;
-            }
-
-            return temp;
-        }
-
-        private byte[] ConvertFromBase64(byte[] temp, int effectiveCount)
+        private byte[] ConvertFromBase64(byte[] effectiveBuffer, int effectiveOffset, int effectiveCount)
         {
             // Get the number of 4 bytes blocks to transform
             int numBlocks = (effectiveCount + _inputIndex) / 4;
 
             byte[] transformBuffer = new byte[_inputIndex + effectiveCount];
             Buffer.BlockCopy(_inputBuffer, 0, transformBuffer, 0, _inputIndex);
-            Buffer.BlockCopy(temp, 0, transformBuffer, _inputIndex, effectiveCount);
+            Buffer.BlockCopy(effectiveBuffer, effectiveOffset, transformBuffer, _inputIndex, effectiveCount);
 
             _inputIndex = (effectiveCount + _inputIndex) % 4;
-            Buffer.BlockCopy(temp, effectiveCount - _inputIndex, _inputBuffer, 0, _inputIndex);
+            Buffer.BlockCopy(effectiveBuffer, effectiveOffset + effectiveCount - _inputIndex, _inputBuffer, 0, _inputIndex);
 
             char[] tempChar = Encoding.ASCII.GetChars(transformBuffer, 0, 4 * numBlocks);
             byte[] tempBytes = Convert.FromBase64CharArray(tempChar, 0, 4 * numBlocks);
             return tempBytes;
         }
 
-        private byte[] DiscardWhiteSpaces(byte[] inputBuffer, int inputOffset, int inputCount)
+        private (byte[], int, int) DiscardWhiteSpacesIfNecessary(byte[] inputBuffer, int inputOffset, int inputCount)
         {
+            if (_whitespaces != FromBase64TransformMode.IgnoreWhiteSpaces)
+            {
+                return (inputBuffer, inputOffset, inputCount);
+            }
+
             int i, iCount = 0;
             for (i = 0; i < inputCount; i++)
             {
@@ -200,10 +186,13 @@ namespace System.Security.Cryptography
             }
 
             // If there's nothing to do, leave early
-            if (iCount == 0 && inputOffset == 0 &&
-                inputCount == inputBuffer.Length)
+            if (iCount == 0)
             {
-                return inputBuffer;
+                return (inputBuffer, inputOffset, inputCount);
+            }
+            if (iCount == inputCount)
+            {
+                return (inputBuffer, inputOffset, 0);
             }
 
             byte[] rgbOut = new byte[inputCount - iCount];
@@ -216,7 +205,7 @@ namespace System.Security.Cryptography
                 }
             }
 
-            return rgbOut;
+            return (rgbOut, 0, rgbOut.Length);
         }
 
         private static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
