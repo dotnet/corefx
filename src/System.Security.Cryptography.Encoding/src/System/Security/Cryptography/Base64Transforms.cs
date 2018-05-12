@@ -5,6 +5,7 @@
 // This file contains two ICryptoTransforms: ToBase64Transform and FromBase64Transform
 // they may be attached to a CryptoStream in either read or write mode
 
+using System.Buffers;
 using System.Text;
 
 namespace System.Security.Cryptography
@@ -116,14 +117,22 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var temp = GetTempBuffer(inputBuffer, inputOffset, inputCount);
+            var (temp, tempCount) = GetTempBuffer(inputBuffer, inputOffset, inputCount);
 
-            if (temp.Length == 0)
+            if (temp == null)
             {
                 return 0;
             }
 
-            byte[] result = Convert.FromBase64CharArray(temp, 0, temp.Length);
+            byte[] result;
+            try
+            {
+                result = Convert.FromBase64CharArray(temp, 0, tempCount);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(temp, true);
+            }
 
             Buffer.BlockCopy(result, 0, outputBuffer, outputOffset, result.Length);
 
@@ -135,15 +144,23 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var temp = GetTempBuffer(inputBuffer, inputOffset, inputCount);
+            var (temp, tempCount) = GetTempBuffer(inputBuffer, inputOffset, inputCount);
 
-            if (temp.Length == 0)
+            if (temp == null)
             {
                 Reset();
                 return Array.Empty<byte>();
             }
 
-            byte[] result = Convert.FromBase64CharArray(temp, 0, temp.Length);
+            byte[] result;
+            try
+            {
+                result = Convert.FromBase64CharArray(temp, 0, tempCount);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(temp, true);
+            }
 
             // reinitialize the transform
             Reset();
@@ -171,7 +188,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private char[] GetTempBuffer(byte[] inputBuffer, int inputOffset, int inputCount)
+        private (char[], int) GetTempBuffer(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             var effectiveCount = inputCount;
             if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
@@ -186,14 +203,14 @@ namespace System.Security.Cryptography
             if (effectiveCount + _inputIndex < 4)
             {
                 FillRemainderBuffer(inputBuffer, inputOffset, inputCount);
-                return Array.Empty<char>();
+                return (null, 0);
             }
 
             // copy current remainder + input -> temp
             var totalBytes = _inputIndex + effectiveCount;
             var remainder = totalBytes % 4;
             var tempCount = _inputIndex + effectiveCount - remainder;
-            var temp = new char[tempCount];
+            var temp = ArrayPool<char>.Shared.Rent(tempCount);
             var tempIndex = 0;
             var inputIndex = inputOffset;
             for (var i = 0; i < _inputIndex; i++)
@@ -221,7 +238,7 @@ namespace System.Security.Cryptography
 
             FillRemainderBuffer(inputBuffer, inputIndex, inputOffset + inputCount - inputIndex);
 
-            return temp;
+            return (temp, tempCount);
         }
 
         private static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
