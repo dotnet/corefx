@@ -116,17 +116,14 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var (effectiveBuffer, effectiveOffset, effectiveCount) =
-                DiscardWhiteSpacesIfNecessary(inputBuffer, inputOffset, inputCount);
+            var temp = GetTempBuffer(inputBuffer, inputOffset, inputCount);
 
-            if (effectiveCount + _inputIndex < 4)
+            if (temp.Length == 0)
             {
-                Buffer.BlockCopy(effectiveBuffer, effectiveOffset, _inputBuffer, _inputIndex, effectiveCount);
-                _inputIndex += effectiveCount;
                 return 0;
             }
 
-            byte[] result = ConvertFromBase64(effectiveBuffer, effectiveOffset, effectiveCount);
+            byte[] result = Convert.FromBase64CharArray(temp, 0, temp.Length);
 
             Buffer.BlockCopy(result, 0, outputBuffer, outputOffset, result.Length);
 
@@ -138,16 +135,15 @@ namespace System.Security.Cryptography
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var (effectiveBuffer, effectiveOffset, effectiveCount) =
-                DiscardWhiteSpacesIfNecessary(inputBuffer, inputOffset, inputCount);
+            var temp = GetTempBuffer(inputBuffer, inputOffset, inputCount);
 
-            if (effectiveCount + _inputIndex < 4)
+            if (temp.Length == 0)
             {
                 Reset();
                 return Array.Empty<byte>();
             }
 
-            byte[] result = ConvertFromBase64(effectiveBuffer, effectiveOffset, effectiveCount);
+            byte[] result = Convert.FromBase64CharArray(temp, 0, temp.Length);
 
             // reinitialize the transform
             Reset();
@@ -155,57 +151,77 @@ namespace System.Security.Cryptography
             return result;
         }
 
-        private byte[] ConvertFromBase64(byte[] effectiveBuffer, int effectiveOffset, int effectiveCount)
+        private void FillRemainderBuffer(byte[] buffer, int offset, int count)
         {
-            // Get the number of 4 bytes blocks to transform
-            int numBlocks = (effectiveCount + _inputIndex) / 4;
-
-            byte[] transformBuffer = new byte[_inputIndex + effectiveCount];
-            Buffer.BlockCopy(_inputBuffer, 0, transformBuffer, 0, _inputIndex);
-            Buffer.BlockCopy(effectiveBuffer, effectiveOffset, transformBuffer, _inputIndex, effectiveCount);
-
-            _inputIndex = (effectiveCount + _inputIndex) % 4;
-            Buffer.BlockCopy(effectiveBuffer, effectiveOffset + effectiveCount - _inputIndex, _inputBuffer, 0, _inputIndex);
-
-            char[] tempChar = Encoding.ASCII.GetChars(transformBuffer, 0, 4 * numBlocks);
-            byte[] tempBytes = Convert.FromBase64CharArray(tempChar, 0, 4 * numBlocks);
-            return tempBytes;
+            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    var value = buffer[offset + i];
+                    if (!char.IsWhiteSpace((char)value))
+                    {
+                        _inputBuffer[_inputIndex++] = value;
+                    }
+                }
+            }
+            else
+            {
+                Buffer.BlockCopy(buffer, offset, _inputBuffer, _inputIndex, count);
+                _inputIndex += count;
+            }
         }
 
-        private (byte[], int, int) DiscardWhiteSpacesIfNecessary(byte[] inputBuffer, int inputOffset, int inputCount)
+        private char[] GetTempBuffer(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            if (_whitespaces != FromBase64TransformMode.IgnoreWhiteSpaces)
+            var effectiveCount = inputCount;
+            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
             {
-                return (inputBuffer, inputOffset, inputCount);
-            }
-
-            int i, iCount = 0;
-            for (i = 0; i < inputCount; i++)
-            {
-                if (char.IsWhiteSpace((char)inputBuffer[inputOffset + i])) iCount++;
-            }
-
-            // If there's nothing to do, leave early
-            if (iCount == 0)
-            {
-                return (inputBuffer, inputOffset, inputCount);
-            }
-            if (iCount == inputCount)
-            {
-                return (inputBuffer, inputOffset, 0);
-            }
-
-            byte[] rgbOut = new byte[inputCount - iCount];
-            iCount = 0;
-            for (i = 0; i < inputCount; i++)
-            {
-                if (!char.IsWhiteSpace((char)inputBuffer[inputOffset + i]))
+                for (var i = 0; i < inputCount; i++)
                 {
-                    rgbOut[iCount++] = inputBuffer[inputOffset + i];
+                    if (char.IsWhiteSpace((char)inputBuffer[inputOffset + i])) effectiveCount--;
                 }
             }
 
-            return (rgbOut, 0, rgbOut.Length);
+            // are there insufficient characters to decode a block?
+            if (effectiveCount + _inputIndex < 4)
+            {
+                FillRemainderBuffer(inputBuffer, inputOffset, inputCount);
+                return Array.Empty<char>();
+            }
+
+            // copy current remainder + input -> temp
+            var totalBytes = _inputIndex + effectiveCount;
+            var remainder = totalBytes % 4;
+            var tempCount = _inputIndex + effectiveCount - remainder;
+            var temp = new char[tempCount];
+            var tempIndex = 0;
+            var inputIndex = inputOffset;
+            for (var i = 0; i < _inputIndex; i++)
+            {
+                temp[tempIndex++] = (char)_inputBuffer[i];
+            }
+            _inputIndex = 0;
+            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
+            {
+                while (tempIndex < tempCount)
+                {
+                    var value = (char)inputBuffer[inputIndex++];
+                    if (!char.IsWhiteSpace(value))
+                    {
+                        temp[tempIndex++] = value;
+                    }
+                }
+            }
+            else
+            {
+                var usableCount = inputCount - remainder;
+                Encoding.ASCII.GetChars(inputBuffer, inputOffset, usableCount, temp, tempIndex);
+                inputIndex += usableCount;
+            }
+
+            FillRemainderBuffer(inputBuffer, inputIndex, inputOffset + inputCount - inputIndex);
+
+            return temp;
         }
 
         private static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
