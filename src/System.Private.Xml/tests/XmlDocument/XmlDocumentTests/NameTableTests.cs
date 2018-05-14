@@ -27,5 +27,27 @@ namespace System.Xml.Tests
             d = new XmlDocument(nt);
             Assert.Same(targetStr, d.Name);
         }
+
+        [Fact]
+        public static void RespectTypesDerivedFromNameTable()
+        {
+            var customNameTable = new CustomNameTable();
+            var xmlDocument = new XmlDocument(customNameTable);
+            Assert.True(customNameTable.NumberOfCallsToAddStringMethod > 0);
+        }
+
+        // We expect users to derive from XmlNameTable but since NameTable it not sealed
+        // it is possible for someone to derive from it, override its methods and so on.
+        // This type is used to test that XmlDocument is properly handling this case.
+        internal class CustomNameTable : NameTable
+        {
+            public int NumberOfCallsToAddStringMethod { get; private set; }
+
+            public override string Add(string key)
+            {
+                ++NumberOfCallsToAddStringMethod;
+                return base.Add(key);
+            }
+        }
     }
 }

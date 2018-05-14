@@ -152,9 +152,11 @@ namespace System.Xml
             baseURI = String.Empty;
             objLock = new object();
 
-            if (imp.NameTable is NameTable nt)
+            if (imp.NameTable.GetType() == typeof(NameTable))
             {
-                // When the name table being used has type NameTable, which is internally defined, avoid re-calculating the hash codes.
+                // When the name table being used is of type NameTable avoid re-calculating the hash codes.
+                NameTable nt = (NameTable)imp.NameTable;
+
                 strDocumentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentNameSeedIndex].key, s_nameTableSeeds[DocumentNameSeedIndex].hash);
                 strDocumentFragmentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentFragmentNameSeedIndex].key, s_nameTableSeeds[DocumentFragmentNameSeedIndex].hash);
                 strCommentName = nt.GetOrAddEntry(s_nameTableSeeds[CommentNameSeedIndex].key, s_nameTableSeeds[CommentNameSeedIndex].hash);
