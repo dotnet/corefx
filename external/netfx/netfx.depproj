@@ -13,9 +13,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsNetFx)' != 'true'">
     <!-- For things not .NETFramework we need the net471 targeting pack to generate facades -->
-    <NuGetTargetMoniker>.NETFramework,Version=v4.7.1</NuGetTargetMoniker>
-    <NuGetTargetMonikerShort>net471</NuGetTargetMonikerShort>
-    <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.1</TargetingPackNugetPackageId>
+    <NuGetTargetMoniker>.NETFramework,Version=v4.7.2</NuGetTargetMoniker>
+    <NuGetTargetMonikerShort>net472</NuGetTargetMonikerShort>
+    <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.2</TargetingPackNugetPackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,10 +40,14 @@
     </BinPlaceConfiguration>
   </ItemGroup>
 
+  <PropertyGroup>
+    <_TargetingPackVersion>1.0.1</_TargetingPackVersion>
+    <_TargetingPackVersion Condition="'$(TargetingPackNugetPackageId)' == 'Microsoft.TargetingPack.NETFramework.v4.7.1' OR '$(TargetingPackNugetPackageId)' == 'Microsoft.TargetingPack.NETFramework.v4.7.2'">1.0.0</_TargetingPackVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="$(TargetingPackNugetPackageId)">
-      <Version Condition="'$(TargetingPackNugetPackageId)' == 'Microsoft.TargetingPack.NETFramework.v4.7.1'">1.0.0-preview</Version>
-      <Version Condition="'$(TargetingPackNugetPackageId)' != 'Microsoft.TargetingPack.NETFramework.v4.7.1'">1.0.1</Version>
+      <Version >$(_TargetingPackVersion)</Version>
     </PackageReference>
     <PackageReference Include="$(NETStandardSupportPackageId)" Condition="'$(AddNetStandardSupportPackage)' == 'true'">
       <Version>$(NETStandardSupportPackageVersion)</Version>

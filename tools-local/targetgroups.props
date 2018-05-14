@@ -223,12 +223,19 @@
       <Imports>net47</Imports>
       <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
-    <!-- netfx is an alias for net471 -->
-    <TargetGroups Include="netfx">
-      <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.1</TargetingPackNugetPackageId>
-      <NuGetTargetMoniker>.NETFramework,Version=v4.7.1</NuGetTargetMoniker>
-      <NuGetTargetMonikerShort>net471</NuGetTargetMonikerShort>
+    <TargetGroups Include="net472">
+      <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.2</TargetingPackNugetPackageId>
+      <NuGetTargetMoniker>.NETFramework,Version=v4.7.2</NuGetTargetMoniker>
+      <NuGetTargetMonikerShort>net472</NuGetTargetMonikerShort>
       <Imports>net471</Imports>
+      <CompatibleWith>netstandard</CompatibleWith>
+    </TargetGroups>
+    <!-- netfx is an alias for net472 -->
+    <TargetGroups Include="netfx">
+      <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.7.2</TargetingPackNugetPackageId>
+      <NuGetTargetMoniker>.NETFramework,Version=v4.7.2</NuGetTargetMoniker>
+      <NuGetTargetMonikerShort>net472</NuGetTargetMonikerShort>
+      <Imports>net472</Imports>
       <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="win8">
