@@ -152,10 +152,9 @@ namespace System.Xml
             baseURI = String.Empty;
             objLock = new object();
 
-            // If the implementation is using the framework NameTable avoid re-computing the hash codes. If not fallback
-            // we have to use the Add method exposed via XmlNameTable abstract class.
             if (imp.NameTable is NameTable nt)
             {
+                // When the name table being used has type NameTable, which is internally defined, avoid re-calculating the hash codes.
                 strDocumentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentNameSeedIndex].key, s_nameTableSeeds[DocumentNameSeedIndex].hash);
                 strDocumentFragmentName = nt.GetOrAddEntry(s_nameTableSeeds[DocumentFragmentNameSeedIndex].key, s_nameTableSeeds[DocumentFragmentNameSeedIndex].hash);
                 strCommentName = nt.GetOrAddEntry(s_nameTableSeeds[CommentNameSeedIndex].key, s_nameTableSeeds[CommentNameSeedIndex].hash);
