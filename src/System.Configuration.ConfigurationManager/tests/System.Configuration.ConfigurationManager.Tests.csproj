@@ -94,6 +94,8 @@
     <Compile Include="System\Configuration\SettingElementTests.cs" />
     <Compile Include="System\Configuration\SettingsDescriptionAttributeTests.cs" />
     <Compile Include="System\Configuration\SettingsManageabilityAtrributeTests.cs" />
+    <Compile Include="System\Configuration\SettingsPropertyIsReadOnlyExceptionTests.cs" />
+    <Compile Include="System\Configuration\SettingsPropertyNotFoundExceptionTests.cs" />
     <Compile Include="System\Configuration\SettingsPropertyWrongTypeExceptionTests.cs" />
     <Compile Include="System\Configuration\SmokeTest.cs" />
     <Compile Include="System\Configuration\StringUtilTests.cs" />
