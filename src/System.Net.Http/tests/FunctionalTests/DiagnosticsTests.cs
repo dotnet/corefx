@@ -518,14 +518,26 @@ namespace System.Net.Http.Functional.Tests
                         {
                             // Forces a synchronous exception for SocketsHttpHandler.
                             // SocketsHttpHandler only allow http scheme for proxies.
-                            Assert.ThrowsAsync<NotSupportedException>(() => client.SendAsync(request)).Wait();
+
+                            // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
+                            // synchronous exception here, because DiagnosticsHandler SendAsync method has async
+                            // modifier, and returns Task. In this case, the Task will complete synchronously.
+                            Task sendTask = client.SendAsync(request);
+                            Assert.True(sendTask.IsFaulted);
+                            Assert.IsType<NotSupportedException>(sendTask.Exception.InnerException);
                         }
                         else
                         {
                             // Forces a synchronous exception for WinHttpHandler.
                             // WinHttpHandler will not allow (proxy != null && !UseCustomProxy).
                             handler.UseProxy = false;
-                            Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request)).Wait();
+
+                            // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
+                            // synchronous exception here, because DiagnosticsHandler SendAsync method has async
+                            // modifier, and returns Task. In this case, the Task will complete synchronously.
+                            Task sendTask = client.SendAsync(request);
+                            Assert.True(sendTask.IsFaulted);
+                            Assert.IsType<InvalidOperationException>(sendTask.Exception.InnerException);
                         }
                     }
                     // Poll with a timeout since logging response is not synchronized with returning a response.
