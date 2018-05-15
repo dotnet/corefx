@@ -51,4 +51,13 @@ typedef void (*SigChldCallback)(int reapAll);
  */
 DLLEXPORT uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
 
+/**
+ * Remove our handler and reissue the signal to be picked up by the previously registered handler.
+ *
+ * In general, we now want to  In the most common case, this will be the default handler,
+ * causing the process to be torn down. It could also be a custom handler registered by other
+ * code before us.
+ */
+DLLEXPORT void SystemNative_RestoreAndHandleCtrl(enum CtrlCode ctrlCode);
+
 END_EXTERN_C
