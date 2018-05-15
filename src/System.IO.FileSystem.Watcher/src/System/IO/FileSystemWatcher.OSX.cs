@@ -307,11 +307,11 @@ namespace System.IO
                 }
             }
 
-            private void FileSystemEventCallback( 
+            private void FileSystemEventCallback(
                 FSEventStreamRef streamRef, 
                 IntPtr clientCallBackInfo, 
                 size_t numEvents, 
-                String[] eventPaths, 
+                String[] eventPaths,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 Interop.EventStream.FSEventStreamEventFlags[] eventFlags,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
@@ -340,8 +340,9 @@ namespace System.IO
                     Debug.Assert(eventPaths[i][eventPaths[i].Length - 1] != '/', "Trailing slashes on events is not supported");
 
                     // Match Windows and don't notify us about changes to the Root folder
-                    string path = eventPaths[i];
-                    if (string.Compare(path, 0, _fullDirectory, 0, path.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                    ReadOnlySpan<char> path = eventPaths[i].AsSpan();
+
+                    if (_fullDirectory.Length >= path.Length && path.SequenceEqual(_fullDirectory.AsSpan().Slice(0, path.Length)))
                     {
                         continue;
                     }
@@ -358,15 +359,15 @@ namespace System.IO
                         // If this event is the second in a rename pair then skip it
                         continue;
                     }
-                    else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i], path)) != 0))
+                    else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i])) != 0))
                     {
                         // The base FileSystemWatcher does a match check against the relative path before combining with 
                         // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
-                        string relativePath = null;
-                        if (path.Equals(_fullDirectory, StringComparison.OrdinalIgnoreCase) == false)
+                        ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
+                        if (path.SequenceEqual(_fullDirectory) == false)
                         {
                             // Remove the root directory to get the relative path
-                            relativePath = path.Remove(0, _fullDirectory.Length);
+                            relativePath = path.Slice(_fullDirectory.Length);
                         }
 
                         // Raise a notification for the event
@@ -392,7 +393,7 @@ namespace System.IO
                                 // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
                                 // Check if the item exists on disk to check which it is
                                 // Don't send a new notification if we already sent one for this event.
-                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                if (DoesItemExist(path.ToString(), IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                 {
                                     if ((eventType & WatcherChangeTypes.Created) == 0)
                                     {
@@ -408,7 +409,7 @@ namespace System.IO
                             {
                                 // Remove the base directory prefix and add the paired event to the list of 
                                 // events to skip and notify the user of the rename 
-                                string newPathRelativeName = eventPaths[pairedId].Remove(0, _fullDirectory.Length);
+                                ReadOnlySpan<char> newPathRelativeName = eventPaths[pairedId].AsSpan().Slice(_fullDirectory.Length);
                                 watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
 
                                 // Create a new list, if necessary, and add the event
@@ -427,7 +428,7 @@ namespace System.IO
             /// Compares the given event flags to the filter flags and returns which event (if any) corresponds
             /// to those flags.
             /// </summary>
-            private WatcherChangeTypes FilterEvents(Interop.EventStream.FSEventStreamEventFlags eventFlags, string fullPath)
+            private WatcherChangeTypes FilterEvents(Interop.EventStream.FSEventStreamEventFlags eventFlags)
             {
                 const Interop.EventStream.FSEventStreamEventFlags changedFlags = Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod |
                                                                                  Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
@@ -479,7 +480,7 @@ namespace System.IO
                         IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
             }
 
-            private bool CheckIfPathIsNested(string eventPath)
+            private bool CheckIfPathIsNested(ReadOnlySpan<char> eventPath)
             {
                 bool doesPathPass = true;
 
@@ -488,8 +489,8 @@ namespace System.IO
                 {
                     // Check if the parent is the root. If so, then we'll continue processing based on the name.
                     // If it isn't, then this will be set to false and we'll skip the name processing since it's irrelevant.
-                    string parent = System.IO.Path.GetDirectoryName(eventPath);
-                    doesPathPass = (string.Compare(parent, 0, _fullDirectory, 0, parent.Length, StringComparison.OrdinalIgnoreCase) == 0);
+                    ReadOnlySpan<char> parent = System.IO.Path.GetDirectoryName(eventPath);
+                    doesPathPass = _fullDirectory.Length < parent.Length ? false : parent.SequenceEqual(_fullDirectory.AsSpan().Slice(0, parent.Length));
                 }
 
                 return doesPathPass;
