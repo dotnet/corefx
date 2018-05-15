@@ -9,6 +9,7 @@ namespace System.Net
     {
         None = 0,
         GZip = 1,
-        Deflate = 2
+        Deflate = 2,
+        Brotli = 4
     }
 }
