@@ -520,8 +520,10 @@ namespace System.Net.Http.Functional.Tests
                             // SocketsHttpHandler only allow http scheme for proxies.
 
                             // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
-                            // synchronous exception here, because DiagnosticsHandler SendAsync method has async
-                            // modifier, and returns Task. In this case, the Task will complete synchronously.
+                            // synchronous exception here, because DiagnosticsHandler SendAsync() method has async
+                            // modifier, and returns Task. If the call is not awaited, the current test method will continue
+                            // run before the call is completed, thus Assert.Throws() will not capture the exception.
+                            // We need to wait for the Task to complete synchronously, to validate the exception.
                             Task sendTask = client.SendAsync(request);
                             Assert.True(sendTask.IsFaulted);
                             Assert.IsType<NotSupportedException>(sendTask.Exception.InnerException);
@@ -533,8 +535,10 @@ namespace System.Net.Http.Functional.Tests
                             handler.UseProxy = false;
 
                             // We cannot use Assert.Throws<Exception>(() => { SendAsync(...); }) to verify the
-                            // synchronous exception here, because DiagnosticsHandler SendAsync method has async
-                            // modifier, and returns Task. In this case, the Task will complete synchronously.
+                            // synchronous exception here, because DiagnosticsHandler SendAsync() method has async
+                            // modifier, and returns Task. If the call is not awaited, the current test method will continue
+                            // run before the call is completed, thus Assert.Throws() will not capture the exception.
+                            // We need to wait for the Task to complete synchronously, to validate the exception.
                             Task sendTask = client.SendAsync(request);
                             Assert.True(sendTask.IsFaulted);
                             Assert.IsType<InvalidOperationException>(sendTask.Exception.InnerException);
