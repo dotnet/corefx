@@ -48,7 +48,7 @@ namespace System.Threading
 
     #region class WinRTSynchronizationContextFactory
 
-    internal sealed class WinRTSynchronizationContextFactory : WinRTSynchronizationContextFactoryBase
+    internal sealed class WinRTSynchronizationContextFactory
     {
         //
         // It's important that we always return the same SynchronizationContext object for any particular ICoreDispatcher
@@ -63,7 +63,10 @@ namespace System.Threading
         private static readonly ConditionalWeakTable<IDispatcherQueue, WinRTDispatcherQueueBasedSynchronizationContext> s_dispatcherQueueContextCache =
             new ConditionalWeakTable<IDispatcherQueue, WinRTDispatcherQueueBasedSynchronizationContext>();
 
-        public override SynchronizationContext Create(object dispatcherObj)
+        //
+        // This method will be invoked through reflection by System.Private.Corelib. Please don't rename this method and don't change its signature
+        //
+        public static SynchronizationContext Create(object dispatcherObj)
         {
             Debug.Assert(dispatcherObj != null);
             Debug.Assert(dispatcherObj is CoreDispatcher || dispatcherObj is IDispatcherQueue);
@@ -169,10 +172,19 @@ namespace System.Threading
 
             private delegate void DelEtwFireThreadTransferSendObj(object id, int kind, string info, bool multiDequeues);
             private delegate void DelEtwFireThreadTransferObj(object id, int kind, string info);
+            private delegate bool DelEtwEventSourceIsEnabled(EventLevel level, EventKeywords Keywords);
+            private delegate bool DelReportUnhandledError(Exception e);
+
             private static DelEtwFireThreadTransferSendObj s_EtwFireThreadTransferSendObj;
             private static DelEtwFireThreadTransferObj s_EtwFireThreadTransferReceiveObj;
             private static DelEtwFireThreadTransferObj s_EtwFireThreadTransferReceiveHandledObj;
+            private static DelEtwEventSourceIsEnabled s_EtwEventSourceIsEnabled;
+            private static DelReportUnhandledError s_ReportUnhandledError;
+
             private static volatile bool s_TriedGetEtwDelegates;
+
+            // Keep same value as FrameworkEventSource.Keywords.ThreadTransfer in System.Private.Corelib
+            private static EventKeywords ThreadTransfer = (EventKeywords)0x0010;
 
             public Invoker(SendOrPostCallback callback, object state)
             {
@@ -180,13 +192,17 @@ namespace System.Threading
                 _callback = callback;
                 _state = state;
 
-                if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                if (!s_TriedGetEtwDelegates)
+                    InitEtwMethods();
+
+                if (s_EtwEventSourceIsEnabled != null && s_EtwEventSourceIsEnabled(EventLevel.Informational, ThreadTransfer))
                     EtwFireThreadTransferSendObj(this);
             }
 
             public void Invoke()
             {
-                if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+
+                if (s_EtwEventSourceIsEnabled(EventLevel.Informational, ThreadTransfer))
                     EtwFireThreadTransferReceiveObj(this);
 
                 if (_executionContext == null)
@@ -197,7 +213,7 @@ namespace System.Threading
                 // If there was an ETW event that fired at the top of the winrt event handling loop, ETW listeners could
                 // use it as a marker of completion of the previous request. Since such an event does not exist we need to
                 // fire the "done handling off-thread request" event in order to enable correct work item assignment.
-                if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                if (s_EtwEventSourceIsEnabled != null && s_EtwEventSourceIsEnabled(EventLevel.Informational, ThreadTransfer))
                     EtwFireThreadTransferReceiveHandledObj(this);
             }
 
@@ -222,7 +238,7 @@ namespace System.Threading
                     //
                     if (!(ex is ThreadAbortException) && !(ex is AppDomainUnloadedException))
                     {
-                        if (!WindowsRuntimeMarshal.ReportUnhandledError(ex))
+                        if (s_ReportUnhandledError != null && !s_ReportUnhandledError(ex))
                         {
                             var edi = ExceptionDispatchInfo.Capture(ex);
                             ThreadPool.QueueUserWorkItem(o => ((ExceptionDispatchInfo)o).Throw(), edi);
@@ -234,42 +250,52 @@ namespace System.Threading
             #region ETW Activity-tracing support
             private static void InitEtwMethods()
             {
-                Type fest = typeof(FrameworkEventSource);
+                Type fest = Type.GetType("System.Diagnostics.Tracing.FrameworkEventSource");
                 var mi1 = fest.GetMethod("ThreadTransferSendObj", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                Debug.Assert(mi1 != null);
+
                 var mi2 = fest.GetMethod("ThreadTransferReceiveObj", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                Debug.Assert(mi2 != null);
+
                 var mi3 = fest.GetMethod("ThreadTransferReceiveHandledObj", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                if (mi1 != null && mi2 != null && mi3 != null)
+                Debug.Assert(mi3 != null);
+
+                var mi4 = fest.GetMethod("IsEnabled", new Type[] { typeof(EventLevel), typeof(EventKeywords)});
+                Debug.Assert(mi4 != null);
+
+                var logMethodInfo = fest.GetField("Log", BindingFlags.Static | BindingFlags.Public);
+                Debug.Assert(logMethodInfo != null);
+
+                Type windowsRuntimeMarshal = Type.GetType("System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMarshal");
+                var reportUnhandledErrorMethodInfo = windowsRuntimeMarshal.GetMethod("ReportUnhandledError", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+                Debug.Assert(reportUnhandledErrorMethodInfo != null);
+
+                if (mi1 != null && mi2 != null && mi3 != null && mi4 != null && log!= null && reportUnhandledErrorMethodInfo != null)
                 {
-                    s_EtwFireThreadTransferSendObj = (DelEtwFireThreadTransferSendObj)mi1.CreateDelegate(typeof(DelEtwFireThreadTransferSendObj),
-                                                                        FrameworkEventSource.Log);
-                    s_EtwFireThreadTransferReceiveObj = (DelEtwFireThreadTransferObj)mi2.CreateDelegate(typeof(DelEtwFireThreadTransferObj),
-                                                                           FrameworkEventSource.Log);
-                    s_EtwFireThreadTransferReceiveHandledObj = (DelEtwFireThreadTransferObj)mi3.CreateDelegate(typeof(DelEtwFireThreadTransferObj),
-                                                                           FrameworkEventSource.Log);
+                    var log = logMethodInfo.GetValue(null);
+                    s_EtwFireThreadTransferSendObj = (DelEtwFireThreadTransferSendObj)mi1.CreateDelegate(typeof(DelEtwFireThreadTransferSendObj), log);
+                    s_EtwFireThreadTransferReceiveObj = (DelEtwFireThreadTransferObj)mi2.CreateDelegate(typeof(DelEtwFireThreadTransferObj), log);
+                    s_EtwFireThreadTransferReceiveHandledObj = (DelEtwFireThreadTransferObj)mi3.CreateDelegate(typeof(DelEtwFireThreadTransferObj), log);
+                    s_EtwEventSourceIsEnabled = (DelEtwEventSourceIsEnabled)mi4.CreateDelegate(typeof(DelEtwEventSourceIsEnabled), log);
+                    s_ReportUnhandledError = (DelReportUnhandledError)reportUnhandledErrorMethodInfo.CreateDelegate(typeof(DelReportUnhandledError));
                 }
                 s_TriedGetEtwDelegates = true;
             }
 
-            private static void EtwFireThreadTransferSendObj(object id)
+            private void EtwFireThreadTransferSendObj(object id)
             {
-                if (!s_TriedGetEtwDelegates)
-                    InitEtwMethods();
                 if (s_EtwFireThreadTransferSendObj != null)
                     s_EtwFireThreadTransferSendObj(id, 3, string.Empty, false);
             }
 
-            private static void EtwFireThreadTransferReceiveObj(object id)
+            private void EtwFireThreadTransferReceiveObj(object id)
             {
-                if (!s_TriedGetEtwDelegates)
-                    InitEtwMethods();
                 if (s_EtwFireThreadTransferReceiveObj != null)
                     s_EtwFireThreadTransferReceiveObj(id, 3, string.Empty);
             }
 
-            private static void EtwFireThreadTransferReceiveHandledObj(object id)
+            private void EtwFireThreadTransferReceiveHandledObj(object id)
             {
-                if (!s_TriedGetEtwDelegates)
-                    InitEtwMethods();
                 if (s_EtwFireThreadTransferReceiveHandledObj != null)
                     s_EtwFireThreadTransferReceiveHandledObj(id, 3, string.Empty);
             }
