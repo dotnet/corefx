@@ -32,7 +32,7 @@ namespace System.Threading.Tasks
 
     /// <summary>Provides an awaitable result of an asynchronous operation.</summary>
     /// <remarks>
-    /// <see cref="ValueTask"/>s are meant to be directly awaited.  To do more complicated operations with them, a <see cref="Task"/>
+    /// <see cref="ValueTask"/> instances are meant to be directly awaited.  To do more complicated operations with them, a <see cref="Task"/>
     /// should be extracted using <see cref="AsTask"/>.  Such operations might include caching a task instance to be awaited later,
     /// registering multiple continuations with a single task, awaiting the same task multiple times, and using combinators over
     /// multiple operations:
@@ -41,7 +41,7 @@ namespace System.Threading.Tasks
     /// Once the result of a <see cref="ValueTask"/> instance has been retrieved, do not attempt to retrieve it again.
     /// <see cref="ValueTask"/> instances may be backed by <see cref="IValueTaskSource"/> instances that are reusable, and such
     /// instances may use the act of retrieving the instances result as a notification that the instance may now be reused for
-    /// a different operation.  Attempting to then reuse that same <see cref="ValueTask"/> will result in undefined behavior.
+    /// a different operation.  Attempting to then reuse that same <see cref="ValueTask"/> results in undefined behavior.
     /// </item>
     /// <item>
     /// Do not attempt to add multiple continuations to the same <see cref="ValueTask"/>.  While this might work if the
@@ -426,7 +426,7 @@ namespace System.Threading.Tasks
     /// <summary>Provides a value type that can represent a synchronously available value or a task object.</summary>
     /// <typeparam name="TResult">Specifies the type of the result.</typeparam>
     /// <remarks>
-    /// <see cref="ValueTask{TResult}"/>s are meant to be directly awaited.  To do more complicated operations with them, a <see cref="Task{TResult}"/>
+    /// <see cref="ValueTask{TResult}"/> instances are meant to be directly awaited.  To do more complicated operations with them, a <see cref="Task{TResult}"/>
     /// should be extracted using <see cref="AsTask"/>.  Such operations might include caching a task instance to be awaited later,
     /// registering multiple continuations with a single task, awaiting the same task multiple times, and using combinators over
     /// multiple operations:
@@ -435,7 +435,7 @@ namespace System.Threading.Tasks
     /// Once the result of a <see cref="ValueTask{TResult}"/> instance has been retrieved, do not attempt to retrieve it again.
     /// <see cref="ValueTask{TResult}"/> instances may be backed by <see cref="IValueTaskSource{TResult}"/> instances that are reusable, and such
     /// instances may use the act of retrieving the instances result as a notification that the instance may now be reused for
-    /// a different operation.  Attempting to then reuse that same <see cref="ValueTask{TResult}"/> will result in undefined behavior.
+    /// a different operation.  Attempting to then reuse that same <see cref="ValueTask{TResult}"/> results in undefined behavior.
     /// </item>
     /// <item>
     /// Do not attempt to add multiple continuations to the same <see cref="ValueTask{TResult}"/>.  While this might work if the
