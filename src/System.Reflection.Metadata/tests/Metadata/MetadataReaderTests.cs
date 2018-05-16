@@ -97,18 +97,6 @@ namespace System.Reflection.Metadata.Tests
 
         internal static unsafe int IndexOf(byte[] peImage, byte[] toFind, int start)
         {
-            for (int i = 0; i < peImage.Length - toFind.Length; i++)
-            {
-                if (toFind.SequenceEqual(peImage.Slice(i + start, i + start + toFind.Length)))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        internal static unsafe int IndexOf(byte[] peImage, byte[] toFind, int start)
-        {
             for (int i = 0; i + start < peImage.Length - toFind.Length; i++)
             {
                 if (toFind.SequenceEqual(peImage.Slice(i + start, i + start + toFind.Length)))
