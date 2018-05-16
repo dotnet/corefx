@@ -342,7 +342,7 @@ namespace System.IO
                     // Match Windows and don't notify us about changes to the Root folder
                     ReadOnlySpan<char> path = eventPaths[i].AsSpan();
 
-                    if (_fullDirectory.Length >= path.Length && path.CompareTo(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase) == 0)
+                    if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -364,7 +364,7 @@ namespace System.IO
                         // The base FileSystemWatcher does a match check against the relative path before combining with 
                         // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
                         ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
-                        if (path.CompareTo(_fullDirectory, StringComparison.OrdinalIgnoreCase) != 0)
+                        if (!path.Equals(_fullDirectory, StringComparison.OrdinalIgnoreCase))
                         {
                             // Remove the root directory to get the relative path
                             relativePath = path.Slice(_fullDirectory.Length);
@@ -490,7 +490,7 @@ namespace System.IO
                     // Check if the parent is the root. If so, then we'll continue processing based on the name.
                     // If it isn't, then this will be set to false and we'll skip the name processing since it's irrelevant.
                     ReadOnlySpan<char> parent = System.IO.Path.GetDirectoryName(eventPath);
-                    doesPathPass = _fullDirectory.Length < parent.Length ? false : parent.CompareTo(_fullDirectory.AsSpan(0, parent.Length), StringComparison.OrdinalIgnoreCase) == 0;
+                    doesPathPass = _fullDirectory.Length < parent.Length ? false : parent.Equals(_fullDirectory.AsSpan(0, parent.Length), StringComparison.OrdinalIgnoreCase);
                 }
 
                 return doesPathPass;
