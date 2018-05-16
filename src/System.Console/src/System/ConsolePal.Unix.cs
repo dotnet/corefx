@@ -1128,7 +1128,7 @@ namespace System
             {
                 // This is called on the native signal handling thread. We need to move to another thread so signal handling is
                 // not blocked. Otherwise we may get deadlocked when the handler depends on work triggered from the signal handling thread.
-                // We spin up a new thread to so the break event is handled promptly.
+                // We spin up a new thread so the break event is handled promptly.
                 Thread handlerThread = new Thread(HandleBreakEvent) { IsBackground = true };
                 handlerThread.Start(ctrlCode);
             }
