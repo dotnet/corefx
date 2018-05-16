@@ -34,7 +34,7 @@ using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
-    public sealed partial class BufferedGraphics : IDisposable
+    public sealed partial class BufferedGraphics
     {
         private Rectangle size;
         private Bitmap membmp = null;
@@ -61,11 +61,8 @@ namespace System.Drawing
             }
         }
 
-        private void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing == false)
-                return;
-
             if (membmp != null)
             {
                 membmp.Dispose();

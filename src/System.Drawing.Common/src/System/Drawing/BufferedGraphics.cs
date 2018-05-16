@@ -14,15 +14,13 @@ namespace System.Drawing
     /// </summary>
     public sealed partial class BufferedGraphics : IDisposable
     {
-        private Graphics _targetGraphics = null;
-        private readonly IntPtr _targetDC = IntPtr.Zero;
+        private Graphics _targetGraphics;
+        private readonly IntPtr _targetDC;
 
         /// <summary>
         /// Determines if we need to dispose of the Context when this is disposed.
         /// </summary>
         internal bool DisposeContext { get; set; }
-
-        ~BufferedGraphics() => Dispose(false);
 
         /// <summary>
         /// Renders the buffer to the original graphics used to allocate the buffer.
@@ -43,10 +41,5 @@ namespace System.Drawing
         /// Renders the buffer to the specified target HDC.
         /// </summary>
         public void Render(IntPtr targetDC) => RenderInternal(new HandleRef(null, targetDC));
-
-        /// <summary>
-        /// Disposes the object and releases the lock on the memory.
-        /// </summary>
-        public void Dispose() => Dispose(true);
     }
 }

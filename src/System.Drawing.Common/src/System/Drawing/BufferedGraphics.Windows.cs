@@ -28,26 +28,23 @@ namespace System.Drawing
             _virtualSize = virtualSize;
         }
 
-        private void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
+            if (_context != null)
             {
-                if (_context != null)
-                {
-                    _context.ReleaseBuffer(this);
+                _context.ReleaseBuffer(this);
 
-                    if (DisposeContext)
-                    {
-                        _context.Dispose();
-                        _context = null;
-                    }
-                }
-
-                if (_bufferedGraphicsSurface != null)
+                if (DisposeContext)
                 {
-                    _bufferedGraphicsSurface.Dispose();
-                    _bufferedGraphicsSurface = null;
+                    _context.Dispose();
+                    _context = null;
                 }
+            }
+
+            if (_bufferedGraphicsSurface != null)
+            {
+                _bufferedGraphicsSurface.Dispose();
+                _bufferedGraphicsSurface = null;
             }
         }
 
