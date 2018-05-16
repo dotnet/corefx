@@ -107,6 +107,99 @@ namespace System.Reflection.Metadata.Tests
         #endregion
 
         [Fact]
+        public unsafe void IsWindowsAttributeUsageAttributeTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            int parentIndex = IndexOf(peImage, new byte[] { 0x25, 0x00, 0xA3, 0x00, 0xA5, 0x01, 0x2E, 0x00, 0x1B, 0x00, 0xD8, 0x00, 0x2E }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, parentIndex);
+
+            peImage[headers.MetadataStartOffset + parentIndex + 6] = 35;
+
+            int attributeTypeIndex = IndexOf(peImage, new byte[] { 0x09, 0x00, 0xE2, 0x02, 0x01, 0x00, 0x19, 0x00, 0x9E, 0x02, 0x05, 0x00, 0x21 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, attributeTypeIndex);
+
+            peImage[headers.MetadataStartOffset + attributeTypeIndex + 12] = 34;
+
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.False(reader.CalculateCustomAttributeValueTreatment(CustomAttributeHandle.FromRowId(2)).GetType().IsAbstract);
+
+            int attributeCtorIndex = IndexOf(peImage, new byte[] { 0x25, 0x00, 0xA3, 0x00, 0xA5, 0x01, 0x23, 0x00, 0x1B, 0x00, 0xD8, 0x00, 0x2E, 0x00, 0x23 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, attributeCtorIndex);
+
+            peImage[headers.MetadataStartOffset + attributeCtorIndex + 8] = 26;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.False(reader.CalculateCustomAttributeValueTreatment(CustomAttributeHandle.FromRowId(2)).GetType().IsAbstract);
+        }
+
+        [Fact]
+        public unsafe void GetAttributeTypeNameRawTest()
+        {
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            int resolutionScopeIndex = IndexOf(peImage, new byte[] { 0x06, 0x00, 0x7C, 0x03, 0xB6, 0x02, 0x0A, 0x00, 0x7C, 0x03, 0xB6, 0x02, 0x0E, 0x00, 0x4B }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, resolutionScopeIndex);
+
+            peImage[headers.MetadataStartOffset + resolutionScopeIndex + 102] = 35;
+
+            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal((uint)2684354566, reader.GetTypeDefinition(MetadataTokens.TypeDefinitionHandle(3)).Name.RawValue);
+
+            int typeDefOrRefIndex = IndexOf(peImage, new byte[] { 0x25, 0x00, 0xA3, 0x00, 0xA5, 0x01, 0x2E, 0x00, 0x1B, 0x00, 0xD8, 0x00, 0x2E, 0x00, 0x23, 0x00, 0xE1 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, typeDefOrRefIndex);
+
+            peImage[headers.MetadataStartOffset + typeDefOrRefIndex + 116] = 34;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal((uint)2684354566, reader.GetTypeDefinition(MetadataTokens.TypeDefinitionHandle(3)).Name.RawValue);
+
+            int flagsIndex = IndexOf(peImage, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x05, 0x10 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, flagsIndex);
+                        
+            int clrIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
+            Assert.NotEqual(-1, clrIndex);
+            peImage[headers.MetadataStartOffset + clrIndex] = 0x00;
+            Array.Copy(BitConverter.GetBytes((uint)(TypeAttributes.WindowsRuntime & ~TypeAttributes.Interface)), 0, peImage, headers.MetadataStartOffset + flagsIndex, sizeof(uint));
+            Array.Copy(BitConverter.GetBytes((uint)(TypeAttributes.WindowsRuntime | TypeAttributes.NestedAssembly)), 0, peImage, headers.MetadataStartOffset + flagsIndex + 28, sizeof(uint));
+
+            //MarshalingBehaviorAttribute needs to be changed.
+            int marshalingIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("MarshalingBehaviorAttribute"), headers.MetadataStartOffset);
+            Assert.NotEqual(-1, marshalingIndex);
+            //Windows.Foundation.Metadata needs to be changed
+            int windowsIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("Windows.Foundation.Metadata"), headers.MetadataStartOffset);
+            Assert.NotEqual(-1, windowsIndex);
+            //Class needs to be changed
+            int classIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("Class"), headers.MetadataStartOffset);
+            Assert.NotEqual(-1, classIndex);
+
+            Array.Copy(Encoding.ASCII.GetBytes("Windows.UI.Xaml"), 0, peImage, headers.MetadataStartOffset + windowsIndex, Encoding.ASCII.GetBytes("Windows.UI.Xaml").Length);
+            peImage[headers.MetadataStartOffset + windowsIndex + Encoding.ASCII.GetBytes("Windows.UI.Xaml").Length] = (byte)0;
+
+            Array.Copy(Encoding.ASCII.GetBytes("TreatAsAbstractComposableClassAttribute"), 0, peImage, headers.MetadataStartOffset + marshalingIndex, Encoding.ASCII.GetBytes("TreatAsAbstractComposableClassAttribute").Length);
+            peImage[headers.MetadataStartOffset + marshalingIndex + Encoding.ASCII.GetBytes("TreatAsAbstractComposableClassAttribute").Length] = (byte)0;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal((uint)16777219, reader.CalculateTypeDefTreatmentAndRowId(TypeDefinitionHandle.FromRowId(3)));
+
+            peImage[headers.MetadataStartOffset + typeDefOrRefIndex + 116] = 11;
+
+            int parenetTypeDefOrRefIndex = IndexOf(peImage, new byte[] { 0x09, 0x00, 0xE2, 0x02, 0x01, 0x00, 0x19, 0x00, 0x9E, 0x02, 0x05, 0x00, 0x21, 0x00, 0xE2, 0x02, 0x09, 0x00, 0x29 }, headers.MetadataStartOffset);
+            Assert.NotEqual(-1, parenetTypeDefOrRefIndex);
+
+            peImage[headers.MetadataStartOffset + parenetTypeDefOrRefIndex] = 10;
+
+            reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
+            Assert.Equal((uint)6, reader.GetTypeDefinition(MetadataTokens.TypeDefinitionHandle(3)).Name.RawValue);
+        }
+
+        [Fact]
         public unsafe void CalculateCustomAttributeValueTreatmentTest()
         {
             byte[] peImage = (byte[])WinRT.Lib.Clone();
