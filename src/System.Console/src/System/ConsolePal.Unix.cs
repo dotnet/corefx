@@ -1113,7 +1113,7 @@ namespace System
                 EnsureInitialized();
 
                 Debug.Assert(!_handlerRegistered);
-                Interop.Sys.RegisterForCtrl(OnBreakEvent);
+                Interop.Sys.RegisterForCtrl(c => OnBreakEvent(c));
                 _handlerRegistered = true;
             }
 
@@ -1126,9 +1126,11 @@ namespace System
 
             private static void OnBreakEvent(Interop.Sys.CtrlCode ctrlCode)
             {
-                // This is called on the native signal handling thread. We need to move to another thread so signal handling is
-                // not blocked. Otherwise we may get deadlocked when the handler depends on work triggered from the signal handling thread.
-                // We spin up a new thread so the break event is handled promptly.
+                // This is called on the native signal handling thread. We need to move to another thread so
+                // signal handling is not blocked. Otherwise we may get deadlocked when the handler depends
+                // on work triggered from the signal handling thread.
+                // We use a new thread rather than queueing to the ThreadPool in order to prioritize handling
+                // in case the ThreadPool is saturated.
                 Thread handlerThread = new Thread(HandleBreakEvent) { IsBackground = true };
                 handlerThread.Start(ctrlCode);
             }
