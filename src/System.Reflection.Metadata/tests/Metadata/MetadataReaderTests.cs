@@ -231,7 +231,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.False(reader.CalculateCustomAttributeValueTreatment(CustomAttributeHandle.FromRowId(2)).GetType().IsAbstract);
 
             int offsetIndex = IndexOf(peImage, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x05, 0x10 }, headers.MetadataStartOffset);
-            Assert.NotEqual(-1, attributeUsageAttributeIndex);
+            Assert.NotEqual(-1, offsetIndex);
 
             peImage[headers.MetadataStartOffset + offsetIndex + 4] = 28;
 
@@ -797,7 +797,7 @@ namespace System.Reflection.Metadata.Tests
 
             //Find the row to double
             int scopeIndex = IndexOf(peImage, new byte[] { 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63 }, rowCountIndex + remainingBytesIndex);
-            Assert.NotEqual(rowCountIndex, -1);
+            Assert.NotEqual(scopeIndex, -1);
 
             //Add the row a second time
             peImage.ToList().InsertRange(rowCountIndex + scopeIndex + remainingBytesIndex, new List<byte> { 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63, 0x00, 0x00, 0x00 });
