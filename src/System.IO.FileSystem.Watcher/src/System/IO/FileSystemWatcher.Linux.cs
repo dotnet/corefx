@@ -581,7 +581,7 @@ namespace System.IO
                                     continue;
                                 }
                             }
-                            expandedName = associatedDirectoryEntry.GetPath(true, nextEvent.name).AsSpan();
+                            expandedName = associatedDirectoryEntry.GetPath(true, nextEvent.name);
                         }
 
                         // To match Windows, ignore all changes that happen on the root folder itself
