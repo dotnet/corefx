@@ -28,7 +28,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
     {
         RemoteInvoke(() =>
         {
-            var sempahore = new SemaphoreSlim(0, 1);
+            var mre = new ManualResetEventSlim();
             var tcs = new TaskCompletionSource<object>();
 
             // CancelKeyPress is triggered by SIGINT/SIGQUIT
@@ -36,7 +36,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
             {
                 tcs.SetResult(null);
                 // Block CancelKeyPress
-                Assert.True(sempahore.Wait(WaitFailTestTimeoutSeconds * 1000));
+                Assert.True(mre.Wait(WaitFailTestTimeoutSeconds * 1000));
             };
 
             // Generate CancelKeyPress
@@ -52,7 +52,7 @@ public partial class CancelKeyPressTests : RemoteExecutorTestBase
             }
 
             // Release CancelKeyPress
-            sempahore.Release();
+            mre.Set();
 
             return SuccessExitCode;
         }).Dispose();
