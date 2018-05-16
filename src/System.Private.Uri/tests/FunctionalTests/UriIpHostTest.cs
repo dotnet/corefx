@@ -234,6 +234,20 @@ namespace System.PrivateUri.Tests
 
         #region IPv6
 
+        [Theory]
+        [Trait("MyTrait", "MyTrait")]
+        [InlineData("[fe80::dcbd:a736:baae:b535{0}]", "%2", true)]
+        //[InlineData("[FE80::dcbd:a736:baae:b535{0}]", "eth0")]
+        [InlineData("[FE81::dcbd:a736:baae:b535{0}]", "%18", false)]
+        [InlineData("[fe80::e077:c9a3:eeba:b8e9{0}]", "%18", true)]
+        public void UriIPv6_LinkLocalAddress(string address, string zoneIndex, bool isValidLinkLocalAddress)
+        {
+            string linklocalAddress = string.Format(address, zoneIndex);
+            string ipv6Address = "http://" + linklocalAddress;
+            var uri = new Uri(ipv6Address);
+            Assert.True(isValidLinkLocalAddress ? uri.Host.Trim('[').Trim(']').EndsWith(zoneIndex) : uri.Host == address);
+        }
+
         [Fact]
         public void UriIPv6Host_CanonicalCollonHex_Success()
         {
@@ -326,8 +340,8 @@ namespace System.PrivateUri.Tests
         [InlineData("FFFFF::")] // Hex out of range
         [InlineData(":%12")] // Colon Scope
         [InlineData("%12")] // Just Scope
-        // TODO # 8330 Discrepency: IPAddress doesn't accept bad scopes, Uri does.
-        //[InlineData("::%1a")] // Alpha numeric Scope
+                            // TODO # 8330 Discrepency: IPAddress doesn't accept bad scopes, Uri does.
+                            //[InlineData("::%1a")] // Alpha numeric Scope        
         public void UriIPv6Host_BadAddress(string address)
         {
             ParseBadIPv6Address(address);

@@ -31,7 +31,9 @@ namespace System
                 ((long*)numbers)[0] = 0L;
                 ((long*)numbers)[1] = 0L;
                 isLoopback = Parse(str, numbers, start, ref scopeId);
-                return '[' + CreateCanonicalName(numbers) + ']';
+                //Link local address https://tools.ietf.org/html/rfc4291#page-11
+                bool isLinkLocalAddress = (numbers[0] == 0xfe80);
+                return '[' + CreateCanonicalName(numbers) + (isLinkLocalAddress ? scopeId : "") + ']';
             }
         }
 
