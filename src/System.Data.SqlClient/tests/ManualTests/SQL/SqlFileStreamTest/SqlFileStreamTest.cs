@@ -6,66 +6,78 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class SqlFileStreamTest
     {
-        [CheckConnStrSetupFact]
-        public static void TestSqlFileStream()
+        private static bool IsFileStreamEnvironmentSet() => DataTestUtility.IsFileStreamSetup();
+        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
+        private static bool IsIntegratedSecurityEnvironmentSet() => DataTestUtility.IsIntegratedSecuritySetup();
+
+        private static int[] insertedValues = { 11 , 22 };
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(IsFileStreamEnvironmentSet), nameof(IsIntegratedSecurityEnvironmentSet), nameof(AreConnectionStringsSetup))]
+        public static void ReadFilestream()
         {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder("server=KEERATS;integrated security=true;database=FileStreamDB");
-            ReadFilestream(builder);
-
-            OverwriteFilestream(builder);
-            ReadFilestream(builder);
-
-            InsertFilestream(builder);
-            ReadFilestream(builder);
-
-            Console.WriteLine("Done");
-        }
-
-        private static void ReadFilestream(SqlConnectionStringBuilder connStringBuilder)
-        {
-            using (SqlConnection connection = new SqlConnection(connStringBuilder.ToString()))
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand("SELECT Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT() FROM employees", connection);
+                string tempTable = SetupTable(connection);
+                int nRow = 0;
+                byte[] retrievedValue;
+                SqlCommand command = new SqlCommand($"SELECT Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT(),EmployeeId FROM {tempTable} ORDER BY EmployeeId", connection);
 
-                SqlTransaction tran = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-                command.Transaction = tran;
+                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+                command.Transaction = transaction;
 
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        // Get the pointer for the file  
+                        // Get the pointer for the file.
                         string path = reader.GetString(0);
                         byte[] transactionContext = reader.GetSqlBytes(1).Buffer;
                         
                         // Create the SqlFileStream  
                         using (Stream fileStream = new SqlFileStream(path, transactionContext, FileAccess.Read, FileOptions.SequentialScan, allocationSize: 0))
                         {
-                            // Read the contents as bytes and write them to the console  
-                            for (long index = 0; index < fileStream.Length; index++)
-                            {
-                                Console.Write(fileStream.ReadByte());
-                            }
+                            // Read the contents as bytes.
+                            retrievedValue = new byte[fileStream.Length];
+                            fileStream.Read(retrievedValue,0,(int)(fileStream.Length));
 
-                            Console.WriteLine();
+                            // Reverse the byte array, if the system architecture is little-endian.
+                            if (BitConverter.IsLittleEndian)
+                                Array.Reverse(retrievedValue);
+
+                            // Compare inserted and retrieved values.
+                            Assert.Equal(insertedValues[nRow], BitConverter.ToInt32(retrievedValue,0));
                         }
+                        nRow++;
                     }
+                    
                 }
-                tran.Commit();
+                transaction.Commit();
+
+                // Drop Table
+                ExecuteNonQueryCommand($"DROP TABLE {tempTable}", connection);
             }
         }
 
-        private static void OverwriteFilestream(SqlConnectionStringBuilder connStringBuilder)
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(IsFileStreamEnvironmentSet), nameof(IsIntegratedSecurityEnvironmentSet), nameof(AreConnectionStringsSetup))]
+        public static void OverwriteFilestream()
         {
-            using (SqlConnection connection = new SqlConnection(connStringBuilder.ToString()))
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
             {
                 connection.Open();
+                string tempTable = SetupTable(connection);
+                byte[] insertedValue = BitConverter.GetBytes(3);
 
-                SqlCommand command = new SqlCommand("SELECT TOP(1) Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT() FROM employees", connection);
+                // Reverse the byte array, if the system architecture is little-endian.
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(insertedValue);
 
-                SqlTransaction tran = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-                command.Transaction = tran;
+                SqlCommand command = new SqlCommand($"SELECT TOP(1) Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT(),EmployeeId FROM {tempTable} ORDER BY EmployeeId", connection);
+
+                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+                command.Transaction = transaction;
 
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
@@ -78,27 +90,43 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         // Create the SqlFileStream  
                         using (Stream fileStream = new SqlFileStream(path, transactionContext, FileAccess.Write, FileOptions.SequentialScan, allocationSize: 0))
                         {
-                            // Write a single byte to the file. This will  
-                            // replace any data in the file.  
-                            Console.WriteLine("OverWriting to FileStream");
-                            fileStream.WriteByte(0x01);
+                            // Overwrite the first row in the table
+                            fileStream.Write((insertedValue), 0, 4);
                         }
                     }
                 }
-                tran.Commit();
+                transaction.Commit();
+
+                // Compare inserted and retrieved value
+                byte[] retrievedValue = RetrieveData(tempTable, connection, insertedValue.Length);
+                Assert.Equal(insertedValue, retrievedValue);
+                
+                // Drop Table
+                ExecuteNonQueryCommand($"DROP TABLE {tempTable}", connection);
             }
         }
 
-        private static void InsertFilestream(SqlConnectionStringBuilder connStringBuilder)
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(IsFileStreamEnvironmentSet), nameof(IsIntegratedSecurityEnvironmentSet), nameof(AreConnectionStringsSetup))]
+        public static void AppendFilestream()
         {
-            using (SqlConnection connection = new SqlConnection(connStringBuilder.ToString()))
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
             {
                 connection.Open();
+                string tempTable = SetupTable(connection);
 
-                SqlCommand command = new SqlCommand("SELECT TOP(1) Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT() FROM employees", connection);
+                byte[] insertedValue = BitConverter.GetBytes(insertedValues[0]);
+                byte appendedByte = 0x04;
+                insertedValue = AddByteToArray(insertedValue, appendedByte);
 
-                SqlTransaction tran = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-                command.Transaction = tran;
+                // Reverse the byte array, if the system architecture is little-endian.
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(insertedValue);
+
+                SqlCommand command = new SqlCommand($"SELECT TOP(1) Photo.PathName(), GET_FILESTREAM_TRANSACTION_CONTEXT(),EmployeeId FROM {tempTable} ORDER BY EmployeeId", connection);
+
+                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+                command.Transaction = transaction;
 
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
@@ -113,15 +141,73 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             // Seek to the end of the file  
                             fileStream.Seek(0, SeekOrigin.End);
 
-                            Console.WriteLine("Appending to FileStream");
                             // Append a single byte   
-                            fileStream.WriteByte(0x02);
+                            fileStream.WriteByte(appendedByte);
                         }
                     }
                 }
-                tran.Commit();
+                transaction.Commit();
+
+                // Compare inserted and retrieved value
+                byte[] retrievedValue = RetrieveData(tempTable, connection, insertedValue.Length);
+                Assert.Equal(insertedValue, retrievedValue);
+
+                // Drop Table
+                ExecuteNonQueryCommand($"DROP TABLE {tempTable}", connection);
             }
 
         }
+        #region Private helper methods
+        private static string SetupTable(SqlConnection conn)
+        {
+            // Generate random table name
+            string tempTable = "fs_" + Guid.NewGuid().ToString().Replace('-', '_');
+
+            // Create table
+            string createTable = $"CREATE TABLE {tempTable} (EmployeeId INT  NOT NULL  PRIMARY KEY, Photo VARBINARY(MAX) FILESTREAM  NULL, RowGuid UNIQUEIDENTIFIER NOT NULL ROWGUIDCOL UNIQUE DEFAULT NEWID() ) ";
+            ExecuteNonQueryCommand(createTable, conn);
+
+            // Insert data into created table
+            for (int i = 0; i < insertedValues.Length; i++)
+            {
+                string prepTable = $"INSERT INTO {tempTable} VALUES ({i + 1}, {insertedValues[i]} , default)";
+                ExecuteNonQueryCommand(prepTable, conn);
+            }
+
+            return tempTable;
+        }
+        private static void ExecuteNonQueryCommand(string cmdText, SqlConnection conn)
+        {
+            using (SqlCommand cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = cmdText;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private static byte[] RetrieveData(string tempTable, SqlConnection conn, int len)
+        {
+            SqlCommand command = new SqlCommand($"SELECT TOP(1) Photo FROM {tempTable}", conn);
+            byte[] bArray = new byte[len];
+            using (SqlDataReader reader = command.ExecuteReader())
+            {
+                reader.Read();
+                reader.GetBytes(0, 0, bArray, 0, len);
+            }
+            return bArray;
+        }
+
+        public static byte[] AddByteToArray(byte[] oldArray, byte newByte)
+        {
+            byte[] newArray = new byte[oldArray.Length + 1];
+            oldArray.CopyTo(newArray, 1);
+            newArray[0] = newByte;
+            return newArray;
+        }
+
+        #endregion
+
     }
+
+
 }

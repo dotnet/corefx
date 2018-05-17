@@ -64,6 +64,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         public static bool IsIntegratedSecuritySetup() => int.TryParse(Environment.GetEnvironmentVariable("TEST_INTEGRATEDSECURITY_SETUP"), out int result) ? result == 1 : false;
 
+        public static bool IsFileStreamSetup() => int.TryParse(Environment.GetEnvironmentVariable("TEST_FILESTREAM_SETUP"), out int result) ? result == 1 : false;
+
         private static bool CheckException<TException>(Exception ex, string exceptionMessage, bool innerExceptionMustBeNull) where TException : Exception
         {
             return ((ex != null) && (ex is TException) &&
