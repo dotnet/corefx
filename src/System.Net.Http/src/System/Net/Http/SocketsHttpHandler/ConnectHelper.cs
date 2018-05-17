@@ -40,10 +40,39 @@ namespace System.Net.Http
 
         public static async ValueTask<(Socket, Stream)> ConnectAsync(string host, int port, CancellationToken cancellationToken)
         {
-            // Rather than creating a new Socket and calling ConnectAsync on it, we use the static
-            // Socket.ConnectAsync with a SocketAsyncEventArgs, as we can then use Socket.CancelConnectAsync
-            // to cancel it if needed. Rent or allocate one.
-            ConnectEventArgs saea;
+            CancellationTokenSource cancelIPv6 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            CancellationTokenSource cancelIPv4 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            
+
+            Task<(Socket, Stream)> tryConnectAsyncIPv6 = ConnectAsyncInternal(host, port, AddressFamily.InterNetworkV6, cancelIPv6.Token);
+
+            if (await Task.WhenAny(tryConnectAsyncIPv6, Task.Delay(200)).ConfigureAwait(false) == tryConnectAsyncIPv6 && tryConnectAsyncIPv6.IsCompletedSuccessfully)
+            {
+                return await tryConnectAsyncIPv6.ConfigureAwait(false);
+            }
+
+            Task<(Socket, Stream)> tryConnectAsyncIPv4 = ConnectAsyncInternal(host, port, AddressFamily.InterNetwork, cancelIPv4.Token);
+            if (await Task.WhenAny(tryConnectAsyncIPv6, tryConnectAsyncIPv4).ConfigureAwait(false) == tryConnectAsyncIPv6)
+            {
+                if(tryConnectAsyncIPv6.IsCompletedSuccessfully)
+                {
+                    cancelIPv4.Cancel();
+                    return await tryConnectAsyncIPv6.ConfigureAwait(false);
+                }
+                return await tryConnectAsyncIPv4.ConfigureAwait(false);
+            }
+            else
+            {
+                if(tryConnectAsyncIPv4.IsCompletedSuccessfully)
+                {
+                    cancelIPv6.Cancel();
+                    return await tryConnectAsyncIPv4.ConfigureAwait(false);
+                }
+                return await tryConnectAsyncIPv6.ConfigureAwait(false);
+            }
+
+            // Old code:
+            /*ConnectEventArgs saea;
             if (!s_connectEventArgs.TryDequeue(out saea))
             {
                 saea = new ConnectEventArgs();
@@ -81,6 +110,62 @@ namespace System.Net.Http
             }
             catch (Exception error)
             {
+                throw CancellationHelper.ShouldWrapInOperationCanceledException(error, cancellationToken) ?
+                    CancellationHelper.CreateOperationCanceledException(error, cancellationToken) :
+                    new HttpRequestException(error.Message, error);
+            }
+            finally
+            {
+                // Pool the event args, or if the pool is full, dispose of it.
+                saea.Clear();
+                if (!s_connectEventArgs.TryEnqueue(saea))
+                {
+                    saea.Dispose();
+                }
+            }*/
+        }
+
+        public static async Task<(Socket, Stream)> ConnectAsyncInternal(string host, int port, AddressFamily family, CancellationToken cancellationToken)
+        {
+            ConnectEventArgs saea;
+            if (!s_connectEventArgs.TryDequeue(out saea))
+            {
+                saea = new ConnectEventArgs();
+            }
+
+            try
+            {
+                saea.Initialize(cancellationToken);
+
+                // Configure which server to which to connect.
+                saea.RemoteEndPoint = new DnsEndPoint(host, port, family);
+
+                // Initiate the connection.
+                if (Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, saea))
+                {
+                    // Connect completing asynchronously. Enable it to be canceled and wait for it.
+                    using (cancellationToken.Register(s => Socket.CancelConnectAsync((SocketAsyncEventArgs)s), saea))
+                    {
+                        await saea.Builder.Task.ConfigureAwait(false);
+                    }
+                }
+                else if (saea.SocketError != SocketError.Success)
+                {
+                    // Connect completed synchronously but unsuccessfully.
+                    throw new SocketException((int)saea.SocketError);
+                }
+
+                Debug.Assert(saea.SocketError == SocketError.Success, $"Expected Success, got {saea.SocketError}.");
+                Debug.Assert(saea.ConnectSocket != null, "Expected non-null socket");
+
+                // Configure the socket and return a stream for it.
+                Socket socket = saea.ConnectSocket;
+                socket.NoDelay = true;
+                return (socket, new NetworkStream(socket, ownsSocket: true));
+            }
+            catch (Exception error)
+            {
+                //Console.WriteLine(error);
                 throw CancellationHelper.ShouldWrapInOperationCanceledException(error, cancellationToken) ?
                     CancellationHelper.CreateOperationCanceledException(error, cancellationToken) :
                     new HttpRequestException(error.Message, error);
