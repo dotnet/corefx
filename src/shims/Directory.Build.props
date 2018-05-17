@@ -5,7 +5,6 @@
     <BuildConfigurations>
       $(BuildConfigurations);
       netcoreapp;
-      netcoreappaot;
       uap;
     </BuildConfigurations>
   </PropertyGroup>

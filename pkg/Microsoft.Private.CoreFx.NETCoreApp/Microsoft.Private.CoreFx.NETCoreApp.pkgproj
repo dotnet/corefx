@@ -9,6 +9,7 @@
 
     <RefBinDir>$(NETCoreAppPackageRefPath)</RefBinDir>
     <LibBinDir>$(NETCoreAppPackageRuntimePath)</LibBinDir>
+    <LibBinDir Condition="$(PackageTargetRuntime.EndsWith('-aot'))">$(NETCoreAppAotPackageRuntimePath)</LibBinDir>
 
     <IsFrameworkPackage>true</IsFrameworkPackage>
 
