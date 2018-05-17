@@ -57,6 +57,6 @@ uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
  * In the most common case, this will be the default handler, causing the process to be torn down.
  * It could also be a custom handler registered by other code before us.
  */
-DLLEXPORT void SystemNative_RestoreAndHandleCtrl(enum CtrlCode ctrlCode);
+void SystemNative_RestoreAndHandleCtrl(enum CtrlCode ctrlCode);
 
 END_EXTERN_C
