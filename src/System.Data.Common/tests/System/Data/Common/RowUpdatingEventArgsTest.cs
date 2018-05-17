@@ -21,10 +21,10 @@ namespace System.Data.Common
             var mapping = new DataTableMapping();
             var args = new RowUpdatingEventArgs(table.NewRow(), null, StatementType.Insert, mapping);
             Assert.NotNull(args.Row);
-            Assert.Equal(table, args.Row.Table);
+            Assert.Same(table, args.Row.Table);
             Assert.Null(args.Command);
             Assert.Equal(StatementType.Insert, args.StatementType);
-            Assert.Equal(mapping, args.TableMapping);
+            Assert.Same(mapping, args.TableMapping);
         }
 
         [Fact]

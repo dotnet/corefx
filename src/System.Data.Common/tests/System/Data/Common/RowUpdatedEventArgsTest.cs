@@ -24,7 +24,7 @@ namespace System.Data.Common
             var table = new DataTable();
             var args = new RowUpdatedEventArgs(table.NewRow(), null, StatementType.Update, new DataTableMapping());
             Assert.NotNull(args.Row);
-            Assert.Equal(table, args.Row.Table);
+            Assert.Same(table, args.Row.Table);
             Assert.Equal(1, args.RowCount);
             Assert.Null(args.Command);
             Assert.Equal(StatementType.Update, args.StatementType);
@@ -51,7 +51,7 @@ namespace System.Data.Common
             args.CopyToRows(newRows, 1);
             Assert.Null(newRows[0]);
             Assert.NotNull(newRows[1]);
-            Assert.Equal(newRows[1].Table, table);
+            Assert.Same(table, newRows[1].Table);
 
             Assert.Throws<IndexOutOfRangeException>(() => args.CopyToRows(newRows, 2));
         }
