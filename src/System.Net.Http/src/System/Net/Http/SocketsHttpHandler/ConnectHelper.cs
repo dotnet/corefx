@@ -52,7 +52,7 @@ namespace System.Net.Http
             Task<(Socket, Stream)> tryConnectAsyncIPv4 = ConnectAsyncInternal(host, port, AddressFamily.InterNetwork, cancelIPv4.Token);
             if (await Task.WhenAny(tryConnectAsyncIPv6, tryConnectAsyncIPv4).ConfigureAwait(false) == tryConnectAsyncIPv6)
             {
-                if(tryConnectAsyncIPv6.IsCompletedSuccessfully)
+                if (tryConnectAsyncIPv6.IsCompletedSuccessfully)
                 {
                     cancelIPv4.Cancel();
                     return await tryConnectAsyncIPv6.ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace System.Net.Http
             }
             else
             {
-                if(tryConnectAsyncIPv4.IsCompletedSuccessfully)
+                if (tryConnectAsyncIPv4.IsCompletedSuccessfully)
                 {
                     cancelIPv6.Cancel();
                     return await tryConnectAsyncIPv4.ConfigureAwait(false);
@@ -72,6 +72,9 @@ namespace System.Net.Http
 
         public static async Task<(Socket, Stream)> ConnectAsyncInternal(string host, int port, AddressFamily family, CancellationToken cancellationToken)
         {
+            // Rather than creating a new Socket and calling ConnectAsync on it, we use the static
+            // Socket.ConnectAsync with a SocketAsyncEventArgs, as we can then use Socket.CancelConnectAsync
+            // to cancel it if needed. Rent or allocate one.
             ConnectEventArgs saea;
             if (!s_connectEventArgs.TryDequeue(out saea))
             {
@@ -110,7 +113,6 @@ namespace System.Net.Http
             }
             catch (Exception error)
             {
-                //Console.WriteLine(error);
                 throw CancellationHelper.ShouldWrapInOperationCanceledException(error, cancellationToken) ?
                     CancellationHelper.CreateOperationCanceledException(error, cancellationToken) :
                     new HttpRequestException(error.Message, error);
