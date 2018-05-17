@@ -242,7 +242,7 @@ namespace System.PrivateUri.Tests
         [InlineData("FE80::e077:c9a3:eeba:b8e9", "%eth10", true)]
         [InlineData("fe81::e077:c9a3:eeba:b8e9", "%18", false)]        
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void UriIPv6Host_LinkLocalAddress(string address, string zoneIndex, bool isValidLinkLocalAddress)
+        public void Host_IPv6LinkLocalAddress_HasScopeId(string address, string zoneIndex, bool isValidLinkLocalAddress)
         {
             string scopedLiteralIpv6 = "[" + address + zoneIndex + "]";
             string literalIpV6Uri = "http://" + scopedLiteralIpv6;
