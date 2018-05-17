@@ -342,8 +342,8 @@ namespace System.PrivateUri.Tests
         [InlineData("FFFFF::")] // Hex out of range
         [InlineData(":%12")] // Colon Scope
         [InlineData("%12")] // Just Scope
-                            // TODO # 8330 Discrepency: IPAddress doesn't accept bad scopes, Uri does.
-                            //[InlineData("::%1a")] // Alpha numeric Scope        
+        // TODO # 8330 Discrepency: IPAddress doesn't accept bad scopes, Uri does.
+        //[InlineData("::%1a")] // Alpha numeric Scope
         public void UriIPv6Host_BadAddress(string address)
         {
             ParseBadIPv6Address(address);
