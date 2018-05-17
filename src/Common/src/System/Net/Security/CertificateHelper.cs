@@ -36,50 +36,54 @@ namespace System.Net.Security
 
             foreach (X509Certificate2 cert in candidateCerts)
             {
-                // Must have private key.
                 if (!cert.HasPrivateKey)
                 {
                     continue;
                 }
                 
-                // If an extension is missing then it will automatically match.
-                bool isMatch = true;
-
-                foreach (X509Extension extension in cert.Extensions)
-                {
-                    if (extension is X509EnhancedKeyUsageExtension ekus)
-                    {
-                        isMatch = false;
-
-                        foreach (Oid oid in ekus.EnhancedKeyUsages)
-                        {
-                            if (oid.Value == ClientAuthenticationOID)
-                            {
-                                 isMatch = true;
-                                 break;
-                             }
-                         }
-                      }
-                      else if (extension is X509KeyUsageExtension ku)
-                      {
-                           const X509KeyUsageFlags requiredUsages = X509KeyUsageFlags.DigitalSignature;
-
-                           isMatch = (ku.KeyUsages & requiredUsages) == requiredUsages;
-                      }
-
-                    if (!isMatch)
-                    {
-                        break;
-                    }
-                }
-
-                if (isMatch)
+                if (IsValidClientCertificate(cert))
                 {
                     return cert;
                 }
             }
 
             return null;
+        }
+
+        private static bool IsValidClientCertificate(X509Certificate2 cert)
+        {
+            foreach (X509Extension extension in cert.Extensions)
+            {
+                if ((extension is X509EnhancedKeyUsageExtension eku) && !IsValidForClientAuthenticationEKU(eku))
+                {
+                    return false;
+                }
+                else if ((extension is X509KeyUsageExtension ku) && !IsValidForDigitalSignatureUsage(ku))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsValidForClientAuthenticationEKU(X509EnhancedKeyUsageExtension eku)
+        {
+            foreach (Oid oid in eku.EnhancedKeyUsages)
+            {
+                if (oid.Value == ClientAuthenticationOID)
+                {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        private static bool IsValidForDigitalSignatureUsage(X509KeyUsageExtension ku)
+        {
+            const X509KeyUsageFlags RequiredUsages = X509KeyUsageFlags.DigitalSignature;
+            return (ku.KeyUsages & RequiredUsages) == RequiredUsages;
         }
     }
 }
