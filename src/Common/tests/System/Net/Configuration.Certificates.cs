@@ -19,22 +19,6 @@ namespace System.Net.Test.Common
             private const string CertificatePassword = "testcertificate";
             private const string TestDataFolder = "TestData";
 
-            private static readonly Mutex m;
-            private const int MutexTimeout = 120 * 1000;
-
-            static Certificates()
-            {
-                if (PlatformDetection.IsUap)
-                {
-                    // UWP doesn't support Global mutexes.
-                    m = new Mutex(false, "Local\\CoreFXTest.Configuration.Certificates.LoadPfxCertificate");
-                }
-                else
-                {
-                    m = new Mutex(false, "Global\\CoreFXTest.Configuration.Certificates.LoadPfxCertificate");
-                }
-            }
-
             public static X509Certificate2 GetServerCertificate() => GetCertificate("testservereku.contoso.com.pfx");
 
             public static X509Certificate2 GetClientCertificate() => GetCertificate("testclienteku.contoso.com.pfx");
@@ -63,9 +47,6 @@ namespace System.Net.Test.Common
 
             private static X509Certificate2 GetCertificate(string certificateFileName)
             {
-                // On Windows, .NET Core applications should not import PFX files in parallel to avoid a known system-level race condition.
-                // This bug results in corrupting the X509Certificate2 certificate state.
-                Assert.True(m.WaitOne(MutexTimeout), "Cannot acquire the global certificate mutex.");
                 try
                 {
                     var cert = new X509Certificate2(
@@ -78,10 +59,6 @@ namespace System.Net.Test.Common
                 {
                     Debug.Fail(nameof(Configuration.Certificates.GetCertificate) + " threw " + ex.ToString());
                     throw;
-                }
-                finally
-                {
-                    m.ReleaseMutex();
                 }
             }
         }
