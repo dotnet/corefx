@@ -911,19 +911,20 @@ namespace System.Reflection.Metadata.Tests
         [Fact]
         public unsafe void GetDeclarativeSecurityAttributeTest()
         {
-            byte[] peImage = (byte[])WinRT.Lib.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+            var mdBuilder = new MetadataBuilder();
 
-            //38688266055 is the presenttable index
-            int presentTablesIndex = IndexOf(peImage, BitConverter.GetBytes(38688266055), headers.MetadataStartOffset);
-            Assert.NotEqual(presentTablesIndex, -1);
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddDeclarativeSecurityAttribute(default(TypeDefinitionHandle), 0, default(BlobHandle));
 
-            //38654728007 gives a value to the declaritive secutity row count and removes it from the row count after it.
-            Array.Copy(BitConverter.GetBytes((ulong)38654728007), 0, peImage, presentTablesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)38654728007).Length);
+            var rootBuilder = new MetadataRootBuilder(mdBuilder);
+            var mdBlob = new BlobBuilder();
+            rootBuilder.Serialize(mdBlob, 0, 0);
 
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
-            Assert.Equal(12, reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)).PermissionSet.GetHeapOffset());
+            using (var mdProvider = MetadataReaderProvider.FromMetadataImage(mdBlob.ToImmutableArray()))
+            {
+                var reader = mdProvider.GetMetadataReader();
+                Assert.Equal(HandleKind.TypeDefinition, reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)).Parent.Kind);
+            }
         }
 
         [Fact]
