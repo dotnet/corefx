@@ -177,6 +177,23 @@ namespace System.Security.Cryptography.Encoding.Tests
             }
         }
 
+        [Fact]
+        public static void ValidateFromBase64_OversizeBuffer()
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes("/Zm9v/");
+                byte[] outputBytes = new byte[6];
+
+                // skip the first and last byte
+                int bytesWritten = transform.TransformBlock(inputBytes, 1, 4, outputBytes, 0);
+
+                string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
+
+                Assert.Equal("foo", outputText);
+            }
+        }
+
         [Theory, MemberData(nameof(TestData_Ascii_Whitespace))]
         public static void ValidateWhitespace(string expected, string data)
         {
