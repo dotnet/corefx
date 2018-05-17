@@ -201,7 +201,7 @@ namespace System.Security.Cryptography
 
             // If there's nothing to do, leave early
             if (iCount == 0 && inputOffset == 0 &&
-                inputOffset == 0 && inputCount == inputBuffer.Length)
+                inputCount == inputBuffer.Length)
             {
                 return inputBuffer;
             }
