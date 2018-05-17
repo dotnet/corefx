@@ -30,7 +30,7 @@ namespace System
                 // optimized zeroing of 8 shorts = 2 longs
                 ((long*)numbers)[0] = 0L;
                 ((long*)numbers)[1] = 0L;
-                isLoopback = Parse(str, numbers, start, ref scopeId);                         
+                isLoopback = Parse(str, numbers, start, ref scopeId);
                 return '[' + CreateCanonicalName(numbers) + ((numbers[0] == 0xfe80) ? scopeId : "") + ']';
             }
         }
