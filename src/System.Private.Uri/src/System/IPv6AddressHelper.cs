@@ -30,10 +30,8 @@ namespace System
                 // optimized zeroing of 8 shorts = 2 longs
                 ((long*)numbers)[0] = 0L;
                 ((long*)numbers)[1] = 0L;
-                isLoopback = Parse(str, numbers, start, ref scopeId);
-                //Link local address https://tools.ietf.org/html/rfc4291#page-11
-                bool isLinkLocalAddress = (numbers[0] == 0xfe80);
-                return '[' + CreateCanonicalName(numbers) + (isLinkLocalAddress ? scopeId : "") + ']';
+                isLoopback = Parse(str, numbers, start, ref scopeId);                                
+                return '[' + CreateCanonicalName(numbers) + ((numbers[0] == 0xfe80) ? scopeId : "") + ']';
             }
         }
 

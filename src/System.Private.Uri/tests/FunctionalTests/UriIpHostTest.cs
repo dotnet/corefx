@@ -234,18 +234,20 @@ namespace System.PrivateUri.Tests
 
         #region IPv6
 
-        [Theory]
-        [Trait("MyTrait", "MyTrait")]
-        [InlineData("[fe80::dcbd:a736:baae:b535{0}]", "%2", true)]
-        //[InlineData("[FE80::dcbd:a736:baae:b535{0}]", "eth0")]
-        [InlineData("[FE81::dcbd:a736:baae:b535{0}]", "%18", false)]
-        [InlineData("[fe80::e077:c9a3:eeba:b8e9{0}]", "%18", true)]
-        public void UriIPv6_LinkLocalAddress(string address, string zoneIndex, bool isValidLinkLocalAddress)
+        [Theory]        
+        [InlineData("fe80::e077:c9a3:eeba:b8e9", "%18", true)]
+        [InlineData("Fe80::e077:c9a3:eeba:b8e9", "%18", true)]
+        [InlineData("fE80::e077:c9a3:eeba:b8e9", "%18", true)]
+        [InlineData("FE80::e077:c9a3:eeba:b8e9", "%18", true)]
+        [InlineData("FE80::e077:c9a3:eeba:b8e9", "%eth10", true)]
+        [InlineData("fe81::e077:c9a3:eeba:b8e9", "%18", false)]        
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void UriIPv6Host_LinkLocalAddress(string address, string zoneIndex, bool isValidLinkLocalAddress)
         {
-            string linklocalAddress = string.Format(address, zoneIndex);
-            string ipv6Address = "http://" + linklocalAddress;
-            var uri = new Uri(ipv6Address);
-            Assert.True(isValidLinkLocalAddress ? uri.Host.Trim('[').Trim(']').EndsWith(zoneIndex) : uri.Host == address);
+            string scopedLiteralIpv6 = "[" + address + zoneIndex + "]";
+            string literalIpV6Uri = "http://" + scopedLiteralIpv6;
+            var uri = new Uri(literalIpV6Uri);
+            Assert.Equal(isValidLinkLocalAddress ? scopedLiteralIpv6 : "[" + address + "]", uri.Host, ignoreCase: true);
         }
 
         [Fact]
