@@ -114,10 +114,10 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            Span<byte> input = ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var (temp, tempCount) = GetTempBuffer(inputBuffer, inputOffset, inputCount);
+            ArraySegment<char> temp = GetTempBuffer(input);
 
             if (temp == null)
             {
@@ -127,11 +127,12 @@ namespace System.Security.Cryptography
             byte[] result;
             try
             {
-                result = Convert.FromBase64CharArray(temp, 0, tempCount);
+                result = Convert.FromBase64CharArray(temp.Array, temp.Offset, temp.Count);
             }
             finally
             {
-                ArrayPool<char>.Shared.Return(temp, true);
+                temp.AsSpan().Clear();
+                ArrayPool<char>.Shared.Return(temp.Array);
             }
 
             Buffer.BlockCopy(result, 0, outputBuffer, outputOffset, result.Length);
@@ -141,10 +142,10 @@ namespace System.Security.Cryptography
 
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            Span<byte> input = ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            var (temp, tempCount) = GetTempBuffer(inputBuffer, inputOffset, inputCount);
+            ArraySegment<char> temp = GetTempBuffer(input);
 
             if (temp == null)
             {
@@ -155,11 +156,12 @@ namespace System.Security.Cryptography
             byte[] result;
             try
             {
-                result = Convert.FromBase64CharArray(temp, 0, tempCount);
+                result = Convert.FromBase64CharArray(temp.Array, temp.Offset, temp.Count);
             }
             finally
             {
-                ArrayPool<char>.Shared.Return(temp, true);
+                temp.AsSpan().Clear();
+                ArrayPool<char>.Shared.Return(temp.Array);
             }
 
             // reinitialize the transform
@@ -168,13 +170,13 @@ namespace System.Security.Cryptography
             return result;
         }
 
-        private void FillRemainderBuffer(byte[] buffer, int offset, int count)
+        private void FillRemainderBuffer(Span<byte> buffer)
         {
             if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
             {
-                for (var i = 0; i < count; i++)
+                for (var i = 0; i < buffer.Length; i++)
                 {
-                    var value = buffer[offset + i];
+                    var value = buffer[i];
                     if (!char.IsWhiteSpace((char)value))
                     {
                         _inputBuffer[_inputIndex++] = value;
@@ -183,36 +185,36 @@ namespace System.Security.Cryptography
             }
             else
             {
-                Buffer.BlockCopy(buffer, offset, _inputBuffer, _inputIndex, count);
-                _inputIndex += count;
+                buffer.CopyTo(_inputBuffer.AsSpan(_inputIndex, buffer.Length));
+                _inputIndex += buffer.Length;
             }
         }
 
-        private (char[], int) GetTempBuffer(byte[] inputBuffer, int inputOffset, int inputCount)
+        private ArraySegment<char> GetTempBuffer(Span<byte> input)
         {
-            var effectiveCount = inputCount;
+            var effectiveCount = input.Length;
             if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
             {
-                for (var i = 0; i < inputCount; i++)
+                for (int i = 0; i < input.Length; i++)
                 {
-                    if (char.IsWhiteSpace((char)inputBuffer[inputOffset + i])) effectiveCount--;
+                    if (char.IsWhiteSpace((char)input[i])) effectiveCount--;
                 }
             }
 
-            // are there insufficient characters to decode a block?
+            // return early if there are insufficient characters to decode a block
             if (effectiveCount + _inputIndex < 4)
             {
-                FillRemainderBuffer(inputBuffer, inputOffset, inputCount);
-                return (null, 0);
+                FillRemainderBuffer(input);
+                return null;
             }
 
             // copy current remainder + input -> temp
             var totalBytes = _inputIndex + effectiveCount;
             var remainder = totalBytes % 4;
-            var tempCount = _inputIndex + effectiveCount - remainder;
+            var tempCount = totalBytes - remainder;
             var temp = ArrayPool<char>.Shared.Rent(tempCount);
             var tempIndex = 0;
-            var inputIndex = inputOffset;
+            var inputIndex = 0;
             for (var i = 0; i < _inputIndex; i++)
             {
                 temp[tempIndex++] = (char)_inputBuffer[i];
@@ -222,7 +224,7 @@ namespace System.Security.Cryptography
             {
                 while (tempIndex < tempCount)
                 {
-                    var value = (char)inputBuffer[inputIndex++];
+                    var value = (char)input[inputIndex++];
                     if (!char.IsWhiteSpace(value))
                     {
                         temp[tempIndex++] = value;
@@ -231,22 +233,23 @@ namespace System.Security.Cryptography
             }
             else
             {
-                var usableCount = inputCount - remainder;
-                Encoding.ASCII.GetChars(inputBuffer, inputOffset, usableCount, temp, tempIndex);
+                var usableCount = input.Length - remainder;
+                Encoding.ASCII.GetChars(input.Slice(0, usableCount), temp.AsSpan().Slice(tempIndex, usableCount));
                 inputIndex += usableCount;
             }
 
-            FillRemainderBuffer(inputBuffer, inputIndex, inputOffset + inputCount - inputIndex);
+            FillRemainderBuffer(input.Slice(inputIndex, input.Length - inputIndex));
 
-            return (temp, tempCount);
+            return new ArraySegment<char>(temp, 0, tempCount);
         }
 
-        private static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+        private static Span<byte> ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             if (inputBuffer == null) throw new ArgumentNullException(nameof(inputBuffer));
             if (inputOffset < 0) throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (inputCount < 0 || (inputCount > inputBuffer.Length)) throw new ArgumentException(SR.Argument_InvalidValue);
             if ((inputBuffer.Length - inputCount) < inputOffset) throw new ArgumentException(SR.Argument_InvalidOffLen);
+            return inputBuffer.AsSpan(inputOffset, inputCount);
         }
 
         // must implement IDisposable, which in this case means clearing the input buffer
