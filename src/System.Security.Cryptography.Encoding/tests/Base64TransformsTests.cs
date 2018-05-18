@@ -45,6 +45,7 @@ namespace System.Security.Cryptography.Encoding.Tests
 
         public static IEnumerable<object[]> TestData_Oversize()
         {
+            // test data with extra chunks of data outside the selected range
             yield return new object[] { "Zm9v////", 0, 4, "foo" };
             yield return new object[] { "////Zm9v", 4, 4, "foo" };
             yield return new object[] { "////Zm9v////", 4, 4, "foo" };
@@ -192,7 +193,6 @@ namespace System.Security.Cryptography.Encoding.Tests
                 byte[] inputBytes = Text.Encoding.ASCII.GetBytes(input);
                 byte[] outputBytes = new byte[100];
 
-                // skip the first and last byte
                 int bytesWritten = transform.TransformBlock(inputBytes, offset, count, outputBytes, 0);
 
                 string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
