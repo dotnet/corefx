@@ -147,6 +147,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public void LockedFileExists()
         {
             string path = GetTestFilePath();
