@@ -43,6 +43,13 @@ namespace System.Security.Cryptography.Encoding.Tests
             yield return new object[] { "foo", " Z m 9 v" };
         }
 
+        public static IEnumerable<object[]> TestData_Oversize()
+        {
+            yield return new object[] { "Zm9v/", 0, 4, "foo" };
+            yield return new object[] { "/Zm9v", 1, 4, "foo" };
+            yield return new object[] { "/Zm9v/", 1, 4, "foo" };
+        }
+
         [Fact]
         public void InvalidInput_ToBase64Transform()
         {
@@ -177,20 +184,20 @@ namespace System.Security.Cryptography.Encoding.Tests
             }
         }
 
-        [Fact]
-        public static void ValidateFromBase64_OversizeBuffer()
+        [Theory, MemberData(nameof(TestData_Oversize))]
+        public static void ValidateFromBase64_OversizeBuffer(string input, int offset, int count, string expected)
         {
             using (var transform = new FromBase64Transform())
             {
-                byte[] inputBytes = Text.Encoding.ASCII.GetBytes("/Zm9v/");
-                byte[] outputBytes = new byte[6];
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(input);
+                byte[] outputBytes = new byte[100];
 
                 // skip the first and last byte
-                int bytesWritten = transform.TransformBlock(inputBytes, 1, 4, outputBytes, 0);
+                int bytesWritten = transform.TransformBlock(inputBytes, offset, count, outputBytes, 0);
 
                 string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
 
-                Assert.Equal("foo", outputText);
+                Assert.Equal(expected, outputText);
             }
         }
 
