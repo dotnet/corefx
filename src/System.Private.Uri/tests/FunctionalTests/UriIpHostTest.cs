@@ -240,6 +240,7 @@ namespace System.PrivateUri.Tests
         [InlineData("fE80::e077:c9a3:eeba:b8e9", "%18")]
         [InlineData("FE80::e077:c9a3:eeba:b8e9", "%18")]
         [InlineData("FE80::e077:c9a3:eeba:b8e9", "%eth10")]
+        [InlineData("FE80::e077:c9a3:eeba:b8e9", "")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Host_IPv6LinkLocalAddress_HasScopeId(string address, string zoneIndex)
         {
