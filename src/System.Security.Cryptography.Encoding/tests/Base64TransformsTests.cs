@@ -45,9 +45,9 @@ namespace System.Security.Cryptography.Encoding.Tests
 
         public static IEnumerable<object[]> TestData_Oversize()
         {
-            yield return new object[] { "Zm9v/", 0, 4, "foo" };
-            yield return new object[] { "/Zm9v", 1, 4, "foo" };
-            yield return new object[] { "/Zm9v/", 1, 4, "foo" };
+            yield return new object[] { "Zm9v////", 0, 4, "foo" };
+            yield return new object[] { "////Zm9v", 4, 4, "foo" };
+            yield return new object[] { "////Zm9v////", 4, 4, "foo" };
         }
 
         [Fact]
