@@ -81,6 +81,15 @@ namespace System.Reflection.Metadata.Tests
             return new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize, options, decoder);
         }
 
+        internal static MetadataReader GetMetadataReader(MetadataBuilder mdBuilder)
+        {
+            MetadataRootBuilder rootBuilder = new MetadataRootBuilder(mdBuilder);
+            BlobBuilder mdBlob = new BlobBuilder();
+            rootBuilder.Serialize(mdBlob, 0, 0);
+
+            return MetadataReaderProvider.FromMetadataImage(mdBlob.ToImmutableArray()).GetMetadataReader();
+        }
+
         internal static unsafe GCHandle GetPinnedPEImage(byte[] peImage)
         {
             lock (s_peImages)
@@ -907,46 +916,44 @@ namespace System.Reflection.Metadata.Tests
             MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
             Assert.Equal(421, reader.GetCustomAttribute(CustomAttributeHandle.FromRowId(1)).Value.GetHeapOffset());
         }
-
+        
         [Fact]
         public unsafe void GetDeclarativeSecurityAttributeTest()
         {
-            var mdBuilder = new MetadataBuilder();
+            MetadataBuilder mdBuilder = new MetadataBuilder();
 
             mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
             mdBuilder.AddDeclarativeSecurityAttribute(default(TypeDefinitionHandle), 0, default(BlobHandle));
 
-            var rootBuilder = new MetadataRootBuilder(mdBuilder);
-            var mdBlob = new BlobBuilder();
-            rootBuilder.Serialize(mdBlob, 0, 0);
-
-            using (var mdProvider = MetadataReaderProvider.FromMetadataImage(mdBlob.ToImmutableArray()))
-            {
-                var reader = mdProvider.GetMetadataReader();
-                Assert.Equal(HandleKind.TypeDefinition, reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)).Parent.Kind);
-            }
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(HandleKind.TypeDefinition, reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)).Parent.Kind);
+            Assert.Equal(default(BlobHandle), reader.GetDeclarativeSecurityAttribute(DeclarativeSecurityAttributeHandle.FromRowId(1)).PermissionSet);
         }
 
         [Fact]
         public unsafe void GetMethodDefTreatmentAndRowIdTest()
         {
-            byte[] peImage = (byte[])WinRT.Lib.Clone();
+            MetadataBuilder mdBuilder = new MetadataBuilder();
 
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
-            Assert.Equal(22, reader.GetMethodDefinition(MethodDefinitionHandle.FromRowId(1)).Name.GetHeapOffset());
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddMethodDefinition(0, 0, default(StringHandle), default(BlobHandle), 0, default(ParameterHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(StringHandle), reader.GetMethodDefinition(MethodDefinitionHandle.FromRowId(1)).Name);
+            Assert.Equal(default(BlobHandle), reader.GetMethodDefinition(MethodDefinitionHandle.FromRowId(1)).Signature);
         }
 
         [Fact]
         public unsafe void GetFieldDefinitionTest()
         {
-            byte[] peImage = (byte[])WinRT.Lib.Clone();
+            MetadataBuilder mdBuilder = new MetadataBuilder();
 
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
-            Assert.Throws<BadImageFormatException>(() => reader.GetFieldDefinition(FieldDefinitionHandle.FromRowId(1)));
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddFieldDefinition(0, default(StringHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(StringHandle), reader.GetFieldDefinition(FieldDefinitionHandle.FromRowId(1)).Name);
+            Assert.Equal(default(BlobHandle), reader.GetFieldDefinition(FieldDefinitionHandle.FromRowId(1)).Signature);
         }
 
         [Fact]
