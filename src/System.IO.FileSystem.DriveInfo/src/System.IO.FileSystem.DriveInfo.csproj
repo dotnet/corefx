@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -19,9 +19,6 @@
     <Compile Include="System\IO\DriveType.cs" />
     <Compile Include="$(CommonPath)\System\HResults.cs">
       <Link>Common\System\HResults.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
-      <Link>Common\System\IO\PathInternal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
@@ -48,10 +45,10 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetVolumeLabel.cs">
       <Link>Common\Interop\Windows\Interop.SetVolumeLabel.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
-      <Link>Common\Interop\Windows\Interop.SetThreadErrorMode.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
+      <Link>Common\CoreLibInterop\Windows\Interop.SetThreadErrorMode.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SecurityOptions.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.SecurityOptions.cs">
       <Link>Common\Interop\Windows\Interop.SecurityOptions.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileOperations.cs">
@@ -60,11 +57,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Win32.cs">
       <Link>Common\System\IO\DriveInfoInternal.Win32.cs</Link>
@@ -78,16 +75,16 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
-      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
       <Link>Common\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MountPoints.cs">
@@ -101,6 +98,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

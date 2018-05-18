@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -71,7 +70,36 @@ namespace System.IO
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
+        internal static bool EndsWithPeriodOrSpace(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            char c = path[path.Length - 1];
+            return c == ' ' || c == '.';
+        }
+
         /// <summary>
+        /// Adds the extended path prefix (\\?\) if not already a device path, IF the path is not relative,
+        /// AND the path is more than 259 characters. (> MAX_PATH + null). This will also insert the extended
+        /// prefix if the path ends with a period or a space. Trailing periods and spaces are normally eaten
+        /// away from paths during normalization, but if we see such a path at this point it should be
+        /// normalized and has retained the final characters. (Typically from one of the *Info classes)
+        /// </summary>
+        internal static string EnsureExtendedPrefixIfNeeded(string path)
+        {
+            if (path != null && (path.Length >= MaxShortPath || EndsWithPeriodOrSpace(path)))
+            {
+                return EnsureExtendedPrefix(path);
+            }
+            else
+            {
+                return path;
+            }
+        }
+
+        /// <summary>
+        /// DO NOT USE- Use EnsureExtendedPrefixIfNeeded. This will be removed shortly.
         /// Adds the extended path prefix (\\?\) if not already a device path, IF the path is not relative,
         /// AND the path is more than 259 characters. (> MAX_PATH + null)
         /// </summary>
@@ -115,7 +143,7 @@ namespace System.IO
         /// <summary>
         /// Returns true if the path uses any of the DOS device path syntaxes. ("\\.\", "\\?\", or "\??\")
         /// </summary>
-        internal static bool IsDevice(string path)
+        internal static bool IsDevice(ReadOnlySpan<char> path)
         {
             // If the path begins with any two separators is will be recognized and normalized and prepped with
             // "\??\" for internal usage correctly. "\??\" is recognized and handled, "/??/" is not.
@@ -131,11 +159,24 @@ namespace System.IO
         }
 
         /// <summary>
+        /// Returns true if the path is a device UNC (\\?\UNC\, \\.\UNC\)
+        /// </summary>
+        internal static bool IsDeviceUNC(ReadOnlySpan<char> path)
+        {
+            return path.Length >= UncExtendedPrefixLength
+                && IsDevice(path)
+                && IsDirectorySeparator(path[7])
+                && path[4] == 'U'
+                && path[5] == 'N'
+                && path[6] == 'C';
+        }
+
+        /// <summary>
         /// Returns true if the path uses the canonical form of extended syntax ("\\?\" or "\??\"). If the
         /// path matches exactly (cannot use alternate directory separators) Windows will skip normalization
         /// and path length checks.
         /// </summary>
-        internal static bool IsExtended(string path)
+        internal static bool IsExtended(ReadOnlySpan<char> path)
         {
             // While paths like "//?/C:/" will work, they're treated the same as "\\.\" paths.
             // Skipping of normalization will *only* occur if back slashes ('\') are used.
@@ -149,7 +190,7 @@ namespace System.IO
         /// <summary>
         /// Check for known wildcard characters. '*' and '?' are the most common ones.
         /// </summary>
-        internal static bool HasWildCardCharacters(string path)
+        internal static bool HasWildCardCharacters(ReadOnlySpan<char> path)
         {
             // Question mark is part of dos device syntax so we have to skip if we are
             int startIndex = IsDevice(path) ? ExtendedPathPrefix.Length : 0;
@@ -172,69 +213,61 @@ namespace System.IO
         /// <summary>
         /// Gets the length of the root of the path (drive, share, etc.).
         /// </summary>
-        internal unsafe static int GetRootLength(string path)
+        internal static int GetRootLength(ReadOnlySpan<char> path)
         {
-            fixed (char* value = path)
-            {
-                return GetRootLength(value, path.Length);
-            }
-        }
-
-        private unsafe static int GetRootLength(char* path, int pathLength)
-        {
+            int pathLength = path.Length;
             int i = 0;
-            int volumeSeparatorLength = 2;  // Length to the colon "C:"
-            int uncRootLength = 2;          // Length to the start of the server name "\\"
 
-            bool extendedSyntax = StartsWithOrdinal(path, pathLength, ExtendedPathPrefix);
-            bool extendedUncSyntax = StartsWithOrdinal(path, pathLength, UncExtendedPathPrefix);
-            if (extendedSyntax)
+            bool deviceSyntax = IsDevice(path);
+            bool deviceUnc = deviceSyntax && IsDeviceUNC(path);
+
+            if ((!deviceSyntax || deviceUnc) && pathLength > 0 && IsDirectorySeparator(path[0]))
             {
-                // Shift the position we look for the root from to account for the extended prefix
-                if (extendedUncSyntax)
+                // UNC or simple rooted path (e.g. "\foo", NOT "\\?\C:\foo")
+                if (deviceUnc || (pathLength > 1 && IsDirectorySeparator(path[1])))
                 {
-                    // "\\" -> "\\?\UNC\"
-                    uncRootLength = UncExtendedPathPrefix.Length;
+                    // UNC (\\?\UNC\ or \\), scan past server\share
+
+                    // Start past the prefix ("\\" or "\\?\UNC\")
+                    i = deviceUnc ? UncExtendedPrefixLength : UncPrefixLength;
+
+                    // Skip two separators at most
+                    int n = 2;
+                    while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0))
+                        i++;
                 }
                 else
                 {
-                    // "C:" -> "\\?\C:"
-                    volumeSeparatorLength += ExtendedPathPrefix.Length;
+                    // Current drive rooted (e.g. "\foo")
+                    i = 1;
                 }
             }
-
-            if ((!extendedSyntax || extendedUncSyntax) && pathLength > 0 && IsDirectorySeparator(path[0]))
+            else if (deviceSyntax)
             {
-                // UNC or simple rooted path (e.g. "\foo", NOT "\\?\C:\foo")
+                // Device path (e.g. "\\?\.", "\\.\")
+                // Skip any characters following the prefix that aren't a separator
+                i = DevicePrefixLength;
+                while (i < pathLength && !IsDirectorySeparator(path[i]))
+                    i++;
 
-                i = 1; //  Drive rooted (\foo) is one character
-                if (extendedUncSyntax || (pathLength > 1 && IsDirectorySeparator(path[1])))
-                {
-                    // UNC (\\?\UNC\ or \\), scan past the next two directory separators at most
-                    // (e.g. to \\?\UNC\Server\Share or \\Server\Share\)
-                    i = uncRootLength;
-                    int n = 2; // Maximum separators to skip
-                    while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0)) i++;
-                }
+                // If there is another separator take it, as long as we have had at least one
+                // non-separator after the prefix (e.g. don't take "\\?\\", but take "\\?\a\")
+                if (i < pathLength && i > DevicePrefixLength && IsDirectorySeparator(path[i]))
+                    i++;
             }
-            else if (pathLength >= volumeSeparatorLength && path[volumeSeparatorLength - 1] == VolumeSeparatorChar)
+            else if (pathLength >= 2
+                && path[1] == VolumeSeparatorChar
+                && IsValidDriveChar(path[0]))
             {
-                // Path is at least longer than where we expect a colon, and has a colon (\\?\A:, A:)
-                // If the colon is followed by a directory separator, move past it
-                i = volumeSeparatorLength;
-                if (pathLength >= volumeSeparatorLength + 1 && IsDirectorySeparator(path[volumeSeparatorLength])) i++;
+                // Valid drive specified path ("C:", "D:", etc.)
+                i = 2;
+
+                // If the colon is followed by a directory separator, move past it (e.g "C:\")
+                if (pathLength > 2 && IsDirectorySeparator(path[2]))
+                    i++;
             }
+
             return i;
-        }
-
-        private unsafe static bool StartsWithOrdinal(char* source, int sourceLength, string value)
-        {
-            if (sourceLength < value.Length) return false;
-            for (int i = 0; i < value.Length; i++)
-            {
-                if (value[i] != source[i]) return false;
-            }
-            return true;
         }
 
         /// <summary>
@@ -249,7 +282,7 @@ namespace System.IO
         /// for C: (rooted, but relative). "C:\a" is rooted and not relative (the current directory
         /// will not be used to modify the path).
         /// </remarks>
-        internal static bool IsPartiallyQualified(string path)
+        internal static bool IsPartiallyQualified(ReadOnlySpan<char> path)
         {
             if (path.Length < 2)
             {
@@ -273,29 +306,6 @@ namespace System.IO
                 // To match old behavior we'll check the drive character for validity as the path is technically
                 // not qualified if you don't have a valid drive. "=:\" is the "=" file's default data stream.
                 && IsValidDriveChar(path[0]));
-        }
-
-        /// <summary>
-        /// Returns the characters to skip at the start of the path if it starts with space(s) and a drive or directory separator.
-        /// (examples are " C:", " \")
-        /// This is a legacy behavior of Path.GetFullPath().
-        /// </summary>
-        /// <remarks>
-        /// Note that this conflicts with IsPathRooted() which doesn't (and never did) such a skip.
-        /// </remarks>
-        internal static int PathStartSkip(string path)
-        {
-            int startIndex = 0;
-            while (startIndex < path.Length && path[startIndex] == ' ') startIndex++;
-
-            if (startIndex > 0 && (startIndex < path.Length && IsDirectorySeparator(path[startIndex]))
-                || (startIndex + 1 < path.Length && path[startIndex + 1] == ':' && IsValidDriveChar(path[startIndex])))
-            {
-                // Go ahead and skip spaces as we're either " C:" or " \"
-                return startIndex;
-            }
-
-            return 0;
         }
 
         /// <summary>
@@ -341,34 +351,33 @@ namespace System.IO
         /// </remarks>
         internal static string NormalizeDirectorySeparators(string path)
         {
-            if (string.IsNullOrEmpty(path)) return path;
+            if (string.IsNullOrEmpty(path))
+                return path;
 
             char current;
-            int start = PathStartSkip(path);
 
-            if (start == 0)
+            // Make a pass to see if we need to normalize so we can potentially skip allocating
+            bool normalized = true;
+
+            for (int i = 0; i < path.Length; i++)
             {
-                // Make a pass to see if we need to normalize so we can potentially skip allocating
-                bool normalized = true;
-
-                for (int i = 0; i < path.Length; i++)
+                current = path[i];
+                if (IsDirectorySeparator(current)
+                    && (current != DirectorySeparatorChar
+                        // Check for sequential separators past the first position (we need to keep initial two for UNC/extended)
+                        || (i > 0 && i + 1 < path.Length && IsDirectorySeparator(path[i + 1]))))
                 {
-                    current = path[i];
-                    if (IsDirectorySeparator(current)
-                        && (current != DirectorySeparatorChar
-                            // Check for sequential separators past the first position (we need to keep initial two for UNC/extended)
-                            || (i > 0 && i + 1 < path.Length && IsDirectorySeparator(path[i + 1]))))
-                    {
-                        normalized = false;
-                        break;
-                    }
+                    normalized = false;
+                    break;
                 }
-
-                if (normalized) return path;
             }
+
+            if (normalized)
+                return path;
 
             StringBuilder builder = new StringBuilder(path.Length);
 
+            int start = 0;
             if (IsDirectorySeparator(path[start]))
             {
                 start++;
@@ -399,22 +408,13 @@ namespace System.IO
         }
 
         /// <summary>
-        /// Returns true if the character is a directory or volume separator.
-        /// </summary>
-        /// <param name="ch">The character to test.</param>
-        internal static bool IsDirectoryOrVolumeSeparator(char ch)
-        {
-            return IsDirectorySeparator(ch) || VolumeSeparatorChar == ch;
-        }
-
-        /// <summary>
         /// Returns true if the path is effectively empty for the current OS.
         /// For unix, this is empty or null. For Windows, this is empty, null, or 
         /// just spaces ((char)32).
         /// </summary>
-        internal static bool IsEffectivelyEmpty(string path)
+        internal static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsEmpty)
                 return true;
 
             foreach (char c in path)

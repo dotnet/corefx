@@ -14,13 +14,9 @@ namespace System.Net.Http
 {
     internal static class HttpUtilities
     {
-        internal static Version DefaultRequestVersion =>
-#if uap
-            HttpVersionInternal.Version20;
-#else
-            HttpVersionInternal.Version11;
-#endif
-        internal static Version DefaultResponseVersion => HttpVersionInternal.Version11;
+        internal static Version DefaultRequestVersion => HttpVersion.Version20;
+
+        internal static Version DefaultResponseVersion => HttpVersion.Version11;
 
         internal static bool IsHttpUri(Uri uri)
         {
@@ -33,10 +29,16 @@ namespace System.Net.Http
             IsSupportedSecureScheme(scheme);
 
         internal static bool IsSupportedNonSecureScheme(string scheme) =>
-            string.Equals(scheme, "http", StringComparison.OrdinalIgnoreCase);
+            string.Equals(scheme, "http", StringComparison.OrdinalIgnoreCase) || IsNonSecureWebSocketScheme(scheme);
 
         internal static bool IsSupportedSecureScheme(string scheme) =>
-            string.Equals(scheme, "https", StringComparison.OrdinalIgnoreCase);
+            string.Equals(scheme, "https", StringComparison.OrdinalIgnoreCase) || IsSecureWebSocketScheme(scheme);
+
+        internal static bool IsNonSecureWebSocketScheme(string scheme) =>
+            string.Equals(scheme, "ws", StringComparison.OrdinalIgnoreCase);
+
+        internal static bool IsSecureWebSocketScheme(string scheme) =>
+            string.Equals(scheme, "wss", StringComparison.OrdinalIgnoreCase);
 
         // Always specify TaskScheduler.Default to prevent us from using a user defined TaskScheduler.Current.
         //

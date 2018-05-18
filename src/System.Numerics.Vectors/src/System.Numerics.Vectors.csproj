@@ -6,13 +6,17 @@
     <RootNamespace>System.Numerics</RootNamespace>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsPartialFacadeAssembly>
+    <IsTargetingNetFx Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsTargetingNetFx>
+    <IsTargetingNetCoreApp Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap' OR '$(TargetGroup)'=='uapaot'">true</IsTargetingNetCoreApp>
+    <IsPartialFacadeAssembly Condition="'$(IsTargetingNetFx)'=='true' OR '$(IsTargetingNetCoreApp)'=='true'">true</IsPartialFacadeAssembly>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.0'">netstandard1.0;portable-net45+win8+wp8+wpa81</PackageTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
@@ -21,37 +25,49 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.0-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <!-- Shared -->
   <ItemGroup>
-    <Compile Include="..\..\Common\src\System\Numerics\Hashing\HashHelpers.cs">
+    <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
       <Link>Common\System\Numerics\Hashing\HashHelpers.cs</Link>
     </Compile>
-    <Compile Include="System\Numerics\ConstantHelper.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Runtime\CompilerServices\IntrinsicAttribute.cs">
+      <Link>System\Runtime\CompilerServices\IntrinsicAttribute.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- On .NET Core, Vector<T> is in System.Private.CoreLib -->
+  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' != 'true'">
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\ConstantHelper.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ConstantHelper.tt</DependentUpon>
+      <Link>System\Numerics\ConstantHelper.cs</Link>
     </Compile>
-    <Compile Include="System\Numerics\JitIntrinsicAttribute.cs" />
-    <Compile Include="System\Numerics\Register.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Register.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Register.tt</DependentUpon>
+      <Link>System\Numerics\Register.cs</Link>
     </Compile>
-    <Compile Include="System\Numerics\Vector.cs">
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Vector.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Vector.tt</DependentUpon>
+      <Link>System\Numerics\Vector.cs</Link>
     </Compile>
-    <Compile Include="System\Numerics\Vector_Operations.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Vector_Operations.cs">
+      <Link>System\Numerics\Vector_Operations.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Carry a copy of MathF where not available -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
-    <Compile Include="..\..\Common\src\System\MathF.netstandard.cs">
+  <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
+    <Compile Include="$(CommonPath)\System\MathF.netstandard.cs">
       <Link>System\MathF.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Portable version only -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+  <ItemGroup Condition="'$(IsTargetingNetFx)' != 'true'">
     <Compile Include="System\Numerics\Matrix3x2.cs" />
     <Compile Include="System\Numerics\Matrix4x4.cs" />
     <Compile Include="System\Numerics\Plane.cs" />
@@ -63,24 +79,34 @@
     <Compile Include="System\Numerics\Vector4.cs" />
     <Compile Include="System\Numerics\Vector4_Intrinsics.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+  <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="System\Numerics\GenerationConfig.ttinclude" />
-    <Content Include="System\Numerics\ConstantHelper.tt">
+    <None Include="$(CommonPath)\CoreLib\System\Numerics\GenerationConfig.ttinclude">
+      <Link>System\Numerics\GenerationConfig.ttinclude</Link>
+    </None>
+    <Content Include="$(CommonPath)\CoreLib\System\Numerics\ConstantHelper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ConstantHelper.cs</LastGenOutput>
+      <Link>System\Numerics\ConstantHelper.tt</Link>
     </Content>
-    <Content Include="System\Numerics\Register.tt">
+    <Content Include="$(CommonPath)\CoreLib\System\Numerics\Register.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Register.cs</LastGenOutput>
+      <Link>System\Numerics\Register.tt</Link>
     </Content>
-    <Content Include="System\Numerics\Vector.tt">
+    <Content Include="$(CommonPath)\CoreLib\System\Numerics\Vector.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Vector.cs</LastGenOutput>
+      <Link>System\Numerics\Vector.tt</Link>
     </Content>
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' == 'true'">
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' != 'true'">
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.Resources.ResourceManager" />

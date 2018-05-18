@@ -1,9 +1,12 @@
 project(System.Native)
 
+# We mark the function which needs exporting with DLLEXPORT
+add_compile_options(-fvisibility=hidden)
+
 set(NATIVE_SOURCES
     pal_console.cpp
     pal_errno.c
-    pal_interfaceaddresses.cpp
+    pal_interfaceaddresses.c
     pal_io.c
     pal_maphardwaretype.c
     pal_memory.c
@@ -14,6 +17,7 @@ set(NATIVE_SOURCES
     pal_random.cpp
     pal_runtimeinformation.cpp
     pal_runtimeextensions.cpp
+    pal_signal.c
     pal_string.cpp
     pal_tcpstate.c
     pal_time.cpp

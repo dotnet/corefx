@@ -67,11 +67,14 @@
     <Compile Include="$(CommonTestPath)\System\ObjectCloner.cs">
       <Link>Common\System\ObjectCloner.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\RandomExtensions.cs">
+      <Link>Common\System\RandomExtensions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" Condition="'$(TargetGroup)'!='netcoreapp'">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
-      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+      <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
     <!-- Generic tests -->
     <Compile Include="Generic\Dictionary\Dictionary.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />

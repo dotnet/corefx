@@ -3,58 +3,53 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Threading;
+using System.Reflection;
 
 namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientTestBase : RemoteExecutorTestBase
     {
-        private const string ManagedHandlerEnvVar = "COMPlus_UseManagedHttpClientHandler";
-        private static readonly LocalDataStoreSlot s_managedHandlerSlot;
+        protected virtual bool UseSocketsHttpHandler => true;
 
-        static HttpClientTestBase()
-        {
-            s_managedHandlerSlot = Thread.GetNamedDataSlot(ManagedHandlerEnvVar);
-            if (s_managedHandlerSlot == null)
-            {
-                try
-                {
-                    s_managedHandlerSlot = Thread.AllocateNamedDataSlot(ManagedHandlerEnvVar);
-                }
-                catch (ArgumentException)
-                {
-                    s_managedHandlerSlot = Thread.GetNamedDataSlot(ManagedHandlerEnvVar);
-                }
-            }
-            Debug.Assert(s_managedHandlerSlot != null);
-        }
-
-        protected virtual bool UseManagedHandler => false;
+        protected bool IsWinHttpHandler => !UseSocketsHttpHandler && PlatformDetection.IsWindows && !PlatformDetection.IsUap && !PlatformDetection.IsFullFramework;
+        protected bool IsCurlHandler => !UseSocketsHttpHandler && !PlatformDetection.IsWindows;
+        protected bool IsNetfxHandler => PlatformDetection.IsWindows && PlatformDetection.IsFullFramework;
+        protected bool IsUapHandler => PlatformDetection.IsWindows && PlatformDetection.IsUap;
 
         protected HttpClient CreateHttpClient() => new HttpClient(CreateHttpClientHandler());
 
-        protected HttpClientHandler CreateHttpClientHandler() => CreateHttpClientHandler(UseManagedHandler);
+        protected HttpClientHandler CreateHttpClientHandler() => CreateHttpClientHandler(UseSocketsHttpHandler);
 
-        protected static HttpClient CreateHttpClient(string useManagedHandlerBoolString) =>
-            new HttpClient(CreateHttpClientHandler(useManagedHandlerBoolString));
+        protected static HttpClient CreateHttpClient(string useSocketsHttpHandlerBoolString) =>
+            new HttpClient(CreateHttpClientHandler(useSocketsHttpHandlerBoolString));
 
-        protected static HttpClientHandler CreateHttpClientHandler(string useManagedHandlerBoolString) =>
-            CreateHttpClientHandler(bool.Parse(useManagedHandlerBoolString));
+        protected static HttpClientHandler CreateHttpClientHandler(string useSocketsHttpHandlerBoolString) =>
+            CreateHttpClientHandler(bool.Parse(useSocketsHttpHandlerBoolString));
 
-        protected static HttpClientHandler CreateHttpClientHandler(bool useManagedHandler) =>
-            useManagedHandler ? CreateManagedHttpClientHandler() : new HttpClientHandler();
-
-        private static HttpClientHandler CreateManagedHttpClientHandler()
+        protected static HttpClientHandler CreateHttpClientHandler(bool useSocketsHttpHandler)
         {
-            try
+            if (!PlatformDetection.IsNetCore || useSocketsHttpHandler)
             {
-                Thread.SetData(s_managedHandlerSlot, true);
                 return new HttpClientHandler();
             }
-            finally
-            {
-                Thread.SetData(s_managedHandlerSlot, null);
-            }
+
+            // Create platform specific handler.
+            ConstructorInfo ctor = typeof(HttpClientHandler).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(bool) }, null);
+            Debug.Assert(ctor != null, "Couldn't find test constructor on HttpClientHandler");
+
+            HttpClientHandler handler = (HttpClientHandler)ctor.Invoke(new object[] { useSocketsHttpHandler });
+            Debug.Assert(useSocketsHttpHandler == IsSocketsHttpHandler(handler), "Unexpected handler.");
+
+            return handler;
+        }
+
+        protected static bool IsSocketsHttpHandler(HttpClientHandler handler) =>
+            GetUnderlyingSocketsHttpHandler(handler) != null;
+
+        protected static object GetUnderlyingSocketsHttpHandler(HttpClientHandler handler)
+        {
+            FieldInfo field = typeof(HttpClientHandler).GetField("_socketsHttpHandler", BindingFlags.Instance | BindingFlags.NonPublic);
+            return field?.GetValue(handler);
         }
     }
 }

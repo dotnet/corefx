@@ -189,11 +189,11 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// Get packet data
+        /// Copies data in SNIPacket to given byte array parameter
         /// </summary>
-        /// <param name="packet">SNI packet</param>
-        /// <param name="inBuff">Buffer</param>
-        /// <param name="dataSize">Data size</param>
+        /// <param name="packet">SNIPacket object containing data packets</param>
+        /// <param name="inBuff">Destination byte array where data packets are copied to</param>
+        /// <param name="dataSize">Length of data packets</param>
         /// <returns>SNI error status</returns>
         public uint PacketGetData(SNIPacket packet, byte[] inBuff, ref uint dataSize)
         {
@@ -238,14 +238,19 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error status</returns>
         public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync)
         {
+            SNIPacket clonedPacket = packet.Clone();
+            uint result;
             if (sync)
             {
-                return handle.Send(packet.Clone());
+                result = handle.Send(clonedPacket);
+                clonedPacket.Dispose();
             }
             else
             {
-                return handle.SendAsync(packet.Clone());
+                result = handle.SendAsync(clonedPacket, true);
             }
+            
+            return result;
         }
 
         /// <summary>
@@ -339,8 +344,22 @@ namespace System.Data.SqlClient.SNI
         private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress));
-            IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
-            string fullyQualifiedDomainName = hostEntry.HostName;
+            IPHostEntry hostEntry = null;
+            string fullyQualifiedDomainName;
+            try
+            {
+                hostEntry = Dns.GetHostEntry(hostNameOrAddress);
+            }
+            catch (SocketException)
+            {
+                // A SocketException can occur while resolving the hostname.
+                // We will fallback on using hostname from the connection string in the finally block
+            }
+            finally
+            {
+                // If the DNS lookup failed, then resort to using the user provided hostname to construct the SPN.
+                fullyQualifiedDomainName = hostEntry?.HostName ?? hostNameOrAddress;
+            }
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName;
             if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
@@ -426,8 +445,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error status</returns>
         public uint ReadAsync(SNIHandle handle, out SNIPacket packet)
         {
-            packet = new SNIPacket(null);
-
+            packet = null;
             return handle.ReceiveAsync(ref packet);
         }
 

@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -13,59 +15,274 @@ namespace System
     public static partial class MemoryExtensions
     {
         /// <summary>
-        /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.
-        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// Creates a new span over the portion of the target array.
         /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="T"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> AsBytes<T>(this Span<T> source)
-            where T : struct
-        {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+        public static Span<T> AsSpan<T>(this T[] array, int start) => Span<T>.Create(array, start);
 
-            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
-            return new Span<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
+        /// <summary>
+        /// Returns a value indicating whether the specified <paramref name="value"/> occurs within the <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static bool Contains(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+            => (IndexOf(span, value, comparisonType) >= 0);
+
+        /// <summary>
+        /// Determines whether this <paramref name="span"/> and the specified <paramref name="other"/> span have the same characters
+        /// when compared using the specified <paramref name="comparisonType"/> option.
+        /// <param name="span">The source span.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
+        /// </summary>
+        public static bool Equals(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.SequenceEqual<char>(other);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                if (span.Length != other.Length)
+                    return false;
+                return EqualsOrdinalIgnoreCase(span, other);
+            }
+
+            return span.ToString().Equals(other.ToString(), comparisonType);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool EqualsOrdinalIgnoreCase(ReadOnlySpan<char> span, ReadOnlySpan<char> other)
+        {
+            Debug.Assert(span.Length == other.Length);
+            if (other.Length == 0)  // span.Length == other.Length == 0
+                return true;
+            return (CompareToOrdinalIgnoreCase(span, other) == 0);
         }
 
         /// <summary>
-        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="T"/> to ReadOnlySpan of bytes.
-        /// That type may not contain pointers or references. This is checked at runtime in order to preserve type safety.
+        /// Compares the specified <paramref name="span"/> and <paramref name="other"/> using the specified <paramref name="comparisonType"/>,
+        /// and returns an integer that indicates their relative position in the sort order.
+        /// <param name="span">The source span.</param>
+        /// <param name="other">The value to compare with the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="other"/> are compared.</param>
         /// </summary>
-        /// <param name="source">The source slice, of type <typeparamref name="T"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="T"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
-            where T : struct
+        public static int CompareTo(this ReadOnlySpan<char> span, ReadOnlySpan<char> other, StringComparison comparisonType)
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.SequenceCompareTo(other);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return CompareToOrdinalIgnoreCase(span, other);
+            }
 
-            int newLength = checked(source.Length * Unsafe.SizeOf<T>());
-            return new ReadOnlySpan<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
+            return string.Compare(span.ToString(), other.ToString(), comparisonType);
+        }
+
+        // Borrowed from https://github.com/dotnet/coreclr/blob/master/src/mscorlib/shared/System/Globalization/CompareInfo.cs#L539
+        private static unsafe int CompareToOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+        {
+            int length = Math.Min(strA.Length, strB.Length);
+            int range = length;
+
+            fixed (char* ap = &MemoryMarshal.GetReference(strA))
+            fixed (char* bp = &MemoryMarshal.GetReference(strB))
+            {
+                char* a = ap;
+                char* b = bp;
+
+                while (length != 0 && (*a <= 0x7F) && (*b <= 0x7F))
+                {
+                    int charA = *a;
+                    int charB = *b;
+
+                    if (charA == charB)
+                    {
+                        a++; b++;
+                        length--;
+                        continue;
+                    }
+
+                    // uppercase both chars - notice that we need just one compare per char
+                    if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
+                    if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
+
+                    // Return the (case-insensitive) difference between them.
+                    if (charA != charB)
+                        return charA - charB;
+
+                    // Next char
+                    a++; b++;
+                    length--;
+                }
+
+                if (length == 0)
+                    return strA.Length - strB.Length;
+
+                range -= length;
+
+                return string.Compare(strA.Slice(range).ToString(), strB.Slice(range).ToString(), StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// Reports the zero-based index of the first occurrence of the specified <paramref name="value"/> in the current <paramref name="span"/>.
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The value to seek within the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        /// </summary>
+        public static int IndexOf(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.IndexOf<char>(value);
+            }
+
+            return span.ToString().IndexOf(value.ToString(), comparisonType);
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+#if !netstandard11
+            string resultString = sourceString.ToLower(culture);
+#else
+            string resultString = culture.TextInfo.ToLower(sourceString);
+#endif
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsSpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to lowercase,
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToLower(source, destination, CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase,
+        /// using the casing rules of the specified culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <param name="culture">An object that supplies culture-specific casing rules.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="culture"/> is null.
+        /// </exception>
+        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        {
+            if (culture == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
+
+            // Assuming that changing case does not affect length
+            if (destination.Length < source.Length)
+                return -1;
+
+            string sourceString = source.ToString();
+#if !netstandard11
+            string resultString = sourceString.ToUpper(culture);
+#else
+            string resultString = culture.TextInfo.ToUpper(sourceString);
+#endif
+            Debug.Assert(sourceString.Length == resultString.Length);
+            resultString.AsSpan().CopyTo(destination);
+            return source.Length;
+        }
+
+        /// <summary>
+        /// Copies the characters from the source span into the destination, converting each character to uppercase
+        /// using the casing rules of the invariant culture.
+        /// </summary>
+        /// <param name="source">The source span.</param>
+        /// <param name="destination">The destination span which contains the transformed characters.</param>
+        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.</remarks>
+        public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
+            => ToUpper(source, destination, CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the end of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool EndsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.EndsWith<char>(value);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return value.Length <= span.Length && EqualsOrdinalIgnoreCase(span.Slice(span.Length - value.Length), value);
+            }
+
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+            return sourceString.EndsWith(valueString, comparisonType);
+        }
+
+        /// <summary>
+        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
+        /// </summary>
+        /// <param name="span">The source span.</param>
+        /// <param name="value">The sequence to compare to the beginning of the source span.</param>
+        /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
+        public static bool StartsWith(this ReadOnlySpan<char> span, ReadOnlySpan<char> value, StringComparison comparisonType)
+        {
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return span.StartsWith<char>(value);
+            }
+            else if (comparisonType == StringComparison.OrdinalIgnoreCase)
+            {
+                return value.Length <= span.Length && EqualsOrdinalIgnoreCase(span.Slice(0, value.Length), value);
+            }
+
+            string sourceString = span.ToString();
+            string valueString = value.ToString();
+            return sourceString.StartsWith(valueString, comparisonType);
         }
 
         /// <summary>
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlySpan<char>(Unsafe.As<Pinnable<char>>(text), StringAdjustment, text.Length);
         }
@@ -75,15 +292,19 @@ namespace System
         /// </summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -96,15 +317,19 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsReadOnlySpan(this string text, int start, int length)
+        public static ReadOnlySpan<char> AsSpan(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -113,11 +338,11 @@ namespace System
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text)
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
+        public static ReadOnlyMemory<char> AsMemory(this string text)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+                return default;
 
             return new ReadOnlyMemory<char>(text, 0, text.Length);
         }
@@ -125,14 +350,18 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -143,100 +372,22 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is a null reference (Nothing in Visual Basic).</exception>
+        /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
-        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text, int start, int length)
+        public static ReadOnlyMemory<char> AsMemory(this string text, int start, int length)
         {
             if (text == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+            {
+                if (start != 0 || length != 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                return default;
+            }
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new ReadOnlyMemory<char>(text, start, length);
-        }
-
-        /// <summary>Attempts to get the underlying <see cref="string"/> from a <see cref="ReadOnlyMemory{T}"/>.</summary>
-        /// <param name="readOnlyMemory">The memory that may be wrapping a <see cref="string"/> object.</param>
-        /// <param name="text">The string.</param>
-        /// <param name="start">The starting location in <paramref name="text"/>.</param>
-        /// <param name="length">The number of items in <paramref name="text"/>.</param>
-        /// <returns></returns>
-        public static bool TryGetString(this ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length)
-        {
-            if (readOnlyMemory.GetObjectStartLength(out int offset, out int count) is string s)
-            {
-                text = s;
-                start = offset;
-                length = count;
-                return true;
-            }
-            else
-            {
-                text = null;
-                start = 0;
-                length = 0;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Casts a Span of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
-        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
-        /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source)
-            where TFrom : struct
-            where TTo : struct
-        {
-            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
-            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
-
-            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
-            return new Span<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
-        }
-
-        /// <summary>
-        /// Casts a ReadOnlySpan of one primitive type <typeparamref name="TFrom"/> to another primitive type <typeparamref name="TTo"/>.
-        /// These types may not contain pointers or references. This is checked at runtime in order to preserve type safety.
-        /// </summary>
-        /// <remarks>
-        /// Supported only for platforms that support misaligned memory access.
-        /// </remarks>
-        /// <param name="source">The source slice, of type <typeparamref name="TFrom"/>.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when <typeparamref name="TFrom"/> or <typeparamref name="TTo"/> contains pointers.
-        /// </exception>
-        /// <exception cref="System.OverflowException">
-        /// Thrown if the Length property of the new Span would exceed Int32.MaxValue.
-        /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source)
-            where TFrom : struct
-            where TTo : struct
-        {
-            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
-            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
-
-            int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
-            return new ReadOnlySpan<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
         }
 
         internal static readonly IntPtr StringAdjustment = MeasureStringAdjustment();

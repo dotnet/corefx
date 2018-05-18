@@ -173,7 +173,7 @@ namespace System.Net.Tests
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
                 Task<WebResponse> getResponse = request.GetResponseAsync();
-                await LoopbackServer.ReadRequestAndSendResponseAsync(server);
+                await server.AcceptConnectionSendResponseAndCloseAsync();
                 using (WebResponse response = await getResponse)
                 {
                     Assert.Throws<InvalidOperationException>(() => request.AutomaticDecompression = DecompressionMethods.Deflate);
@@ -184,6 +184,29 @@ namespace System.Net.Tests
                     Assert.Throws<InvalidOperationException>(() => request.SendChunked = true);
                     Assert.Throws<InvalidOperationException>(() => request.Proxy = WebRequest.DefaultWebProxy);
                     Assert.Throws<InvalidOperationException>(() => request.Headers = null);
+                }
+            });
+        }
+
+        [Fact]
+        public async Task HttpWebRequest_SetHostHeader_ContainsPortNumber()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                string host = uri.Host + ":" + uri.Port;
+                request.Host = host;
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                    Assert.Contains($"Host: {host}", headers);
+                });
+
+                using (var response = (HttpWebResponse) await getResponse)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
             });
         }
@@ -682,14 +705,7 @@ namespace System.Net.Tests
         public void ServicePoint_GetValue_ExpectedResult(Uri remoteServer)
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.NotNull(request.ServicePoint);
-            }
-            else
-            {
-                Assert.Throws<PlatformNotSupportedException>(() => request.ServicePoint);
-            }
+            Assert.NotNull(request.ServicePoint);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -752,7 +768,7 @@ namespace System.Net.Tests
                 request.ProtocolVersion = requestVersion;
 
                 Task<WebResponse> getResponse = request.GetResponseAsync();
-                Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server);
+                Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
 
                 using (HttpWebResponse response = (HttpWebResponse) await getResponse)
                 {
@@ -897,6 +913,7 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "no exception thrown on mono")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "no exception thrown on netfx")]
         public void BeginGetRequestStream_CreatePostRequestThenCallTwice_ThrowsInvalidOperationException(Uri remoteServer)
         {
@@ -1239,6 +1256,7 @@ namespace System.Net.Tests
         }
 
         [ActiveIssue(19083)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "dotnet/corefx #19083")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #19083")]
         [Fact]
         public async Task Abort_BeginGetRequestStreamThenAbort_EndGetRequestStreamThrowsWebException()
@@ -1261,6 +1279,7 @@ namespace System.Net.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "ResponseCallback not called after Abort on mono")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ResponseCallback not called after Abort on netfx")]
         [Fact]
         public async Task Abort_BeginGetResponseThenAbort_ResponseCallbackCalledBeforeAbortReturns()

@@ -7,9 +7,9 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed class ExprMemberGroup : ExprWithType, IExprWithObject
+    internal sealed class ExprMemberGroup : ExprWithType
     {
-        public ExprMemberGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol pMPS, Expr optionalObject, CMemberLookupResults memberLookupResults)
+        public ExprMemberGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, Expr optionalObject, CMemberLookupResults memberLookupResults)
             : base(ExpressionKind.MemberGroup, MethodGroupType.Instance)
         {
             Debug.Assert(
@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                            | EXPRFLAG.EXF_MASK_ANY)) == 0);
             Flags = flags;
             Name = name;
-            TypeArgs = typeArgs ?? BSYMMGR.EmptyTypeArray();
+            TypeArgs = typeArgs ?? TypeArray.Empty;
             SymKind = symKind;
             ParentType = parentType;
             OptionalObject = optionalObject;
@@ -38,11 +38,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // After binding the group to arguments, this is set to the meth sym that is bound.
         // The object expression. NULL for a static invocation.
         public Expr OptionalObject { get; set; }
-
-        // The lhs that was bound to resolve this invocation. Set for static invocations only.
-        // We don't use the regular defines because we don't want to visit this guy in regular visitors,
-        // just in the visitors that create the node maps for LAF and refactoring.
-        public Expr OptionalLHS { get; set; }
 
         // The owning call of this member group. NEVER visit this thing.
         // The list of the methods that the memgroup is binding to. This list is formulated after binding

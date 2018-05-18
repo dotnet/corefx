@@ -182,7 +182,7 @@ namespace System.Diagnostics.Tracing
             //
 
             //
-            // check if the object has been allready disposed
+            // check if the object has been already disposed
             //
             if (m_disposed) return;
 
@@ -259,12 +259,6 @@ namespace System.Diagnostics.Tracing
                     m_anyKeywordMask = anyKeyword;
                     m_allKeywordMask = allKeyword;
 
-                    // ES_SESSION_INFO is a marker for additional places we #ifdeffed out to remove
-                    // references to EnumerateTraceGuidsEx.  This symbol is actually not used because
-                    // today we use FEATURE_ACTIVITYSAMPLING to determine if this code is there or not.
-                    // However we put it in the #if so that we don't lose the fact that this feature
-                    // switch is at least partially independent of FEATURE_ACTIVITYSAMPLING
-
                     List<Tuple<SessionInfo, bool>> sessionsChanged = GetSessions();
                     foreach (var session in sessionsChanged)
                     {
@@ -337,7 +331,7 @@ namespace System.Diagnostics.Tracing
         protected EventKeywords MatchAnyKeyword { get { return (EventKeywords)m_anyKeywordMask; } set { m_anyKeywordMask = unchecked((long)value); } }
         protected EventKeywords MatchAllKeyword { get { return (EventKeywords)m_allKeywordMask; } set { m_allKeywordMask = unchecked((long)value); } }
 
-        static private int FindNull(byte[] buffer, int idx)
+        private static int FindNull(byte[] buffer, int idx)
         {
             while (idx < buffer.Length && buffer[idx] != 0)
                 idx++;
@@ -567,7 +561,7 @@ namespace System.Diagnostics.Tracing
             if (filterData == null)
             {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN && PLATFORM_WINDOWS)
-                string regKey = @"\Microsoft\Windows\CurrentVersion\Winevt\Publishers\{" + m_providerName + "}";
+                string regKey = @"\Microsoft\Windows\CurrentVersion\Winevt\Publishers\{" + m_providerId + "}";
                 if (System.Runtime.InteropServices.Marshal.SizeOf(typeof(IntPtr)) == 8)
                     regKey = @"HKEY_LOCAL_MACHINE\Software" + @"\Wow6432Node" + regKey;
                 else
@@ -964,6 +958,8 @@ namespace System.Diagnostics.Tracing
                     List<int> refObjPosition = new List<int>(s_etwAPIMaxRefObjCount);
                     List<object> dataRefObj = new List<object>(s_etwAPIMaxRefObjCount);
                     EventData* userData = stackalloc EventData[2 * argCount];
+                    for (int i = 0; i < 2 * argCount; i++)
+                        userData[i] = default(EventData);
                     EventData* userDataPtr = (EventData*)userData;
                     byte* dataBuffer = stackalloc byte[s_basicTypeAllocationBufferSize * 2 * argCount]; // Assume 16 chars for non-string argument
                     byte* currentBuffer = dataBuffer;
@@ -1137,7 +1133,7 @@ namespace System.Diagnostics.Tracing
         // <CallsSuppressUnmanagedCode Name="UnsafeNativeMethods.ManifestEtw.EventWrite(System.Int64,EventDescriptor&,System.UInt32,System.Void*):System.UInt32" />
         // </SecurityKernel>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        internal unsafe protected bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
+        internal protected unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
         {
             if (childActivityID != null)
             {
@@ -1161,6 +1157,7 @@ namespace System.Diagnostics.Tracing
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
         internal unsafe bool WriteEventRaw(
             ref EventDescriptor eventDescriptor,
+            IntPtr eventHandle,
             Guid* activityID,
             Guid* relatedActivityID,
             int dataCount,
@@ -1171,7 +1168,7 @@ namespace System.Diagnostics.Tracing
             status = m_eventProvider.EventWriteTransferWrapper(
                 m_regHandle,
                 ref eventDescriptor,
-                IntPtr.Zero,
+                eventHandle,
                 activityID,
                 relatedActivityID,
                 dataCount,

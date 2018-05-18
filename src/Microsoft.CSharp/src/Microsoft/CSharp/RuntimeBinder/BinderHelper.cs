@@ -10,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Numerics.Hashing;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -488,10 +489,65 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return SpecialNames.CLR_False;
 
                 case ExpressionType.Increment:
-                    return SpecialNames.CLR_PreIncrement;
+                    return SpecialNames.CLR_Increment;
                 case ExpressionType.Decrement:
-                    return SpecialNames.CLR_PreDecrement;
+                    return SpecialNames.CLR_Decrement;
             }
+        }
+
+        internal static int AddArgHashes(int hash, Type[] typeArguments, CSharpArgumentInfo[] argInfos)
+        {
+            foreach (var typeArg in typeArguments)
+            {
+                hash = HashHelpers.Combine(hash, typeArg.GetHashCode());
+            }
+
+            return AddArgHashes(hash, argInfos);
+        }
+
+        internal static int AddArgHashes(int hash, CSharpArgumentInfo[] argInfos)
+        {
+            foreach (var argInfo in argInfos)
+            {
+                hash = HashHelpers.Combine(hash, (int)argInfo.Flags);
+                var argName = argInfo.Name;
+                if (!string.IsNullOrEmpty(argName))
+                {
+                    hash = HashHelpers.Combine(hash, argName.GetHashCode());
+                }
+            }
+
+            return hash;
+        }
+
+        internal static bool CompareArgInfos(Type[] typeArgs, Type[] otherTypeArgs, CSharpArgumentInfo[] argInfos, CSharpArgumentInfo[] otherArgInfos)
+        {
+            for (int i = 0; i < typeArgs.Length; i++)
+            {
+                if (typeArgs[i] != otherTypeArgs[i])
+                {
+                    return false;
+                }
+            }
+
+            return CompareArgInfos(argInfos, otherArgInfos);
+        }
+
+        internal static bool CompareArgInfos(CSharpArgumentInfo[] argInfos, CSharpArgumentInfo[] otherArgInfos)
+        {
+            for (int i = 0; i < argInfos.Length; i++)
+            {
+                var argInfo = argInfos[i];
+                var otherArgInfo = otherArgInfos[i];
+
+                if (argInfo.Flags != otherArgInfo.Flags ||
+                    argInfo.Name != otherArgInfo.Name)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

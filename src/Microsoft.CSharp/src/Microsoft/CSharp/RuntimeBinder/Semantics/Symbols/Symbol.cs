@@ -68,6 +68,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public Symbol nextChild;     // next child of this parent
         public Symbol nextSameName;  // next child of this parent with same name.
 
+        public Symbol LookupNext(symbmask_t kindmask)
+        {
+            // Keep traversing the list of symbols with same name and parent.
+            for (Symbol sym = nextSameName; sym != null; sym = sym.nextSameName)
+            {
+                if ((kindmask & sym.mask()) != 0)
+                {
+                    return sym;
+                }
+            }
+
+            return null;
+        }
 
         public ACCESS GetAccess()
         {
@@ -149,10 +162,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_TypeParameterSymbol:
                     return ((AggregateSymbol)parent).AssociatedAssembly;
 
-                case SYMKIND.SK_AggregateDeclaration:
-                    return ((AggregateDeclaration)this).GetAssembly();
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).AssociatedAssembly;
+
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "GetAssemblyID called on bad sym kind");
@@ -174,8 +186,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case SYMKIND.SK_TypeParameterSymbol:
                     return ((AggregateSymbol)parent).InternalsVisibleTo(assembly);
 
-                case SYMKIND.SK_AggregateDeclaration:
-                    return ((AggregateDeclaration)this).Agg().InternalsVisibleTo(assembly);
                 case SYMKIND.SK_AggregateSymbol:
                     return ((AggregateSymbol)this).InternalsVisibleTo(assembly);
                 default:
@@ -189,28 +199,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Assembly assem = GetAssembly();
             return assem == sym.GetAssembly() || sym.InternalsVisibleTo(assem);
-        }
-
-        /* Returns if the symbol is virtual. */
-        public bool IsVirtual()
-        {
-            switch (_kind)
-            {
-                case SYMKIND.SK_MethodSymbol:
-                    return ((MethodSymbol)this).isVirtual;
-
-                case SYMKIND.SK_EventSymbol:
-                    MethodSymbol methAdd = ((EventSymbol)this).methAdd;
-                    return methAdd != null && methAdd.isVirtual;
-
-                case SYMKIND.SK_PropertySymbol:
-                    PropertySymbol prop = ((PropertySymbol)this);
-                    MethodSymbol meth = prop.GetterMethod ?? prop.SetterMethod;
-                    return meth != null && meth.isVirtual;
-
-                default:
-                    return false;
-            }
         }
 
         public bool IsOverride()

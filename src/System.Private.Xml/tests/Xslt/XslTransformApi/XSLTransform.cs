@@ -49,7 +49,7 @@ namespace System.Xml.Tests
     public class XsltApiTestCaseBase : FileCleanupTestBase
     {
         private const string XmlResolverDocumentName = "xmlResolver_document_function.xml";
-        private static readonly string s_temporaryResolverDocumentFullName = Path.Combine(Path.GetTempPath(), "XslTransformApi", XmlResolverDocumentName);
+        private static readonly string s_temporaryResolverDocumentFullName = Path.Combine(Path.GetTempPath(), typeof(XsltApiTestCaseBase) + "_" + Path.GetRandomFileName());
         private static readonly object s_temporaryResolverDocumentLock = new object();
 
         // Generic data for all derived test cases
@@ -57,7 +57,7 @@ namespace System.Xml.Tests
 
         public String szDefaultNS = "urn:my-object";
         public String szEmpty = "";
-        public String szInvalid = "*?%(){}[]&!@#$";
+        public String szInvalid = "*?%()\0{}[]&!@#$";
         public String szLongString = "ThisIsAVeryLongStringToBeStoredAsAVariableToDetermineHowLargeThisBufferForAVariableNameCanBeAndStillFunctionAsExpected";
         public String szLongNS = "http://www.miocrosoft.com/this/is/a/very/long/namespace/uri/to/do/the/api/testing/for/xslt/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/0123456789/";
         public String[] szWhiteSpace = { "  ", "\n", "\t", "\r", "\t\n  \r\t" };

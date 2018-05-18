@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
 using static System.Buffers.Binary.BinaryPrimitives;
+using System.Text;
+using System.Reflection;
 
 namespace System
 {
@@ -141,7 +143,7 @@ namespace System
             // This space intentionally left blank.
         }
 
-        public static void Validate<T>(this Memory<T> memory, params T[] expected) where T : struct, IEquatable<T>
+        public static void Validate<T>(this Memory<T> memory, params T[] expected) where T : IEquatable<T>
         {
             Assert.True(memory.Span.SequenceEqual(expected));
         }
@@ -157,7 +159,7 @@ namespace System
             }
         }
 
-        public static void Validate<T>(this ReadOnlyMemory<T> memory, params T[] expected) where T : struct, IEquatable<T>
+        public static void Validate<T>(this ReadOnlyMemory<T> memory, params T[] expected) where T : IEquatable<T>
         {
             Assert.True(memory.Span.SequenceEqual(expected));
         }
@@ -175,7 +177,7 @@ namespace System
 
         public static void Validate<T>(Span<byte> span, T value) where T : struct
         {
-            T read = ReadMachineEndian<T>(span);
+            T read = MemoryMarshal.Read<T>(span);
             Assert.Equal(value, read);
             span.Clear();
         }
@@ -238,6 +240,17 @@ namespace System
             return spanLE;
         }
 
+        public static string BuildString(int length, int seed)
+        {
+            Random rnd = new Random(seed);
+            var builder = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                builder.Append((char)rnd.Next(65, 91));
+            }
+            return builder.ToString();
+        }
+
         [StructLayout(LayoutKind.Explicit)]
         public struct TestStructExplicit
         {
@@ -284,6 +297,20 @@ namespace System
             public int I;
             public string S;
         }
+
+#pragma warning disable 0649 //Field 'SpanTests.InnerStruct.J' is never assigned to, and will always have its default value 0
+        internal struct StructWithReferences
+        {
+            public int I;
+            public InnerStruct Inner;
+        }
+
+        internal struct InnerStruct
+        {
+            public int J;
+            public object O;
+        }
+#pragma warning restore 0649 //Field 'SpanTests.InnerStruct.J' is never assigned to, and will always have its default value 0
 
         public enum TestEnum
         {
@@ -366,6 +393,22 @@ namespace System
                 }
             }
         }
+
+        /// <summary>Creates a <see cref="Memory{T}"/> with the specified values in its backing field.</summary>
+        public static Memory<T> DangerousCreateMemory<T>(object obj, int offset, int length)
+        {
+            Memory<T> mem = default;
+            object boxedMemory = mem;
+
+            typeof(Memory<T>).GetField("_object", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(boxedMemory, obj);
+            typeof(Memory<T>).GetField("_index", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(boxedMemory, offset);
+            typeof(Memory<T>).GetField("_length", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(boxedMemory, length);
+
+            return (Memory<T>)boxedMemory;
+        }
+
+        /// <summary>Creates a <see cref="ReadOnlyMemory{T}"/> with the specified values in its backing field.</summary>
+        public static ReadOnlyMemory<T> DangerousCreateReadOnlyMemory<T>(object obj, int offset, int length) =>
+            DangerousCreateMemory<T>(obj, offset, length);
     }
 }
-

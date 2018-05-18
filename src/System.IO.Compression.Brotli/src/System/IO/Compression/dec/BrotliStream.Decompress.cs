@@ -18,7 +18,7 @@ namespace System.IO.Compression
             return Read(new Span<byte>(buffer, offset, count));
         }
 
-        public override int Read(Span<byte> destination)
+        public override int Read(Span<byte> buffer)
         {
             if (_mode != CompressionMode.Decompress)
                 throw new InvalidOperationException(SR.BrotliStream_Compress_UnsupportedOperation);
@@ -27,7 +27,7 @@ namespace System.IO.Compression
             Span<byte> source = Span<byte>.Empty;
             OperationStatus lastResult = OperationStatus.DestinationTooSmall;
             // We want to continue calling Decompress until we're either out of space for output or until Decompress indicates it is finished.
-            while (destination.Length > 0 && lastResult != OperationStatus.Done)
+            while (buffer.Length > 0 && lastResult != OperationStatus.Done)
             {
                 int bytesConsumed = 0;
                 int bytesWritten = 0;
@@ -53,7 +53,7 @@ namespace System.IO.Compression
                     source = new Span<byte>(_buffer, 0, readBytes);
                 }
 
-                lastResult = _decoder.Decompress(source, destination, out bytesConsumed, out bytesWritten);
+                lastResult = _decoder.Decompress(source, buffer, out bytesConsumed, out bytesWritten);
                 if (lastResult == OperationStatus.InvalidData)
                     throw new InvalidOperationException(SR.BrotliStream_Decompress_InvalidData);
                 if (bytesConsumed > 0)
@@ -61,7 +61,7 @@ namespace System.IO.Compression
                 if (bytesWritten > 0)
                 {
                     totalWritten += bytesWritten;
-                    destination = destination.Slice(bytesWritten);
+                    buffer = buffer.Slice(bytesWritten);
                 }
             }
 
@@ -74,13 +74,13 @@ namespace System.IO.Compression
         public override int EndRead(IAsyncResult asyncResult) =>
             TaskToApm.End<int>(asyncResult);
 
-        public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            ValidateParameters(array, offset, count);
-            return ReadAsync(new Memory<byte>(array, offset, count), cancellationToken).AsTask();
+            ValidateParameters(buffer, offset, count);
+            return ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_mode != CompressionMode.Decompress)
                 throw new InvalidOperationException(SR.BrotliStream_Compress_UnsupportedOperation);
@@ -91,10 +91,10 @@ namespace System.IO.Compression
             {
                 return new ValueTask<int>(Task.FromCanceled<int>(cancellationToken));
             }
-             return FinishReadAsyncMemory(destination, cancellationToken);
+             return FinishReadAsyncMemory(buffer, cancellationToken);
         }
 
-        private async ValueTask<int> FinishReadAsyncMemory(Memory<byte> destination, CancellationToken cancellationToken)
+        private async ValueTask<int> FinishReadAsyncMemory(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             AsyncOperationStarting();
             try
@@ -103,7 +103,7 @@ namespace System.IO.Compression
                 Memory<byte> source = Memory<byte>.Empty;
                 OperationStatus lastResult = OperationStatus.DestinationTooSmall;
                 // We want to continue calling Decompress until we're either out of space for output or until Decompress indicates it is finished.
-                while (destination.Length > 0 && lastResult != OperationStatus.Done)
+                while (buffer.Length > 0 && lastResult != OperationStatus.Done)
                 {
 
                     int bytesConsumed = 0;
@@ -113,7 +113,7 @@ namespace System.IO.Compression
                     {
                         int readBytes = 0;
                         int iter = 0;
-                        while (readBytes < _buffer.Length && ((iter = await _stream.ReadAsync(_buffer, readBytes, _buffer.Length - readBytes, cancellationToken).ConfigureAwait(false)) > 0))
+                        while (readBytes < _buffer.Length && ((iter = await _stream.ReadAsync(new Memory<byte>(_buffer, readBytes, _buffer.Length - readBytes), cancellationToken).ConfigureAwait(false)) > 0))
                         {
                             readBytes += iter;
                             if (readBytes > _buffer.Length)
@@ -131,7 +131,7 @@ namespace System.IO.Compression
                     }
 
                     cancellationToken.ThrowIfCancellationRequested();
-                    lastResult = _decoder.Decompress(source, destination, out bytesConsumed, out bytesWritten);
+                    lastResult = _decoder.Decompress(source, buffer, out bytesConsumed, out bytesWritten);
                     if (lastResult == OperationStatus.InvalidData)
                         throw new InvalidOperationException(SR.BrotliStream_Decompress_InvalidData);
                     if (bytesConsumed > 0)
@@ -139,7 +139,7 @@ namespace System.IO.Compression
                     if (bytesWritten > 0)
                     {
                         totalWritten += bytesWritten;
-                        destination = destination.Slice(bytesWritten);
+                        buffer = buffer.Slice(bytesWritten);
                     }
                 }
 

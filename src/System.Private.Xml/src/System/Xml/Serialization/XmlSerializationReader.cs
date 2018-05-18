@@ -111,7 +111,7 @@ namespace System.Xml.Serialization
         private string _guidID;
         private string _timeSpanID;
 
-        private static bool s_checkDeserializeAdvances;
+        private static bool s_checkDeserializeAdvances=false;
 
         protected abstract void InitIDs();
 
@@ -1106,7 +1106,7 @@ namespace System.Xml.Serialization
             if (arraySize != null && arraySize.Length > 0)
                 dimensions = arraySize.Split(null);
             else
-                dimensions = new string[0];
+                dimensions = Array.Empty<string>();
 
             soapArrayInfo.dimensions = 0;
             soapArrayInfo.length = -1;
@@ -1427,40 +1427,6 @@ namespace System.Xml.Serialization
             Array b = Array.CreateInstance(elementType, length);
             Array.Copy(a, b, length);
             return b;
-        }
-        // This is copied from Core's XmlReader.ReadString, as it is not exposed in the Contract.
-        protected virtual string ReadString()
-        {
-            if (Reader.ReadState != ReadState.Interactive)
-            {
-                return string.Empty;
-            }
-            Reader.MoveToElement();
-            if (Reader.NodeType == XmlNodeType.Element)
-            {
-                if (Reader.IsEmptyElement)
-                {
-                    return string.Empty;
-                }
-                else if (!Reader.Read())
-                {
-                    throw new InvalidOperationException(SR.Xml_InvalidOperation);
-                }
-                if (Reader.NodeType == XmlNodeType.EndElement)
-                {
-                    return string.Empty;
-                }
-            }
-            string result = string.Empty;
-            while (IsTextualNode(Reader.NodeType))
-            {
-                result += Reader.Value;
-                if (!Reader.Read())
-                {
-                    break;
-                }
-            }
-            return result;
         }
 
         // 0x6018
@@ -2411,7 +2377,7 @@ namespace System.Xml.Serialization
 
         internal void GenerateEnd()
         {
-            GenerateEnd(new string[0], new XmlMapping[0], new Type[0]);
+            GenerateEnd(Array.Empty<string>(), Array.Empty<XmlMapping>(), Array.Empty<Type>());
         }
         internal void GenerateEnd(string[] methods, XmlMapping[] xmlMappings, Type[] types)
         {
@@ -3573,7 +3539,7 @@ namespace System.Xml.Serialization
                 Writer.Write(", ");
                 WriteQuotedCSharpString(structMapping.Namespace);
                 Writer.WriteLine(");");
-                members = new Member[0];
+                members = Array.Empty<Member>();
                 anyFixups = false;
                 fixupMethodName = null;
             }

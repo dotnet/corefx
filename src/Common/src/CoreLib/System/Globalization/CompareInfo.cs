@@ -16,6 +16,8 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Buffers;
+using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
@@ -94,7 +96,7 @@ namespace System.Globalization
         **   culture    the ID of the culture
         **   assembly   the assembly which contains the sorting table.
         **Exceptions:
-        **  ArugmentNullException when the assembly is null
+        **  ArgumentNullException when the assembly is null
         **  ArgumentException if culture is invalid.
         ============================================================================*/
         // Assembly constructor should be deprecated, we don't act on the assembly information any more
@@ -121,7 +123,7 @@ namespace System.Globalization
         **   name      the name of the culture
         **   assembly  the assembly which contains the sorting table.
         **Exceptions:
-        **  ArugmentNullException when the assembly is null
+        **  ArgumentNullException when the assembly is null
         **  ArgumentException if name is invalid.
         ============================================================================*/
         // Assembly constructor should be deprecated, we don't act on the assembly information any more
@@ -298,7 +300,7 @@ namespace System.Globalization
             return (Compare(string1, string2, CompareOptions.None));
         }
 
-        public unsafe virtual int Compare(string string1, string string2, CompareOptions options)
+        public virtual int Compare(string string1, string string2, CompareOptions options)
         {
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
@@ -339,22 +341,22 @@ namespace System.Globalization
             if (_invariantMode)
             {
                 if ((options & CompareOptions.IgnoreCase) != 0)
-                    return CompareOrdinalIgnoreCase(string1, 0, string1.Length, string2, 0, string2.Length);
+                    return CompareOrdinalIgnoreCase(string1, string2);
 
                 return String.CompareOrdinal(string1, string2);
             }
 
-            return CompareString(string1.AsReadOnlySpan(), string2.AsReadOnlySpan(), options);
+            return CompareString(string1.AsSpan(), string2.AsSpan(), options);
         }
 
         // TODO https://github.com/dotnet/coreclr/issues/13827:
         // This method shouldn't be necessary, as we should be able to just use the overload
         // that takes two spans.  But due to this issue, that's adding significant overhead.
-        internal unsafe int Compare(ReadOnlySpan<char> string1, string string2, CompareOptions options)
+        internal int Compare(ReadOnlySpan<char> string1, string string2, CompareOptions options)
         {
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
-                return CompareOrdinalIgnoreCase(string1, string2.AsReadOnlySpan());
+                return CompareOrdinalIgnoreCase(string1, string2.AsSpan());
             }
 
             // Verify the options before we do any real comparison.
@@ -365,7 +367,7 @@ namespace System.Globalization
                     throw new ArgumentException(SR.Argument_CompareOptionOrdinal, nameof(options));
                 }
 
-                return string.CompareOrdinal(string1, string2.AsReadOnlySpan());
+                return string.CompareOrdinal(string1, string2.AsSpan());
             }
 
             if ((options & ValidCompareMaskOffFlags) != 0)
@@ -382,45 +384,33 @@ namespace System.Globalization
             if (_invariantMode)
             {
                 return (options & CompareOptions.IgnoreCase) != 0 ?
-                    CompareOrdinalIgnoreCase(string1, string2.AsReadOnlySpan()) :
-                    string.CompareOrdinal(string1, string2.AsReadOnlySpan());
+                    CompareOrdinalIgnoreCase(string1, string2.AsSpan()) :
+                    string.CompareOrdinal(string1, string2.AsSpan());
             }
 
             return CompareString(string1, string2, options);
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/21395: Expose this publicly?
-        internal unsafe virtual int Compare(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2, CompareOptions options)
+        internal int CompareOptionNone(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
         {
-            if (options == CompareOptions.OrdinalIgnoreCase)
-            {
-                return CompareOrdinalIgnoreCase(string1, string2);
-            }
+            // Check for empty span or span from a null string
+            if (string1.Length == 0 || string2.Length == 0)
+                return string1.Length - string2.Length;
 
-            // Verify the options before we do any real comparison.
-            if ((options & CompareOptions.Ordinal) != 0)
-            {
-                if (options != CompareOptions.Ordinal)
-                {
-                    throw new ArgumentException(SR.Argument_CompareOptionOrdinal, nameof(options));
-                }
+            return _invariantMode ?
+                string.CompareOrdinal(string1, string2) :
+                CompareString(string1, string2, CompareOptions.None);
+        }
 
-                return string.CompareOrdinal(string1, string2);
-            }
+        internal int CompareOptionIgnoreCase(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
+        {
+            // Check for empty span or span from a null string
+            if (string1.Length == 0 || string2.Length == 0)
+                return string1.Length - string2.Length;
 
-            if ((options & ValidCompareMaskOffFlags) != 0)
-            {
-                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
-            }
-
-            if (_invariantMode)
-            {
-                return (options & CompareOptions.IgnoreCase) != 0 ?
-                    CompareOrdinalIgnoreCase(string1, string2) :
-                    string.CompareOrdinal(string1, string2);
-            }
-
-            return CompareString(string1, string2, options);
+            return _invariantMode ?
+                CompareOrdinalIgnoreCase(string1, string2) :
+                CompareString(string1, string2, CompareOptions.IgnoreCase);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -436,7 +426,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
 
 
-        public unsafe virtual int Compare(string string1, int offset1, int length1, string string2, int offset2, int length2)
+        public virtual int Compare(string string1, int offset1, int length1, string string2, int offset2, int length2)
         {
             return Compare(string1, offset1, length1, string2, offset2, length2, 0);
         }
@@ -511,35 +501,23 @@ namespace System.Globalization
                 return (1);
             }
 
+            ReadOnlySpan<char> span1 = string1.AsSpan(offset1, length1);
+            ReadOnlySpan<char> span2 = string2.AsSpan(offset2, length2);
+
             if (options == CompareOptions.Ordinal)
             {
-                return CompareOrdinal(string1, offset1, length1,
-                                      string2, offset2, length2);
+                return string.CompareOrdinal(span1, span2);
             }
 
             if (_invariantMode)
             {
                 if ((options & CompareOptions.IgnoreCase) != 0)
-                    return CompareOrdinalIgnoreCase(string1, offset1, length1, string2, offset2, length2);
+                    return CompareOrdinalIgnoreCase(span1, span2);
 
-                return CompareOrdinal(string1, offset1, length1, string2, offset2, length2);
+                return string.CompareOrdinal(span1, span2);
             }
 
-            return CompareString(
-                string1.AsReadOnlySpan().Slice(offset1, length1),
-                string2.AsReadOnlySpan().Slice(offset2, length2),
-                options);
-        }
-
-        private static int CompareOrdinal(string string1, int offset1, int length1, string string2, int offset2, int length2)
-        {
-            int result = String.CompareOrdinal(string1, offset1, string2, offset2,
-                                                       (length1 < length2 ? length1 : length2));
-            if ((length1 != length2) && result == 0)
-            {
-                return (length1 > length2 ? 1 : -1);
-            }
-            return (result);
+            return CompareString(span1, span2, options);
         }
 
         //
@@ -547,61 +525,107 @@ namespace System.Globalization
         // it assumes the strings are Ascii string till we hit non Ascii character in strA or strB and then we continue the comparison by
         // calling the OS.
         //
-        internal static unsafe int CompareOrdinalIgnoreCase(string strA, int indexA, int lengthA, string strB, int indexB, int lengthB)
+        internal static int CompareOrdinalIgnoreCase(string strA, int indexA, int lengthA, string strB, int indexB, int lengthB)
         {
             Debug.Assert(indexA + lengthA <= strA.Length);
             Debug.Assert(indexB + lengthB <= strB.Length);
-            return CompareOrdinalIgnoreCase(strA.AsReadOnlySpan().Slice(indexA, lengthA), strB.AsReadOnlySpan().Slice(indexB, lengthB));
+            return CompareOrdinalIgnoreCase(
+                ref Unsafe.Add(ref strA.GetRawStringData(), indexA),
+                lengthA,
+                ref Unsafe.Add(ref strB.GetRawStringData(), indexB),
+                lengthB);
         }
 
-        internal static unsafe int CompareOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+        internal static int CompareOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
         {
-            int length = Math.Min(strA.Length, strB.Length);
+            return CompareOrdinalIgnoreCase(ref MemoryMarshal.GetReference(strA), strA.Length, ref MemoryMarshal.GetReference(strB), strB.Length);
+        }
+
+        internal static int CompareOrdinalIgnoreCase(string strA, string strB)
+        {
+            return CompareOrdinalIgnoreCase(ref strA.GetRawStringData(), strA.Length, ref strB.GetRawStringData(), strB.Length);
+        }
+
+        internal static int CompareOrdinalIgnoreCase(ref char strA, int lengthA, ref char strB, int lengthB)
+        {
+            int length = Math.Min(lengthA, lengthB);
             int range = length;
 
-            fixed (char* ap = &MemoryMarshal.GetReference(strA))
-            fixed (char* bp = &MemoryMarshal.GetReference(strB))
+            ref char charA = ref strA;
+            ref char charB = ref strB;
+
+            // in InvariantMode we support all range and not only the ascii characters.
+            char maxChar = (GlobalizationMode.Invariant ? (char)0xFFFF : (char)0x7F);
+
+            while (length != 0 && charA <= maxChar && charB <= maxChar)
             {
-                char* a = ap;
-                char* b = bp;
-
-                // in InvariantMode we support all range and not only the ascii characters.
-                char maxChar = (char) (GlobalizationMode.Invariant ? 0xFFFF : 0x80);
-
-                while (length != 0 && (*a <= maxChar) && (*b <= maxChar))
+                // Ordinal equals or lowercase equals if the result ends up in the a-z range 
+                if (charA == charB ||
+                    ((charA | 0x20) == (charB | 0x20) &&
+                        (uint)((charA | 0x20) - 'a') <= (uint)('z' - 'a')))
                 {
-                    int charA = *a;
-                    int charB = *b;
+                    length--;
+                    charA = ref Unsafe.Add(ref charA, 1);
+                    charB = ref Unsafe.Add(ref charB, 1);
+                }
+                else
+                {
+                    int currentA = charA;
+                    int currentB = charB;
 
-                    if (charA == charB)
-                    {
-                        a++; b++;
-                        length--;
-                        continue;
-                    }
-
-                    // uppercase both chars - notice that we need just one compare per char
-                    if ((uint)(charA - 'a') <= 'z' - 'a') charA -= 0x20;
-                    if ((uint)(charB - 'a') <= 'z' - 'a') charB -= 0x20;
+                    // Uppercase both chars if needed
+                    if ((uint)(charA - 'a') <= 'z' - 'a')
+                        currentA -= 0x20;
+                    if ((uint)(charB - 'a') <= 'z' - 'a')
+                        currentB -= 0x20;
 
                     // Return the (case-insensitive) difference between them.
-                    if (charA != charB)
-                        return charA - charB;
-
-                    // Next char
-                    a++; b++;
-                    length--;
+                    return currentA - currentB;
                 }
-
-                if (length == 0)
-                    return strA.Length - strB.Length;
-
-                Debug.Assert(!GlobalizationMode.Invariant);
-
-                range -= length;
-
-                return CompareStringOrdinalIgnoreCase(a, strA.Length - range, b, strB.Length - range);
             }
+
+            if (length == 0)
+                return lengthA - lengthB;
+
+            Debug.Assert(!GlobalizationMode.Invariant);
+
+            range -= length;
+
+            return CompareStringOrdinalIgnoreCase(ref charA, lengthA - range, ref charB, lengthB - range);
+        }
+
+
+        internal static bool EqualsOrdinalIgnoreCase(ref char strA, ref char strB, int length)
+        {
+            ref char charA = ref strA;
+            ref char charB = ref strB;
+
+            // in InvariantMode we support all range and not only the ascii characters.
+            char maxChar = (GlobalizationMode.Invariant ? (char)0xFFFF : (char)0x7F);
+
+            while (length != 0 && charA <= maxChar && charB <= maxChar)
+            {
+                // Ordinal equals or lowercase equals if the result ends up in the a-z range 
+                if (charA == charB ||
+                    ((charA | 0x20) == (charB | 0x20) &&
+                        (uint)((charA | 0x20) - 'a') <= (uint)('z' - 'a')))
+                {
+                    length--;
+                    charA = ref Unsafe.Add(ref charA, 1);
+                    charB = ref Unsafe.Add(ref charB, 1);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (length == 0)
+                return true;
+
+            Debug.Assert(!GlobalizationMode.Invariant);
+
+            return CompareStringOrdinalIgnoreCase(ref charA, length, ref charB, length) == 0;
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -649,6 +673,17 @@ namespace System.Globalization
             {
                 return source.StartsWith(prefix, (options & CompareOptions.IgnoreCase) != 0 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
+
+            return StartsWith(source, prefix, options);
+        }
+
+        internal bool IsPrefix(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
+        {
+            Debug.Assert(prefix.Length != 0);
+            Debug.Assert(source.Length != 0);
+            Debug.Assert((options & ValidIndexMaskOffFlags) == 0);
+            Debug.Assert(!_invariantMode);
+            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             return StartsWith(source, prefix, options);
         }
@@ -703,6 +738,17 @@ namespace System.Globalization
             {
                 return source.EndsWith(suffix, (options & CompareOptions.IgnoreCase) != 0 ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
+
+            return EndsWith(source, suffix, options);
+        }
+
+        internal bool IsSuffix(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
+        {
+            Debug.Assert(suffix.Length != 0);
+            Debug.Assert(source.Length != 0);
+            Debug.Assert((options & ValidIndexMaskOffFlags) == 0);
+            Debug.Assert(!_invariantMode);
+            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             return EndsWith(source, suffix, options);
         }
@@ -819,6 +865,11 @@ namespace System.Globalization
             if (count < 0 || startIndex > source.Length - count)
                 throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_Count);
 
+            if (source.Length == 0)
+            {
+                return -1;
+            }
+
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
                 return source.IndexOf(value.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase);
@@ -828,7 +879,7 @@ namespace System.Globalization
             // Ordinal can't be selected with other flags
             if ((options & ValidIndexMaskOffFlags) != 0 && (options != CompareOptions.Ordinal))
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
-            
+
             if (_invariantMode)
                 return IndexOfOrdinal(source, new string(value, 1), startIndex, count, ignoreCase: (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) != 0);
 
@@ -881,6 +932,22 @@ namespace System.Globalization
                 return IndexOfOrdinal(source, value, startIndex, count, ignoreCase: (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) != 0);
 
             return IndexOfCore(source, value, startIndex, count, options, null);
+        }
+
+        internal int IndexOfOrdinal(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+        {
+            Debug.Assert(!_invariantMode);
+            Debug.Assert(!source.IsEmpty);
+            Debug.Assert(!value.IsEmpty);
+            return IndexOfOrdinalCore(source, value, ignoreCase);
+        }
+
+        internal unsafe int IndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
+        {
+            Debug.Assert(!_invariantMode);
+            Debug.Assert(!source.IsEmpty);
+            Debug.Assert(!value.IsEmpty);
+            return IndexOfCore(source, value, options, null);
         }
 
         // The following IndexOf overload is mainly used by String.Replace. This overload assumes the parameters are already validated
@@ -1198,6 +1265,34 @@ namespace System.Globalization
             return (this.Name.GetHashCode());
         }
 
+        internal static unsafe int GetIgnoreCaseHash(string source)
+        {
+            Debug.Assert(source != null, "source must not be null");
+
+            // Do not allocate on the stack if string is empty
+            if (source.Length == 0)
+            {
+                return source.GetHashCode();
+            }
+
+            char[] borrowedArr = null;
+            Span<char> span = source.Length <= 255 ?
+                stackalloc char[255] :
+                (borrowedArr = ArrayPool<char>.Shared.Rent(source.Length));
+
+            int charsWritten = source.AsSpan().ToUpperInvariant(span);
+
+            // Slice the array to the size returned by ToUpperInvariant.
+            int hash = Marvin.ComputeHash32(MemoryMarshal.AsBytes(span.Slice(0, charsWritten)), Marvin.DefaultSeed);
+
+            // Return the borrowed array if necessary.
+            if (borrowedArr != null)
+            {
+                ArrayPool<char>.Shared.Return(borrowedArr);
+            }
+
+            return hash;
+        }
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -1238,6 +1333,11 @@ namespace System.Globalization
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
 
+            if (_invariantMode)
+            {
+                return ((options & CompareOptions.IgnoreCase) != 0) ? GetIgnoreCaseHash(source) : source.GetHashCode();
+            }
+
             return GetHashCodeOfStringCore(source, options);
         }
 
@@ -1255,11 +1355,11 @@ namespace System.Globalization
 
             if (options == CompareOptions.OrdinalIgnoreCase)
             {
-                return TextInfo.GetHashCodeOrdinalIgnoreCase(source);
+                return GetIgnoreCaseHash(source);
             }
 
             //
-            // GetHashCodeOfString does more parameters validation. basically will throw when  
+            // GetHashCodeOfString does more parameters validation. basically will throw when
             // having Ordinal, OrdinalIgnoreCase and StringSort
             //
 

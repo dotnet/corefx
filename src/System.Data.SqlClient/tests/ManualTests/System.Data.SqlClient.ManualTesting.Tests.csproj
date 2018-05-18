@@ -32,6 +32,7 @@
     <Compile Include="SQL\ParameterTest\DateTimeVariantTest.cs" />
     <Compile Include="SQL\ParameterTest\OutputParameter.cs" />
     <Compile Include="SQL\ParameterTest\ParametersTest.cs" />
+    <Compile Include="SQL\ParameterTest\SqlAdapterUpdateBatch.cs" />
     <Compile Include="SQL\ParameterTest\SqlVariantParam.cs" />
     <Compile Include="SQL\ParameterTest\SteAttribute.cs" />
     <Compile Include="SQL\ParameterTest\SteParam.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="SQL\MARSTest\MARSTest.cs" />
     <Compile Include="SQL\MirroringTest\ConnectionOnMirroringTest.cs" />
     <Compile Include="SQL\ParallelTransactionsTest\ParallelTransactionsTest.cs" />
+    <Compile Include="SQL\SqlCredentialTest\SqlCredentialTest.cs" />
     <Compile Include="SQL\SqlSchemaInfoTest\SqlSchemaInfoTest.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\AdjustPrecScaleForBulkCopy.cs" />
     <Compile Include="SQL\SqlBulkCopyTest\ErrorOnRowsMarkedAsDeleted.cs" />

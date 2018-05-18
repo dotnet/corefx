@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using Internal.Cryptography;
 using Internal.NativeCrypto;
 using static Internal.NativeCrypto.CapiHelper;
 
@@ -265,10 +266,10 @@ namespace System.Security.Cryptography
             // Save the KeySize value to a local because it has non-trivial cost.
             int keySize = KeySize;
 
-            // size check -- must be at most the modulus size
-            if (rgb.Length > (keySize / 8))
+            // size check -- must be exactly the modulus size
+            if (rgb.Length != (keySize / 8))
             {
-                throw new CryptographicException(SR.Format(SR.Cryptography_Padding_DecDataTooBig, Convert.ToString(keySize / 8)));
+                throw new CryptographicException(SR.Cryptography_RSA_DecryptWrongSize);
             }
 
             byte[] decryptedKey;
@@ -314,6 +315,19 @@ namespace System.Security.Cryptography
             if (rgb == null)
             {
                 throw new ArgumentNullException(nameof(rgb));
+            }
+
+            if (fOAEP)
+            {
+                int rsaSize = (KeySize + 7) / 8;
+                const int OaepSha1Overhead = 20 + 20 + 2;
+
+                // Normalize the Windows 7 and Windows 8.1+ exception
+                if (rsaSize - OaepSha1Overhead < rgb.Length)
+                {
+                    const int NTE_BAD_LENGTH = unchecked((int)0x80090004);
+                    throw NTE_BAD_LENGTH.ToCryptographicException();
+                }
             }
 
             byte[] encryptedKey = null;

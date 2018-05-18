@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Runtime.InteropServices;
 
 namespace System.Xml
 {
@@ -175,6 +175,25 @@ namespace System.Xml
             return null;
         }
 
+        internal string GetOrAddEntry(string str, int hashCode)
+        {
+            for (Entry e = _entries[hashCode & _mask]; e != null; e = e.next)
+            {
+                if (e.hashCode == hashCode && e.str.Equals(str))
+                {
+                    return e.str;
+                }
+            }
+
+            return AddEntry(str, hashCode);
+        }
+
+        internal static int ComputeHash32(string key)
+        {
+            ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan());
+            return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
+        }
+
         //
         // Private methods
         //
@@ -197,7 +216,7 @@ namespace System.Xml
             Entry[] oldEntries = _entries;
             Entry[] newEntries = new Entry[newMask + 1];
 
-            // use oldEntries.Length to eliminate the range check            
+            // use oldEntries.Length to eliminate the range check
             for (int i = 0; i < oldEntries.Length; i++)
             {
                 Entry e = oldEntries[i];
@@ -231,16 +250,9 @@ namespace System.Xml
             }
             return true;
         }
-
-        private static int ComputeHash32(string key)
-        {
-            ReadOnlySpan<byte> bytes = key.AsReadOnlySpan().AsBytes();
-            return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
-        }
-
         private static int ComputeHash32(char[] key, int start, int len)
         {
-            ReadOnlySpan<byte> bytes = key.AsReadOnlySpan().Slice(start, len).AsBytes();
+            ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(start, len));
             return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
         }
     }

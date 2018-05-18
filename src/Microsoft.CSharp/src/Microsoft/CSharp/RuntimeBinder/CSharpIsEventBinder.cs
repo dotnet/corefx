@@ -4,6 +4,7 @@
 
 using System;
 using System.Dynamic;
+using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
@@ -18,8 +19,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         public Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals)
             => runtimeBinder.BindIsEvent(this, arguments, locals);
 
-        public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
-            => symbolTable.PopulateSymbolTableWithName(Name, null, arguments[0].Info.IsStaticType ? arguments[0].Value as Type : arguments[0].Type);
+        public void PopulateSymbolTableWithName(Type callingType, ArgumentObject[] arguments)
+            => SymbolTable.PopulateSymbolTableWithName(Name, null, arguments[0].Info.IsStaticType ? arguments[0].Value as Type : arguments[0].Type);
 
         public bool IsBinderThatCanHaveRefReceiver => false;
 
@@ -27,11 +28,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         public string Name { get; }
 
-        public Type CallingContext { get; }
-
-        public bool IsChecked => false;
-
         private readonly RuntimeBinder _binder;
+
+        private readonly Type _callingContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSharpIsEventBinder"/> class.
@@ -43,8 +42,32 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type callingContext)
         {
             Name = name;
-            CallingContext = callingContext;
-            _binder = RuntimeBinder.GetInstance();
+            _callingContext = callingContext;
+            _binder = new RuntimeBinder(callingContext);
+        }
+
+        public int GetGetBinderEquivalenceHash()
+        {
+            int hash = _callingContext?.GetHashCode() ?? 0;
+            hash = HashHelpers.Combine(hash, Name.GetHashCode());
+            return hash;
+        }
+
+        public bool IsEquivalentTo(ICSharpBinder other)
+        {
+            var otherBinder = other as CSharpIsEventBinder;
+            if (otherBinder == null)
+            {
+                return false;
+            }
+
+            if (_callingContext != otherBinder._callingContext ||
+                Name != otherBinder.Name)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

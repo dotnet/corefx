@@ -31,6 +31,7 @@ namespace System.Net.Http.Headers
         public string Name => _headerName;
         public HttpHeaderParser Parser => _knownHeader?.Parser;
         public HttpHeaderType HeaderType => _knownHeader == null ? HttpHeaderType.Custom : _knownHeader.HeaderType;
+        public KnownHeader KnownHeader => _knownHeader;
 
         public bool Equals(HeaderDescriptor other) =>
             _knownHeader == null ?
@@ -38,8 +39,6 @@ namespace System.Net.Http.Headers
                 _knownHeader == other._knownHeader;
         public override int GetHashCode() => _knownHeader?.GetHashCode() ?? StringComparer.OrdinalIgnoreCase.GetHashCode(_headerName);
         public override bool Equals(object obj) => throw new InvalidOperationException();   // Ensure this is never called, to avoid boxing
-        public static bool operator ==(HeaderDescriptor left, HeaderDescriptor right) => left.Equals(right);
-        public static bool operator !=(HeaderDescriptor left, HeaderDescriptor right) => !left.Equals(right);
 
         // Returns false for invalid header name.
         public static bool TryGet(string headerName, out HeaderDescriptor descriptor)
@@ -81,7 +80,7 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            descriptor = new HeaderDescriptor(ByteArrayHelpers.GetStringFromByteSpan(headerName));
+            descriptor = new HeaderDescriptor(HttpRuleParser.GetTokenString(headerName));
             return true;
         }
 
@@ -112,7 +111,7 @@ namespace System.Net.Http.Headers
                 }
             }
 
-            return ByteArrayHelpers.GetStringFromByteSpan(headerValue);
+            return HttpRuleParser.DefaultHttpEncoding.GetString(headerValue);
         }
     }
 }

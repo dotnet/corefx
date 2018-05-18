@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include "pal_types.h"
 #include "opensslshim.h"
+#include "pal_types.h"
 
 /*
 Padding options for RsaPublicEncrypt and RsaPrivateDecrypt.
@@ -13,6 +13,7 @@ enum RsaPadding : int32_t
 {
     Pkcs1 = 0,
     OaepSHA1 = 1,
+    NoPadding = 2,
 };
 
 /*
@@ -62,6 +63,22 @@ extern "C" int32_t
 CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa, RsaPadding padding);
 
 /*
+Shims RSA_private_encrypt with a fixed value of RSA_NO_PADDING.
+
+Requires that the input be the size of the key.
+Returns the number of bytes written (which should be flen), or -1 on error.
+*/
+extern "C" int32_t CryptoNative_RsaSignPrimitive(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa);
+
+/*
+Shims RSA_public_decrypt with a fixed value of RSA_NO_PADDING.
+
+Requires that the input be the size of the key.
+Returns the number of bytes written (which should be flen), or -1 on error.
+*/
+extern "C" int32_t CryptoNative_RsaVerificationPrimitive(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa);
+
+/*
 Shims the RSA_size method.
 
 Returns the RSA modulus size in bytes.
@@ -109,7 +126,7 @@ extern "C" int32_t CryptoNative_GetRsaParameters(const RSA* rsa,
 /*
 Sets all the parameters on the RSA instance.
 */
-extern "C" void CryptoNative_SetRsaParameters(RSA* rsa,
+extern "C" int32_t CryptoNative_SetRsaParameters(RSA* rsa,
                                               uint8_t* n,
                                               int32_t nLength,
                                               uint8_t* e,

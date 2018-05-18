@@ -242,9 +242,19 @@ namespace System.IO.IsolatedStorage
             return _fs.Read(buffer, offset, count);
         }
 
+        public override int Read(System.Span<byte> buffer)
+        {
+            return _fs.Read(buffer);
+        }
+
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, Threading.CancellationToken cancellationToken)
         {
             return _fs.ReadAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+        {
+            return _fs.ReadAsync(buffer, cancellationToken);
         }
 
         public override int ReadByte()
@@ -264,9 +274,19 @@ namespace System.IO.IsolatedStorage
             _fs.Write(buffer, offset, count);
         }
 
+        public override void Write(System.ReadOnlySpan<byte> buffer)
+        {
+            _fs.Write(buffer);
+        }
+
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _fs.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        {
+            return _fs.WriteAsync(buffer, cancellationToken);
         }
 
         public override void WriteByte(byte value)

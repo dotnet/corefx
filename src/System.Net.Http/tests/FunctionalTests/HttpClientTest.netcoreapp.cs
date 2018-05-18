@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientTest
+    public abstract partial class HttpClientTest
     {
         [Fact]
         public async Task PatchAsync_Canceled_Throws()
@@ -23,7 +23,7 @@ namespace System.Net.Http.Functional.Tests
 
                 cts.Cancel();
                 
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t1);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t1);
             }
         }
 

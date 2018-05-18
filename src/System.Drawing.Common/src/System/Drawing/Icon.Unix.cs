@@ -292,7 +292,6 @@ namespace System.Drawing
             }
         }
 
-        [MonoLimitation("The same icon, SystemIcons.WinLogo, is returned for all file types.")]
         public static Icon ExtractAssociatedIcon(string filePath)
         {
             if (filePath == null)
@@ -466,7 +465,7 @@ namespace System.Drawing
 
             IconImage ii = new IconImage();
             ii.iconHeader = bih;
-            ii.iconColors = new uint[0];    // no palette
+            ii.iconColors = Array.Empty<uint>();    // no palette
             int xor_size = (((bih.biBitCount * bitmap.Width + 31) & ~31) >> 3) * bitmap.Height;
             ii.iconXOR = new byte[xor_size];
             int p = 0;

@@ -62,7 +62,7 @@ namespace System.Security.Cryptography.Asn1
 // past where the buffer was "allocated".  This causes quite a number of reallocs
 // and copies, so it's a #define opt-in.
                 byte[] newBytes = new byte[_offset + pendingCount];
-                
+
                 if (_buffer != null)
                 {
                     Buffer.BlockCopy(_buffer, 0, newBytes, 0, _offset);
@@ -99,7 +99,7 @@ namespace System.Security.Cryptography.Asn1
             int spaceRequired = tag.CalculateEncodedSize();
             EnsureWriteCapacity(spaceRequired);
 
-            if (!tag.TryWrite(_buffer.AsSpan().Slice(_offset, spaceRequired), out int written) ||
+            if (!tag.TryWrite(_buffer.AsSpan(_offset, spaceRequired), out int written) ||
                 written != spaceRequired)
             {
                 Debug.Fail($"TryWrite failed or written was wrong value ({written} vs {spaceRequired})");
@@ -190,7 +190,7 @@ namespace System.Security.Cryptography.Asn1
             Debug.Assert(parsedBack.Length == preEncodedValue.Length);
 
             EnsureWriteCapacity(preEncodedValue.Length);
-            preEncodedValue.Span.CopyTo(_buffer.AsSpan().Slice(_offset));
+            preEncodedValue.Span.CopyTo(_buffer.AsSpan(_offset));
             _offset += preEncodedValue.Length;
         }
 
@@ -216,7 +216,7 @@ namespace System.Security.Cryptography.Asn1
 
         // T-REC-X.690-201508 sec 11.1, 8.2
         private void WriteBooleanCore(Asn1Tag tag, bool value)
-        { 
+        {
             Debug.Assert(!tag.IsConstructed);
             WriteTag(tag);
             WriteLength(1);
@@ -237,6 +237,11 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public void WriteInteger(BigInteger value)
+        {
+            WriteIntegerCore(Asn1Tag.Integer, value);
+        }
+
+        public void WriteInteger(ReadOnlySpan<byte> value)
         {
             WriteIntegerCore(Asn1Tag.Integer, value);
         }
@@ -313,7 +318,7 @@ namespace System.Security.Cryptography.Asn1
         private void WriteNonNegativeIntegerCore(Asn1Tag tag, ulong value)
         {
             int valueLength;
-            
+
             // 0x80 needs two bytes: 0x00 0x80
             if (value < 0x80)
                 valueLength = 1;
@@ -366,6 +371,42 @@ namespace System.Security.Cryptography.Asn1
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
             WriteIntegerCore(tag.AsPrimitive(), value);
+        }
+
+        public void WriteInteger(Asn1Tag tag, ReadOnlySpan<byte> value)
+        {
+            CheckUniversalTag(tag, UniversalTagNumber.Integer);
+
+            WriteIntegerCore(tag.AsPrimitive(), value);
+        }
+
+        private void WriteIntegerCore(Asn1Tag tag, ReadOnlySpan<byte> value)
+        {
+            if (value.IsEmpty)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            // T-REC-X.690-201508 sec 8.3.2
+            if (value.Length > 1)
+            {
+                ushort bigEndianValue = (ushort)(value[0] << 8 | value[1]);
+                const ushort RedundancyMask = 0b1111_1111_1000_0000;
+                ushort masked = (ushort)(bigEndianValue & RedundancyMask);
+
+                // If the first 9 bits are all 0 or are all 1, the value is invalid.
+                if (masked == 0 || masked == RedundancyMask)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+            }
+
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
+            WriteLength(value.Length);
+            // WriteLength ensures the content-space
+            value.CopyTo(_buffer.AsSpan(_offset));
+            _offset += value.Length;
         }
 
         // T-REC-X.690-201508 sec 8.3
@@ -449,7 +490,7 @@ namespace System.Security.Cryptography.Asn1
             WriteLength(bitString.Length + 1);
             _buffer[_offset] = (byte)unusedBitCount;
             _offset++;
-            bitString.CopyTo(_buffer.AsSpan().Slice(_offset));
+            bitString.CopyTo(_buffer.AsSpan(_offset));
             _offset += bitString.Length;
         }
 
@@ -508,7 +549,7 @@ namespace System.Security.Cryptography.Asn1
                 _buffer[_offset] = 0;
                 _offset++;
 
-                dest = _buffer.AsSpan().Slice(_offset);
+                dest = _buffer.AsSpan(_offset);
                 remainingData.Slice(0, MaxCERContentSize).CopyTo(dest);
 
                 remainingData = remainingData.Slice(MaxCERContentSize);
@@ -521,7 +562,7 @@ namespace System.Security.Cryptography.Asn1
             _buffer[_offset] = (byte)unusedBitCount;
             _offset++;
 
-            dest = _buffer.AsSpan().Slice(_offset);
+            dest = _buffer.AsSpan(_offset);
             remainingData.CopyTo(dest);
             _offset += remainingData.Length;
 
@@ -552,7 +593,7 @@ namespace System.Security.Cryptography.Asn1
             WriteNamedBitList(tag, enumValue.GetType(), enumValue);
         }
 
-        public void WriteNamedBitList<TEnum>(Asn1Tag tag, TEnum enumValue) where TEnum : struct 
+        public void WriteNamedBitList<TEnum>(Asn1Tag tag, TEnum enumValue) where TEnum : struct
         {
             WriteNamedBitList(tag, typeof(TEnum), enumValue);
         }
@@ -655,7 +696,7 @@ namespace System.Security.Cryptography.Asn1
             // Clear the constructed flag, if present.
             WriteTag(tag.AsPrimitive());
             WriteLength(octetString.Length);
-            octetString.CopyTo(_buffer.AsSpan().Slice(_offset));
+            octetString.CopyTo(_buffer.AsSpan(_offset));
             _offset += octetString.Length;
         }
 
@@ -707,7 +748,7 @@ namespace System.Security.Cryptography.Asn1
                 WriteTag(primitiveOctetString);
                 WriteLength(MaxCERSegmentSize);
 
-                dest = _buffer.AsSpan().Slice(_offset);
+                dest = _buffer.AsSpan(_offset);
                 remainingData.Slice(0, MaxCERSegmentSize).CopyTo(dest);
 
                 _offset += MaxCERSegmentSize;
@@ -716,7 +757,7 @@ namespace System.Security.Cryptography.Asn1
 
             WriteTag(primitiveOctetString);
             WriteLength(remainingData.Length);
-            dest = _buffer.AsSpan().Slice(_offset);
+            dest = _buffer.AsSpan(_offset);
             remainingData.CopyTo(dest);
             _offset += remainingData.Length;
 
@@ -759,7 +800,7 @@ namespace System.Security.Cryptography.Asn1
             if (oidValue == null)
                 throw new ArgumentNullException(nameof(oidValue));
 
-            WriteObjectIdentifier(oidValue.AsReadOnlySpan());
+            WriteObjectIdentifier(oidValue.AsSpan());
         }
 
         public void WriteObjectIdentifier(ReadOnlySpan<char> oidValue)
@@ -780,7 +821,7 @@ namespace System.Security.Cryptography.Asn1
             if (oidValue == null)
                 throw new ArgumentNullException(nameof(oidValue));
 
-            WriteObjectIdentifier(tag, oidValue.AsReadOnlySpan());
+            WriteObjectIdentifier(tag, oidValue.AsSpan());
         }
 
         public void WriteObjectIdentifier(Asn1Tag tag, ReadOnlySpan<char> oidValue)
@@ -843,13 +884,13 @@ namespace System.Security.Cryptography.Asn1
                 BigInteger subIdentifier = ParseSubIdentifier(ref remaining);
                 subIdentifier += 40 * firstComponent;
 
-                int localLen = EncodeSubIdentifier(tmp.AsSpan().Slice(tmpOffset), ref subIdentifier);
+                int localLen = EncodeSubIdentifier(tmp.AsSpan(tmpOffset), ref subIdentifier);
                 tmpOffset += localLen;
 
                 while (!remaining.IsEmpty)
                 {
                     subIdentifier = ParseSubIdentifier(ref remaining);
-                    localLen = EncodeSubIdentifier(tmp.AsSpan().Slice(tmpOffset), ref subIdentifier);
+                    localLen = EncodeSubIdentifier(tmp.AsSpan(tmpOffset), ref subIdentifier);
                     tmpOffset += localLen;
                 }
 
@@ -920,7 +961,7 @@ namespace System.Security.Cryptography.Asn1
                 dest[0] = 0;
                 return 1;
             }
-           
+
             BigInteger unencoded = subIdentifier;
             int idx = 0;
 
@@ -974,7 +1015,7 @@ namespace System.Security.Cryptography.Asn1
         private void WriteEnumeratedValue(Asn1Tag tag, Type tEnum, object enumValue)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Enumerated);
-            
+
             Type backingType = tEnum.GetEnumUnderlyingType();
 
             if (tEnum.IsDefined(typeof(FlagsAttribute), false))
@@ -1080,7 +1121,7 @@ namespace System.Security.Cryptography.Asn1
 
             PopTag(tag, sortContents);
         }
-        
+
         public void WriteUtcTime(DateTimeOffset value)
         {
             WriteUtcTimeCore(Asn1Tag.UtcTime, value);
@@ -1097,7 +1138,7 @@ namespace System.Security.Cryptography.Asn1
         // T-REC-X.680-201508 sec 47
         // T-REC-X.690-201508 sec 11.8
         private void WriteUtcTimeCore(Asn1Tag tag, DateTimeOffset value)
-        { 
+        {
             // Because UtcTime is IMPLICIT VisibleString it technically can have
             // a constructed form.
             // DER says character strings must be primitive.
@@ -1121,7 +1162,7 @@ namespace System.Security.Cryptography.Asn1
             int minute = normalized.Minute;
             int second = normalized.Second;
 
-            Span<byte> baseSpan = _buffer.AsSpan().Slice(_offset);
+            Span<byte> baseSpan = _buffer.AsSpan(_offset);
             StandardFormat format = new StandardFormat('D', 2);
 
             if (!Utf8Formatter.TryFormat(year % 100, baseSpan.Slice(0, 2), out _, format) ||
@@ -1134,7 +1175,7 @@ namespace System.Security.Cryptography.Asn1
                 Debug.Fail($"Utf8Formatter.TryFormat failed to build components of {normalized:O}");
                 throw new CryptographicException();
             }
-            
+
             _buffer[_offset + 12] = (byte)'Z';
 
             _offset += UtcTimeValueLength;
@@ -1188,7 +1229,7 @@ namespace System.Security.Cryptography.Asn1
             if (!omitFractionalSeconds)
             {
                 long floatingTicks = normalized.Ticks % TimeSpan.TicksPerSecond;
-                
+
                 if (floatingTicks != 0)
                 {
                     // We're only loading in sub-second ticks.
@@ -1234,7 +1275,7 @@ namespace System.Security.Cryptography.Asn1
             int minute = normalized.Minute;
             int second = normalized.Second;
 
-            Span<byte> baseSpan = _buffer.AsSpan().Slice(_offset);
+            Span<byte> baseSpan = _buffer.AsSpan(_offset);
             StandardFormat d4 = new StandardFormat('D', 4);
             StandardFormat d2 = new StandardFormat('D', 2);
 
@@ -1248,7 +1289,7 @@ namespace System.Security.Cryptography.Asn1
                 Debug.Fail($"Utf8Formatter.TryFormat failed to build components of {normalized:O}");
                 throw new CryptographicException();
             }
-            
+
             _offset += IntegerPortionLength;
             fraction.CopyTo(baseSpan.Slice(IntegerPortionLength));
             _offset += fraction.Length;
@@ -1287,7 +1328,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             bytesWritten = _offset;
-            _buffer.AsSpan().Slice(0, _offset).CopyTo(dest);
+            _buffer.AsSpan(0, _offset).CopyTo(dest);
             return true;
         }
 
@@ -1305,7 +1346,7 @@ namespace System.Security.Cryptography.Asn1
 
             // If the stack is closed out then everything is a definite encoding (BER, DER) or a
             // required indefinite encoding (CER). So we're correctly sized up, and ready to copy.
-            return _buffer.AsSpan().Slice(0, _offset).ToArray();
+            return _buffer.AsSpan(0, _offset).ToArray();
         }
 
         public ReadOnlySpan<byte> EncodeAsSpan()
@@ -1408,7 +1449,7 @@ namespace System.Security.Cryptography.Asn1
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
-            WriteCharacterString(encodingType, str.AsReadOnlySpan());
+            WriteCharacterString(encodingType, str.AsSpan());
         }
 
         public void WriteCharacterString(UniversalTagNumber encodingType, ReadOnlySpan<char> str)
@@ -1419,11 +1460,11 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public void WriteCharacterString(Asn1Tag tag, UniversalTagNumber encodingType, string str)
-        {   
+        {
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
-            WriteCharacterString(tag, encodingType, str.AsReadOnlySpan());
+            WriteCharacterString(tag, encodingType, str.AsSpan());
         }
 
         public void WriteCharacterString(Asn1Tag tag, UniversalTagNumber encodingType, ReadOnlySpan<char> str)
@@ -1472,7 +1513,7 @@ namespace System.Security.Cryptography.Asn1
                     // Clear the constructed tag, if present.
                     WriteTag(tag.AsPrimitive());
                     WriteLength(size);
-                    Span<byte> dest = _buffer.AsSpan().Slice(_offset, size);
+                    Span<byte> dest = _buffer.AsSpan(_offset, size);
 
                     fixed (byte* destPtr = &MemoryMarshal.GetReference(dest))
                     {
@@ -1517,7 +1558,7 @@ namespace System.Security.Cryptography.Asn1
                 }
             }
 
-            WriteConstructedCerOctetString(tag, tmp.AsSpan().Slice(0, size));
+            WriteConstructedCerOctetString(tag, tmp.AsSpan(0, size));
             Array.Clear(tmp, 0, size);
             ArrayPool<byte>.Shared.Return(tmp);
         }

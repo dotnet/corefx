@@ -205,8 +205,10 @@ namespace System.Tests
         [InlineData((double)789, (double)-789, false)]
         [InlineData((double)789, (double)0, false)]
         [InlineData(double.NaN, double.NaN, true)]
+        [InlineData(double.NaN, -double.NaN, true)]
         [InlineData((double)789, (float)789, false)]
         [InlineData((double)789, "789", false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void Equals(double d1, object value, bool expected)
         {
             if (value is double d2)
@@ -326,8 +328,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Parse_Valid_TestData()
         {
-            // Defaults: AllowLeadingWhite | AllowTrailingWhite | AllowLeadingSign | AllowDecimalPoint | AllowExponent | AllowThousands
-            NumberStyles defaultStyle = NumberStyles.Float;
+            NumberStyles defaultStyle = NumberStyles.Float | NumberStyles.AllowThousands;
 
             NumberFormatInfo emptyFormat = NumberFormatInfo.CurrentInfo;
 
@@ -374,7 +375,7 @@ namespace System.Tests
         {
             bool isDefaultProvider = provider == null || provider == NumberFormatInfo.CurrentInfo;
             double result;
-            if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None)
+            if ((style & ~(NumberStyles.Float | NumberStyles.AllowThousands)) == 0 && style != NumberStyles.None)
             {
                 // Use Parse(string) or Parse(string, IFormatProvider)
                 if (isDefaultProvider)
@@ -439,7 +440,7 @@ namespace System.Tests
         {
             bool isDefaultProvider = provider == null || provider == NumberFormatInfo.CurrentInfo;
             double result;
-            if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None && (style & NumberStyles.AllowLeadingWhite) == (style & NumberStyles.AllowTrailingWhite))
+            if ((style & ~(NumberStyles.Float | NumberStyles.AllowThousands)) == 0 && style != NumberStyles.None && (style & NumberStyles.AllowLeadingWhite) == (style & NumberStyles.AllowTrailingWhite))
             {
                 // Use Parse(string) or Parse(string, IFormatProvider)
                 if (isDefaultProvider)

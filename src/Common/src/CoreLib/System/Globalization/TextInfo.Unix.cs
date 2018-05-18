@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 
@@ -12,68 +13,7 @@ namespace System.Globalization
     {
         private Tristate _needsTurkishCasing = Tristate.NotInitialized;
 
-        private void FinishInitialization()
-        {
-        }
-
-        private unsafe string ChangeCase(string s, bool toUpper)
-        {
-            Debug.Assert(!_invariantMode);
-
-            Debug.Assert(s != null);
-
-            if (s.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            string result = string.FastAllocateString(s.Length);
-
-            fixed (char* pSource = s)
-            {
-                fixed (char* pResult = result)
-                {
-#if CORECLR
-                    if (IsAsciiCasingSameAsInvariant && s.IsAscii())
-                    {
-                        int length = s.Length;
-                        char* a = pSource, b = pResult;
-                        if (toUpper)
-                        {
-                            while (length-- != 0)
-                            {
-                                *b++ = ToUpperAsciiInvariant(*a++);
-                            }
-                        }
-                        else
-                        {
-                            while (length-- != 0)
-                            {
-                                *b++ = ToLowerAsciiInvariant(*a++);
-                            }
-                        }
-                    }
-                    else
-#endif
-                    {
-                        ChangeCase(pSource, s.Length, pResult, result.Length, toUpper);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private unsafe char ChangeCase(char c, bool toUpper)
-        {
-            Debug.Assert(!_invariantMode);
-
-            char dst = default(char);
-
-            ChangeCase(&c, 1, &dst, 1, toUpper);
-
-            return dst;
-        }
+        private void FinishInitialization() { }
 
         // -----------------------------
         // ---- PAL layer ends here ----

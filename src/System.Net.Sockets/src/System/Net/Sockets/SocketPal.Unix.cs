@@ -47,7 +47,7 @@ namespace System.Net.Sockets
                 return default(IPPacketInformation);
             }
 
-            Interop.Sys.IPPacketInformation nativePacketInfo;
+            Interop.Sys.IPPacketInformation nativePacketInfo = default;
             if (!Interop.Sys.TryGetIPPacketInformation(messageHeader, isIPv4, &nativePacketInfo))
             {
                 return default(IPPacketInformation);
@@ -65,7 +65,7 @@ namespace System.Net.Sockets
         {
             Debug.Assert(socketAddress != null || socketAddressLen == 0, $"Unexpected values: socketAddress={socketAddress}, socketAddressLen={socketAddressLen}");
 
-            long received;
+            long received = 0;
             int sockAddrLen = socketAddress != null ? socketAddressLen : 0;
 
             fixed (byte* sockAddr = socketAddress)
@@ -123,7 +123,7 @@ namespace System.Net.Sockets
                     IOVectorCount = 1
                 };
 
-                long bytesSent;
+                long bytesSent = 0;
                 errno = Interop.Sys.SendMessage(
                     socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                     &messageHeader,
@@ -186,7 +186,7 @@ namespace System.Net.Sockets
                         IOVectorCount = iovCount
                     };
 
-                    long bytesSent;
+                    long bytesSent = 0;
                     errno = Interop.Sys.SendMessage(
                         socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                         &messageHeader,
@@ -244,7 +244,7 @@ namespace System.Net.Sockets
 
         private static unsafe int Receive(SafeCloseSocket socket, SocketFlags flags, IList<ArraySegment<byte>> buffers, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
         {
-            int available;
+            int available = 0;
             errno = Interop.Sys.GetBytesAvailable(socket, &available);
             if (errno != Interop.Error.SUCCESS)
             {
@@ -353,7 +353,7 @@ namespace System.Net.Sockets
 
             Interop.Sys.MessageHeader messageHeader;
 
-            long received;
+            long received = 0;
             fixed (byte* rawSocketAddress = socketAddress)
             fixed (byte* b = &MemoryMarshal.GetReference(buffer))
             {
@@ -432,7 +432,7 @@ namespace System.Net.Sockets
                         ControlBufferLen = cmsgBufferLen
                     };
 
-                    long received;
+                    long received = 0;
                     errno = Interop.Sys.ReceiveMessage(
                         socket.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                         &messageHeader,
@@ -470,7 +470,7 @@ namespace System.Net.Sockets
 
         public static unsafe bool TryCompleteAccept(SafeCloseSocket socket, byte[] socketAddress, ref int socketAddressLen, out IntPtr acceptedFd, out SocketError errorCode)
         {
-            IntPtr fd;
+            IntPtr fd = IntPtr.Zero;
             Interop.Error errno;
             int sockAddrLen = socketAddressLen;
             fixed (byte* rawSocketAddress = socketAddress)
@@ -545,7 +545,7 @@ namespace System.Net.Sockets
 
         public static unsafe bool TryCompleteConnect(SafeCloseSocket socket, int socketAddressLen, out SocketError errorCode)
         {
-            Interop.Error socketError;
+            Interop.Error socketError = default;
             Interop.Error err;
             try
             {
@@ -864,7 +864,7 @@ namespace System.Net.Sockets
         {
             if (!handle.IsNonBlocking)
             {
-                return handle.AsyncContext.Connect(socketAddress, socketAddressLen, -1);
+                return handle.AsyncContext.Connect(socketAddress, socketAddressLen);
             }
 
             SocketError errorCode;
@@ -1097,17 +1097,15 @@ namespace System.Net.Sockets
             {
                 if (optionName == SocketOptionName.ReceiveTimeout)
                 {
-                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.ReceiveTimeout = optionValue == 0 ? -1 : optionValue;
-                    handle.TrackOption(optionLevel, optionName);
-                    return SocketError.Success;
+                    err = Interop.Sys.SetReceiveTimeout(handle, optionValue);
+                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                 }
                 else if (optionName == SocketOptionName.SendTimeout)
                 {
-                    // Note, setting a non-infinite timeout will force the handle into nonblocking mode
                     handle.SendTimeout = optionValue == 0 ? -1 : optionValue;
-                    handle.TrackOption(optionLevel, optionName);
-                    return SocketError.Success;
+                    err = Interop.Sys.SetSendTimeout(handle, optionValue);
+                    return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                 }
             }
             else if (optionLevel == SocketOptionLevel.IP)
@@ -1307,7 +1305,7 @@ namespace System.Net.Sockets
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
                 Interop.Sys.MulticastOption.MULTICAST_DROP;
 
-            Interop.Sys.IPv4MulticastOption opt;
+            Interop.Sys.IPv4MulticastOption opt = default;
             Interop.Error err = Interop.Sys.GetIPv4MulticastOption(handle, optName, &opt);
             if (err != Interop.Error.SUCCESS)
             {
@@ -1332,7 +1330,7 @@ namespace System.Net.Sockets
                 Interop.Sys.MulticastOption.MULTICAST_ADD :
                 Interop.Sys.MulticastOption.MULTICAST_DROP;
 
-            Interop.Sys.IPv6MulticastOption opt;
+            Interop.Sys.IPv6MulticastOption opt = default;
             Interop.Error err = Interop.Sys.GetIPv6MulticastOption(handle, optName, &opt);
             if (err != Interop.Error.SUCCESS)
             {

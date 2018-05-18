@@ -15,7 +15,7 @@ namespace System.Buffers
         private const int s_maxBufferSize = int.MaxValue;
         public sealed override int MaxBufferSize => s_maxBufferSize;
 
-        public sealed override OwnedMemory<T> Rent(int minimumBufferSize = -1)
+        public sealed override IMemoryOwner<T> Rent(int minimumBufferSize = -1)
         {
             if (minimumBufferSize == -1)
                 minimumBufferSize = 1 + (4095 / Unsafe.SizeOf<T>());
@@ -25,6 +25,6 @@ namespace System.Buffers
             return new ArrayMemoryPoolBuffer(minimumBufferSize);
         }
 
-        protected sealed override void Dispose(bool disposing) {}  // ArrayMemoryPool is a shared pool so Dispose() would be a nop even if there were native resources to dispose.
+        protected sealed override void Dispose(bool disposing) { }  // ArrayMemoryPool is a shared pool so Dispose() would be a nop even if there were native resources to dispose.
     }
 }

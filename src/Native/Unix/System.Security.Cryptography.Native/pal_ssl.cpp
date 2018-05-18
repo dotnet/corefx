@@ -80,13 +80,8 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
     {
         protocolOptions |= SSL_OP_NO_SSLv2;
     }
-#ifndef OPENSSL_NO_SSL3
     if ((protocols & PAL_SSL_SSL3) != PAL_SSL_SSL3)
-#endif
     {
-        // If OPENSSL_NO_SSL3 is defined, then ensure we always include
-        // SSL_OP_NO_SSLv3 in case we end up running against a binary
-        // which had SSLv3 enabled (we don't want to use SSLv3 in that case).
         protocolOptions |= SSL_OP_NO_SSLv3;
     }
     if ((protocols & PAL_SSL_TLS) != PAL_SSL_TLS)
@@ -107,7 +102,10 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
 #endif
 
     SSL_CTX_set_options(ctx, protocolOptions);
-    TrySetECDHNamedCurve(ctx);
+    if (TrySetECDHNamedCurve(ctx) == 0)
+    {
+        ERR_clear_error();
+    }
 }
 
 extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
@@ -118,15 +116,16 @@ extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
 extern "C" int32_t CryptoNative_SslGetError(SSL* ssl, int32_t ret)
 {
     // This pops off "old" errors left by other operations
-    // until the first and last error are the same
+    // until the first error is equal to the last one, 
     // this should be looked at again when OpenSsl 1.1 is migrated to
     while (ERR_peek_error() != ERR_peek_last_error())
     {
         ERR_get_error();
     }
-    int32_t errorCode = SSL_get_error(ssl, ret);
-    ERR_clear_error();
-    return errorCode;
+
+    // The error queue should be cleaned outside, if done here there will be no info
+    // for managed exception.
+    return SSL_get_error(ssl, ret);
 }
 
 extern "C" void CryptoNative_SslDestroy(SSL* ssl)
@@ -609,6 +608,6 @@ extern "C" void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** proto
 
 extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, const uint8_t* name)
 {
-    return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, name));
+    return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, const_cast<unsigned char*>(name)));
 }
 

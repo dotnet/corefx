@@ -15,14 +15,14 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientEKUTest : HttpClientTestBase
+    public abstract class HttpClientEKUTest : HttpClientTestBase
     {
         // Curl + OSX SecureTransport doesn't support the custom certificate callback.
         private static bool BackendSupportsCustomCertificateHandling =>
 #if TargetsWindows
             true;
 #else
-            CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false;
+            Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) ?? false;
 #endif
 
         private static bool CanTestCertificates =>
@@ -32,11 +32,6 @@ namespace System.Net.Http.Functional.Tests
         private static bool CanTestClientCertificates =>
             CanTestCertificates && BackendSupportsCustomCertificateHandling;
 
-#if !TargetsWindows
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
-#endif
-        
         public const int TestTimeoutMilliseconds = 15 * 1000;
 
         public static X509Certificate2 serverCertificateServerEku = Configuration.Certificates.GetServerCertificate();
@@ -67,7 +62,7 @@ namespace System.Net.Http.Functional.Tests
                 string requestUriString = GetUriStringAndConfigureHandler(options, server, handler);
                 tasks[1] = client.GetStringAsync(requestUriString);
 
-                await Task.WhenAll(tasks).TimeoutAfter(TestTimeoutMilliseconds);
+                await tasks.WhenAllOrAnyFailed(TestTimeoutMilliseconds);
             }
         }
 
@@ -113,7 +108,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.ClientCertificates.Add(clientCertificateNoEku);
                 tasks[1] = client.GetStringAsync(requestUriString);
 
-                await Task.WhenAll(tasks).TimeoutAfter(TestTimeoutMilliseconds);
+                await tasks.WhenAllOrAnyFailed(TestTimeoutMilliseconds);
             }
         }
 

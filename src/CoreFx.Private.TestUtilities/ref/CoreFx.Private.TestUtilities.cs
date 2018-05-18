@@ -42,6 +42,7 @@ namespace System
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
+        public static bool IsAlpine { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -56,8 +57,10 @@ namespace System
         public static bool IsNetfx462OrNewer { get { throw null; } }
         public static bool IsNetfx470OrNewer { get { throw null; } }
         public static bool IsNetfx471OrNewer { get { throw null; } }
+        public static bool IsNetfx472OrNewer { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
+        public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
@@ -87,10 +90,13 @@ namespace System
         public static bool IsUbuntu1604 { get { throw null; } }
         public static bool IsUbuntu1704 { get { throw null; } }
         public static bool IsUbuntu1710 { get { throw null; } }
+        public static bool IsUbuntu1710OrHigher { get { throw null; } }
+        public static bool IsUbuntu1804 { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
         public static bool IsWindows10Version1709OrGreater { get { throw null; } } // >= Windows 10 Fall Creators Update
+        public static bool IsWindows10Version1803OrGreater { get { throw null; } } // >= Windows 10 April 2018 Update
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
         public static bool IsWindowsAndElevated { get { throw null; } }
@@ -101,6 +107,8 @@ namespace System
         public static bool IsInAppContainer { get { throw null; } }
         public static bool IsWinRTSupported { get { throw null; } }
         public static bool IsXmlDsigXsltTransformSupported { get { throw null; } }
+        public static string LibcRelease { get { throw null; } }
+        public static string LibcVersion { get { throw null; } }
         public static System.Version OSXVersion { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
@@ -111,6 +119,10 @@ namespace System
     {
         [CLSCompliant(false)]
         public static Xunit.TheoryData ToTheoryData<T>(this System.Collections.Generic.IEnumerable<T> data) { throw null; }
+    }
+    public static partial class TestEnvironment
+    {
+        public static bool IsStressModeEnabled { get { throw null; } }
     }
 }
 namespace System.Diagnostics
@@ -132,12 +144,14 @@ namespace System.Diagnostics
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, string arg5, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<System.Threading.Tasks.Task<int>> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, System.Threading.Tasks.Task<int>> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, System.Threading.Tasks.Task<int>> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
-            public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options) { }
+            public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
+            public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.RemoteInvokeOptions Options { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-            public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public void Dispose() { }
         }
     }
@@ -149,6 +163,7 @@ namespace System.Diagnostics
         public string ExceptionFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public int ExpectedExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool Start { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool RunAsSudo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Diagnostics.ProcessStartInfo StartInfo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public int TimeOut { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }

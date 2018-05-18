@@ -21,8 +21,8 @@ namespace System.MemoryTests
             memory = new ReadOnlyMemory<int>(a, 0, a.Length);
             memory.Span.Validate(91, 92, -93, 94);
 
-            OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
-            ((ReadOnlyMemory<int>)owner.Memory).Span.Validate(91, 92, -93, 94);
+            MemoryManager<int> manager = new CustomMemoryForTest<int>(a);
+            ((ReadOnlyMemory<int>)manager.Memory).Span.Validate(91, 92, -93, 94);
         }
 
         [Fact]
@@ -37,8 +37,24 @@ namespace System.MemoryTests
             memory = new ReadOnlyMemory<long>(a, 0, a.Length);
             memory.Span.Validate(91, -92, 93, 94, -95);
 
-            OwnedMemory<long> owner = new CustomMemoryForTest<long>(a);
-            ((ReadOnlyMemory<long>)owner.Memory).Span.Validate(91, -92, 93, 94, -95);
+            MemoryManager<long> manager = new CustomMemoryForTest<long>(a);
+            ((ReadOnlyMemory<long>)manager.Memory).Span.Validate(91, -92, 93, 94, -95);
+        }
+
+        [Fact]
+        public static void SpanFromCtorArrayChar()
+        {
+            char[] a = { '1', '2', '3', '4', '-' };
+            ReadOnlyMemory<char> memory;
+
+            memory = new ReadOnlyMemory<char>(a);
+            memory.Span.Validate('1', '2', '3', '4', '-');
+
+            memory = new ReadOnlyMemory<char>(a, 0, a.Length);
+            memory.Span.Validate('1', '2', '3', '4', '-');
+
+            MemoryManager<char> manager = new CustomMemoryForTest<char>(a);
+            ((ReadOnlyMemory<char>)manager.Memory).Span.Validate('1', '2', '3', '4', '-');
         }
 
         [Fact]
@@ -55,8 +71,21 @@ namespace System.MemoryTests
             memory = new ReadOnlyMemory<object>(a, 0, a.Length);
             memory.Span.ValidateReferenceType(o1, o2);
 
-            OwnedMemory<object> owner = new CustomMemoryForTest<object>(a);
-            ((ReadOnlyMemory<object>)owner.Memory).Span.ValidateReferenceType(o1, o2);
+            MemoryManager<object> manager = new CustomMemoryForTest<object>(a);
+            ((ReadOnlyMemory<object>)manager.Memory).Span.ValidateReferenceType(o1, o2);
+        }
+
+        [Fact]
+        public static void SpanFromStringAsMemory()
+        {
+            string a = "1234-";
+            ReadOnlyMemory<char> memory;
+
+            memory = a.AsMemory();
+            memory.Span.Validate('1', '2', '3', '4', '-');
+
+            memory = a.AsMemory(0, a.Length);
+            memory.Span.Validate('1', '2', '3', '4', '-');
         }
 
         [Fact]
@@ -71,8 +100,8 @@ namespace System.MemoryTests
             memory = new ReadOnlyMemory<int>(empty, 0, empty.Length);
             memory.Span.ValidateNonNullEmpty();
 
-            OwnedMemory<int> owner = new CustomMemoryForTest<int>(empty);
-            ((ReadOnlyMemory<int>)owner.Memory).Span.Validate();
+            MemoryManager<int> manager = new CustomMemoryForTest<int>(empty);
+            ((ReadOnlyMemory<int>)manager.Memory).Span.Validate();
         }
 
         [Fact]
@@ -90,8 +119,8 @@ namespace System.MemoryTests
             memory = new ReadOnlyMemory<int>(aAsIntArray, 0, aAsIntArray.Length);
             memory.Span.Validate(42, -1);
 
-            OwnedMemory<int> owner = new CustomMemoryForTest<int>(aAsIntArray);
-            ((ReadOnlyMemory<int>)owner.Memory).Span.Validate(42, -1);
+            MemoryManager<int> manager = new CustomMemoryForTest<int>(aAsIntArray);
+            ((ReadOnlyMemory<int>)manager.Memory).Span.Validate(42, -1);
         }
 
         [Fact]
@@ -106,5 +135,28 @@ namespace System.MemoryTests
             Assert.True(spanObject.SequenceEqual(default));
         }
 
+        [Fact]
+        public static void TornMemory_Array_SpanThrowsIfOutOfBounds()
+        {
+            ReadOnlyMemory<int> memory;
+
+            memory = TestHelpers.DangerousCreateReadOnlyMemory<int>(new int[4], 0, 5);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+
+            memory = TestHelpers.DangerousCreateReadOnlyMemory<int>(new int[4], 3, 2);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+        }
+
+        [Fact]
+        public static void TornMemory_String_SpanThrowsIfOutOfBounds()
+        {
+            ReadOnlyMemory<char> memory;
+
+            memory = TestHelpers.DangerousCreateReadOnlyMemory<char>("1234", 0, 5);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+
+            memory = TestHelpers.DangerousCreateReadOnlyMemory<char>("1234", 3, 2);
+            Assert.Throws<ArgumentOutOfRangeException>(() => memory.Span.DontBox());
+        }
     }
 }

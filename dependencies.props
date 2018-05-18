@@ -9,20 +9,20 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>742a4f4fcf83aa3eb562bdb6ed78ff3046f0b9d0</CoreFxCurrentRef>
-    <CoreClrCurrentRef>6f6396f0d747d5c73d6c669b7a5239eecff9df79</CoreClrCurrentRef>
-    <CoreSetupCurrentRef>742a4f4fcf83aa3eb562bdb6ed78ff3046f0b9d0</CoreSetupCurrentRef>
+    <CoreFxCurrentRef>808a3dd4f4a0c80eb868e5b7425ffeaf8fcd8c85</CoreFxCurrentRef>
+    <CoreClrCurrentRef>08a3c9892de333438b450fcb1228334e8f72310e</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>08a3c9892de333438b450fcb1228334e8f72310e</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>6f6396f0d747d5c73d6c669b7a5239eecff9df79</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>6f6396f0d747d5c73d6c669b7a5239eecff9df79</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>808a3dd4f4a0c80eb868e5b7425ffeaf8fcd8c85</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>808a3dd4f4a0c80eb868e5b7425ffeaf8fcd8c85</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
-    <StandardCurrentRef>6298244e25cf84d91e3cda9627315f2425274624</StandardCurrentRef>
-    <BuildToolsCurrentRef>742a4f4fcf83aa3eb562bdb6ed78ff3046f0b9d0</BuildToolsCurrentRef>
+    <StandardCurrentRef>5077f4a159e71ee4c4801adb1f426b895ecd961b</StandardCurrentRef>
+    <BuildToolsCurrentRef>7d8f7c738b9d8081e4bb8929755b46af6c308c6d</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
   <PropertyGroup>
-    <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.0.3</NETStandardLibraryPackageVersion>
     <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
 
     <!-- SNI runtime package -->
@@ -31,30 +31,38 @@
 
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>preview2-26126-03</CoreFxExpectedPrerelease>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview2-26126-03</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview2-26126-07</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <ProjectNTfsExpectedPrerelease>beta-26126-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-26126-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26126-00</ProjectNTfsTestILCPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>2.1.0-preview2-26125-06</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.1.0-preview2-26125-06</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview2-26125-06</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.1.0-preview2-26125-06</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <CoreFxExpectedPrerelease>preview1-26514-01</CoreFxExpectedPrerelease>
+    <MicrosoftNETCorePlatformsPackageVersion>2.2.0-preview1-26514-01</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.2.0-preview1-26514-05</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-26514-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-26514-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-26514-00</ProjectNTfsTestILCPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>2.2.0-preview1-26514-01</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.2.0-preview1-26514-01</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26514-01</MicrosoftNETCoreAppPackageVersion>
 
     <!-- CoreFX-built SNI identity package -->
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
 
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
-    <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0015</XunitPerfAnalysisPackageVersion>
-    <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
-    <XunitNetcoreExtensionsVersion>2.1.0-prerelease-02425-02</XunitNetcoreExtensionsVersion>
+    <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0019</XunitPerfAnalysisPackageVersion>
+    <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
+    <XunitNetcoreExtensionsVersion>2.2.0-preview1-02810-02</XunitNetcoreExtensionsVersion>
+
+    <!-- Roslyn optimization data package version -->
+    <OptimizationDataVersion>2.0.0-rc-61101-17</OptimizationDataVersion>
   </PropertyGroup>
 
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
-    <FeedTasksPackageVersion>2.1.0-prerelease-02425-02</FeedTasksPackageVersion>
+    <FeedTasksPackageVersion>2.2.0-preview1-02810-02</FeedTasksPackageVersion>
+  </PropertyGroup>
+
+  <!-- Publish symbol build task package -->
+  <PropertyGroup>
+    <PublishSymbolsPackage>Microsoft.SymbolUploader.Build.Task</PublishSymbolsPackage>
+    <PublishSymbolsPackageVersion>1.0.0-beta-62806-01</PublishSymbolsPackageVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -161,11 +169,6 @@
       <ElementName>MicrosoftNETCoreAppPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.App</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreSetup">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>MicrosoftDotNetPlatformAbstractionsPackageVersion</ElementName>
-      <PackageId>Microsoft.DotNet.PlatformAbstractions</PackageId>
-    </XmlUpdateStep>
     <UpdateStep Include="BuildTools">
       <UpdaterType>File</UpdaterType>
       <Path>$(MSBuildThisFileDirectory)BuildToolsVersion.txt</Path>
@@ -190,7 +193,7 @@
 
   <PropertyGroup>
     <XUnitPackageVersion>2.3.0-beta1-build3642</XUnitPackageVersion>
-    <CompatibilityShimsPackageVersion>2.0.0</CompatibilityShimsPackageVersion>
+    <CompatibilityShimsPackageVersion>2.1.0</CompatibilityShimsPackageVersion>
   </PropertyGroup>
 
   <!-- Set up dependencies on packages that aren't found in a BuildInfo. -->

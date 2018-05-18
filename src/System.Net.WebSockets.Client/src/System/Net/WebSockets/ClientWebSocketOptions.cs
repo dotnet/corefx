@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
@@ -19,8 +20,8 @@ namespace System.Net.WebSockets
         private IWebProxy _proxy;
         private CookieContainer _cookies;
         private int _receiveBufferSize = 0x1000;
-        private int _sendBufferSize = 0x1000;
         private ArraySegment<byte>? _buffer;
+        private RemoteCertificateValidationCallback _remoteCertificateValidationCallback;
 
         internal X509CertificateCollection _clientCertificates;
         internal WebHeaderCollection _requestHeaders;
@@ -107,6 +108,16 @@ namespace System.Net.WebSockets
             }
         }
 
+        public RemoteCertificateValidationCallback RemoteCertificateValidationCallback
+        {
+            get => _remoteCertificateValidationCallback;
+            set
+            {
+                ThrowIfReadOnly();
+                _remoteCertificateValidationCallback = value;
+            }
+        }
+
         public CookieContainer Cookies
         {
             get
@@ -161,7 +172,6 @@ namespace System.Net.WebSockets
         }
 
         internal int ReceiveBufferSize => _receiveBufferSize;
-        internal int SendBufferSize => _sendBufferSize;
         internal ArraySegment<byte>? Buffer => _buffer;
 
         public void SetBuffer(int receiveBufferSize, int sendBufferSize)
@@ -178,7 +188,6 @@ namespace System.Net.WebSockets
             }
 
             _receiveBufferSize = receiveBufferSize;
-            _sendBufferSize = sendBufferSize;
             _buffer = null;
         }
 
@@ -202,7 +211,6 @@ namespace System.Net.WebSockets
             }
 
             _receiveBufferSize = receiveBufferSize;
-            _sendBufferSize = sendBufferSize;
             _buffer = buffer;
         }
 

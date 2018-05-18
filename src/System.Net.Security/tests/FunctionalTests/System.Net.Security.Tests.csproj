@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -42,6 +42,9 @@
     <Compile Include="ServiceNameCollectionTest.cs" />
     <Compile Include="NegotiateStreamKerberosTest.cs" />
     <!-- Common test files -->
+    <Compile Include="$(CommonTestPath)\System\IO\DelegateStream.cs">
+      <Link>Common\System\IO\DelegateStream.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
       <Link>Common\System\Net\Capability.Security.cs</Link>
     </Compile>
@@ -84,15 +87,21 @@
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>ProductionCode\Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
     <!-- TODO #13070: Add net463 to the condition after the TFM gets updated to the actual .Net 4.7-->
+    <Compile Include="..\..\src\System\Net\Security\SniHelper.cs">
+      <Link>src\SniHelper.cs</Link>
+    </Compile>
+    <Compile Include="SniHelperTest.cs" />
+    <Compile Include="SslAuthenticationOptionsTest.cs" />
     <Compile Include="SslStreamAlertsTest.cs" />
     <Compile Include="SslStreamAllowRenegotiationTests.cs" />
     <Compile Include="SslStreamAlpnTests.cs" />
+    <Compile Include="SslStreamSniTest.cs" />
     <Compile Include="SslStreamEKUTest.cs" />
     <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamCredentialCacheTest.cs" />
@@ -146,13 +155,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.0-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.1-prerelease\content\**\*.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

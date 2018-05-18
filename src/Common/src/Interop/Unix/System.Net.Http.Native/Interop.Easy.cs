@@ -111,6 +111,7 @@ internal static partial class Interop
             CURLOPT_PROXYTYPE = CurlOptionLongBase + 101,
             CURLOPT_HTTPAUTH = CurlOptionLongBase + 107,
             CURLOPT_TCP_NODELAY = CurlOptionLongBase + 121,
+            CURLOPT_TCP_KEEPALIVE = CurlOptionLongBase + 213,
             CURLOPT_CONNECTTIMEOUT_MS = CurlOptionLongBase + 156,
             CURLOPT_ADDRESS_SCOPE = CurlOptionLongBase + 171,
             CURLOPT_PROTOCOLS = CurlOptionLongBase + 181,
@@ -153,13 +154,15 @@ internal static partial class Interop
             CURL_HTTP_VERSION_NONE = 0,
             CURL_HTTP_VERSION_1_0 = 1,
             CURL_HTTP_VERSION_1_1 = 2,
-            CURL_HTTP_VERSION_2_0 = 3,
+            CURL_HTTP_VERSION_2TLS = 4,
         };
 
         // Enum for constants defined for CURL_SSLVERSION
         internal enum CurlSslVersion
         {
             CURL_SSLVERSION_TLSv1 = 1,   /* TLS 1.x */
+            CURL_SSLVERSION_SSLv2 = 2,   /* SSL 2 */
+            CURL_SSLVERSION_SSLv3 = 3,   /* SSL 3 */
             CURL_SSLVERSION_TLSv1_0 = 4, /* TLS 1.0 */
             CURL_SSLVERSION_TLSv1_1 = 5, /* TLS 1.1 */
             CURL_SSLVERSION_TLSv1_2 = 6, /* TLS 1.2 */

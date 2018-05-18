@@ -14,6 +14,9 @@ namespace System.Net.Http
     internal class WinInetProxyHelper
     {
         private bool _useProxy = false;
+        private bool _autoDetectionFailed;
+        private int _lastTimeAutoDetectionFailed; // Environment.TickCount units (milliseconds).
+        private const int _recentAutoDetectionInterval = 120_000; // 2 minutes in milliseconds.
 
         public WinInetProxyHelper()
         {
@@ -28,22 +31,21 @@ namespace System.Net.Http
                     Proxy = Marshal.PtrToStringUni(proxyConfig.Proxy);
                     ProxyBypass = Marshal.PtrToStringUni(proxyConfig.ProxyBypass);
 
-                    WinHttpTraceHelper.Trace(
-                        "WinInetProxyHelper.ctor: AutoConfigUrl={0}, AutoDetect={1}, Proxy={2}, ProxyBypass={3}",
-                        AutoConfigUrl,
-                        AutoDetect,
-                        Proxy,
-                        ProxyBypass);
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(this, $"AutoConfigUrl={AutoConfigUrl}, AutoDetect={AutoDetect}, Proxy={Proxy}, ProxyBypass={ProxyBypass}");
+                    }
+
                     _useProxy = true;
                 }
                 else
                 {
                     // We match behavior of WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY and ignore errors.
                     int lastError = Marshal.GetLastWin32Error();
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: error={0}", lastError);
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"error={lastError}");
                 }
 
-                WinHttpTraceHelper.Trace("WinInetProxyHelper.ctor: _useProxy={0}", _useProxy);
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"_useProxy={_useProxy}");
             }
 
             finally
@@ -78,6 +80,10 @@ namespace System.Net.Http
         public string Proxy { get; set; }
 
         public string ProxyBypass { get; set; }
+
+        public bool RecentAutoDetectionFailure =>
+            _autoDetectionFailed &&
+            Environment.TickCount - _lastTimeAutoDetectionFailed <= _recentAutoDetectionInterval;
 
         public bool GetProxyForUrl(
             SafeWinHttpHandle sessionHandle,
@@ -123,21 +129,22 @@ namespace System.Net.Http
             var repeat = false;
             do
             {
+                _autoDetectionFailed = false;
                 if (Interop.WinHttp.WinHttpGetProxyForUrl(
                     sessionHandle,
                     uri.AbsoluteUri,
                     ref autoProxyOptions,
                     out proxyInfo))
                 {
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: Using autoconfig proxy settings");
+                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Using autoconfig proxy settings");
                     useProxy = true;
-                    
+
                     break;
                 }
                 else
                 {
                     var lastError = Marshal.GetLastWin32Error();
-                    WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: error={0}", lastError);
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"error={lastError}");
 
                     if (lastError == Interop.WinHttp.ERROR_WINHTTP_LOGIN_FAILURE)
                     {
@@ -154,6 +161,12 @@ namespace System.Net.Http
                     }
                     else
                     {
+                        if (lastError == Interop.WinHttp.ERROR_WINHTTP_AUTODETECTION_FAILED)
+                        {
+                            _autoDetectionFailed = true;
+                            _lastTimeAutoDetectionFailed = Environment.TickCount;
+                        }
+
                         break;
                     }
                 }
@@ -167,14 +180,11 @@ namespace System.Net.Http
                 proxyInfo.ProxyBypass = string.IsNullOrEmpty(ProxyBypass) ?
                     IntPtr.Zero : Marshal.StringToHGlobalUni(ProxyBypass);
 
-                WinHttpTraceHelper.Trace(
-                    "WinInetProxyHelper.GetProxyForUrl: Fallback to Proxy={0}, ProxyBypass={1}",
-                    Proxy,
-                    ProxyBypass);
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Fallback to Proxy={Proxy}, ProxyBypass={ProxyBypass}");
                 useProxy = true;
             }
 
-            WinHttpTraceHelper.Trace("WinInetProxyHelper.GetProxyForUrl: useProxy={0}", useProxy);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"useProxy={useProxy}");
 
             return useProxy;
         }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -38,17 +38,14 @@
     <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
       <Link>Common\System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
-      <Link>Common\System\IO\PathInternal.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\RowConfigReader.cs">
       <Link>Common\System\IO\RowConfigReader.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
@@ -62,8 +59,8 @@
     <Compile Include="$(CommonPath)\System\Text\ReusableTextReader.cs">
       <Link>Common\System\Text\ReusableTextReader.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Text\ValueStringBuilder.cs">
-      <Link>Common\System\Text\ValueStringBuilder.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
+      <Link>Common\CoreLib\System\Text\ValueStringBuilder.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\IdentityHelper.cs">
       <Link>Common\System\Security\IdentityHelper.cs</Link>
@@ -74,17 +71,17 @@
     <Compile Include="Tests\Interop\procfsTests.cs" />
     <Compile Include="Tests\System\AssertExtensionTests.cs" />
     <Compile Include="Tests\System\CharArrayHelpersTests.cs" />
+    <Compile Include="Tests\System\IO\PathInternal.Tests.cs" />
     <Compile Include="Tests\System\IO\StringParserTests.cs" />
     <Compile Include="Tests\System\MarvinTests.cs" />
     <Compile Include="Tests\System\PasteArgumentsTests.cs" />
     <Compile Include="Tests\System\Security\IdentityHelperTests.cs" />
     <Compile Include="Tests\System\Text\ValueStringBuilderTests.cs" />
     <Compile Include="Tests\System\StringExtensions.Tests.cs" />
+    <Compile Include="Tests\System\StringTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\ArrayBuilderTests.cs" />
     <Compile Include="Tests\System\Collections\Generic\LargeArrayBuilderTests.cs" />
-    <Compile Include="Tests\System\IO\PathInternal_Unix_Tests.cs" />
     <Compile Include="Tests\System\IO\RowConfigReaderTests.cs" />
-    <Compile Include="Tests\System\IO\PathInternal.Tests.cs" />
     <Compile Include="Tests\System\Net\HttpKnownHeaderNamesTests.cs" />
     <Compile Include="System\Net\Sockets\Fletcher32.cs">
       <Link>System\Net\Sockets\Fletcher32.cs</Link>
@@ -97,29 +94,29 @@
     </Compile>
     <Compile Include="Tests\System\Net\VirtualNetworkTest.cs" />
     <Compile Include="Tests\System\Net\VirtualNetworkStreamTest.cs" />
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>ProductionCode\Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.cs">
+      <Link>Common\CoreLib\System\IO\PathInternal.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)'=='true'">
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.Windows.cs">
-      <Link>Common\System\IO\PathInternal.Windows.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
+      <Link>Common\CoreLib\System\IO\PathInternal.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="Tests\System\IO\PathInternal.Windows.Tests.cs" />
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFullPathNameW.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetFullPathNameW.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="Tests\System\IO\PathInternal.Windows.Tests.cs" />    
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
     <Compile Include="Tests\System\IO\Win32Marshal.Tests.cs" />
     <Compile Include="..\src\System\PasteArguments.Windows.cs">
@@ -127,10 +124,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)'=='true'">
-    <Compile Include="..\src\System\IO\PathInternal.Unix.cs">
-      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+    <Compile Include="Tests\System\IO\PathInternal.Unix.Tests.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Unix.cs">
+      <Link>Common\CoreLib\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
@@ -142,8 +140,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CommonTest\System\" />
+    <Folder Include="Common\System\Security\Cryptography\" />
     <Folder Include="System\Net\Sockets\" />
     <Folder Include="System\Net\VirtualNetwork\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

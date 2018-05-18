@@ -68,13 +68,25 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateInvalidOperationException_OutstandingReferences() { return new InvalidOperationException(SR.OutstandingReferences); }
 
+        internal static void ThrowInvalidOperationException_UnexpectedSegmentType() { throw CreateInvalidOperationException_UnexpectedSegmentType(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateInvalidOperationException_UnexpectedSegmentType() { return new InvalidOperationException(SR.UnexpectedSegmentType); }
+
+        internal static void ThrowInvalidOperationException_EndPositionNotReached() { throw CreateInvalidOperationException_EndPositionNotReached(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateInvalidOperationException_EndPositionNotReached() { return new InvalidOperationException(SR.EndPositionNotReached); }
+
+        internal static void ThrowArgumentOutOfRangeException_PositionOutOfRange() { throw CreateArgumentOutOfRangeException_PositionOutOfRange(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange() { return new ArgumentOutOfRangeException("position"); }
+
+        internal static void ThrowArgumentOutOfRangeException_OffsetOutOfRange() { throw CreateArgumentOutOfRangeException_OffsetOutOfRange(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentOutOfRangeException_OffsetOutOfRange() { return new ArgumentOutOfRangeException(nameof(ExceptionArgument.offset)); }
+
         internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer() { throw CreateObjectDisposedException_ArrayMemoryPoolBuffer(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateObjectDisposedException_ArrayMemoryPoolBuffer() { return new ObjectDisposedException("ArrayMemoryPoolBuffer"); }
-
-        internal static void ThrowObjectDisposedException_MemoryDisposed() { throw CreateObjectDisposedException_MemoryDisposed(); }
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateObjectDisposedException_MemoryDisposed() { return new ObjectDisposedException("OwnedMemory<T>", SR.MemoryDisposed); }
 
         internal static void ThrowFormatException_BadFormatSpecifier() { throw CreateFormatException_BadFormatSpecifier(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -83,6 +95,10 @@ namespace System
         internal static void ThrowArgumentException_OverlapAlignmentMismatch() { throw CreateArgumentException_OverlapAlignmentMismatch(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
+
+        internal static void ThrowNotSupportedException() { throw CreateThrowNotSupportedException(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateThrowNotSupportedException() { return new NotSupportedException(); }
 
         //
         // Enable use of ThrowHelper from TryFormat() routines without introducing dozens of non-code-coveraged "bytesWritten = 0; return false" boilerplate.
@@ -104,20 +120,74 @@ namespace System
             ThrowHelper.ThrowFormatException_BadFormatSpecifier();
             return false;
         }
+
+        //
+        // ReadOnlySequence .ctor validation Throws coalesced to enable inlining of the .ctor
+        //
+        public static void ThrowArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+            => throw CreateArgumentValidationException(startSegment, startIndex, endSegment);
+
+        private static Exception CreateArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+        {
+            if (startSegment == null)
+                return CreateArgumentNullException(ExceptionArgument.startSegment);
+            else if (endSegment == null)
+                return CreateArgumentNullException(ExceptionArgument.endSegment);
+            else if (startSegment != endSegment && startSegment.RunningIndex > endSegment.RunningIndex)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.endSegment);
+            else if ((uint)startSegment.Memory.Length < (uint)startIndex)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
+            else
+                return CreateArgumentOutOfRangeException(ExceptionArgument.endIndex);
+        }
+
+        public static void ThrowArgumentValidationException(Array array, int start)
+            => throw CreateArgumentValidationException(array, start);
+
+        private static Exception CreateArgumentValidationException(Array array, int start)
+        {
+            if (array == null)
+                return CreateArgumentNullException(ExceptionArgument.array);
+            else if ((uint)start > (uint)array.Length)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            else
+                return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
+
+        //
+        // ReadOnlySequence Slice validation Throws coalesced to enable inlining of the Slice
+        //
+        public static void ThrowStartOrEndArgumentValidationException(long start)
+            => throw CreateStartOrEndArgumentValidationException(start);
+
+        private static Exception CreateStartOrEndArgumentValidationException(long start)
+        {
+            if (start < 0)
+                return CreateArgumentOutOfRangeException(ExceptionArgument.start);
+            return CreateArgumentOutOfRangeException(ExceptionArgument.length);
+        }
+
     }
 
+    //
+    // The convention for this enum is using the argument name as the enum name
+    //
     internal enum ExceptionArgument
     {
-        array,
         length,
         start,
-        text,
-        obj,
-        ownedMemory,
         minimumBufferSize,
-        byteOffset,
-        pointer,
+        elementIndex,
         comparable,
-        comparer
+        comparer,
+        destination,
+        offset,
+        startSegment,
+        endSegment,
+        startIndex,
+        endIndex,
+        array,
+        culture,
+        manager
     }
 }

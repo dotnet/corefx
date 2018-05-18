@@ -77,11 +77,11 @@
        -->
   <PropertyGroup>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
-      $(OverridePackageSource);
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
+      $(OverridePackageSource);
       $(RestoreSources)
     </RestoreSources>
   </PropertyGroup>
@@ -148,8 +148,8 @@
 
     <_packageRID/>
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</_packageRID>
+    <_packageRID Condition="$(TargetGroup.StartsWith('uap'))">win10-$(ArchGroup)</_packageRID>
+    <_packageRID Condition="$(TargetGroup.EndsWith('aot'))">win10-$(ArchGroup)-aot</_packageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(_packageRID)</PackageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(RuntimeOS)-$(ArchGroup)</PackageRID>
   </PropertyGroup>
@@ -157,6 +157,7 @@
   <!-- Set some shortcuts for more terse conditions in project files -->
   <PropertyGroup>
     <TargetsNetCoreApp Condition="$(TargetGroup.StartsWith('netcoreapp'))">true</TargetsNetCoreApp>
+    <TargetsUap Condition="$(TargetGroup.StartsWith('uap'))">true</TargetsUap>
     <TargetsNetFx Condition="$(TargetGroup.StartsWith('net4')) OR '$(TargetGroup)' == 'netfx'">true</TargetsNetFx>
   </PropertyGroup>
 
@@ -174,6 +175,8 @@
   <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
   <PropertyGroup>
     <DebugType Condition="'$(DebugType)' == ''">Portable</DebugType>
+    <!-- Empty DebugType when building for netfx and in windows so that it is set to full or pdbonly later -->
+    <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(RunningOnUnix)' != 'true'"></DebugType>
     <UseSourceLink>true</UseSourceLink>
   </PropertyGroup>
 

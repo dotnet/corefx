@@ -669,13 +669,6 @@ namespace System
             return new DateTimeOffset(dateResult.Ticks, offset);
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/25337: Remove this overload once corefx is updated to target the new signatures
-        public static DateTimeOffset ParseExact(ReadOnlySpan<char> input, string format, IFormatProvider formatProvider, DateTimeStyles styles)
-        {
-            if (format == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.format);
-            return ParseExact(input, (ReadOnlySpan<char>)format, formatProvider, styles);
-        }
-
         public static DateTimeOffset ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, DateTimeStyles styles = DateTimeStyles.None)
         {
             styles = ValidateStyles(styles, nameof(styles));
@@ -762,30 +755,26 @@ namespace System
 
         public override String ToString()
         {
-            return DateTimeFormat.Format(ClockDateTime, null, DateTimeFormatInfo.CurrentInfo, Offset);
+            return DateTimeFormat.Format(ClockDateTime, null, null, Offset);
         }
 
         public String ToString(String format)
         {
-            return DateTimeFormat.Format(ClockDateTime, format, DateTimeFormatInfo.CurrentInfo, Offset);
+            return DateTimeFormat.Format(ClockDateTime, format, null, Offset);
         }
 
         public String ToString(IFormatProvider formatProvider)
         {
-            return DateTimeFormat.Format(ClockDateTime, null, DateTimeFormatInfo.GetInstance(formatProvider), Offset);
+            return DateTimeFormat.Format(ClockDateTime, null, formatProvider, Offset);
         }
 
         public String ToString(String format, IFormatProvider formatProvider)
         {
-            return DateTimeFormat.Format(ClockDateTime, format, DateTimeFormatInfo.GetInstance(formatProvider), Offset);
+            return DateTimeFormat.Format(ClockDateTime, format, formatProvider, Offset);
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/25337: Remove this overload once corefx is updated to target the new signatures
-        public bool TryFormat(Span<char> destination, out int charsWritten, string format, IFormatProvider provider) =>
-            TryFormat(destination, out charsWritten, (ReadOnlySpan<char>)format, provider);
-
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider formatProvider = null) =>
-            DateTimeFormat.TryFormat(ClockDateTime, destination, out charsWritten, format, DateTimeFormatInfo.GetInstance(formatProvider), Offset);
+            DateTimeFormat.TryFormat(ClockDateTime, destination, out charsWritten, format, formatProvider, Offset);
 
         public DateTimeOffset ToUniversalTime()
         {
@@ -860,18 +849,6 @@ namespace System
                                                          out offset);
             result = new DateTimeOffset(dateResult.Ticks, offset);
             return parsed;
-        }
-
-        // TODO https://github.com/dotnet/corefx/issues/25337: Remove this overload once corefx is updated to target the new signatures
-        public static bool TryParseExact(ReadOnlySpan<char> input, string format, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
-        {
-            if (format == null)
-            {
-                result = default;
-                return false;
-            }
-
-            return TryParseExact(input, (ReadOnlySpan<char>)format, formatProvider, styles, out result);
         }
 
         public static bool TryParseExact(

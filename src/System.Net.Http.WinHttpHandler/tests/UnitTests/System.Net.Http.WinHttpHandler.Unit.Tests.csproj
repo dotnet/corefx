@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -43,8 +43,8 @@
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
-      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>
@@ -54,9 +54,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpStatusDescription.cs">
       <Link>Common\System\Net\HttpStatusDescription.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\HttpVersionInternal.cs">
-      <Link>Common\System\Net\HttpVersionInternal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
@@ -73,9 +70,6 @@
     <Compile Include="$(CommonPath)\System\Net\Http\NoWriteNoSeekStreamContent.cs">
       <Link>Common\System\Net\Http\NoWriteNoSeekStreamContent.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Http\WinHttpException.cs">
-      <Link>Common\System\Net\Http\WinHttpException.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\CertificateHelper.cs">
       <Link>Common\System\Net\Security\CertificateHelper.cs</Link>
     </Compile>
@@ -88,8 +82,8 @@
     <Compile Include="$(CommonPath)\System\Threading\Tasks\RendezvousAwaitable.cs">
       <Link>Common\System\Threading\Tasks\RendezvousAwaitable.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\WinHttpAuthHelper.cs">
       <Link>ProductionCode\WinHttpAuthHelper.cs</Link>
@@ -102,6 +96,9 @@
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\WinHttpCookieContainerAdapter.cs">
       <Link>ProductionCode\WinHttpCookieContainerAdapter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\WinHttpException.cs">
+      <Link>ProductionCode\WinHttpException.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\WinHttpHandler.cs">
       <Link>ProductionCode\WinHttpHandler.cs</Link>

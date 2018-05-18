@@ -17,6 +17,7 @@
     <Compile Include="MethodCoverage.cs" />
     <Compile Include="CESchedulerPairTests.cs" />
     <!-- Task -->
+    <Compile Include="Task\ExecutionContextFlowTest.cs" />
     <Compile Include="Task\RunContinuationsAsynchronouslyTests.cs" />
     <Compile Include="Task\TPLTestException.cs" />
     <Compile Include="Task\TaskRunSyncTests.cs" />
@@ -54,6 +55,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="CancellationTokenTests.netcoreapp.cs" />
+    <Compile Include="Task\TaskCanceledExceptionTests.netcoreapp.cs" />
     <Compile Include="Task\TaskStatusTest.netcoreapp.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

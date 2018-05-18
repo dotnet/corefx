@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
+using System.Security;
 
 namespace System.IO
 {
@@ -303,7 +304,7 @@ namespace System.IO
                 ReadSpan(new Span<byte>(array, offset, count));
         }
 
-        public override int Read(Span<byte> destination)
+        public override int Read(Span<byte> buffer)
         {
             if (GetType() == typeof(FileStream) && !_useAsyncIO)
             {
@@ -311,7 +312,7 @@ namespace System.IO
                 {
                     throw Error.GetFileNotOpen();
                 }
-                return ReadSpan(destination);
+                return ReadSpan(buffer);
             }
             else
             {
@@ -321,7 +322,7 @@ namespace System.IO
                 // of Read(byte[],int,int) overload.  Or if the stream is in async mode, we can't call the
                 // synchronous ReadSpan, so we similarly call the base Read, which will turn delegate to
                 // Read(byte[],int,int), which will do the right thing if we're in async mode.
-                return base.Read(destination);
+                return base.Read(buffer);
             }
         }
 
@@ -354,14 +355,14 @@ namespace System.IO
             return ReadAsyncTask(buffer, offset, count, cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!_useAsyncIO || GetType() != typeof(FileStream))
             {
                 // If we're not using async I/O, delegate to the base, which will queue a call to Read.
                 // Or if this isn't a concrete FileStream, a derived type may have overridden ReadAsync(byte[],...),
                 // which was introduced first, so delegate to the base which will delegate to that.
-                return base.ReadAsync(destination, cancellationToken);
+                return base.ReadAsync(buffer, cancellationToken);
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -374,7 +375,7 @@ namespace System.IO
                 throw Error.GetFileNotOpen();
             }
 
-            Task<int> t = ReadAsyncInternal(destination, cancellationToken, out int synchronousResult);
+            Task<int> t = ReadAsyncInternal(buffer, cancellationToken, out int synchronousResult);
             return t != null ?
                 new ValueTask<int>(t) :
                 new ValueTask<int>(synchronousResult);
@@ -411,7 +412,7 @@ namespace System.IO
             }
         }
 
-        public override void Write(ReadOnlySpan<byte> destination)
+        public override void Write(ReadOnlySpan<byte> buffer)
         {
             if (GetType() == typeof(FileStream) && !_useAsyncIO)
             {
@@ -419,7 +420,7 @@ namespace System.IO
                 {
                     throw Error.GetFileNotOpen();
                 }
-                WriteSpan(destination);
+                WriteSpan(buffer);
             }
             else
             {
@@ -429,7 +430,7 @@ namespace System.IO
                 // of Write(byte[],int,int) overload.  Or if the stream is in async mode, we can't call the
                 // synchronous WriteSpan, so we similarly call the base Write, which will turn delegate to
                 // Write(byte[],int,int), which will do the right thing if we're in async mode.
-                base.Write(destination);
+                base.Write(buffer);
             }
         }
 
@@ -457,22 +458,22 @@ namespace System.IO
             if (IsClosed)
                 throw Error.GetFileNotOpen();
 
-            return WriteAsyncInternal(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken);
+            return WriteAsyncInternal(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
-        public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!_useAsyncIO || GetType() != typeof(FileStream))
             {
                 // If we're not using async I/O, delegate to the base, which will queue a call to Write.
                 // Or if this isn't a concrete FileStream, a derived type may have overridden WriteAsync(byte[],...),
                 // which was introduced first, so delegate to the base which will delegate to that.
-                return base.WriteAsync(source, cancellationToken);
+                return base.WriteAsync(buffer, cancellationToken);
             }
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<int>(cancellationToken);
+                return new ValueTask(Task.FromCanceled<int>(cancellationToken));
             }
 
             if (IsClosed)
@@ -480,7 +481,7 @@ namespace System.IO
                 throw Error.GetFileNotOpen();
             }
 
-            return WriteAsyncInternal(source, cancellationToken);
+            return WriteAsyncInternal(buffer, cancellationToken);
         }
 
         /// <summary>
@@ -673,6 +674,22 @@ namespace System.IO
 
         internal virtual bool IsClosed => _fileHandle.IsClosed;
 
+        private static bool IsIoRelatedException(Exception e) =>
+            // These all derive from IOException
+            //     DirectoryNotFoundException
+            //     DriveNotFoundException
+            //     EndOfStreamException
+            //     FileLoadException
+            //     FileNotFoundException
+            //     PathTooLongException
+            //     PipeException 
+            e is IOException ||
+            // Note that SecurityException is only thrown on runtimes that support CAS
+            // e is SecurityException || 
+            e is UnauthorizedAccessException ||
+            e is NotSupportedException ||
+            (e is ArgumentException && !(e is ArgumentNullException));
+
         /// <summary>
         /// Gets the array used for buffering reading and writing.  
         /// If the array hasn't been allocated, this will lazily allocate it.
@@ -836,7 +853,7 @@ namespace System.IO
             if (!IsAsync)
                 return base.BeginWrite(array, offset, numBytes, callback, state);
             else
-                return TaskToApm.Begin(WriteAsyncInternal(new ReadOnlyMemory<byte>(array, offset, numBytes), CancellationToken.None), callback, state);
+                return TaskToApm.Begin(WriteAsyncInternal(new ReadOnlyMemory<byte>(array, offset, numBytes), CancellationToken.None).AsTask(), callback, state);
         }
 
         public override int EndRead(IAsyncResult asyncResult)

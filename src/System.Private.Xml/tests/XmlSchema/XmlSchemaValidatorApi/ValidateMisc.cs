@@ -892,7 +892,6 @@ namespace System.Xml.Tests
             }
         }
 
-        //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_1()
         {
@@ -918,7 +917,6 @@ namespace System.Xml.Tests
             }
         }
 
-        //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_2()
         {

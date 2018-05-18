@@ -4,10 +4,9 @@
   <PropertyGroup>
     <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
-    <CoreClrPackageVersion Condition="'$(TargetGroup)' == 'netcoreapp2.0'">2.0.0</CoreClrPackageVersion>
     <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
+  <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'  Or '$(TargetGroup)' == 'uap10.0.16299aot'">
     <!-- Temporarily Override restore moniker since NETNative's targeting pack still uses uap10.1 moniker -->
     <NuGetTargetMoniker>UAP,Version=v10.1</NuGetTargetMoniker>
     <NuGetTargetMonikerShort>uap10.1</NuGetTargetMonikerShort>
@@ -15,7 +14,7 @@
     <BinPlaceILCInputFolder>false</BinPlaceILCInputFolder>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'  Or '$(TargetGroup)' == 'uap10.0.16299aot'">
     <PackageReference Include="Microsoft.TargetingPack.Private.NETNative">
       <Version>1.1.0-$(ProjectNTfsExpectedPrerelease)</Version>
     </PackageReference>
@@ -24,7 +23,7 @@
     <FileToExclude Include="System.Private.CoreLib.WinRTInterop" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
+  <ItemGroup Condition="'$(TargetGroup)'!='uapaot'  And '$(TargetGroup)' != 'uap10.0.16299aot'">
     <PackageReference Include="Microsoft.NETCore.Platforms">
       <Version>$(MicrosoftNETCorePlatformsPackageVersion)</Version>
     </PackageReference>
@@ -75,6 +74,7 @@
 
   <PropertyGroup>
     <SymbolPackagesDir>$(PackagesDir)symbolpackages/</SymbolPackagesDir>
+    <DotNetAssetRootUrl Condition="'$(DotNetAssetRootUrl)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-core/assets/</DotNetAssetRootUrl>
   </PropertyGroup>
 
   <Target Name="CalculateCoreCLRSymbolPackageProperties"
@@ -82,9 +82,7 @@
 
     <ItemGroup>
       <_CoreCLRSymbolPackagesToDownload Include="@(ReferenceCopyLocalPaths->'%(NuGetPackageId)')" Condition="$([System.String]::Copy('%(Identity)').EndsWith('System.Private.CoreLib.dll'))">
-        <!-- If there is an asset root URL set (for orchestrated build), then append symbols to that to grab the coreclr symbol location.  The orchestrated build uses a flat package layout. -->
-        <Url Condition="'$(DotNetAssetRootUrl)'!=''">$(DotNetAssetRootUrl)symbols/%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg</Url>
-        <Url Condition="'$(DotNetAssetRootUrl)'==''">https://dotnet.myget.org/F/dotnet-core/symbols/%(NuGetPackageId)/%(NuGetPackageVersion)/</Url>
+        <Url>$(DotNetAssetRootUrl)symbols/%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg</Url>
         <DestinationFile>%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg.zip</DestinationFile>
         <UnzipDestinationDir>$(SymbolPackagesDir)/%(NuGetPackageId).%(NuGetPackageVersion)</UnzipDestinationDir>
       </_CoreCLRSymbolPackagesToDownload>

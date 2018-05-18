@@ -20,6 +20,7 @@ namespace System.IO.Pipes
         private bool _canRead;
         private bool _canWrite;
         private bool _isAsync;
+        private bool _isCurrentUserOnly;
         private bool _isMessageComplete;
         private bool _isFromExistingHandle;
         private bool _isHandleExposed;
@@ -125,11 +126,11 @@ namespace System.IO.Pipes
             return ReadCore(new Span<byte>(buffer, offset, count));
         }
 
-        public override int Read(Span<byte> destination)
+        public override int Read(Span<byte> buffer)
         {
             if (_isAsync)
             {
-                return base.Read(destination);
+                return base.Read(buffer);
             }
 
             if (!CanRead)
@@ -138,7 +139,7 @@ namespace System.IO.Pipes
             }
             CheckReadOperations();
 
-            return ReadCore(destination);
+            return ReadCore(buffer);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -170,11 +171,11 @@ namespace System.IO.Pipes
             return ReadAsyncCore(new Memory<byte>(buffer, offset, count), cancellationToken);
         }
 
-        public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!_isAsync)
             {
-                return base.ReadAsync(destination, cancellationToken);
+                return base.ReadAsync(buffer, cancellationToken);
             }
 
             if (!CanRead)
@@ -189,13 +190,13 @@ namespace System.IO.Pipes
 
             CheckReadOperations();
 
-            if (destination.Length == 0)
+            if (buffer.Length == 0)
             {
                 UpdateMessageCompletion(false);
                 return new ValueTask<int>(0);
             }
 
-            return new ValueTask<int>(ReadAsyncCore(destination, cancellationToken));
+            return new ValueTask<int>(ReadAsyncCore(buffer, cancellationToken));
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -232,11 +233,11 @@ namespace System.IO.Pipes
             WriteCore(new ReadOnlySpan<byte>(buffer, offset, count));
         }
 
-        public override void Write(ReadOnlySpan<byte> source)
+        public override void Write(ReadOnlySpan<byte> buffer)
         {
             if (_isAsync)
             {
-                base.Write(source);
+                base.Write(buffer);
                 return;
             }
 
@@ -246,7 +247,7 @@ namespace System.IO.Pipes
             }
             CheckWriteOperations();
 
-            WriteCore(source);
+            WriteCore(buffer);
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -277,11 +278,11 @@ namespace System.IO.Pipes
             return WriteAsyncCore(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken);
         }
 
-        public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!_isAsync)
             {
-                return base.WriteAsync(source, cancellationToken);
+                return base.WriteAsync(buffer, cancellationToken);
             }
 
             if (!CanWrite)
@@ -291,17 +292,17 @@ namespace System.IO.Pipes
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<int>(cancellationToken);
+                return new ValueTask(Task.FromCanceled<int>(cancellationToken));
             }
 
             CheckWriteOperations();
 
-            if (source.Length == 0)
+            if (buffer.Length == 0)
             {
-                return Task.CompletedTask;
+                return default;
             }
 
-            return WriteAsyncCore(source, cancellationToken);
+            return new ValueTask(WriteAsyncCore(buffer, cancellationToken));
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -628,6 +629,18 @@ namespace System.IO.Pipes
             set
             {
                 _state = value;
+            }
+        }
+
+        internal bool IsCurrentUserOnly
+        {
+            get
+            {
+                return _isCurrentUserOnly;
+            }
+            set
+            {
+                _isCurrentUserOnly = value;
             }
         }
     }

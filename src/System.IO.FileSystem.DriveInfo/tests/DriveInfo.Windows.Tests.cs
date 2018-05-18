@@ -17,22 +17,22 @@ namespace System.IO.FileSystem.DriveInfoTests
     public class DriveInfoWindowsTests
     {
         [Theory]
-        [InlineData(":", null)]
-        [InlineData("://", null)]
-        [InlineData(@":\", null)]
-        [InlineData(":/", null)]
-        [InlineData(@":\\", null)]
-        [InlineData("Az", null)]
-        [InlineData("1", null)]
-        [InlineData("a1", null)]
-        [InlineData(@"\\share", null)]
-        [InlineData(@"\\", null)]
-        [InlineData("c ", null)]
-        [InlineData("", "path")]
-        [InlineData(" c", null)]
-        public void Ctor_InvalidPath_ThrowsArgumentException(string driveName, string paramName)
+        [InlineData(":")]
+        [InlineData("://")]
+        [InlineData(@":\")]
+        [InlineData(":/")]
+        [InlineData(@":\\")]
+        [InlineData("Az")]
+        [InlineData("1")]
+        [InlineData("a1")]
+        [InlineData(@"\\share")]
+        [InlineData(@"\\")]
+        [InlineData("c ")]
+        [InlineData("")]
+        [InlineData(" c")]
+        public void Ctor_InvalidPath_ThrowsArgumentException(string driveName)
         {
-            AssertExtensions.Throws<ArgumentException>(paramName, null, () => new DriveInfo(driveName));
+            AssertExtensions.Throws<ArgumentException>("driveName", null, () => new DriveInfo(driveName));
         }
 
         [Fact]

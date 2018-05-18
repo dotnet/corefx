@@ -37,19 +37,6 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers) : base(schemas, CodeGenerationOptions.GenerateProperties, new ImportContext(typeIdentifiers, false)) { }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers, CodeGenerationOptions options) : base(schemas, options, new ImportContext(typeIdentifiers, false)) { }
-
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter3"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeGenerationOptions options, ImportContext context) : base(schemas, options, context) { }
-
-
         /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportDerivedTypeMapping"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
@@ -1166,7 +1153,7 @@ namespace System.Xml.Serialization
             accessor.Mapping = mapping;
 
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Text = accessor;
             if (isMixed)
             {
@@ -1499,7 +1486,7 @@ namespace System.Xml.Serialization
             AttributeAccessor accessor = ImportAttribute(attribute, identifier, ns, attribute);
             if (accessor == null) return;
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Attribute = accessor;
             member.Name = CodeIdentifier.MakeValid(Accessor.UnescapeName(accessor.Name));
             member.Name = membersScope.AddUnique(member.Name, member);
@@ -1529,7 +1516,7 @@ namespace System.Xml.Serialization
             accessor.Mapping = mapping;
 
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Attribute = accessor;
             member.Name = membersScope.MakeRightCase("AnyAttr");
             member.Name = membersScope.AddUnique(member.Name, member);
@@ -1584,7 +1571,7 @@ namespace System.Xml.Serialization
 
             xmlnsMapping.TypeDesc = xmlnsTypeDesc;
             xmlnsMapping.TypeName = xmlnsMapping.TypeDesc.Name;
-            xmlnsMapping.Members = new MemberMapping[0];
+            xmlnsMapping.Members = Array.Empty<MemberMapping>();
             xmlnsMapping.IncludeInSchema = false;
             xmlnsMapping.ReferencedByTopLevelElement = true;
 

@@ -178,48 +178,6 @@ namespace System.IO.Compression
         }
 
         [Fact]
-        public virtual void Dispose_WithUnfinishedWriteAsync()
-        {
-            byte[] buffer = new byte[100000];
-            Random rand = new Random();
-            rand.NextBytes(buffer);
-
-            using (var writeStream = new ManualSyncMemoryStream(false))
-            {
-                var compressor = CreateStream(writeStream, CompressionMode.Compress, leaveOpen: true);
-                compressor.Write(buffer, 0, buffer.Length);
-                int writesBeingFlushed = 2;
-                Task task = null;
-                try
-                {
-                    // Write needs to be big enough to trigger a write to the underlying base stream so the WriteAsync call doesn't immediately complete.
-                    task = compressor.WriteAsync(buffer, 0, buffer.Length);
-                    while (task.IsCompleted)
-                    {
-                        rand.NextBytes(buffer);
-                        task = compressor.WriteAsync(buffer, 0, buffer.Length);
-                        writesBeingFlushed++;
-                    }
-
-                    // WriteAsync will be blocked on writing the output to the underlying stream. Calling Dispose will trigger a Finish call with unwritten output
-                    // still available.
-                    Assert.InRange(writeStream.Length, 0, buffer.Length);
-                    compressor.Dispose();
-                    Assert.InRange(writeStream.Length, 0, buffer.Length * writesBeingFlushed);
-                    Assert.False(task.IsCompleted);
-                }
-                finally
-                {
-                    // Unblock Async operations
-                    writeStream.manualResetEvent.Set();
-                    // WriteAsync call will return to the compression stream's WriteAsync which will attempt to 
-                    // access members of the now disposed stream. 
-                    Assert.Throws<AggregateException>(() => task.Wait(1000));
-                }
-            }
-        }
-
-        [Fact]
         public virtual async Task Dispose_WithUnfinishedReadAsync()
         {
             string compressedPath = CompressedTestFile(UncompressedTestFile());
@@ -1360,7 +1318,7 @@ namespace System.IO.Compression
         }
         #if STREAM_MEMORY_OVERLOADS_AVAILABLE
 
-        public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             ReadHit = true;
 
@@ -1372,10 +1330,10 @@ namespace System.IO.Compression
             {
                 await Task.Run(() => manualResetEvent.Wait(cancellationToken)).ConfigureAwait(false);
             }
-            return await base.ReadAsync(destination, cancellationToken);
+            return await base.ReadAsync(buffer, cancellationToken);
         }
 
-        public override async Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             WriteHit = true;
 
@@ -1388,7 +1346,7 @@ namespace System.IO.Compression
                 await Task.Run(() => manualResetEvent.Wait(cancellationToken)).ConfigureAwait(false);
             }
 
-            await base.WriteAsync(source, cancellationToken);
+            await base.WriteAsync(buffer, cancellationToken);
         }
         #endif
     }

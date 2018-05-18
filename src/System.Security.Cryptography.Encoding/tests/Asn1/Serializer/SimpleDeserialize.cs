@@ -442,7 +442,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
 
         [Fact]
-        public static void TooMuchData()
+        public static void TooMuchDataInValue()
         {
             // This is { IA5String("IA5"), UTF8String("UTF8") }, which is the opposite
             // of the field order of OptionalValues.  SO it will see the UTF8String as null,
@@ -451,6 +451,71 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Throws<CryptographicException>(
                 () => AsnSerializer.Deserialize<OptionalValues>(inputData, AsnEncodingRules.BER));
+        }
+
+        [Fact]
+        public static void TooMuchDataForValue()
+        {
+            // Two empty sequences, which is more data than one OptionalValues value.
+            byte[] inputData = "30003000".HexToByteArray();
+
+            OptionalValues parsed = AsnSerializer.Deserialize<OptionalValues>(
+                inputData,
+                AsnEncodingRules.BER,
+                out int bytesRead);
+
+            Assert.NotNull(parsed);
+            Assert.Equal(2, bytesRead);
+
+            Assert.Throws<CryptographicException>(
+                () => AsnSerializer.Deserialize<OptionalValues>(inputData, AsnEncodingRules.BER));
+        }
+
+        [Fact]
+        public static void ReadIndefiniteLengthCustomTaggedStrings()
+        {
+            byte[] inputData = (
+                // (constructed) SEQUENCE (indefinite)
+                "3080" +
+                  // (constructed) CONTEXT-SPECIFIC 0 (indefinite)
+                  "A080" +
+                    // OCTET STRING (3): 020100
+                    "0403020100" +
+                    // EoC ([0])
+                    "0000" +
+                  // (constructed) CONTEXT-SPECIFIC 1 (indefinite)
+                  "A180" +
+                    // BIT STRING (4) (0 unused bits): 010203
+                    "030400010203" +
+                    // EoC ([1])
+                    "0000" +
+                  // EoC (SEQUENCE)
+                  "0000").HexToByteArray();
+
+            CustomTaggedBinaryStrings parsed =
+                AsnSerializer.Deserialize<CustomTaggedBinaryStrings>(inputData, AsnEncodingRules.BER);
+
+            Assert.Equal("020100", parsed.OctetString.ByteArrayToHex());
+            Assert.Equal("010203", parsed.BitString.ByteArrayToHex());
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        // Not CER since it uses a definite encoding for the sequence.
+        [InlineData(PublicEncodingRules.DER)]
+        public static void ReadNegativeIntegers(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = (
+                "3007" +
+                  "0201FE" +
+                  "0202FEEF").HexToByteArray();
+
+            BigIntegers bigIntegers = AsnSerializer.Deserialize<BigIntegers>(
+                inputData,
+                (AsnEncodingRules)ruleSet);
+
+            Assert.Equal(-2, (int)bigIntegers.First);
+            Assert.Equal("FEEF", bigIntegers.Second.ByteArrayToHex());
         }
     }
 
@@ -822,5 +887,26 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         [IA5String, OptionalValue]
         public string IA5String;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CustomTaggedBinaryStrings
+    {
+        [OctetString]
+        [ExpectedTag(0)]
+        public ReadOnlyMemory<byte> OctetString;
+
+        [BitString]
+        [ExpectedTag(1)]
+        public ReadOnlyMemory<byte> BitString;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BigIntegers
+    {
+        public BigInteger First;
+
+        [Integer]
+        public ReadOnlyMemory<byte> Second;
     }
 }

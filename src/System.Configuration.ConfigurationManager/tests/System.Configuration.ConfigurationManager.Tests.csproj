@@ -90,6 +90,7 @@
     <Compile Include="System\Configuration\LocalFileSettingsProviderTests.cs" />
     <Compile Include="System\Configuration\NameValueConfigurationCollectionTests.cs" />
     <Compile Include="System\Configuration\SectionGroupsTests.cs" />
+    <Compile Include="System\Configuration\SettingElementTests.cs" />
     <Compile Include="System\Configuration\SmokeTest.cs" />
     <Compile Include="System\Configuration\StringUtilTests.cs" />
     <Compile Include="System\Configuration\TempConfig.cs" />
@@ -103,6 +104,12 @@
     <Compile Include="System\Configuration\UrlPathTests.cs" />
     <Compile Include="System\Configuration\ValidatiorUtilsTests.cs" />
     <Compile Include="System\Drawing\Configuration\SystemDrawingSectionTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

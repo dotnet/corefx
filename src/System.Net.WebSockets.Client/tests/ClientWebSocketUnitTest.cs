@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Common.Tests;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace System.Net.WebSockets.Client.Tests
 {
@@ -15,16 +16,8 @@ namespace System.Net.WebSockets.Client.Tests
     /// </summary>
     public class ClientWebSocketUnitTest
     {
-        private readonly ITestOutputHelper _output;
-
-        public ClientWebSocketUnitTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         private static bool WebSocketsSupported { get { return WebSocketHelper.WebSocketsSupported; } }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void Ctor_Success()
         {
@@ -32,7 +25,6 @@ namespace System.Net.WebSockets.Client.Tests
             cws.Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void Abort_CreateAndAbort_StateIsClosed()
         {
@@ -44,7 +36,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndClose_ThrowsInvalidOperationException()
         {
@@ -57,14 +48,21 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task CloseAsync_CreateAndCloseOutput_ThrowsInvalidOperationExceptionWithMessage()
         {
             using (var cws = new ClientWebSocket())
             {
-                var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                    () => cws.CloseOutputAsync(WebSocketCloseStatus.Empty, "", new CancellationToken()));
+                InvalidOperationException exception;
+                using (var tcc = new ThreadCultureChange())
+                {
+                    // The .Net Native toolchain optimizes away exception messages.
+                    if (!PlatformDetection.IsNetNative)
+                        tcc.ChangeCultureInfo(CultureInfo.InvariantCulture);
+
+                    exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                        () => cws.CloseOutputAsync(WebSocketCloseStatus.Empty, "", new CancellationToken()));
+                }
 
                 // The .Net Native toolchain optimizes away exception messages.
                 if (!PlatformDetection.IsNetNative)
@@ -77,7 +75,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndReceive_ThrowsInvalidOperationException()
         {
@@ -94,7 +91,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task CloseAsync_CreateAndReceive_ThrowsInvalidOperationExceptionWithMessage()
         {
@@ -104,8 +100,17 @@ namespace System.Net.WebSockets.Client.Tests
                 var segment = new ArraySegment<byte>(buffer);
                 var ct = new CancellationToken();
 
-                var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                    () => cws.ReceiveAsync(segment, ct));
+                InvalidOperationException exception;
+
+                using (var tcc = new ThreadCultureChange())
+                {
+                    // The .Net Native toolchain optimizes away exception messages.
+                    if (!PlatformDetection.IsNetNative)
+                        tcc.ChangeCultureInfo(CultureInfo.InvariantCulture);
+
+                    exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                        () => cws.ReceiveAsync(segment, ct));
+                }
 
                 // The .Net Native toolchain optimizes away exception messages.
                 if (!PlatformDetection.IsNetNative)
@@ -118,7 +123,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndSend_ThrowsInvalidOperationException()
         {
@@ -135,7 +139,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task CloseAsync_CreateAndSend_ThrowsInvalidOperationExceptionWithMessage()
         {
@@ -145,8 +148,16 @@ namespace System.Net.WebSockets.Client.Tests
                 var segment = new ArraySegment<byte>(buffer);
                 var ct = new CancellationToken();
 
-                var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                    () => cws.SendAsync(segment, WebSocketMessageType.Text, false, ct));
+                InvalidOperationException exception;
+                using (var tcc = new ThreadCultureChange())
+                {
+                    // The .Net Native toolchain optimizes away exception messages.
+                    if (!PlatformDetection.IsNetNative)
+                        tcc.ChangeCultureInfo(CultureInfo.InvariantCulture);
+
+                    exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                        () => cws.SendAsync(segment, WebSocketMessageType.Text, false, ct));
+                }
 
                 // The .Net Native toolchain optimizes away exception messages.
                 if (!PlatformDetection.IsNetNative)
@@ -159,7 +170,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void Ctor_ExpectedPropertyValues()
         {
@@ -174,7 +184,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void Abort_CreateAndDisposeAndAbort_StateIsClosedSuccess()
         {
@@ -185,7 +194,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_DisposeAndClose_ThrowsObjectDisposedException()
         {
@@ -198,7 +206,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_DisposeAndCloseOutput_ThrowsObjectDisposedExceptionWithMessage()
         {
@@ -215,7 +222,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void ReceiveAsync_CreateAndDisposeAndReceive_ThrowsObjectDisposedExceptionWithMessage()
         {
@@ -235,7 +241,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void SendAsync_CreateAndDisposeAndSend_ThrowsObjectDisposedExceptionWithMessage()
         {
@@ -255,7 +260,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(WebSocketsSupported))]
         public void Dispose_CreateAndDispose_ExpectedPropertyValues()
         {

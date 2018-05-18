@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -24,14 +24,10 @@
     </Compile>
     <Compile Include="System\IO\InternalBufferOverflowException.cs" />
     <Compile Include="System\IO\NotifyFilters.cs" />
-    <Compile Include="System\IO\PatternMatcher.cs" />
     <Compile Include="System\IO\RenamedEventArgs.cs" />
     <Compile Include="System\IO\RenamedEventHandler.cs" />
     <Compile Include="System\IO\WatcherChangeTypes.cs" />
     <Compile Include="System\IO\WaitForChangedResult.cs" />
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
-      <Link>Common\System\IO\PathInternal.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
     </Compile>
@@ -43,11 +39,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
-      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
-      <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileOperations.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FileOperations.cs</Link>
@@ -58,7 +54,7 @@
     <Compile Include="System\IO\FileSystemWatcher.Win32.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\Interop\Windows\Interop.CloseHandle.cs</Link>
     </Compile>
   </ItemGroup>
@@ -84,19 +80,19 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Read.cs">
       <Link>Common\Interop\Unix\libc\Interop.Read.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
-      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
       <Link>Common\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
   </ItemGroup>
@@ -108,7 +104,7 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
       <Link>Common\Interop\Unix\Interop.Poll.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
     </Compile>
   </ItemGroup>
@@ -150,6 +146,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

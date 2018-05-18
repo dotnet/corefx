@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,9 @@ namespace System.Net.WebSockets
     {
         /// <summary>GUID appended by the server as part of the security key response.  Defined in the RFC.</summary>
         private const string WSServerGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+        /// <summary>Shared, lazily-initialized handler for when using default options.</summary>
+        private static SocketsHttpHandler s_defaultHandler;
 
         private readonly CancellationTokenSource _abortSource = new CancellationTokenSource();
         private WebSocketState _state = WebSocketState.Connecting;
@@ -52,7 +56,7 @@ namespace System.Net.WebSockets
         public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) =>
             _webSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
 
-        public Task SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) =>
+        public ValueTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken) =>
             _webSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
 
         public Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken) =>
@@ -66,53 +70,14 @@ namespace System.Net.WebSockets
 
         public Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken) =>
             _webSocket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
-
-        private sealed class DirectManagedHttpClientHandler : HttpClientHandler
-        {
-            private const string ManagedHandlerEnvVar = "COMPlus_UseManagedHttpClientHandler";
-            private static readonly LocalDataStoreSlot s_managedHandlerSlot = GetSlot();
-            private static readonly object s_true = true;
-
-            private static LocalDataStoreSlot GetSlot()
-            {
-                LocalDataStoreSlot slot = Thread.GetNamedDataSlot(ManagedHandlerEnvVar);
-                if (slot != null)
-                {
-                    return slot;
-                }
-
-                try
-                {
-                    return Thread.AllocateNamedDataSlot(ManagedHandlerEnvVar);
-                }
-                catch (ArgumentException) // in case of a race condition where multiple threads all try to allocate the slot concurrently
-                {
-                    return Thread.GetNamedDataSlot(ManagedHandlerEnvVar);
-                }
-            }
-
-            public static DirectManagedHttpClientHandler CreateHandler()
-            {
-                Thread.SetData(s_managedHandlerSlot, s_true);
-                try
-                {
-                    return new DirectManagedHttpClientHandler();
-                }
-                finally { Thread.SetData(s_managedHandlerSlot, null); }
-            }
-
-            public new Task<HttpResponseMessage> SendAsync(
-                HttpRequestMessage request, CancellationToken cancellationToken) =>
-                base.SendAsync(request, cancellationToken);
-        }
-
+        
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
             HttpResponseMessage response = null;
+            SocketsHttpHandler handler = null;
+            bool disposeHandler = true;
             try
             {
-                // Create the request message, including a uri with ws{s} switched to http{s}.
-                uri = new UriBuilder(uri) { Scheme = (uri.Scheme == UriScheme.Ws) ? UriScheme.Http : UriScheme.Https }.Uri;
                 var request = new HttpRequestMessage(HttpMethod.Get, uri);
                 if (options._requestHeaders?.Count > 0) // use field to avoid lazily initializing the collection
                 {
@@ -127,15 +92,64 @@ namespace System.Net.WebSockets
                 AddWebSocketHeaders(request, secKeyAndSecWebSocketAccept.Key, options);
 
                 // Create the handler for this request and populate it with all of the options.
-                DirectManagedHttpClientHandler handler = DirectManagedHttpClientHandler.CreateHandler();
-                handler.UseDefaultCredentials = options.UseDefaultCredentials;
-                handler.Credentials = options.Credentials;
-                handler.Proxy = options.Proxy;
-                handler.CookieContainer = options.Cookies;
-                if (options._clientCertificates?.Count > 0) // use field to avoid lazily initializing the collection
+                // Try to use a shared handler rather than creating a new one just for this request, if
+                // the options are compatible.
+                if (options.Credentials == null &&
+                    !options.UseDefaultCredentials &&
+                    options.Proxy == null &&
+                    options.Cookies == null &&
+                    options.RemoteCertificateValidationCallback == null &&
+                    options._clientCertificates?.Count == 0)
                 {
-                    handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                    handler.ClientCertificates.AddRange(options.ClientCertificates);
+                    disposeHandler = false;
+                    handler = s_defaultHandler;
+                    if (handler == null)
+                    {
+                        handler = new SocketsHttpHandler()
+                        {
+                            PooledConnectionLifetime = TimeSpan.Zero,
+                            UseProxy = false,
+                            UseCookies = false,
+                        };
+                        if (Interlocked.CompareExchange(ref s_defaultHandler, handler, null) != null)
+                        {
+                            handler.Dispose();
+                            handler = s_defaultHandler;
+                        }
+                    }
+                }
+                else
+                {
+                    handler = new SocketsHttpHandler();
+                    handler.PooledConnectionLifetime = TimeSpan.Zero;
+                    handler.CookieContainer = options.Cookies;
+                    handler.UseCookies = options.Cookies != null;
+                    handler.SslOptions.RemoteCertificateValidationCallback = options.RemoteCertificateValidationCallback;
+
+                    if (options.UseDefaultCredentials)
+                    {
+                        handler.Credentials = CredentialCache.DefaultCredentials;
+                    }
+                    else
+                    {
+                        handler.Credentials = options.Credentials;
+                    }
+
+                    if (options.Proxy == null)
+                    {
+                        handler.UseProxy = false;
+                    }
+                    else if (options.Proxy != ClientWebSocket.DefaultWebProxy.Instance)
+                    {
+                        handler.Proxy = options.Proxy;
+                    }
+
+                    if (options._clientCertificates?.Count > 0) // use field to avoid lazily initializing the collection
+                    {
+                        Debug.Assert(handler.SslOptions.ClientCertificates == null);
+                        handler.SslOptions.ClientCertificates = new X509Certificate2Collection();
+                        handler.SslOptions.ClientCertificates.AddRange(options.ClientCertificates);
+                    }
                 }
 
                 // Issue the request.  The response must be status code 101.
@@ -143,7 +157,7 @@ namespace System.Net.WebSockets
                 if (cancellationToken.CanBeCanceled) // avoid allocating linked source if external token is not cancelable
                 {
                     linkedCancellation =
-                        externalAndAbortCancellation = 
+                        externalAndAbortCancellation =
                         CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _abortSource.Token);
                 }
                 else
@@ -154,13 +168,13 @@ namespace System.Net.WebSockets
 
                 using (linkedCancellation)
                 {
-                    response = await handler.SendAsync(request, externalAndAbortCancellation.Token).ConfigureAwait(false);
+                    response = await new HttpMessageInvoker(handler).SendAsync(request, externalAndAbortCancellation.Token).ConfigureAwait(false);
                     externalAndAbortCancellation.Token.ThrowIfCancellationRequested(); // poll in case sends/receives in request/response didn't observe cancellation
                 }
 
                 if (response.StatusCode != HttpStatusCode.SwitchingProtocols)
                 {
-                    throw new WebSocketException(SR.net_webstatus_ConnectFailure);
+                    throw new WebSocketException(SR.Format(SR.net_WebSockets_Connect101Expected, (int) response.StatusCode));
                 }
 
                 // The Connection, Upgrade, and SecWebSocketAccept headers are required and with specific values.
@@ -189,14 +203,6 @@ namespace System.Net.WebSockets
                     }
                 }
 
-                // Get or create the buffer to use
-                const int MinBufferSize = 14; // from ManagedWebSocket.MaxMessageHeaderLength
-                ArraySegment<byte> optionsBuffer = options.Buffer.GetValueOrDefault();
-                Memory<byte> buffer =
-                    optionsBuffer.Count >= MinBufferSize ? optionsBuffer : // use the provided buffer if it's big enough
-                    options.ReceiveBufferSize >= MinBufferSize ? new byte[options.ReceiveBufferSize] : // or use the requested size if it's big enough
-                    Memory<byte>.Empty; // or let WebSocket.CreateFromStream use its default
-
                 // Get the response stream and wrap it in a web socket.
                 Stream connectedStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 Debug.Assert(connectedStream.CanWrite);
@@ -205,8 +211,7 @@ namespace System.Net.WebSockets
                     connectedStream,
                     isServer: false,
                     subprotocol,
-                    options.KeepAliveInterval,
-                    buffer);
+                    options.KeepAliveInterval);
             }
             catch (Exception exc)
             {
@@ -223,6 +228,14 @@ namespace System.Net.WebSockets
                     throw;
                 }
                 throw new WebSocketException(SR.net_webstatus_ConnectFailure, exc);
+            }
+            finally
+            {
+                // Disposing the handler will not affect any active stream wrapped in the WebSocket.
+                if (disposeHandler)
+                {
+                    handler?.Dispose();
+                }
             }
         }
 

@@ -43,7 +43,7 @@
     <Compile Include="$(CommonPath)\Internal\Cryptography\Windows\CryptoThrowHelper.cs">
       <Link>Internal\Cryptography\Windows\CryptoThrowHelper.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Internal\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
@@ -100,6 +100,7 @@
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Linq" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

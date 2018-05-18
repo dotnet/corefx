@@ -23,14 +23,14 @@ csharp_new_line_before_catch = true
 csharp_new_line_before_finally = true
 csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_members_in_anonymous_types = true
-csharp_new_line_within_query_expression_clauses = true
+csharp_new_line_between_query_expression_clauses = true
 
 # Indentation preferences
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
 csharp_indent_switch_labels = true
-csharp_indent_labels = flush_left
+csharp_indent_labels = one_less_than_current
 
 # avoid this. unless absolutely necessary
 dotnet_style_qualification_for_field = false:suggestion

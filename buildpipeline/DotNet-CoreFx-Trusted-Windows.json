@@ -3,6 +3,29 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "displayName": "run begin.ps1",
+      "timeoutInMinutes": 0,
+      "alwaysRun": true,
+      "task": {
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$Env:AgentToolsPath\\begin.ps1\") {\n   \"$Env:AgentToolsPath\\begin.ps1 script found. Executing...\"\n    & $Env:AgentToolsPath\\begin.ps1\n} else {\n   \"$Env:AgentToolsPath\\begin.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Delete 'corefx'",
@@ -80,7 +103,8 @@
         "signType": "real",
         "zipSources": "false",
         "version": "",
-        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
+        "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
+        "esrpSigning": "$(PB_UseEsrpSigning)"
       }
     },
     {
@@ -206,7 +230,7 @@
         "msbuildLocation": "",
         "platform": "",
         "configuration": "",
-        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\"",
+        "msbuildArguments": "$(PB_CreateHelixArguments) /p:\"Branch=$(SourceBranch)\" /p:\"CloudDropConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudDropAccountName);AccountKey=$(CloudDropAccessToken);EndpointSuffix=core.windows.net\" /p:\"CloudResultsConnectionString=DefaultEndpointsProtocol=https;AccountName=$(PB_CloudResultsAccountName);AccountKey=$(OutputCloudResultsAccessToken);EndpointSuffix=core.windows.net\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"HelixApiEndpoint=$(PB_HelixApiEndPoint)\" /p:TargetQueues=$(PB_TargetQueue) /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ProductBuildId=$(ProductBuildId)\"",
         "clean": "false",
         "maximumCpuCount": "false",
         "restoreNugetPackages": "false",
@@ -232,31 +256,6 @@
         "arguments": "-AzureAccount=$(PB_CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(PB_Label) -- /p:OverwriteOnPublish=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
-      }
-    },
-    {
-      "environment": {},
-      "enabled": true,
-      "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Index symbol sources",
-      "timeoutInMinutes": 0,
-      "refName": "Task13",
-      "task": {
-        "id": "0675668a-7bba-4ccb-901d-5ad6554ca653",
-        "versionSpec": "1.*",
-        "definitionType": "task"
-      },
-      "inputs": {
-        "SymbolsPath": "",
-        "SearchPattern": "corefx\\bin\\*$(PB_Platform).$(PB_ConfigurationGroup)\\**\\*.pdb",
-        "SymbolsFolder": "",
-        "SkipIndexing": "false",
-        "TreatNotIndexedAsWarning": "false",
-        "SymbolsMaximumWaitTime": "",
-        "SymbolsProduct": "",
-        "SymbolsVersion": "",
-        "SymbolsArtifactName": "Symbols_$(PB_ConfigurationGroup)"
       }
     },
     {
@@ -346,30 +345,23 @@
       "environment": {},
       "enabled": true,
       "continueOnError": true,
-      "alwaysRun": false,
-      "displayName": "Build solution corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
+      "alwaysRun": true,
+      "displayName": "run end.ps1",
       "timeoutInMinutes": 0,
-      "condition": "always()",
-      "refName": "Task16",
       "task": {
-        "id": "c6c4c611-aa2e-4a33-b606-5eaba2196824",
-        "versionSpec": "1.*",
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+        "versionSpec": "2.*",
         "definitionType": "task"
       },
       "inputs": {
-        "solution": "corefx\\Tools\\scripts\\vstsagent\\cleanupagent.proj",
-        "msbuildLocationMethod": "version",
-        "msbuildVersion": "14.0",
-        "msbuildArchitecture": "x86",
-        "msbuildLocation": "",
-        "platform": "",
-        "configuration": "",
-        "msbuildArguments": "/p:AgentDirectory=$(Agent.HomeDirectory) /p:DoClean=$(PB_CleanAgent)",
-        "clean": "false",
-        "maximumCpuCount": "false",
-        "restoreNugetPackages": "false",
-        "logProjectEvents": "false",
-        "createLogFile": "false"
+        "targetType": "inline",
+        "filePath": "",
+        "arguments": "",
+        "script": "if (Test-Path \"$Env:AgentToolsPath\\end.ps1\") {\n   \"$Env:AgentToolsPath\\end.ps1 script found. Executing...\"\n    & $Env:AgentToolsPath\\end.ps1\n} else {\n   \"$Env:AgentToolsPath\\end.ps1 script does not exist. Moving on...\"\n}",
+        "errorActionPreference": "continue",
+        "failOnStderr": "false",
+        "ignoreLASTEXITCODE": "true",
+        "workingDirectory": ""
       }
     }
   ],
@@ -410,8 +402,20 @@
       "value": null,
       "isSecret": true
     },
+    "HelixApiAccessKey": {
+      "value": null,
+      "isSecret": true
+    },
+    "OutputCloudResultsAccessToken": {
+      "value": null,
+      "isSecret": true
+    },
     "OfficialBuildId": {
       "value": "$(Build.BuildNumber)",
+      "allowOverride": true
+    },
+    "ProductBuildId": {
+      "value": "",
       "allowOverride": true
     },
     "PB_BuildArguments": {
@@ -487,7 +491,8 @@
       "value": "dn-bot"
     },
     "PB_VsoCorefxGitUrl": {
-      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/"
+      "value": "https://$(PB_VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(PB_VsoRepositoryName)/",
+      "isSecret": true
     },
     "PB_VsoRepositoryName": {
       "value": "DotNet-CoreFX-Trusted"
@@ -523,6 +528,10 @@
     },
     "PB_AssetRootUrl": {
       "value": ""
+    },
+    "PB_UseEsrpSigning": {
+      "value": "false",
+      "allowOverride": true
     }
   },
   "demands": [
@@ -570,11 +579,17 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 36,
-    "name": "DotNet-Build",
+    "_links": {
+      "self": {
+        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330"
+      }
+    },
+    "id": 330,
+    "name": "DotNetCore-Build",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330",
     "pool": {
-      "id": 39,
-      "name": "DotNet-Build"
+      "id": 97,
+      "name": "DotNetCore-Build"
     }
   },
   "id": 893,

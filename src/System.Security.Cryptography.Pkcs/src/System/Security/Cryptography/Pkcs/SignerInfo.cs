@@ -71,6 +71,8 @@ namespace System.Security.Cryptography.Pkcs
             }
         }
 
+        internal ReadOnlyMemory<byte> GetSignatureMemory() => _signature;
+
         public byte[] GetSignature() => _signature.ToArray();
 
         public X509Certificate2 Certificate
@@ -511,7 +513,7 @@ namespace System.Security.Cryptography.Pkcs
 
                             var digestAttr = (Pkcs9MessageDigest)obj.Values[0];
 
-                            if (!contentDigest.AsSpan().SequenceEqual(digestAttr.MessageDigest.AsReadOnlySpan()))
+                            if (!contentDigest.AsSpan().SequenceEqual(digestAttr.MessageDigest))
                             {
                                 throw new CryptographicException(SR.Cryptography_BadHashValue);
                             }
@@ -539,7 +541,7 @@ namespace System.Security.Cryptography.Pkcs
             bool verifySignatureOnly)
         {
             IncrementalHash hasher = PrepareDigest();
-            CmsSignature signatureProcessor = CmsSignature.Resolve(SignatureAlgorithm.Value);
+            CmsSignature signatureProcessor = CmsSignature.ResolveAndVerifyKeyType(SignatureAlgorithm.Value, key: null);
 
             if (signatureProcessor == null)
             {
@@ -620,7 +622,7 @@ namespace System.Security.Cryptography.Pkcs
             return Helpers.GetDigestAlgorithm(DigestAlgorithm.Value);
         }
 
-        private static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
+        internal static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
         {
             var coll = new CryptographicAttributeObjectCollection();
 

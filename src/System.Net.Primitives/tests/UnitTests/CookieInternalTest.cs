@@ -43,18 +43,6 @@ namespace NetPrimitivesUnitTests
         }
 
         [Theory]
-        [InlineData("cookie_name=cookie_value")]
-        [InlineData("cookie_name=cookie_value;")]
-        [InlineData("cookie_name1=cookie_value1;cookie_name2=cookie_value2")]
-        [InlineData("cookie_name1=cookie_value1;cookie_name2=cookie_value2;")]
-        public void CookieParserGetString_SetCookieHeaderValue_Success(string cookieString)
-        {
-            var parser = new CookieParser(cookieString);
-            string actual = parser.GetString();
-            Assert.Equal(cookieString, actual);
-        }
-
-        [Theory]
         [InlineData("cookie_name=cookie_value", new[] { "cookie_name", "cookie_value" })]
         [InlineData("cookie_name=cookie_value;", new[] { "cookie_name", "cookie_value" })]
         [InlineData("cookie_name1=cookie_value1;cookie_name2=cookie_value2", new[] { "cookie_name1", "cookie_value1", "cookie_name2", "cookie_value2" })]
@@ -67,34 +55,6 @@ namespace NetPrimitivesUnitTests
             while (true)
             {
                 Cookie cookie = parser.GetServer();
-                if (cookie == null)
-                {
-                    break;
-                }
-
-                cookieCount++;
-                Assert.Equal(expectedStrings[index++], cookie.Name);
-                Assert.Equal(expectedStrings[index++], cookie.Value);
-            }
-
-            int expectedCookieCount = expectedStrings.Length >> 1;
-            Assert.Equal(expectedCookieCount, cookieCount);
-        }
-
-        [ActiveIssue(22925)]
-        [Theory]
-        [InlineData("cookie_name=cookie_value", new[] { "cookie_name", "cookie_value" })]
-        [InlineData("cookie_name=cookie_value;", new[] { "cookie_name", "cookie_value" })]
-        [InlineData("cookie_name1=cookie_value1;cookie_name2=cookie_value2", new[] { "cookie_name1", "cookie_value1", "cookie_name2", "cookie_value2" })]
-        [InlineData("cookie_name1=cookie_value1;cookie_name2=cookie_value2;", new[] { "cookie_name1", "cookie_value1", "cookie_name2", "cookie_value2" })]
-        public void CookieParserGet_SetCookieHeaderValue_Success(string cookieString, string[] expectedStrings)
-        {
-            int index = 0;
-            int cookieCount = 0;
-            var parser = new CookieParser(cookieString);
-            while (true)
-            {
-                Cookie cookie = parser.Get();
                 if (cookie == null)
                 {
                     break;

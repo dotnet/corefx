@@ -27,7 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             DependsMask = 0x10,
             Indirect = 0x12
         }
-        private readonly SymbolLoader _symbolLoader;
+
         private readonly ExpressionBinder _binder;
         private readonly TypeArray _pMethodTypeParameters;
         private readonly TypeArray _pMethodFormalParameterTypes;
@@ -81,7 +81,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static bool Infer(
             ExpressionBinder binder,
-            SymbolLoader symbolLoader,
             MethodSymbol pMethod,
             TypeArray pMethodFormalParameterTypes,
             ArgInfos pMethodArguments,
@@ -99,9 +98,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pMethodFormalParameterTypes != null);
             Debug.Assert(pMethodArguments.carg <= pMethodFormalParameterTypes.Count);
 
-            var inferrer = new MethodTypeInferrer(binder, symbolLoader,
-                pMethodFormalParameterTypes, pMethodArguments,
-                pMethod.typeVars);
+            var inferrer = new MethodTypeInferrer(
+                binder, pMethodFormalParameterTypes, pMethodArguments, pMethod.typeVars);
             bool success = inferrer.InferTypeArgs();
 
             ppInferredTypeArguments = inferrer.GetResults();
@@ -118,12 +116,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // SPEC: with an empty set of bounds.
 
         private MethodTypeInferrer(
-            ExpressionBinder exprBinder, SymbolLoader symLoader,
-            TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments,
-            TypeArray pMethodTypeParameters)
+            ExpressionBinder exprBinder, TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments, TypeArray pMethodTypeParameters)
         {
             _binder = exprBinder;
-            _symbolLoader = symLoader;
             _pMethodFormalParameterTypes = pMethodFormalParameterTypes;
             _pMethodArguments = pMethodArguments;
             _pMethodTypeParameters = pMethodTypeParameters;
@@ -142,7 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray GetResults() => GetGlobalSymbols().AllocParams(_pFixedResults);
+        private TypeArray GetResults() => TypeArray.Allocate(_pFixedResults);
 
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -1181,37 +1176,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             //TypeArray pInterfaces = null;
 
-            if (!pSource.IsStructType && !pSource.IsClassType && !pSource.IsInterfaceType && !(pSource is TypeParameterType))
+            if (pSource is AggregateType sourceAts && (sourceAts.IsStructType || sourceAts.IsClassType || sourceAts.IsInterfaceType))
             {
-                return false;
-            }
-
-            var interfaces = pSource.AllPossibleInterfaces();
-            AggregateType pInterface = null;
-            foreach (AggregateType pCurrent in interfaces)
-            {
-                if (pCurrent.OwningAggregate == pDest.OwningAggregate)
+                AggregateType iface = null;
+                foreach (AggregateType current in sourceAts.IfacesAll.Items)
                 {
-                    if (pInterface == null)
+                    if (current.OwningAggregate == pDest.OwningAggregate)
                     {
-                        pInterface = pCurrent;
-                    }
-                    else if (pInterface != pCurrent)
-                    {
-                        // Not unique. Bail out.
-                        return false;
+                        if (iface == null)
+                        {
+                            iface = current;
+                        }
+                        else if (iface != current)
+                        {
+                            // Not unique. Bail out.
+                            return false;
+                        }
                     }
                 }
-            }
-            if (pInterface == null)
-            {
-                return false;
-            }
-            LowerBoundTypeArgumentInference(pInterface, pDest);
-            return true;
-        }
 
-        ////////////////////////////////////////////////////////////////////////////////
+                if (iface != null)
+                {
+                    LowerBoundTypeArgumentInference(iface, pDest);
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private void LowerBoundTypeArgumentInference(
             AggregateType pSource, AggregateType pDest)
@@ -1485,37 +1477,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   or indirectly implements C<V1...Vk> then an exact ...
             // SPEC:  ... and U is an interface CType ...
 
-            if (!pDest.IsStructType && !pDest.IsClassType && !pDest.IsInterfaceType)
+            if (pDest is AggregateType destAts && (destAts.IsStructType || destAts.IsClassType || destAts.IsInterfaceType))
             {
-                return false;
-            }
-
-            var interfaces = pDest.AllPossibleInterfaces();
-            AggregateType pInterface = null;
-            foreach (AggregateType pCurrent in interfaces)
-            {
-                if (pCurrent.OwningAggregate == pSource.OwningAggregate)
+                AggregateType iface = null;
+                foreach (AggregateType current in destAts.IfacesAll.Items)
                 {
-                    if (pInterface == null)
+                    if (current.OwningAggregate == pSource.OwningAggregate)
                     {
-                        pInterface = pCurrent;
-                    }
-                    else if (pInterface != pCurrent)
-                    {
-                        // Not unique. Bail out.
-                        return false;
+                        if (iface == null)
+                        {
+                            iface = current;
+                        }
+                        else if (iface != current)
+                        {
+                            // Not unique. Bail out.
+                            return false;
+                        }
                     }
                 }
-            }
-            if (pInterface == null)
-            {
-                return false;
-            }
-            UpperBoundTypeArgumentInference(pInterface, pDest as AggregateType);
-            return true;
-        }
 
-        ////////////////////////////////////////////////////////////////////////////////
+                if (iface != null)
+                {
+                    UpperBoundTypeArgumentInference(iface, pDest as AggregateType);
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private void UpperBoundTypeArgumentInference(
             AggregateType pSource, AggregateType pDest)
@@ -1704,60 +1693,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // used to alter the types at the beginning of binding. that
             // way we get an accessible type, and if it so happens that
             // the selected type is inappropriate (for conversions) then
-            // we let overload resolution sort it out. 
+            // we let overload resolution sort it out.
             //
             // since we can never infer ref/out or pointer types here, we
-            // are more or less guaranteed a best accessible type. However,
-            // in the interest of safety, if it becomes impossible to
-            // choose a "best accessible" type, then we will fail type
-            // inference so we do not try to pass the inaccessible type
-            // back to overload resolution.
+            // are guaranteed a best accessible type.
 
-            CType pBestAccessible;
-            if (GetTypeManager().GetBestAccessibleType(_binder.GetSemanticChecker(), _binder.GetContext(), pBest, out pBestAccessible))
-            {
-                pBest = pBestAccessible;
-            }
-            else
-            {
-                Debug.Assert(false, "Method type inference could not find an accessible type over the best candidate in fixed");
-                return false;
-            }
-
+            _pFixedResults[iParam] = TypeManager.GetBestAccessibleType(_binder.Context.ContextForMemberLookup, pBest);
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // END RUNTIME BINDER ONLY CHANGE
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-            _pFixedResults[iParam] = pBest;
             UpdateDependenciesAfterFix(iParam);
             return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Helper methods
-        //
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-
-        private SymbolLoader GetSymbolLoader()
-        {
-            return _symbolLoader;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private TypeManager GetTypeManager()
-        {
-            return GetSymbolLoader().GetTypeManager();
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private BSYMMGR GetGlobalSymbols()
-        {
-            return GetSymbolLoader().getBSymmgr();
         }
     }
 }

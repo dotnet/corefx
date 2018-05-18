@@ -1,5 +1,10 @@
 [
   {
+    "Name": "CoreFx.Private.TestUtilities",
+    "Description": "Private package, which provides testing utility classes. The package is meant to be used when running CoreFX tests on a runtime.",
+    "CommonTypes": []
+  },
+  {
     "Name": "RuntimePackage",
     "Description": "Internal implementation package not meant for direct consumption.  Please do not reference directly.",
     "CommonTypes": []
@@ -29,7 +34,7 @@
     "Name": "Microsoft.Diagnostics.Tracing.EventSource.Redist",
     "Description": "This package includes the class Microsoft.Diagnostics.Tracing.EventSource which enables firing ETW events from managed code. This is the \"runtime\" or \"redist\" EventSource package and should be referenced directly only by other NuGet packages that need the EventSource functionality. Application developers that need this functionality should instead reference the Microsoft.Diagnostics.Tracing.EventSource NuGet package which provides an enhanced developer experience.
 
-      This package enables defining a strongly typed specification of an ETW provider that can be called by managed code. The EventSource class is also included in the .NET Framework. This package provides a newer version that has more features. It is meant to be used as a stop gap until those features it contains are ported to System.Diagnostics.Tracing.EventSource.
+      This package enables defining a strongly typed specification of an ETW provider that can be called by managed code. The EventSource class is also included in the .NET Framework, .NET Core, and netstandard2.0 in the System.Diagnostics.Tracing namespace. This package contains the latest version of EventSource and is meant to be used as a stop gap for .NET Framework developers until features and fixes are ported to System.Diagnostics.Tracing.EventSource in the .NET Framework.
 
       For more details, have a look at http://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource.aspx.
 
@@ -198,6 +203,13 @@
       "Microsoft.Win32.RegistryValueKind",
       "Microsoft.Win32.RegistryHive",
       "Microsoft.Win32.RegistryView"
+    ]
+  },
+  {
+    "Name": "Microsoft.Win32.SystemEvents",
+    "Description": "Provides access to Windows system event notifications.",
+    "CommonTypes": [
+      "Microsoft.Win32.SystemEvents"
     ]
   },
   {
@@ -893,6 +905,15 @@
     "CommonTypes": []
   },
   {
+    "Name": "System.IO.Pipelines",
+    "Description": "Single producer single consumer byte buffer management.",
+    "CommonTypes": [
+      "System.IO.Pipelines.Pipe",
+      "System.IO.Pipelines.PipeWriter",
+      "System.IO.Pipelines.PipeReader"
+    ]
+  },
+  {
     "Name": "System.IO.Pipes",
     "Description": "Provides a means for interprocess communication through anonymous and/or named pipes.",
     "CommonTypes": [
@@ -991,9 +1012,16 @@
   },
   {
     "Name": "System.Memory",
-    "Description": "Provides types for efficient low-allocation access to memory.",
+    "Description": "Provides types for efficient representation and pooling of managed, stack, and native memory segments and sequences of such segments, along with primitives to parse and format UTF-8 encoded text stored in those memory segments.",
     "CommonTypes": [
-      "System.Span"
+        "System.Span",
+        "System.ReadOnlySpan",
+        "System.Memory",
+        "System.ReadOnlyMemory",
+        "System.Buffers.MemoryPool",
+        "System.Buffers.ReadOnlySequence",
+        "System.Buffers.Text.Utf8Parser",
+        "System.Buffers.Text.Utf8Formatter"
     ]
   },
   {
@@ -1418,7 +1446,7 @@
       "System.Runtime.Caching.FileChangeMonitor",
       "System.Runtime.Caching.HostFileChangeMonitor",
       "System.Runtime.Caching.MemoryCache",
-      "System.Runtime.Caching.ObjectCache",
+      "System.Runtime.Caching.ObjectCache"
     ]
   },
   {
@@ -1498,6 +1526,14 @@
       "System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute"
+    ]
+  },
+  {
+    "Name": "System.Runtime.Intrinsics.Experimental",
+    "Description": "Provides APIs to processor specific instructions.",
+    "CommonTypes": [
+        "System.Runtime.Intrinsics.Vector128<>",
+        "System.Runtime.Intrinsics.Vector256<>"
     ]
   },
   {

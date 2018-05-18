@@ -12,7 +12,6 @@
 ** 
 ===========================================================*/
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -100,10 +99,8 @@ namespace System
         {
             string s = m_value ? TrueLiteral : FalseLiteral;
 
-            if (s.Length <= destination.Length)
+            if (s.AsSpan().TryCopyTo(destination))
             {
-                bool copied = s.AsReadOnlySpan().TryCopyTo(destination);
-                Debug.Assert(copied);
                 charsWritten = s.Length;
                 return true;
             }
@@ -178,16 +175,37 @@ namespace System
         // Static Methods
         // 
 
+        // Custom string compares for early application use by config switches, etc
+        // 
+        internal static bool IsTrueStringIgnoreCase(ReadOnlySpan<char> value)
+        {
+            return (value.Length == 4 &&
+                    (value[0] == 't' || value[0] == 'T') &&
+                    (value[1] == 'r' || value[1] == 'R') &&
+                    (value[2] == 'u' || value[2] == 'U') &&
+                    (value[3] == 'e' || value[3] == 'E'));
+        }
+
+        internal static bool IsFalseStringIgnoreCase(ReadOnlySpan<char> value)
+        {
+            return (value.Length == 5 &&
+                    (value[0] == 'f' || value[0] == 'F') &&
+                    (value[1] == 'a' || value[1] == 'A') &&
+                    (value[2] == 'l' || value[2] == 'L') &&
+                    (value[3] == 's' || value[3] == 'S') &&
+                    (value[4] == 'e' || value[4] == 'E'));
+        }
+
         // Determines whether a String represents true or false.
         // 
         public static Boolean Parse(String value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
-            return Parse(value.AsReadOnlySpan());
+            return Parse(value.AsSpan());
         }
 
         public static bool Parse(ReadOnlySpan<char> value) =>
-            TryParse(value, out bool result) ? result : throw new FormatException(SR.Format_BadBoolean);
+            TryParse(value, out bool result) ? result : throw new FormatException(SR.Format(SR.Format_BadBoolean, new string(value)));
 
         // Determines whether a String represents true or false.
         // 
@@ -199,20 +217,18 @@ namespace System
                 return false;
             }
 
-            return TryParse(value.AsReadOnlySpan(), out result);
+            return TryParse(value.AsSpan(), out result);
         }
 
         public static bool TryParse(ReadOnlySpan<char> value, out bool result)
         {
-            ReadOnlySpan<char> trueSpan = TrueLiteral.AsReadOnlySpan();
-            if (StringSpanHelpers.Equals(trueSpan, value, StringComparison.OrdinalIgnoreCase))
+            if (IsTrueStringIgnoreCase(value))
             {
                 result = true;
                 return true;
             }
 
-            ReadOnlySpan<char> falseSpan = FalseLiteral.AsReadOnlySpan();
-            if (StringSpanHelpers.Equals(falseSpan, value, StringComparison.OrdinalIgnoreCase))
+            if (IsFalseStringIgnoreCase(value))
             {
                 result = false;
                 return true;
@@ -221,13 +237,13 @@ namespace System
             // Special case: Trim whitespace as well as null characters.
             value = TrimWhiteSpaceAndNull(value);
 
-            if (StringSpanHelpers.Equals(trueSpan, value, StringComparison.OrdinalIgnoreCase))
+            if (IsTrueStringIgnoreCase(value))
             {
                 result = true;
                 return true;
             }
 
-            if (StringSpanHelpers.Equals(falseSpan, value, StringComparison.OrdinalIgnoreCase))
+            if (IsFalseStringIgnoreCase(value))
             {
                 result = false;
                 return true;

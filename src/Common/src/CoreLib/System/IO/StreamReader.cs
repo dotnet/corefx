@@ -70,20 +70,20 @@ namespace System.IO
         // We don't guarantee thread safety on StreamReader, but we should at 
         // least prevent users from trying to read anything while an Async
         // read from the same thread is in progress.
-        private volatile Task _asyncReadTask;
+        private Task _asyncReadTask = Task.CompletedTask;
 
         private void CheckAsyncTaskInProgress()
         {
             // We are not locking the access to _asyncReadTask because this is not meant to guarantee thread safety. 
             // We are simply trying to deter calling any Read APIs while an async Read from the same thread is in progress.
-
-            Task t = _asyncReadTask;
-
-            if (t != null && !t.IsCompleted)
+            if (!_asyncReadTask.IsCompleted)
             {
-                throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
+                ThrowAsyncIOInProgress();
             }
         }
+
+        private static void ThrowAsyncIOInProgress() =>
+            throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
         // StreamReader by default will ignore illegal UTF8 characters. We don't want to 
         // throw here because we want to be able to read ill-formed data without choking. 
@@ -1091,7 +1091,7 @@ namespace System.IO
                         {
                             Debug.Assert(_bytePos <= _encoding.Preamble.Length, "possible bug in _compressPreamble.  Are two threads using this StreamReader at the same time?");
                             int tmpBytePos = _bytePos;
-                            int len = await tmpStream.ReadAsync(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos, cancellationToken).ConfigureAwait(false);
+                            int len = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos), cancellationToken).ConfigureAwait(false);
                             Debug.Assert(len >= 0, "Stream.Read returned a negative number!  This is a bug in your stream class.");
 
                             if (len == 0)
@@ -1127,7 +1127,7 @@ namespace System.IO
                         {
                             Debug.Assert(_bytePos == 0, "_bytePos can be non zero only when we are trying to _checkPreamble.  Are two threads using this StreamReader at the same time?");
 
-                            _byteLen = await tmpStream.ReadAsync(tmpByteBuffer, 0, tmpByteBuffer.Length, cancellationToken).ConfigureAwait(false);
+                            _byteLen = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer), cancellationToken).ConfigureAwait(false);
 
                             Debug.Assert(_byteLen >= 0, "Stream.Read returned a negative number!  This is a bug in your stream class.");
 
@@ -1303,7 +1303,7 @@ namespace System.IO
                 {
                     Debug.Assert(_bytePos <= _encoding.Preamble.Length, "possible bug in _compressPreamble. Are two threads using this StreamReader at the same time?");
                     int tmpBytePos = _bytePos;
-                    int len = await tmpStream.ReadAsync(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos).ConfigureAwait(false);
+                    int len = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos)).ConfigureAwait(false);
                     Debug.Assert(len >= 0, "Stream.Read returned a negative number!  This is a bug in your stream class.");
 
                     if (len == 0)
@@ -1325,7 +1325,7 @@ namespace System.IO
                 else
                 {
                     Debug.Assert(_bytePos == 0, "_bytePos can be non zero only when we are trying to _checkPreamble. Are two threads using this StreamReader at the same time?");
-                    _byteLen = await tmpStream.ReadAsync(tmpByteBuffer, 0, tmpByteBuffer.Length).ConfigureAwait(false);
+                    _byteLen = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer)).ConfigureAwait(false);
                     Debug.Assert(_byteLen >= 0, "Stream.Read returned a negative number!  Bug in stream class.");
 
                     if (_byteLen == 0)  // We're at EOF

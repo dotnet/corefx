@@ -13,29 +13,53 @@
 FOR_ALL_OPENSSL_FUNCTIONS
 #undef PER_FUNCTION_BLOCK
 
+// x.x.x, considering the max number of decimal digits for each component
+static const int MaxVersionStringLength = 32;
+#define SONAME_BASE "libssl.so."
+
 static void* libssl = nullptr;
 
-bool OpenLibrary()
+static bool OpenLibrary()
 {
-    // First try the default versioned so naming as described in the OpenSSL doc
-    libssl = dlopen("libssl.so.1.0.0", RTLD_LAZY);
+    // If there is an override of the version specified using the CLR_OPENSSL_VERSION_OVERRIDE
+    // env variable, try to load that first.
+    // The format of the value in the env variable is expected to be the version numbers,
+    // like 1.0.0, 1.0.2 etc.
+    char* versionOverride = getenv("CLR_OPENSSL_VERSION_OVERRIDE");
+
+    if ((versionOverride != nullptr) && strnlen(versionOverride, MaxVersionStringLength + 1) <= MaxVersionStringLength)
+    {
+        char soName[sizeof(SONAME_BASE) + MaxVersionStringLength] = SONAME_BASE;
+
+        strcat(soName, versionOverride);
+        libssl = dlopen(soName, RTLD_LAZY);
+    }
+
+    if (libssl == nullptr)
+    {
+        // Debian 9 has dropped support for SSLv3 and so they have bumped their soname. Let's try it
+        // before trying the version 1.0.0 to make it less probable that some of our other dependencies 
+        // end up loading conflicting version of libssl.
+        libssl = dlopen("libssl.so.1.0.2", RTLD_LAZY);
+    }
+
+    if (libssl == nullptr)
+    {
+        // Now try the default versioned so naming as described in the OpenSSL doc
+        libssl = dlopen("libssl.so.1.0.0", RTLD_LAZY);
+    }
+
     if (libssl == nullptr)
     {
         // Fedora derived distros use different naming for the version 1.0.0
         libssl = dlopen("libssl.so.10", RTLD_LAZY);
     }
 
-    if (libssl == nullptr)
-    {
-        // Debian 9 has dropped support for SSLv3 and so they have bumped their soname
-        libssl = dlopen("libssl.so.1.0.2", RTLD_LAZY);
-    }
-
     return libssl != nullptr;
 }
 
 __attribute__((constructor))
-void InitializeOpenSSLShim()
+static void InitializeOpenSSLShim()
 {
     if (!OpenLibrary())
     {
@@ -53,7 +77,7 @@ void InitializeOpenSSLShim()
 }
 
 __attribute__((destructor))
-void ShutdownOpenSSLShim()
+static void ShutdownOpenSSLShim()
 {
     if (libssl != nullptr)
     {

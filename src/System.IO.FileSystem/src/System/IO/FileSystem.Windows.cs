@@ -66,7 +66,7 @@ namespace System.IO
             List<string> stackDir = new List<string>();
 
             // Attempt to figure out which directories don't exist, and only
-            // create the ones we need.  Note that InternalExists may fail due
+            // create the ones we need.  Note that FileExists may fail due
             // to Win32 ACL's preventing us from seeing a directory, and this
             // isn't threadsafe.
 
@@ -75,7 +75,7 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathHelpers.EndsInDirectorySeparator(fullPath))
+            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath))
                 length--;
 
             int lengthRoot = PathInternal.GetRootLength(fullPath);
@@ -120,7 +120,7 @@ namespace System.IO
                     int currentError = Marshal.GetLastWin32Error();
                     // While we tried to avoid creating directories that don't
                     // exist above, there are at least two cases that will 
-                    // cause us to see ERROR_ALREADY_EXISTS here.  InternalExists 
+                    // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
                     // can fail because we didn't have permission to the 
                     // directory.  Secondly, another thread or process could
                     // create the directory between the time we check and the
@@ -131,7 +131,7 @@ namespace System.IO
                     else
                     {
                         // If there's a file in this directory's place, or if we have ERROR_ACCESS_DENIED when checking if the directory already exists throw.
-                        if (File.InternalExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
+                        if (FileExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
                         {
                             firstError = currentError;
                             errorString = name;
@@ -183,38 +183,6 @@ namespace System.IO
                     && ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
         }
 
-        public static IEnumerable<string> EnumeratePaths(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
-        {
-            FindEnumerableFactory.NormalizeInputs(ref fullPath, ref searchPattern);
-            switch (searchTarget)
-            {
-                case SearchTarget.Files:
-                    return FindEnumerableFactory.UserFiles(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Directories:
-                    return FindEnumerableFactory.UserDirectories(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Both:
-                    return FindEnumerableFactory.UserEntries(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(searchTarget));
-            }
-        }
-
-        public static IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
-        {
-            FindEnumerableFactory.NormalizeInputs(ref fullPath, ref searchPattern);
-            switch (searchTarget)
-            {
-                case SearchTarget.Directories:
-                    return FindEnumerableFactory.DirectoryInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Files:
-                    return FindEnumerableFactory.FileInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                case SearchTarget.Both:
-                    return FindEnumerableFactory.FileSystemInfos(fullPath, searchPattern, searchOption == SearchOption.AllDirectories);
-                default:
-                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
-            }
-        }
-
         /// <summary>
         /// Returns 0 on success, otherwise a Win32 error code.  Note that
         /// classes should use -1 as the uninitialized state for dataInitialized.
@@ -225,7 +193,7 @@ namespace System.IO
             int errorCode = Interop.Errors.ERROR_SUCCESS;
 
             // Neither GetFileAttributes or FindFirstFile like trailing separators
-            path = path.TrimEnd(PathHelpers.DirectorySeparatorChars);
+            path = PathInternal.TrimEndingDirectorySeparator(path);
 
             using (DisableMediaInsertionPrompt.Create())
             {
@@ -289,36 +257,6 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
 
             return (FileAttributes)data.dwFileAttributes;
-        }
-
-        public static string GetCurrentDirectory()
-        {
-            StringBuilder sb = StringBuilderCache.Acquire(Interop.Kernel32.MAX_PATH + 1);
-            if (Interop.Kernel32.GetCurrentDirectory(sb.Capacity, sb) == 0)
-                throw Win32Marshal.GetExceptionForLastWin32Error();
-            string currentDirectory = sb.ToString();
-            // Note that if we have somehow put our command prompt into short
-            // file name mode (i.e. by running edlin or a DOS grep, etc), then
-            // this will return a short file name.
-            if (currentDirectory.IndexOf('~') >= 0)
-            {
-                int r = Interop.Kernel32.GetLongPathName(currentDirectory, sb, sb.Capacity);
-                if (r == 0 || r >= Interop.Kernel32.MAX_PATH)
-                {
-                    int errorCode = Marshal.GetLastWin32Error();
-                    if (r >= Interop.Kernel32.MAX_PATH)
-                        errorCode = Interop.Errors.ERROR_FILENAME_EXCED_RANGE;
-                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND &&
-                        errorCode != Interop.Errors.ERROR_INVALID_FUNCTION &&  // by design - enough said.
-                        errorCode != Interop.Errors.ERROR_ACCESS_DENIED)
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
-                }
-                currentDirectory = sb.ToString();
-            }
-            StringBuilderCache.Release(sb);
-
-            return currentDirectory;
         }
 
         public static DateTimeOffset GetCreationTime(string fullPath)
@@ -417,9 +355,17 @@ namespace System.IO
 
         public static void RemoveDirectory(string fullPath, bool recursive)
         {
-            // Do not recursively delete through reparse points.
-            if (!recursive || IsReparsePoint(fullPath))
+            if (!recursive)
             {
+                RemoveDirectoryInternal(fullPath, topLevel: true);
+                return;
+            }
+
+            Interop.Kernel32.WIN32_FIND_DATA findData = new Interop.Kernel32.WIN32_FIND_DATA();
+            GetFindData(fullPath, ref findData);
+            if (IsNameSurrogateReparsePoint(ref findData))
+            {
+                // Don't recurse
                 RemoveDirectoryInternal(fullPath, topLevel: true);
                 return;
             }
@@ -427,24 +373,38 @@ namespace System.IO
             // We want extended syntax so we can delete "extended" subdirectories and files
             // (most notably ones with trailing whitespace or periods)
             fullPath = PathInternal.EnsureExtendedPrefix(fullPath);
-
-            Interop.Kernel32.WIN32_FIND_DATA findData = new Interop.Kernel32.WIN32_FIND_DATA();
             RemoveDirectoryRecursive(fullPath, ref findData, topLevel: true);
         }
 
-        private static bool IsReparsePoint(string fullPath)
+        private static void GetFindData(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
         {
-            Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
-            if (errorCode != Interop.Errors.ERROR_SUCCESS)
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(PathInternal.TrimEndingDirectorySeparator(fullPath), ref findData))
             {
-                // File not found doesn't make much sense coming from a directory delete.
-                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                    errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
+                if (handle.IsInvalid)
+                {
+                    int errorCode = Marshal.GetLastWin32Error();
+                    // File not found doesn't make much sense coming from a directory delete.
+                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                        errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
+                }
             }
+        }
 
-            return (((FileAttributes)data.dwFileAttributes & FileAttributes.ReparsePoint) != 0);
+        private static bool IsNameSurrogateReparsePoint(ref Interop.Kernel32.WIN32_FIND_DATA data)
+        {
+            // Name surrogates are reparse points that point to other named entities local to the file system.
+            // Reparse points can be used for other types of files, notably OneDrive placeholder files. We
+            // should treat reparse points that are not name surrogates as any other directory, e.g. recurse
+            // into them. Surrogates should just be detached.
+            // 
+            // See
+            // https://github.com/dotnet/corefx/issues/24250
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365511.aspx
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365197.aspx
+
+            return ((FileAttributes)data.dwFileAttributes & FileAttributes.ReparsePoint) != 0
+                && (data.dwReserved0 & 0x20000000) != 0; // IsReparseTagNameSurrogate
         }
 
         private static void RemoveDirectoryRecursive(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData, bool topLevel)
@@ -452,7 +412,7 @@ namespace System.IO
             int errorCode;
             Exception exception = null;
 
-            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(Directory.EnsureTrailingDirectorySeparator(fullPath) + "*", ref findData))
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(Path.Join(fullPath, "*"), ref findData))
             {
                 if (handle.IsInvalid)
                     throw Win32Marshal.GetExceptionForLastWin32Error(fullPath);
@@ -481,9 +441,10 @@ namespace System.IO
                             continue;
 
                         string fileName = findData.cFileName.GetStringFromFixedBuffer();
-                        if ((findData.dwFileAttributes & (int)FileAttributes.ReparsePoint) == 0)
+
+                        if (!IsNameSurrogateReparsePoint(ref findData))
                         {
-                            // Not a reparse point, recurse.
+                            // Not a reparse point, or the reparse point isn't a name surrogate, recurse.
                             try
                             {
                                 RemoveDirectoryRecursive(
@@ -499,12 +460,13 @@ namespace System.IO
                         }
                         else
                         {
-                            // Reparse point, don't recurse, just remove. (dwReserved0 is documented for this flag)
+                            // Name surrogate reparse point, don't recurse, simply remove the directory.
+                            // If a mount point, we have to delete the mount point first.
                             if (findData.dwReserved0 == Interop.Kernel32.IOReparseOptions.IO_REPARSE_TAG_MOUNT_POINT)
                             {
                                 // Mount point. Unmount using full path plus a trailing '\'.
                                 // (Note: This doesn't remove the underlying directory)
-                                string mountPoint = Path.Combine(fullPath, fileName + PathHelpers.DirectorySeparatorCharAsString);
+                                string mountPoint = Path.Join(fullPath, fileName, PathInternal.DirectorySeparatorCharAsString);
                                 if (!Interop.Kernel32.DeleteVolumeMountPoint(mountPoint) && exception == null)
                                 {
                                     errorCode = Marshal.GetLastWin32Error();
@@ -591,20 +553,6 @@ namespace System.IO
                 {
                     throw Win32Marshal.GetExceptionForLastWin32Error(fullPath);
                 }
-            }
-        }
-
-        public static void SetCurrentDirectory(string fullPath)
-        {
-            if (!Interop.Kernel32.SetCurrentDirectory(fullPath))
-            {
-                // If path doesn't exist, this sets last error to 2 (File 
-                // not Found).  LEGACY: This may potentially have worked correctly
-                // on Win9x, maybe.
-                int errorCode = Marshal.GetLastWin32Error();
-                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                    errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
             }
         }
 

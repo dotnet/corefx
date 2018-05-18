@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal sealed partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         // ----------------------------------------------------------------------------
         // This class takes an EXPRMEMGRP and a set of arguments and binds the arguments
@@ -17,8 +16,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             public MethPropWithInst BestResult { get; set; }
 
-            public MethPropWithInst AmbiguousResult { get; set; }
-
             public MethPropWithInst InaccessibleResult { get; }
 
             public MethPropWithInst UninferableResult { get; }
@@ -26,7 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public GroupToArgsBinderResult()
             {
                 BestResult = new MethPropWithInst();
-                AmbiguousResult = new MethPropWithInst();
                 InaccessibleResult = new MethPropWithInst();
                 UninferableResult = new MethPropWithInst();
             }

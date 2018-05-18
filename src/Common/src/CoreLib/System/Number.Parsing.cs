@@ -300,7 +300,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static int ParseInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info)
+        internal static unsafe int ParseInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info)
         {
             NumberBuffer number = default;
             int i = 0;
@@ -324,7 +324,7 @@ namespace System
             return i;
         }
 
-        internal unsafe static long ParseInt64(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe long ParseInt64(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             long i = 0;
@@ -348,7 +348,7 @@ namespace System
             return i;
         }
 
-        internal unsafe static uint ParseUInt32(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe uint ParseUInt32(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             uint i = 0;
@@ -373,7 +373,7 @@ namespace System
             return i;
         }
 
-        internal unsafe static ulong ParseUInt64(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe ulong ParseUInt64(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             ulong i = 0;
@@ -396,8 +396,12 @@ namespace System
             return i;
         }
 
-        private unsafe static bool ParseNumber(ref char* str, NumberStyles options, ref NumberBuffer number, NumberFormatInfo numfmt, bool parseDecimal)
+        private static unsafe bool ParseNumber(ref char* str, char* strEnd, NumberStyles options, ref NumberBuffer number, NumberFormatInfo numfmt, bool parseDecimal)
         {
+            Debug.Assert(str != null);
+            Debug.Assert(strEnd != null);
+            Debug.Assert(str <= strEnd);
+
             const int StateSign = 0x0001;
             const int StateParens = 0x0002;
             const int StateDigits = 0x0004;
@@ -430,7 +434,7 @@ namespace System
 
             int state = 0;
             char* p = str;
-            char ch = *p;
+            char ch = p < strEnd ? *p : '\0';
             char* next;
 
             while (true)
@@ -439,7 +443,7 @@ namespace System
                 // "-Kr 1231.47" is legal but "- 1231.47" is not.
                 if (!IsWhite(ch) || (options & NumberStyles.AllowLeadingWhite) == 0 || ((state & StateSign) != 0 && ((state & StateCurrency) == 0 && numfmt.NumberNegativePattern != 2)))
                 {
-                    if ((((options & NumberStyles.AllowLeadingSign) != 0) && (state & StateSign) == 0) && ((next = MatchChars(p, numfmt.PositiveSign)) != null || ((next = MatchChars(p, numfmt.NegativeSign)) != null && (number.sign = true))))
+                    if ((((options & NumberStyles.AllowLeadingSign) != 0) && (state & StateSign) == 0) && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || ((next = MatchChars(p, strEnd, numfmt.NegativeSign)) != null && (number.sign = true))))
                     {
                         state |= StateSign;
                         p = next - 1;
@@ -449,7 +453,7 @@ namespace System
                         state |= StateSign | StateParens;
                         number.sign = true;
                     }
-                    else if (currSymbol != null && (next = MatchChars(p, currSymbol)) != null)
+                    else if (currSymbol != null && (next = MatchChars(p, strEnd, currSymbol)) != null)
                     {
                         state |= StateCurrency;
                         currSymbol = null;
@@ -462,7 +466,7 @@ namespace System
                         break;
                     }
                 }
-                ch = *++p;
+                ch = ++p < strEnd ? *p : '\0';
             }
             int digCount = 0;
             int digEnd = 0;
@@ -493,12 +497,12 @@ namespace System
                         number.scale--;
                     }
                 }
-                else if (((options & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberDecimalSeparator)) != null))
+                else if (((options & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, numfmt.NumberDecimalSeparator)) != null))
                 {
                     state |= StateDecimal;
                     p = next - 1;
                 }
-                else if (((options & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, numfmt.NumberGroupSeparator)) != null))
+                else if (((options & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, numfmt.NumberGroupSeparator)) != null))
                 {
                     p = next - 1;
                 }
@@ -506,7 +510,7 @@ namespace System
                 {
                     break;
                 }
-                ch = *++p;
+                ch = ++p < strEnd ? *p : '\0';
             }
 
             bool negExp = false;
@@ -517,14 +521,14 @@ namespace System
                 if ((ch == 'E' || ch == 'e') && ((options & NumberStyles.AllowExponent) != 0))
                 {
                     char* temp = p;
-                    ch = *++p;
-                    if ((next = MatchChars(p, numfmt.positiveSign)) != null)
+                    ch = ++p < strEnd ? *p : '\0';
+                    if ((next = MatchChars(p, strEnd, numfmt.positiveSign)) != null)
                     {
-                        ch = *(p = next);
+                        ch = (p = next) < strEnd ? *p : '\0';
                     }
-                    else if ((next = MatchChars(p, numfmt.negativeSign)) != null)
+                    else if ((next = MatchChars(p, strEnd, numfmt.negativeSign)) != null)
                     {
-                        ch = *(p = next);
+                        ch = (p = next) < strEnd ? *p : '\0';
                         negExp = true;
                     }
                     if (ch >= '0' && ch <= '9')
@@ -533,13 +537,13 @@ namespace System
                         do
                         {
                             exp = exp * 10 + (ch - '0');
-                            ch = *++p;
+                            ch = ++p < strEnd ? *p : '\0';
                             if (exp > 1000)
                             {
                                 exp = 9999;
                                 while (ch >= '0' && ch <= '9')
                                 {
-                                    ch = *++p;
+                                    ch = ++p < strEnd ? *p : '\0';
                                 }
                             }
                         } while (ch >= '0' && ch <= '9');
@@ -552,14 +556,14 @@ namespace System
                     else
                     {
                         p = temp;
-                        ch = *p;
+                        ch = p < strEnd ? *p : '\0';
                     }
                 }
                 while (true)
                 {
                     if (!IsWhite(ch) || (options & NumberStyles.AllowTrailingWhite) == 0)
                     {
-                        if (((options & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, numfmt.PositiveSign)) != null || (((next = MatchChars(p, numfmt.NegativeSign)) != null) && (number.sign = true))))
+                        if (((options & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, strEnd, numfmt.PositiveSign)) != null || (((next = MatchChars(p, strEnd, numfmt.NegativeSign)) != null) && (number.sign = true))))
                         {
                             state |= StateSign;
                             p = next - 1;
@@ -568,7 +572,7 @@ namespace System
                         {
                             state &= ~StateParens;
                         }
-                        else if (currSymbol != null && (next = MatchChars(p, currSymbol)) != null)
+                        else if (currSymbol != null && (next = MatchChars(p, strEnd, currSymbol)) != null)
                         {
                             currSymbol = null;
                             p = next - 1;
@@ -578,7 +582,7 @@ namespace System
                             break;
                         }
                     }
-                    ch = *++p;
+                    ch = ++p < strEnd ? *p : '\0';
                 }
                 if ((state & StateParens) == 0)
                 {
@@ -601,7 +605,7 @@ namespace System
             return false;
         }
 
-        internal unsafe static bool TryParseInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out int result)
+        internal static unsafe bool TryParseInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out int result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -628,7 +632,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static bool TryParseInt64(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out long result)
+        internal static unsafe bool TryParseInt64(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out long result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -655,7 +659,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static bool TryParseUInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out uint result)
+        internal static unsafe bool TryParseUInt32(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out uint result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -682,7 +686,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static bool TryParseUInt64(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out ulong result)
+        internal static unsafe bool TryParseUInt64(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out ulong result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -709,7 +713,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static decimal ParseDecimal(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe decimal ParseDecimal(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             decimal result = 0;
@@ -723,7 +727,7 @@ namespace System
             return result;
         }
 
-        internal unsafe static double ParseDouble(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe double ParseDouble(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             double d = 0;
@@ -734,15 +738,15 @@ namespace System
                 //Check the three with which we're concerned and rethrow if it's not one of
                 //those strings.
                 ReadOnlySpan<char> sTrim = value.Trim();
-                if (StringSpanHelpers.Equals(sTrim, numfmt.PositiveInfinitySymbol))
+                if (sTrim.EqualsOrdinal(numfmt.PositiveInfinitySymbol))
                 {
                     return double.PositiveInfinity;
                 }
-                if (StringSpanHelpers.Equals(sTrim, numfmt.NegativeInfinitySymbol))
+                if (sTrim.EqualsOrdinal(numfmt.NegativeInfinitySymbol))
                 {
                     return double.NegativeInfinity;
                 }
-                if (StringSpanHelpers.Equals(sTrim, numfmt.NaNSymbol))
+                if (sTrim.EqualsOrdinal(numfmt.NaNSymbol))
                 {
                     return double.NaN;
                 }
@@ -757,7 +761,7 @@ namespace System
             return d;
         }
 
-        internal unsafe static float ParseSingle(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
+        internal static unsafe float ParseSingle(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt)
         {
             NumberBuffer number = default;
             double d = 0;
@@ -768,15 +772,15 @@ namespace System
                 //Check the three with which we're concerned and rethrow if it's not one of
                 //those strings.
                 ReadOnlySpan<char> sTrim = value.Trim();
-                if (StringSpanHelpers.Equals(sTrim, numfmt.PositiveInfinitySymbol))
+                if (sTrim.EqualsOrdinal(numfmt.PositiveInfinitySymbol))
                 {
                     return float.PositiveInfinity;
                 }
-                if (StringSpanHelpers.Equals(sTrim, numfmt.NegativeInfinitySymbol))
+                if (sTrim.EqualsOrdinal(numfmt.NegativeInfinitySymbol))
                 {
                     return float.NegativeInfinity;
                 }
-                if (StringSpanHelpers.Equals(sTrim, numfmt.NaNSymbol))
+                if (sTrim.EqualsOrdinal(numfmt.NaNSymbol))
                 {
                     return float.NaN;
                 }
@@ -795,7 +799,7 @@ namespace System
             return castSingle;
         }
 
-        internal unsafe static bool TryParseDecimal(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out decimal result)
+        internal static unsafe bool TryParseDecimal(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out decimal result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -812,7 +816,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static bool TryParseDouble(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out double result)
+        internal static unsafe bool TryParseDouble(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out double result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -829,7 +833,7 @@ namespace System
             return true;
         }
 
-        internal unsafe static bool TryParseSingle(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out float result)
+        internal static unsafe bool TryParseSingle(ReadOnlySpan<char> value, NumberStyles options, NumberFormatInfo numfmt, out float result)
         {
             NumberBuffer number = default;
             result = 0;
@@ -859,7 +863,7 @@ namespace System
             fixed (char* stringPointer = &MemoryMarshal.GetReference(str))
             {
                 char* p = stringPointer;
-                if (!ParseNumber(ref p, options, ref number, info, parseDecimal)
+                if (!ParseNumber(ref p, p + str.Length, options, ref number, info, parseDecimal)
                     || (p - stringPointer < str.Length && !TrailingZeros(str, (int)(p - stringPointer))))
                 {
                     throw new FormatException(SR.Format_InvalidString);
@@ -873,7 +877,7 @@ namespace System
             fixed (char* stringPointer = &MemoryMarshal.GetReference(str))
             {
                 char* p = stringPointer;
-                if (!ParseNumber(ref p, options, ref number, numfmt, parseDecimal)
+                if (!ParseNumber(ref p, p + str.Length, options, ref number, numfmt, parseDecimal)
                     || (p - stringPointer < str.Length && !TrailingZeros(str, (int)(p - stringPointer))))
                 {
                     return false;
@@ -897,17 +901,17 @@ namespace System
             return true;
         }
 
-        private unsafe static char* MatchChars(char* p, string str)
+        private static unsafe char* MatchChars(char* p, char* pEnd, string str)
         {
             fixed (char* stringPointer = str)
             {
-                return MatchChars(p, stringPointer);
+                return MatchChars(p, pEnd, stringPointer);
             }
         }
 
-        private unsafe static char* MatchChars(char* p, char* str)
+        private static unsafe char* MatchChars(char* p, char* pEnd, char* str)
         {
-            Debug.Assert(p != null && str != null);
+            Debug.Assert(p != null && pEnd != null && p <= pEnd && str != null);
 
             if (*str == '\0')
             {
@@ -917,8 +921,13 @@ namespace System
             // We only hurt the failure case
             // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 as a
             // space character we use 0x20 space character instead to mean the same.
-            while (*p == *str || (*str == '\u00a0' && *p == '\u0020'))
+            while (true)
             {
+                char cp = p < pEnd ? *p : '\0';
+                if (cp != *str && !(*str == '\u00a0' && cp == '\u0020'))
+                {
+                    break;
+                }
                 p++;
                 str++;
                 if (*str == '\0') return p;

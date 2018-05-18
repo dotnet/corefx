@@ -23,87 +23,6 @@ namespace System.Net.NameResolution.PalTests
         }
 
         [Fact]
-        public void GetHostByName_LocalHost()
-        {
-            IPHostEntry hostEntry = NameResolutionPal.GetHostByName("localhost");
-            Assert.NotNull(hostEntry);
-            Assert.NotNull(hostEntry.HostName);
-            Assert.NotNull(hostEntry.AddressList);
-            Assert.NotNull(hostEntry.Aliases);
-        }
-
-        public static object[][] InvalidHostNames = new object[][] {
-            new object[] { ":" },
-            new object[] { "..." }
-        };
-
-        [Theory, MemberData(nameof(InvalidHostNames))]
-        public void GetHostByName_InvalidHostName_Throws(string hostName)
-        {
-            Assert.ThrowsAny<SocketException>(() => NameResolutionPal.GetHostByName(hostName));
-        }
-
-        [Fact]
-        public void GetHostByName_HostName()
-        {
-            string hostName = NameResolutionPal.GetHostName();
-            Assert.NotNull(hostName);
-
-            IPHostEntry hostEntry = NameResolutionPal.GetHostByName(hostName);
-            Assert.NotNull(hostEntry);
-            Assert.NotNull(hostEntry.HostName);
-            Assert.NotNull(hostEntry.AddressList);
-            Assert.NotNull(hostEntry.Aliases);
-        }
-
-        [Fact]
-        public void GetHostByAddr_LocalHost()
-        {
-            Assert.NotNull(NameResolutionPal.GetHostByAddr(new IPAddress(0x0100007f)));
-        }
-
-        [Fact]
-        public void GetHostByName_LocalHost_GetHostByAddr()
-        {
-            IPHostEntry hostEntry1 = NameResolutionPal.GetHostByName("localhost");
-            Assert.NotNull(hostEntry1);
-            IPHostEntry hostEntry2 = NameResolutionPal.GetHostByAddr(hostEntry1.AddressList[0]);
-            Assert.NotNull(hostEntry2);
-
-            IPAddress[] list1 = hostEntry1.AddressList;
-            IPAddress[] list2 = hostEntry2.AddressList;
-
-            for (int i = 0; i < list1.Length; i++)
-            {
-                Assert.NotEqual(-1, Array.IndexOf(list2, list1[i]));
-            }
-        }
-
-        [Fact]
-        public void GetHostByName_HostName_GetHostByAddr()
-        {
-            IPHostEntry hostEntry1 = NameResolutionPal.GetHostByName(System.Net.Test.Common.Configuration.Http.Http2Host);
-            Assert.NotNull(hostEntry1);
-
-            IPAddress[] list1 = hostEntry1.AddressList;
-            Assert.InRange(list1.Length, 1, Int32.MaxValue);
-
-            foreach (IPAddress addr1 in list1)
-            {
-                IPHostEntry hostEntry2 = NameResolutionPal.GetHostByAddr(addr1);
-                Assert.NotNull(hostEntry2);
-
-                IPAddress[] list2 = hostEntry2.AddressList;
-                Assert.InRange(list2.Length, 1, list1.Length);
-
-                foreach (IPAddress addr2 in list2)
-                {
-                    Assert.NotEqual(-1, Array.IndexOf(list1, addr2));
-                }
-            }
-        }
-
-        [Fact]
         public void TryGetAddrInfo_LocalHost()
         {
             IPHostEntry hostEntry;
@@ -125,6 +44,13 @@ namespace System.Net.NameResolution.PalTests
             IPHostEntry hostEntry;
             int nativeErrorCode;
             SocketError error = NameResolutionPal.TryGetAddrInfo(hostName, out hostEntry, out nativeErrorCode);
+            if (error == SocketError.HostNotFound && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
+            {
+                // On Unix, we are not guaranteed to be able to resove the local host. The ability to do so depends on the 
+                // machine configurations, which varies by distro and is often inconsistent.
+                return;
+            }
+            
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(hostEntry);
             Assert.NotNull(hostEntry.HostName);

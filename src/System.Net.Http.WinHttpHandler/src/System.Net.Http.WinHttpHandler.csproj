@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,6 +10,7 @@
     <!-- Although we have a NS configuration, the actual UWP implementation is a shim over WinRT: so just validate against OneCore -->
     <UWPCompatible>false</UWPCompatible>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
+    <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
@@ -29,11 +30,9 @@
          up item called CompileItem and then just include it here. -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="@(CompileItem)" />
-    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
-      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\HttpVersionInternal.cs">
-      <Link>Common\System\Net\HttpVersionInternal.cs</Link>
+    <Compile Include="System\Net\Http\NetEventSource.WinHttpHandler.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
@@ -42,6 +41,7 @@
   <ItemGroup>
     <Reference Include="System.Buffers" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />

@@ -47,6 +47,9 @@
     <Compile Include="System\Diagnostics\ThreadWaitReason.cs" />
     <Compile Include="System\Diagnostics\MonitoringDescriptionAttribute.cs" />
     <Compile Include="System\Collections\Specialized\StringDictionaryWrapper.cs" />
+    <Compile Include="..\..\Common\src\System\PasteArguments.cs">
+      <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EnumProcessModules.cs">
@@ -90,8 +93,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.CloseHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.PERF_INFO.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.PERF_INFO.cs</Link>
@@ -203,10 +206,7 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Encoding.Constants.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.Encoding.Constants.cs</Link>
-    </Compile>
+    </Compile>    
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetConsoleCP.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetConsoleCP.cs</Link>
     </Compile>
@@ -216,11 +216,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CreateProcessWithLogon.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.CreateProcessWithLogon.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
-      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LUID.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.LUID.cs</Link>
@@ -243,14 +243,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.ProcessOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.MultiByteToWideChar.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Interop.UNICODE_STRING.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WideCharToMultiByte.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.WideCharToMultiByte.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.WideCharToMultiByte.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.WideCharToMultiByte.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Text\ConsoleEncoding.cs">
       <Link>Common\System\Text\ConsoleEncoding.cs</Link>
@@ -288,8 +288,8 @@
     <Compile Include="System\Diagnostics\ProcessStartInfo.Unix.cs" />
     <Compile Include="System\Diagnostics\ProcessWaitHandle.Unix.cs" />
     <Compile Include="System\Diagnostics\ProcessWaitState.Unix.cs" />
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
       <Link>Common\System\IO\StringParser.cs</Link>
@@ -297,10 +297,10 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Close.cs">
       <Link>Common\Interop\Unix\Interop.Close.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
@@ -318,6 +318,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPid.cs">
       <Link>Common\Interop\Unix\Interop.GetPid.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPwUid.cs">
+      <Link>Common\Interop\Unix\Interop.GetPwUid.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSetPriority.cs">
       <Link>Common\Interop\Unix\Interop.GetSetPriority.cs</Link>
     </Compile>
@@ -327,17 +330,23 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Kill.cs">
       <Link>Common\Interop\Unix\Interop.Kill.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadLink.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.ReadLink.cs">
       <Link>Common\Interop\Unix\Interop.ReadLink.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RegisterForSigChld.cs">
+      <Link>Common\Interop\Unix\Interop.RegisterForRegisterForSigChld.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ResourceLimits.cs">
       <Link>Common\Interop\Unix\Interop.ResourceLimits.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.POpen.cs">
       <Link>Common\Interop\Unix\Interop.POpen.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitId.cs">
+      <Link>Common\Interop\Unix\Interop.WaitId.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitPid.cs">
       <Link>Common\Interop\Unix\Interop.WaitPid.cs</Link>
@@ -352,15 +361,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SchedGetSetAffinity.cs">
       <Link>Common\Interop\Linux\Interop.SchedGetSetAffinity.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
-      <Link>Common\System\Collections\Generic\ArrayBuilder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
-      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
-      <Link>Common\System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Text\ReusableTextReader.cs">
       <Link>Common\System\Text\ReusableTextReader.cs</Link>
@@ -413,7 +413,7 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetTimestamp.cs">
       <Link>Common\Unix\System.Native\Interop.GetTimestamp.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Unix\System.Native\Interop.Stat.cs</Link>
     </Compile>
   </ItemGroup>
@@ -436,6 +436,7 @@
     <Reference Include="System.Diagnostics.FileVersionInfo" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Linq" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />

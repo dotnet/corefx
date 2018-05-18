@@ -65,7 +65,7 @@ namespace System.Reflection.Metadata.Tests
             mdtNestedClass = 0x29000000,
         }
 
-        internal static readonly Dictionary<byte[], GCHandle> peImages = new Dictionary<byte[], GCHandle>();
+        private static readonly Dictionary<byte[], GCHandle> s_peImages = new Dictionary<byte[], GCHandle>();
 
         internal static unsafe MetadataReader GetMetadataReader(byte[] peImage, bool isModule = false, MetadataReaderOptions options = MetadataReaderOptions.Default, MetadataStringDecoder decoder = null)
         {
@@ -83,16 +83,195 @@ namespace System.Reflection.Metadata.Tests
 
         internal static unsafe GCHandle GetPinnedPEImage(byte[] peImage)
         {
-            GCHandle pinned;
-            if (!peImages.TryGetValue(peImage, out pinned))
+            lock (s_peImages)
             {
-                peImages.Add(peImage, pinned = GCHandle.Alloc(peImage, GCHandleType.Pinned));
-            }
+                GCHandle pinned;
+                if (!s_peImages.TryGetValue(peImage, out pinned))
+                {
+                    s_peImages.Add(peImage, pinned = GCHandle.Alloc(peImage, GCHandleType.Pinned));
+                }
 
-            return pinned;
+                return pinned;
+            }
+        }
+
+        internal static unsafe int IndexOf(byte[] peImage, byte[] toFind, int start)
+        {
+            for (int i = 0; i < peImage.Length - toFind.Length; i++)
+            {
+                if (toFind.SequenceEqual(peImage.Slice(i + start, i + start + toFind.Length)))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         #endregion
+
+        [Fact]
+        public unsafe void InvalidSignature()
+        {
+            byte* ptr = stackalloc byte[4];
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader(ptr, 16));
+        }
+
+        [Fact]
+        public unsafe void InvalidFindMscorlibAssemblyRefNoProjection()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //find index for mscorlib
+            int mscorlibIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("mscorlib"), headers.MetadataStartOffset);
+            Assert.NotEqual(mscorlibIndex, -1);
+            //mutate mscorlib
+            peImage[mscorlibIndex + headers.MetadataStartOffset] = 0xFF;
+
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+        }
+
+        [Fact]
+        public unsafe void InvalidStreamHeaderLengths()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            // mutate CLR to reach MetadataKind.WindowsMetadata
+            // find CLR
+            int clrIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
+            Assert.NotEqual(clrIndex, -1);
+            //find 5, This is the streamcount and is the last thing that should be read befor the test.
+            int fiveIndex = IndexOf(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
+            Assert.NotEqual(fiveIndex, -1);
+
+            peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
+
+            //Not enough space for VersionString
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 2, MetadataReaderOptions.Default));
+            //NotEnoughSpaceForStreamHeaderName for index of five + uint16 + COR20Constants.MinimumSizeofStreamHeader
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader + 2, MetadataReaderOptions.Default));
+            //SR.StreamHeaderTooSmall
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader , MetadataReaderOptions.Default));
+
+        }
+
+        [Fact]
+        public unsafe void InvalidSpaceForStreams()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])NetModule.AppCS.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //find 5, This is the streamcount we'll change to one to leave out loops.
+            int fiveIndex = IndexOf(peImage, new byte[] { 5 }, headers.MetadataStartOffset);
+            Assert.NotEqual(fiveIndex, -1);
+            Array.Copy(BitConverter.GetBytes((ushort)1), 0, peImage, fiveIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ushort)1).Length);
+
+            string[] streamNames= new string[]
+            {
+                COR20Constants.StringStreamName, COR20Constants.BlobStreamName, COR20Constants.GUIDStreamName,
+                COR20Constants.UserStringStreamName, COR20Constants.CompressedMetadataTableStreamName,
+                COR20Constants.UncompressedMetadataTableStreamName, COR20Constants.MinimalDeltaMetadataTableStreamName,
+                COR20Constants.StandalonePdbStreamName, "#invalid"
+            };
+
+            foreach (string name in streamNames)
+            {
+                Array.Copy(Encoding.ASCII.GetBytes(name), 0, peImage, fiveIndex + 10 + headers.MetadataStartOffset, Encoding.ASCII.GetBytes(name).Length);
+                peImage[fiveIndex + 10 + headers.MetadataStartOffset + name.Length] = (byte)0;
+                Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 15 + name.Length));
+            }
+
+
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), 0, peImage, fiveIndex + 10 + headers.MetadataStartOffset, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName).Length);
+            peImage[fiveIndex + 10 + headers.MetadataStartOffset + COR20Constants.MinimalDeltaMetadataTableStreamName.Length] = (byte)0;
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+
+        }
+
+        [Fact]
+        public unsafe void InvalidExternalTableMask()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+
+            //38654710855 is the external table mask from PortablePdbs.DocumentsPdb
+            int externalTableMaskIndex = IndexOf(peImage, BitConverter.GetBytes(38654710855), 0);
+            Assert.NotEqual(externalTableMaskIndex, -1);
+
+            Array.Copy(BitConverter.GetBytes(38654710855 + 1), 0, peImage, externalTableMaskIndex, BitConverter.GetBytes(38654710855 + 1).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length));
+        }
+
+        [Fact]
+        public unsafe void IsMinimalDelta()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            //Find COR20Constants.StringStreamName to be changed to COR20Constants.MinimalDeltaMetadataTableStreamName
+            int stringIndex = IndexOf(peImage, Encoding.ASCII.GetBytes(COR20Constants.StringStreamName), 0);
+            Assert.NotEqual(stringIndex, -1);
+            //find remainingBytes to be increased because we are changing to uncompressed
+            int remainingBytesIndex = IndexOf(peImage, BitConverter.GetBytes(180), 0);
+            Assert.NotEqual(remainingBytesIndex, -1);
+            //find compressed to change to uncompressed
+            int compressedIndex = IndexOf(peImage, Encoding.ASCII.GetBytes(COR20Constants.CompressedMetadataTableStreamName), 0);
+            Assert.NotEqual(compressedIndex, -1);
+
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), 0, peImage, stringIndex, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName).Length);
+            peImage[stringIndex + COR20Constants.MinimalDeltaMetadataTableStreamName.Length] = (byte)0;
+            Array.Copy(BitConverter.GetBytes(250), 0, peImage, remainingBytesIndex, BitConverter.GetBytes(250).Length);
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName), 0, peImage, compressedIndex, Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName).Length);
+
+            MetadataReader minimalDeltaReader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+            Assert.True(minimalDeltaReader.IsMinimalDelta);
+        }
+
+
+        [Fact]
+        public unsafe void InvalidMetaDataTableHeaders()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])NetModule.AppCS.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //1392 is the remaining bytes from NetModule.AppCS
+            int remainingBytesIndex = IndexOf(peImage, BitConverter.GetBytes(1392), headers.MetadataStartOffset);
+            Assert.NotEqual(remainingBytesIndex, -1);
+            //14057656686423 is the presentTables from NetModule.AppCS, must be after remainingBytesIndex
+            int presentTablesIndex = IndexOf(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
+            Assert.NotEqual(presentTablesIndex, -1);
+
+            //Set this.ModuleTable.NumberOfRows to 0
+            Array.Copy(BitConverter.GetBytes((ulong)0), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16, BitConverter.GetBytes((ulong)0).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //set row counts greater than TokenTypeIds.RIDMask
+            Array.Copy(BitConverter.GetBytes((ulong)16777216), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16, BitConverter.GetBytes((ulong)16777216).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //set remaining bytes smaller than required for row counts.
+            Array.Copy(BitConverter.GetBytes(25), 0, peImage, remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes(25).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //14057656686424 is a value to make (presentTables & ~validTables) != 0 but not (presentTables & (ulong)(TableMask.PtrTables | TableMask.EnCMap)) != 0
+            Array.Copy(BitConverter.GetBytes((ulong)14057656686424), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)14057656686424).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //14066246621015 makes (presentTables & ~validTables) != 0 fail
+            Array.Copy(BitConverter.GetBytes((ulong)14066246621015), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)14066246621015).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //set remaining bytes smaller than MetadataStreamConstants.SizeOfMetadataTableHeader
+            Array.Copy(BitConverter.GetBytes(1), 0, peImage, remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes(1).Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+        }
 
         [Fact]
         public unsafe void EmptyMetadata()
@@ -251,8 +430,8 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
             Assert.Equal("Class1", reader.GetString(winrtDef.Name));
             Assert.Equal(
-                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
-                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit, 
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 winrtDef.Attributes);
 
             var strReader = reader.GetBlobReader(winrtDef.Name);
@@ -265,7 +444,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(StringKind.WinRTPrefixed, clrDef.Name.StringKind);
             Assert.Equal("<WinRT>Class1", reader.GetString(clrDef.Name));
             Assert.Equal(
-                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
                 TypeAttributes.Import | TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 clrDef.Attributes);
 
@@ -462,7 +641,7 @@ namespace System.Reflection.Metadata.Tests
         /// <summary>
         /// ModuleRef Table Columns:
         ///     Name (offset to #String)
-        /// -----------------------------    
+        /// -----------------------------
         /// File Table Columns:
         ///     Name (offset to #String)
         ///     Flags (4 byte uint)
@@ -478,7 +657,7 @@ namespace System.Reflection.Metadata.Tests
                 // ModuleCS01.mod - 2B 56 10 8B 34 A1 DC CD CC B5 CF 66 5E 43 94 5E 09 9F 34 A3
                 new byte[] { 0x2B, 0x56, 0x10, 0x8B, 0x34, 0xA1, 0xDC, 0xCD, 0xCC, 0xB5, 0xCF, 0x66, 0x5E, 0x43, 0x94, 0x5E, 0x09, 0x9F, 0x34, 0xA3 },
 
-                // ModuleVB01.mod - A7 F0 25 28 0F 3C 29 2E 83 90 F0 FA A7 13 8E E4 54 16 D7 A0 
+                // ModuleVB01.mod - A7 F0 25 28 0F 3C 29 2E 83 90 F0 FA A7 13 8E E4 54 16 D7 A0
                 new byte[] { 0xA7, 0xF0, 0x25, 0x28, 0x0F, 0x3C, 0x29, 0x2E, 0x83, 0x90, 0xF0, 0xFA, 0xA7, 0x13, 0x8E, 0xE4, 0x54, 0x16, 0xD7, 0xA0 }
             };
 
@@ -520,7 +699,7 @@ namespace System.Reflection.Metadata.Tests
         /// <summary>
         /// ModuleRef Table Columns:
         ///     Name (offset to #String)
-        /// -----------------------------    
+        /// -----------------------------
         /// File Table Columns:
         ///     Name (offset to #String)
         ///     Flags (4 byte uint)
@@ -534,7 +713,7 @@ namespace System.Reflection.Metadata.Tests
             var expHashs = new byte[][]
             {
                 // ModuleCS00.mod
-                // new byte [] { 0xd4, 0x6b, 0xec, 0x25, 0x47, 0x01, 0x20, 0x30, 0x05, 0x42, 0x34, 0x4b, 0x31, 0x22, 0x44, 0xd8, 0x1c, 0x87, 0xd0, 0x98 }, 
+                // new byte [] { 0xd4, 0x6b, 0xec, 0x25, 0x47, 0x01, 0x20, 0x30, 0x05, 0x42, 0x34, 0x4b, 0x31, 0x22, 0x44, 0xd8, 0x1c, 0x87, 0xd0, 0x98 },
             };
 
             // ModuleVB01
@@ -837,7 +1016,7 @@ namespace System.Reflection.Metadata.Tests
 
             // var expNest = new bool[] { false, false, false, true, true, true, true };
             // count is calc-ed by the smaller of last row of table OR next row in EventMap table
-            // TODO: check with DEV - too much work to figure out, hard code for now - property, event 
+            // TODO: check with DEV - too much work to figure out, hard code for now - property, event
             var expMemberCount = new uint[]
             {
                 /*<Module>*/0, 0, /*ModVBClass*/ 2, 0, /*ModVBStruct*/ 0, 1,
@@ -916,13 +1095,13 @@ namespace System.Reflection.Metadata.Tests
         /// of it) report correct values for their child namespaces, types, etc. All namespaces in the module are expected
         /// to be listed in the allNamespaces array. Additionally, the global namespace is expected to have type definitions
         /// for GlobalClassA, GlobalClassB, and Module. No type forwarder declarations are expected.
-        /// 
+        ///
         /// All namespaces that aren't the global NS are expected to have type definitions equal to the array
         /// @namespaceName.Split('.')
         /// So, ns1.Ns2.NS3 is expected to have type definitions
         /// {"ns1", "Ns2", "NS3"}.
-        /// 
-        /// definitionExceptions and forwarderExceptions may be used to override the default expectations. Pass in 
+        ///
+        /// definitionExceptions and forwarderExceptions may be used to override the default expectations. Pass in
         /// namespace (key) and what is expected (list of strings) for each exception.
         /// </summary>
         private void ValidateNamespaceChildren(
@@ -1802,7 +1981,7 @@ namespace System.Reflection.Metadata.Tests
         {
             // CSModule1
             var expTDef = new int[] { 0x02000007, 0x2000008 }; // class other who implements the interface
-            var expIfs = new int[] { 0x1b000001, 0x1b000002 }; // TypeSpec table 
+            var expIfs = new int[] { 0x1b000001, 0x1b000002 }; // TypeSpec table
 
             var reader = GetMetadataReader(NetModule.ModuleCS01, true);
             Assert.Equal(2, reader.InterfaceImplTable.NumberOfRows);
@@ -1999,7 +2178,7 @@ namespace System.Reflection.Metadata.Tests
             // class other who implements the interface
             // InteropImpl
             var comClassRids = new int[] { 2, 3, 4 }; // , 0x02000002, 0x2000003, 0x2000004, };
-            // TypeDef/Ref/Spec table 
+            // TypeDef/Ref/Spec table
             var comInterface = new int[] { 0x01000002, 0x01000004, 0x01000005, };
 
             // CSModule1
@@ -2162,7 +2341,7 @@ namespace System.Reflection.Metadata.Tests
         /// MethodSemantics Table
         ///     Semantic (2-byte unsigned)
         ///     Method (RID to method table)
-        ///     Association (Token)    
+        ///     Association (Token)
         /// </summary>
         [Fact]
         public void ValidateMethodSemanticsTable()
@@ -2462,6 +2641,23 @@ namespace System.Reflection.Metadata.Tests
             // Note that ilasm doesn't retain the order in which other accessors were specified in IL,
             // so if the DLL resource is rebuilt from IL this test may need to be adjusted.
             Assert.Equal(new[] { "resume_Notification", "other_Notification", "suspend_Notification" }, otherAccessorNames);
+        }
+
+        [Fact]
+        public void DebugMetadataHeader()
+        {
+            var pdbBlob = PortablePdbs.DocumentsPdb;
+            using (var provider = MetadataReaderProvider.FromPortablePdbStream(new MemoryStream(pdbBlob)))
+            {
+                var reader = provider.GetMetadataReader();
+
+                Assert.Equal(default, reader.DebugMetadataHeader.EntryPoint);
+                AssertEx.Equal(new byte[] { 0x89, 0x03, 0x86, 0xAD, 0xFF, 0x27, 0x56, 0x46, 0x9F, 0x3F, 0xE2, 0x18, 0x4B, 0xEF, 0xFC, 0xC0, 0xBE, 0x0C, 0x52, 0xA0 }, reader.DebugMetadataHeader.Id);
+                Assert.Equal(0x7c, reader.DebugMetadataHeader.IdStartOffset);
+
+                var slice = pdbBlob.AsSpan(reader.DebugMetadataHeader.IdStartOffset, reader.DebugMetadataHeader.Id.Length);
+                AssertEx.Equal(reader.DebugMetadataHeader.Id, slice.ToArray());
+            }
         }
 
         [Fact]

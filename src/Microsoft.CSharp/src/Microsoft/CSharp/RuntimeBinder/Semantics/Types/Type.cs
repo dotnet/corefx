@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -103,8 +104,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         [ExcludeFromCodeCoverage] // Should only be called through override.
         public virtual AggregateType UnderlyingEnumType => throw Error.InternalCompilerError();
 
-        public virtual bool IsUnsigned => false;
-
         // Pointer types (or arrays of them) are the only unsafe types.
         // Note that generics may not be instantiated with pointer types
         public virtual bool IsUnsafe() => false;
@@ -124,5 +123,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public virtual bool IsNonNullableValueType => false;
 
         public virtual bool IsReferenceType => false;
+
+        [ExcludeFromCodeCoverage] // Should only be called through override.
+        public virtual AggregateType GetAts()
+        {
+            Debug.Fail("Bad type for AsAggregateType");
+            return null;
+        }
     }
 }

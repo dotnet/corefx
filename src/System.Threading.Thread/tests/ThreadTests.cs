@@ -18,7 +18,7 @@ namespace System.Threading.Threads.Tests
         public static string HostRunnerTest = HostRunner;
     }
 
-    public static class ThreadTests 
+    public static partial class ThreadTests 
     {
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
         private const int ExpectedTimeoutMilliseconds = ThreadTestHelpers.ExpectedTimeoutMilliseconds;
@@ -26,6 +26,11 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void ConstructorTest()
         {
+            const int SmallStackSize = 64 << 10; // 64 KB, currently accepted in all supported platforms, and is the PAL minimum
+            const int LargeStackSize = 2 << 20; // 2 MB, see https://github.com/dotnet/coreclr/issues/17170
+
+            int pageSizeBytes = Environment.SystemPageSize;
+
             Action<Thread> startThreadAndJoin =
                 t =>
                 {
@@ -38,22 +43,25 @@ namespace System.Threading.Threads.Tests
                 {
                     // Try to stack-allocate an array to verify that close to the expected amount of stack space is actually
                     // available
-                    int bufferSizeBytes = Math.Max(16 << 10, stackSizeBytes - (64 << 10));
+                    int bufferSizeBytes = Math.Max(16 << 10, stackSizeBytes - SmallStackSize);
                     unsafe
                     {
                         byte* buffer = stackalloc byte[bufferSizeBytes];
-                        Volatile.Write(ref buffer[0], 0xff);
+                        for (int i = 0; i < bufferSizeBytes; i += pageSizeBytes)
+                        {
+                            Volatile.Write(ref buffer[i], 0xff);
+                        }
                         Volatile.Write(ref buffer[bufferSizeBytes - 1], 0xff);
                     }
                 };
             startThreadAndJoin(new Thread(() => verifyStackSize(0)));
             startThreadAndJoin(new Thread(() => verifyStackSize(0), 0));
-            startThreadAndJoin(new Thread(() => verifyStackSize(64 << 10), 64 << 10)); // 64 KB
-            startThreadAndJoin(new Thread(() => verifyStackSize(16 << 20), 16 << 20)); // 16 MB
+            startThreadAndJoin(new Thread(() => verifyStackSize(SmallStackSize), SmallStackSize));
+            startThreadAndJoin(new Thread(() => verifyStackSize(LargeStackSize), LargeStackSize));
             startThreadAndJoin(new Thread(state => verifyStackSize(0)));
             startThreadAndJoin(new Thread(state => verifyStackSize(0), 0));
-            startThreadAndJoin(new Thread(state => verifyStackSize(64 << 10), 64 << 10)); // 64 KB
-            startThreadAndJoin(new Thread(state => verifyStackSize(16 << 20), 16 << 20)); // 16 MB
+            startThreadAndJoin(new Thread(state => verifyStackSize(SmallStackSize), SmallStackSize));
+            startThreadAndJoin(new Thread(state => verifyStackSize(LargeStackSize), LargeStackSize));
 
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null));
             Assert.Throws<ArgumentNullException>(() => new Thread((ThreadStart)null, 0));
@@ -506,12 +514,43 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void NameTest()
         {
-            var t = new Thread(() => { });
+            string name = Guid.NewGuid().ToString("N");
+            Action waitForThread;
+            var t =
+                ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
+                {
+                    var ct = Thread.CurrentThread;
+                    Assert.Equal(name, ct.Name);
+                    Assert.Throws<InvalidOperationException>(() => ct.Name = null);
+                    Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
+                    Assert.Equal(name, ct.Name);
+                });
+            t.IsBackground = true;
             Assert.Null(t.Name);
-            t.Name = "a";
-            Assert.Equal("a", t.Name);
-            Assert.Throws<InvalidOperationException>(() => t.Name = "b");
-            Assert.Equal("a", t.Name);
+            t.Name = null;
+            t.Name = null;
+            Assert.Null(t.Name);
+            t.Name = name;
+            Assert.Equal(name, t.Name);
+            Assert.Throws<InvalidOperationException>(() => t.Name = null);
+            Assert.Throws<InvalidOperationException>(() => t.Name = name + "b");
+            Assert.Equal(name, t.Name);
+            t.Start();
+            waitForThread();
+
+            ThreadTestHelpers.RunTestInBackgroundThread(() =>
+            {
+                var ct = Thread.CurrentThread;
+                Assert.Null(ct.Name);
+                ct.Name = null;
+                ct.Name = null;
+                Assert.Null(ct.Name);
+                ct.Name = name;
+                Assert.Equal(name, ct.Name);
+                Assert.Throws<InvalidOperationException>(() => ct.Name = null);
+                Assert.Throws<InvalidOperationException>(() => ct.Name = name + "b");
+                Assert.Equal(name, ct.Name);
+            });
         }
 
         [Fact]
@@ -893,7 +932,12 @@ namespace System.Threading.Threads.Tests
         {
             var e = new AutoResetEvent(false);
             Action waitForThread;
-            var t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, e.CheckedWait);
+            Thread t = null;
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, () =>
+                {
+                    e.CheckedWait();
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             Assert.Throws<InvalidOperationException>(() => t.Start(null));
             Assert.Throws<InvalidOperationException>(() => t.Start(t));
@@ -915,17 +959,29 @@ namespace System.Threading.Threads.Tests
             Assert.Throws<ThreadStateException>(() => t.Start(null));
             Assert.Throws<ThreadStateException>(() => t.Start(t));
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Null(parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Null(parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start();
             waitForThread();
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Null(parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Null(parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start(null);
             waitForThread();
 
-            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter => Assert.Equal(t, parameter));
+            t = ThreadTestHelpers.CreateGuardedThread(out waitForThread, parameter =>
+                {
+                    Assert.Same(t, parameter);
+                    Assert.Same(t, Thread.CurrentThread);
+                });
             t.IsBackground = true;
             t.Start(t);
             waitForThread();

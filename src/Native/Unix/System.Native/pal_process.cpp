@@ -32,10 +32,6 @@
 // Validate that our Signals enum values are correct for the platform
 static_assert(PAL_SIGKILL == SIGKILL, "");
 
-// Validate that our WaitPidOptions enum values are correct for the platform
-static_assert(PAL_WNOHANG == WNOHANG, "");
-static_assert(PAL_WUNTRACED == WUNTRACED, "");
-
 // Validate that our SysLogPriority values are correct for the platform
 static_assert(PAL_LOG_EMERG == LOG_EMERG, "");
 static_assert(PAL_LOG_ALERT == LOG_ALERT, "");
@@ -151,6 +147,9 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t redirectStdin,
                                       int32_t redirectStdout,
                                       int32_t redirectStderr,
+                                      int32_t setCredentials,
+                                      uint32_t userId,
+                                      uint32_t groupId,
                                       int32_t* childPid,
                                       int32_t* stdinFd,
                                       int32_t* stdoutFd,
@@ -170,7 +169,7 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0)
+    if ((redirectStdin & ~1) != 0 || (redirectStdout & ~1) != 0 || (redirectStderr & ~1) != 0 || (setCredentials & ~1) != 0)
     {
         assert(false && "Boolean redirect* inputs must be 0 or 1.");
         errno = EINVAL;
@@ -233,6 +232,14 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
             ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
         }
 
+        if (setCredentials)
+        {
+            if (setgid(groupId) == -1 || setuid(userId) == -1)
+            {
+                ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+            }
+        }
+
         // Change to the designated working directory, if one was specified
         if (nullptr != cwd)
         {
@@ -289,6 +296,13 @@ done:
         CloseIfOpen(stdinFds[WRITE_END_OF_PIPE]);
         CloseIfOpen(stdoutFds[READ_END_OF_PIPE]);
         CloseIfOpen(stderrFds[READ_END_OF_PIPE]);
+
+        // Reap child
+        if (processId > 0)
+        {
+            int status;
+            waitpid(processId, &status, 0);
+        }
 
         *stdinFd = -1;
         *stdoutFd = -1;
@@ -353,7 +367,12 @@ static int32_t ConvertRLimitResourcesPalToPlatform(RLimitResources value)
 static rlim_t ConvertFromManagedRLimitInfinityToPalIfNecessary(uint64_t value)
 {
     // rlim_t type can vary per platform, so we also treat anything outside its range as infinite.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma clang diagnostic ignored "-Wtautological-type-limit-compare"
     if (value == UINT64_MAX || value > std::numeric_limits<rlim_t>::max())
+#pragma clang diagnostic pop
         return RLIM_INFINITY;
 
     return static_cast<rlim_t>(value);
@@ -431,33 +450,48 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
     syslog(static_cast<int>(priority), message, arg1);
 }
 
-extern "C" int32_t SystemNative_WaitPid(int32_t pid, int32_t* status, WaitPidOptions options)
+extern "C" int32_t SystemNative_WaitIdAnyExitedNoHangNoWait()
 {
-    assert(status != nullptr);
-
+    siginfo_t siginfo;
     int32_t result;
-    while (CheckInterrupted(result = waitpid(pid, status, static_cast<int>(options))));
+    while (CheckInterrupted(result = waitid(P_ALL, 0, &siginfo, WEXITED | WNOHANG | WNOWAIT)));
+    if (result == -1 && errno == ECHILD)
+    {
+        // The calling process has no existing unwaited-for child processes.
+        result = 0;
+    }
+    else if (result == 0 && siginfo.si_signo == SIGCHLD)
+    {
+        result = siginfo.si_pid;
+    }
     return result;
 }
 
-extern "C" int32_t SystemNative_WExitStatus(int32_t status)
+extern "C" int32_t SystemNative_WaitPidExitedNoHang(int32_t pid, int32_t* exitCode)
 {
-    return WEXITSTATUS(status);
-}
+    assert(exitCode != nullptr);
 
-extern "C" int32_t SystemNative_WIfExited(int32_t status)
-{
-    return WIFEXITED(status);
-}
-
-extern "C" int32_t SystemNative_WIfSignaled(int32_t status)
-{
-    return WIFSIGNALED(status);
-}
-
-extern "C" int32_t SystemNative_WTermSig(int32_t status)
-{
-    return WTERMSIG(status);
+    int32_t result;
+    int status;
+    while (CheckInterrupted(result = waitpid(pid, &status, WNOHANG)));
+    if (result > 0)
+    {
+        if (WIFEXITED(status))
+        {
+            // the child terminated normally.
+            *exitCode = WEXITSTATUS(status);
+        }
+        else if (WIFSIGNALED(status))
+        {
+            // child process was terminated by a signal.
+            *exitCode = 128 + WTERMSIG(status);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    return result;
 }
 
 extern "C" int64_t SystemNative_PathConf(const char* path, PathConfName name)

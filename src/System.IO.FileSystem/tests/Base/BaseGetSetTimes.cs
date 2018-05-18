@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
@@ -14,6 +15,8 @@ namespace System.IO.Tests
 
         public abstract T GetExistingItem();
         public abstract T GetMissingItem();
+
+        public abstract string GetItemPath(T item);
 
         public abstract IEnumerable<TimeFunction> TimeFunctions(bool requiresRoundtripping = false);
 
@@ -68,23 +71,82 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(26349, TestPlatforms.AnyUnix)]
-        public void TimesIncludeMillisecondPart()
+        [PlatformSpecific(TestPlatforms.Linux)] // Windows tested below, and OSX does not currently support millisec granularity
+        public void TimesIncludeMillisecondPart_Linux()
         {
             T item = GetExistingItem();
+
+            string driveFormat = new DriveInfo(GetItemPath(item)).DriveFormat;
+
             Assert.All(TimeFunctions(), (function) =>
             {
                 var msec = 0;
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 5; i++)
                 {
-                    msec = function.Getter(item).Millisecond;
+                    DateTime time = function.Getter(item);
+                    msec = time.Millisecond;
+
                     if (msec != 0)
                         break;
+
+                    // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                    // not support millisecond granularity.
+
+                    // If it's 1/1000, or low granularity, this may help:
+                    Thread.Sleep(1234);
+
+                    // If it's the OS/Filesystem often returns 0 for the millisecond part, this may
+                    // help prove it. This should only be written 1/1000 runs, unless the test is going to
+                    // fail.
+                    Console.WriteLine($"## TimesIncludeMillisecondPart got a file time of {time.ToString("o")} on {driveFormat}");
 
                     item = GetExistingItem(); // try a new file/directory
                 }
 
                 Assert.NotEqual(0, msec);
+            });
+        }
+
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Breaking out Windows as it passes no problem there
+        public void TimesIncludeMillisecondPart_Windows()
+        {
+            T item = GetExistingItem();
+            Assert.All(TimeFunctions(), (function) =>
+            {
+                var msec = 0;
+                for (int i = 0; i < 5; i++)
+                {
+                    DateTime time = function.Getter(item);
+                    msec = time.Millisecond;
+                    if (msec != 0)
+                        break;
+
+                    // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                    // not support millisecond granularity.
+
+                    // If it's 1/1000, or low granularity, this may help:
+                    Thread.Sleep(1234);
+
+                    item = GetExistingItem(); // try a new file/directory
+                }
+
+                Assert.NotEqual(0, msec);
+            });
+        }
+
+        [Fact]
+        // OSX does not currently support millisec granularity: use this test as a canary to flag
+        // if this ever changes so we can enable the actual test
+        [PlatformSpecific(TestPlatforms.OSX)]
+        public void TimesIncludeMillisecondPart_OSX()
+        {
+            T item = GetExistingItem();
+            Assert.All(TimeFunctions(), (function) =>
+            {
+                DateTime time = function.Getter(item);
+                Assert.Equal(0, time.Millisecond);
             });
         }
 

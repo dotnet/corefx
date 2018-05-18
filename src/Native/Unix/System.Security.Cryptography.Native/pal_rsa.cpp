@@ -35,9 +35,17 @@ extern "C" RSA* CryptoNative_DecodeRsaPublicKey(const uint8_t* buf, int32_t len)
 
 static int GetOpenSslPadding(RsaPadding padding)
 {
-    assert(padding == Pkcs1 || padding == OaepSHA1);
+    assert(padding == Pkcs1 || padding == OaepSHA1 || padding == NoPadding);
 
-    return padding == Pkcs1 ? RSA_PKCS1_PADDING : RSA_PKCS1_OAEP_PADDING;
+    switch (padding)
+    {
+        case Pkcs1:
+            return RSA_PKCS1_PADDING;
+        case OaepSHA1:
+            return RSA_PKCS1_OAEP_PADDING;
+        case NoPadding:
+            return RSA_NO_PADDING;
+    }
 }
 
 static int HasNoPrivateKey(RSA* rsa)
@@ -51,7 +59,7 @@ static int HasNoPrivateKey(RSA* rsa)
     // The method has descibed itself as having the private key external to the structure.
     // That doesn't mean it's actually present, but we can't tell.
     if (meth->flags & RSA_FLAG_EXT_PKEY)
-       return 0;
+        return 0;
 
     // In the event that there's a middle-ground where we report failure when success is expected,
     // one could do something like check if the RSA_METHOD intercepts all private key operations:
@@ -91,6 +99,22 @@ CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, R
 
     int openSslPadding = GetOpenSslPadding(padding);
     return RSA_private_decrypt(flen, from, to, rsa, openSslPadding);
+}
+
+extern "C" int32_t CryptoNative_RsaSignPrimitive(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa)
+{
+    if (HasNoPrivateKey(rsa))
+    {
+        ERR_PUT_error(ERR_LIB_RSA, RSA_F_RSA_PRIVATE_ENCRYPT, RSA_R_VALUE_MISSING, __FILE__, __LINE__);
+        return -1;
+    }
+
+    return RSA_private_encrypt(flen, from, to, rsa, RSA_NO_PADDING);
+}
+
+extern "C" int32_t CryptoNative_RsaVerificationPrimitive(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa)
+{
+    return RSA_public_decrypt(flen, from, to, rsa, RSA_NO_PADDING);
 }
 
 extern "C" int32_t CryptoNative_RsaSize(RSA* rsa)
@@ -191,7 +215,7 @@ extern "C" int32_t CryptoNative_GetRsaParameters(const RSA* rsa,
     return 1;
 }
 
-static void SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
+static int32_t SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
 {
     assert(rsaFieldAddress != nullptr);
     if (rsaFieldAddress)
@@ -199,16 +223,21 @@ static void SetRsaParameter(BIGNUM** rsaFieldAddress, uint8_t* buffer, int32_t b
         if (!buffer || !bufferLength)
         {
             *rsaFieldAddress = nullptr;
+            return 1;
         }
         else
         {
             BIGNUM* bigNum = BN_bin2bn(buffer, bufferLength, nullptr);
             *rsaFieldAddress = bigNum;
+
+            return bigNum != nullptr;
         }
     }
+
+    return 0;
 }
 
-extern "C" void CryptoNative_SetRsaParameters(RSA* rsa,
+extern "C" int32_t CryptoNative_SetRsaParameters(RSA* rsa,
                                               uint8_t* n,
                                               int32_t nLength,
                                               uint8_t* e,
@@ -229,15 +258,16 @@ extern "C" void CryptoNative_SetRsaParameters(RSA* rsa,
     if (!rsa)
     {
         assert(false);
-        return;
+        return 0;
     }
 
-    SetRsaParameter(&rsa->n, n, nLength);
-    SetRsaParameter(&rsa->e, e, eLength);
-    SetRsaParameter(&rsa->d, d, dLength);
-    SetRsaParameter(&rsa->p, p, pLength);
-    SetRsaParameter(&rsa->dmp1, dmp1, dmp1Length);
-    SetRsaParameter(&rsa->q, q, qLength);
-    SetRsaParameter(&rsa->dmq1, dmq1, dmq1Length);
-    SetRsaParameter(&rsa->iqmp, iqmp, iqmpLength);
+    return 
+        SetRsaParameter(&rsa->n, n, nLength) &&
+        SetRsaParameter(&rsa->e, e, eLength) &&
+        SetRsaParameter(&rsa->d, d, dLength) &&
+        SetRsaParameter(&rsa->p, p, pLength) &&
+        SetRsaParameter(&rsa->dmp1, dmp1, dmp1Length) &&
+        SetRsaParameter(&rsa->q, q, qLength) &&
+        SetRsaParameter(&rsa->dmq1, dmq1, dmq1Length) &&
+        SetRsaParameter(&rsa->iqmp, iqmp, iqmpLength);
 }

@@ -227,7 +227,7 @@ namespace System.Runtime.Serialization
         private Exception CreateInvalidPrimitiveTypeException(Type type)
         {
             return new InvalidDataContractException(SR.Format(
-                type.IsInterface ? SR.InterfaceTypeCannotBeCreated : SR.InvalidPrimitiveType,
+                type.IsInterface ? SR.InterfaceTypeCannotBeCreated : SR.InvalidPrimitiveType_Serialization,
                 DataContract.GetClrTypeFullName(type)));
         }
 
@@ -502,7 +502,7 @@ namespace System.Runtime.Serialization
         public virtual byte[] ReadContentAsBase64()
         {
             if (isEndOfEmptyElement)
-                return new byte[0];
+                return Array.Empty<byte>();
 
             if (dictionaryReader == null)
             {

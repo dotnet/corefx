@@ -77,12 +77,29 @@ namespace System.Net.Security
             _innerStream = innerStream;
         }
 
-        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions)
+        /// <summary>Set as the _exception when the instance is disposed.</summary>
+        private static readonly ExceptionDispatchInfo s_disposedSentinel = ExceptionDispatchInfo.Capture(new ObjectDisposedException(nameof(SslStream)));
+
+        private void ThrowIfExceptional()
         {
-            if (_exception != null)
+            ExceptionDispatchInfo e = _exception;
+            if (e != null)
             {
-                _exception.Throw();
+                // If the stored exception just indicates disposal, throw a new ODE rather than the stored one,
+                // so as to not continually build onto the shared exception's stack.
+                if (ReferenceEquals(e, s_disposedSentinel))
+                {
+                    throw new ObjectDisposedException(nameof(SslStream));
+                }
+
+                // Throw the stored exception.
+                e.Throw();
             }
+        }
+
+        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
+        {
+            ThrowIfExceptional();
 
             if (Context != null && Context.IsValidContext)
             {
@@ -99,15 +116,14 @@ namespace System.Net.Security
                 throw new ArgumentNullException(nameof(sslClientAuthenticationOptions.TargetHost));
             }
 
-            if (sslClientAuthenticationOptions.TargetHost.Length == 0)
-            {
-                sslClientAuthenticationOptions.TargetHost = "?" + Interlocked.Increment(ref s_uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
-            }
-
             _exception = null;
             try
             {
-                _sslAuthenticationOptions = new SslAuthenticationOptions(sslClientAuthenticationOptions);
+                _sslAuthenticationOptions = new SslAuthenticationOptions(sslClientAuthenticationOptions, remoteCallback, localCallback);
+                if (_sslAuthenticationOptions.TargetHost.Length == 0)
+                {
+                    _sslAuthenticationOptions.TargetHost = "?" + Interlocked.Increment(ref s_uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
+                }
                 _context = new SecureChannel(_sslAuthenticationOptions);
             }
             catch (Win32Exception e)
@@ -116,12 +132,9 @@ namespace System.Net.Security
             }
         }
 
-        internal void ValidateCreateContext(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
-            if (_exception != null)
-            {
-                _exception.Throw();
-            }
+            ThrowIfExceptional();
 
             if (Context != null && Context.IsValidContext)
             {
@@ -133,15 +146,11 @@ namespace System.Net.Security
                 throw new InvalidOperationException(SR.net_auth_client_server);
             }
 
-            if (sslServerAuthenticationOptions.ServerCertificate == null)
-            {
-                throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
-            }
-
             _exception = null;
+            _sslAuthenticationOptions = sslAuthenticationOptions;
+
             try
             {
-                _sslAuthenticationOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
                 _context = new SecureChannel(_sslAuthenticationOptions);
             }
             catch (Win32Exception e)
@@ -401,7 +410,7 @@ namespace System.Net.Security
             }
         }
 
-        private ExceptionDispatchInfo SetException(Exception e)
+        private void SetException(Exception e)
         {
             Debug.Assert(e != null, $"Expected non-null Exception to be passed to {nameof(SetException)}");
 
@@ -410,12 +419,7 @@ namespace System.Net.Security
                 _exception = ExceptionDispatchInfo.Capture(e);
             }
 
-            if (_exception != null && Context != null)
-            {
-                Context.Close();
-            }
-
-            return _exception;
+            Context?.Close();
         }
 
         private bool HandshakeCompleted
@@ -436,10 +440,7 @@ namespace System.Net.Security
 
         internal void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
-            if (_exception != null)
-            {
-                _exception.Throw();
-            }
+            ThrowIfExceptional();
 
             if (authSuccessCheck && !IsAuthenticated)
             {
@@ -467,11 +468,9 @@ namespace System.Net.Security
         //
         internal void Close()
         {
-            _exception = ExceptionDispatchInfo.Capture(new ObjectDisposedException("SslStream"));
-            if (Context != null)
-            {
-                Context.Close();
-            }
+            _exception = s_disposedSentinel;
+            Context?.Close();
+            _secureStream?.Dispose();
         }
 
         internal SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
@@ -668,14 +667,12 @@ namespace System.Net.Security
                 _Framing = Framing.Unknown;
                 _handshakeCompleted = false;
 
-                if (SetException(e).SourceException == e)
+                SetException(e);
+                if (_exception.SourceException != e)
                 {
-                    throw;
+                   ThrowIfExceptional();
                 }
-                else
-                {
-                    _exception.Throw();
-                }
+                throw;
             }
             finally
             {
@@ -734,7 +731,8 @@ namespace System.Net.Security
                 _Framing = Framing.Unknown;
                 _handshakeCompleted = false;
 
-                SetException(e).Throw();
+                SetException(e);
+                ThrowIfExceptional();
             }
         }
 
@@ -1286,7 +1284,7 @@ namespace System.Net.Security
                     AsyncProtocolRequest request = (AsyncProtocolRequest)_queuedReadStateRequest;
                     request.Buffer = renegotiateBuffer;
                     _queuedReadStateRequest = null;
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncResumeHandshakeRead), request);
+                    ThreadPool.QueueUserWorkItem(s => s.sslState.AsyncResumeHandshakeRead(s.request), (sslState: this, request), preferLocal: false);
                 }
             }
         }
@@ -1384,7 +1382,7 @@ namespace System.Net.Security
                     taskCompletionSource.SetResult(0);
                     break;
                 default:
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncResumeHandshake), obj);
+                    ThreadPool.QueueUserWorkItem(s => s.sslState.AsyncResumeHandshake(s.obj), (sslState: this, obj), preferLocal: false);
                     break;
             }
         }
@@ -1748,9 +1746,8 @@ namespace System.Net.Security
         //
         // Called with no user stack.
         //
-        private void AsyncResumeHandshakeRead(object state)
+        private void AsyncResumeHandshakeRead(AsyncProtocolRequest asyncRequest)
         {
-            AsyncProtocolRequest asyncRequest = (AsyncProtocolRequest)state;
             try
             {
                 if (_pendingReHandshake)
@@ -1774,22 +1771,6 @@ namespace System.Net.Security
 
                 FinishHandshake(e, asyncRequest);
             }
-        }
-
-        //
-        // Called with no user stack.
-        //
-        private void CompleteRequestWaitCallback(object state)
-        {
-            AsyncProtocolRequest request = (AsyncProtocolRequest)state;
-
-            // Force async completion.
-            if (request.MustCompleteSynchronously)
-            {
-                throw new InternalException();
-            }
-
-            request.CompleteRequest(0);
         }
 
         private void RehandshakeCompleteCallback(IAsyncResult result)

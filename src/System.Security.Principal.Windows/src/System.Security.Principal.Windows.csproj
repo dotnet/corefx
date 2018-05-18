@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -68,6 +68,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentThread.cs">
       <Link>Common\Interop\Interop.GetCurrentThread.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ClaimSecurityAttributes.cs">
+      <Link>Common\Interop\Interop.ClaimSecurityAttributes.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken_SafeAccessTokenHandle.cs">
       <Link>Common\Interop\Interop.OpenProcessToken.cs</Link>
     </Compile>
@@ -80,7 +83,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DuplicateHandle.cs">
       <Link>Common\Interop\Interop.DuplicateHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\Interop\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.LsaGetLogonSessionData.cs">

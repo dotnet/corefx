@@ -7,10 +7,6 @@
 
 #if PLATFORM_WINDOWS
 #define FEATURE_MANAGED_ETW
-
-#if !ES_BUILD_STANDALONE
-#define FEATURE_ACTIVITYSAMPLING
-#endif
 #endif // PLATFORM_WINDOWS
 
 #if ES_BUILD_STANDALONE
@@ -28,6 +24,7 @@ using System.Resources;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 #if !ES_BUILD_AGAINST_DOTNET_V35
 using Contract = System.Diagnostics.Contracts.Contract;
@@ -49,6 +46,10 @@ namespace System.Diagnostics.Tracing
     {
 #if FEATURE_MANAGED_ETW
         private byte[] providerMetadata;
+#endif
+
+#if FEATURE_PERFTRACING
+        private ConcurrentDictionary<int, IntPtr> m_eventHandleMap = new ConcurrentDictionary<int, IntPtr>();
 #endif
 
         /// <summary>
@@ -435,9 +436,18 @@ namespace System.Diagnostics.Tracing
             identity = nameInfo.identity;
             EventDescriptor descriptor = new EventDescriptor(identity, level, opcode, (long)keywords);
 
+#if FEATURE_PERFTRACING
+            IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_provider, m_eventHandleMap, descriptor, eventTypes);
+            Debug.Assert(eventHandle != IntPtr.Zero);
+#else
+            IntPtr eventHandle = IntPtr.Zero;
+#endif
+
             var pinCount = eventTypes.pinCount;
             var scratch = stackalloc byte[eventTypes.scratchSize];
             var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+            for(int i = 0; i < eventTypes.dataCount + 3; i++)
+                descriptors[i] = default(EventData);
 
             var pins = stackalloc GCHandle[pinCount];
             for (int i = 0; i < pinCount; i++)
@@ -474,6 +484,7 @@ namespace System.Diagnostics.Tracing
                     this.WriteEventRaw(
                         eventName,
                         ref descriptor,
+                        eventHandle,
                         activityID,
                         childActivityID,
                         (int)(DataCollector.ThreadInstance.Finish() - descriptors),
@@ -540,9 +551,19 @@ namespace System.Diagnostics.Tracing
                     return;
                 }
 
+#if FEATURE_PERFTRACING
+                    IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_provider, m_eventHandleMap, descriptor, eventTypes);
+                    Debug.Assert(eventHandle != IntPtr.Zero);
+#else
+                    IntPtr eventHandle = IntPtr.Zero;
+#endif
+
                 // We make a descriptor for each EventData, and because we morph strings to counted strings
                 // we may have 2 for each arg, so we allocate enough for this.  
-                var descriptors = stackalloc EventData[eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3];
+                var descriptorsLength = eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3;
+                var descriptors = stackalloc EventData[descriptorsLength];
+                for(int i = 0; i < descriptorsLength; i++)
+                    descriptors[i] = default(EventData);
 
                 fixed (byte*
                     pMetadata0 = this.providerMetadata,
@@ -556,35 +577,20 @@ namespace System.Diagnostics.Tracing
 
                     for (int i = 0; i < eventTypes.typeInfos.Length; i++)
                     {
-                        // Until M3, we need to morph strings to a counted representation
-                        // When TDH supports null terminated strings, we can remove this.  
-                        if (eventTypes.typeInfos[i].DataType == typeof(string))
-                        {
-                            // Write out the size of the string 
-                            descriptors[numDescrs].DataPointer = (IntPtr) (&descriptors[numDescrs + 1].m_Size);
-                            descriptors[numDescrs].m_Size = 2;
-                            numDescrs++;
+                        descriptors[numDescrs].m_Ptr = data[i].m_Ptr;
+                        descriptors[numDescrs].m_Size = data[i].m_Size;
 
-                            descriptors[numDescrs].m_Ptr = data[i].m_Ptr;
-                            descriptors[numDescrs].m_Size = data[i].m_Size - 2;   // Remove the null terminator
-                            numDescrs++;
-                        }
-                        else
-                        {
-                            descriptors[numDescrs].m_Ptr = data[i].m_Ptr;
-                            descriptors[numDescrs].m_Size = data[i].m_Size;
+                        // old conventions for bool is 4 bytes, but meta-data assumes 1.
+                        if (data[i].m_Size == 4 && eventTypes.typeInfos[i].DataType == typeof(bool))
+                            descriptors[numDescrs].m_Size = 1;
 
-                            // old conventions for bool is 4 bytes, but meta-data assumes 1.  
-                            if (data[i].m_Size == 4 && eventTypes.typeInfos[i].DataType == typeof(bool))
-                                descriptors[numDescrs].m_Size = 1;
-
-                            numDescrs++;
-                        }
+                        numDescrs++;
                     }
 
                     this.WriteEventRaw(
                         eventName,
                         ref descriptor,
+                        eventHandle,
                         activityID,
                         childActivityID,
                         numDescrs,
@@ -614,10 +620,19 @@ namespace System.Diagnostics.Tracing
                         return;
                     }
 
+#if FEATURE_PERFTRACING
+                    IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_provider, m_eventHandleMap, descriptor, eventTypes);
+                    Debug.Assert(eventHandle != IntPtr.Zero);
+#else
+                    IntPtr eventHandle = IntPtr.Zero;
+#endif
+
 #if FEATURE_MANAGED_ETW
                     var pinCount = eventTypes.pinCount;
                     var scratch = stackalloc byte[eventTypes.scratchSize];
                     var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+                    for(int i=0; i<eventTypes.dataCount + 3; i++)
+                        descriptors[i] = default(EventData);
 
                     var pins = stackalloc GCHandle[pinCount];
                     for (int i = 0; i < pinCount; i++)
@@ -634,7 +649,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
 
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
-                        System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
+                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
 #endif
                         EventOpcode opcode = (EventOpcode)descriptor.Opcode;
 
@@ -674,6 +689,7 @@ namespace System.Diagnostics.Tracing
                             this.WriteEventRaw(
                                 eventName,
                                 ref descriptor,
+                                eventHandle,
                                 pActivityId,
                                 pRelatedActivityId,
                                 (int)(DataCollector.ThreadInstance.Finish() - descriptors),
@@ -684,7 +700,7 @@ namespace System.Diagnostics.Tracing
                             if (m_Dispatchers != null)
                             {
                                 var eventData = (EventPayload)(eventTypes.typeInfos[0].GetData(data));
-                                WriteToAllListeners(eventName, ref descriptor, nameInfo.tags, pActivityId, eventData);
+                                WriteToAllListeners(eventName, ref descriptor, nameInfo.tags, pActivityId, pRelatedActivityId, eventData);
                             }
 
                         }
@@ -713,7 +729,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        private unsafe void WriteToAllListeners(string eventName, ref EventDescriptor eventDescriptor, EventTags tags, Guid* pActivityId, EventPayload payload)
+        private unsafe void WriteToAllListeners(string eventName, ref EventDescriptor eventDescriptor, EventTags tags, Guid* pActivityId, Guid* pChildActivityId, EventPayload payload)
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
             eventCallbackArgs.EventName = eventName;
@@ -725,7 +741,9 @@ namespace System.Diagnostics.Tracing
             // Self described events do not have an id attached. We mark it internally with -1.
             eventCallbackArgs.EventId = -1;
             if (pActivityId != null)
-                eventCallbackArgs.RelatedActivityId = *pActivityId;
+                eventCallbackArgs.ActivityId = *pActivityId;
+            if (pChildActivityId != null)
+                eventCallbackArgs.RelatedActivityId = *pChildActivityId;
 
             if (payload != null)
             {

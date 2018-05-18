@@ -477,15 +477,15 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     public static void XML_TypeWithXmlSchemaFormAttribute()
     {
         var value = new TypeWithXmlSchemaFormAttribute() { NoneSchemaFormListProperty = new List<string> { "abc" }, QualifiedSchemaFormListProperty = new List<bool> { true }, UnqualifiedSchemaFormListProperty = new List<int> { 1 } };
-        var acutal = SerializeAndDeserialize<TypeWithXmlSchemaFormAttribute>(value,
+        var actual = SerializeAndDeserialize<TypeWithXmlSchemaFormAttribute>(value,
 @"<?xml version=""1.0""?><TypeWithXmlSchemaFormAttribute xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><UnqualifiedSchemaFormListProperty><int>1</int></UnqualifiedSchemaFormListProperty><NoneSchemaFormListProperty><NoneParameter>abc</NoneParameter></NoneSchemaFormListProperty><QualifiedSchemaFormListProperty><QualifiedParameter>true</QualifiedParameter></QualifiedSchemaFormListProperty></TypeWithXmlSchemaFormAttribute>");
 
-        Assert.StrictEqual(value.NoneSchemaFormListProperty.Count, acutal.NoneSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.NoneSchemaFormListProperty[0], acutal.NoneSchemaFormListProperty[0]);
-        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty.Count, acutal.UnqualifiedSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty[0], acutal.UnqualifiedSchemaFormListProperty[0]);
-        Assert.StrictEqual(value.QualifiedSchemaFormListProperty.Count, acutal.QualifiedSchemaFormListProperty.Count);
-        Assert.StrictEqual(value.QualifiedSchemaFormListProperty[0], acutal.QualifiedSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.NoneSchemaFormListProperty.Count, actual.NoneSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.NoneSchemaFormListProperty[0], actual.NoneSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty.Count, actual.UnqualifiedSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.UnqualifiedSchemaFormListProperty[0], actual.UnqualifiedSchemaFormListProperty[0]);
+        Assert.StrictEqual(value.QualifiedSchemaFormListProperty.Count, actual.QualifiedSchemaFormListProperty.Count);
+        Assert.StrictEqual(value.QualifiedSchemaFormListProperty[0], actual.QualifiedSchemaFormListProperty[0]);
     }
 
     [Fact]
@@ -1611,6 +1611,97 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToPositiveInfinity>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToNegativeInfinity>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [ActiveIssue(28321)]
+    [Fact]
+    public static void SerializeWithDefaultValueSetToNaNTest()
+    {
+        var value = new DefaultValuesSetToNaN();
+        value.DoubleField = Double.NaN;
+        value.SingleField = Single.NaN;
+        value.FloatProp = Single.NaN;
+        value.DoubleProp = Double.NaN;
+
+        bool result=SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNaN xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void SerializeWithDefaultValueSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        value.DoubleField = Double.PositiveInfinity;
+        value.SingleField = Single.PositiveInfinity;
+        value.FloatProp = Single.PositiveInfinity;
+        value.DoubleProp = Double.PositiveInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void SerializeWithDefaultValueSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        value.DoubleField = Double.NegativeInfinity;
+        value.SingleField = Single.NegativeInfinity;
+        value.FloatProp = Single.NegativeInfinity;
+        value.DoubleProp = Double.NegativeInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+        @"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    private static bool SerializeWithDefaultValue<T>(T value, string baseline)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(T));
+        using (MemoryStream ms = new MemoryStream())
+        {
+            serializer.Serialize(ms, value);
+            ms.Position = 0;
+            string output = new StreamReader(ms).ReadToEnd();
+            Utils.CompareResult result = Utils.Compare(baseline, output);
+            return result.Equal;
+        }
     }
 
     [Fact]

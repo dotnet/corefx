@@ -78,35 +78,35 @@ namespace System.ComponentModel.Composition
             string filename = Path.GetTempFileName();
             using (FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                Assert.Throws<FileLoadException>(() =>
+                if (PlatformDetection.IsWindows) // File locking is Windows specific.
                 {
-                    var catalog = catalogCreator(filename);
-                });
+                    Assert.Throws<FileLoadException>(() => catalogCreator(filename));
+                }
+                else
+                {
+                    Assert.Throws<BadImageFormatException>(() => catalogCreator(filename));
+                }
             }
         }
 
         public static void Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull(Func<string, AssemblyCatalog> catalogCreator)
         {
-            Assert.Throws<ArgumentNullException>("codeBase", () =>
-            {
-                var catalog = catalogCreator((string)null);
-            });
+            Assert.Throws<ArgumentNullException>("codeBase", () => catalogCreator(null));
         }
 
         public static void Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument(Func<string, AssemblyCatalog> catalogCreator)
         {
-            Assert.Throws<ArgumentException>("codeBase", () =>
-            {
-                var catalog = catalogCreator("");
-            });
+            Assert.Throws<ArgumentException>("codeBase", () => catalogCreator(""));
         }
 
         public static void Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument(Func<string, AssemblyCatalog> catalogCreator)
         {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                var catalog = catalogCreator("??||>");
-            });
+            Assert.Throws<ArgumentException>(() => catalogCreator("??||>"));
+        }
+
+        public static void Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO(Func<string, AssemblyCatalog> catalogCreator)
+        {
+            Assert.ThrowsAny<IOException>(() => catalogCreator("??||>"));
         }
 
         public static void Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad(Func<string, AssemblyCatalog> catalogCreator)
@@ -114,35 +114,24 @@ namespace System.ComponentModel.Composition
             string directory = Environment.GetFolderPath(Environment.SpecialFolder.System);
             Assert.True(Directory.Exists(directory));
 
-            Assert.Throws<FileLoadException>(() =>
-            {
-                var catalog = catalogCreator(directory);
-            });
+            Assert.Throws<FileLoadException>(() => catalogCreator(directory));
         }
 
         public static void Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong(Func<string, AssemblyCatalog> catalogCreator)
         {
             Assert.Throws<PathTooLongException>(() =>
-            {
-                var catalog = catalogCreator(@"c:\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\myassembly.dll");
-            });
+                catalogCreator(@"c:\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\myassembly.dll"));
         }
 
         public static void Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat(Func<string, AssemblyCatalog> catalogCreator)
         {
             string filename = Path.GetTempFileName();
-            Assert.Throws<BadImageFormatException>(() =>
-            {
-                var catalog = catalogCreator(filename);
-            });
+            Assert.Throws<BadImageFormatException>(() => catalogCreator(filename));
         }
 
         public static void Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound(Func<string, AssemblyCatalog> catalogCreator)
         {
-            Assert.Throws<FileNotFoundException>(() =>
-            {
-                var catalog = catalogCreator(@"FileThat should not ever exist");
-            });
+            Assert.Throws<FileNotFoundException>(() => catalogCreator(@"FileThat should not ever exist"));
         }
 
         // Test Assembly variant of the APIs
@@ -160,18 +149,12 @@ namespace System.ComponentModel.Composition
 
         public static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, AssemblyCatalog> catalogCreator)
         {
-            AssertExtensions.Throws<ArgumentNullException>("reflectionContext", () =>
-            {
-                var catalog = catalogCreator(null);
-            });
+            AssertExtensions.Throws<ArgumentNullException>("reflectionContext", () => catalogCreator(null));
         }
 
         public static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, AssemblyCatalog> catalogCreator)
         {
-            AssertExtensions.Throws<ArgumentNullException>("definitionOrigin", () =>
-            {
-                var catalog = catalogCreator(null);
-            });
+            AssertExtensions.Throws<ArgumentNullException>("definitionOrigin", () => catalogCreator(null));
         }
 
         //=========================================================================================================================================
@@ -215,10 +198,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s);
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s);
             });
@@ -314,10 +308,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext());
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext());
             });
@@ -412,10 +417,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, (ICompositionElement)new AssemblyCatalog(s));
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, (ICompositionElement)new AssemblyCatalog(s));
             });
@@ -509,10 +525,21 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
-        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument_Desktop()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
+            {
+                return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext(), (ICompositionElement)new AssemblyCatalog(s));
+            });
+        }
+
+        [Fact]
+        [ActiveIssue(25498)] // Also see https://github.com/dotnet/corefx/issues/27269
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO_Core()
+        {
+            AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowIO((s) =>
             {
                 return new AssemblyCatalog(s, new AssemblyCatalogTestsReflectionContext(), (ICompositionElement)new AssemblyCatalog(s));
             });
@@ -780,10 +807,7 @@ namespace System.ComponentModel.Composition
             catalog.Dispose();
             var definition = ImportDefinitionFactory.Create();
 
-            ExceptionAssert.ThrowsDisposed(catalog, () =>
-            {
-                catalog.GetExports(definition);
-            });
+            ExceptionAssert.ThrowsDisposed(catalog, () => catalog.GetExports(definition));
         }
 
         [Fact]
@@ -792,10 +816,7 @@ namespace System.ComponentModel.Composition
         {
             var catalog = CreateAssemblyCatalog();
 
-            AssertExtensions.Throws<ArgumentNullException>("definition", () =>
-            {
-                catalog.GetExports((ImportDefinition)null);
-            });
+            AssertExtensions.Throws<ArgumentNullException>("definition", () => catalog.GetExports(null));
         }
 
         [Fact]
@@ -1059,6 +1080,19 @@ namespace System.ComponentModel.Composition
 
                 Assert.Equal(catalog.DisplayName, catalog.ToString());
             }
+        }
+
+        [Fact]                       
+        public void NonStaticallyReferencedAssembly()
+        {
+            string testAssembly = "System.ComponentModel.Composition.Noop.Assembly.dll";
+            var directory = TemporaryFileCopier.GetNewTemporaryDirectory();
+            Directory.CreateDirectory(directory);
+            var finalPath = Path.Combine(directory, testAssembly);
+            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
+            File.Copy(sourcePath, finalPath);
+            var assemblyCatalog = new AssemblyCatalog(finalPath);
+            Assert.NotEmpty(assemblyCatalog);
         }
     }
 }

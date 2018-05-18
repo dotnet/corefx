@@ -143,7 +143,12 @@ namespace System.Net.Http
 
         internal bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
-            return _bufferedContent != null && _bufferedContent.TryGetBuffer(out buffer);
+            if (_bufferedContent != null)
+            {
+                return _bufferedContent.TryGetBuffer(out buffer);
+            }
+            buffer = default;
+            return false;
         }
 
         protected HttpContent()
@@ -299,7 +304,18 @@ namespace System.Net.Http
 
         protected abstract Task SerializeToStreamAsync(Stream stream, TransportContext context);
 
-        public Task CopyToAsync(Stream stream, TransportContext context)
+        // TODO #9071: Expose this publicly.  Until it's public, only sealed or internal types should override it, and then change
+        // their SerializeToStreamAsync implementation to delegate to this one.  They need to be sealed as otherwise an external
+        // type could derive from it and override SerializeToStreamAsync(stream, context) further, at which point when
+        // HttpClient calls SerializeToStreamAsync(stream, context, cancellationToken), their custom override will be skipped.
+        internal virtual Task SerializeToStreamAsync(Stream stream, TransportContext context, CancellationToken cancellationToken) =>
+            SerializeToStreamAsync(stream, context);
+
+        public Task CopyToAsync(Stream stream, TransportContext context) =>
+            CopyToAsync(stream, context, CancellationToken.None);
+
+        // TODO #9071: Expose this publicly.
+        internal Task CopyToAsync(Stream stream, TransportContext context, CancellationToken cancellationToken)
         {
             CheckDisposed();
             if (stream == null)
@@ -309,19 +325,17 @@ namespace System.Net.Http
 
             try
             {
-                Task task = null;
                 ArraySegment<byte> buffer;
                 if (TryGetBuffer(out buffer))
                 {
-                    task = stream.WriteAsync(buffer.Array, buffer.Offset, buffer.Count);
+                    return CopyToAsyncCore(stream.WriteAsync(new ReadOnlyMemory<byte>(buffer.Array, buffer.Offset, buffer.Count), cancellationToken));
                 }
                 else
                 {
-                    task = SerializeToStreamAsync(stream, context);
+                    Task task = SerializeToStreamAsync(stream, context, cancellationToken);
                     CheckTaskNotNull(task);
+                    return CopyToAsyncCore(new ValueTask(task));
                 }
-
-                return CopyToAsyncCore(task);
             }
             catch (Exception e) when (StreamCopyExceptionNeedsWrapping(e))
             {
@@ -329,7 +343,7 @@ namespace System.Net.Http
             }
         }
 
-        private static async Task CopyToAsyncCore(Task copyTask)
+        private static async Task CopyToAsyncCore(ValueTask copyTask)
         {
             try
             {
@@ -354,7 +368,10 @@ namespace System.Net.Http
         // No "CancellationToken" parameter needed since canceling the CTS will close the connection, resulting
         // in an exception being thrown while we're buffering.
         // If buffering is used without a connection, it is supposed to be fast, thus no cancellation required.
-        public Task LoadIntoBufferAsync(long maxBufferSize)
+        public Task LoadIntoBufferAsync(long maxBufferSize) =>
+            LoadIntoBufferAsync(maxBufferSize, CancellationToken.None);
+
+        internal Task LoadIntoBufferAsync(long maxBufferSize, CancellationToken cancellationToken)
         {
             CheckDisposed();
             if (maxBufferSize > HttpContent.MaxBufferSize)
@@ -382,7 +399,7 @@ namespace System.Net.Http
 
             try
             {
-                Task task = SerializeToStreamAsync(tempBuffer, null);
+                Task task = SerializeToStreamAsync(tempBuffer, null, cancellationToken);
                 CheckTaskNotNull(task);
                 return LoadIntoBufferAsyncCore(task, tempBuffer);
             }
@@ -719,6 +736,12 @@ namespace System.Net.Http
                 return base.WriteAsync(buffer, offset, count, cancellationToken);
             }
 
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+            {
+                CheckSize(buffer.Length);
+                return base.WriteAsync(buffer, cancellationToken);
+            }
+
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
                 CheckSize(count);
@@ -851,11 +874,11 @@ namespace System.Net.Http
                 _length += count;
             }
 
-            public override void Write(ReadOnlySpan<byte> source)
+            public override void Write(ReadOnlySpan<byte> buffer)
             {
-                EnsureCapacity(_length + source.Length);
-                source.CopyTo(new Span<byte>(_buffer, _length, source.Length));
-                _length += source.Length;
+                EnsureCapacity(_length + buffer.Length);
+                buffer.CopyTo(new Span<byte>(_buffer, _length, buffer.Length));
+                _length += buffer.Length;
             }
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -864,10 +887,10 @@ namespace System.Net.Http
                 return Task.CompletedTask;
             }
 
-            public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
             {
-                Write(source.Span);
-                return Task.CompletedTask;
+                Write(buffer.Span);
+                return default;
             }
 
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>

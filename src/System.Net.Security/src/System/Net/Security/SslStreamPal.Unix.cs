@@ -15,8 +15,6 @@ namespace System.Net.Security
 {
     internal static class SslStreamPal
     {
-        private static readonly StreamSizes s_streamSizes = new StreamSizes();
-
         public static Exception GetException(SecurityStatusPal status)
         {
             return status.Exception ?? new Interop.OpenSsl.SslException((int)status.ErrorCode);
@@ -122,7 +120,7 @@ namespace System.Net.Security
 
         public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out StreamSizes streamSizes)
         {
-            streamSizes = s_streamSizes;
+            streamSizes = StreamSizes.Default;
         }
 
         public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
@@ -256,6 +254,11 @@ namespace System.Net.Security
                 code == Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_WRITE)
             {
                 return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+            }
+            else if (code == Interop.Ssl.SslErrorCode.SSL_ERROR_SSL)
+            {
+                // OpenSSL failure occurred.  The error queue contains more details, when building the exception the queue will be cleared.
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, Interop.Crypto.CreateOpenSslCryptographicException());
             }
             else
             {

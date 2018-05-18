@@ -3,11 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Text;
 using System.Threading;
 
@@ -783,10 +782,20 @@ namespace System.Diagnostics
         ///     This is called from the threadpool when a process exits.
         /// </devdoc>
         /// <internalonly/>
-        private void CompletionCallback(object context, bool wasSignaled)
+        private void CompletionCallback(object waitHandleContext, bool wasSignaled)
         {
-            StopWatchingForExit();
-            RaiseOnExited();
+            Debug.Assert(waitHandleContext != null, "Process.CompletionCallback called with no waitHandleContext");
+            lock (this)
+            {
+                // Check the exited event that we get from the threadpool
+                // matches the event we are waiting for.
+                if (waitHandleContext != _waitHandle)
+                {
+                    return;
+                }
+                StopWatchingForExit();
+                RaiseOnExited();
+            }
         }
 
         /// <internalonly/>
@@ -836,7 +845,14 @@ namespace System.Diagnostics
             {
                 if (_haveProcessHandle)
                 {
-                    StopWatchingForExit();
+                    // We need to lock to ensure we don't run concurrently with CompletionCallback.
+                    // Without this lock we could reset _raisedOnExited which causes CompletionCallback to
+                    // raise the Exited event a second time for the same process.
+                    lock (this)
+                    {
+                        // This sets _waitHandle to null which causes CompletionCallback to not emit events.
+                        StopWatchingForExit();
+                    }
 #if FEATURE_TRACESWITCH
                     Debug.WriteLineIf(_processTracing.TraceVerbose, "Process - CloseHandle(process) in Close()");
 #endif
@@ -1198,6 +1214,10 @@ namespace System.Diagnostics
             {
                 throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
             }
+            if (!string.IsNullOrEmpty(startInfo.Arguments) && startInfo.ArgumentList.Count > 0)
+            {
+                throw new InvalidOperationException(SR.ArgumentAndArgumentListInitialized);
+            }
 
             //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            
             if (_disposed)
@@ -1464,6 +1484,17 @@ namespace System.Diagnostics
             {
                 DataReceivedEventArgs e = new DataReceivedEventArgs(data);
                 errorDataReceived(this, e); // Call back to user informing data is available.
+            }
+        }
+
+        private static void AppendArguments(StringBuilder stringBuilder, Collection<string> argumentList)
+        {
+            if (argumentList.Count > 0)
+            {
+                foreach (string argument in argumentList)
+                {
+                    PasteArguments.AppendArgument(stringBuilder, argument);
+                }
             }
         }
 

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using System.Linq;
 using System.Net.Test.Common;
 using System.Security.Authentication;
@@ -55,6 +56,28 @@ namespace System.Net.Security.Tests
 
                 await Assert.ThrowsAsync<AuthenticationException>(() => t1);
                 await t2;
+            }
+        }
+
+        [Fact]
+        public async Task SslStream_ServerLocalCertificateSelectionCallbackReturnsNull_Throw()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
+            {
+                return null;
+            });
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var client = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var server = new SslStream(serverStream, false, null, selectionCallback))
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                await Assert.ThrowsAsync<NotSupportedException>(async () =>
+                    await TestConfiguration.WhenAllOrAnyFailedWithTimeout(client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false)), server.AuthenticateAsServerAsync(certificate))
+                );
             }
         }
 
@@ -307,6 +330,55 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public async Task SslStream_StreamToStream_Dispose_Throws()
+        {
+            VirtualNetwork network = new VirtualNetwork()
+            {
+                DisableConnectionBreaking = true
+            };
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            {
+                var serverSslStream = new SslStream(serverStream);
+                await DoHandshake(clientSslStream, serverSslStream);
+
+                var serverBuffer = new byte[1];
+                Task serverReadTask = serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length);
+                await serverSslStream.WriteAsync(new byte[] { 1 }, 0, 1)
+                    .TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
+
+                // Shouldn't throw, the context is diposed now.
+                // Since the server read task is in progress, the read buffer is not returned to ArrayPool.
+                serverSslStream.Dispose();
+
+                // Read in client
+                var clientBuffer = new byte[1];
+                await clientSslStream.ReadAsync(clientBuffer, 0, clientBuffer.Length);
+                Assert.Equal(1, clientBuffer[0]);
+
+                await clientSslStream.WriteAsync(new byte[] { 2 }, 0, 1);
+
+                if (PlatformDetection.IsFullFramework)
+                {
+                    await Assert.ThrowsAsync<ObjectDisposedException>(() => serverReadTask);
+                }
+                else
+                {
+                    IOException serverException = await Assert.ThrowsAsync<IOException>(() => serverReadTask);
+                    Assert.IsType<ObjectDisposedException>(serverException.InnerException);
+                }
+
+                await Assert.ThrowsAsync<ObjectDisposedException>(() => serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length));
+
+                // Now, there is no pending read, so the internal buffer will be returned to ArrayPool.
+                serverSslStream.Dispose();
+                await Assert.ThrowsAsync<ObjectDisposedException>(() => serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length));
+            }
+        }
+
+        [Fact]
         public void SslStream_StreamToStream_Flush_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -334,6 +406,50 @@ namespace System.Net.Security.Tests
                 Assert.False(task.IsCompleted);
                 stream.CompleteAsyncFlush();
                 Assert.True(task.IsCompleted);
+            }
+        }
+
+        [Fact]
+        public async Task SslStream_StreamToStream_EOFDuringFrameRead_ThrowsIOException()
+        {
+            var network = new VirtualNetwork();
+            using (var clientNetworkStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverNetworkStream = new VirtualNetworkStream(network, isServer: true))
+            {
+                int readMode = 0;
+                var serverWrappedNetworkStream = new DelegateStream(
+                    canWriteFunc: () => true,
+                    canReadFunc: () => true,
+                    writeFunc: (buffer, offset, count) => serverNetworkStream.Write(buffer, offset, count),
+                    readFunc: (buffer, offset, count) =>
+                    {
+                        // Do normal reads as requested until the read mode is set
+                        // to 1.  Then do a single read of only 10 bytes to read only
+                        // part of the message, and subsequently return EOF.
+                        if (readMode == 0)
+                        {
+                            return serverNetworkStream.Read(buffer, offset, count);
+                        }
+                        else if (readMode == 1)
+                        {
+                            readMode = 2;
+                            return serverNetworkStream.Read(buffer, offset, 10); // read at least header but less than full frame
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    });
+
+
+                using (var clientSslStream = new SslStream(clientNetworkStream, false, AllowAnyServerCertificate))
+                using (var serverSslStream = new SslStream(serverWrappedNetworkStream))
+                {
+                    await DoHandshake(clientSslStream, serverSslStream);
+                    await clientSslStream.WriteAsync(new byte[20], 0, 20);
+                    readMode = 1;
+                    await Assert.ThrowsAsync<IOException>(() => serverSslStream.ReadAsync(new byte[1], 0, 1));
+                }
             }
         }
 

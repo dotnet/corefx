@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.Net
 {
@@ -231,7 +232,7 @@ namespace System.Net
                 return false;
             }
 
-            address = IPAddressParser.Parse(ipString.AsReadOnlySpan(), tryParse: true);
+            address = IPAddressParser.Parse(ipString.AsSpan(), tryParse: true);
             return (address != null);
         }
 
@@ -248,7 +249,7 @@ namespace System.Net
                 throw new ArgumentNullException(nameof(ipString));
             }
 
-            return IPAddressParser.Parse(ipString.AsReadOnlySpan(), tryParse: false);
+            return IPAddressParser.Parse(ipString.AsSpan(), tryParse: false);
         }
 
         public static IPAddress Parse(ReadOnlySpan<char> ipSpan)
@@ -610,7 +611,7 @@ namespace System.Net
                 const int addressAndScopeIdLength = IPAddressParserStatics.IPv6AddressBytes + sizeof(uint);
                 Span<byte> addressAndScopeIdSpan = stackalloc byte[addressAndScopeIdLength];
 
-                new ReadOnlySpan<ushort>(_numbers).AsBytes().CopyTo(addressAndScopeIdSpan);
+                MemoryMarshal.AsBytes(new ReadOnlySpan<ushort>(_numbers)).CopyTo(addressAndScopeIdSpan);
                 Span<byte> scopeIdSpan = addressAndScopeIdSpan.Slice(IPAddressParserStatics.IPv6AddressBytes);
                 bool scopeWritten = BitConverter.TryWriteBytes(scopeIdSpan, _addressOrScopeId);
                 Debug.Assert(scopeWritten);
@@ -626,7 +627,7 @@ namespace System.Net
  
                 // For IPv4 addresses, we use Marvin on the integer representation of the Address.
                 hashCode = Marvin.ComputeHash32(
-                    addressOrScopeIdSpan.AsBytes(),
+                    MemoryMarshal.AsBytes(addressOrScopeIdSpan),
                     Marvin.DefaultSeed);
             }
 

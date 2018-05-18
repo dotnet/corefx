@@ -10,6 +10,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
+using System.Security;
+using System.Runtime.InteropServices;
 
 namespace System.Data.SqlClient
 {
@@ -90,6 +92,10 @@ namespace System.Data.SqlClient
 
         private readonly LastIOTimer _lastSuccessfulIOTimer;
 
+        // secure password information to be stored
+        //  At maximum number of secure string that need to be stored is two; one for login password and the other for new change password
+        private SecureString[] _securePasswords = new SecureString[2] { null, null };
+        private int[] _securePasswordOffsetsInBuffer = new int[2];
 
         // This variable is used to track whether another thread has requested a cancel.  The
         // synchronization points are
@@ -757,7 +763,7 @@ namespace System.Data.SqlClient
 
         internal abstract bool IsPacketEmpty(object readPacket);
 
-        internal abstract object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error);
+        internal abstract object ReadSyncOverAsync(int timeoutRemaining, out uint error);
 
         internal abstract object ReadAsync(out uint error, ref object handle);
 
@@ -2073,7 +2079,7 @@ namespace System.Data.SqlClient
                 Interlocked.Increment(ref _readingCount);
                 shouldDecrement = true;
 
-                readPacket = ReadSyncOverAsync(GetTimeoutRemaining(), false, out error);
+                readPacket = ReadSyncOverAsync(GetTimeoutRemaining(), out error);
 
                 Interlocked.Decrement(ref _readingCount);
                 shouldDecrement = false;
@@ -2295,7 +2301,11 @@ namespace System.Data.SqlClient
 
                 if (_networkPacketTimeout == null)
                 {
-                    _networkPacketTimeout = new Timer(OnTimeout, null, Timeout.Infinite, Timeout.Infinite);
+                    _networkPacketTimeout = ADP.UnsafeCreateTimer(
+                        new TimerCallback(OnTimeout),
+                        null,
+                        Timeout.Infinite,
+                        Timeout.Infinite);
                 }
 
                 // -1 == Infinite
@@ -2510,7 +2520,7 @@ namespace System.Data.SqlClient
                                 Interlocked.Increment(ref _readingCount);
                                 shouldDecrement = true;
 
-                                syncReadPacket = ReadSyncOverAsync(stateObj.GetTimeoutRemaining(), _parser.MARSOn, out error);
+                                syncReadPacket = ReadSyncOverAsync(stateObj.GetTimeoutRemaining(), out error);
 
                                 Interlocked.Decrement(ref _readingCount);
                                 shouldDecrement = false;
@@ -2643,6 +2653,32 @@ namespace System.Data.SqlClient
                 {
                     // _networkPacketTimeout is set to null before Disposing, but there is still a slight chance
                     // that object was disposed after we took a copy
+                }
+            }
+        }
+
+        private void SetBufferSecureStrings()
+        {
+            if (_securePasswords != null)
+            {
+                for (int i = 0; i < _securePasswords.Length; i++)
+                {
+                    if (_securePasswords[i] != null)
+                    {
+                        IntPtr str = IntPtr.Zero;
+                        try
+                        {
+                            str = Marshal.SecureStringToBSTR(_securePasswords[i]);
+                            byte[] data = new byte[_securePasswords[i].Length * 2];
+                            Marshal.Copy(str, data, 0, _securePasswords[i].Length * 2);
+                            TdsParserStaticMethods.ObfuscatePassword(data);
+                            data.CopyTo(_outBuff, _securePasswordOffsetsInBuffer[i]);
+                        }
+                        finally
+                        {
+                            Marshal.ZeroFreeBSTR(str);
+                        }
+                    }
                 }
             }
         }
@@ -2872,7 +2908,34 @@ namespace System.Data.SqlClient
         // Network/Packet Writing & Processing //
         /////////////////////////////////////////
 
+        internal void WriteSecureString(SecureString secureString)
+        {
+            Debug.Assert(_securePasswords[0] == null || _securePasswords[1] == null, "There are more than two secure passwords");
 
+            int index = _securePasswords[0] != null ? 1 : 0;
+
+            _securePasswords[index] = secureString;
+            _securePasswordOffsetsInBuffer[index] = _outBytesUsed;
+
+            // loop through and write the entire array
+            int lengthInBytes = secureString.Length * 2;
+
+            // It is guaranteed both secure password and secure change password should fit into the first packet
+            // Given current TDS format and implementation it is not possible that one of secure string is the last item and exactly fill up the output buffer
+            //  if this ever happens and it is correct situation, the packet needs to be written out after _outBytesUsed is update
+            Debug.Assert((_outBytesUsed + lengthInBytes) < _outBuff.Length, "Passwords cannot be splited into two different packet or the last item which fully fill up _outBuff!!!");
+
+            _outBytesUsed += lengthInBytes;
+        }
+
+        internal void ResetSecurePasswordsInformation()
+        {
+            for (int i = 0; i < _securePasswords.Length; ++i)
+            {
+                _securePasswords[i] = null;
+                _securePasswordOffsetsInBuffer[i] = 0;
+            }
+        }
 
         internal Task WaitForAccumulatedWrites()
         {
@@ -3162,15 +3225,16 @@ namespace System.Data.SqlClient
                 // Add packet to the pending list (since the callback can happen any time after we call SNIWritePacket)
                 packetPointer = AddPacketToPendingList(packet);
             }
+
             // Async operation completion may be delayed (success pending).
             try
             {
             }
             finally
             {
-
                 sniError = WritePacket(packet, sync);
             }
+
             if (sniError == TdsEnums.SNI_SUCCESS_IO_PENDING)
             {
                 Debug.Assert(!sync, "Completion should be handled in SniManagedWwrapper");
@@ -3343,6 +3407,7 @@ namespace System.Data.SqlClient
             // Prepare packet, and write to packet.
             object packet = GetResetWritePacket();
 
+            SetBufferSecureStrings();
             SetPacketData(packet, _outBuff, _outBytesUsed);
 
             uint sniError;
