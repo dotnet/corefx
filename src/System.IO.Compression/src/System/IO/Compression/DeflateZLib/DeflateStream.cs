@@ -801,7 +801,7 @@ namespace System.IO.Compression
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
-                            _destination.Write(new ReadOnlySpan<byte>(_arrayPoolBuffer, 0, bytesRead));
+                            _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                         }
                         else
                         {
@@ -879,7 +879,7 @@ namespace System.IO.Compression
                     int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
                     {
-                        _destination.Write(new ReadOnlySpan<byte>(_arrayPoolBuffer, 0, bytesRead));
+                        _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                     }
                     else
                     {
