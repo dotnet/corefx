@@ -770,6 +770,51 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void ZeroLengthCompareTo_StringComparison()
+        {
+            string value = "456";
+            string s = value.Substring(2, 0);
+
+            Assert.True(0 < string.Compare(value, s, StringComparison.Ordinal));
+
+            Assert.True(0 < string.Compare(value, s, StringComparison.CurrentCulture));
+            Assert.True(0 < string.Compare(value, s, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(0 < string.Compare(value, s, StringComparison.InvariantCulture));
+            Assert.True(0 < string.Compare(value, s, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(0 < string.Compare(value, s, StringComparison.OrdinalIgnoreCase));
+
+            string emptyValue = value.Substring(1, 0);
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.Ordinal));
+
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.CurrentCulture));
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.InvariantCulture));
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.InvariantCultureIgnoreCase));
+            Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.OrdinalIgnoreCase));
+
+            char[] a = value.ToArray();
+
+            var span = new ReadOnlySpan<char>(a);
+            var slice = new ReadOnlySpan<char>(a, 2, 0);
+            Assert.True(0 < span.CompareTo(slice, StringComparison.Ordinal));
+
+            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCulture));
+            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCulture));
+            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(0 < span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
+
+            span = new ReadOnlySpan<char>(a, 1, 0);
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
+
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCulture));
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.Equal(0, span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
         public static void Compare_Invalid()
         {
             // Invalid comparison type

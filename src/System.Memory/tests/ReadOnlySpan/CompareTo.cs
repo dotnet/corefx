@@ -9,32 +9,7 @@ using Xunit;
 namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
-    {
-        [Fact]
-        public static void ZeroLengthCompareTo_StringComparison()
-        {
-            char[] a = { '4', '5', '6' };
-
-            var span = new ReadOnlySpan<char>(a);
-            var slice = new ReadOnlySpan<char>(a, 2, 0);
-            Assert.True(0 < span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-
-            span = new ReadOnlySpan<char>(a, 1, 0);
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-        }
-
+    {   
         [Fact]
         public static void SameSpanCompareTo_StringComparison()
         {
