@@ -120,13 +120,13 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public void EnsureSuccessStatusCode_AddContentToMessage_ContentIsDisposed()
+        public void EnsureSuccessStatusCode_AddContentToMessage_ContentIsNotDisposed()
         {
             using (var response404 = new HttpResponseMessage(HttpStatusCode.NotFound))
             {
                 response404.Content = new MockContent();
                 Assert.Throws<HttpRequestException>(() => response404.EnsureSuccessStatusCode());
-                Assert.True((response404.Content as MockContent).IsDisposed);
+                Assert.False((response404.Content as MockContent).IsDisposed);
             }
 
             using (var response200 = new HttpResponseMessage(HttpStatusCode.OK))
