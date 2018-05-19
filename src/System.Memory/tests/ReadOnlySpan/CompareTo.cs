@@ -9,51 +9,8 @@ using Xunit;
 namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
-    {   
-        [Fact]
-        public static void SameSpanCompareTo_StringComparison()
-        {
-            char[] a = { '4', '5', '6' };
-            var span = new ReadOnlySpan<char>(a);
-            Assert.Equal(0, span.CompareTo(span, StringComparison.Ordinal));
-
-            Assert.Equal(0, span.CompareTo(span, StringComparison.CurrentCulture));
-            Assert.Equal(0, span.CompareTo(span, StringComparison.CurrentCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(span, StringComparison.InvariantCulture));
-            Assert.Equal(0, span.CompareTo(span, StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(span, StringComparison.OrdinalIgnoreCase));
-        }
-
-        [Fact]
-        public static void LengthMismatchCompareTo_StringComparison()
-        {
-            char[] a = { '4', '5', '6' };
-            var span = new ReadOnlySpan<char>(a, 0, 2);
-            var slice = new ReadOnlySpan<char>(a, 0, 3);
-            Assert.True(0 > span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.True(0 > span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.True(0 > span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(0 > span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.True(0 > span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(0 > span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-        }
-
-        [Fact]
-        public static void CompareToOverlappingMatch_StringComparison()
-        {
-            char[] a = { '4', '5', '6', '5', '6', '5' };
-            var span = new ReadOnlySpan<char>(a, 1, 3);
-            var slice = new ReadOnlySpan<char>(a, 3, 3);
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-        }
-
+    {                
+        
         [Fact]
         public static void CompareToMatchDifferentSpans_StringComparison()
         {
