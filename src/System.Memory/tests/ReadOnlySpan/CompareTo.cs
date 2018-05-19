@@ -12,22 +12,6 @@ namespace System.SpanTests
     {                
         
         [Fact]
-        public static void CompareToMatchDifferentSpans_StringComparison()
-        {
-            char[] a = { '4', '5', '6', '7' };
-            char[] b = { '4', '5', '6' };
-            var span = new ReadOnlySpan<char>(a, 0, 3);
-            var slice = new ReadOnlySpan<char>(b, 0, 3);
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-        }
-
-        [Fact]
         public static void CompareToNoMatch_StringComparison()
         {
             for (int length = 1; length < 150; length++)
