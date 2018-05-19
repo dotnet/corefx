@@ -5,8 +5,9 @@
 #include "pal_types.h"
 #include <termios.h>
 #include <sys/ioctl.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
+#include <pal_termios.h>
 
 /* This is dup of System/IO/Ports/NativeMethods.cs */
 enum
@@ -27,7 +28,16 @@ enum
     HandshakeBoth           // Software & Hardware Flow Control
 };
 
-static int SystemNative_TermiosGetStatus(int fd)
+/* Interop/Unix/Interop.Termios.cs */
+enum {
+  SignalDtr = 1,
+  SignalDsr = 2,
+  SignalRts = 3,
+  SignalCts = 4,
+  SignalDcd = 5,
+};
+
+static int TermiosGetStatus(int32_t fd)
 {
     int status = 0;
     if(ioctl(fd, TIOCMGET, &status) < 0)
@@ -38,73 +48,60 @@ static int SystemNative_TermiosGetStatus(int fd)
     return status;
 }
 
-static int SystemNative_TermiosGetSignal(int fd, int bit)
+int32_t TermiosGetSignal(int32_t fd, int32_t signal)
 {
-    int status = 0;
+    int status;
+
     if(ioctl(fd, TIOCMGET, &status) < 0)
     {
         return -1;
     }
 
-    return (status & bit) ? 1 : 0;
-}
-
-extern "C" int32_t SystemNative_TermiosGetDcd(int fd)
-{
-    return SystemNative_TermiosGetSignal(fd, TIOCM_CAR);
-}
-
-extern "C" int32_t SystemNative_TermiosGetCts(int fd)
-{
-    return SystemNative_TermiosGetSignal(fd, TIOCM_CTS);
-}
-
-extern "C" int32_t SystemNative_TermiosGetRts(int fd)
-{
-    return SystemNative_TermiosGetSignal(fd, TIOCM_RTS);
-}
-
-extern "C" int32_t SystemNative_TermiosGetDsr(int fd)
-{
-    return SystemNative_TermiosGetSignal(fd, TIOCM_DSR);
-}
-
-extern "C" int32_t SystemNative_TermiosGetDtr(int fd)
-{
-    return SystemNative_TermiosGetSignal(fd, TIOCM_DTR);
-}
-
-extern "C" int32_t SystemNative_TermiosSetDtr(int fd, bool set)
-{
-    int status = SystemNative_TermiosGetStatus(fd);
-    if (status >= 0)
+    switch (signal)
     {
-        if (set)
-        {
-            status |= TIOCM_DTR;
-        }
-        else
-        {
-            status &= ~TIOCM_DTR;
-        }
-        return ioctl(fd, TIOCMSET, &status);
+    case SignalDtr:
+        return (status & TIOCM_DTR) ? 1 : 0;
+    case SignalDsr:
+        return (status & TIOCM_DSR) ? 1 : 0;
+    case SignalRts:
+        return (status & TIOCM_RTS) ? 1 : 0;
+    case SignalCts:
+        return (status & TIOCM_CTS) ? 1 : 0;
+    case SignalDcd:
+        return (status & TIOCM_CAR) ? 1 : 0;
+    default:
+        return -1;
+   }
+}
+
+int32_t TermiosSetSignal(int32_t fd, int32_t signal, int32_t set)
+{
+    int status;
+    int bit;
+
+    switch (signal)
+    {
+    case SignalRts:
+        bit = TIOCM_RTS;
+        break;
+    case SignalDtr:
+        bit = TIOCM_DTR;
+        break;
+    default:
+        errno = EINVAL;
+        return -1;
     }
 
-    return -1;
-}
-
-extern "C" int32_t SystemNative_TermiosSetRts(int fd, bool set)
-{
-    int status = SystemNative_TermiosGetStatus(fd);
+    status  = TermiosGetStatus(fd);
     if (status >= 0)
     {
         if (set)
         {
-            status |= TIOCM_RTS;
+            status |= bit;
         }
         else
         {
-            status &= ~TIOCM_RTS;
+            status &= ~bit;
         }
         return ioctl(fd, TIOCMSET, &status);
     }
@@ -113,7 +110,7 @@ extern "C" int32_t SystemNative_TermiosSetRts(int fd, bool set)
 }
 
 static speed_t
-SystemNative_TermiosSpeed2rate(int speed)
+TermiosSpeed2Rate(int speed)
 {
     switch (speed)
     {
@@ -154,11 +151,11 @@ SystemNative_TermiosSpeed2rate(int speed)
     case 50:
         return B50;
     }
-    return (static_cast<speed_t>(speed));
+    return ((speed_t)(speed));
 }
 
 static int
-SystemNative_TermiosRate2speed(speed_t brate)
+TermiosRate2Speed(speed_t brate)
 {
     switch (brate)
     {
@@ -200,11 +197,11 @@ SystemNative_TermiosRate2speed(speed_t brate)
         return 50;
     }
 
-    return (static_cast<int>(brate));
+    return brate;
 }
 
-extern "C" int32_t
-SystemNative_TermiosGetSpeed(int fd)
+int32_t
+TermiosGetSpeed(int32_t fd)
 {
     struct termios       term;
     if (tcgetattr(fd, &term) < 0)
@@ -212,11 +209,11 @@ SystemNative_TermiosGetSpeed(int fd)
         return  -1;
     }
 
-    return SystemNative_TermiosRate2speed(cfgetispeed(&term));
+    return TermiosRate2Speed(cfgetispeed(&term));
 }
 
-extern "C" int32_t
-SystemNative_TermiosSetSpeed(int fd, int speed)
+int32_t
+TermiosSetSpeed(int32_t fd, uint32_t speed)
 {
     struct termios       term;
     if (tcgetattr(fd, &term) < 0)
@@ -224,7 +221,7 @@ SystemNative_TermiosSetSpeed(int fd, int speed)
         return  -1;
     }
 
-    cfsetspeed(&term, SystemNative_TermiosSpeed2rate(speed));
+    cfsetspeed(&term, TermiosSpeed2Rate(speed));
 
     if (tcsetattr(fd, TCSANOW, &term) < 0)
     {
@@ -234,8 +231,8 @@ SystemNative_TermiosSetSpeed(int fd, int speed)
     return speed;
 }
 
-extern "C" int32_t
-SystemNative_TermiosAvailableBytes(int fd, int readBuffer)
+int32_t
+TermiosAvailableBytes(int32_t fd, int32_t readBuffer)
 {
     int32_t bytes;
     if (ioctl (fd, readBuffer ? FIONREAD : TIOCOUTQ, &bytes) == -1) {
@@ -245,26 +242,26 @@ SystemNative_TermiosAvailableBytes(int fd, int readBuffer)
     return bytes;
 }
 
-extern "C" int32_t
-SystemNative_TermiosDiscard(int fd, int queue)
+int32_t
+TermiosDiscard(int32_t fd, int32_t queue)
 {
     return tcflush(fd, queue == 0 ? TCIOFLUSH : queue == 1 ? TCIFLUSH : TCOFLUSH);
 }
 
-extern "C" int32_t
-SystemNative_TermiosDrain(int fd)
+int32_t
+TermiosDrain(int32_t fd)
 {
     return tcdrain(fd);
 }
 
-extern "C" int32_t
-SystemNative_TermiosSendBreak(int fd, int duration)
+int32_t
+TermiosSendBreak(int32_t fd, uint32_t duration)
 {
     return tcsendbreak(fd, duration);
 }
 
-extern "C" int32_t
-SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int parity, int handshake)
+int32_t
+TermiosReset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake)
 {
     struct termios       term;
     int ret = 0;
@@ -276,11 +273,11 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
 
     cfmakeraw(&term);
     term.c_cflag |=  (CLOCAL | CREAD);
-    term.c_lflag &= ~(static_cast<tcflag_t>(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN ));
-    term.c_oflag &= ~(static_cast<tcflag_t>(OPOST));
+    term.c_lflag &= ~((tcflag_t)(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN ));
+    term.c_oflag &= ~((tcflag_t)(OPOST));
     term.c_iflag = IGNBRK;
 
-    term.c_cflag &= ~(static_cast<tcflag_t>(CSIZE));
+    term.c_cflag &= ~((tcflag_t)(CSIZE));
     switch (dataBits)
     {
     case 5:
@@ -301,7 +298,7 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
     // There really is only choice of 1 or 2.
     if (stopBits == 1)
     {
-        term.c_cflag &= ~(static_cast<tcflag_t>(CSTOPB));
+        term.c_cflag &= ~((tcflag_t)(CSTOPB));
     }
     else if (stopBits > 1)
     {
@@ -309,7 +306,7 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
     }
 
     // Set parity
-    term.c_iflag &= ~(static_cast<tcflag_t>(INPCK | ISTRIP));
+    term.c_iflag &= ~((tcflag_t)(INPCK | ISTRIP));
     switch (parity)
     {
     case ParityOdd:
@@ -317,15 +314,15 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
         break;
     case ParityEven:
         term.c_cflag |= PARENB;
-        term.c_cflag &= ~(static_cast<tcflag_t>(PARODD));
+        term.c_cflag &= ~((tcflag_t)(PARODD));
         break;
     default:
-        term.c_cflag &= ~(static_cast<tcflag_t>(PARENB | PARODD));
+        term.c_cflag &= ~((tcflag_t)(PARENB | PARODD));
     }
 
     // Flow control - clear first.
-    term.c_iflag &= ~(static_cast<tcflag_t>(IXOFF | IXON));
-    term.c_cflag &= ~(static_cast<tcflag_t>(CRTSCTS));
+    term.c_iflag &= ~((tcflag_t)(IXOFF | IXON));
+    term.c_cflag &= ~((tcflag_t)(CRTSCTS));
     switch (handshake)
     {
         case HandshakeNone: /* None */
@@ -337,7 +334,6 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
         case HandshakeBoth: /* software & hardware flow control */
             term.c_cflag |= CRTSCTS;
             // fall through
-            [[clang::fallthrough]];
         case HandshakeSoft: /* XOn/XOff */
             term.c_iflag |= IXOFF | IXON;
             break;
@@ -345,7 +341,7 @@ SystemNative_TermiosReset(int fd, int speed, int dataBits, int stopBits, int par
 
     if (speed)
     {
-        speed_t brate = SystemNative_TermiosSpeed2rate(speed);
+        speed_t brate = TermiosSpeed2Rate(speed);
         ret = cfsetspeed(&term, brate);
     }
 
