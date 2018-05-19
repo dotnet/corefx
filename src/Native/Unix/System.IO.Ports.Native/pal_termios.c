@@ -30,11 +30,11 @@ enum
 
 /* Interop/Unix/Interop.Termios.cs */
 enum {
-  SignalDtr = 1,
-  SignalDsr = 2,
-  SignalRts = 3,
-  SignalCts = 4,
-  SignalDcd = 5,
+    SignalDtr = 1,
+    SignalDsr = 2,
+    SignalRts = 3,
+    SignalCts = 4,
+    SignalDcd = 5,
 };
 
 static int TermiosGetStatus(int32_t fd)
