@@ -6,6 +6,8 @@
 // they may be attached to a CryptoStream in either read or write mode
 
 using System.Buffers;
+using System.Buffers.Text;
+using System.Diagnostics;
 using System.Text;
 
 namespace System.Security.Cryptography
@@ -95,9 +97,11 @@ namespace System.Security.Cryptography
 
     public class FromBase64Transform : ICryptoTransform
     {
-        private byte[] _inputBuffer = new byte[4];
+        private const int BLOCK_SIZE = 4;
+        private byte[] _inputBuffer = new byte[BLOCK_SIZE];
         private int _inputIndex;
         private FromBase64TransformMode _whitespaces;
+        private bool _finished = false;
 
         public FromBase64Transform() : this(FromBase64TransformMode.IgnoreWhiteSpaces) { }
         public FromBase64Transform(FromBase64TransformMode whitespaces)
@@ -114,142 +118,215 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            Span<byte> input = ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            ReadOnlySpan<byte> input = ValidateInputBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
+            Span<byte> output = ValidateOutputBlock(outputBuffer, outputOffset);
+            int outputWritten = 0;
 
-            ArraySegment<char> temp = GetTempBuffer(input);
-
-            if (temp == null)
+            if (_whitespaces == FromBase64TransformMode.DoNotIgnoreWhiteSpaces)
             {
-                return 0;
-            }
+                int totalInput = _inputIndex + input.Length;
+                int remainder = totalInput % BLOCK_SIZE;
+                int usableInput = input.Length - remainder;
 
-            byte[] result;
-            try
+                if (_inputIndex > 0)
+                {
+                    int copy = Math.Min(input.Length, _inputBuffer.Length - _inputIndex);
+                    input.Slice(0, copy).CopyTo(_inputBuffer.AsSpan(_inputIndex));
+                    _inputIndex += copy;
+                    if (_inputIndex < _inputBuffer.Length)
+                    {
+                        // not enough bytes to form a single block
+                        return outputWritten;
+                    }
+                    _inputIndex = 0;
+                    
+                    DecodeBlocks(_inputBuffer, ref output, ref outputWritten);
+
+                    input = input.Slice(copy);
+                    usableInput -= copy;
+                }
+
+                ReadOnlySpan<byte> newRemainder = input.Slice(usableInput);
+                input = input.Slice(0, usableInput);
+
+                DecodeBlocks(input, ref output, ref outputWritten);
+                
+                newRemainder.CopyTo(_inputBuffer);
+                _inputIndex = newRemainder.Length;
+
+                return outputWritten;
+            }
+            else
             {
-                result = Convert.FromBase64CharArray(temp.Array, temp.Offset, temp.Count);
+                int inputPos = 0;
+                while (inputPos < input.Length)
+                {
+                    while (_inputIndex < _inputBuffer.Length && inputPos < input.Length)
+                    {
+                        if (!char.IsWhiteSpace((char)input[inputPos]))
+                        {
+                            _inputBuffer[_inputIndex++] = input[inputPos];
+                        }
+                        inputPos++;
+                    }
+                    if (_inputIndex == _inputBuffer.Length)
+                    {
+                        _inputIndex = 0;
+                        DecodeBlocks(_inputBuffer, ref output, ref outputWritten);
+                    }
+                }
+
+                return outputWritten;
             }
-            finally
+        }
+
+        void DecodeBlocks(ReadOnlySpan<byte> input, ref Span<byte> output, ref int totalBytesWritten)
+        {
+            if (input.Length == 0)
             {
-                temp.AsSpan().Clear();
-                ArrayPool<char>.Shared.Return(temp.Array);
+                return;
             }
-
-            Buffer.BlockCopy(result, 0, outputBuffer, outputOffset, result.Length);
-
-            return result.Length;
+            if (_finished)
+            {
+                throw new FormatException("zzz invalid data");
+            }
+            Debug.Assert(input.Length % BLOCK_SIZE == 0, nameof(input) + ".Length % " + nameof(BLOCK_SIZE) + " != 0");
+            bool final = input[input.Length - 1] == (byte)'=';
+            OperationStatus status = Base64.DecodeFromUtf8(input, output, out int bytesConsumed, out int bytesWritten, final);
+            switch (status)
+            {
+                case OperationStatus.DestinationTooSmall:
+                    throw new ArgumentException("dst", "zzz output buffer too small");
+                case OperationStatus.InvalidData:
+                    throw new FormatException("zzz invalid data");
+            }
+            Debug.Assert(bytesConsumed == input.Length, nameof(bytesConsumed) + " != " + nameof(input) + ".Length");
+            output = output.Slice(bytesWritten);
+            totalBytesWritten += bytesWritten;
+            _finished = final;
         }
 
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            Span<byte> input = ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            ReadOnlySpan<byte> input = ValidateInputBlock(inputBuffer, inputOffset, inputCount);
             if (_inputBuffer == null) throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
 
-            ArraySegment<char> temp = GetTempBuffer(input);
-
-            if (temp == null)
+            if (_inputIndex == 0 && input.Length == 0)
             {
                 Reset();
                 return Array.Empty<byte>();
             }
 
-            byte[] result;
-            try
+            int outputSize;
+            int omittedPadding = 0;
+            if (_whitespaces == FromBase64TransformMode.DoNotIgnoreWhiteSpaces)
             {
-                result = Convert.FromBase64CharArray(temp.Array, temp.Offset, temp.Count);
+                int totalCount = _inputIndex + input.Length;
+
+                omittedPadding = BLOCK_SIZE - 1 - (totalCount + BLOCK_SIZE - 1) % BLOCK_SIZE;
+                if (omittedPadding > 2)
+                {
+                    throw new FormatException($"zzz invalid data");
+                }
+
+                // round up to the nearest whole block
+                outputSize = Base64.GetMaxDecodedFromUtf8Length(totalCount + omittedPadding);
+                // check the last two characters for padding or make up missing padding
+                if (omittedPadding > 0 ||
+                    ((input.Length > 0 && input[input.Length - 1] == (byte)'=') ||
+                    (input.Length == 0 && _inputBuffer[BLOCK_SIZE - 1] == (byte)'=')))
+                {
+                    outputSize--;
+                    if (omittedPadding > 1 ||
+                        ((input.Length > 1 && input[input.Length - 2] == (byte)'=') ||
+                        (input.Length == 1 && _inputBuffer[BLOCK_SIZE - 1] == (byte)'=') ||
+                        (input.Length == 0 && _inputBuffer[BLOCK_SIZE - 2] == (byte)'=')))
+                    {
+                        outputSize--;
+                    }
+                }
             }
-            finally
+            else
             {
-                temp.AsSpan().Clear();
-                ArrayPool<char>.Shared.Return(temp.Array);
+                int nonSpace = 0;
+                int padding = 0;
+                for (int i = 0; i < _inputIndex; i++)
+                {
+                    if (!char.IsWhiteSpace((char)_inputBuffer[i]))
+                    {
+                        nonSpace++;
+                        if (_inputBuffer[i] == (byte)'=')
+                        {
+                            padding++;
+                        }
+                        else if (padding > 0)
+                        {
+                            throw new FormatException("zzz invalid data");
+                        }
+                    }
+                }
+                for (int i = 0; i < input.Length; i++)
+                {
+                    if (!char.IsWhiteSpace((char)input[i]))
+                    {
+                        nonSpace++;
+                        if (input[i] == (byte)'=')
+                        {
+                            padding++;
+                        }
+                        else if (padding > 0)
+                        {
+                            throw new FormatException("zzz invalid data");
+                        }
+                    }
+                }
+
+                omittedPadding = BLOCK_SIZE - 1 - (nonSpace + BLOCK_SIZE - 1) % BLOCK_SIZE;
+                if (padding + omittedPadding > 2)
+                {
+                    throw new FormatException($"zzz invalid data");
+                }
+
+                outputSize = Base64.GetMaxDecodedFromUtf8Length(nonSpace + omittedPadding) - padding - omittedPadding;
             }
 
-            // reinitialize the transform
+            var result = new byte[outputSize];
+
+            int written = TransformBlock(inputBuffer, inputOffset, inputCount, result, 0);
+            Debug.Assert((_inputIndex + omittedPadding) % BLOCK_SIZE == 0, "(" + nameof(_inputIndex) + " + " + nameof(omittedPadding) + ") % BLOCK_SIZE != 0");
+
+            if (omittedPadding > 0)
+            {
+                for (int i = 0; i < omittedPadding; i++)
+                {
+                    _inputBuffer[BLOCK_SIZE - 1 - i] = (byte)'=';
+                }
+                Span<byte> output = result.AsSpan(written);
+                int paddingWritten = 0;
+                DecodeBlocks(_inputBuffer, ref output, ref paddingWritten);
+            }
+
             Reset();
 
             return result;
         }
 
-        private void FillRemainderBuffer(Span<byte> buffer)
-        {
-            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-            {
-                for (var i = 0; i < buffer.Length; i++)
-                {
-                    var value = buffer[i];
-                    if (!char.IsWhiteSpace((char)value))
-                    {
-                        _inputBuffer[_inputIndex++] = value;
-                    }
-                }
-            }
-            else
-            {
-                buffer.CopyTo(_inputBuffer.AsSpan(_inputIndex, buffer.Length));
-                _inputIndex += buffer.Length;
-            }
-        }
-
-        private ArraySegment<char> GetTempBuffer(Span<byte> input)
-        {
-            var effectiveCount = input.Length;
-            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-            {
-                for (int i = 0; i < input.Length; i++)
-                {
-                    if (char.IsWhiteSpace((char)input[i])) effectiveCount--;
-                }
-            }
-
-            // return early if there are insufficient characters to decode a block
-            if (effectiveCount + _inputIndex < 4)
-            {
-                FillRemainderBuffer(input);
-                return null;
-            }
-
-            // copy current remainder + input -> temp
-            var totalBytes = _inputIndex + effectiveCount;
-            var remainder = totalBytes % 4;
-            var tempCount = totalBytes - remainder;
-            var temp = ArrayPool<char>.Shared.Rent(tempCount);
-            var tempIndex = 0;
-            var inputIndex = 0;
-            for (var i = 0; i < _inputIndex; i++)
-            {
-                temp[tempIndex++] = (char)_inputBuffer[i];
-            }
-            _inputIndex = 0;
-            if (_whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-            {
-                while (tempIndex < tempCount)
-                {
-                    var value = (char)input[inputIndex++];
-                    if (!char.IsWhiteSpace(value))
-                    {
-                        temp[tempIndex++] = value;
-                    }
-                }
-            }
-            else
-            {
-                var usableCount = input.Length - remainder;
-                Encoding.ASCII.GetChars(input.Slice(0, usableCount), temp.AsSpan().Slice(tempIndex, usableCount));
-                inputIndex += usableCount;
-            }
-
-            FillRemainderBuffer(input.Slice(inputIndex, input.Length - inputIndex));
-
-            return new ArraySegment<char>(temp, 0, tempCount);
-        }
-
-        private static Span<byte> ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+        private static ReadOnlySpan<byte> ValidateInputBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             if (inputBuffer == null) throw new ArgumentNullException(nameof(inputBuffer));
             if (inputOffset < 0) throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (inputCount < 0 || (inputCount > inputBuffer.Length)) throw new ArgumentException(SR.Argument_InvalidValue);
             if ((inputBuffer.Length - inputCount) < inputOffset) throw new ArgumentException(SR.Argument_InvalidOffLen);
             return inputBuffer.AsSpan(inputOffset, inputCount);
+        }
+
+        private static Span<byte> ValidateOutputBlock(byte[] outputBuffer, int outputOffset)
+        {
+            if (outputBuffer == null) throw new ArgumentNullException("dst");
+            if (outputOffset < 0) throw new ArgumentOutOfRangeException(nameof(outputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (outputBuffer.Length < outputOffset) throw new ArgumentException(SR.Argument_InvalidOffLen);
+            return outputBuffer.AsSpan(outputOffset);
         }
 
         // must implement IDisposable, which in this case means clearing the input buffer
@@ -264,6 +341,7 @@ namespace System.Security.Cryptography
         private void Reset()
         {
             _inputIndex = 0;
+            _finished = false;
         }
 
         public void Clear()
