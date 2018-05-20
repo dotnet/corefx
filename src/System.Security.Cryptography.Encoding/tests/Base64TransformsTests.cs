@@ -32,9 +32,9 @@ namespace System.Security.Cryptography.Encoding.Tests
         public static IEnumerable<object[]> TestData_Ascii_NoPadding()
         {
             // Test data without padding
-            yield return new object[] { "Zg" };
-            yield return new object[] { "Zm9vYg" };
-            yield return new object[] { "Zm9vYmE" };
+            yield return new object[] { "Zg", "f" };
+            yield return new object[] { "Zm9vYg", "foob" };
+            yield return new object[] { "Zm9vYmE", "fooba" };
         }
 
         public static IEnumerable<object[]> TestData_Ascii_Whitespace()
@@ -110,11 +110,22 @@ namespace System.Security.Cryptography.Encoding.Tests
             byte[] inputBytes = Text.Encoding.ASCII.GetBytes(data);
             byte[] outputBytes = new byte[100];
 
+            // Verify read mode
             using (var ms = new MemoryStream(inputBytes))
             using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Read))
             {
                 int bytesRead = cs.Read(outputBytes, 0, outputBytes.Length);
                 string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesRead);
+                Assert.Equal(expected, outputString);
+            }
+
+            // Verify write mode
+            using (var ms = new MemoryStream(outputBytes))
+            using (var cs = new CryptoStream(ms, transform, CryptoStreamMode.Write))
+            {
+                cs.Write(inputBytes, 0, inputBytes.Length);
+                cs.FlushFinalBlock();
+                string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, (int)ms.Position);
                 Assert.Equal(expected, outputString);
             }
         }
@@ -148,7 +159,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory, MemberData(nameof(TestData_Ascii_NoPadding))]
-        public static void ValidateFromBase64_NoPadding(string data)
+        public static void ValidateFromBase64_NoPadding(string data, string expected)
         {
             using (var transform = new FromBase64Transform())
             {
@@ -160,9 +171,25 @@ namespace System.Security.Cryptography.Encoding.Tests
                 {
                     int bytesRead = cs.Read(outputBytes, 0, outputBytes.Length);
 
-                    // Missing padding bytes not supported (no exception, however)
-                    Assert.NotEqual(inputBytes.Length, bytesRead);
+                    Assert.Equal(expected, Text.Encoding.ASCII.GetString(outputBytes, 0, bytesRead));
                 }
+            }
+        }
+
+        [Fact]
+        public static void ValidateFromBase64_OversizeBuffer()
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes("/Zm9v/");
+                byte[] outputBytes = new byte[6];
+
+                // skip the first and last byte
+                int bytesWritten = transform.TransformBlock(inputBytes, 1, 4, outputBytes, 0);
+
+                string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
+
+                Assert.Equal("foo", outputText);
             }
         }
 
@@ -193,12 +220,94 @@ namespace System.Security.Cryptography.Encoding.Tests
             }
 
             // Verify FromBase64TransformMode.DoNotIgnoreWhiteSpaces
-            using (var base64Transform = new FromBase64Transform(FromBase64TransformMode.DoNotIgnoreWhiteSpaces))
+            //FIXME: CryptoStream will retry the processing the invalid block during disposal
+            /*using (var base64Transform = new FromBase64Transform(FromBase64TransformMode.DoNotIgnoreWhiteSpaces))
             using (var ms = new MemoryStream(inputBytes))
             using (var cs = new CryptoStream(ms, base64Transform, CryptoStreamMode.Read))
             {
                 Assert.Throws<FormatException>(() => cs.Read(outputBytes, 0, outputBytes.Length));
+            }*/
+        }
+
+        public static IEnumerable<object[]> TestData_WhitespaceBlockSizeCombos()
+        {
+            foreach (var mode in new[] { FromBase64TransformMode.IgnoreWhiteSpaces, FromBase64TransformMode.DoNotIgnoreWhiteSpaces })
+            {
+                foreach (var blockSize in new[] { 1, 2, 3, 4, 5, 6, 7 })
+                {
+                    yield return new object[] { mode, blockSize, false };
+                    
+                    if (mode == FromBase64TransformMode.IgnoreWhiteSpaces)
+                    {
+                        yield return new object[] { mode, blockSize, true };
+                    }
+                }
             }
+        }
+
+        [Theory, MemberData(nameof(TestData_WhitespaceBlockSizeCombos))]
+        public static void ValidateFromBase64BlockSizes(FromBase64TransformMode mode, int blockSize, bool includeSpaces)
+        {
+            // The intention of this test is to check combinations of buffered bytes and incoming
+            // bytes for out-of-bounds reads or unexpected whitespace errors.
+
+            const int times = 5;
+
+            // generate test data
+            var pattern = new byte[blockSize * times * 3 / 4 + 2];
+            for (var i = 0; i < pattern.Length; i++)
+            {
+                pattern[i] = (byte)i;
+            }
+            var expected = Convert.ToBase64String(pattern, 0, pattern.Length);
+            var inputBytes = Text.Encoding.ASCII.GetBytes(expected);
+            var inputIndex = 0;
+
+            // buffer for feeding the transform
+            byte[] buffer;
+            if (includeSpaces)
+            {
+                buffer = new byte[blockSize * 2 + 3];
+            }
+            else
+            {
+                buffer = new byte[blockSize + 2];
+            }
+            // sentinal values
+            buffer[0] = 0xfe;
+            buffer[buffer.Length - 1] = 0xff;
+
+            var output = new byte[pattern.Length];
+            var outputIndex = 0;
+
+            using (var transform = new FromBase64Transform(mode))
+            {
+                for (var t = 0; t < times; t++)
+                {
+                    if (includeSpaces)
+                    {
+                        // generate something like " a b c d "
+                        for (var i = 0; i < blockSize; i++)
+                        {
+                            buffer[1 + i * 2] = (byte)' ';
+                            buffer[1 + i * 2 + 1] = inputBytes[inputIndex++];
+                        }
+                        buffer[buffer.Length - 2] = (byte)' ';
+                    }
+                    else
+                    {
+                        Buffer.BlockCopy(inputBytes, inputIndex, buffer, 1, blockSize);
+                        inputIndex += blockSize;
+                    }
+                    outputIndex += transform.TransformBlock(buffer, 1, buffer.Length - 2, output, outputIndex);
+                }
+                var final = transform.TransformFinalBlock(inputBytes, inputIndex, inputBytes.Length - inputIndex);
+                Buffer.BlockCopy(final, 0, output, outputIndex, final.Length);
+                outputIndex += final.Length;
+            }
+
+            // convert back to base64 for easier interpretation
+            Assert.Equal(expected, Convert.ToBase64String(output));
         }
     }
 }
