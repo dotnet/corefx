@@ -28,6 +28,7 @@
     <Compile Include="FileInfo\GetSetAttributesCommon.cs" />
     <Compile Include="FileInfo\IsReadOnly.cs" />
     <Compile Include="FileInfo\Replace.cs" />
+    <Compile Include="FileStream\CopyTo.cs" />
     <Compile Include="FileStream\Handle.cs" />
     <Compile Include="Directory\GetLogicalDrives.cs" />
     <Compile Include="FileStream\EndRead.cs" />
