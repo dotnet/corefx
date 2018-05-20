@@ -618,9 +618,9 @@ check_function_exists(
     HAVE_UNAME)
 
 check_symbol_exists(
-    ucred
+    getsockopt
     sys/socket.h
-    HAVE_UCRED
+    HAVE_GETSOCKOPT
 )
 
 # getdomainname on OSX takes an 'int' instead of a 'size_t'

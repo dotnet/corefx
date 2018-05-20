@@ -1359,7 +1359,7 @@ int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
 int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid)
 {
     int fd = ToFileDescriptor(socket);
-#if defined(SO_PEERCRED) && defined(HAVE_UCRED)
+#if defined(SO_PEERCRED) && defined(HAVE_GETSOCKOPT)
     struct ucred creds;
     socklen_t len = sizeof(creds);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &creds, &len) == 0)
