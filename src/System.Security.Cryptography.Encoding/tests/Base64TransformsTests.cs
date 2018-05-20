@@ -32,9 +32,9 @@ namespace System.Security.Cryptography.Encoding.Tests
         public static IEnumerable<object[]> TestData_Ascii_NoPadding()
         {
             // Test data without padding
-            yield return new object[] { "Zg" };
-            yield return new object[] { "Zm9vYg" };
-            yield return new object[] { "Zm9vYmE" };
+            yield return new object[] { "Zg", "f" };
+            yield return new object[] { "Zm9vYg", "foob" };
+            yield return new object[] { "Zm9vYmE", "fooba" };
         }
 
         public static IEnumerable<object[]> TestData_Ascii_Whitespace()
@@ -159,7 +159,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory, MemberData(nameof(TestData_Ascii_NoPadding))]
-        public static void ValidateFromBase64_NoPadding(string data)
+        public static void ValidateFromBase64_NoPadding(string data, string expected)
         {
             using (var transform = new FromBase64Transform())
             {
@@ -171,8 +171,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 {
                     int bytesRead = cs.Read(outputBytes, 0, outputBytes.Length);
 
-                    // Missing padding bytes not supported (no exception, however)
-                    Assert.NotEqual(inputBytes.Length, bytesRead);
+                    Assert.Equal(expected, Text.Encoding.ASCII.GetString(outputBytes, 0, bytesRead));
                 }
             }
         }
