@@ -2617,11 +2617,12 @@ namespace System
             if (loopback)
             {
                 flags |= Flags.LoopbackHost;
-            }
-            if(linkLocalAddress)
+            }            
+            if (linkLocalAddress)
             {
                 flags |= Flags.LinkLocalAddress;
             }
+
             return host;
         }
 
