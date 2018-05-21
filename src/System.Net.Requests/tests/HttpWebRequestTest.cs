@@ -474,8 +474,8 @@ namespace System.Net.Tests
                 List<string> requestLines = await serverTask;
                 if (!keepAlive.HasValue || keepAlive.Value)
                 {
-                    // Validate that the request doesn't contain Connection: "close", but we can't validate
-                    // that it does contain Connection: "keep-alive", as that's optional as of HTTP 1.1.
+                    // Validate that the request doesn't contain "Connection: close", but we can't validate
+                    // that it does contain "Connection: Keep-Alive", as that's optional as of HTTP 1.1.
                     Assert.DoesNotContain("Connection: close", requestLines, StringComparer.OrdinalIgnoreCase);
                 }
                 else
