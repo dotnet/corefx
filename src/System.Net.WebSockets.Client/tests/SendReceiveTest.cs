@@ -50,7 +50,7 @@ namespace System.Net.WebSockets.Client.Tests
                 // The server will read buffers and aggregate it before echoing back a complete message.
                 // But since this test uses a receive buffer that is smaller than the complete message, we will get
                 // back partial message fragments as we read them until we read the complete message payload.
-                for (int i = 0; i < SendBufferSize*5; i++)
+                for (int i = 0; i < SendBufferSize * 5; i++)
                 {
                     await SendAsync(cws, sendSegment, WebSocketMessageType.Binary, false, ctsDefault.Token);
                 }
