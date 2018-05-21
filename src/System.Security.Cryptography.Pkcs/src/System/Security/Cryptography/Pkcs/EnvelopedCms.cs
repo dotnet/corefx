@@ -158,7 +158,7 @@ namespace System.Security.Cryptography.Pkcs
         //
         public void Decrypt()
         {
-            DecryptContent(RecipientInfos, null);
+            DecryptContent(RecipientInfos, null, null);
         }
 
         public void Decrypt(RecipientInfo recipientInfo)
@@ -166,7 +166,7 @@ namespace System.Security.Cryptography.Pkcs
             if (recipientInfo == null)
                 throw new ArgumentNullException(nameof(recipientInfo));
 
-            DecryptContent(new RecipientInfoCollection(recipientInfo), null);
+            DecryptContent(new RecipientInfoCollection(recipientInfo), null, null);
         }
 
         public void Decrypt(RecipientInfo recipientInfo, X509Certificate2Collection extraStore)
@@ -177,7 +177,7 @@ namespace System.Security.Cryptography.Pkcs
             if (extraStore == null)
                 throw new ArgumentNullException(nameof(extraStore));
 
-            DecryptContent(new RecipientInfoCollection(recipientInfo), extraStore);
+            DecryptContent(new RecipientInfoCollection(recipientInfo), extraStore, null);
         }
 
         public void Decrypt(X509Certificate2Collection extraStore)
@@ -185,10 +185,24 @@ namespace System.Security.Cryptography.Pkcs
             if (extraStore == null)
                 throw new ArgumentNullException(nameof(extraStore));
 
-            DecryptContent(RecipientInfos, extraStore);
+            DecryptContent(RecipientInfos, extraStore, null);
         }
 
-        private void DecryptContent(RecipientInfoCollection recipientInfos, X509Certificate2Collection extraStore)
+        public void Decrypt(RecipientInfo recipientInfo, AsymmetricAlgorithm privateKey)
+        {
+            if (recipientInfo == null)
+                throw new ArgumentNullException(nameof(recipientInfo));
+
+            X509Certificate2Collection extraStore = new X509Certificate2Collection();
+            ContentInfo contentInfo = _decryptorPal.TryDecrypt(recipientInfo, null, privateKey, Certificates, extraStore, out Exception exception);
+
+            if (exception != null)
+                throw exception;
+
+            SetContentInfo(contentInfo);
+        }
+
+        private void DecryptContent(RecipientInfoCollection recipientInfos, X509Certificate2Collection extraStore, AsymmetricAlgorithm privateKey)
         {
             switch (_lastCall)
             {
@@ -227,7 +241,7 @@ namespace System.Security.Cryptography.Pkcs
                     exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
                     continue;
                 }
-                newContentInfo = _decryptorPal.TryDecrypt(recipientInfo, cert, originatorCerts, extraStore, out exception);
+                newContentInfo = _decryptorPal.TryDecrypt(recipientInfo, cert, privateKey, originatorCerts, extraStore, out exception);
                 if (exception != null)
                     continue;
 
@@ -237,10 +251,15 @@ namespace System.Security.Cryptography.Pkcs
             if (exception != null)
                 throw exception;
 
-            ContentInfo = newContentInfo;
+            SetContentInfo(newContentInfo);
+        }
+
+        private void SetContentInfo(ContentInfo contentInfo)
+        {
+            ContentInfo = contentInfo;
 
             // Desktop compat: Encode() after a Decrypt() returns you the same thing that ContentInfo.Content does.
-            _encodedMessage = newContentInfo.Content.CloneByteArray();
+            _encodedMessage = contentInfo.Content.CloneByteArray();
 
             _lastCall = LastCall.Decrypt;
         }

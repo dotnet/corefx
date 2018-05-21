@@ -97,6 +97,40 @@ namespace System.Security.Cryptography.Pkcs
 
         public SubjectIdentifierType Type { get; }
         public object Value { get; }
+
+        public bool IsMatch(X509Certificate2 certificate)
+        {
+            switch (Type)
+            {
+                case SubjectIdentifierType.IssuerAndSerialNumber:
+                    {
+                        X509IssuerSerial issuerSerial = (X509IssuerSerial)Value;
+                        byte[] serialNumber = issuerSerial.SerialNumber.ToSerialBytes();
+                        string issuer = issuerSerial.IssuerName;
+                        byte[] certSerialNumber = certificate.GetSerialNumber();
+                        if (Helpers.AreByteArraysEqual(certSerialNumber, serialNumber) && certificate.Issuer == issuer)
+                            return true;
+                    }
+                    break;
+
+                case SubjectIdentifierType.SubjectKeyIdentifier:
+                    {
+                        string skiString = (string)Value;
+                        byte[] ski = skiString.ToSkiBytes();
+                        byte[] candidateSki = PkcsPal.Instance.GetSubjectKeyIdentifier(certificate);
+                        if (Helpers.AreByteArraysEqual(ski, candidateSki))
+                            return true;
+                    }
+                    break;
+
+                default:
+                    // RecipientInfo's can only be created by this package so if this an invalid type, it's the package's fault.
+                    Debug.Fail($"Invalid recipientIdentifier type: {Type}");
+                    throw new CryptographicException();
+            }
+
+            return false;
+        }
     }
 }
 
