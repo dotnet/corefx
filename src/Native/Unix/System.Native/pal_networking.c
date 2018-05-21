@@ -51,47 +51,47 @@
 
 #if HAVE_KQUEUE
 #if KEVENT_HAS_VOID_UDATA
-void* GetKeventUdata(uintptr_t udata)
+static void* GetKeventUdata(uintptr_t udata)
 {
     return (void*)udata;
 }
-uintptr_t GetSocketEventData(void* udata)
+static uintptr_t GetSocketEventData(void* udata)
 {
     return (uintptr_t)udata;
 }
 #else
-intptr_t GetKeventUdata(uintptr_t udata)
+static intptr_t GetKeventUdata(uintptr_t udata)
 {
     return (intptr_t)udata;
 }
-uintptr_t GetSocketEventData(intptr_t udata)
+static uintptr_t GetSocketEventData(intptr_t udata)
 {
     return (uintptr_t)udata;
 }
 #endif
 #if KEVENT_REQUIRES_INT_PARAMS
-int GetKeventNchanges(int nchanges)
+static int GetKeventNchanges(int nchanges)
 {
     return nchanges;
 }
-int16_t GetKeventFilter(int16_t filter)
+static int16_t GetKeventFilter(int16_t filter)
 {
     return filter;
 }
-uint16_t GetKeventFlags(uint16_t flags)
+static uint16_t GetKeventFlags(uint16_t flags)
 {
     return flags;
 }
 #else
-size_t GetKeventNchanges(int nchanges)
+static size_t GetKeventNchanges(int nchanges)
 {
     return (size_t)nchanges;
 }
-int16_t GetKeventFilter(uint32_t filter)
+static int16_t GetKeventFilter(uint32_t filter)
 {
     return (int16_t)filter;
 }
-uint16_t GetKeventFlags(uint32_t flags)
+static uint16_t GetKeventFlags(uint32_t flags)
 {
     return (uint16_t)flags;
 }
@@ -824,7 +824,7 @@ static int32_t GetIPv6PacketInformation(struct cmsghdr* controlMessage, struct I
     return 1;
 }
 
-struct cmsghdr* GET_CMSG_NXTHDR(struct msghdr* mhdr, struct cmsghdr* cmsg)
+static struct cmsghdr* GET_CMSG_NXTHDR(struct msghdr* mhdr, struct cmsghdr* cmsg)
 {
 #ifndef __GLIBC__
 // Tracking issue: #6312
@@ -1128,7 +1128,7 @@ int32_t SystemNative_SetLingerOption(intptr_t socket, struct LingerOption* optio
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
-int32_t SetTimeoutOption(int32_t socket, int32_t millisecondsTimeout, int optionName)
+static int32_t SetTimeoutOption(int32_t socket, int32_t millisecondsTimeout, int optionName)
 {
     if (millisecondsTimeout < 0)
     {
@@ -1968,13 +1968,13 @@ int32_t SystemNative_GetBytesAvailable(intptr_t socket, int32_t* available)
 
 static const size_t SocketEventBufferElementSize = sizeof(struct epoll_event) > sizeof(struct SocketEvent) ? sizeof(struct epoll_event) : sizeof(struct SocketEvent);
 
-static enum SocketEvents GetSocketEvents(uint32_t events)
+static int GetSocketEvents(uint32_t events)
 {
     int asyncEvents = (((events & EPOLLIN) != 0) ? SocketEvents_SA_READ : 0) | (((events & EPOLLOUT) != 0) ? SocketEvents_SA_WRITE : 0) |
                       (((events & EPOLLRDHUP) != 0) ? SocketEvents_SA_READCLOSE : 0) |
                       (((events & EPOLLHUP) != 0) ? SocketEvents_SA_CLOSE : 0) | (((events & EPOLLERR) != 0) ? SocketEvents_SA_ERROR : 0);
 
-    return (enum SocketEvents)asyncEvents;
+    return asyncEvents;
 }
 
 static uint32_t GetEPollEvents(enum SocketEvents events)

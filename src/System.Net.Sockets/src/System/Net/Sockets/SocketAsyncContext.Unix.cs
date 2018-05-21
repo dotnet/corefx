@@ -133,7 +133,7 @@ namespace System.Net.Sockets
 
             public ManualResetEventSlim Event
             {
-                private get { return (ManualResetEventSlim)CallbackOrEvent; }
+                get { return CallbackOrEvent as ManualResetEventSlim; }
                 set { CallbackOrEvent = value; }
             }
 
@@ -177,28 +177,11 @@ namespace System.Net.Sockets
                 return true;
             }
 
-            public bool SetComplete()
+            public void SetComplete()
             {
                 Debug.Assert(Volatile.Read(ref _state) == (int)State.Running);
 
                 Volatile.Write(ref _state, (int)State.Complete);
-
-                if (CallbackOrEvent is ManualResetEventSlim e)
-                {
-                    e.Set();
-
-                    // No callback needed
-                    return false;
-                }
-                else
-                {
-#if DEBUG
-                    Debug.Assert(Interlocked.CompareExchange(ref _callbackQueued, 1, 0) == 0, $"Unexpected _callbackQueued: {_callbackQueued}");
-#endif
-
-                    // Indicate callback is needed
-                    return true;
-                }
             }
 
             public void SetWaiting()
@@ -274,6 +257,21 @@ namespace System.Net.Sockets
                 // Note, we leave the operation in the OperationQueue.
                 // When we get around to processing it, we'll see it's cancelled and skip it.
                 return true;
+            }
+
+            public void Dispatch(WaitCallback processingCallback)
+            {
+                ManualResetEventSlim e = Event;
+                if (e != null)
+                {
+                    // Sync operation.  Signal waiting thread to continue processing.
+                    e.Set();
+                }
+                else
+                {
+                    // Async operation.  Process the IO on the threadpool.
+                    ThreadPool.UnsafeQueueUserWorkItem(processingCallback, this);
+                }
             }
 
             // Called when op is not in the queue yet, so can't be otherwise executing
@@ -696,8 +694,8 @@ namespace System.Net.Sockets
             private LockToken Lock() => new LockToken(_queueLock);
 
             private static readonly WaitCallback s_processingCallback =
-                typeof(TOperation) == typeof(ReadOperation) ? ((o) => { var context = ((SocketAsyncContext)o); context._receiveQueue.ProcessQueue(context); }) :
-                typeof(TOperation) == typeof(WriteOperation) ? ((o) => { var context = ((SocketAsyncContext)o); context._sendQueue.ProcessQueue(context); }) :
+                typeof(TOperation) == typeof(ReadOperation) ? ((op) => { var operation = ((ReadOperation)op); operation.AssociatedContext._receiveQueue.ProcessAsyncOperation(operation); }) :
+                typeof(TOperation) == typeof(WriteOperation) ? ((op) => { var operation = ((WriteOperation)op); operation.AssociatedContext._sendQueue.ProcessAsyncOperation(operation); }) :
                 (WaitCallback)null;
 
             public void Init()
@@ -800,6 +798,7 @@ namespace System.Net.Sockets
             // Called on the epoll thread whenever we receive an epoll notification.
             public void HandleEvent(SocketAsyncContext context)
             {
+                AsyncOperation op;
                 using (Lock())
                 {
                     Trace(context, $"Enter");
@@ -815,6 +814,7 @@ namespace System.Net.Sockets
                         case QueueState.Waiting:
                             Debug.Assert(_tail != null, "State == Waiting but queue is empty!");
                             _state = QueueState.Processing;
+                            op = _tail.Next;
                             // Break out and release lock
                             break;
 
@@ -835,16 +835,37 @@ namespace System.Net.Sockets
                     }
                 }
 
-                // We just transitioned from Waiting to Processing.
-                // Spawn a work item to do the actual processing.
-                ThreadPool.UnsafeQueueUserWorkItem(s_processingCallback, context);
+                // Dispatch the op so we can try to process it.
+                op.Dispatch(s_processingCallback);
+            }
+            
+            private void ProcessAsyncOperation(TOperation op)
+            {
+                OperationResult result = ProcessQueuedOperation(op);
+
+                Debug.Assert(op.Event == null, "Sync operation encountered in ProcessAsyncOperation");
+
+                if (result == OperationResult.Completed)
+                {
+                    // At this point, the operation has completed and it's no longer
+                    // in the queue / no one else has a reference to it.  We can invoke
+                    // the callback and let it pool the object if appropriate.
+                    op.InvokeCallback(allowPooling: true);
+                }
             }
 
-            // Called on the threadpool when data may be available.
-            public void ProcessQueue(SocketAsyncContext context)
+            public enum OperationResult
             {
+                Pending = 0,
+                Completed = 1,
+                Cancelled = 2
+            }
+
+            public OperationResult ProcessQueuedOperation(TOperation op)
+            {
+                SocketAsyncContext context = op.AssociatedContext;
+
                 int observedSequenceNumber;
-                AsyncOperation op;
                 using (Lock())
                 {
                     Trace(context, $"Enter");
@@ -853,132 +874,185 @@ namespace System.Net.Sockets
                     {
                         Debug.Assert(_tail == null);
                         Trace(context, $"Exit (stopped)");
-                        return;
+                        return OperationResult.Cancelled;
                     }
                     else
                     {
                         Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
                         Debug.Assert(_tail != null, "Unexpected empty queue while processing I/O");
+                        Debug.Assert(op == _tail.Next, "Operation is not at head of queue???");
                         observedSequenceNumber = _sequenceNumber;
-                        op = _tail.Next;        // head of queue
                     }
                 }
 
-                bool needCallback = false;
-                AsyncOperation nextOp;
+                bool wasCompleted = false;
                 while (true)
                 {
-                    bool wasCompleted = false;
-
                     // Try to change the op state to Running.  
                     // If this fails, it means the operation was previously cancelled,
                     // and we should just remove it from the queue without further processing.
-                    bool isRunning = op.TrySetRunning();
-                    if (isRunning)
-                    {
-                        // Try to perform the IO
-                        wasCompleted = op.TryComplete(context);
-                        if (wasCompleted)
-                        {
-                            needCallback = op.SetComplete();
-                        }
-                        else
-                        {
-                            op.SetWaiting();
-                        }
-                    }
-
-                    nextOp = null;
-                    if (wasCompleted || !isRunning)
-                    {
-                        // Remove the op from the queue and see if there's more to process.
-
-                        using (Lock())
-                        {
-                            if (_state == QueueState.Stopped)
-                            {
-                                Debug.Assert(_tail == null);
-                                Trace(context, $"Exit (stopped)");
-                            }
-                            else
-                            {
-                                Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
-                                Debug.Assert(_tail.Next == op, "Queue modified while processing queue");
-
-                                if (op == _tail)
-                                {
-                                    // No more operations to process
-                                    _tail = null;
-                                    _state = QueueState.Ready;
-                                    _sequenceNumber++;
-                                    Trace(context, $"Exit (finished queue)");
-                                }
-                                else
-                                {
-                                    // Pop current operation and advance to next
-                                    nextOp = _tail.Next = op.Next;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Check for retry and reset queue state.
-
-                        using (Lock())
-                        {
-                            if (_state == QueueState.Stopped)
-                            {
-                                Debug.Assert(_tail == null);
-                                Trace(context, $"Exit (stopped)");
-                            }
-                            else
-                            {
-                                Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
-
-                                if (observedSequenceNumber != _sequenceNumber)
-                                {
-                                    // We received another epoll notification since we previously checked it.
-                                    // So, we need to retry the operation.
-                                    Debug.Assert(observedSequenceNumber - _sequenceNumber < 10000, "Very large sequence number increase???");
-                                    observedSequenceNumber = _sequenceNumber;
-                                    nextOp = op;
-                                }
-                                else
-                                {
-                                    _state = QueueState.Waiting;
-                                    Trace(context, $"Exit (received EAGAIN)");
-                                }
-                            }
-                        }
-                    }
-
-                    if (needCallback || nextOp == null)
+                    if (!op.TrySetRunning())
                     {
                         break;
                     }
 
-                    op = nextOp;
-                }
-
-                if (needCallback)
-                {
-                    if (nextOp != null)
+                    // Try to perform the IO
+                    if (op.TryComplete(context))
                     {
-                        Debug.Assert(_state == QueueState.Processing);
-
-                        // Spawn a new work item to continue processing the queue.
-                        ThreadPool.UnsafeQueueUserWorkItem(s_processingCallback, context);
+                        op.SetComplete();
+                        wasCompleted = true;
+                        break;
                     }
 
-                    // At this point, the operation has completed and it's no longer
-                    // in the queue / no one else has a reference to it.  We can invoke
-                    // the callback and let it pool the object if appropriate.
-                    op.InvokeCallback(allowPooling: true);
+                    op.SetWaiting();
+
+                    // Check for retry and reset queue state.
+
+                    using (Lock())
+                    {
+                        if (_state == QueueState.Stopped)
+                        {
+                            Debug.Assert(_tail == null);
+                            Trace(context, $"Exit (stopped)");
+                            return OperationResult.Cancelled;
+                        }
+                        else
+                        {
+                            Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
+
+                            if (observedSequenceNumber != _sequenceNumber)
+                            {
+                                // We received another epoll notification since we previously checked it.
+                                // So, we need to retry the operation.
+                                Debug.Assert(observedSequenceNumber - _sequenceNumber < 10000, "Very large sequence number increase???");
+                                observedSequenceNumber = _sequenceNumber;
+                            }
+                            else
+                            {
+                                _state = QueueState.Waiting;
+                                Trace(context, $"Exit (received EAGAIN)");
+                                return OperationResult.Pending;
+                            }
+                        }
+                    }
                 }
-                else
+
+                // Remove the op from the queue and see if there's more to process.
+
+                AsyncOperation nextOp = null;
+                using (Lock())
                 {
-                    Debug.Assert(nextOp == null);
+                    if (_state == QueueState.Stopped)
+                    {
+                        Debug.Assert(_tail == null);
+                        Trace(context, $"Exit (stopped)");
+                    }
+                    else
+                    {
+                        Debug.Assert(_state == QueueState.Processing, $"_state={_state} while processing queue!");
+                        Debug.Assert(_tail.Next == op, "Queue modified while processing queue");
+
+                        if (op == _tail)
+                        {
+                            // No more operations to process
+                            _tail = null;
+                            _state = QueueState.Ready;
+                            _sequenceNumber++;
+                            Trace(context, $"Exit (finished queue)");
+                        }
+                        else
+                        {
+                            // Pop current operation and advance to next
+                            nextOp = _tail.Next = op.Next;
+                        }
+                    }
+                }
+
+                if (nextOp != null)
+                {
+                    nextOp.Dispatch(s_processingCallback);
+                }
+
+                return (wasCompleted ? OperationResult.Completed : OperationResult.Cancelled);
+            }
+
+            public void CancelAndContinueProcessing(TOperation op)
+            {
+                // Note, only sync operations use this method.
+                Debug.Assert(op.Event != null);
+
+                // Remove operation from queue.
+                // Note it must be there since it can only be processed and removed by the caller.
+                AsyncOperation nextOp = null;
+                using (Lock())
+                {
+                    if (_state == QueueState.Stopped)
+                    {
+                        Debug.Assert(_tail == null);
+                    }
+                    else
+                    {
+                        Debug.Assert(_tail != null, "Unexpected empty queue in CancelAndContinueProcessing");
+
+                        if (_tail.Next == op)
+                        {
+                            // We're the head of the queue
+                            if (op == _tail)
+                            {
+                                // No more operations 
+                                _tail = null;
+                            }
+                            else
+                            {
+                                // Pop current operation and advance to next
+                                _tail.Next = op.Next;
+                            }
+
+                            // We're the first op in the queue.
+                            if (_state == QueueState.Processing)
+                            {
+                                // The queue has already handed off execution responsibility to us.
+                                // We need to dispatch to the next op.
+                                if (_tail == null)
+                                {
+                                    _state = QueueState.Ready;
+                                    _sequenceNumber++;
+                                }
+                                else
+                                {
+                                    nextOp = _tail.Next;
+                                }
+                            }
+                            else if (_state == QueueState.Waiting)
+                            {
+                                if (_tail == null)
+                                {
+                                    _state = QueueState.Ready;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // We're not the head of the queue.
+                            // Just find this op and remove it.
+                            AsyncOperation current = _tail.Next;
+                            while (current.Next != op)
+                            {
+                                current = current.Next;
+                            }
+
+                            if (current.Next == _tail)
+                            {
+                                _tail = current;
+                            }
+                            current.Next = current.Next.Next;
+                        }
+                    }
+                }
+
+                if (nextOp != null)
+                {
+                    nextOp.Dispatch(s_processingCallback);
                 }
             }
 
@@ -1112,6 +1186,8 @@ namespace System.Net.Sockets
         private void PerformSyncOperation<TOperation>(ref OperationQueue<TOperation> queue, TOperation operation, int timeout, int observedSequenceNumber)
             where TOperation : AsyncOperation
         {
+            Debug.Assert(timeout == -1 || timeout > 0, $"Unexpected timeout: {timeout}");
+
             using (var e = new ManualResetEventSlim(false, 0))
             {
                 operation.Event = e;
@@ -1122,25 +1198,67 @@ namespace System.Net.Sockets
                     return;
                 }
 
-                if (e.Wait(timeout))
+                bool timeoutExpired = false;
+                while (true)
                 {
-                    // Completed within timeout
-                    return;
+                    DateTime waitStart = DateTime.UtcNow;
+
+                    if (!e.Wait(timeout))
+                    {
+                        timeoutExpired = true;
+                        break;
+                    }
+
+                    // Reset the event now to avoid lost notifications if the processing is unsuccessful.
+                    e.Reset();
+
+                    // We've been signalled to try to process the operation.
+                    OperationQueue<TOperation>.OperationResult result = queue.ProcessQueuedOperation(operation);
+                    if (result == OperationQueue<TOperation>.OperationResult.Completed ||
+                        result == OperationQueue<TOperation>.OperationResult.Cancelled)
+                    {
+                        break;
+                    }
+
+                    // Couldn't process the operation.
+                    // Adjust timeout and try again.
+                    if (timeout > 0)
+                    {
+                        timeout -= (DateTime.UtcNow - waitStart).Milliseconds;
+
+                        if (timeout <= 0)
+                        {
+                            timeoutExpired = true;
+                            break;
+                        }
+                    }
                 }
 
-                bool cancelled = operation.TryCancel();
-                if (cancelled)
+                if (timeoutExpired)
                 {
+                    queue.CancelAndContinueProcessing(operation);
                     operation.ErrorCode = SocketError.TimedOut;
                 }
             }
         }
 
-        public SocketError Accept(byte[] socketAddress, ref int socketAddressLen, int timeout, out IntPtr acceptedFd)
+        private bool ShouldRetrySyncOperation(out SocketError errorCode)
+        {
+            if (_nonBlockingSet)
+            {
+                errorCode = SocketError.Success;    // Will be ignored
+                return true;
+            }
+
+            // We are in blocking mode, so the EAGAIN we received indicates a timeout.
+            errorCode = SocketError.TimedOut;
+            return false;
+        }
+
+        public SocketError Accept(byte[] socketAddress, ref int socketAddressLen, out IntPtr acceptedFd)
         {
             Debug.Assert(socketAddress != null, "Expected non-null socketAddress");
             Debug.Assert(socketAddressLen > 0, $"Unexpected socketAddressLen: {socketAddressLen}");
-            Debug.Assert(timeout == -1 || timeout > 0, $"Unexpected timeout: {timeout}");
 
             SocketError errorCode;
             int observedSequenceNumber;
@@ -1157,7 +1275,7 @@ namespace System.Net.Sockets
                 SocketAddressLen = socketAddressLen,
             };
 
-            PerformSyncOperation(ref _receiveQueue, operation, timeout, observedSequenceNumber);
+            PerformSyncOperation(ref _receiveQueue, operation, -1, observedSequenceNumber);
 
             socketAddressLen = operation.SocketAddressLen;
             acceptedFd = operation.AcceptedFileDescriptor;
@@ -1201,11 +1319,10 @@ namespace System.Net.Sockets
             return SocketError.IOPending;
         }
 
-        public SocketError Connect(byte[] socketAddress, int socketAddressLen, int timeout)
+        public SocketError Connect(byte[] socketAddress, int socketAddressLen)
         {
             Debug.Assert(socketAddress != null, "Expected non-null socketAddress");
             Debug.Assert(socketAddressLen > 0, $"Unexpected socketAddressLen: {socketAddressLen}");
-            Debug.Assert(timeout == -1 || timeout > 0, $"Unexpected timeout: {timeout}");
 
             // Connect is different than the usual "readiness" pattern of other operations.
             // We need to call TryStartConnect to initiate the connect with the OS, 
@@ -1226,7 +1343,7 @@ namespace System.Net.Sockets
                 SocketAddressLen = socketAddressLen
             };
 
-            PerformSyncOperation(ref _sendQueue, operation, timeout, observedSequenceNumber);
+            PerformSyncOperation(ref _sendQueue, operation, -1, observedSequenceNumber);
 
             return operation.ErrorCode;
         }
@@ -1292,7 +1409,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_receiveQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteReceiveFrom(_socket, buffer.Span, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode))
+                (SocketPal.TryCompleteReceiveFrom(_socket, buffer.Span, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 flags = receivedFlags;
                 return errorCode;
@@ -1319,7 +1437,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_receiveQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteReceiveFrom(_socket, buffer, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode))
+                (SocketPal.TryCompleteReceiveFrom(_socket, buffer, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 flags = receivedFlags;
                 return errorCode;
@@ -1397,7 +1516,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_receiveQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteReceiveFrom(_socket, buffers, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode))
+                (SocketPal.TryCompleteReceiveFrom(_socket, buffers, flags, socketAddress, ref socketAddressLen, out bytesReceived, out receivedFlags, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 flags = receivedFlags;
                 return errorCode;
@@ -1464,7 +1584,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_receiveQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteReceiveMessageFrom(_socket, buffer.Span, buffers, flags, socketAddress, ref socketAddressLen, isIPv4, isIPv6, out bytesReceived, out receivedFlags, out ipPacketInformation, out errorCode))
+                (SocketPal.TryCompleteReceiveMessageFrom(_socket, buffer.Span, buffers, flags, socketAddress, ref socketAddressLen, isIPv4, isIPv6, out bytesReceived, out receivedFlags, out ipPacketInformation, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 flags = receivedFlags;
                 return errorCode;
@@ -1551,7 +1672,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_sendQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteSendTo(_socket, buffer, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode))
+                (SocketPal.TryCompleteSendTo(_socket, buffer, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 return errorCode;
             }
@@ -1582,7 +1704,8 @@ namespace System.Net.Sockets
             int bufferIndexIgnored = 0, offset = 0, count = buffer.Length;
             int observedSequenceNumber;
             if (_sendQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteSendTo(_socket, buffer, null, ref bufferIndexIgnored, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode))
+                (SocketPal.TryCompleteSendTo(_socket, buffer, null, ref bufferIndexIgnored, ref offset, ref count, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 return errorCode;
             }
@@ -1663,7 +1786,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_sendQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteSendTo(_socket, buffers, ref bufferIndex, ref offset, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode))
+                (SocketPal.TryCompleteSendTo(_socket, buffers, ref bufferIndex, ref offset, flags, socketAddress, socketAddressLen, ref bytesSent, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 return errorCode;
             }
@@ -1730,7 +1854,8 @@ namespace System.Net.Sockets
             SocketError errorCode;
             int observedSequenceNumber;
             if (_sendQueue.IsReady(this, out observedSequenceNumber) &&
-                SocketPal.TryCompleteSendFile(_socket, fileHandle, ref offset, ref count, ref bytesSent, out errorCode))
+                (SocketPal.TryCompleteSendFile(_socket, fileHandle, ref offset, ref count, ref bytesSent, out errorCode) ||
+                !ShouldRetrySyncOperation(out errorCode)))
             {
                 return errorCode;
             }

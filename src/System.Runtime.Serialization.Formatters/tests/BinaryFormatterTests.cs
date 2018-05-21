@@ -75,7 +75,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
-        [ActiveIssue(28816, TargetFrameworkMonikers.NetFramework)]
         public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs) 
             => ValidateAndRoundtrip(obj, blobs, false);
 
@@ -130,6 +129,22 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Simple), isSamePlatform);
                     EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i].Base64Blob, FormatterAssemblyStyle.Full), isSamePlatform);
                 }
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void RegexExceptionSerializable()
+        {
+            try
+            {
+                new Regex("*"); // parsing "*" - Quantifier {x,y} following nothing.
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.Equal(ex.GetType().Name, "RegexParseException");
+                ArgumentException clone = BinaryFormatterHelpers.Clone(ex);
+                Assert.IsType<ArgumentException>(clone);
             }
         }
 

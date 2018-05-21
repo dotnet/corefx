@@ -60,6 +60,28 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public async Task SslStream_ServerLocalCertificateSelectionCallbackReturnsNull_Throw()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            var selectionCallback = new LocalCertificateSelectionCallback((object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] issuers) =>
+            {
+                return null;
+            });
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var client = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var server = new SslStream(serverStream, false, null, selectionCallback))
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                await Assert.ThrowsAsync<NotSupportedException>(async () =>
+                    await TestConfiguration.WhenAllOrAnyFailedWithTimeout(client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false)), server.AuthenticateAsServerAsync(certificate))
+                );
+            }
+        }
+
+        [Fact]
         public async Task SslStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
@@ -384,6 +406,50 @@ namespace System.Net.Security.Tests
                 Assert.False(task.IsCompleted);
                 stream.CompleteAsyncFlush();
                 Assert.True(task.IsCompleted);
+            }
+        }
+
+        [Fact]
+        public async Task SslStream_StreamToStream_EOFDuringFrameRead_ThrowsIOException()
+        {
+            var network = new VirtualNetwork();
+            using (var clientNetworkStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverNetworkStream = new VirtualNetworkStream(network, isServer: true))
+            {
+                int readMode = 0;
+                var serverWrappedNetworkStream = new DelegateStream(
+                    canWriteFunc: () => true,
+                    canReadFunc: () => true,
+                    writeFunc: (buffer, offset, count) => serverNetworkStream.Write(buffer, offset, count),
+                    readFunc: (buffer, offset, count) =>
+                    {
+                        // Do normal reads as requested until the read mode is set
+                        // to 1.  Then do a single read of only 10 bytes to read only
+                        // part of the message, and subsequently return EOF.
+                        if (readMode == 0)
+                        {
+                            return serverNetworkStream.Read(buffer, offset, count);
+                        }
+                        else if (readMode == 1)
+                        {
+                            readMode = 2;
+                            return serverNetworkStream.Read(buffer, offset, 10); // read at least header but less than full frame
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    });
+
+
+                using (var clientSslStream = new SslStream(clientNetworkStream, false, AllowAnyServerCertificate))
+                using (var serverSslStream = new SslStream(serverWrappedNetworkStream))
+                {
+                    await DoHandshake(clientSslStream, serverSslStream);
+                    await clientSslStream.WriteAsync(new byte[20], 0, 20);
+                    readMode = 1;
+                    await Assert.ThrowsAsync<IOException>(() => serverSslStream.ReadAsync(new byte[1], 0, 1));
+                }
             }
         }
 

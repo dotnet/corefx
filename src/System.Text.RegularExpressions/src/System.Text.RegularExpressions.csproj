@@ -37,6 +37,8 @@
     <Compile Include="System\Text\RegularExpressions\RegexMatchTimeoutException.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexNode.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexOptions.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexParseError.cs" />
+    <Compile Include="System\Text\RegularExpressions\RegexParseException.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexParser.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexPrefix.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexReplacement.cs" />
@@ -48,8 +50,8 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Generic\ValueListBuilder.cs">
       <Link>Common\System\Collections\Generic\ValueListBuilder.cs</Link>

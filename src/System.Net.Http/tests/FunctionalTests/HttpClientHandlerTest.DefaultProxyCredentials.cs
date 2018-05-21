@@ -44,7 +44,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
@@ -69,7 +69,7 @@ namespace System.Net.Http.Functional.Tests
                 if (!IsCurlHandler) // libcurl sends Basic auth preemptively when only basic creds are provided; other handlers wait for 407.
                 {
                     await server.AcceptConnectionSendResponseAndCloseAsync(
-                        HttpStatusCode.ProxyAuthenticationRequired, "Connection: close\r\nProxy-Authenticate: Basic\r\n");
+                        HttpStatusCode.ProxyAuthenticationRequired, "Proxy-Authenticate: Basic\r\n");
                 }
 
                 List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.OK);

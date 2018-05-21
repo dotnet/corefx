@@ -99,7 +99,8 @@ extern "C" int32_t CryptoNative_DsaVerify(
     {
         if (success == -1)
         {
-            // Clear the queue, as we don't check the error information
+            // Clear the queue, as we don't check the error information.
+            // Managed caller expects the error queue to be cleared in case of error.
             ERR_clear_error();
         }
         return 0;
@@ -141,7 +142,7 @@ extern "C" int32_t CryptoNative_GetDsaParameters(
     return 1;
 }
 
-static void SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
+static int32_t SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t bufferLength)
 {
     assert(dsaFieldAddress != nullptr);
     if (dsaFieldAddress)
@@ -149,13 +150,18 @@ static void SetDsaParameter(BIGNUM** dsaFieldAddress, uint8_t* buffer, int32_t b
         if (!buffer || !bufferLength)
         {
             *dsaFieldAddress = nullptr;
+            return 1;
         }
         else
         {
             BIGNUM* bigNum = BN_bin2bn(buffer, bufferLength, nullptr);
             *dsaFieldAddress = bigNum;
+
+            return bigNum != nullptr;
         }
     }
+
+    return 0;
 }
 
 extern "C" int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
@@ -185,11 +191,10 @@ extern "C" int32_t CryptoNative_DsaKeyCreateByExplicitParameters(
 
     DSA* dsa = *outDsa;
 
-    SetDsaParameter(&dsa->p, p, pLength);
-    SetDsaParameter(&dsa->q, q, qLength);
-    SetDsaParameter(&dsa->g, g, gLength);
-    SetDsaParameter(&dsa->pub_key, y, yLength);
-    SetDsaParameter(&dsa->priv_key, x, xLength);
-
-    return 1;
+    return
+        SetDsaParameter(&dsa->p, p, pLength) &&
+        SetDsaParameter(&dsa->q, q, qLength) &&
+        SetDsaParameter(&dsa->g, g, gLength) &&
+        SetDsaParameter(&dsa->pub_key, y, yLength) &&
+        SetDsaParameter(&dsa->priv_key, x, xLength);
 }

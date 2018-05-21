@@ -155,7 +155,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory, InlineData("nano"), InlineData("vi")]
+        [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
         public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
@@ -178,7 +178,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory, InlineData("nano"), InlineData("vi")]
+        [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
         public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
@@ -186,7 +186,7 @@ namespace System.Diagnostics.Tests
             if (IsProgramInstalled(programToOpenWith))
             {
                 string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
                 ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
                 psi.ArgumentList.Add(fileToOpen);
                 using (var px = Process.Start(psi))
@@ -385,6 +385,21 @@ namespace System.Diagnostics.Tests
             Process p = CreateProcessPortable(RemotelyInvokable.Dummy);
             p.StartInfo.UserName = "DoesNotExist";
             Assert.Throws<Win32Exception>(() => p.Start());
+        }
+
+        [Fact]
+        public void TestExitCodeKilledChild()
+        {
+            using (Process p = CreateProcessLong())
+            {
+                p.Start();
+                p.Kill();
+                p.WaitForExit();
+
+                // SIGKILL may change per platform
+                const int SIGKILL = 9; // Linux, macOS, FreeBSD, ...
+                Assert.Equal(128 + SIGKILL, p.ExitCode);
+            }
         }
 
         /// <summary>

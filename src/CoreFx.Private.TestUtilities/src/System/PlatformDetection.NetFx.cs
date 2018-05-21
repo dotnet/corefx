@@ -24,6 +24,8 @@ namespace System
 
         public static bool IsNetfx471OrNewer => GetFrameworkVersion() >= new Version(4, 7, 1);
 
+        public static bool IsNetfx472OrNewer => GetFrameworkVersion() >= new Version(4, 7, 2);
+
         public static string LibcRelease => "";
         public static string LibcVersion => "";
 
@@ -37,6 +39,8 @@ namespace System
                 if (ndpKey != null)
                 {
                     int value = (int)(ndpKey.GetValue("Release") ?? 0);
+                    if (value >= 461808)
+                        return new Version(4, 7, 2);
                     if (value >= 461308)
                         return new Version(4, 7, 1);
                     if (value >= 460798)
