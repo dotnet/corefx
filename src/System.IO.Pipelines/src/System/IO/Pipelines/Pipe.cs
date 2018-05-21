@@ -138,7 +138,11 @@ namespace System.IO.Pipelines
                 AllocateWriteHeadUnsynchronized(sizeHint);
             }
 
-            return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
+            // Slice the AvailableMemory to the WritableBytes size
+            int end = _writingHead.End;
+            Memory<byte> availableMemory = _writingHead.AvailableMemory;
+            availableMemory = availableMemory.Slice(end, availableMemory.Length - end);
+            return availableMemory;
         }
 
         internal Span<byte> GetSpan(int sizeHint)
@@ -158,7 +162,11 @@ namespace System.IO.Pipelines
                 AllocateWriteHeadUnsynchronized(sizeHint);
             }
 
-            return _writingHead.AvailableMemory.Span.Slice(_writingHead.End, _writingHead.WritableBytes);
+            // Slice the AvailableMemory to the WritableBytes size
+            int end = _writingHead.End;
+            Span<byte> availableMemory = _writingHead.AvailableMemory.Span;
+            availableMemory = availableMemory.Slice(end, availableMemory.Length - end);
+            return availableMemory;
         }
 
         private void AllocateWriteHeadUnsynchronized(int sizeHint)

@@ -122,6 +122,15 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public void CookieContainer_SetNull_ThrowsArgumentNullException()
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                Assert.Throws<ArgumentNullException>(() => handler.CookieContainer = null);
+            }
+        }
+
+        [Fact]
         public void Ctor_ExpectedDefaultPropertyValues_CommonPlatform()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -241,6 +250,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
@@ -370,6 +380,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
@@ -430,6 +441,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_Cancel_CancellationTokenPropagates()
@@ -472,6 +484,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData("[::1234]")]
         [InlineData("[::1234]:8080")]
@@ -498,6 +511,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData("1.2.3.4")]
         [InlineData("1.2.3.4:8080")]
@@ -533,6 +547,7 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { "[::1234]" };
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [OuterLoop] // Test uses azure endpoint.
         [MemberData(nameof(DestinationHost_MemberData))]
@@ -560,6 +575,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         [OuterLoop] // Test uses azure endpoint.
         public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
@@ -593,6 +609,7 @@ namespace System.Net.Http.Functional.Tests
             from useSsl in new[] { true, false }
             select new object[] { address, useSsl };
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
@@ -786,6 +803,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(300)]
         [InlineData(301)]
@@ -959,6 +977,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectToUriWithParams_RequestMsgUriSet()
@@ -1097,6 +1116,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("#origFragment", "", "#origFragment", false)]
@@ -1194,6 +1214,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         [OuterLoop] // Test uses azure endpoint.
         public async Task HttpClientHandler_CredentialIsNotCredentialCacheAfterRedirect_StatusCodeOK()
@@ -1299,6 +1320,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(":")]
         [InlineData("\x1234: \x5678")]
@@ -1323,6 +1345,7 @@ namespace System.Net.Http.Functional.Tests
             }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync($"HTTP/1.1 200 OK\r\n{invalidHeader}\r\nContent-Length: 11\r\n\r\nhello world"));
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task PostAsync_ManyDifferentRequestHeaders_SentCorrectly()
         {
@@ -1484,6 +1507,7 @@ namespace System.Net.Http.Functional.Tests
             from dribble in new[] { false, true }
             select new object[] { newline, fold, dribble };
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly_MemberData))]
         public async Task GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly(string newline, string fold, bool dribble)
@@ -1713,6 +1737,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("")] // missing size
@@ -2154,7 +2179,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     await LoopbackServer.CreateServerAsync(async (server3, url3) =>
                     {
-                        var unblockServers = new TaskCompletionSource<bool>(TaskContinuationOptions.RunContinuationsAsynchronously);
+                        var unblockServers = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                         // First server connects but doesn't send any response yet
                         Task serverTask1 = server1.AcceptConnectionAsync(async connection1 =>
@@ -2232,6 +2257,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework currently does not allow unicode in DNS names")]
         [OuterLoop]
         [Fact]
         public async Task GetAsync_UnicodeHostName_SuccessStatusCodeInResponse()
@@ -2515,6 +2541,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [OuterLoop]
         [Theory]
         [InlineData(false)]
@@ -2721,7 +2748,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)] // Test hangs. But this test seems invalid. An HttpRequestMessage can only be sent once.
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)] // Test hangs. But this test seems invalid. An HttpRequestMessage can only be sent once.
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("12345678910", 0)]
@@ -3153,7 +3180,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public async Task ProxyAuth_Digest_Succeeds()
         {
