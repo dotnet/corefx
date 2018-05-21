@@ -791,27 +791,25 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.InvariantCulture));
             Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.OrdinalIgnoreCase));
+            
+            var span = value.AsSpan();
+            var emptySlice = value.AsSpan(2, 0);           
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.Ordinal));
 
-            char[] a = value.ToArray();
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.CurrentCulture));
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.InvariantCulture));
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(0 < span.CompareTo(emptySlice, StringComparison.OrdinalIgnoreCase));
 
-            var span = new ReadOnlySpan<char>(a);
-            var slice = new ReadOnlySpan<char>(a, 2, 0);
-            Assert.True(0 < span.CompareTo(slice, StringComparison.Ordinal));
+            span = value.AsSpan(1, 0);            
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.Ordinal));
 
-            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(0 < span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
-
-            span = new ReadOnlySpan<char>(a, 1, 0);
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
-
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCulture));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.Equal(0, span.CompareTo(slice, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.CurrentCulture));
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.InvariantCulture));
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.Equal(0, span.CompareTo(emptySlice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -825,9 +823,8 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(value, value, StringComparison.InvariantCulture));
             Assert.Equal(0, string.Compare(value, value, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(value, value, StringComparison.OrdinalIgnoreCase));
-
-            char[] a = value.ToCharArray();
-            var span = new ReadOnlySpan<char>(a);
+            
+            var span = value.AsSpan();
             Assert.Equal(0, span.CompareTo(span, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(span, StringComparison.CurrentCulture));
@@ -851,11 +848,9 @@ namespace System.Tests
             Assert.True(0 > string.Compare(s1, s2, StringComparison.InvariantCulture));
             Assert.True(0 > string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(0 > string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
-
-
-            char[] a = value.ToCharArray();
-            var span = new ReadOnlySpan<char>(a, 0, 2);
-            var slice = new ReadOnlySpan<char>(a, 0, 3);
+            
+            var span = value.AsSpan(0, 2);
+            var slice = value.AsSpan(0, 3);
             Assert.True(0 > span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.True(0 > span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -879,10 +874,9 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCulture));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
-
-            char[] a = value.ToCharArray();
-            var span = new ReadOnlySpan<char>(a, 1, 3);
-            var slice = new ReadOnlySpan<char>(a, 3, 3);
+            
+            var span = value.AsSpan(1, 3);
+            var slice = value.AsSpan(3, 3);            
             Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -908,11 +902,9 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCulture));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
-
-            char[] a = sa.ToCharArray();
-            char[] b = sb.ToCharArray();
-            var span = new ReadOnlySpan<char>(a, 0, 3);
-            var slice = new ReadOnlySpan<char>(b, 0, 3);
+            
+            var span = sa.AsSpan(0, 3);
+            var slice = sb.AsSpan(0, 3);            
             Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -1010,10 +1002,10 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, (StringComparison)6));
             
-            var span = new ReadOnlySpan<char>(value.ToCharArray());
-            TestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.CurrentCulture - 1));
-            TestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
-            TestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
+            var span = value.AsSpan();
+            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.CurrentCulture - 1));
+            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
+            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
         }
 
 
@@ -3588,28 +3580,6 @@ namespace System.Tests
             }
 
             Assert.False(chEnum.MoveNext(), "expect to not having any characters to enumerate");
-        }
-    }
-
-    public static class TestHelpers
-    {
-        public delegate void AssertThrowsActionReadOnly<T>(ReadOnlySpan<T> span);
-
-        // Cannot use standard Assert.Throws() when testing Span - Span and closures don't get along.
-        public static void AssertThrows<E, T>(ReadOnlySpan<T> span, AssertThrowsActionReadOnly<T> action) where E : Exception
-        {
-            try
-            {
-                action(span);
-                Assert.False(true, "Expected exception: " + typeof(E).GetType());
-            }
-            catch (E)
-            {
-            }
-            catch (Exception wrongException)
-            {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(E).GetType() + ": Actual: " + wrongException.GetType());
-            }
         }
     }
 }
