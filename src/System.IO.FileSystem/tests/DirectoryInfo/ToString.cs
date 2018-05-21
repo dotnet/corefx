@@ -40,6 +40,7 @@ namespace System.IO.Tests
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Drive letter only
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
         public void DriveOnlyReturnsPeriod_Windows_Desktop()
         {
             string path = @"C:";

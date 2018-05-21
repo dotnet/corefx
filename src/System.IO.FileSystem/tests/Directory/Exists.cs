@@ -381,6 +381,7 @@ namespace System.IO.Tests
         // We just care that we can access an accessible drive directly, we don't care which one.
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer        
         public void DriveAsPath()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
@@ -392,7 +393,9 @@ namespace System.IO.Tests
         public void ExtendedDriveAsPath()
         {
             Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
-            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
+
+            if (PlatformDetection.IsNotInAppContainer)
+                Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
         }
 
         [Fact]
