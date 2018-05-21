@@ -45,6 +45,16 @@ namespace System.PrivateUri.Tests
             Assert.Equal("[::1]", test.Host);
         }
 
+        [Fact]        
+        public void IdnDnsSafeHost_IPv6HostLinkLocalAddress_ScopeIdButNoBrackets()
+        {
+            Uri test = new Uri("http://[fe80::e077:c9a3:eeba:b8e9%18]/");
+
+            Assert.Equal("fe80::e077:c9a3:eeba:b8e9%18", test.DnsSafeHost);
+            Assert.Equal("fe80::e077:c9a3:eeba:b8e9%18", test.IdnHost);
+            Assert.Equal("[fe80::e077:c9a3:eeba:b8e9%18]", test.Host);
+        }
+
         [Fact]
         public void IdnDnsSafeHost_MixedCase_ToLowerCase()
         {
