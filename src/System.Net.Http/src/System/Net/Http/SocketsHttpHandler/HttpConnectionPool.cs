@@ -644,8 +644,8 @@ namespace System.Net.Http
                     {
                         connection.Trace(
                             receivedUnexpectedData ? "Disposing connection returned to pool. Read-ahead unexpectedly completed." :
-                            _disposed ? "Disposing connection returned to pool.  Pool was disposed." :
-                            "Disposing connection returned to pool.  Zero idle timeout.");
+                            _disposed ? "Disposing connection returned to pool. Pool was disposed." :
+                            "Disposing connection returned to pool. Zero idle timeout.");
                     }
                     connection.Dispose();
                     return;
