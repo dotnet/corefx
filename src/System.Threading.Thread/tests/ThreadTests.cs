@@ -27,7 +27,7 @@ namespace System.Threading.Threads.Tests
         public static void ConstructorTest()
         {
             const int SmallStackSizeBytes = 64 << 10; // 64 KB, currently accepted in all supported platforms, and is the PAL minimum
-            const int LargeStackSizeBytes = 16 << 20; // 2 MB, see https://github.com/dotnet/coreclr/issues/17170
+            const int LargeStackSizeBytes = 16 << 20; // 64 MB
 
             int pageSizeBytes = Environment.SystemPageSize;
 
