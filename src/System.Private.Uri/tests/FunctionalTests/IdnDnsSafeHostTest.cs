@@ -45,7 +45,8 @@ namespace System.PrivateUri.Tests
             Assert.Equal("[::1]", test.Host);
         }
 
-        [Fact]        
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void IdnDnsSafeHost_IPv6HostLinkLocalAddress_ScopeIdButNoBrackets()
         {
             Uri test = new Uri("http://[fe80::e077:c9a3:eeba:b8e9%18]/");
