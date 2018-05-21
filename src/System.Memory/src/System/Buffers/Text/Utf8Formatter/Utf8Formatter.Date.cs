@@ -97,7 +97,7 @@ namespace System.Buffers.Text
         /// </exceptions>
         public static bool TryFormat(DateTimeOffset value, Span<byte> destination, out int bytesWritten, StandardFormat format = default)
         {
-            TimeSpan offset = Utf8Constants.s_nullUtcOffset;
+            TimeSpan offset = Utf8Constants.NullUtcOffset;
             char symbol = format.Symbol;
             if (format.IsDefault)
             {
@@ -158,10 +158,10 @@ namespace System.Buffers.Text
                     return TryFormatDateTimeL(value, destination, out bytesWritten);
 
                 case 'O':
-                    return TryFormatDateTimeO(value, Utf8Constants.s_nullUtcOffset, destination, out bytesWritten);
+                    return TryFormatDateTimeO(value, Utf8Constants.NullUtcOffset, destination, out bytesWritten);
 
                 case 'G':
-                    return TryFormatDateTimeG(value, Utf8Constants.s_nullUtcOffset, destination, out bytesWritten);
+                    return TryFormatDateTimeG(value, Utf8Constants.NullUtcOffset, destination, out bytesWritten);
 
                 default:
                     return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);

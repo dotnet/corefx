@@ -40,7 +40,7 @@ namespace System.Buffers.Text
                 return true;
             }
 
-            return TryParseAsSpecialFloatingPoint<float>(source, float.PositiveInfinity, float.NegativeInfinity, float.NaN, out value, out bytesConsumed);
+            return TryParseAsSpecialFloatingPoint(source, float.PositiveInfinity, float.NegativeInfinity, float.NaN, out value, out bytesConsumed);
         }
 
         /// <summary>

@@ -31,27 +31,13 @@ namespace System.Buffers.Text
                 uint dowString = (dow0 << 24) | (dow1 << 16) | (dow2 << 8) | comma;
                 switch (dowString)
                 {
-                    case 0x53756E2c /* 'Sun,' */:
-                        dayOfWeek = DayOfWeek.Sunday;
-                        break;
-                    case 0x4d6f6e2c /* 'Mon,' */:
-                        dayOfWeek = DayOfWeek.Monday;
-                        break;
-                    case 0x5475652c /* 'Tue,' */:
-                        dayOfWeek = DayOfWeek.Tuesday;
-                        break;
-                    case 0x5765642c /* 'Wed,' */:
-                        dayOfWeek = DayOfWeek.Wednesday;
-                        break;
-                    case 0x5468752c /* 'Thu,' */:
-                        dayOfWeek = DayOfWeek.Thursday;
-                        break;
-                    case 0x4672692c /* 'Fri,' */:
-                        dayOfWeek = DayOfWeek.Friday;
-                        break;
-                    case 0x5361742c /* 'Sat,' */:
-                        dayOfWeek = DayOfWeek.Saturday;
-                        break;
+                    case 0x53756E2c /* 'Sun,' */: dayOfWeek = DayOfWeek.Sunday; break;
+                    case 0x4d6f6e2c /* 'Mon,' */: dayOfWeek = DayOfWeek.Monday; break;
+                    case 0x5475652c /* 'Tue,' */: dayOfWeek = DayOfWeek.Tuesday; break;
+                    case 0x5765642c /* 'Wed,' */: dayOfWeek = DayOfWeek.Wednesday; break;
+                    case 0x5468752c /* 'Thu,' */: dayOfWeek = DayOfWeek.Thursday; break;
+                    case 0x4672692c /* 'Fri,' */: dayOfWeek = DayOfWeek.Friday; break;
+                    case 0x5361742c /* 'Sat,' */: dayOfWeek = DayOfWeek.Saturday; break;
                     default:
                         bytesConsumed = 0;
                         dateTimeOffset = default;
@@ -97,42 +83,18 @@ namespace System.Buffers.Text
                 uint monthString = (mon0 << 24) | (mon1 << 16) | (mon2 << 8) | space;
                 switch (monthString)
                 {
-                    case 0x4a616e20 /* 'Jan ' */ :
-                        month = 1;
-                        break;
-                    case 0x46656220 /* 'Feb ' */ :
-                        month = 2;
-                        break;
-                    case 0x4d617220 /* 'Mar ' */ :
-                        month = 3;
-                        break;
-                    case 0x41707220 /* 'Apr ' */ :
-                        month = 4;
-                        break;
-                    case 0x4d617920 /* 'May ' */ :
-                        month = 5;
-                        break;
-                    case 0x4a756e20 /* 'Jun ' */ :
-                        month = 6;
-                        break;
-                    case 0x4a756c20 /* 'Jul ' */ :
-                        month = 7;
-                        break;
-                    case 0x41756720 /* 'Aug ' */ :
-                        month = 8;
-                        break;
-                    case 0x53657020 /* 'Sep ' */ :
-                        month = 9;
-                        break;
-                    case 0x4f637420 /* 'Oct ' */ :
-                        month = 10;
-                        break;
-                    case 0x4e6f7620 /* 'Nov ' */ :
-                        month = 11;
-                        break;
-                    case 0x44656320 /* 'Dec ' */ :
-                        month = 12;
-                        break;
+                    case 0x4a616e20 /* 'Jan ' */ : month = 1; break;
+                    case 0x46656220 /* 'Feb ' */ : month = 2; break;
+                    case 0x4d617220 /* 'Mar ' */ : month = 3; break;
+                    case 0x41707220 /* 'Apr ' */ : month = 4; break;
+                    case 0x4d617920 /* 'May ' */ : month = 5; break;
+                    case 0x4a756e20 /* 'Jun ' */ : month = 6; break;
+                    case 0x4a756c20 /* 'Jul ' */ : month = 7; break;
+                    case 0x41756720 /* 'Aug ' */ : month = 8; break;
+                    case 0x53657020 /* 'Sep ' */ : month = 9; break;
+                    case 0x4f637420 /* 'Oct ' */ : month = 10; break;
+                    case 0x4e6f7620 /* 'Nov ' */ : month = 11; break;
+                    case 0x44656320 /* 'Dec ' */ : month = 12; break;
                     default:
                         bytesConsumed = 0;
                         dateTimeOffset = default;
