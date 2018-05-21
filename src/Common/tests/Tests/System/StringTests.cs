@@ -1007,8 +1007,7 @@ namespace System.Tests
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
         }
-
-
+        
         [Fact]
         public static void Compare_Invalid()
         {
