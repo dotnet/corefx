@@ -5,7 +5,7 @@ namespace System.Net
     internal static class HttpDateParser
     {
         private static readonly string[] s_dateFormats = new string[] {
-            "r", // RFC 1123, required output format but too strict for input
+            // "r", // RFC 1123, required output format but too strict for input
             "ddd, d MMM yyyy H:m:s 'GMT'", // RFC 1123 (r, except it allows both 1 and 01 for date and time)
             "ddd, d MMM yyyy H:m:s 'UTC'", // RFC 1123, UTC
             "ddd, d MMM yyyy H:m:s", // RFC 1123, no zone - assume GMT
