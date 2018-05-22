@@ -57,6 +57,7 @@ namespace System.Net.Tests
         }
     }
 
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public class HttpListenerResponseTests : HttpListenerResponseTestBase
     {
         [Fact]

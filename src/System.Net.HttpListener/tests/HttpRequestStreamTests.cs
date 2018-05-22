@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public class HttpRequestStreamTests : IDisposable
     {
         private HttpListenerFactory _factory;

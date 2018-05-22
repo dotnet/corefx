@@ -11,6 +11,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public class HttpListenerWebSocketTests : IDisposable
     {
         public static bool PartialMessagesSupported => PlatformDetection.ClientWebSocketPartialMessagesSupported;

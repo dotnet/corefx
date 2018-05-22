@@ -9,6 +9,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     [ActiveIssue(18784, TargetFrameworkMonikers.Uap)]
     public class HttpListenerResponseHeadersTests : HttpListenerResponseTestBase
     {

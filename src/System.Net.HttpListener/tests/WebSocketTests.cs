@@ -10,6 +10,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public class WebSocketTests : IDisposable
     {
         private HttpListenerFactory _factory;
