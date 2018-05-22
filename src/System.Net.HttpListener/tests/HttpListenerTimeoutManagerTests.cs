@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Net.Tests
 {
-    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     public class HttpListenerTimeoutManagerTests
     {
         [Theory]
@@ -48,7 +48,7 @@ namespace System.Net.Tests
         }
     }
 
-    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // httpsys component missing in Nano.
     [PlatformSpecific(TestPlatforms.Windows)]
     public class HttpListenerTimeoutManagerWindowsTests : IDisposable
     {
