@@ -48,6 +48,7 @@ namespace System.Net.Tests
         }
     }
 
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     [PlatformSpecific(TestPlatforms.Windows)]
     public class HttpListenerTimeoutManagerWindowsTests : IDisposable
     {
