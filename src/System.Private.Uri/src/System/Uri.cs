@@ -2617,7 +2617,7 @@ namespace System
             if (loopback)
             {
                 flags |= Flags.LoopbackHost;
-            }            
+            }
             if (linkLocalAddress)
             {
                 flags |= Flags.LinkLocalAddress;
