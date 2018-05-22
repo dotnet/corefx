@@ -45,19 +45,27 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                 if (recipientInfo.Pal is ManagedKeyTransPal ktri)
                 {
-                    ContentInfo ret = Helpers.WithKey(ktri.DecryptCek(cert, privateKey as RSA, out Exception e),
-                        (cek) =>
+                    byte[] cek = ktri.DecryptCek(cert, privateKey as RSA, out exception);
+                    // Pin CEK to prevent it from getting copied during heap compaction.
+                    fixed (byte* pinnedCek = cek)
+                    {
+                        try
                         {
-                            if (e != null)
+                            if (exception != null)
                             {
                                 return null;
                             }
 
-                            return TryDecryptCore(cek, _envelopedData.EncryptedContentInfo.ContentType, _envelopedData.EncryptedContentInfo.EncryptedContent, _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm, out e);
-                        });
-
-                    exception = e;
-                    return ret;
+                            return TryDecryptCore(cek, _envelopedData.EncryptedContentInfo.ContentType, _envelopedData.EncryptedContentInfo.EncryptedContent, _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm, out exception);
+                        }
+                        finally
+                        {
+                            if (cek != null)
+                            {
+                                Array.Clear(cek, 0, cek.Length);
+                            }
+                        }
+                    }
                 }
                 else
                 {

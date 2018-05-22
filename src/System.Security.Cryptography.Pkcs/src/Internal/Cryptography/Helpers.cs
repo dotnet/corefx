@@ -458,25 +458,6 @@ namespace Internal.Cryptography
             }
         }
 
-        internal static unsafe ResultType WithKey<ResultType>(byte[] key, Func<byte[], ResultType> a)
-        {
-            // Pin CEK to prevent it from getting copied during heap compaction.
-            fixed (byte* pinnedKey = key)
-            {
-                try
-                {
-                    return a(key);
-                }
-                finally
-                {
-                    if (key != null)
-                    {
-                        Array.Clear(key, 0, key.Length);
-                    }
-                }
-            }
-        }
-
         private static ReadOnlyMemory<byte> GetSubjectPublicKeyInfo(X509Certificate2 certificate)
         {
             var parsedCertificate = AsnSerializer.Deserialize<Certificate>(certificate.RawData, AsnEncodingRules.DER);

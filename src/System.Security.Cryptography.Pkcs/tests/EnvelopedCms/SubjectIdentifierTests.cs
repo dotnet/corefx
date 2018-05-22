@@ -39,7 +39,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        public static EnvelopedCms GetDocWithRecipient(SubjectIdentifierType type, X509Certificate2 cert)
+        private static EnvelopedCms GetDocWithRecipient(SubjectIdentifierType type, X509Certificate2 cert)
         {
             byte[] content = new byte[] { 1, 2, 3, 4 };
             EnvelopedCms cms = new EnvelopedCms(new ContentInfo(content));

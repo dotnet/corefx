@@ -17,24 +17,34 @@ namespace Internal.Cryptography.Pal.Windows
 {
     internal sealed partial class DecryptorPalWindows : DecryptorPal
     {
-        public sealed override ContentInfo TryDecrypt(RecipientInfo recipientInfo, X509Certificate2 cert, AsymmetricAlgorithm privateKey, X509Certificate2Collection originatorCerts, X509Certificate2Collection extraStore, out Exception exception)
+        public unsafe sealed override ContentInfo TryDecrypt(RecipientInfo recipientInfo, X509Certificate2 cert, AsymmetricAlgorithm privateKey, X509Certificate2Collection originatorCerts, X509Certificate2Collection extraStore, out Exception exception)
         {
             Debug.Assert((cert != null) ^ (privateKey != null));
 
             if (privateKey != null)
             {
                 ContentInfo contentInfo = _hCryptMsg.GetContentInfo();
-                ContentInfo ret = Helpers.WithKey(AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(cert, privateKey as RSA, recipientInfo.EncryptedKey, recipientInfo.KeyEncryptionAlgorithm.Oid.Value, out Exception e),
-                    (cek) =>
+                byte[] cek = AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(cert, privateKey as RSA, recipientInfo.EncryptedKey, recipientInfo.KeyEncryptionAlgorithm.Oid.Value, out exception);
+                // Pin CEK to prevent it from getting copied during heap compaction.
+                fixed (byte* pinnedCek = cek)
+                {
+                    try
                     {
-                        if (e != null)
+                        if (exception != null)
+                        {
                             return null;
+                        }
 
-                        return AnyOS.ManagedPkcsPal.ManagedDecryptorPal.TryDecryptCore(cek, contentInfo.ContentType.Value, contentInfo.Content, _contentEncryptionAlgorithm, out e);
-                    });
-
-                exception = e;
-                return ret;
+                        return AnyOS.ManagedPkcsPal.ManagedDecryptorPal.TryDecryptCore(cek, contentInfo.ContentType.Value, contentInfo.Content, _contentEncryptionAlgorithm, out exception);
+                    }
+                    finally
+                    {
+                        if (cek != null)
+                        {
+                            Array.Clear(cek, 0, cek.Length);
+                        }
+                    }
+                }
             }
 
             Debug.Assert(recipientInfo != null);

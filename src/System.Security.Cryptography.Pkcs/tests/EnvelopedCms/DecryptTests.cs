@@ -12,81 +12,73 @@ using System.Linq;
 
 namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
-    public static partial class DecryptTests
+    public abstract partial class DecryptTests
     {
+        private bool _useExplicitPrivateKey;
         public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        public DecryptTests(bool useExplicitPrivateKey)
+        {
+            _useExplicitPrivateKey = useExplicitPrivateKey;
+        }
+
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_IssuerAndSerial(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_IssuerAndSerial()
         {
             byte[] content = { 5, 112, 233, 43 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_Ski(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_Ski()
         {
             byte[] content = { 6, 3, 128, 33, 44 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.SubjectKeyIdentifier, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.SubjectKeyIdentifier);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_Capi(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_Capi()
         {
             byte[] content = { 5, 77, 32, 33, 2, 34 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_256(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_256()
         {
             byte[] content = { 5, 77, 32, 33, 2, 34 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSASha256KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSASha256KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_384(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_384()
         {
             byte[] content = { 5, 77, 32, 33, 2, 34 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSASha384KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSASha384KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_512(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_512()
         {
             byte[] content = { 5, 77, 32, 33, 2, 34 };
             ContentInfo contentInfo = new ContentInfo(content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSASha512KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSASha512KeyTransfer1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop("Leaks key on disk if interrupted")]
-        public static void Decrypt_512_FixedValue(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_512_FixedValue()
         {
             byte[] content = { 5, 77, 32, 33, 2, 34 };
             byte[] message = (
@@ -102,14 +94,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 "E86D448989382A93E7"
             ).HexToByteArray();
 
-            VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content), useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content));
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop("Leaks key on disk if interrupted")]
-        public static void Decrypt_512_NoData_FixedValue(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_512_NoData_FixedValue()
         {
             // This is the Decrypt_512_FixedData test re-encoded to remove the
             // encryptedContentInfo.encryptedContent optional value.
@@ -133,14 +123,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 content = new byte[6];
             }
 
-            VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content), useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content));
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
-        [InlineData(false)]
-        [InlineData(true)]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop("Leaks key on disk if interrupted")]
-        public static void Decrypt_512_CekDoesNotDecrypt_FixedValue(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_512_CekDoesNotDecrypt_FixedValue()
         {
             // This is the Decrypt_512_NoData_FixedValue test except that the last
             // byte of the recipient encrypted key has been changed from 0x96 to 0x95
@@ -159,15 +147,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ).HexToByteArray();
 
             Assert.ThrowsAny<CryptographicException>(
-                () => VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content), useExplicitPrivateKeyForDecryption));
+                () => VerifySimpleDecrypt(message, Certificates.RSASha512KeyTransfer1, new ContentInfo(content)));
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [ActiveIssue(29825)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_SignedWithinEnveloped(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_SignedWithinEnveloped()
         {
             byte[] content =
                  ("3082032506092a864886f70d010702a082031630820312020101310b300906052b0e03021a0500301206092a864886f70d01"
@@ -189,15 +175,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 + "336a2ba6ae2443d0ab").HexToByteArray();
 
             ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Signed), content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [ActiveIssue(29825)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void Decrypt_EnvelopedWithinEnveloped(bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_EnvelopedWithinEnveloped()
         {
             byte[] content =
                  ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -209,65 +193,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
 
             ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7SignedEnveloped), content);
-            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, useExplicitPrivateKeyForDecryption);
-        }
-
-        [ConditionalFact(nameof(SupportsCngCertificates))]
-        [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void DecryptMultipleRecipients()
-        {
-            // Force Decrypt() to try multiple recipients. Ensure that a failure to find a matching cert in one doesn't cause it to quit early.
-
-            CertLoader[] certLoaders = new CertLoader[]
-            {
-                Certificates.RSAKeyTransfer1,
-                Certificates.RSAKeyTransfer2,
-                Certificates.RSAKeyTransfer3,
-            };
-
-            byte[] content = { 6, 3, 128, 33, 44 };
-            EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(content), new AlgorithmIdentifier(new Oid(Oids.Aes256)));
-            CmsRecipientCollection recipients = new CmsRecipientCollection();
-            foreach (CertLoader certLoader in certLoaders)
-            {
-                recipients.Add(new CmsRecipient(certLoader.GetCertificate()));
-            }
-            ecms.Encrypt(recipients);
-            byte[] encodedMessage = ecms.Encode();
-
-            ecms = new EnvelopedCms();
-            ecms.Decode(encodedMessage);
-
-            // How do we know that Decrypt() tries receipients in the order they appear in ecms.RecipientInfos? Because we wrote the implementation.
-            // Not that some future implementation can't ever change it but it's the best guess we have.
-            RecipientInfo me = ecms.RecipientInfos[2];
-
-            CertLoader matchingCertLoader = null;
-            for (int index = 0; index < recipients.Count; index++)
-            {
-                if (recipients[index].Certificate.Issuer == ((X509IssuerSerial)(me.RecipientIdentifier.Value)).IssuerName)
-                {
-                    matchingCertLoader = certLoaders[index];
-                    break;
-                }
-            }
-            Assert.NotNull(matchingCertLoader);
-
-            using (X509Certificate2 cert = matchingCertLoader.TryGetCertificateWithPrivateKey())
-            {
-                if (cert == null)
-                    return; // Sorry - CertLoader is not configured to load certs with private keys - we've tested as much as we can.
-                X509Certificate2Collection extraStore = new X509Certificate2Collection();
-                extraStore.Add(cert);
-                ecms.Decrypt(extraStore);
-            }
-
-            ContentInfo contentInfo = ecms.ContentInfo;
-            Assert.Equal<byte>(content, contentInfo.Content);
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
         [Fact]
-        public static void EncryptToNegativeSerialNumber()
+        public void EncryptToNegativeSerialNumber()
         {
             CertLoader negativeSerial = Certificates.NegativeSerialNumber;
 
@@ -307,11 +237,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(content, cms2.ContentInfo.Content);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes128_IssuerAndSerial(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes128_IssuerAndSerial()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm is Aes128
@@ -328,14 +256,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes192_IssuerAndSerial(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes192_IssuerAndSerial()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes192
@@ -352,14 +278,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_IssuerAndSerial(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_IssuerAndSerial()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes256
@@ -376,14 +300,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleTripleDes_IssuerAndSerial(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleTripleDes_IssuerAndSerial()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is 3DES-CBC
@@ -400,14 +322,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_Ski(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_Ski()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
             // and of type SubjectKeyIdentifier. The symmetric algorithm used is Aes256
@@ -424,14 +344,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_RsaTransferCapi(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_RsaTransferCapi()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransferCapi1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes256
@@ -448,14 +366,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransferCapi1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_RsaSha256(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_RsaSha256()
         {
             // Message encrypted on framework for a recipient using the certificate returned by 
             // Certificates.RSASha256KeyTransfer1.GetCertificate() and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes256
@@ -472,14 +388,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSASha256KeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_RsaSha384(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_RsaSha384()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSASha384KeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes256
@@ -496,14 +410,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSASha384KeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimpleAes256_RsaSha512(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimpleAes256_RsaSha512()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSASha512KeyTransfer1.GetCertificate()
             // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes256
@@ -520,14 +432,12 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSASha512KeyTransfer1;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestDecryptSimple_ExplicitSki(bool useExplicitPrivateKeyForDecryption)
+        public void TestDecryptSimple_ExplicitSki()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer_ExplicitSki.GetCertificate()
             // and of type SubjectKeyIdentifier. The symmetric algorithm used is Aes256
@@ -547,7 +457,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSAKeyTransfer_ExplicitSki;
 
-            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }
 
         [Fact]
@@ -595,7 +505,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             return null;
         }
 
-        private static void TestSimpleDecrypt_RoundTrip(CertLoader certLoader, ContentInfo contentInfo, string algorithmOidValue, SubjectIdentifierType type, bool useExplicitPrivateKeyForDecryption)
+        private void TestSimpleDecrypt_RoundTrip(CertLoader certLoader, ContentInfo contentInfo, string algorithmOidValue, SubjectIdentifierType type)
         {
             // Deep-copy the contentInfo since the real ContentInfo doesn't do this. This defends against a bad implementation changing
             // our "expectedContentInfo" to match what it produces.
@@ -615,10 +525,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             // We don't pass "certificate" down because it's expected that the certificate used for encrypting doesn't have a private key (part of the purpose of this test is
             // to ensure that you don't need the recipient's private key to encrypt.) The decrypt phase will have to locate the matching cert with the private key.
-            VerifySimpleDecrypt(encodedMessage, certLoader, expectedContentInfo, useExplicitPrivateKeyForDecryption);
+            VerifySimpleDecrypt(encodedMessage, certLoader, expectedContentInfo);
         }
 
-        private static void VerifySimpleDecrypt(byte[] encodedMessage, CertLoader certLoader, ContentInfo expectedContent, bool useExplicitPrivateKeyForDecryption)
+        private void VerifySimpleDecrypt(byte[] encodedMessage, CertLoader certLoader, ContentInfo expectedContent)
         {
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
@@ -629,7 +539,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                     return; // Sorry - CertLoader is not configured to load certs with private keys - we've tested as much as we can.
 
 #if netcoreapp // API not present on netfx
-                if (useExplicitPrivateKeyForDecryption)
+                if (_useExplicitPrivateKey)
                 {
                     using (X509Certificate2 pubCert = certLoader.GetCertificate())
                     {
@@ -648,5 +558,71 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Assert.Equal<byte>(expectedContent.Content, contentInfo.Content);
             }
         }
+
+        public class DecryptTestsUsingCertWithPrivateKey : DecryptTests
+        {
+            public DecryptTestsUsingCertWithPrivateKey() : base(false) { }
+
+            [ConditionalFact(nameof(SupportsCngCertificates))]
+            [OuterLoop(/* Leaks key on disk if interrupted */)]
+            public static void DecryptMultipleRecipients()
+            {
+                // Force Decrypt() to try multiple recipients. Ensure that a failure to find a matching cert in one doesn't cause it to quit early.
+
+                CertLoader[] certLoaders = new CertLoader[]
+                {
+                Certificates.RSAKeyTransfer1,
+                Certificates.RSAKeyTransfer2,
+                Certificates.RSAKeyTransfer3,
+                };
+
+                byte[] content = { 6, 3, 128, 33, 44 };
+                EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(content), new AlgorithmIdentifier(new Oid(Oids.Aes256)));
+                CmsRecipientCollection recipients = new CmsRecipientCollection();
+                foreach (CertLoader certLoader in certLoaders)
+                {
+                    recipients.Add(new CmsRecipient(certLoader.GetCertificate()));
+                }
+                ecms.Encrypt(recipients);
+                byte[] encodedMessage = ecms.Encode();
+
+                ecms = new EnvelopedCms();
+                ecms.Decode(encodedMessage);
+
+                // How do we know that Decrypt() tries receipients in the order they appear in ecms.RecipientInfos? Because we wrote the implementation.
+                // Not that some future implementation can't ever change it but it's the best guess we have.
+                RecipientInfo me = ecms.RecipientInfos[2];
+
+                CertLoader matchingCertLoader = null;
+                for (int index = 0; index < recipients.Count; index++)
+                {
+                    if (recipients[index].Certificate.Issuer == ((X509IssuerSerial)(me.RecipientIdentifier.Value)).IssuerName)
+                    {
+                        matchingCertLoader = certLoaders[index];
+                        break;
+                    }
+                }
+                Assert.NotNull(matchingCertLoader);
+
+                using (X509Certificate2 cert = matchingCertLoader.TryGetCertificateWithPrivateKey())
+                {
+                    if (cert == null)
+                        return; // Sorry - CertLoader is not configured to load certs with private keys - we've tested as much as we can.
+                    X509Certificate2Collection extraStore = new X509Certificate2Collection();
+                    extraStore.Add(cert);
+                    ecms.Decrypt(extraStore);
+                }
+
+                ContentInfo contentInfo = ecms.ContentInfo;
+                Assert.Equal<byte>(content, contentInfo.Content);
+            }
+        }
+
+#if netcoreapp // API not present on netfx
+        public class DecryptTestsUsingExplicitPrivateKey : DecryptTests
+        {
+            public DecryptTestsUsingExplicitPrivateKey() : base(true) { }
+        }
+#endif
     }
 }

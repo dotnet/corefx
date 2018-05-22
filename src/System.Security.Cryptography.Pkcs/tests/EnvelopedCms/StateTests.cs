@@ -274,9 +274,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
         // State 4: Called Decode() + Decrypt()
         //
-        [ConditionalFact(nameof(SupportsCngCertificates))]
+        [ConditionalTheory(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void PostDecrypt_Encode()
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void PostDecrypt_Encode(bool useExplicitPrivateKey)
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
             EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(expectedContent));
@@ -294,9 +296,18 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             {
                 if (cer == null)
                     return; // Sorry - CertLoader is not configured to load certs with private keys - we've tested as much as we can.
-                X509Certificate2Collection extraStore = new X509Certificate2Collection(cer);
+
                 RecipientInfoCollection r = ecms.RecipientInfos;
-                ecms.Decrypt(r[0], extraStore);
+
+                if (useExplicitPrivateKey)
+                {
+                    ecms.Decrypt(r[0], cer.GetRSAPrivateKey());
+                }
+                else
+                {
+                    X509Certificate2Collection extraStore = new X509Certificate2Collection(cer);
+                    ecms.Decrypt(r[0], extraStore);
+                }
 
                 // Desktop compat: Calling Encode() at this point should have thrown an InvalidOperationException. Instead, it returns
                 // the decrypted inner content (same as ecms.ContentInfo.Content). This is easy for someone to take a reliance on

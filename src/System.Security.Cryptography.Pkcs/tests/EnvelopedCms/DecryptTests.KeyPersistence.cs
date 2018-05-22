@@ -8,23 +8,17 @@ using System.Security.Cryptography.Pkcs.Tests;
 
 namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
-    public static partial class DecryptTests
+    partial class DecryptTests
     {
         [Theory]
-        [InlineData(Oids.Aes128, false)]
-        [InlineData(Oids.Aes192, false)]
-        [InlineData(Oids.Aes256, false)]
-        [InlineData(Oids.Rc2, false)]
-        [InlineData(Oids.Des, false)]
-        [InlineData(Oids.TripleDesCbc, false)]
-        [InlineData(Oids.Aes128, true)]
-        [InlineData(Oids.Aes192, true)]
-        [InlineData(Oids.Aes256, true)]
-        [InlineData(Oids.Rc2, true)]
-        [InlineData(Oids.Des, true)]
-        [InlineData(Oids.TripleDesCbc, true)]
+        [InlineData(Oids.Aes128)]
+        [InlineData(Oids.Aes192)]
+        [InlineData(Oids.Aes256)]
+        [InlineData(Oids.Rc2)]
+        [InlineData(Oids.Des)]
+        [InlineData(Oids.TripleDesCbc)]
         // RC4 is not supported for CNG keys (the key provider for this cert)
-        public static void Decrypt_256_Ephemeral(string algOid, bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_256_Ephemeral(string algOid)
         {
             byte[] content = { 1, 1, 2, 3, 5, 8, 13, 21 };
             ContentInfo contentInfo = new ContentInfo(content);
@@ -32,26 +26,19 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Certificates.RSASha256KeyTransfer1.CloneAsEphemeralLoader(),
                 contentInfo,
                 algOid,
-                SubjectIdentifierType.IssuerAndSerialNumber,
-                useExplicitPrivateKeyForDecryption);
+                SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
         [Theory]
-        [InlineData(Oids.Aes128, false)]
-        [InlineData(Oids.Aes192, false)]
-        [InlineData(Oids.Aes256, false)]
-        [InlineData(Oids.Rc2, false)]
-        [InlineData(Oids.Des, false)]
-        [InlineData(Oids.TripleDesCbc, false)]
-        [InlineData(Oids.Aes128, true)]
-        [InlineData(Oids.Aes192, true)]
-        [InlineData(Oids.Aes256, true)]
-        [InlineData(Oids.Rc2, true)]
-        [InlineData(Oids.Des, true)]
-        [InlineData(Oids.TripleDesCbc, true)]
+        [InlineData(Oids.Aes128)]
+        [InlineData(Oids.Aes192)]
+        [InlineData(Oids.Aes256)]
+        [InlineData(Oids.Rc2)]
+        [InlineData(Oids.Des)]
+        [InlineData(Oids.TripleDesCbc)]
         // RC4 is not supported for CNG keys (the key provider for this cert)
         [OuterLoop("Leaks key on disk if interrupted")]
-        public static void Decrypt_256_Perphemeral(string algOid, bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_256_Perphemeral(string algOid)
         {
             byte[] content = { 1, 1, 2, 3, 5, 8, 13, 21 };
             ContentInfo contentInfo = new ContentInfo(content);
@@ -59,25 +46,18 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Certificates.RSASha256KeyTransfer1.CloneAsPerphemeralLoader(),
                 contentInfo,
                 algOid,
-                SubjectIdentifierType.IssuerAndSerialNumber,
-                useExplicitPrivateKeyForDecryption);
+                SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
         [Theory]
-        [InlineData(Oids.Aes128, false)]
-        [InlineData(Oids.Aes192, false)]
-        [InlineData(Oids.Aes256, false)]
-        [InlineData(Oids.Rc2, false)]
-        [InlineData(Oids.Des, false)]
-        [InlineData(Oids.TripleDesCbc, false)]
-        [InlineData(Oids.Aes128, true)]
-        [InlineData(Oids.Aes192, true)]
-        [InlineData(Oids.Aes256, true)]
-        [InlineData(Oids.Rc2, true)]
-        [InlineData(Oids.Des, true)]
-        [InlineData(Oids.TripleDesCbc, true)]
+        [InlineData(Oids.Aes128)]
+        [InlineData(Oids.Aes192)]
+        [InlineData(Oids.Aes256)]
+        [InlineData(Oids.Rc2)]
+        [InlineData(Oids.Des)]
+        [InlineData(Oids.TripleDesCbc)]
         // RC4 is not supported by the CNG version of the key, so it is not supported ephemeral.
-        public static void Decrypt_Capi_Ephemeral(string algOid, bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_Capi_Ephemeral(string algOid)
         {
             byte[] content = { 1, 1, 2, 3, 5, 8, 13, 21 };
             ContentInfo contentInfo = new ContentInfo(content);
@@ -85,29 +65,23 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Certificates.RSAKeyTransferCapi1.CloneAsEphemeralLoader(),
                 contentInfo,
                 algOid,
-                SubjectIdentifierType.IssuerAndSerialNumber,
-                useExplicitPrivateKeyForDecryption);
+                SubjectIdentifierType.IssuerAndSerialNumber);
         }
 
         [Theory]
-        [InlineData(Oids.Aes128, false)]
-        [InlineData(Oids.Aes192, false)]
-        [InlineData(Oids.Aes256, false)]
-        [InlineData(Oids.Rc2, false)]
-        [InlineData(Oids.Des, false)]
-        [InlineData(Oids.TripleDesCbc, false)]
+        [InlineData(Oids.Aes128)]
+        [InlineData(Oids.Aes192)]
+        [InlineData(Oids.Aes256)]
+        [InlineData(Oids.Rc2)]
+        [InlineData(Oids.Des)]
+        [InlineData(Oids.TripleDesCbc)]
         // RC4 works in this context (only when not using explicit private key).
-        [InlineData(Oids.Rc4, false)]
-        [InlineData(Oids.Aes128, true)]
-        [InlineData(Oids.Aes192, true)]
-        [InlineData(Oids.Aes256, true)]
-        [InlineData(Oids.Rc2, true)]
-        [InlineData(Oids.Des, true)]
-        [InlineData(Oids.TripleDesCbc, true)]
+        [InlineData(Oids.Rc4)]
         [OuterLoop("Leaks key on disk if interrupted")]
-        public static void Decrypt_Capi_Perphemeral(string algOid, bool useExplicitPrivateKeyForDecryption)
+        public void Decrypt_Capi_Perphemeral(string algOid)
         {
-            if (algOid == Oids.Rc4 && !ContentEncryptionAlgorithmTests.SupportsRc4)
+            // Explicit key API uses managed implementation which does not support RC4
+            if (algOid == Oids.Rc4 && (!ContentEncryptionAlgorithmTests.SupportsRc4 || _useExplicitPrivateKey))
             {
                 return;
             }
@@ -118,8 +92,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Certificates.RSAKeyTransferCapi1.CloneAsPerphemeralLoader(),
                 contentInfo,
                 algOid,
-                SubjectIdentifierType.IssuerAndSerialNumber,
-                useExplicitPrivateKeyForDecryption);
+                SubjectIdentifierType.IssuerAndSerialNumber);
         }
     }
 }

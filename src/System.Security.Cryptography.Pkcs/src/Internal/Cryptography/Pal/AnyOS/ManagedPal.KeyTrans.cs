@@ -184,8 +184,10 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return null;
             }
 
+#if netcoreapp
             byte[] cek = null;
             int cekLength = 0;
+#endif
 
             try
             {
@@ -203,7 +205,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return new Span<byte>(cek, 0, cekLength).ToArray();
 #else
                 exception = null;
-                return rsa.Decrypt(_asn.EncryptedKey.Span.ToArray(), encryptionPadding);
+                return privateKey.Decrypt(encryptedKey.ToArray(), encryptionPadding);
 #endif
             }
             catch (CryptographicException e)
@@ -211,6 +213,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 exception = e;
                 return null;
             }
+#if netcoreapp
             finally
             {
                 if (cek != null)
@@ -219,6 +222,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     ArrayPool<byte>.Shared.Return(cek);
                 }
             }
+#endif
         }
     }
 }
