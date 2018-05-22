@@ -16,7 +16,7 @@ internal partial class Interop
         [ResourceExposure(ResourceScope.Machine)]
         internal static extern bool DeviceIoControl
 		(
-			Microsoft.Win32.SafeHandles.SafeFileHandle fileHandle,
+			SafeFileHandle fileHandle,
 			uint ioControlCode,
 			IntPtr inBuffer,
 			uint cbInBuffer,

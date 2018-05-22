@@ -10,7 +10,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
         private static bool IsIntegratedSecurityEnvironmentSet() => DataTestUtility.IsIntegratedSecuritySetup();
 
-        private static int[] insertedValues = { 11 , 22 };
+        private static int[] s_insertedValues = { 11 , 22 };
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalFact(nameof(IsFileStreamEnvironmentSet), nameof(IsIntegratedSecurityEnvironmentSet), nameof(AreConnectionStringsSetup))]
@@ -47,7 +47,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                 Array.Reverse(retrievedValue);
 
                             // Compare inserted and retrieved values.
-                            Assert.Equal(insertedValues[nRow], BitConverter.ToInt32(retrievedValue,0));
+                            Assert.Equal(s_insertedValues[nRow], BitConverter.ToInt32(retrievedValue,0));
                         }
                         nRow++;
                     }
@@ -115,7 +115,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 connection.Open();
                 string tempTable = SetupTable(connection);
 
-                byte[] insertedValue = BitConverter.GetBytes(insertedValues[0]);
+                byte[] insertedValue = BitConverter.GetBytes(s_insertedValues[0]);
                 byte appendedByte = 0x04;
                 insertedValue = AddByteToArray(insertedValue, appendedByte);
 
@@ -168,9 +168,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             ExecuteNonQueryCommand(createTable, conn);
 
             // Insert data into created table
-            for (int i = 0; i < insertedValues.Length; i++)
+            for (int i = 0; i < s_insertedValues.Length; i++)
             {
-                string prepTable = $"INSERT INTO {tempTable} VALUES ({i + 1}, {insertedValues[i]} , default)";
+                string prepTable = $"INSERT INTO {tempTable} VALUES ({i + 1}, {s_insertedValues[i]} , default)";
                 ExecuteNonQueryCommand(prepTable, conn);
             }
 
