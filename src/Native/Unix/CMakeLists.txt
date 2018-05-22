@@ -11,6 +11,7 @@ set(VERSION_FILE_PATH "${CMAKE_BINARY_DIR}/../../version.c")
 
 add_compile_options(-Wno-format-nonliteral)
 add_compile_options(-Wno-disabled-macro-expansion)
+add_compile_options(-Wthread-safety-analysis)
 add_compile_options(-Wno-c++98-compat)
 add_compile_options(-Wno-padded)
 add_compile_options(-Wno-empty-translation-unit)
