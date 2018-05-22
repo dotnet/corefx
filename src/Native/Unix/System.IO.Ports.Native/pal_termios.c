@@ -316,7 +316,7 @@ Termios_GetSpeed(int32_t fd)
 }
 
 int32_t
-Termios_SetSpeed(int32_t fd, uint32_t speed)
+Termios_SetSpeed(int32_t fd, int32_t speed)
 {
     struct termios term;
     speed_t brate = TermiosSpeed2Rate(speed);
@@ -375,13 +375,13 @@ Termios_Drain(int32_t fd)
 }
 
 int32_t
-Termios_SendBreak(int32_t fd, uint32_t duration)
+Termios_SendBreak(int32_t fd, int32_t duration)
 {
     return tcsendbreak(fd, duration);
 }
 
 int32_t
-Termios_Reset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake)
+Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake)
 {
     struct termios term;
     int ret = 0;

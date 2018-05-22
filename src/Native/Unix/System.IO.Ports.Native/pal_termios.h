@@ -11,13 +11,13 @@ int32_t Termios_GetSignal(int32_t fd, int32_t signal);
 int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set);
 
 int32_t Termios_GetSpeed(int32_t fd);
-int32_t Termios_SetSpeed(int32_t fd, uint32_t speed);
+int32_t Termios_SetSpeed(int32_t fd, int32_t speed);
 
 int32_t Termios_AvailableBytes(int32_t fd, int32_t readBuffer);
 
-int32_t Termios_Reset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake);
+int32_t Termios_Reset(int32_t fd, int32_t speed, int32_t dataBits, int32_t stopBits, int32_t parity, int32_t handshake);
 int32_t Termios_Discard(int32_t fd, int32_t queue);
 int32_t Termios_Drain(int32_t fd);
-int32_t Termios_SendBreak(int32_t fd, uint32_t duration);
+int32_t Termios_SendBreak(int32_t fd, int32_t duration);
 
 END_EXTERN_C
