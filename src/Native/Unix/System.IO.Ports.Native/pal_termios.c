@@ -37,10 +37,16 @@ enum {
     SignalDcd = 5,
 };
 
+enum {
+    AllQueues = 0,
+    ReceiveQueue = 1,
+    SendQueue = 2,
+};
+
 static int TermiosGetStatus(int32_t fd)
 {
     int status = 0;
-    if(ioctl(fd, TIOCMGET, &status) < 0)
+    if (ioctl(fd, TIOCMGET, &status) < 0)
     {
         return -1;
     }
@@ -48,11 +54,11 @@ static int TermiosGetStatus(int32_t fd)
     return status;
 }
 
-int32_t TermiosGetSignal(int32_t fd, int32_t signal)
+int32_t Termios_GetSignal(int32_t fd, int32_t signal)
 {
     int status;
 
-    if(ioctl(fd, TIOCMGET, &status) < 0)
+    if (ioctl(fd, TIOCMGET, &status) < 0)
     {
         return -1;
     }
@@ -74,7 +80,7 @@ int32_t TermiosGetSignal(int32_t fd, int32_t signal)
    }
 }
 
-int32_t TermiosSetSignal(int32_t fd, int32_t signal, int32_t set)
+int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set)
 {
     int status;
     int bit;
@@ -92,7 +98,7 @@ int32_t TermiosSetSignal(int32_t fd, int32_t signal, int32_t set)
         return -1;
     }
 
-    status  = TermiosGetStatus(fd);
+    status = TermiosGetStatus(fd);
     if (status >= 0)
     {
         if (set)
@@ -114,6 +120,55 @@ TermiosSpeed2Rate(int speed)
 {
     switch (speed)
     {
+        /* High speeds are not portable and may or may not be supported */
+#ifdef B4000000
+    case 4000000:
+        return B4000000;
+#endif
+#ifdef B3500000
+    case 3500000:
+        return B3500000;
+#endif
+#ifdef B3000000
+    case 3000000:
+        return B3000000;
+#endif
+#ifdef B2500000
+    case 2500000:
+        return B2500000;
+#endif
+#ifdef B2000000
+    case 2000000:
+        return B2000000;
+#endif
+#ifdef B1500000
+    case 1500000:
+        return B1500000;
+#endif
+#ifdef B1152000
+    case 1152000:
+        return B1152000;
+#endif
+#ifdef B1000000
+    case 1000000:
+        return B1000000;
+#endif
+#ifdef B921600
+    case 921600:
+        return B921600;
+#endif
+#ifdef B576000
+    case 576000:
+        return B576000;
+#endif
+#ifdef B500000
+    case 500000:
+        return B500000;
+#endif
+#ifdef B460800
+    case 460800:
+        return B460800;
+#endif
     case 230400:
         return B230400;
     case 115200:
@@ -151,7 +206,7 @@ TermiosSpeed2Rate(int speed)
     case 50:
         return B50;
     }
-    return ((speed_t)(speed));
+    return B0;
 }
 
 static int
@@ -159,9 +214,57 @@ TermiosRate2Speed(speed_t brate)
 {
     switch (brate)
     {
+#ifdef B4000000
+    case B4000000:
+        return 4000000;
+#endif
+#ifdef B3500000
+    case B3500000:
+        return 3500000;
+#endif
+#ifdef B3000000
+    case B3000000:
+        return 3000000;
+#endif
+#ifdef B2500000
+    case B2500000:
+        return 2500000;
+#endif
+#ifdef B2000000
+    case B2000000:
+        return 2000000;
+#endif
+#ifdef B1500000
+    case B1500000:
+        return 1500000;
+#endif
+#ifdef B1152000
+    case B1152000:
+        return 1152000;
+#endif
+#ifdef B1000000
+    case B1000000:
+        return 1000000;
+#endif
+#ifdef B921600
+    case B921600:
+        return 921600;
+#endif
+#ifdef B576000
+    case B576000:
+        return 576000;
+#endif
+#ifdef B500000
+    case B500000:
+        return 500000;
+#endif
+#ifdef B460800
+    case B460800:
+        return 460800;
+#endif
     case B230400:
         return 230400;
-    case 115200:
+    case B115200:
         return 115200;
     case B57600:
         return 57600;
@@ -201,9 +304,9 @@ TermiosRate2Speed(speed_t brate)
 }
 
 int32_t
-TermiosGetSpeed(int32_t fd)
+Termios_GetSpeed(int32_t fd)
 {
-    struct termios       term;
+    struct termios term;
     if (tcgetattr(fd, &term) < 0)
     {
         return  -1;
@@ -213,15 +316,23 @@ TermiosGetSpeed(int32_t fd)
 }
 
 int32_t
-TermiosSetSpeed(int32_t fd, uint32_t speed)
+Termios_SetSpeed(int32_t fd, uint32_t speed)
 {
-    struct termios       term;
+    struct termios term;
+    speed_t brate = TermiosSpeed2Rate(speed);
+
+    if (brate == B0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
     if (tcgetattr(fd, &term) < 0)
     {
         return  -1;
     }
 
-    cfsetspeed(&term, TermiosSpeed2Rate(speed));
+    cfsetspeed(&term, brate);
 
     if (tcsetattr(fd, TCSANOW, &term) < 0)
     {
@@ -232,10 +343,11 @@ TermiosSetSpeed(int32_t fd, uint32_t speed)
 }
 
 int32_t
-TermiosAvailableBytes(int32_t fd, int32_t readBuffer)
+Termios_AvailableBytes(int32_t fd, int32_t readBuffer)
 {
     int32_t bytes;
-    if (ioctl (fd, readBuffer ? FIONREAD : TIOCOUTQ, &bytes) == -1) {
+    if (ioctl (fd, readBuffer ? FIONREAD : TIOCOUTQ, &bytes) == -1)
+    {
         return -1;
     }
 
@@ -243,27 +355,35 @@ TermiosAvailableBytes(int32_t fd, int32_t readBuffer)
 }
 
 int32_t
-TermiosDiscard(int32_t fd, int32_t queue)
+Termios_Discard(int32_t fd, int32_t queue)
 {
-    return tcflush(fd, queue == 0 ? TCIOFLUSH : queue == 1 ? TCIFLUSH : TCOFLUSH);
+    switch (queue)
+    {
+    case ReceiveQueue:
+        return tcflush(fd, TCIFLUSH);
+    case SendQueue:
+        return tcflush(fd, TCOFLUSH);
+    default:
+        return tcflush(fd, TCIOFLUSH);
+    }
 }
 
 int32_t
-TermiosDrain(int32_t fd)
+Termios_Drain(int32_t fd)
 {
     return tcdrain(fd);
 }
 
 int32_t
-TermiosSendBreak(int32_t fd, uint32_t duration)
+Termios_SendBreak(int32_t fd, uint32_t duration)
 {
     return tcsendbreak(fd, duration);
 }
 
 int32_t
-TermiosReset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake)
+Termios_Reset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake)
 {
-    struct termios       term;
+    struct termios term;
     int ret = 0;
 
     if (tcgetattr(fd, &term) < 0)
@@ -342,6 +462,12 @@ TermiosReset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int 
     if (speed)
     {
         speed_t brate = TermiosSpeed2Rate(speed);
+        if (brate == B0)
+        {
+            errno = EINVAL;
+            return -1;
+        }
+
         ret = cfsetspeed(&term, brate);
     }
 

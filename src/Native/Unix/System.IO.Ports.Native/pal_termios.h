@@ -7,17 +7,17 @@
 
 BEGIN_EXTERN_C
 
-int32_t TermiosGetSignal(int32_t fd, int32_t signal);
-int32_t TermiosSetSignal(int32_t fd, int32_t signal, int32_t set);
+int32_t Termios_GetSignal(int32_t fd, int32_t signal);
+int32_t Termios_SetSignal(int32_t fd, int32_t signal, int32_t set);
 
-int32_t TermiosGetSpeed(int32_t fd);
-int32_t TermiosSetSpeed(int32_t fd, uint32_t speed);
+int32_t Termios_GetSpeed(int32_t fd);
+int32_t Termios_SetSpeed(int32_t fd, uint32_t speed);
 
-int32_t TermiosAvailableBytes(int32_t fd, int32_t readBuffer);
+int32_t Termios_AvailableBytes(int32_t fd, int32_t readBuffer);
 
-int32_t TermiosReset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake);
-int32_t TermiosDiscard(int32_t fd, int32_t queue);
-int32_t TermiosDrain(int32_t fd);
-int32_t TermiosSendBreak(int32_t fd, uint32_t duration);
+int32_t Termios_Reset(int32_t fd, int speed, int dataBits, int stopBits, int parity, int handshake);
+int32_t Termios_Discard(int32_t fd, int32_t queue);
+int32_t Termios_Drain(int32_t fd);
+int32_t Termios_SendBreak(int32_t fd, uint32_t duration);
 
 END_EXTERN_C
