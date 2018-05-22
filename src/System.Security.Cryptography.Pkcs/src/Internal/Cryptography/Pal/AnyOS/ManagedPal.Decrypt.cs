@@ -45,7 +45,15 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                 if (recipientInfo.Pal is ManagedKeyTransPal ktri)
                 {
-                    byte[] cek = ktri.DecryptCek(cert, privateKey as RSA, out exception);
+                    RSA key = privateKey as RSA;
+
+                    if (key == null)
+                    {
+                        exception = new CryptographicException(SR.Cryptography_Cms_Decrypting_RequiresRSAPrivateKey);
+                        return null;
+                    }
+
+                    byte[] cek = ktri.DecryptCek(cert, key, out exception);
                     // Pin CEK to prevent it from getting copied during heap compaction.
                     fixed (byte* pinnedCek = cek)
                     {
@@ -56,7 +64,12 @@ namespace Internal.Cryptography.Pal.AnyOS
                                 return null;
                             }
 
-                            return TryDecryptCore(cek, _envelopedData.EncryptedContentInfo.ContentType, _envelopedData.EncryptedContentInfo.EncryptedContent, _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm, out exception);
+                            return TryDecryptCore(
+                                cek,
+                                _envelopedData.EncryptedContentInfo.ContentType,
+                                _envelopedData.EncryptedContentInfo.EncryptedContent,
+                                _envelopedData.EncryptedContentInfo.ContentEncryptionAlgorithm,
+                                out exception);
                         }
                         finally
                         {
@@ -149,7 +162,11 @@ namespace Internal.Cryptography.Pal.AnyOS
                     decrypted);
             }
 
-            private static byte[] DecryptContent(ReadOnlyMemory<byte> encryptedContent, byte[] cek, AlgorithmIdentifierAsn contentEncryptionAlgorithm, out Exception exception)
+            private static byte[] DecryptContent(
+                ReadOnlyMemory<byte> encryptedContent,
+                byte[] cek,
+                AlgorithmIdentifierAsn contentEncryptionAlgorithm,
+                out Exception exception)
             {
                 exception = null;
                 int encryptedContentLength = encryptedContent.Length;

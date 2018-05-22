@@ -196,7 +196,13 @@ namespace System.Security.Cryptography.Pkcs
             CheckStateForDecryption();
 
             X509Certificate2Collection extraStore = new X509Certificate2Collection();
-            ContentInfo contentInfo = _decryptorPal.TryDecrypt(recipientInfo, null, privateKey, Certificates, extraStore, out Exception exception);
+            ContentInfo contentInfo = _decryptorPal.TryDecrypt(
+                recipientInfo,
+                null,
+                privateKey,
+                Certificates,
+                extraStore,
+                out Exception exception);
 
             if (exception != null)
                 throw exception;
@@ -225,7 +231,15 @@ namespace System.Security.Cryptography.Pkcs
                     exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
                     continue;
                 }
-                newContentInfo = _decryptorPal.TryDecrypt(recipientInfo, cert, null, originatorCerts, extraStore, out exception);
+
+                newContentInfo = _decryptorPal.TryDecrypt(
+                    recipientInfo,
+                    cert,
+                    null,
+                    originatorCerts,
+                    extraStore,
+                    out exception);
+
                 if (exception != null)
                     continue;
 

@@ -108,28 +108,24 @@ namespace System.Security.Cryptography.Pkcs
                         byte[] serialNumber = issuerSerial.SerialNumber.ToSerialBytes();
                         string issuer = issuerSerial.IssuerName;
                         byte[] certSerialNumber = certificate.GetSerialNumber();
-                        if (Helpers.AreByteArraysEqual(certSerialNumber, serialNumber) && certificate.Issuer == issuer)
-                            return true;
+
+                        return Helpers.AreByteArraysEqual(certSerialNumber, serialNumber) && certificate.Issuer == issuer;
                     }
-                    break;
 
                 case SubjectIdentifierType.SubjectKeyIdentifier:
                     {
                         string skiString = (string)Value;
                         byte[] ski = skiString.ToSkiBytes();
                         byte[] candidateSki = PkcsPal.Instance.GetSubjectKeyIdentifier(certificate);
-                        if (Helpers.AreByteArraysEqual(ski, candidateSki))
-                            return true;
+
+                        return Helpers.AreByteArraysEqual(ski, candidateSki);
                     }
-                    break;
 
                 default:
-                    // RecipientInfo's can only be created by this package so if this an invalid type, it's the package's fault.
-                    Debug.Fail($"Invalid recipientIdentifier type: {Type}");
+                    // SubjectIdentifier can only be created by this package so if this an invalid type, it's the package's fault.
+                    Debug.Fail($"Invalid SubjectIdentifierType: {Type}");
                     throw new CryptographicException();
             }
-
-            return false;
         }
     }
 }

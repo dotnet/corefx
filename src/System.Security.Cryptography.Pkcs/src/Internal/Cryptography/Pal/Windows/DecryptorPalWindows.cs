@@ -12,7 +12,10 @@ namespace Internal.Cryptography.Pal.Windows
 {
     internal sealed partial class DecryptorPalWindows : DecryptorPal
     {
-        private DecryptorPalWindows(SafeCryptMsgHandle hCryptMsg, RecipientInfoCollection recipientInfos, AlgorithmIdentifierAsn contentEncryptionAlgorithm)
+        private DecryptorPalWindows(
+            SafeCryptMsgHandle hCryptMsg,
+            RecipientInfoCollection recipientInfos,
+            AlgorithmIdentifierAsn contentEncryptionAlgorithm)
             : base(recipientInfos)
         {
             _hCryptMsg = hCryptMsg;

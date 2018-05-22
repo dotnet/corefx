@@ -17,14 +17,33 @@ namespace Internal.Cryptography.Pal.Windows
 {
     internal sealed partial class DecryptorPalWindows : DecryptorPal
     {
-        public unsafe sealed override ContentInfo TryDecrypt(RecipientInfo recipientInfo, X509Certificate2 cert, AsymmetricAlgorithm privateKey, X509Certificate2Collection originatorCerts, X509Certificate2Collection extraStore, out Exception exception)
+        public unsafe sealed override ContentInfo TryDecrypt(
+            RecipientInfo recipientInfo,
+            X509Certificate2 cert,
+            AsymmetricAlgorithm privateKey,
+            X509Certificate2Collection originatorCerts,
+            X509Certificate2Collection extraStore,
+            out Exception exception)
         {
             Debug.Assert((cert != null) ^ (privateKey != null));
 
             if (privateKey != null)
             {
+                RSA key = privateKey as RSA;
+
+                if (key == null)
+                {
+                    exception = new CryptographicException(SR.Cryptography_Cms_Decrypting_RequiresRSAPrivateKey);
+                    return null;
+                }
+
                 ContentInfo contentInfo = _hCryptMsg.GetContentInfo();
-                byte[] cek = AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(cert, privateKey as RSA, recipientInfo.EncryptedKey, recipientInfo.KeyEncryptionAlgorithm.Oid.Value, out exception);
+                byte[] cek = AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(
+                                cert,
+                                key,
+                                recipientInfo.EncryptedKey,
+                                recipientInfo.KeyEncryptionAlgorithm.Oid.Value,
+                                out exception);
                 // Pin CEK to prevent it from getting copied during heap compaction.
                 fixed (byte* pinnedCek = cek)
                 {
@@ -35,7 +54,12 @@ namespace Internal.Cryptography.Pal.Windows
                             return null;
                         }
 
-                        return AnyOS.ManagedPkcsPal.ManagedDecryptorPal.TryDecryptCore(cek, contentInfo.ContentType.Value, contentInfo.Content, _contentEncryptionAlgorithm, out exception);
+                        return AnyOS.ManagedPkcsPal.ManagedDecryptorPal.TryDecryptCore(
+                            cek,
+                            contentInfo.ContentType.Value,
+                            contentInfo.Content,
+                            _contentEncryptionAlgorithm,
+                            out exception);
                     }
                     finally
                     {
