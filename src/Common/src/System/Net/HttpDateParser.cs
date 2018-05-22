@@ -31,13 +31,15 @@ namespace System.Net
             "d MMM yyyy H:m:s", // RFC 5322 no day-of-week, no zone
         };
 
-        private static readonly IFormatProvider s_formatProvider = DateTimeFormatInfo.InvariantInfo;
-        private static readonly DateTimeStyles s_style = DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal;
-
         // Try the various date formats in the order listed above.
         // We should accept a wide variety of common formats, but only output RFC 1123 style dates.
         internal static bool TryStringToDate(string input, out DateTimeOffset result) =>
-             DateTimeOffset.TryParseExact(input, s_dateFormats, s_formatProvider, s_style, out result);
+             DateTimeOffset.TryParseExact(
+                 input,
+                 s_dateFormats,
+                 DateTimeFormatInfo.InvariantInfo,
+                 DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal,
+                 out result);
 
         // Format according to RFC1123; 'r' uses invariant info (DateTimeFormatInfo.InvariantInfo).
         internal static string DateToString(DateTimeOffset dateTime) =>
