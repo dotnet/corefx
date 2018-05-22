@@ -158,7 +158,7 @@ namespace System.Security.Cryptography.Pkcs
         //
         public void Decrypt()
         {
-            DecryptContent(RecipientInfos, null, null);
+            DecryptContent(RecipientInfos, null);
         }
 
         public void Decrypt(RecipientInfo recipientInfo)
@@ -166,7 +166,7 @@ namespace System.Security.Cryptography.Pkcs
             if (recipientInfo == null)
                 throw new ArgumentNullException(nameof(recipientInfo));
 
-            DecryptContent(new RecipientInfoCollection(recipientInfo), null, null);
+            DecryptContent(new RecipientInfoCollection(recipientInfo), null);
         }
 
         public void Decrypt(RecipientInfo recipientInfo, X509Certificate2Collection extraStore)
@@ -177,7 +177,7 @@ namespace System.Security.Cryptography.Pkcs
             if (extraStore == null)
                 throw new ArgumentNullException(nameof(extraStore));
 
-            DecryptContent(new RecipientInfoCollection(recipientInfo), extraStore, null);
+            DecryptContent(new RecipientInfoCollection(recipientInfo), extraStore);
         }
 
         public void Decrypt(X509Certificate2Collection extraStore)
@@ -185,13 +185,15 @@ namespace System.Security.Cryptography.Pkcs
             if (extraStore == null)
                 throw new ArgumentNullException(nameof(extraStore));
 
-            DecryptContent(RecipientInfos, extraStore, null);
+            DecryptContent(RecipientInfos, extraStore);
         }
 
         public void Decrypt(RecipientInfo recipientInfo, AsymmetricAlgorithm privateKey)
         {
             if (recipientInfo == null)
                 throw new ArgumentNullException(nameof(recipientInfo));
+
+            CheckStateForDecryption();
 
             X509Certificate2Collection extraStore = new X509Certificate2Collection();
             ContentInfo contentInfo = _decryptorPal.TryDecrypt(recipientInfo, null, privateKey, Certificates, extraStore, out Exception exception);
@@ -202,7 +204,41 @@ namespace System.Security.Cryptography.Pkcs
             SetContentInfo(contentInfo);
         }
 
-        private void DecryptContent(RecipientInfoCollection recipientInfos, X509Certificate2Collection extraStore, AsymmetricAlgorithm privateKey)
+        private void DecryptContent(RecipientInfoCollection recipientInfos, X509Certificate2Collection extraStore)
+        {
+            CheckStateForDecryption();
+            extraStore = extraStore ?? new X509Certificate2Collection();
+
+            X509Certificate2Collection certs = new X509Certificate2Collection();
+            PkcsPal.Instance.AddCertsFromStoreForDecryption(certs);
+            certs.AddRange(extraStore);
+
+            X509Certificate2Collection originatorCerts = Certificates;
+
+            ContentInfo newContentInfo = null;
+            Exception exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
+            foreach (RecipientInfo recipientInfo in recipientInfos)
+            {
+                X509Certificate2 cert = certs.TryFindMatchingCertificate(recipientInfo.RecipientIdentifier);
+                if (cert == null)
+                {
+                    exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
+                    continue;
+                }
+                newContentInfo = _decryptorPal.TryDecrypt(recipientInfo, cert, null, originatorCerts, extraStore, out exception);
+                if (exception != null)
+                    continue;
+
+                break;
+            }
+
+            if (exception != null)
+                throw exception;
+
+            SetContentInfo(newContentInfo);
+        }
+
+        private void CheckStateForDecryption()
         {
             switch (_lastCall)
             {
@@ -222,36 +258,6 @@ namespace System.Security.Cryptography.Pkcs
                     Debug.Fail($"Unexpected _lastCall value: {_lastCall}");
                     throw new InvalidOperationException();
             }
-
-            extraStore = extraStore ?? new X509Certificate2Collection();
-
-            X509Certificate2Collection certs = new X509Certificate2Collection();
-            PkcsPal.Instance.AddCertsFromStoreForDecryption(certs);
-            certs.AddRange(extraStore);
-
-            X509Certificate2Collection originatorCerts = Certificates;
-
-            ContentInfo newContentInfo = null;
-            Exception exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
-            foreach (RecipientInfo recipientInfo in recipientInfos)
-            {
-                X509Certificate2 cert = certs.TryFindMatchingCertificate(recipientInfo.RecipientIdentifier);
-                if (cert == null)
-                {
-                    exception = PkcsPal.Instance.CreateRecipientsNotFoundException();
-                    continue;
-                }
-                newContentInfo = _decryptorPal.TryDecrypt(recipientInfo, cert, privateKey, originatorCerts, extraStore, out exception);
-                if (exception != null)
-                    continue;
-
-                break;
-            }
-
-            if (exception != null)
-                throw exception;
-
-            SetContentInfo(newContentInfo);
         }
 
         private void SetContentInfo(ContentInfo contentInfo)

@@ -98,7 +98,7 @@ namespace System.Security.Cryptography.Pkcs
         public SubjectIdentifierType Type { get; }
         public object Value { get; }
 
-        public bool IsMatch(X509Certificate2 certificate)
+        public bool MatchesCertificate(X509Certificate2 certificate)
         {
             switch (Type)
             {

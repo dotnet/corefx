@@ -20,7 +20,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             {
                 EnvelopedCms cms = GetDocWithRecipient(type, cert);
                 Assert.Equal(1, cms.RecipientInfos.Count);
-                Assert.True(cms.RecipientInfos[0].RecipientIdentifier.IsMatch(cert));
+                Assert.True(cms.RecipientInfos[0].RecipientIdentifier.MatchesCertificate(cert));
             }
         }
 
@@ -35,7 +35,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             {
                 EnvelopedCms cms = GetDocWithRecipient(type, cert);
                 Assert.Equal(1, cms.RecipientInfos.Count);
-                Assert.False(cms.RecipientInfos[0].RecipientIdentifier.IsMatch(notMatchingCert));
+                Assert.False(cms.RecipientInfos[0].RecipientIdentifier.MatchesCertificate(notMatchingCert));
             }
         }
 

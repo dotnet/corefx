@@ -301,7 +301,7 @@ namespace System.Security.Cryptography.Pkcs
         internal SubjectIdentifier() { }
         public System.Security.Cryptography.Pkcs.SubjectIdentifierType Type { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public object Value { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool IsMatch(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { throw null; }
+        public bool MatchesCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { throw null; }
     }
     public sealed partial class SubjectIdentifierOrKey
     {

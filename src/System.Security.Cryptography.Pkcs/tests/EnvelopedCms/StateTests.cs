@@ -277,7 +277,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         [ConditionalTheory(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [InlineData(false)]
+#if netcoreapp // API not supported on netfx
         [InlineData(true)]
+#endif
         public static void PostDecrypt_Encode(bool useExplicitPrivateKey)
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
@@ -301,7 +303,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
                 if (useExplicitPrivateKey)
                 {
+#if netcoreapp
                     ecms.Decrypt(r[0], cer.GetRSAPrivateKey());
+#else
+                    Assert.True(false, "Should not run on this platform");
+#endif
                 }
                 else
                 {
@@ -356,9 +362,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsCngCertificates))]
+        [ConditionalTheory(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void PostDecrypt_Decrypt()
+        [InlineData(false)]
+#if netcoreapp // API not supported on netfx
+        [InlineData(true)]
+#endif
+        public static void PostDecrypt_Decrypt(bool useExplicitPrivateKey)
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
 
@@ -392,13 +402,31 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 extraStore.Add(cert2);
                 extraStore.Add(cert3);
                 RecipientInfoCollection r = ecms.RecipientInfos;
-                ecms.Decrypt(r[0], extraStore);
+
+                Action decrypt = () =>
+                {
+                    if (useExplicitPrivateKey)
+                    {
+#if netcoreapp
+                        ecms.Decrypt(r[0], cert1.GetRSAPrivateKey());
+#else
+                        Assert.True(false, "Should not run on this platform");
+#endif
+                    }
+                    else
+                    {
+                        ecms.Decrypt(r[0], extraStore);
+                    }
+                };
+
+                decrypt();
+
                 ContentInfo contentInfo = ecms.ContentInfo;
                 Assert.Equal<byte>(expectedContent, contentInfo.Content);
 
                 // Though this doesn't seem like a terribly unreasonable thing to attempt, attempting to call Decrypt() again
                 // after a successful Decrypt() throws a CryptographicException saying "Already decrypted."
-                Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(r[1], extraStore));
+                Assert.ThrowsAny<CryptographicException>(() => decrypt());
             }
         }
 

@@ -543,7 +543,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 {
                     using (X509Certificate2 pubCert = certLoader.GetCertificate())
                     {
-                        RecipientInfo recipient = ecms.RecipientInfos.Cast<RecipientInfo>().Where((r) => r.RecipientIdentifier.IsMatch(cert)).Single();
+                        RecipientInfo recipient = ecms.RecipientInfos.Cast<RecipientInfo>().Where((r) => r.RecipientIdentifier.MatchesCertificate(cert)).Single();
                         ecms.Decrypt(recipient, cert.PrivateKey);
                     }
                 }
