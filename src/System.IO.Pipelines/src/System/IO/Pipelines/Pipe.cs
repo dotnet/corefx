@@ -141,7 +141,7 @@ namespace System.IO.Pipelines
             // Slice the AvailableMemory to the WritableBytes size
             int end = _writingHead.End;
             Memory<byte> availableMemory = _writingHead.AvailableMemory;
-            availableMemory = availableMemory.Slice(end, availableMemory.Length - end);
+            availableMemory = availableMemory.Slice(end);
             return availableMemory;
         }
 
@@ -165,7 +165,7 @@ namespace System.IO.Pipelines
             // Slice the AvailableMemory to the WritableBytes size
             int end = _writingHead.End;
             Span<byte> availableMemory = _writingHead.AvailableMemory.Span;
-            availableMemory = availableMemory.Slice(end, availableMemory.Length - end);
+            availableMemory = availableMemory.Slice(end);
             return availableMemory;
         }
 
