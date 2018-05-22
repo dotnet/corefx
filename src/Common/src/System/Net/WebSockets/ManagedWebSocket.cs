@@ -727,10 +727,11 @@ namespace System.Net.WebSockets
                         _receivedMaskOffsetOffset = ApplyMask(payloadBuffer.Span.Slice(0, totalBytesReceived), header.Mask, _receivedMaskOffsetOffset);
                     }
                     header.PayloadLength -= totalBytesReceived;
+                    var endOfMessage = header.Fin && header.PayloadLength == 0;
 
                     // If this a text message, validate that it contains valid UTF8.
                     if (header.Opcode == MessageOpcode.Text &&
-                        !TryValidateUtf8(payloadBuffer.Span.Slice(0, totalBytesReceived), header.Fin && header.PayloadLength == 0, _utf8TextState))
+                        !TryValidateUtf8(payloadBuffer.Span.Slice(0, totalBytesReceived), endOfMessage, _utf8TextState))
                     {
                         await CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.InvalidPayloadData, WebSocketError.Faulted).ConfigureAwait(false);
                     }
@@ -739,7 +740,7 @@ namespace System.Net.WebSockets
                     return resultGetter.GetResult(
                         totalBytesReceived,
                         header.Opcode == MessageOpcode.Text ? WebSocketMessageType.Text : WebSocketMessageType.Binary,
-                        header.Fin && header.PayloadLength == 0,
+                        endOfMessage,
                         null, null);
                 }
             }
