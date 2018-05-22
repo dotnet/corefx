@@ -47,7 +47,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 {
                     RSA key = privateKey as RSA;
 
-                    if (key == null)
+                    if (privateKey != null && key == null)
                     {
                         exception = new CryptographicException(SR.Cryptography_Cms_Decrypting_RequiresRSAPrivateKey);
                         return null;
