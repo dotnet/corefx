@@ -41,6 +41,6 @@ namespace System.Net
 
         // Format according to RFC1123; 'r' uses invariant info (DateTimeFormatInfo.InvariantInfo).
         internal static string DateToString(DateTimeOffset dateTime) =>
-            dateTime.ToUniversalTime().ToString("r", CultureInfo.InvariantCulture);
+            dateTime.ToUniversalTime().ToString("r");
     }
 }
