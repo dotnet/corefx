@@ -148,6 +148,7 @@ void* SignalHandlerLoop(void* arg)
                         } while (pid > 0);
                     }
                 }
+                pthread_mutex_unlock(&lock);
             }
 
             if (callback != NULL)
