@@ -164,9 +164,9 @@ namespace System.IO.Pipelines
 
             // Slice the AvailableMemory to the WritableBytes size
             int end = _writingHead.End;
-            Span<byte> availableMemory = _writingHead.AvailableMemory.Span;
-            availableMemory = availableMemory.Slice(end);
-            return availableMemory;
+            Span<byte> availableSpan = _writingHead.AvailableMemory.Span;
+            availableSpan = availableSpan.Slice(end);
+            return availableSpan;
         }
 
         private void AllocateWriteHeadUnsynchronized(int sizeHint)
@@ -231,16 +231,9 @@ namespace System.IO.Pipelines
         private int GetSegmentSize(int sizeHint)
         {
             // First we need to handle case where hint is smaller than minimum segment size
-            if (_minimumSegmentSize >= sizeHint)
-                sizeHint = _minimumSegmentSize;
-
+            sizeHint = Math.Max(_minimumSegmentSize, sizeHint);
             // After that adjust it to fit into pools max buffer size
-            int adjustedToMaximumSize = 0;
-            if (_pool.MaxBufferSize <= sizeHint)
-                adjustedToMaximumSize = _pool.MaxBufferSize;
-            else
-                adjustedToMaximumSize = sizeHint;
-
+            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, sizeHint);
             return adjustedToMaximumSize;
         }
 
