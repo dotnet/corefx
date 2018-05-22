@@ -105,22 +105,19 @@ namespace System.Net.WebSockets.Tests
         public static async Task ManagedWebSocket_ReceiveUTF8SplitAcrossMultipleBuffers()
         {
             // 1 character - 2 bytes
-            var payload = Encoding.UTF8.GetBytes("\u00E6");
+            byte[] payload = Encoding.UTF8.GetBytes("\u00E6");
             var frame = new byte[payload.Length + 2];
             frame[0] = 0x81; // FIN = true, Opcode = Text
             frame[1] = (byte)payload.Length;
             Array.Copy(payload, 0, frame, 2, payload.Length);
 
-            using (var stream = new MemoryStream())
+            using (var stream = new MemoryStream(frame, writable: true))
             {
-                stream.Write(frame);
-                stream.Seek(0, SeekOrigin.Begin);
-                stream.Flush();
-                var websocket = WebSocketProtocol.CreateFromStream(stream, false, "null", Timeout.InfiniteTimeSpan);
+                WebSocket websocket = WebSocketProtocol.CreateFromStream(stream, false, "null", Timeout.InfiniteTimeSpan);
 
                 // read first half of the multi-byte character
                 var recvBuffer = new byte[1];
-                var result = await websocket.ReceiveAsync(new ArraySegment<byte>(recvBuffer), CancellationToken.None);
+                WebSocketReceiveResult result = await websocket.ReceiveAsync(new ArraySegment<byte>(recvBuffer), CancellationToken.None);
                 Assert.False(result.EndOfMessage);
                 Assert.Equal(1, result.Count);
                 Assert.Equal(0xc3, recvBuffer[0]);
