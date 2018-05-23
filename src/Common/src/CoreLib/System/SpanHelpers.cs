@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime;
-using System.Runtime.InteropServices;
 
 using Internal.Runtime.CompilerServices;
 
@@ -19,127 +18,6 @@ namespace System
 {
     internal static partial class SpanHelpers
     {
-        public static int IndexOfCultureHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(span.Length != 0);
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return CompareInfo.InvariantIndexOf(span, value, ignoreCase: false);
-            }
-
-            return compareInfo.IndexOf(span, value, CompareOptions.None);
-        }
-
-        public static int IndexOfCultureIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(span.Length != 0);
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return CompareInfo.InvariantIndexOf(span, value, ignoreCase: true);
-            }
-
-            return compareInfo.IndexOf(span, value, CompareOptions.IgnoreCase);
-        }
-
-        public static int IndexOfOrdinalHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, bool ignoreCase)
-        {
-            Debug.Assert(span.Length != 0);
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return CompareInfo.InvariantIndexOf(span, value, ignoreCase);
-            }
-
-            return CompareInfo.Invariant.IndexOfOrdinal(span, value, ignoreCase);
-        }
-
-        public static bool StartsWithCultureHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return span.StartsWith(value);
-            }
-            if (span.Length == 0)
-            {
-                return false;
-            }
-            return compareInfo.IsPrefix(span, value, CompareOptions.None);
-        }
-
-        public static bool StartsWithCultureIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return StartsWithOrdinalIgnoreCaseHelper(span, value);
-            }
-            if (span.Length == 0)
-            {
-                return false;
-            }
-            return compareInfo.IsPrefix(span, value, CompareOptions.IgnoreCase);
-        }
-
-        public static bool StartsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (span.Length < value.Length)
-            {
-                return false;
-            }
-            return CompareInfo.CompareOrdinalIgnoreCase(span.Slice(0, value.Length), value) == 0;
-        }
-
-        public static bool EndsWithCultureHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return span.EndsWith(value);
-            }
-            if (span.Length == 0)
-            {
-                return false;
-            }
-            return compareInfo.IsSuffix(span, value, CompareOptions.None);
-        }
-
-        public static bool EndsWithCultureIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value, CompareInfo compareInfo)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (GlobalizationMode.Invariant)
-            {
-                return EndsWithOrdinalIgnoreCaseHelper(span, value);
-            }
-            if (span.Length == 0)
-            {
-                return false;
-            }
-            return compareInfo.IsSuffix(span, value, CompareOptions.IgnoreCase);
-        }
-
-        public static bool EndsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> span, ReadOnlySpan<char> value)
-        {
-            Debug.Assert(value.Length != 0);
-
-            if (span.Length < value.Length)
-            {
-                return false;
-            }
-            return (CompareInfo.CompareOrdinalIgnoreCase(span.Slice(span.Length - value.Length), value) == 0);
-        }
-
         public static unsafe void ClearWithoutReferences(ref byte b, nuint byteLength)
         {
             if (byteLength == 0)
@@ -469,14 +347,14 @@ namespace System
 
             for (; pointerSizeLength >= 8; pointerSizeLength -= 8)
             {
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -4) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -5) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -6) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -7) = default(IntPtr);
-                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -8) = default(IntPtr);
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -4) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -5) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -6) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -7) = default;
+                Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -8) = default;
             }
 
             Debug.Assert(pointerSizeLength <= 7);
@@ -515,23 +393,23 @@ namespace System
             Debug.Assert(pointerSizeLength >= 4);
 
             // Write first four and last three.
-            Unsafe.Add(ref ip, 2) = default(IntPtr);
-            Unsafe.Add(ref ip, 3) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default(IntPtr);
+            Unsafe.Add(ref ip, 2) = default;
+            Unsafe.Add(ref ip, 3) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -3) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -2) = default;
 
         Write2To3:
             Debug.Assert(pointerSizeLength >= 2);
 
             // Write first two and last one.
-            Unsafe.Add(ref ip, 1) = default(IntPtr);
-            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default(IntPtr);
+            Unsafe.Add(ref ip, 1) = default;
+            Unsafe.Add(ref Unsafe.Add(ref ip, (IntPtr)pointerSizeLength), -1) = default;
 
         Write1:
             Debug.Assert(pointerSizeLength >= 1);
 
             // Write only element.
-            ip = default(IntPtr);
+            ip = default;
         }
     }
 }

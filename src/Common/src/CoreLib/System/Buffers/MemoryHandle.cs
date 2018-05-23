@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime;
 using System.Runtime.InteropServices;
 
 namespace System.Buffers
@@ -39,7 +38,7 @@ namespace System.Buffers
         /// <summary>
         /// Frees the pinned handle and releases IPinnable.
         /// </summary>
-       public void Dispose()
+        public void Dispose()
         {
             if (_handle.IsAllocated)
             {

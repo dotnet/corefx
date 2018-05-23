@@ -13,7 +13,7 @@ namespace System.Memory.Tests
     {
         public class Array : ReadOnlySequenceTestsChar
         {
-            public Array() : base(ReadOnlySequenceFactoryChar.ArrayFactory) { }
+            public Array() : base(ReadOnlySequenceFactory<char>.ArrayFactory) { }
         }
 
         public class String : ReadOnlySequenceTestsChar
@@ -23,22 +23,27 @@ namespace System.Memory.Tests
 
         public class Memory : ReadOnlySequenceTestsChar
         {
-            public Memory() : base(ReadOnlySequenceFactoryChar.MemoryFactory) { }
+            public Memory() : base(ReadOnlySequenceFactory<char>.MemoryFactory) { }
         }
 
         public class SingleSegment : ReadOnlySequenceTestsChar
         {
-            public SingleSegment() : base(ReadOnlySequenceFactoryChar.SingleSegmentFactory) { }
+            public SingleSegment() : base(ReadOnlySequenceFactory<char>.SingleSegmentFactory) { }
         }
 
         public class SegmentPerChar : ReadOnlySequenceTestsChar
         {
-            public SegmentPerChar() : base(ReadOnlySequenceFactoryChar.SegmentPerCharFactory) { }
+            public SegmentPerChar() : base(ReadOnlySequenceFactory<char>.SegmentPerItemFactory) { }
         }
 
-        internal ReadOnlySequenceFactoryChar Factory { get; }
+        public class SplitInThreeSegments : ReadOnlySequenceTestsChar
+        {
+            public SplitInThreeSegments() : base(ReadOnlySequenceFactory<char>.SplitInThree) { }
+        }
 
-        internal ReadOnlySequenceTestsChar(ReadOnlySequenceFactoryChar factory)
+        internal ReadOnlySequenceFactory<char> Factory { get; }
+
+        internal ReadOnlySequenceTestsChar(ReadOnlySequenceFactory<char> factory)
         {
             Factory = factory;
         }
@@ -74,8 +79,9 @@ namespace System.Memory.Tests
         [Fact]
         public void ToStringIsCorrect()
         {
-            ReadOnlySequence<char> buffer = Factory.CreateWithContent(Enumerable.Range(0, 255).Select(i => (char)i).ToArray());
-            Assert.Equal("System.Buffers.ReadOnlySequence<Char>[255]", buffer.ToString());
+            char[] array = Enumerable.Range(0, 255).Select(i => (char)i).ToArray();
+            ReadOnlySequence<char> buffer = Factory.CreateWithContent(array);
+            Assert.Equal(array, buffer.ToString());
         }
 
         [Theory]
@@ -128,108 +134,6 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void SegmentStartIsConsideredInBoundsCheck()
-        {
-            // 0               50           100    0             50             100
-            // [                ##############] -> [##############                ]
-            //                         ^c1            ^c2
-            var bufferSegment1 = new BufferSegment<char>(new char[49]);
-            BufferSegment<char> bufferSegment2 = bufferSegment1.Append(new char[50]);
-
-            var buffer = new ReadOnlySequence<char>(bufferSegment1, 0, bufferSegment2, 50);
-
-            SequencePosition c1 = buffer.GetPosition(25); // segment 1 index 75
-            SequencePosition c2 = buffer.GetPosition(55); // segment 2 index 5
-
-            ReadOnlySequence<char> sliced = buffer.Slice(c1, c2);
-            Assert.Equal(30, sliced.Length);
-
-            c1 = buffer.GetPosition(25, buffer.Start); // segment 1 index 75
-            c2 = buffer.GetPosition(55, buffer.Start); // segment 2 index 5
-
-            sliced = buffer.Slice(c1, c2);
-            Assert.Equal(30, sliced.Length);
-        }
-
-        [Fact]
-        public void GetPositionPrefersNextSegment()
-        {
-            BufferSegment<char> bufferSegment1 = new BufferSegment<char>(new char[50]);
-            BufferSegment<char> bufferSegment2 = bufferSegment1.Append(new char[0]);
-
-            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(bufferSegment1, 0, bufferSegment2, 0);
-
-            SequencePosition c1 = buffer.GetPosition(50);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(50, buffer.Start);
-
-            Assert.Equal(0, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-        }
-
-        [Fact]
-        public void GetPositionDoesNotCrossOutsideBuffer()
-        {
-            var bufferSegment1 = new BufferSegment<char>(new char[100]);
-            BufferSegment<char> bufferSegment2 = bufferSegment1.Append(new char[100]);
-            BufferSegment<char> bufferSegment3 = bufferSegment2.Append(new char[0]);
-
-            var buffer = new ReadOnlySequence<char>(bufferSegment1, 0, bufferSegment2, 100);
-
-            SequencePosition c1 = buffer.GetPosition(200);
-
-            Assert.Equal(100, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-
-            c1 = buffer.GetPosition(200, buffer.Start);
-
-            Assert.Equal(100, c1.GetInteger());
-            Assert.Equal(bufferSegment2, c1.GetObject());
-        }
-
-        [Fact]
-        public void Create_WorksWithArray()
-        {
-            var buffer = new ReadOnlySequence<char>(new char[] { (char)1, (char)2, (char)3, (char)4, (char)5 });
-            Assert.Equal(buffer.ToArray(), new char[] { (char)1, (char)2, (char)3, (char)4, (char)5 });
-        }
-
-        [Fact]
-        public void Empty_ReturnsLengthZeroBuffer()
-        {
-            var buffer = ReadOnlySequence<char>.Empty;
-            Assert.Equal(0, buffer.Length);
-            Assert.Equal(true, buffer.IsSingleSegment);
-            Assert.Equal(0, buffer.First.Length);
-        }
-
-        [Fact]
-        public void Create_WorksWithArrayWithOffset()
-        {
-            var buffer = new ReadOnlySequence<char>(new char[] { (char)1, (char)2, (char)3, (char)4, (char)5 }, 2, 3);
-            Assert.Equal(buffer.ToArray(), new char[] { (char)3, (char)4, (char)5 });
-        }
-
-        [Fact]
-        public void C_WorksWithArrayWithOffset()
-        {
-            var buffer = new ReadOnlySequence<char>(new char[] { (char)1, (char)2, (char)3, (char)4, (char)5 }, 2, 3);
-            Assert.Equal(buffer.ToArray(), new char[] { (char)3, (char)4, (char)5 });
-        }
-
-
-        [Fact]
-        public void Create_WorksWithMemory()
-        {
-            var memory = new ReadOnlyMemory<char>(new char[] { (char)1, (char)2, (char)3, (char)4, (char)5 });
-            var buffer = new ReadOnlySequence<char>(memory.Slice(2, 3));
-            Assert.Equal(new char[] { (char)3, (char)4, (char)5 }, buffer.ToArray());
-        }
-
-        [Fact]
         public void SliceToTheEndWorks()
         {
             ReadOnlySequence<char> buffer = Factory.CreateOfSize(10);
@@ -252,7 +156,7 @@ namespace System.Memory.Tests
         [InlineData("/localhost:5000/PATH/PATH2/ HTTP/1.1", ' ', 27)]
         public void PositionOf_ReturnsPosition(string raw, char searchFor, int expectIndex)
         {
-            ReadOnlySequence<char> buffer = Factory.CreateWithContent(raw);
+            ReadOnlySequence<char> buffer = Factory.CreateWithContent(raw.ToCharArray());
             SequencePosition? result = buffer.PositionOf((char)searchFor);
 
             Assert.NotNull(result);
@@ -302,12 +206,107 @@ namespace System.Memory.Tests
 
         public static TheoryData<Action<ReadOnlySequence<char>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<char>>>
         {
-            b => b.Slice(101),
-            b => b.Slice(0, 101),
-            b => b.Slice(b.Start, 101),
-            b => b.Slice(0, 70).Slice(b.End, b.End),
-            b => b.Slice(0, 70).Slice(b.Start, b.End),
-            b => b.Slice(0, 70).Slice(0, b.End)
+            // negative start	
+            b => b.Slice(-1), // no length
+            b => b.Slice(-1, -1), // negative length
+            b => b.Slice(-1, 0), // zero length
+            b => b.Slice(-1, 1), // positive length
+            b => b.Slice(-1, 101), // after end length
+            b => b.Slice(-1, b.Start), // to start
+            b => b.Slice(-1, b.End), // to end
+
+            // zero start
+            b => b.Slice(0, -1), // negative length
+            b => b.Slice(0, 101), // after end length
+
+            // end start
+            b => b.Slice(100, -1), // negative length
+            b => b.Slice(100, 1), // after end length
+            b => b.Slice(100, b.Start), // to start
+
+            // After end start
+            b => b.Slice(101), // no length
+            b => b.Slice(101, -1), // negative length
+            b => b.Slice(101, 0), // zero length
+            b => b.Slice(101, 1), // after end length
+            b => b.Slice(101, b.Start), // to start
+            b => b.Slice(101, b.End), // to end
+
+            // At Start start
+            b => b.Slice(b.Start, -1), // negative length
+            b => b.Slice(b.Start, 101), // after end length
+
+            // At End start
+            b => b.Slice(b.End, -1), // negative length
+            b => b.Slice(b.End, 1), // after end length
+            b => b.Slice(b.End, b.Start), // to start
+
+            // Slice at begin
+            b => b.Slice(0, 70).Slice(0, b.End), // to after end
+            b => b.Slice(0, 70).Slice(b.Start, b.End), // to after end
+            // from after end
+            b => b.Slice(0, 70).Slice(b.End),
+            b => b.Slice(0, 70).Slice(b.End, -1), // negative length
+            b => b.Slice(0, 70).Slice(b.End, 0), // zero length
+            b => b.Slice(0, 70).Slice(b.End, 1), // after end length
+            b => b.Slice(0, 70).Slice(b.End, b.Start), // to start
+            b => b.Slice(0, 70).Slice(b.End, b.End), // to after end
+
+            // Slice at begin
+            b => b.Slice(b.Start, 70).Slice(0, b.End), // to after end
+            b => b.Slice(b.Start, 70).Slice(b.Start, b.End), // to after end
+            // from after end
+            b => b.Slice(b.Start, 70).Slice(b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End, -1), // negative length
+            b => b.Slice(b.Start, 70).Slice(b.End, 0), // zero length
+            b => b.Slice(b.Start, 70).Slice(b.End, 1), // after end length
+            b => b.Slice(b.Start, 70).Slice(b.End, b.Start), // to start
+            b => b.Slice(b.Start, 70).Slice(b.End, b.End), // to after end
+
+            // Slice at middle
+            b => b.Slice(30, 40).Slice(0, b.Start), // to before start
+            b => b.Slice(30, 40).Slice(0, b.End), // to after end
+            // from before start
+            b => b.Slice(30, 40).Slice(b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, -1), // negative length
+            b => b.Slice(30, 40).Slice(b.Start, 0), // zero length
+            b => b.Slice(30, 40).Slice(b.Start, 1), // positive length
+            b => b.Slice(30, 40).Slice(b.Start, 41), // after end length
+            b => b.Slice(30, 40).Slice(b.Start, b.Start), // to before start
+            b => b.Slice(30, 40).Slice(b.Start, b.End), // to after end
+            // from after end
+            b => b.Slice(30, 40).Slice(b.End),
+            b => b.Slice(b.Start, 70).Slice(b.End, -1), // negative length
+            b => b.Slice(b.Start, 70).Slice(b.End, 0), // zero length
+            b => b.Slice(b.Start, 70).Slice(b.End, 1), // after end length
+            b => b.Slice(30, 40).Slice(b.End, b.Start), // to before start
+            b => b.Slice(30, 40).Slice(b.End, b.End), // to after end
+
+            // Slice at end
+            b => b.Slice(70, 30).Slice(0, b.Start), // to before start
+            // from before start
+            b => b.Slice(30, 40).Slice(b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, -1), // negative length
+            b => b.Slice(30, 40).Slice(b.Start, 0), // zero length
+            b => b.Slice(30, 40).Slice(b.Start, 1), // positive length
+            b => b.Slice(30, 40).Slice(b.Start, 31), // after end length
+            b => b.Slice(30, 40).Slice(b.Start, b.Start), // to before start
+            b => b.Slice(30, 40).Slice(b.Start, b.End), // to end
+            // from end
+            b => b.Slice(70, 30).Slice(b.End, b.Start), // to before start
+
+            // Slice at end
+            b => b.Slice(70, 30).Slice(0, b.Start), // to before start
+            // from before start
+            b => b.Slice(30, 40).Slice(b.Start),
+            b => b.Slice(30, 40).Slice(b.Start, -1), // negative length
+            b => b.Slice(30, 40).Slice(b.Start, 0), // zero length
+            b => b.Slice(30, 40).Slice(b.Start, 1), // positive length
+            b => b.Slice(30, 40).Slice(b.Start, 31), // after end length
+            b => b.Slice(30, 40).Slice(b.Start, b.Start), // to before start
+            b => b.Slice(30, 40).Slice(b.Start, b.End), // to end
+            // from end
+            b => b.Slice(70, 30).Slice(b.End, b.Start), // to before start
         };
     }
 }

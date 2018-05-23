@@ -154,10 +154,9 @@ namespace System.Security.Cryptography
 
             int rsaSize = Interop.Crypto.RsaSize(key);
 
-            if (data.Length > rsaSize)
+            if (data.Length != rsaSize)
             {
-                throw new CryptographicException(
-                    SR.Format(SR.Cryptography_Padding_DecDataTooBig, rsaSize));
+                throw new CryptographicException(SR.Cryptography_RSA_DecryptWrongSize);
             }
 
             if (destination.Length < rsaSize)
@@ -356,7 +355,7 @@ namespace System.Security.Cryptography
 
             try
             {
-                Interop.Crypto.SetRsaParameters(
+                if (!Interop.Crypto.SetRsaParameters(
                     key,
                     parameters.Modulus,
                     parameters.Modulus != null ? parameters.Modulus.Length : 0,
@@ -373,7 +372,10 @@ namespace System.Security.Cryptography
                     parameters.DQ, 
                     parameters.DQ != null ? parameters.DQ.Length : 0,
                     parameters.InverseQ,
-                    parameters.InverseQ != null ? parameters.InverseQ.Length : 0);
+                    parameters.InverseQ != null ? parameters.InverseQ.Length : 0))
+                {
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                }
 
                 imported = true;
             }
@@ -695,7 +697,7 @@ namespace System.Security.Cryptography
             {
                 int algorithmNid = GetAlgorithmNid(hashAlgorithm);
                 SafeRsaHandle rsa = _key.Value;
-                return Interop.Crypto.RsaVerify(algorithmNid, hash, hash.Length, signature, signature.Length, rsa);
+                return Interop.Crypto.RsaVerify(algorithmNid, hash, signature, rsa);
             }
             else if (padding == RSASignaturePadding.Pss)
             {
@@ -749,6 +751,7 @@ namespace System.Security.Cryptography
 
             if (nid == Interop.Crypto.NID_undef)
             {
+                Interop.Crypto.ErrClearError();
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmName.Name);
             }
 

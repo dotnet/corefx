@@ -17,9 +17,9 @@ namespace System.Net.Http
     internal static class ConnectHelper
     {
         /// <summary>Pool of event args to use to establish connections.</summary>
-        private static readonly ConcurrentQueue<ConnectEventArgs>.Segment s_connectEventArgs =
-            new ConcurrentQueue<ConnectEventArgs>.Segment(
-                ConcurrentQueue<ConnectEventArgs>.Segment.RoundUpToPowerOf2(Environment.ProcessorCount));
+        private static readonly ConcurrentQueueSegment<ConnectEventArgs> s_connectEventArgs =
+            new ConcurrentQueueSegment<ConnectEventArgs>(
+                ConcurrentQueueSegment<ConnectEventArgs>.RoundUpToPowerOf2(Math.Max(2, Environment.ProcessorCount)));
 
         /// <summary>
         /// Helper type used by HttpClientHandler when wrapping SocketsHttpHandler to map its
@@ -54,9 +54,7 @@ namespace System.Net.Http
                 saea.Initialize(cancellationToken);
 
                 // Configure which server to which to connect.
-                saea.RemoteEndPoint = IPAddress.TryParse(host, out IPAddress address) ?
-                    (EndPoint)new IPEndPoint(address, port) :
-                    new DnsEndPoint(host, port);
+                saea.RemoteEndPoint = new DnsEndPoint(host, port);
 
                 // Initiate the connection.
                 if (Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, saea))

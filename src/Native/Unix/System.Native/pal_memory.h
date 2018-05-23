@@ -15,6 +15,6 @@ BEGIN_EXTERN_C
  *
  * Returns a pointer to the memory.
  */
-void* SystemNative_MemSet(void *s, int c, uintptr_t n);
+DLLEXPORT void* SystemNative_MemSet(void *s, int c, uintptr_t n);
 
 END_EXTERN_C

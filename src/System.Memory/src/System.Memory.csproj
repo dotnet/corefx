@@ -21,8 +21,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap10.0.16299-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap10.0.16299-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\SequencePosition.cs" />
     <Compile Include="System\ThrowHelper.cs" />
@@ -33,6 +31,7 @@
     <Compile Include="System\Buffers\MemoryPool.cs" />
     <Compile Include="System\Buffers\OperationStatus.cs" />
     <Compile Include="System\Buffers\ReadOnlySequence.cs" />
+    <Compile Include="System\Buffers\ReadOnlySequenceDebugView.cs" />
     <Compile Include="System\Buffers\ReadOnlySequenceSegment.cs" />
     <Compile Include="System\Buffers\ReadOnlySequence_helpers.cs" />
     <Compile Include="System\Buffers\Binary\Reader.cs" />
@@ -96,6 +95,7 @@
     <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.cs" />
     <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpan.LittleG.cs" />
     <Compile Include="System\Buffers\Text\Utf8Parser\Utf8Parser.TimeSpanSplitter.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Buffers\Text\FormattingHelpers.CountDigits.cs" />
   </ItemGroup>
   <!-- Double/Decimal format/parser logic copied (almost verbatim) over from CoreRT -->
   <ItemGroup>

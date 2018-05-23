@@ -25,7 +25,7 @@ uint32_t InitializeSignalHandling(void);
  *
  * Should only be called when a callback is not currently registered.
  */
-void SystemNative_RegisterForCtrl(CtrlCallback callback);
+DLLEXPORT void SystemNative_RegisterForCtrl(CtrlCallback callback);
 
 /**
  * Unregisters the previously registered ctrlCCallback.
@@ -37,7 +37,7 @@ void SystemNative_RegisterForCtrl(CtrlCallback callback);
  * previously registered must remain valid until all ctrl handling activity
  * has quiesced.
  */
-void SystemNative_UnregisterForCtrl(void);
+DLLEXPORT void SystemNative_UnregisterForCtrl(void);
 
 typedef void (*SigChldCallback)(int reapAll);
 
@@ -49,6 +49,14 @@ typedef void (*SigChldCallback)(int reapAll);
  *
  * Should only be called when a callback is not currently registered.
  */
-uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
+DLLEXPORT uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
+
+/**
+ * Remove our handler and reissue the signal to be picked up by the previously registered handler.
+ *
+ * In the most common case, this will be the default handler, causing the process to be torn down.
+ * It could also be a custom handler registered by other code before us.
+ */
+DLLEXPORT void SystemNative_RestoreAndHandleCtrl(enum CtrlCode ctrlCode);
 
 END_EXTERN_C

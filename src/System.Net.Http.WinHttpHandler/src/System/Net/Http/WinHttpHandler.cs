@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Net.Security;
 using System.Runtime.InteropServices;
@@ -47,13 +46,11 @@ namespace System.Net.Http
     public class WinHttpHandler : HttpMessageHandler
 #endif
     {
-#if NET46
+        // These are normally defined already in System.Net.Primitives as part of the HttpVersion type.
+        // However, these are not part of 'netstandard'. WinHttpHandler currently builds against
+        // 'netstandard' so we need to add these definitions here.
         internal static readonly Version HttpVersion20 = new Version(2, 0);
         internal static readonly Version HttpVersionUnknown = new Version(0, 0);
-#else
-        internal static Version HttpVersion20 => HttpVersionInternal.Version20;
-        internal static Version HttpVersionUnknown => HttpVersionInternal.Unknown;
-#endif
         private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
 
         [ThreadStatic]
@@ -711,7 +708,8 @@ namespace System.Net.Http
                             // Use WinInet per-user proxy settings.
                             accessType = Interop.WinHttp.WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
                         }
-                        WinHttpTraceHelper.Trace("WinHttpHandler.EnsureSessionHandleExists: proxy accessType={0}", accessType);
+
+                        if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Proxy accessType={accessType}");
 
                         sessionHandle = Interop.WinHttp.WinHttpOpen(
                             IntPtr.Zero,
@@ -723,7 +721,7 @@ namespace System.Net.Http
                         if (sessionHandle.IsInvalid)
                         {
                             int lastError = Marshal.GetLastWin32Error();
-                            WinHttpTraceHelper.Trace("WinHttpHandler.EnsureSessionHandleExists: error={0}", lastError);
+                            if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"error={lastError}");
                             if (lastError != Interop.WinHttp.ERROR_INVALID_PARAMETER)
                             {
                                 ThrowOnInvalidHandle(sessionHandle, nameof(Interop.WinHttp.WinHttpOpen));
@@ -783,7 +781,7 @@ namespace System.Net.Http
                 // Specify an HTTP server.
                 connectHandle = Interop.WinHttp.WinHttpConnect(
                     _sessionHandle,
-                    state.RequestMessage.RequestUri.Host,
+                    state.RequestMessage.RequestUri.HostNameType == UriHostNameType.IPv6 ? "[" + state.RequestMessage.RequestUri.IdnHost + "]" : state.RequestMessage.RequestUri.IdnHost,
                     (ushort)state.RequestMessage.RequestUri.Port,
                     0);
                 ThrowOnInvalidHandle(connectHandle, nameof(Interop.WinHttp.WinHttpConnect));
@@ -792,11 +790,11 @@ namespace System.Net.Http
                 // Try to use the requested version if a known/supported version was explicitly requested.
                 // Otherwise, we simply use winhttp's default.
                 string httpVersion = null;
-                if (state.RequestMessage.Version == HttpVersionInternal.Version10)
+                if (state.RequestMessage.Version == HttpVersion.Version10)
                 {
                     httpVersion = "HTTP/1.0";
                 }
-                else if (state.RequestMessage.Version == HttpVersionInternal.Version11)
+                else if (state.RequestMessage.Version == HttpVersion.Version11)
                 {
                     httpVersion = "HTTP/1.1";
                 }
@@ -888,13 +886,12 @@ namespace System.Net.Http
                 state.Tcs.TrySetResult(responseMessage);
 
                 // HttpStatusCode cast is needed for 308 Moved Permenantly, which we support but is not included in NetStandard status codes.
-                if (WinHttpTraceHelper.IsTraceEnabled() &&
+                if (NetEventSource.IsEnabled &&
                     ((responseMessage.StatusCode >= HttpStatusCode.MultipleChoices && responseMessage.StatusCode <= HttpStatusCode.SeeOther) ||
                      (responseMessage.StatusCode >= HttpStatusCode.RedirectKeepVerb && responseMessage.StatusCode <= (HttpStatusCode)308)) &&
                     state.RequestMessage.RequestUri.Scheme == Uri.UriSchemeHttps && responseMessage.Headers.Location?.Scheme == Uri.UriSchemeHttp)
                 {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SendAsync: Insecure https to http redirect from {0} to {1} blocked.",
-                        state.RequestMessage.RequestUri.ToString(), responseMessage.Headers.Location.ToString());
+                    NetEventSource.Error(this, $"Insecure https to http redirect from {state.RequestMessage.RequestUri.ToString()} to {responseMessage.Headers.Location.ToString()} blocked.");
                 }
             }
             catch (Exception ex)
@@ -1208,11 +1205,11 @@ namespace System.Net.Http
                 Interop.WinHttp.WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
                 ref optionData))
             {
-                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option supported, setting to {0}", optionData);
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"HTTP/2 option supported, setting to {optionData}");
             }
             else
             {
-                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option not supported");
+                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "HTTP/2 option not supported");
             }
         }
 
@@ -1223,19 +1220,6 @@ namespace System.Net.Http
                 handle,
                 option,
                 ref optionData))
-            {
-                WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetOption));
-            }
-        }
-
-        private void SetWinHttpOption(SafeWinHttpHandle handle, uint option, string optionData)
-        {
-            Debug.Assert(handle != null);
-            if (!Interop.WinHttp.WinHttpSetOption(
-                handle,
-                option,
-                optionData,
-                (uint)optionData.Length))
             {
                 WinHttpException.ThrowExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpSetOption));
             }
@@ -1334,7 +1318,7 @@ namespace System.Net.Http
             if (handle.IsInvalid)
             {
                 int lastError = Marshal.GetLastWin32Error();
-                WinHttpTraceHelper.Trace("WinHttpHandler.ThrowOnInvalidHandle: error={0}", lastError);
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"error={lastError}");
                 throw WinHttpException.CreateExceptionUsingError(lastError, nameOfCalledFunction);
             }
         }

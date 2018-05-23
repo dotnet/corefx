@@ -114,6 +114,9 @@ namespace System.Diagnostics
                 ProcessWaitState pws;
                 if (isNewChild)
                 {
+                    // When the PID is recycled for a new child, we remove the old child.
+                    s_childProcessWaitStates.Remove(processId);
+
                     pws = new ProcessWaitState(processId, isChild: true);
                     s_childProcessWaitStates.Add(processId, pws);
                     pws._outstandingRefCount++; // For Holder
@@ -142,22 +145,25 @@ namespace System.Diagnostics
         /// Decrements the ref count on the wait state object, and if it's the last one,
         /// removes it from the table.
         /// </summary>
-        internal bool ReleaseRef()
+        internal void ReleaseRef()
         {
             ProcessWaitState pws;
             Dictionary<int, ProcessWaitState> waitStates = _isChild ? s_childProcessWaitStates : s_processWaitStates;
-            bool removed = false;
             lock (waitStates)
             {
                 bool foundState = waitStates.TryGetValue(_processId, out pws);
                 Debug.Assert(foundState);
                 if (foundState)
                 {
-                    --pws._outstandingRefCount;
-                    if (pws._outstandingRefCount == 0)
+                    --_outstandingRefCount;
+                    if (_outstandingRefCount == 0)
                     {
-                        waitStates.Remove(_processId);
-                        removed = true;
+                        // The dictionary may contain a different ProcessWaitState if the pid was recycled.
+                        if (pws == this)
+                        {
+                            waitStates.Remove(_processId);
+                        }
+                        pws = this;
                     }
                     else
                     {
@@ -166,7 +172,6 @@ namespace System.Diagnostics
                 }
             }
             pws?.Dispose();
-            return removed;
         }
 
         /// <summary>
@@ -494,7 +499,7 @@ namespace System.Diagnostics
                         // Wait
                         try
                         {
-                            await Task.Delay(pollingIntervalMs, cancellationToken);
+                            await Task.Delay(pollingIntervalMs, cancellationToken); // no need for ConfigureAwait(false) as we're in a Task.Run
                             pollingIntervalMs = Math.Min(pollingIntervalMs * 2, MaxPollingIntervalMs);
                         }
                         catch (OperationCanceledException) { }
@@ -522,7 +527,7 @@ namespace System.Diagnostics
 
                 // Try to get the state of the child process
                 int exitCode;
-                int waitResult = Interop.Sys.WaitIdExitedNoHang(_processId, out exitCode, keepWaitable: false);
+                int waitResult = Interop.Sys.WaitPidExitedNoHang(_processId, out exitCode);
 
                 if (waitResult == _processId)
                 {
@@ -558,8 +563,7 @@ namespace System.Diagnostics
                 do
                 {
                     // Find a process that terminated without reaping it yet.
-                    int exitCode;
-                    pid = Interop.Sys.WaitIdExitedNoHang(-1, out exitCode, keepWaitable: true);
+                    pid = Interop.Sys.WaitIdAnyExitedNoHangNoWait();
                     if (pid > 0)
                     {
                         if (s_childProcessWaitStates.TryGetValue(pid, out ProcessWaitState pws))
@@ -633,7 +637,7 @@ namespace System.Diagnostics
                     do
                     {
                         int exitCode;
-                        pid = Interop.Sys.WaitIdExitedNoHang(-1, out exitCode, keepWaitable: false);
+                        pid = Interop.Sys.WaitPidExitedNoHang(-1, out exitCode);
                     } while (pid > 0);
                 }
             }

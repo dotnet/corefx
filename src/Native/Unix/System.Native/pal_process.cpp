@@ -367,7 +367,12 @@ static int32_t ConvertRLimitResourcesPalToPlatform(RLimitResources value)
 static rlim_t ConvertFromManagedRLimitInfinityToPalIfNecessary(uint64_t value)
 {
     // rlim_t type can vary per platform, so we also treat anything outside its range as infinite.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma clang diagnostic ignored "-Wtautological-type-limit-compare"
     if (value == UINT64_MAX || value > std::numeric_limits<rlim_t>::max())
+#pragma clang diagnostic pop
         return RLIM_INFINITY;
 
     return static_cast<rlim_t>(value);
@@ -445,34 +450,46 @@ extern "C" void SystemNative_SysLog(SysLogPriority priority, const char* message
     syslog(static_cast<int>(priority), message, arg1);
 }
 
-extern "C" int32_t SystemNative_WaitIdExitedNoHang(int32_t pid, int32_t* exitCode, int32_t keepWaitable)
+extern "C" int32_t SystemNative_WaitIdAnyExitedNoHangNoWait()
 {
-    assert(exitCode != nullptr);
-
     siginfo_t siginfo;
     int32_t result;
-    idtype_t idtype = pid == -1 ? P_ALL : P_PID;
-    int options = WEXITED | WNOHANG;
-    if (keepWaitable != 0)
+    while (CheckInterrupted(result = waitid(P_ALL, 0, &siginfo, WEXITED | WNOHANG | WNOWAIT)));
+    if (result == -1 && errno == ECHILD)
     {
-        options |= WNOWAIT;
-    }
-    while (CheckInterrupted(result = waitid(idtype, static_cast<id_t>(pid), &siginfo, options)));
-    if (idtype == P_ALL && result == -1 && errno == ECHILD)
-    {
+        // The calling process has no existing unwaited-for child processes.
         result = 0;
     }
     else if (result == 0 && siginfo.si_signo == SIGCHLD)
     {
-        if (siginfo.si_code == CLD_EXITED)
+        result = siginfo.si_pid;
+    }
+    return result;
+}
+
+extern "C" int32_t SystemNative_WaitPidExitedNoHang(int32_t pid, int32_t* exitCode)
+{
+    assert(exitCode != nullptr);
+
+    int32_t result;
+    int status;
+    while (CheckInterrupted(result = waitpid(pid, &status, WNOHANG)));
+    if (result > 0)
+    {
+        if (WIFEXITED(status))
         {
-            *exitCode = siginfo.si_status;
+            // the child terminated normally.
+            *exitCode = WEXITSTATUS(status);
+        }
+        else if (WIFSIGNALED(status))
+        {
+            // child process was terminated by a signal.
+            *exitCode = 128 + WTERMSIG(status);
         }
         else
         {
-            *exitCode = 128 + siginfo.si_status;
+            assert(false);
         }
-        result = siginfo.si_pid;
     }
     return result;
 }
