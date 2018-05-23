@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -269,8 +269,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileOperations.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FileOperations.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileTypes.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.FileTypes.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FileTypes.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.FileTypes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs</Link>
@@ -281,8 +281,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Method.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.Method.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
+      <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.FILE_FULL_EA_INFORMATION.cs">
       <Link>Common\Interop\Windows\NtDll\Interop.FILE_FULL_EA_INFORMATION.cs</Link>
