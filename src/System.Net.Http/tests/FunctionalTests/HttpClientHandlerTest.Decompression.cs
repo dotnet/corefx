@@ -8,11 +8,19 @@ using System.IO.Compression;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandler_Decompression_Test : HttpClientTestBase
     {
+        private readonly ITestOutputHelper _output;
+
+        public HttpClientHandler_Decompression_Test(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         public static IEnumerable<object[]> DecompressedResponse_MethodSpecified_DecompressedContentReturned_MemberData()
         {
             foreach (bool specifyAllMethods in new[] { false, true })
@@ -43,6 +51,15 @@ namespace System.Net.Http.Functional.Tests
         public async Task DecompressedResponse_MethodSpecified_DecompressedContentReturned(
             string encodingName, Func<Stream, Stream> compress, DecompressionMethods methods)
         {
+            _output.WriteLine($"encodingName={encodingName}");
+            _output.WriteLine($"methods={methods}");
+
+            if (!UseSocketsHttpHandler && encodingName == "br")
+            {
+                // Brotli only supported on SocketsHttpHandler.
+                return;
+            }
+
             var expectedContent = new byte[12345];
             new Random(42).NextBytes(expectedContent);
 
@@ -95,6 +112,15 @@ namespace System.Net.Http.Functional.Tests
         public async Task DecompressedResponse_MethodNotSpecified_OriginalContentReturned(
             string encodingName, Func<Stream, Stream> compress, DecompressionMethods methods)
         {
+            _output.WriteLine($"encodingName={encodingName}");
+            _output.WriteLine($"methods={methods}");
+
+            if (!UseSocketsHttpHandler && encodingName == "br")
+            {
+                // Brotli only supported on SocketsHttpHandler.
+                return;
+            }
+
             var expectedContent = new byte[12345];
             new Random(42).NextBytes(expectedContent);
 
