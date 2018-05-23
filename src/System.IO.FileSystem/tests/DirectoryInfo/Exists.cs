@@ -37,7 +37,6 @@ namespace System.IO.Tests
             Assert.True(di.Exists);
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
         public void Root()
         {

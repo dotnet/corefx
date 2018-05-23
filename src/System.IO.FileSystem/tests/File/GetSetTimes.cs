@@ -77,9 +77,8 @@ namespace System.IO.Tests
                 DateTimeKind.Utc);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void PageFileHasTimes()
         {
             // Typically there is a page file on the C: drive, if not, don't bother trying to track it down.

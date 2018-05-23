@@ -114,7 +114,13 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsInAppContainer))] // Can't read root in appcontainer
+        public void RootPath_AppContainer()
+        {
+            string dirName = Path.GetPathRoot(Directory.GetCurrentDirectory());
+            Assert.Throws<DirectoryNotFoundException>(() => Create(dirName));
+        }
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer        
         public void RootPath()
         {
@@ -489,7 +495,7 @@ namespace System.IO.Tests
         {
             if (PlatformDetection.IsInAppContainer)
             {
-                Assert.ThrowsAny<UnauthorizedAccessException>(() => Create(Path.Combine(TestDirectory, path)));                
+                AssertExtensions.ThrowsAny<DirectoryNotFoundException, IOException, UnauthorizedAccessException>(() => Create(Path.Combine(TestDirectory, path))); 
             }
             else
             {
