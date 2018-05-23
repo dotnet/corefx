@@ -49,7 +49,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                     if (privateKey != null && key == null)
                     {
-                        exception = new CryptographicException(SR.Cryptography_Cms_Decrypting_RequiresRSAPrivateKey);
+                        exception = new CryptographicException(SR.Cryptography_Cms_Ktri_RSARequired);
                         return null;
                     }
 

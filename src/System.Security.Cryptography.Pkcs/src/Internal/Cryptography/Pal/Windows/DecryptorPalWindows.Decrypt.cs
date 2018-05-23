@@ -33,17 +33,18 @@ namespace Internal.Cryptography.Pal.Windows
 
                 if (key == null)
                 {
-                    exception = new CryptographicException(SR.Cryptography_Cms_Decrypting_RequiresRSAPrivateKey);
+                    exception = new CryptographicException(SR.Cryptography_Cms_Ktri_RSARequired);
                     return null;
                 }
 
                 ContentInfo contentInfo = _hCryptMsg.GetContentInfo();
                 byte[] cek = AnyOS.ManagedPkcsPal.ManagedKeyTransPal.DecryptCekCore(
-                                cert,
-                                key,
-                                recipientInfo.EncryptedKey,
-                                recipientInfo.KeyEncryptionAlgorithm.Oid.Value,
-                                out exception);
+                    cert,
+                    key,
+                    recipientInfo.EncryptedKey,
+                    recipientInfo.KeyEncryptionAlgorithm.Oid.Value,
+                    out exception);
+
                 // Pin CEK to prevent it from getting copied during heap compaction.
                 fixed (byte* pinnedCek = cek)
                 {

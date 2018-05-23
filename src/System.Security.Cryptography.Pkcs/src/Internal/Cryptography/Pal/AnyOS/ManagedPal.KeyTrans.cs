@@ -39,10 +39,10 @@ namespace Internal.Cryptography.Pal.AnyOS
 
             internal byte[] DecryptCek(X509Certificate2 cert, RSA privateKey, out Exception exception)
             {
-                RSAEncryptionPadding encryptionPadding;
                 ReadOnlyMemory<byte>? parameters = _asn.KeyEncryptionAlgorithm.Parameters;
+                string keyEncryptionAlgorithm = _asn.KeyEncryptionAlgorithm.Algorithm.Value;
 
-                switch (_asn.KeyEncryptionAlgorithm.Algorithm.Value)
+                switch (keyEncryptionAlgorithm)
                 {
                     case Oids.Rsa:
                         if (parameters != null &&
@@ -51,8 +51,6 @@ namespace Internal.Cryptography.Pal.AnyOS
                             exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                             return null;
                         }
-
-                        encryptionPadding = RSAEncryptionPadding.Pkcs1;
                         break;
                     case Oids.RsaOaep:
                         if (parameters != null &&
@@ -61,8 +59,6 @@ namespace Internal.Cryptography.Pal.AnyOS
                             exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                             return null;
                         }
-
-                        encryptionPadding = RSAEncryptionPadding.OaepSHA1;
                         break;
                     default:
                         exception = new CryptographicException(
@@ -72,17 +68,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                         return null;
                 }
 
-                if (privateKey != null)
-                {
-                    return DecryptKey(privateKey, encryptionPadding, _asn.EncryptedKey.Span, out exception);
-                }
-                else
-                {
-                    using (RSA rsa = cert.GetRSAPrivateKey())
-                    {
-                        return DecryptKey(rsa, encryptionPadding, _asn.EncryptedKey.Span, out exception);
-                    }
-                }
+                return DecryptCekCore(cert, privateKey, _asn.EncryptedKey.Span, keyEncryptionAlgorithm, out exception);
             }
 
             internal static byte[] DecryptCekCore(
@@ -125,9 +111,9 @@ namespace Internal.Cryptography.Pal.AnyOS
         }
 
         private static KeyTransRecipientInfoAsn MakeKtri(
-                byte[] cek,
-                CmsRecipient recipient,
-                out bool v0Recipient)
+            byte[] cek,
+            CmsRecipient recipient,
+            out bool v0Recipient)
         {
             KeyTransRecipientInfoAsn ktri = new KeyTransRecipientInfoAsn();
 
