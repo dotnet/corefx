@@ -39,11 +39,11 @@ internal partial class Interop
             ObjectAttributes objectAttributes = ObjectAttributes.OBJ_CASE_INSENSITIVE
             )
         {
-                return ( CreateFile(EaBuffer: null, EaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
+                return ( CreateFile(eaBuffer: new Microsoft.Win32.SafeHandles.SafeFileHandle(IntPtr.Zero, true), eaLength: 0, path, rootDirectory,createDisposition, desiredAccess, shareAccess, fileAttributes, createOptions, objectAttributes) );
         }
         internal unsafe static (int status, IntPtr handle) CreateFile(
-            SafeHandle EaBuffer,
-            uint EaLength,
+            SafeHandle eaBuffer,
+            uint eaLength,
             ReadOnlySpan<char> path,
             IntPtr rootDirectory,
             CreateDisposition createDisposition,
@@ -78,8 +78,8 @@ internal partial class Interop
                     ShareAccess: shareAccess,
                     CreateDisposition: createDisposition,
                     CreateOptions: createOptions,
-                    EaBuffer: EaBuffer,
-                    EaLength: EaLength);
+                    EaBuffer: eaBuffer,
+                    EaLength: eaLength);
 
                 return (status, handle);
             }

@@ -663,8 +663,8 @@ namespace System.Data.SqlTypes
                                                                             shareAccess: nShareAccess,
                                                                             fileAttributes: 0,
                                                                             createOptions: dwCreateOptions,
-                                                                            EaBuffer: eaBuffer,
-                                                                            EaLength: (uint)eaBuffer.Length);
+                                                                            eaBuffer: eaBuffer,
+                                                                            eaLength: (uint)eaBuffer.Length);
                     retval = status;
                     hFile = new SafeFileHandle(handle, true);
                 }
