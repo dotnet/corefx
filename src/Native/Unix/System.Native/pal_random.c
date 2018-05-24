@@ -100,5 +100,5 @@ void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* buffer, int3
         *(buffer + i) ^= num;
         num >>= 8;
     }
-#endif // HAS_ARC4RANDOM
+#endif // HAVE_ARC4RANDOM
 }
