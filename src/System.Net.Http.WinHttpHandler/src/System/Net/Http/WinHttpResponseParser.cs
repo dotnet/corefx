@@ -77,16 +77,14 @@ namespace System.Net.Http
 
                     if (contentEncodingLength > 0)
                     {
-                        if (CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(
-                            EncodingNameGzip, buffer, contentEncodingStartIndex, contentEncodingLength) &&
-                            (manuallyProcessedDecompressionMethods & DecompressionMethods.GZip) == DecompressionMethods.GZip)
+                        if ((manuallyProcessedDecompressionMethods & DecompressionMethods.GZip) == DecompressionMethods.GZip &&
+                            CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(EncodingNameGzip, buffer, contentEncodingStartIndex, contentEncodingLength))
                         {
                             decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
                             stripEncodingHeaders = true;
                         }
-                        else if (CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(
-                            EncodingNameDeflate, buffer, contentEncodingStartIndex, contentEncodingLength) &&
-                            (manuallyProcessedDecompressionMethods & DecompressionMethods.Deflate) == DecompressionMethods.Deflate)
+                        else if ((manuallyProcessedDecompressionMethods & DecompressionMethods.Deflate) == DecompressionMethods.Deflate &&
+                                 CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(EncodingNameDeflate, buffer, contentEncodingStartIndex, contentEncodingLength))
                         {
                             decompressedStream = new DeflateStream(responseStream, CompressionMode.Decompress);
                             stripEncodingHeaders = true;

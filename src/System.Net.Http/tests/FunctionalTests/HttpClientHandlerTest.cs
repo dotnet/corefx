@@ -679,6 +679,12 @@ namespace System.Net.Http.Functional.Tests
             string encodings,
             string manualAcceptEncodingHeaderValues)
         {
+            if (IsCurlHandler)
+            {
+                // Skip these tests on CurlHandler, dotnet/corefx #29905.
+                return;
+            }
+
             if (!UseSocketsHttpHandler &&
                 (encodings.Contains("br") || manualAcceptEncodingHeaderValues.Contains("br")))
             {
