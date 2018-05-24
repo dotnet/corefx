@@ -163,6 +163,22 @@ namespace System.Net.Sockets.Tests
             await MulticastInterface_Set_IPv6_Helper(0);
         }
 
+        [Fact]
+        public void MulticastTTL_Set_IPv4_Succeeds()
+        {
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            // This should not thow. We currently do not have good mechanism how to verify that the TTL/Hops is actually set.
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 2);
+        }
+
+        [Fact]
+        public void MulticastTTL_Set_IPv6_Succeeds()
+        {
+            Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+            // This should not thow. We currently do not have good mechanism how to verify that the TTL/Hops is actually set.
+            socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastTimeToLive, 2);
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
