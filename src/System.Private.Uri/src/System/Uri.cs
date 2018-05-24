@@ -114,7 +114,7 @@ namespace System
             FragmentIriCanonical = 0x40000000000,
             IriCanonical = 0x78000000000,
             UnixPath = 0x100000000000,
-            LinkLocalAddress = 0x200000000000
+            IPv6LinkLocalAddress = 0x200000000000
         }
 
         private Flags _flags;
@@ -1194,7 +1194,7 @@ namespace System
                 if (HostType == Flags.IPv6HostType)
                 {
                     ret = ret.Substring(1, ret.Length - 2);
-                    if ((object)_info.ScopeId != null && (_flags & Flags.LinkLocalAddress) == 0)
+                    if ((object)_info.ScopeId != null && (_flags & Flags.IPv6LinkLocalAddress) == 0)
                     {
                         ret += _info.ScopeId;
                     }
@@ -2618,9 +2618,10 @@ namespace System
             {
                 flags |= Flags.LoopbackHost;
             }
+
             if (linkLocalAddress)
             {
-                flags |= Flags.LinkLocalAddress;
+                flags |= Flags.IPv6LinkLocalAddress;
             }
 
             return host;

@@ -48,7 +48,7 @@ namespace System.PrivateUri.Tests
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [InlineData("fe80::e077:c9a3:eeba:b8e9", "%18")]
-        public void IdnDnsSafeHost_IPv6HostLinkLocalAddress_ScopeIdButNoBrackets(string address, string zoneIndex)
+        public void IdnDnsSafeHost_IPv6HostLinkLocalAddress_ScopeIdCorrectlyFormatted(string address, string zoneIndex)
         {
             string scopedLiteralIpv6 = address + zoneIndex;
             string scopedLiteralIpv6Brackets = "[" + scopedLiteralIpv6 + "]";
