@@ -50,14 +50,13 @@ namespace System.IO.Enumeration
             CloseDirectoryHandle();
             OnDirectoryFinished(_currentPath);
 
-            if (_pending == null || _pending.Count == 0)
+            // Attempt to grab another directory to process
+            if (!DequeueNextDirectory())
             {
                 _lastEntryFound = true;
             }
             else
             {
-                // Grab the next directory to parse
-                DequeueNextDirectory();
                 FindNextEntry();
             }
         }
