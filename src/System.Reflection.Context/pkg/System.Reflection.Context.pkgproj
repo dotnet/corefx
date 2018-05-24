@@ -9,6 +9,7 @@
     <InboxOnTargetFramework Include="net45">
       <AsFrameworkReference>true</AsFrameworkReference>
     </InboxOnTargetFramework>
+    <InboxOnTargetFramework Include="uap10.0.16299" />
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
