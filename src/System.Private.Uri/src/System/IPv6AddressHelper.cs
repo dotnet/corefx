@@ -32,7 +32,7 @@ namespace System
                 ((long*)numbers)[1] = 0L;
                 isLoopback = Parse(str, numbers, start, ref scopeId);
                 linkLocalAddress = numbers[0] == 0xfe80;
-                return '[' + CreateCanonicalName(numbers) + (linkLocalAddress ? scopeId : "") + ']';
+                return "[" + CreateCanonicalName(numbers) + (linkLocalAddress ? scopeId : "") + "]";
             }
         }
 
