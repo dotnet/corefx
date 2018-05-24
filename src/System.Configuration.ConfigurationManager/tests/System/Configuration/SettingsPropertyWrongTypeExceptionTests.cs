@@ -12,42 +12,24 @@ namespace System.Configuration
         [Fact]
         public void SingleParameterExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyIsReadOnlyException("ThisIsATest");
-            }
-            catch (SettingsPropertyIsReadOnlyException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-            }
+            var exception = new SettingsPropertyIsReadOnlyException("ThisIsATest");
+            Assert.Equal("ThisIsATest", exception.Message);
         }
 
         [Fact]
         public void ExceptionWithInnerExceptionExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyIsReadOnlyException("ThisIsATest", new AggregateException("AlsoATest"));
-            }
-            catch (SettingsPropertyIsReadOnlyException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-                Assert.Equal("AlsoATest", exception.InnerException.Message);
-                Assert.IsType<AggregateException>(exception.InnerException);
-            }
+            var exception = new SettingsPropertyIsReadOnlyException("ThisIsATest", new AggregateException("AlsoATest"));
+            Assert.Equal("ThisIsATest", exception.Message);
+            Assert.Equal("AlsoATest", exception.InnerException.Message);
+            Assert.IsType<AggregateException>(exception.InnerException);
         }
 
         [Fact]
         public void ExceptionEmptyConstructorReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyIsReadOnlyException();
-            }
-            catch (SettingsPropertyIsReadOnlyException exception)
-            {
-                Assert.IsType<SettingsPropertyIsReadOnlyException>(exception);
-            }
+            var exception = new SettingsPropertyIsReadOnlyException();
+            Assert.IsType<SettingsPropertyIsReadOnlyException>(exception);
         }
     }
 }

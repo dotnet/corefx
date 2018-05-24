@@ -46,6 +46,5 @@ namespace System.Configuration
             var retrievedElement = collection.Get("TestElementName");
             Assert.Equal(null, retrievedElement);
         }
-
     }
 }

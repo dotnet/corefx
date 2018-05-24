@@ -12,42 +12,24 @@ namespace System.Configuration
         [Fact]
         public void SingleParameterExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyWrongTypeException("ThisIsATest");
-            }
-            catch (SettingsPropertyWrongTypeException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-            }
+            var exception = new SettingsPropertyWrongTypeException("ThisIsATest");
+            Assert.Equal("ThisIsATest", exception.Message);
         }
 
         [Fact]
         public void ExceptionWithInnerExceptionExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyWrongTypeException("ThisIsATest", new AggregateException("AlsoATest"));
-            }
-            catch (SettingsPropertyWrongTypeException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-                Assert.Equal("AlsoATest", exception.InnerException.Message);
-                Assert.IsType<AggregateException>(exception.InnerException);
-            }
+            var exception = new SettingsPropertyWrongTypeException("ThisIsATest", new AggregateException("AlsoATest"));
+            Assert.Equal("ThisIsATest", exception.Message);
+            Assert.Equal("AlsoATest", exception.InnerException.Message);
+            Assert.IsType<AggregateException>(exception.InnerException);
         }
 
         [Fact]
         public void ExceptionEmptyConstructorReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyWrongTypeException();
-            }
-            catch (SettingsPropertyWrongTypeException exception)
-            {
-                Assert.IsType<SettingsPropertyWrongTypeException>(exception);
-            }
+            var exception = new SettingsPropertyWrongTypeException();
+            Assert.IsType<SettingsPropertyWrongTypeException>(exception);
         }
     }
 }

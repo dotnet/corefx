@@ -11,42 +11,24 @@ namespace System.Configuration
         [Fact]
         public void SingleParameterExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyNotFoundException("ThisIsATest");
-            }
-            catch (SettingsPropertyNotFoundException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-            }
+            var exception =  new SettingsPropertyNotFoundException("ThisIsATest");
+            Assert.Equal("ThisIsATest", exception.Message);
         }
 
         [Fact]
         public void ExceptionWithInnerExceptionExceptionReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyNotFoundException("ThisIsATest", new AggregateException("AlsoATest"));
-            }
-            catch (SettingsPropertyNotFoundException exception)
-            {
-                Assert.Equal("ThisIsATest", exception.Message);
-                Assert.Equal("AlsoATest", exception.InnerException.Message);
-                Assert.IsType<AggregateException>(exception.InnerException);
-            }
+            var exception = new SettingsPropertyNotFoundException("ThisIsATest", new AggregateException("AlsoATest"));
+            Assert.Equal("ThisIsATest", exception.Message);
+            Assert.Equal("AlsoATest", exception.InnerException.Message);
+            Assert.IsType<AggregateException>(exception.InnerException);
         }
 
         [Fact]
         public void ExceptionEmptyConstructorReturnsExpected()
         {
-            try
-            {
-                throw new SettingsPropertyNotFoundException();
-            }
-            catch (SettingsPropertyNotFoundException exception)
-            {
-                Assert.IsType<SettingsPropertyNotFoundException>(exception);
-            }
+            var exception = new SettingsPropertyNotFoundException();
+            Assert.IsType<SettingsPropertyNotFoundException>(exception);
         }
     }
 }
