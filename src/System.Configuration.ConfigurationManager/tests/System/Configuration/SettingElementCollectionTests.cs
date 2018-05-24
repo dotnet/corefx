@@ -22,7 +22,7 @@ namespace System.Configuration
             var collection = new SettingElementCollection();
             collection.Add(settingElement);
             var retrievedElement = collection.Get("TestElementName");
-            Assert.Equal(settingElement, retrievedElement);
+            Assert.Same(settingElement, retrievedElement);
         }
 
         [Fact]
