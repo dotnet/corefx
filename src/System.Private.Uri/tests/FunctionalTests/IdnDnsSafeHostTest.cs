@@ -49,16 +49,14 @@ namespace System.PrivateUri.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]        
         public void IdnDnsSafeHost_IPv6HostLinkLocalAddress_ScopeIdCorrectlyFormatted()
         {
-            string address = "fe80::e077:c9a3:eeba:b8e9";
-            string zoneIndex = "%18";
+            const string ScopedLiteralIpv6 = "fe80::e077:c9a3:eeba:b8e9%18";
 
-            string scopedLiteralIpv6 = address + zoneIndex;
-            string scopedLiteralIpv6Brackets = "[" + scopedLiteralIpv6 + "]";
+            string scopedLiteralIpv6Brackets = "[" + ScopedLiteralIpv6 + "]";
             string literalIpV6Uri = "http://" + scopedLiteralIpv6Brackets;
             Uri test = new Uri(literalIpV6Uri);
 
-            Assert.Equal(scopedLiteralIpv6, test.DnsSafeHost);
-            Assert.Equal(scopedLiteralIpv6, test.IdnHost);
+            Assert.Equal(ScopedLiteralIpv6, test.DnsSafeHost);
+            Assert.Equal(ScopedLiteralIpv6, test.IdnHost);
             Assert.Equal(scopedLiteralIpv6Brackets, test.Host);
         }
 

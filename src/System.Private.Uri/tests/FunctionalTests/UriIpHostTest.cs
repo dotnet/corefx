@@ -255,13 +255,13 @@ namespace System.PrivateUri.Tests
         [Fact]
         public void Host_NonIPv6LinkLocalAddress_NoScopeId()
         {
-            string address = "fe81::e077:c9a3:eeba:b8e9";
-            string zoneIndex = "%18";
+            const string Address = "fe81::e077:c9a3:eeba:b8e9";
+            const string ZoneIndex = "%18";
 
-            string scopedLiteralIpv6Brackets = "[" + address + zoneIndex + "]";
+            string scopedLiteralIpv6Brackets = "[" + Address + ZoneIndex + "]";
             string literalIpV6Uri = "http://" + scopedLiteralIpv6Brackets;
             var uri = new Uri(literalIpV6Uri);
-            Assert.Equal("[" + address + "]", uri.Host);
+            Assert.Equal("[" + Address + "]", uri.Host);
         }
        
         [Fact]
