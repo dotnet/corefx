@@ -413,7 +413,7 @@ namespace System.Text.Tests
                 foreach (ReadOnlyMemory<char> chunk in inBuilder.EnumerateChunks())
                     outStr += new string(chunk.Span);
 
-                // The strings formed by concatinating the chunks should be the same as the value in the StringBuilder. 
+                // The strings formed by concatenating the chunks should be the same as the value in the StringBuilder. 
                 Assert.Equal(outStr, inBuilder.ToString());
             }
         }
