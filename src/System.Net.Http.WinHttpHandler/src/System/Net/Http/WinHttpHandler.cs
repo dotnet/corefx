@@ -640,7 +640,7 @@ namespace System.Net.Http
                 }
 
                 if ((manuallyProcessedDecompressionMethods & DecompressionMethods.Deflate) == DecompressionMethods.Deflate &&
-                         !requestMessage.Headers.AcceptEncoding.Contains(s_deflateHeaderValue))
+                    !requestMessage.Headers.AcceptEncoding.Contains(s_deflateHeaderValue))
                 {
                     requestMessage.Headers.AcceptEncoding.Add(s_deflateHeaderValue);
                 }

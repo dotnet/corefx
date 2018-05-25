@@ -57,9 +57,6 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            _output.WriteLine($"encodingName={encodingName}");
-            _output.WriteLine($"methods={methods}");
-
             var expectedContent = new byte[12345];
             new Random(42).NextBytes(expectedContent);
 
@@ -112,15 +109,6 @@ namespace System.Net.Http.Functional.Tests
         public async Task DecompressedResponse_MethodNotSpecified_OriginalContentReturned(
             string encodingName, Func<Stream, Stream> compress, DecompressionMethods methods)
         {
-            _output.WriteLine($"encodingName={encodingName}");
-            _output.WriteLine($"methods={methods}");
-
-            if (!UseSocketsHttpHandler && encodingName == "br")
-            {
-                // Brotli only supported on SocketsHttpHandler.
-                return;
-            }
-
             var expectedContent = new byte[12345];
             new Random(42).NextBytes(expectedContent);
 
