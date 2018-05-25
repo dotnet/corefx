@@ -251,11 +251,13 @@ namespace System.PrivateUri.Tests
             var uri = new Uri(literalIpV6Uri);
             Assert.Equal(scopedLiteralIpv6Brackets, uri.Host, ignoreCase: true);
         }
-
-        [Theory]
-        [InlineData("fe81::e077:c9a3:eeba:b8e9", "%18")]
-        public void Host_NonIPv6LinkLocalAddress_NoScopeId(string address, string zoneIndex)
+        
+        [Fact]
+        public void Host_NonIPv6LinkLocalAddress_NoScopeId()
         {
+            string address = "fe81::e077:c9a3:eeba:b8e9";
+            string zoneIndex = "%18";
+
             string scopedLiteralIpv6Brackets = "[" + address + zoneIndex + "]";
             string literalIpV6Uri = "http://" + scopedLiteralIpv6Brackets;
             var uri = new Uri(literalIpV6Uri);
