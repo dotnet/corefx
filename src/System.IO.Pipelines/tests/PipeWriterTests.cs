@@ -120,7 +120,7 @@ namespace System.IO.Pipelines.Tests
                 var span = writer.GetSpan(10);
 
                 Assert.True(span.Length >= 10);
-                System.Diagnostics.Debugger.Launch();
+                //System.Diagnostics.Debugger.Launch();
             }
         }
 
