@@ -166,7 +166,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void MulticastTTL_Set_IPv4_Succeeds()
         {
-            using ( Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 // This should not throw. We currently do not have good mechanism how to verify that the TTL/Hops is actually set.
 
