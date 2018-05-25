@@ -410,7 +410,7 @@ namespace System.Text.Tests
 
                 // Copy the string out (not using StringBuilder).  
                 string outStr = "";
-                foreach (ReadOnlyMemory<char> chunk in inBuilder.EnumerateChunks())
+                foreach (ReadOnlyMemory<char> chunk in inBuilder.GetChunks())
                     outStr += new string(chunk.Span);
 
                 // The strings formed by concatenating the chunks should be the same as the value in the StringBuilder. 
