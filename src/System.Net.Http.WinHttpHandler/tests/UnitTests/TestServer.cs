@@ -157,8 +157,6 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
         public static byte[] CompressBytes(byte[] bytes, bool useGZip)
         {
-            byte[] compressedBytes;
-
             using (var memoryStream = new MemoryStream())
             {
                 Stream compressedStream = null;
@@ -173,10 +171,9 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
                 compressedStream.Write(bytes, 0, bytes.Length);
                 compressedStream.Dispose();
-                compressedBytes = memoryStream.ToArray();
-            }
 
-            return compressedBytes;
+                return memoryStream.ToArray();
+            }
         }
     }
 }
