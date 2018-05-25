@@ -114,13 +114,14 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void EnsureAllocatesSpan()
         {
-            PipeWriter writer = Pipe.Writer;
-            var span = writer.GetSpan(10);
+            while (true)
+            {
+                PipeWriter writer = Pipe.Writer;
+                var span = writer.GetSpan(10);
 
-            Assert.True(span.Length >= 10);
-            // 0 byte Flush would not complete the reader so we complete.
-            Pipe.Writer.Complete();
-            Assert.Equal(new byte[] { }, Read());
+                Assert.True(span.Length >= 10);
+                System.Diagnostics.Debugger.Launch();
+            }
         }
 
         [Fact]
