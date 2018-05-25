@@ -30,7 +30,7 @@ internal static partial class Interop
         );
 
         [DllImport("ws2_32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern unsafe void FreeAddrInfoEx([In] AddressInfoEx* pAddrInfo);
+        internal static extern unsafe void FreeAddrInfoExW([In] AddressInfoEx* pAddrInfo);
     }
 }
 
