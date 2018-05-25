@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
@@ -177,9 +178,31 @@ namespace Internal.Cryptography.Pal.AnyOS
                 if (contentInfo.ContentType.Value == Oids.Pkcs7Data)
                 {
                     toEncrypt = EncodeOctetString(toEncrypt);
+                    return encryptor.OneShot(toEncrypt);
                 }
+                else
+                {
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                        {
+                            AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.DER);
+                            AsnReader innerReader = reader.ReadSequence();
 
-                return encryptor.OneShot(toEncrypt);
+                            if (reader.HasData)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+
+                            while (innerReader.HasData)
+                            {
+                                cryptoStream.Write(innerReader.GetEncodedValue().Span);
+                            }
+                        }
+
+                        return memoryStream.ToArray();
+                    }
+                }
             }
         }
     }

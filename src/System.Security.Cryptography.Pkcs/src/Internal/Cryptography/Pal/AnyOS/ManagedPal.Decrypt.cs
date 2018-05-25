@@ -155,6 +155,22 @@ namespace Internal.Cryptography.Pal.AnyOS
                         }
                     }
                 }
+                else
+                {
+                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                    {
+                        writer.PushSequence();
+                        AsnReader reader = new AsnReader(decrypted, AsnEncodingRules.DER);
+
+                        while (reader.HasData)
+                        {
+                            writer.WriteEncodedValue(reader.GetEncodedValue());
+                        }
+
+                        writer.PopSequence();
+                        decrypted = writer.Encode();
+                    }
+                }
 
                 exception = null;
                 return new ContentInfo(
