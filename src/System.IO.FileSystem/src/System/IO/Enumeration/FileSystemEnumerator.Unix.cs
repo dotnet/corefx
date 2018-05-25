@@ -66,8 +66,8 @@ namespace System.IO.Enumeration
             }
         }
 
-        private bool InternalContinueOnError(Interop.ErrorInfo info)
-            => (_options.IgnoreInaccessible && IsAccessError(info)) || ContinueOnError(info.RawErrno);
+        private bool InternalContinueOnError(Interop.ErrorInfo info, bool ignoreNotFound = false)
+            => (ignoreNotFound && IsDirectoryNotFound(info)) || (_options.IgnoreInaccessible && IsAccessError(info)) || ContinueOnError(info.RawErrno);
 
         private static bool IsDirectoryNotFound(Interop.ErrorInfo info)
             => info.Error == Interop.Error.ENOTDIR || info.Error == Interop.Error.ENOENT;
@@ -82,7 +82,7 @@ namespace System.IO.Enumeration
             if (handle == IntPtr.Zero)
             {
                 Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
-                if (InternalContinueOnError(info) || (ignoreNotFound && IsDirectoryNotFound(info)))
+                if (InternalContinueOnError(info, ignoreNotFound))
                 {
                     return IntPtr.Zero;
                 }
@@ -202,12 +202,6 @@ namespace System.IO.Enumeration
 
         private bool DequeueNextDirectory()
         {
-            if (_pending == null || _pending.Count == 0)
-                return false;
-
-            _currentPath = _pending.Dequeue();
-            _directoryHandle = CreateDirectoryHandle(_currentPath, ignoreNotFound: true);
-
             // In Windows we open handles before we queue them, not after. If we fail to create the handle
             // but are ok with it (IntPtr.Zero), we don't queue them. Unix can't handle having a lot of
             // open handles, so we open after the fact.
@@ -217,9 +211,18 @@ namespace System.IO.Enumeration
             // data we're maintaining, the number of active handles (they're not infinite), and the length
             // of time we have handles open (preventing some actions such as renaming/deleting/etc.).
 
-            // If we couldn't open and didn't throw, just attempt to move on.
-            return _directoryHandle == IntPtr.Zero
-                ? DequeueNextDirectory() : true;
+            _directoryHandle = IntPtr.Zero;
+
+            while (_directoryHandle == IntPtr.Zero)
+            {
+                if (_pending == null || _pending.Count == 0)
+                    return false;
+
+                _currentPath = _pending.Dequeue();
+                _directoryHandle = CreateDirectoryHandle(_currentPath, ignoreNotFound: true);
+            }
+
+            return true;
         }
 
         private void InternalDispose(bool disposing)

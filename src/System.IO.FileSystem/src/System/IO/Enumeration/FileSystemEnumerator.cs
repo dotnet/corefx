@@ -32,8 +32,8 @@ namespace System.IO.Enumeration
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { }
 
         /// <summary>
-        /// Called when a native API returns an error. Return true to continue, or false
-        /// to throw the default exception for the given error.
+        /// Called when a native API returns an error that would normally cause a throw.
+        /// Return true to continue, or false to throw the default exception for the given error.
         /// </summary>
         /// <param name="error">The native error code.</param>
         protected virtual bool ContinueOnError(int error) => false;
