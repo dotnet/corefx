@@ -196,7 +196,12 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                             while (innerReader.HasData)
                             {
+#if netcoreapp
                                 cryptoStream.Write(innerReader.GetEncodedValue().Span);
+#else
+                                byte[] encoded = innerReader.GetEncodedValue().ToArray();
+                                cryptoStream.Write(encoded, 0, encoded.Length);
+#endif
                             }
                         }
 
