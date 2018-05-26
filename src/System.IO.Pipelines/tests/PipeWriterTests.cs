@@ -4,6 +4,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -112,12 +113,21 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void EnsureAllocatesSpan()
+        public unsafe void EnsureAllocatesSpan()
         {
+            unchecked
+            {
+                int* p = (int*)0xFF004324;
+                int q = *p;
+            }
+
+            var ptr = new IntPtr(42);
+            Marshal.StructureToPtr(42, ptr, true);
+
             while (true)
             {
                 PipeWriter writer = Pipe.Writer;
-                var span = writer.GetSpan(10);
+                Span<byte> span = writer.GetSpan(10);
 
                 Assert.True(span.Length >= 10);
                 //System.Diagnostics.Debugger.Launch();
