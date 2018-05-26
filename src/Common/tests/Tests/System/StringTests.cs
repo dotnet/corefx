@@ -1525,7 +1525,7 @@ namespace System.Tests
 
                     string s1 = new string(first);
                     string s2 = new string(second);
-                    bool b = s1.EndsWith(s2);
+                    bool b = s1.EndsWith(s2, StringComparison.Ordinal);
                     Assert.False(b);
 
                     var firstSpan = new ReadOnlySpan<char>(first);
