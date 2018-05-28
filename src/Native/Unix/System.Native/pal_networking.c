@@ -1654,6 +1654,22 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
                 // case SocketOptionName_SO_TCP_BSDURGENT:
 
+                case SocketOptionName_SO_TCP_KEEPALIVE_RETRYCOUNT:
+                    *optName = TCP_KEEPCNT;
+                    return true;
+
+                case SocketOptionName_SO_TCP_KEEPALIVE_TIME:
+                    #ifdef OS_MACOSX
+                    *optName = TCP_KEEPALIVE;
+                    #else
+                    *optName = TCP_KEEPIDLE;
+                    #endif
+                    return true;
+
+                case SocketOptionName_SO_TCP_KEEPALIVE_INTERVAL:
+                    *optName = TCP_KEEPINTVL;
+                    return true;
+
                 default:
                     return false;
             }

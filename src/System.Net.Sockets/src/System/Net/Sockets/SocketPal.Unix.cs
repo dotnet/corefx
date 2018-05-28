@@ -16,25 +16,6 @@ namespace System.Net.Sockets
     {
         public const bool SupportsMultipleConnectAttempts = false;
         private static readonly bool SupportsDualModeIPv4PacketInfo = GetPlatformSupportsDualModeIPv4PacketInfo();
-        private static readonly IDictionary<SocketOptionName, SocketOptionName> keepAliveOsSpecificOptionNames;
-
-        static SocketPal()
-        {
-            keepAliveOsSpecificOptionNames =
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ?
-                new Dictionary<SocketOptionName, SocketOptionName>
-                {
-                    { SocketOptionName.TcpKeepAliveRetryCount, (SocketOptionName)0x6 },   // TCP_KEEPCNT
-                    { SocketOptionName.TcpKeepAliveTime, (SocketOptionName)0x4 },         // TCP_KEEPIDLE
-                    { SocketOptionName.TcpKeepAliveInterval, (SocketOptionName)0x5 }      // TCP_KEEPINTVL
-                } :
-                new Dictionary<SocketOptionName, SocketOptionName>
-                {
-                    { SocketOptionName.TcpKeepAliveRetryCount, (SocketOptionName)0x102 }, // TCP_KEEPCNT
-                    { SocketOptionName.TcpKeepAliveTime, (SocketOptionName)0x10 },        // TCP_KEEPALIVE: https://www.winehq.org/pipermail/wine-devel/2015-July/108583.html
-                    { SocketOptionName.TcpKeepAliveInterval, (SocketOptionName)0x101 }    // TCP_KEEPINTVL
-                }
-        }
 
         private static bool GetPlatformSupportsDualModeIPv4PacketInfo()
         {
@@ -1166,15 +1147,6 @@ namespace System.Net.Sockets
                         err = Interop.Sys.SetIPv4MulticastOption(handle, Interop.Sys.MulticastOption.MULTICAST_IF, &opt);
                         return GetErrorAndTrackSetting(handle, optionLevel, optionName, err);
                     }
-                }
-            }
-            else if (optionLevel == SocketOptionLevel.Tcp)
-            {
-                if (optionName == SocketOptionName.TcpKeepAliveRetryCount || 
-                    optionName == SocketOptionName.TcpKeepAliveTime || 
-                    optionName == SocketOptionName.TcpKeepAliveInterval)
-                {
-                    optionName = keepAliveOsSpecificOptionNames[optionName];
                 }
             }
 
