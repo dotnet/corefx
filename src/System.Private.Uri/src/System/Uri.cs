@@ -1194,6 +1194,8 @@ namespace System
                 if (HostType == Flags.IPv6HostType)
                 {
                     ret = ret.Substring(1, ret.Length - 2);
+
+                    //To avoid duplicated ScopeId on Ipv6 local link address
                     if ((object)_info.ScopeId != null && (_flags & Flags.IPv6LinkLocalAddress) == 0)
                     {
                         ret += _info.ScopeId;
