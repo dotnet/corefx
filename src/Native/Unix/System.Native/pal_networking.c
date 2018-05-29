@@ -1659,7 +1659,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     return true;
 
                 case SocketOptionName_SO_TCP_KEEPALIVE_TIME:
-                    #ifdef OS_MACOSX
+                    #if HAVE_TCP_H_TCP_KEEPALIVE
                     *optName = TCP_KEEPALIVE;
                     #else
                     *optName = TCP_KEEPIDLE;
