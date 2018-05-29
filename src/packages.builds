@@ -6,13 +6,23 @@
     <PackageReportDir Condition="'$(PackageReportDir)' == ''">$(BinDir)pkg/reports/</PackageReportDir>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" Condition="'$(SkipManagedPackageBuild)' != 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="*\pkg\**\*.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
