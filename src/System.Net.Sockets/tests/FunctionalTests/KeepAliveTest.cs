@@ -38,12 +38,15 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_KeepAliveState_Set_Success_AnyUnix()
         {
-            socket.KeepAliveState = new KeepAliveOption(enabled, retryCount, time, interval);
-
-            Assert.Equal<bool>(enabled, socket.KeepAliveState.Enabled);
-            Assert.Equal<int>(retryCount, socket.KeepAliveState.RetryCount);
-            Assert.Equal<int>(time, socket.KeepAliveState.Time);
-            Assert.Equal<int>(interval, socket.KeepAliveState.Interval);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, enabled);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, retryCount);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, time);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, interval);
+            
+            Assert.Equal<bool>(enabled, IsKeepAliveEnabled(socket));
+            Assert.Equal<int>(retryCount, GetTcpOption(socket, SocketOptionName.TcpKeepAliveRetryCount));
+            Assert.Equal<int>(time, GetTcpOption(socket, SocketOptionName.TcpKeepAliveTime));
+            Assert.Equal<int>(interval, GetTcpOption(socket, SocketOptionName.TcpKeepAliveInterval));
         }
 
         public void Dispose()
@@ -54,6 +57,11 @@ namespace System.Net.Sockets.Tests
         private bool IsKeepAliveEnabled(Socket socket)
         {
             return (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
+        }
+
+        private int GetTcpOption(Socket socket, SocketOptionName socketOptionName)
+        {
+            return (int)socket.GetSocketOption(SocketOptionLevel.Tcp, socketOptionName);
         }
     }
 }

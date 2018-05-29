@@ -496,20 +496,6 @@ namespace System.Net.Sockets
             }
         }
 
-        public KeepAliveOption KeepAliveState
-        {
-            // Windows >= 10 1709 (10.0.16299), Linux, OS X >= 10.7.0 (Darwin kernel >= 11.0.0)
-            get
-            {
-                return SocketPal.GetKeepAliveState(this);
-            }
-            // Windows (RetryCount ignored if < 10 1703), Linux, OS X >= 10.7.0 (Darwin kernel >= 11.0.0)
-            set
-            {
-                SocketPal.SetKeepAliveState(this, value);
-            }
-        }
-
         public LingerOption LingerState
         {
             get

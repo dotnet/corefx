@@ -451,13 +451,6 @@ namespace System.Net.Sockets
             set { Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, value); }
         }
 
-        // Gets or sets the value of the connection's keep-alive option.
-        public KeepAliveOption KeepAliveState
-        {
-            get { return Client.KeepAliveState; }
-            set { Client.KeepAliveState = value; }
-        }
-
         // Gets or sets the value of the connection's linger option.
         public LingerOption LingerState
         {

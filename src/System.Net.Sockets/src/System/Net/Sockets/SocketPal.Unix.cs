@@ -27,26 +27,6 @@ namespace System.Net.Sockets
             // nop.  No initialization required.
         }
 
-        public static KeepAliveOption GetKeepAliveState(Socket socket)
-        {
-            bool enabled = (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
-            int retryCount = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount);
-            int time = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime);
-            int interval = (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval);
-            return new KeepAliveOption(enabled, retryCount, time, interval);
-        }
-
-        public static void SetKeepAliveState(Socket socket, KeepAliveOption keepAliveOption)
-        {
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, keepAliveOption.Enabled);
-            if (!keepAliveOption.Enabled)
-                return;
-
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, keepAliveOption.RetryCount);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, keepAliveOption.Time);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, keepAliveOption.Interval);
-        }
-
         public static SocketError GetSocketErrorForErrorCode(Interop.Error errorCode)
         {
             return SocketErrorPal.GetSocketErrorForNativeError(errorCode);
