@@ -186,7 +186,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     {
                         using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                         {
-                            AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.DER);
+                            AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.BER);
                             AsnReader innerReader = reader.ReadSequence();
 
                             if (reader.HasData)

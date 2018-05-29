@@ -157,10 +157,10 @@ namespace Internal.Cryptography.Pal.AnyOS
                 }
                 else
                 {
-                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
                     {
                         writer.PushSequence();
-                        AsnReader reader = new AsnReader(decrypted, AsnEncodingRules.DER);
+                        AsnReader reader = new AsnReader(decrypted, AsnEncodingRules.BER);
 
                         while (reader.HasData)
                         {
