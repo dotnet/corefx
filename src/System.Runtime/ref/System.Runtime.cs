@@ -2922,6 +2922,7 @@ namespace System
         public virtual bool IsSZArray { get { throw null; } }
         public virtual bool IsTypeDefinition { get { throw null; } }
         public bool IsUnicodeClass { get { throw null; } }
+        public bool IsUTF8Class { get { throw null; } }
         public bool IsValueType { get { throw null; } }
         public virtual bool IsVariableBoundArray { get { throw null; } }
         public bool IsVisible { get { throw null; } }
@@ -6217,6 +6218,7 @@ namespace System.Reflection
         SpecialName = 1024,
         StringFormatMask = 196608,
         UnicodeClass = 65536,
+        UTF8Class = 327680,
         VisibilityMask = 7,
         WindowsRuntime = 16384,
     }
@@ -6856,6 +6858,7 @@ namespace System.Runtime.InteropServices
         Auto = 4,
         None = 1,
         Unicode = 3,
+        UTF8 = 5,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(5597), Inherited=false)]
     public sealed partial class ComVisibleAttribute : System.Attribute
