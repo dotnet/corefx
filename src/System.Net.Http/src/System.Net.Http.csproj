@@ -155,8 +155,8 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Internal\Padding.cs">
-      <Link>Common\CoreLib\Internal\Padding.cs</Link>
+    <Compile Include="$(CommonPath)\Internal\Padding.cs">
+      <Link>Common\Internal\Padding.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NTAuthentication.Common.cs">
       <Link>Common\System\Net\NTAuthentication.Common.cs</Link>
