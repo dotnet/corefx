@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <PackageReportDir Condition="'$(PackageReportDir)' == ''">$(BinDir)pkg/reports/</PackageReportDir>
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
