@@ -250,7 +250,7 @@ namespace System.Diagnostics
 
             if (GetWaitState().GetExited(out _, refresh))
             {
-                throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
+                throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
             }
         }
 
