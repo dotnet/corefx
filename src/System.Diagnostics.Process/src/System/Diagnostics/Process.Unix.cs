@@ -242,6 +242,7 @@ namespace System.Diagnostics
 
         partial void ThrowIfExited(bool refresh)
         {
+            // Don't allocate a ProcessWaitState.Holder unless we're refreshing.
             if (_waitStateHolder == null && !refresh)
             {
                 return;
