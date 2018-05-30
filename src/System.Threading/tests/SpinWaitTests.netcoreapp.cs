@@ -15,7 +15,7 @@ namespace System.Threading.Tests
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sleep1Threshold", () => spinner.SpinOnce(-1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("sleep1Threshold", () => spinner.SpinOnce(int.MinValue));
-            Assert.Equal(spinner.Count, 0);
+            Assert.Equal(0, spinner.Count);
 
             spinner.SpinOnce(sleep1Threshold: 0);
             Assert.Equal(1, spinner.Count);
