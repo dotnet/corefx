@@ -792,8 +792,8 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(emptyValue, s, StringComparison.OrdinalIgnoreCase));
             
-            var span = value.AsSpan();
-            var emptySlice = value.AsSpan(2, 0);           
+            ReadOnlySpan<char> span = value.AsSpan();
+            ReadOnlySpan<char> emptySlice = value.AsSpan(2, 0);           
             Assert.True(0 < span.CompareTo(emptySlice, StringComparison.Ordinal));
 
             Assert.True(0 < span.CompareTo(emptySlice, StringComparison.CurrentCulture));
@@ -824,7 +824,7 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(value, value, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(value, value, StringComparison.OrdinalIgnoreCase));
             
-            var span = value.AsSpan();
+            ReadOnlySpan<char> span = value.AsSpan();
             Assert.Equal(0, span.CompareTo(span, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(span, StringComparison.CurrentCulture));
@@ -849,8 +849,8 @@ namespace System.Tests
             Assert.True(0 > string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(0 > string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
             
-            var span = value.AsSpan(0, 2);
-            var slice = value.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value.AsSpan(0, 2);
+            ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             Assert.True(0 > span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.True(0 > span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -875,8 +875,8 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
             
-            var span = value.AsSpan(1, 3);
-            var slice = value.AsSpan(3, 3);            
+            ReadOnlySpan<char> span = value.AsSpan(1, 3);
+            ReadOnlySpan<char> slice = value.AsSpan(3, 3);            
             Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -903,8 +903,8 @@ namespace System.Tests
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
             
-            var span = sa.AsSpan(0, 3);
-            var slice = sb.AsSpan(0, 3);            
+            ReadOnlySpan<char> span = sa.AsSpan(0, 3);
+            ReadOnlySpan<char> slice = sb.AsSpan(0, 3);            
             Assert.Equal(0, span.CompareTo(slice, StringComparison.Ordinal));
 
             Assert.Equal(0, span.CompareTo(slice, StringComparison.CurrentCulture));
@@ -1002,7 +1002,7 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, (StringComparison)6));
             
-            var span = value.AsSpan();
+            ReadOnlySpan<char> span = value.AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.CurrentCulture - 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
@@ -1152,7 +1152,7 @@ namespace System.Tests
             string s1 = "456";
             Assert.True(s1.Contains(s1));
             
-            var span = s1.AsSpan();
+            ReadOnlySpan<char> span = s1.AsSpan();
             Assert.True(span.Contains(span, StringComparison.Ordinal));
 
             Assert.True(span.Contains(span, StringComparison.CurrentCulture));
@@ -1171,8 +1171,8 @@ namespace System.Tests
             string s2 = value.Substring(0, 3);
             Assert.False(s1.Contains(s2));
             
-            var span = value.AsSpan(0, 2);
-            var slice = value.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value.AsSpan(0, 2);
+            ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             Assert.False(span.Contains(slice, StringComparison.Ordinal));
 
             Assert.False(span.Contains(slice, StringComparison.CurrentCulture));
@@ -1191,8 +1191,8 @@ namespace System.Tests
             string s2 = value.Substring(0, 2);
             Assert.True(s1.Contains(s2));
             
-            var span = value.AsSpan(0, 3);
-            var slice = value.AsSpan(0 ,2);
+            ReadOnlySpan<char> span = value.AsSpan(0, 3);
+            ReadOnlySpan<char> slice = value.AsSpan(0 ,2);
             Assert.True(span.Contains(slice, StringComparison.Ordinal));
 
             Assert.True(span.Contains(slice, StringComparison.CurrentCulture));
@@ -1212,8 +1212,8 @@ namespace System.Tests
             string s2 = value2.Substring(0, 3);
             Assert.True(s1.Contains(s2));
             
-            var span = value1.AsSpan(0, 3);
-            var slice = value2.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value1.AsSpan(0, 3);
+            ReadOnlySpan<char> slice = value2.AsSpan(0, 3);
             Assert.True(span.Contains(slice, StringComparison.Ordinal));
 
             Assert.True(span.Contains(slice, StringComparison.CurrentCulture));
@@ -1297,7 +1297,7 @@ namespace System.Tests
         [Fact]
         public static void ContainsUnknownComparisonType_StringComparison()
         {                        
-            var span = "456".AsSpan();
+            ReadOnlySpan<char> span = "456".AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.CurrentCulture - 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, (StringComparison)6));
@@ -1453,7 +1453,7 @@ namespace System.Tests
             bool b = s.EndsWith(s);
             Assert.True(b);
 
-            var span = s.AsSpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             b = span.EndsWith(span);
             Assert.True(b);
         }
@@ -1468,8 +1468,8 @@ namespace System.Tests
             bool b = s1.EndsWith(s2);
             Assert.False(b);
 
-            var span = value.AsSpan(0, 2);
-            var slice = value.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value.AsSpan(0, 2);
+            ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             b = span.EndsWith(slice);
             Assert.False(b);
         }
@@ -1484,8 +1484,8 @@ namespace System.Tests
             bool b = s1.EndsWith(s2);
             Assert.True(b);
 
-            var span = value.AsSpan(0, 3);
-            var slice = value.AsSpan(1, 2);
+            ReadOnlySpan<char> span = value.AsSpan(0, 3);
+            ReadOnlySpan<char> slice = value.AsSpan(1, 2);
             b = span.EndsWith(slice);
             Assert.True(b);
         }
@@ -1501,8 +1501,8 @@ namespace System.Tests
             bool c = s1.EndsWith(s2);
             Assert.True(c);
 
-            var span = value1.AsSpan(0, 3);
-            var slice = value2.AsSpan(0 ,3);
+            ReadOnlySpan<char> span = value1.AsSpan(0, 3);
+            ReadOnlySpan<char> slice = value2.AsSpan(0 ,3);
             c = span.EndsWith(slice);
             Assert.True(c);
         }
@@ -1592,7 +1592,7 @@ namespace System.Tests
             Assert.True(s.EndsWith(s, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(s.EndsWith(s, StringComparison.OrdinalIgnoreCase));
 
-            var span = s.AsSpan();
+            ReadOnlySpan<char> span = s.AsSpan();
             Assert.True(span.EndsWith(span, StringComparison.Ordinal));
 
             Assert.True(span.EndsWith(span, StringComparison.CurrentCulture));
@@ -1641,8 +1641,8 @@ namespace System.Tests
             Assert.False(s1.EndsWith(s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.False(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-            var span = value.AsSpan(0 ,2);
-            var slice = value.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value.AsSpan(0 ,2);
+            ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             Assert.False(span.EndsWith(slice, StringComparison.Ordinal));
 
             Assert.False(span.EndsWith(slice, StringComparison.CurrentCulture));
@@ -1667,8 +1667,8 @@ namespace System.Tests
             Assert.True(s1.EndsWith(s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-            var span = value.AsSpan(0, 3);            
-            var slice = value.AsSpan(1 ,2);
+            ReadOnlySpan<char> span = value.AsSpan(0, 3);            
+            ReadOnlySpan<char> slice = value.AsSpan(1 ,2);
             Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
 
             Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
@@ -1694,8 +1694,8 @@ namespace System.Tests
             Assert.True(s1.EndsWith(s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-            var span = value1.AsSpan(1, 3);
-            var slice = value2.AsSpan(0, 3);
+            ReadOnlySpan<char> span = value1.AsSpan(1, 3);
+            ReadOnlySpan<char> slice = value2.AsSpan(0, 3);
             Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
 
             Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
@@ -1808,7 +1808,7 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => value.EndsWith(value, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => value.EndsWith(value, (StringComparison)6));
 
-            var span = value.AsSpan();
+            ReadOnlySpan<char> span = value.AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.CurrentCulture - 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, (StringComparison)6));
