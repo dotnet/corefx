@@ -232,11 +232,11 @@
   <!-- SqlFileStream -->
   <!-- Non-Windows -->
   <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.UnSupported.cs" />
+    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
   <!-- Windows UAP -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(IsUAPAssembly)' == 'true'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.UnSupported.cs" />
+    <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
   <!-- Windows Non-UAP dependencies -->
   <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
