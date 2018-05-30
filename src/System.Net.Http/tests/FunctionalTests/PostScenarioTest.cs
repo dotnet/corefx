@@ -54,7 +54,7 @@ namespace System.Net.Http.Functional.Tests
 
                 for (int i = 1; i <= 3; i++)
                 {
-                    HttpResponseMessage response = client.PutAsync(serverUri, content).Result;
+                    HttpResponseMessage response = await client.PutAsync(serverUri, content);
                     Assert.Equal(requestBody.Length, ms.Position); // Stream left at end after send.
 
                     string responseBody = await response.Content.ReadAsStringAsync();
