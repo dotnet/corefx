@@ -1119,7 +1119,8 @@ namespace System.Tests
         {
             var a = new char[3];
 
-            #if !netfx
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             string s1 = new string(a);
             string s2 = new string(a, 2, 0);
             Assert.True(s1.Contains(s2, StringComparison.Ordinal));
@@ -1138,7 +1139,7 @@ namespace System.Tests
             Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
             Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
             Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
-            #endif
+#endif
 
             var span = new ReadOnlySpan<char>(a);
             var emptySlice = new ReadOnlySpan<char>(a, 2, 0);
@@ -1165,7 +1166,8 @@ namespace System.Tests
         {            
             string s1 = "456";
 
-            #if !netfx
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             Assert.True(s1.Contains(s1, StringComparison.Ordinal));
 
             Assert.True(s1.Contains(s1, StringComparison.CurrentCulture));	
@@ -1173,7 +1175,7 @@ namespace System.Tests
             Assert.True(s1.Contains(s1, StringComparison.InvariantCulture));	
             Assert.True(s1.Contains(s1, StringComparison.InvariantCultureIgnoreCase));	
             Assert.True(s1.Contains(s1, StringComparison.OrdinalIgnoreCase));
-            #endif
+#endif
 
             ReadOnlySpan<char> span = s1.AsSpan();
             Assert.True(span.Contains(span, StringComparison.Ordinal));
@@ -1189,8 +1191,9 @@ namespace System.Tests
         public static void LengthMismatchContains_StringComparison()
         {
             string value = "456";
-
-            #if !netfx
+            
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             string s1 = value.Substring(0, 2);
             string s2 = value.Substring(0, 3);
             Assert.False(s1.Contains(s2, StringComparison.Ordinal));
@@ -1200,7 +1203,7 @@ namespace System.Tests
             Assert.False(s1.Contains(s2, StringComparison.InvariantCulture));	
             Assert.False(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
             Assert.False(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));            
-            #endif
+#endif
 
             ReadOnlySpan<char> span = value.AsSpan(0, 2);
             ReadOnlySpan<char> slice = value.AsSpan(0, 3);
@@ -1217,8 +1220,9 @@ namespace System.Tests
         public static void ContainsMatch_StringComparison()
         {
             string value = "456";
-
-            #if !netfx
+            
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             string s1 = value.Substring(0, 3);
             string s2 = value.Substring(0, 2);
             Assert.True(s1.Contains(s2, StringComparison.Ordinal));
@@ -1228,7 +1232,7 @@ namespace System.Tests
             Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
             Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
             Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
-            #endif
+#endif
 
             ReadOnlySpan<char> span = value.AsSpan(0, 3);
             ReadOnlySpan<char> slice = value.AsSpan(0 ,2);
@@ -1246,8 +1250,9 @@ namespace System.Tests
         {
             string value1 = "4567";
             string value2 = "456";
-
-            #if !netfx
+            
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             string s1 = value1.Substring(0, 3);
             string s2 = value2.Substring(0, 3);
             Assert.True(s1.Contains(s2, StringComparison.Ordinal));
@@ -1257,7 +1262,7 @@ namespace System.Tests
             Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
             Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
             Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
-            #endif
+#endif
 
             ReadOnlySpan<char> span = value1.AsSpan(0, 3);
             ReadOnlySpan<char> slice = value2.AsSpan(0, 3);
@@ -1285,8 +1290,9 @@ namespace System.Tests
                     }
 
                     second[mismatchIndex] = (char)(second[mismatchIndex] + 1);
-
-                    #if !netfx
+                    
+#if !netfx
+                    //this Contains overload doesn't exist on netfx
                     string s1 = new string(first);
                     string s2 = new string(second);
                     Assert.False(s1.Contains(s2, StringComparison.Ordinal));
@@ -1306,7 +1312,7 @@ namespace System.Tests
                     Assert.Equal(	
                         s1.ToString().StartsWith(s2.ToString(), StringComparison.InvariantCultureIgnoreCase),	
                         s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));
-                    #endif
+#endif
 
                     var firstSpan = new ReadOnlySpan<char>(first);
                     var secondSpan = new ReadOnlySpan<char>(second);
@@ -1343,7 +1349,8 @@ namespace System.Tests
                 second[0] = (char)100;
                 second[length + 1] = (char)100;
 
-                #if !netfx
+#if !netfx
+                //this Contains overload doesn't exist on netfx
                 string s1 = new string(first, 1, length);
                 string s2 = new string(second, 1, length);
                 Assert.True(s1.Contains(s2, StringComparison.Ordinal));
@@ -1353,7 +1360,7 @@ namespace System.Tests
                 Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
                 Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
                 Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
-                #endif
+#endif
 
                 var span1 = new ReadOnlySpan<char>(first, 1, length);
                 var span2 = new ReadOnlySpan<char>(second, 1, length);
@@ -1372,11 +1379,12 @@ namespace System.Tests
         {                        
             string s = "456";
 
-            #if !netfx
+#if !netfx
+            //this Contains overload doesn't exist on netfx
             Assert.Throws<ArgumentException>(() => s.Contains(s, StringComparison.CurrentCulture - 1));	
             Assert.Throws<ArgumentException>(() => s.Contains(s, StringComparison.OrdinalIgnoreCase + 1));	
             Assert.Throws<ArgumentException>(() => s.Contains(s, (StringComparison)6));
-            #endif
+#endif
 
             ReadOnlySpan<char> span = s.AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.CurrentCulture - 1));
