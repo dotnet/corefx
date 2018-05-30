@@ -12,7 +12,6 @@
     <ProjectReference Include="..\src\System.Threading.Tasks.Extensions.csproj" />
 
     <InboxOnTargetFramework Include="netcoreapp2.1" />
-    <InboxOnTargetFramework Include="$(UAPvNextTFM)" />
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
 
     <!-- this package is part of the implementation closure of NETStandard.Library

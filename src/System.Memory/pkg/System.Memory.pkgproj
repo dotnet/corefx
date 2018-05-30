@@ -8,7 +8,6 @@
     </ProjectReference>
     <ProjectReference Include="..\src\System.Memory.csproj" />
     <InboxOnTargetFramework  Include="netcoreapp2.1" />
-    <InboxOnTargetFramework  Include="$(UAPvNextTFM)" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -12,9 +12,9 @@
       netcoreapp-Unix;
       netcoreapp-Windows_NT;
       uap10.0.16299-Windows_NT;
-      uap-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
+      uap-Windows_NT;
       $(PackageConfigurations)
     </BuildConfigurations>
   </PropertyGroup>
