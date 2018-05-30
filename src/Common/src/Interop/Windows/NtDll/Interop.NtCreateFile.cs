@@ -124,7 +124,7 @@ internal partial class Interop
             /// </summary>
             public unsafe OBJECT_ATTRIBUTES(UNICODE_STRING* objectName, ObjectAttributes attributes, IntPtr rootDirectory)
             {
-                Length = (uint)Marshal.SizeOf(typeof(OBJECT_ATTRIBUTES));
+                Length = (uint)sizeof(OBJECT_ATTRIBUTES);
                 RootDirectory = rootDirectory;
                 ObjectName = objectName;
                 Attributes = attributes;

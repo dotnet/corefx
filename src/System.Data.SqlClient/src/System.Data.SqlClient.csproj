@@ -232,11 +232,11 @@
   <!-- SqlFileStream -->
   <!-- Non-Windows -->
   <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Unix.cs" />
+    <Compile Include="System\Data\SqlClient\SqlFileStream.UnSupported.cs" />
   </ItemGroup>
   <!-- Windows UAP -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(IsUAPAssembly)' == 'true'">
-    <Compile Include="System\Data\SqlClient\SqlFileStream.Uap.cs" />
+    <Compile Include="System\Data\SqlClient\SqlFileStream.UnSupported.cs" />
   </ItemGroup>
   <!-- Windows Non-UAP dependencies -->
   <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp') AND '$(TargetsWindows)' == 'true'">
@@ -247,8 +247,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Access.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.Access.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.IoControlCodeAccess.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.IoControlCodeAccess.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CTL_CODE.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.CTL_CODE.cs</Link>
@@ -262,11 +262,11 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FileTypes.cs">
       <Link>Common\CoreLib\Interop\Windows\kernel32\Interop.FileTypes.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
+      <Link>Common\CoreLib\System\IO\PathInternal.Windows.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetFileType_SafeHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFullPathName.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetFullPathName.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Method.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.Method.cs</Link>

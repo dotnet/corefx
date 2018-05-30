@@ -11,20 +11,20 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-#pragma warning disable BCL0015 // Invalid Pinvoke call
+        #pragma warning disable BCL0015 // Invalid Pinvoke call
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true)]
         [ResourceExposure(ResourceScope.Machine)]
         internal static extern bool DeviceIoControl
-		(
-			SafeFileHandle fileHandle,
-			uint ioControlCode,
-			IntPtr inBuffer,
-			uint cbInBuffer,
-			IntPtr outBuffer,
-			uint cbOutBuffer,
-			out uint cbBytesReturned,
-			IntPtr overlapped
-		);
-#pragma warning restore BCL0015 // Invalid Pinvoke call
+        (
+            SafeFileHandle fileHandle,
+            uint ioControlCode,
+            IntPtr inBuffer,
+            uint cbInBuffer,
+            IntPtr outBuffer,
+            uint cbOutBuffer,
+            out uint cbBytesReturned,
+            IntPtr overlapped
+        );
+        #pragma warning restore BCL0015 // Invalid Pinvoke call
     }
 }

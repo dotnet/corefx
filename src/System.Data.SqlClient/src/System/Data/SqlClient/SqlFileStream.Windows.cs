@@ -405,31 +405,15 @@ namespace System.Data.SqlTypes
 
         #endregion
 
-        static private readonly char[] s_invalidPathChars = Path.GetInvalidPathChars();
-
-        // path length limitations:
-        // 1. path length storage (in bytes) in UNICODE_STRING is limited to UInt16.MaxValue bytes = Int16.MaxValue chars
-        // 2. GetFullPathName API of kernel32 does not accept paths with length (in chars) greater than 32766
-        //  (32766 is actually Int16.MaxValue - 1, while (-1) is for NULL termination)
-        // We must check for the lowest value between the the two
-        private const int MaxWin32PathLength = short.MaxValue - 1;
-
         [Conditional("DEBUG")]
         static private void AssertPathFormat(string path)
         {
             Debug.Assert(path != null);
             Debug.Assert(path == path.Trim());
             Debug.Assert(path.Length > 0);
-            Debug.Assert(path.Length <= MaxWin32PathLength);
-            Debug.Assert(path.IndexOfAny(s_invalidPathChars) < 0);
             Debug.Assert(path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase));
-            Debug.Assert(!path.StartsWith(@"\\.\", StringComparison.Ordinal));
         }
 
-        // SQLBUVSTS01 bugs 192677 and 193221: we cannot use System.IO.Path.GetFullPath for two reasons:
-        // * it requires PathDiscovery permissions, which is unnecessary for SqlFileStream since we are dealing with network path
-        // * it is limited to 260 length while in our case file path can be much longer
-        // To overcome the above limitations we decided to use GetFullPathName function from kernel32.dll
         [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
         static private string GetFullPathInternal(string path)
@@ -447,106 +431,22 @@ namespace System.Data.SqlTypes
                 throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidPath), "path");
             }
 
-            // check for the path length before we normalize it with GetFullPathName
-            if (path.Length > MaxWin32PathLength)
-            {
-                // cannot use PathTooLongException here since our length limit is 32K while
-                // PathTooLongException error message states that the path should be limited to 260
-                throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidPath), "path");
-            }
-
-            // GetFullPathName does not check for invalid characters so we still have to validate them before
-            if (path.IndexOfAny(s_invalidPathChars) >= 0)
+            // make sure path is not DOS device path
+            if (!path.StartsWith(@"\\") && !System.IO.PathInternal.IsDevice(path.AsSpan()))
             {
                 throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidPath), "path");
             }
-
-            // make sure path is a UNC path
-            if (!path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
-            {
-                throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidPath), "path");
-            }
-
-            //-----------------------------------------------------------------
 
             // normalize the path
-            path = SafeGetFullPathName(path);
+            path = System.IO.Path.GetFullPath(path);
 
-            // we do not expect windows API to return invalid paths
-            Debug.Assert(path.Length <= MaxWin32PathLength, "GetFullPathName returns path longer than max expected!");
-
-            // CONSIDER: is this a precondition validation that can be done above? Or must the path be normalized first?
-            // after normalization, we have to ensure that the path does not attempt to refer to a root device, etc.
-            if (path.StartsWith(@"\\.\", StringComparison.Ordinal))
+            // make sure path is a UNC path
+            if (System.IO.PathInternal.IsDeviceUNC(path.AsSpan()))
             {
                 throw ADP.Argument(SR.GetString(SR.SqlFileStream_PathNotValidDiskResource), "path");
             }
 
             return path;
-        }
-
-        static private void DemandAccessPermission
-            (
-                string path,
-                System.IO.FileAccess access
-            )
-        {
-            // ensure we demand on valid path
-            AssertPathFormat(path);
-
-            FileIOPermissionAccess demandPermissions;
-            switch (access)
-            {
-                case System.IO.FileAccess.Read:
-                    demandPermissions = FileIOPermissionAccess.Read;
-                    break;
-
-                case System.IO.FileAccess.Write:
-                    demandPermissions = FileIOPermissionAccess.Write;
-                    break;
-
-                case System.IO.FileAccess.ReadWrite:
-                default:
-                    // the caller have to validate the value of 'access' parameter
-                    Debug.Assert(access == System.IO.FileAccess.ReadWrite);
-                    demandPermissions = FileIOPermissionAccess.Read | FileIOPermissionAccess.Write;
-                    break;
-            }
-
-            FileIOPermission filePerm;
-            bool pathTooLong = false;
-
-            // check for read and/or write permissions
-            try
-            {
-                filePerm = new FileIOPermission(demandPermissions, path);
-                filePerm.Demand();
-            }
-            catch (PathTooLongException e)
-            {
-                pathTooLong = true;
-                ADP.TraceExceptionWithoutRethrow(e);
-            }
-
-            if (pathTooLong)
-            {
-                // SQLBUVSTS bugs 192677 and 203422: currently, FileIOPermission does not support path longer than MAX_PATH (260)
-                // so we cannot demand permissions for long files. We are going to open bug for FileIOPermission to
-                // support this.
-
-                // In the meanwhile, we agreed to have try-catch block on the permission demand instead of checking the path length.
-                // This way, if/when the 260-chars limitation is fixed in FileIOPermission, we will not need to change our code
-                // since we do not want to relax security checks, we have to demand this permission for AllFiles in order to continue!
-                // Note: demand for AllFiles will fail in scenarios where the running code does not have this permission (such as ASP.Net)
-                // and the only workaround will be reducing the total path length, which means reducing the length of SqlFileStream path
-                // components, such as instance name, table name, etc.. to fit into 260 characters
-                filePerm = new FileIOPermission(PermissionState.Unrestricted)
-                {
-                    AllFiles = demandPermissions
-                };
-
-                filePerm.Demand();
-            }
         }
 
         // SxS: SQL File Stream is a database resource, not a local machine one
@@ -581,11 +481,7 @@ namespace System.Data.SqlTypes
             // * trim whitespace from the beginning and end of the path
             // * ensure that the path starts with '\\'
             // * ensure that the path does not start with '\\.\'
-            // * ensure that the path is not longer than Int16.MaxValue
             sPath = GetFullPathInternal(sPath);
-
-            // ensure the running code has permission to read/write the file
-            DemandAccessPermission(sPath, access);
 
             FileFullEaInformation eaBuffer = null;
 
@@ -725,7 +621,7 @@ namespace System.Data.SqlTypes
                 {
                     uint ioControlCode = Interop.Kernel32.CTL_CODE(FILE_DEVICE_FILE_SYSTEM,
                         IoControlCodeFunctionCode, (byte)Interop.Kernel32.Method.METHOD_BUFFERED,
-                        (byte)Interop.Kernel32.Access.FILE_ANY_ACCESS);
+                        (byte)Interop.Kernel32.IoControlCodeAccess.FILE_ANY_ACCESS);
 
                     if (!Interop.Kernel32.DeviceIoControl(hFile, ioControlCode, IntPtr.Zero, 0, IntPtr.Zero, 0, out uint cbBytesReturned, IntPtr.Zero))
                     {
@@ -737,26 +633,8 @@ namespace System.Data.SqlTypes
 
                 // now that we've successfully opened a handle on the path and verified that it is a file,
                 // use the SafeFileHandle to initialize our internal System.IO.FileStream instance
-                // NOTE: need to assert UnmanagedCode permissions for this constructor. This is relatively benign
-                // in that we've done much the same validation as in the FileStream(string path, ...) ctor case
-                // most notably, validating that the handle type corresponds to an on-disk file.
-                bool bRevertAssert = false;
-                try
-                {
-                    SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-                    sp.Assert();
-                    bRevertAssert = true;
-
-                    System.Diagnostics.Debug.Assert(_m_fs == null);
-
-                    _m_fs = new System.IO.FileStream(hFile, access, DefaultBufferSize, ((options & System.IO.FileOptions.Asynchronous) != 0));
-                }
-                finally
-                {
-                    if (bRevertAssert)
-                        SecurityPermission.RevertAssert();
-                }
-
+                System.Diagnostics.Debug.Assert(_m_fs == null);
+                _m_fs = new System.IO.FileStream(hFile, access, DefaultBufferSize, ((options & System.IO.FileOptions.Asynchronous) != 0));
             }
             catch
             {
@@ -785,70 +663,14 @@ namespace System.Data.SqlTypes
             // ensure we have validated and normalized the path before
             AssertPathFormat(path);
 
-            string formatPath = @"\??\UNC\{0}\{1}";
+            string formatPath = string.Empty;
+            string uniqueId = string.Empty;
 
-            string uniqueId = Guid.NewGuid().ToString("N");
+            formatPath = System.IO.PathInternal.IsDeviceUNC(path.AsSpan()) ? @"\??" : @"\??\UNC\{0}\{1}";
+            uniqueId = Guid.NewGuid().ToString("N");
             return string.Format(CultureInfo.InvariantCulture, formatPath, path.Trim('\\'), uniqueId);
-
         }
 
-        // <summary>
-        // safe wrapper for GetFullPathName
-        // check that the path length is less than Int16.MaxValue before calling this API!
-        // </summary>
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
-        static private string SafeGetFullPathName(string path)
-        {
-            Debug.Assert(path != null, "path is null?");
-
-            // make sure to test for Int16.MaxValue limit before calling this method
-            // see the below comment re GetLastWin32Error for the reason
-            Debug.Assert(path.Length < short.MaxValue);
-
-            // since we expect network paths, the 'full path' is expected to be the same size
-            // as the provided one. we still need to allocate +1 for null termination
-            System.Text.StringBuilder buffer = new System.Text.StringBuilder(path.Length + 1);
-            int cchRequiredSize = Interop.Kernel32.GetFullPathName(path, buffer.Capacity, buffer, IntPtr.Zero);
-
-            // if our buffer was smaller than required, GetFullPathName will succeed and return us the required buffer size with null
-            if (cchRequiredSize > buffer.Capacity)
-            {
-                // we have to reallocate and retry
-                buffer.Capacity = cchRequiredSize;
-                cchRequiredSize = Interop.Kernel32.GetFullPathName(path, buffer.Capacity, buffer, IntPtr.Zero);
-            }
-
-            if (cchRequiredSize == 0)
-            {
-                // GetFullPathName call failed 
-                int lastError = Marshal.GetLastWin32Error();
-                if (lastError == 0)
-                {
-                    // we found that in some cases GetFullPathName fail but does not set the last error value
-                    // for example, it happens when the path provided to it is longer than 32K: return value is 0 (failure)
-                    // but GetLastError was zero too so we raised Win32Exception saying "The operation completed successfully".
-                    // To raise proper "path too long" failure, check the length before calling this API.
-                    // For other (yet unknown cases), we will throw InvalidPath message since we do not know what exactly happened
-                    throw ADP.Argument(SR.GetString(SR.SqlFileStream_InvalidPath), "path");
-                }
-                else
-                {
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception(lastError);
-                    ADP.TraceExceptionAsReturnValue(e);
-                    throw e;
-                }
-            }
-
-            // this should not happen since we already reallocate
-            Debug.Assert(cchRequiredSize <= buffer.Capacity, string.Format(
-                System.Globalization.CultureInfo.InvariantCulture,
-                "second call to GetFullPathName returned greater size: {0} > {1}",
-                cchRequiredSize,
-                buffer.Capacity));
-
-            return buffer.ToString();
-        }
         #endregion
 
     }
@@ -904,8 +726,8 @@ namespace System.Data.SqlTypes
                 throw ADP.ArgumentOutOfRange("transactionContext");
 
             Interop.NtDll.FILE_FULL_EA_INFORMATION eaBuffer;
-            eaBuffer.nextEntryOffset = 0;
-            eaBuffer.flags = 0;
+            eaBuffer.NextEntryOffset = 0;
+            eaBuffer.Flags = 0;
             eaBuffer.EaName = 0;
 
             // string will be written as ANSI chars, so Length == ByteLength in this case

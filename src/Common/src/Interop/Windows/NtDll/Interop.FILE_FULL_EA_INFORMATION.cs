@@ -9,37 +9,37 @@ internal partial class Interop
 {
     internal partial class NtDll
     {
-		/// <summary>
+        /// <summary>
         /// <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/wdm/ns-wdm-_file_full_ea_information">FILE_FULL_EA_INFORMATION</a> structure.
         /// Provides extended attribute (EA) information. This structure is used primarily by network drivers.
         /// </summary>
         [StructLayoutAttribute(LayoutKind.Sequential)]
         internal unsafe struct FILE_FULL_EA_INFORMATION
         {
-			/// <summary>
+            /// <summary>
             /// The offset of the next FILE_FULL_EA_INFORMATION-type entry. This member is zero if no other entries follow this one.
             /// </summary>
-            internal UInt32 nextEntryOffset;
+            internal uint NextEntryOffset;
             
-			/// <summary>
+            /// <summary>
             /// Can be zero or can be set with FILE_NEED_EA, indicating that the file to which the EA belongs cannot be interpreted without understanding the associated extended attributes.
             /// </summary>
-			internal Byte flags;
+            internal byte Flags;
             
-			/// <summary>
+            /// <summary>
             /// The length in bytes of the EaName array. This value does not include a null-terminator to EaName.
             /// </summary>
-			internal Byte EaNameLength;
+            internal byte EaNameLength;
             
-			/// <summary>
+            /// <summary>
             /// The length in bytes of each EA value in the array.
             /// </summary>
-			internal UInt16 EaValueLength;
+            internal ushort EaValueLength;
             
-			/// <summary>
+            /// <summary>
             /// An array of characters naming the EA for this entry.
             /// </summary>
-			internal Byte EaName;
+            internal byte EaName;
         }
     }
 }
