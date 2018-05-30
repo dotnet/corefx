@@ -95,10 +95,10 @@ namespace System.Net.Tests
             yield return new object[] { "PUT {path} HTTP/1.1", null, null, null, "Length Required" };
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task GetContext_InvalidRequest_DoesNotGetContext()
         {
-            // These tests take upwards of 20s if this uses [Theory].
+            // These tests take upwards of 20s if this uses [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))].
             foreach (object[] testData in InvalidRequest_TestData())
             {
                 using (Socket client = Factory.GetConnectedSocket())

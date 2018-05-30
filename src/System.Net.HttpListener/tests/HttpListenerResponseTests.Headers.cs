@@ -14,7 +14,7 @@ namespace System.Net.Tests
     {
         private static string s_longString = new string('a', ushort.MaxValue + 1);
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AddHeader_ValidValue_ReplacesHeaderInCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -26,7 +26,7 @@ namespace System.Net.Tests
             Assert.Equal("value2", response.Headers["name"]);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AddHeader_NullOrEmptyName_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -34,7 +34,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentNullException>("name", () => response.AddHeader("", ""));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [ActiveIssue(22057, TargetFrameworkMonikers.Netcoreapp)]
         public async Task AddHeader_LongName_ThrowsArgumentOutOfRangeException()
         {
@@ -42,7 +42,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => response.AddHeader("name", s_longString));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AddHeader_InvalidNameOrValue_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -51,7 +51,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentException>("value", () => response.AddHeader("name", "value1\rvalue2\r"));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AppendHeader_ValidValue_AddsHeaderToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -63,7 +63,7 @@ namespace System.Net.Tests
             Assert.Equal("value1,value2", response.Headers["name"]);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(null)]
         [InlineData("")]
         public async Task AppendHeader_NullOrEmptyName_ThrowsArgumentNullException(string name)
@@ -72,7 +72,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentNullException>("name", () => response.AppendHeader(null, ""));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [ActiveIssue(22057, TargetFrameworkMonikers.Netcoreapp)]
         public async Task AppendHeader_LongName_ThrowsArgumentOutOfRangeException()
         {
@@ -80,7 +80,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => response.AppendHeader("name", s_longString));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AppendHeader_InvalidNameOrValue_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -89,7 +89,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentException>("value", () => response.AppendHeader("name", "value1\rvalue2\r"));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentEncoding_SetCustom_DoesNothing()
         {
             // Setting HttpListenerResponse.ContentEncoding does nothing - it is never used.
@@ -104,7 +104,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentEncoding_SetDisposed_DoesNothing()
         {
             HttpListenerResponse response = await GetResponse();
@@ -117,7 +117,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentEncoding_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -133,7 +133,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("application/json", 152)]
         [InlineData("  applICATion/jSOn   ", 152)]
         [InlineData("garbage", 143)]
@@ -150,7 +150,7 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nContent-Type: {contentType.Trim()}\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(null, null)]
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
@@ -170,7 +170,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Encoding", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentType_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -180,7 +180,7 @@ namespace System.Net.Tests
             Assert.Null(response.ContentType);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentType_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -196,7 +196,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Type", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task OutputStream_GetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -205,7 +205,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => response.OutputStream);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("http://microsoft.com", 152)]
         [InlineData("  http://MICROSOFT.com   ", 152)]
         [InlineData("garbage", 139)]
@@ -223,7 +223,7 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nLocation: {redirectLocation.Trim()}\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(null, null)]
         [InlineData("", null)]
         [InlineData("\r \t \n", "")]
@@ -246,7 +246,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Location", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task RedirectLocation_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -256,7 +256,7 @@ namespace System.Net.Tests
             Assert.Null(response.RedirectLocation);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task RedirectLocation_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -272,7 +272,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Location", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(100, "HTTP/1.1 100 Continue", 112)]
         [InlineData(404, "HTTP/1.1 404 Not Found", 127)]
         [InlineData(401, "HTTP/1.1 401 Unauthorized", 130)]
@@ -291,7 +291,7 @@ namespace System.Net.Tests
             Assert.StartsWith($"{startLine}\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task StatusCode_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -301,7 +301,7 @@ namespace System.Net.Tests
             Assert.Equal(200, response.StatusCode);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task StatusCode_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -317,7 +317,7 @@ namespace System.Net.Tests
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(99)]
         [InlineData(1000)]
         public async Task StatusCode_SetInvalid_ThrowsProtocolViolationException(int statusCode)
@@ -329,7 +329,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(100, "Continue")]
         [InlineData(101, "Switching Protocols")]
         [InlineData(102, "Processing")]
@@ -394,7 +394,7 @@ namespace System.Net.Tests
             Assert.StartsWith($"HTTP/1.1 404 {expectedDescription}\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("", "", 118)]
         [InlineData("A !#\t1\u1234", "A !#\t14", 125)] // 
         [InlineData("StatusDescription", "StatusDescription", 135)]
@@ -411,7 +411,7 @@ namespace System.Net.Tests
             Assert.StartsWith($"HTTP/1.1 200 {expectedStatusDescription}\r\n", clientResponse);
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task StatusDescription_SetNull_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -421,7 +421,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("\0abc")]
         [InlineData("\u007F")]
         [InlineData("\r")]
@@ -435,7 +435,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task StatusDescription_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -445,7 +445,7 @@ namespace System.Net.Tests
             Assert.Equal("OK", response.StatusDescription);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task StatusDescription_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -461,7 +461,7 @@ namespace System.Net.Tests
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true, 120)]
         [InlineData(false, 106)]
         public async Task SendChunked_GetSet_ReturnsExpected(bool sendChunked, int expectedNumberOfBytes)
@@ -496,7 +496,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SendChunked_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -509,7 +509,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nTransfer-Encoding: chunked\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SendChunked_SetAfterHeadersSent_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -525,7 +525,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SendChunked_SetTrueAndRequestHttpVersionMinorIsZero_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -541,7 +541,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true, 120)]
         [InlineData(false, 139)]
         public async Task KeepAlive_GetSet_ReturnsExpected(bool keepAlive, int expectedNumberOfBytes)
@@ -578,7 +578,7 @@ namespace System.Net.Tests
             }
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task KeepAlive_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -594,7 +594,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Connection", clientResponse);
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task KeepAlive_SetAfterHeadersSent_DoesNothing()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -610,7 +610,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task KeepAlive_NoBoundaryAndRequestHttpRequestVersionMinorIsZero_SetsToFalseWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -625,7 +625,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task KeepAlive_ContentLengthBoundaryAndRequestHttpVersionMinorIsZero_DoesNotChangeWhenSendingHeaders()
         {
             using (HttpListenerResponse response = await GetResponse("1.0"))
@@ -643,7 +643,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(0, 106)]
         [InlineData(10, 117)]
         public async Task ContentLength64_GetSet_ReturnsExpected(int contentLength64, int expectedNumberOfBytes)
@@ -673,7 +673,7 @@ namespace System.Net.Tests
             Assert.Contains($"\r\nContent-Length: {contentLength64}\r\n", clientResponse);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(100, 0, 112)]
         [InlineData(101, 0, 123)]
         [InlineData(204, 0, 114)]
@@ -701,7 +701,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentLength64_SetDisposed_ThrowsObjectDisposedException()
         {
             HttpListenerResponse response = await GetResponse();
@@ -715,7 +715,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Content-Length", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentLength64_SetAfterHeadersSent_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -731,7 +731,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Transfer-Encoding", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ContentLength64_SetNegative_ThrowsArgumentOutOfRangeException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -755,7 +755,7 @@ namespace System.Net.Tests
             yield return new object[] { new Version(1, 1, 2, 3) };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(ProtocolVersion_Set_TestData))]
         public async Task ProtocolVersion_SetValid_ReturnsExpected(Version version)
         {
@@ -771,7 +771,7 @@ namespace System.Net.Tests
             Assert.StartsWith("HTTP/1.1 200 OK\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task ProtocolVersion_SetNull_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -781,7 +781,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
         [InlineData(2, 0)]
@@ -794,7 +794,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Headers_GetSet_ReturnsExpected()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -817,7 +817,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nName1: Value1\r\nName2: Value2\r\nName3: \r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Headers_SetCollectionWithRequestHeaders_Works()
         {
             HttpListenerResponse response = await GetResponse();
@@ -831,7 +831,7 @@ namespace System.Net.Tests
             Assert.Equal("value", response.Headers["accept"]);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("Transfer-Encoding")]
         [ActiveIssue(22057, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetRestricted_ThrowsArgumentException(string name)
@@ -841,7 +841,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentException>("name", () => response.Headers.Add($"{name}:value"));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Headers_SetNull_ThrowsNullReferenceException()
         {
             using (HttpListenerResponse response = await GetResponse())
@@ -853,7 +853,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [ActiveIssue(22057, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetLongName_ThrowsArgumentOutOfRangeException()
         {
@@ -865,7 +865,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => response.Headers.Add(HttpResponseHeader.Age, s_longString));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [ActiveIssue(22057, TargetFrameworkMonikers.Netcoreapp)]
         public async Task Headers_SetRequestHeader_ThrowsInvalidOperationException()
         {

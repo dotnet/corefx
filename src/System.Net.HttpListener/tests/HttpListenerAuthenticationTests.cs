@@ -31,7 +31,7 @@ namespace System.Net.Tests
         public void Dispose() => _factory.Dispose();
 
         // [ActiveIssue(20840, TestPlatforms.Unix)] // Managed implementation connects successfully.
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))]
         [InlineData("Basic")]
         [InlineData("NTLM")]
         [InlineData("Negotiate")]
@@ -48,7 +48,7 @@ namespace System.Net.Tests
         }
 
         // [ActiveIssue(20840, TestPlatforms.Unix)] Managed implementation connects successfully.
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))]
         [InlineData("Basic")]
         [InlineData("NTLM")]
         [InlineData("Negotiate")]
@@ -64,7 +64,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(AuthenticationSchemes.Basic)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
@@ -75,7 +75,7 @@ namespace System.Net.Tests
         }
 
         [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(BasicAuthenticationHeader_TestData))]
         public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
         {
@@ -107,7 +107,7 @@ namespace System.Net.Tests
         }
 
         [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [ActiveIssue(20098, TestPlatforms.Unix)]
         [InlineData("ExampleRealm")]
         [InlineData("  ExampleRealm  ")]
         [InlineData("")]
@@ -125,14 +125,14 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task TestAnonymousAuthentication()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
             await ValidateNullUser();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task TestBasicAuthenticationWithDelegate()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.None;
@@ -142,7 +142,7 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("somename:somepassword", "somename", "somepassword")]
         [InlineData("somename:", "somename", "")]
         [InlineData(":somepassword", "", "somepassword")]
@@ -154,7 +154,7 @@ namespace System.Net.Tests
             await ValidateValidUser(authString, expectedName, expectedPassword);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task TestAnonymousAuthenticationWithDelegate()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.None;
@@ -164,7 +164,7 @@ namespace System.Net.Tests
             await ValidateNullUser();
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
         [ActiveIssue(20604)]
         public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
         {
@@ -187,7 +187,7 @@ namespace System.Net.Tests
             yield return new object[] { "abcd", HttpStatusCode.BadRequest };
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
         [ActiveIssue(20604)]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
@@ -210,7 +210,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         [ActiveIssue(20604)]
         public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
         {
@@ -225,7 +225,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         [ActiveIssue(20604)]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
@@ -241,7 +241,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AuthenticationSchemeSelectorDelegate_ReturnsInvalidAuthenticationScheme_PerformsNoAuthentication()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
@@ -259,7 +259,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AuthenticationSchemeSelectorDelegate_ThrowsException_SendsInternalServerErrorToClient()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
@@ -271,7 +271,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void AuthenticationSchemeSelectorDelegate_ThrowsOutOfMemoryException_RethrowsException()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
@@ -284,7 +284,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void AuthenticationSchemeSelectorDelegate_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -293,7 +293,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.AuthenticationSchemeSelectorDelegate = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void AuthenticationSchemes_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -302,7 +302,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.AuthenticationSchemes = AuthenticationSchemes.Basic);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void ExtendedProtectionPolicy_SetNull_ThrowsArgumentNullException()
         {
             using (var listener = new HttpListener())
@@ -311,7 +311,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void ExtendedProtectionPolicy_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -320,7 +320,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.ExtendedProtectionPolicy = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void ExtendedProtectionPolicy_SetCustomChannelBinding_ThrowsObjectDisposedException()
         {
             using (var listener = new HttpListener())
@@ -330,7 +330,7 @@ namespace System.Net.Tests
             }
         }
         
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void UnsafeConnectionNtlmAuthentication_SetGet_ReturnsExpected()
         {
             using (var listener = new HttpListener())
@@ -348,7 +348,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void UnsafeConnectionNtlmAuthentication_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -357,7 +357,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.UnsafeConnectionNtlmAuthentication = false);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void ExtendedProtectionSelectorDelegate_SetNull_ThrowsArgumentNullException()
         {
             using (var listener = new HttpListener())
@@ -366,7 +366,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void ExtendedProtectionSelectorDelegate_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -375,7 +375,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.ExtendedProtectionSelectorDelegate = null);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Realm_SetWithoutBasicAuthenticationScheme_SendsNoChallengeToClient()
         {
             _listener.Realm = "ExampleRealm";
@@ -391,7 +391,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Realm_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
