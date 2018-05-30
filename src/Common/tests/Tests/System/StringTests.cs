@@ -1764,7 +1764,6 @@ namespace System.Tests
             }
         }
 
-
         [Fact]
         public static void MakeSureNoEndsWithChecksGoOutOfRange_StringComparison()
         {
