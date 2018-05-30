@@ -1606,6 +1606,12 @@ namespace System.Tests
 
                     string s1 = new string(first);
                     string s2 = new string(second);
+
+                    //On Linux there are some characters in the range of 0~32 which has a sort weight. 
+                    //For example null character on Linux will be ignored if it is compared to anything
+                    //while on Windows null will be always compared as ordinal.
+                    //For desired behavior, use ordinal comparison instead of linguistic comparison.
+                    //This is a known difference between Windows and Unix (https://github.com/dotnet/coreclr/issues/2051).
                     bool b = s1.EndsWith(s2, StringComparison.Ordinal);
                     Assert.False(b);
 
