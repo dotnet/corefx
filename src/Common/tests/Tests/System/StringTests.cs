@@ -1127,23 +1127,23 @@ namespace System.Tests
             Assert.True(s1.Contains(s2));
             
             var span = new ReadOnlySpan<char>(a);
-            var slice = new ReadOnlySpan<char>(a, 2, 0);
-            Assert.True(span.Contains(slice, StringComparison.Ordinal));
+            var emptySlice = new ReadOnlySpan<char>(a, 2, 0);
+            Assert.True(span.Contains(emptySlice, StringComparison.Ordinal));
 
-            Assert.True(span.Contains(slice, StringComparison.CurrentCulture));
-            Assert.True(span.Contains(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(span.Contains(slice, StringComparison.InvariantCulture));
-            Assert.True(span.Contains(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(span.Contains(slice, StringComparison.OrdinalIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.CurrentCulture));
+            Assert.True(span.Contains(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.InvariantCulture));
+            Assert.True(span.Contains(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.OrdinalIgnoreCase));
 
             span = ReadOnlySpan<char>.Empty;
-            Assert.True(span.Contains(slice, StringComparison.Ordinal));
+            Assert.True(span.Contains(emptySlice, StringComparison.Ordinal));
 
-            Assert.True(span.Contains(slice, StringComparison.CurrentCulture));
-            Assert.True(span.Contains(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(span.Contains(slice, StringComparison.InvariantCulture));
-            Assert.True(span.Contains(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(span.Contains(slice, StringComparison.OrdinalIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.CurrentCulture));
+            Assert.True(span.Contains(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.InvariantCulture));
+            Assert.True(span.Contains(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.Contains(emptySlice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -1441,8 +1441,8 @@ namespace System.Tests
             Assert.True(b);
 
             var span = new ReadOnlySpan<char>(a);
-            var slice = new ReadOnlySpan<char>(a, 2, 0);
-            b = span.EndsWith<char>(slice);
+            var emptySlice = new ReadOnlySpan<char>(a, 2, 0);
+            b = span.EndsWith<char>(emptySlice);
             Assert.True(b);
         }
 
@@ -1561,23 +1561,23 @@ namespace System.Tests
             Assert.True(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
             var span = new ReadOnlySpan<char>(a);
-            var slice = new ReadOnlySpan<char>(a, 2, 0);
-            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+            var emptySlice = new ReadOnlySpan<char>(a, 2, 0);
+            Assert.True(span.EndsWith(emptySlice, StringComparison.Ordinal));
 
-            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
-            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
-            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.OrdinalIgnoreCase));
 
             span = ReadOnlySpan<char>.Empty;
-            Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.Ordinal));
 
-            Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
-            Assert.True(span.EndsWith(slice, StringComparison.CurrentCultureIgnoreCase));
-            Assert.True(span.EndsWith(slice, StringComparison.InvariantCulture));
-            Assert.True(span.EndsWith(slice, StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(span.EndsWith(slice, StringComparison.OrdinalIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.CurrentCulture));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.CurrentCultureIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.InvariantCulture));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(span.EndsWith(emptySlice, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
