@@ -1119,13 +1119,27 @@ namespace System.Tests
         {
             var a = new char[3];
 
+            #if !netfx
             string s1 = new string(a);
             string s2 = new string(a, 2, 0);
-            Assert.True(s1.Contains(s2));
+            Assert.True(s1.Contains(s2, StringComparison.Ordinal));
             
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+
             s1 = string.Empty;
-            Assert.True(s1.Contains(s2));
-            
+            Assert.True(s1.Contains(s2, StringComparison.Ordinal));
+
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+            #endif
+
             var span = new ReadOnlySpan<char>(a);
             var emptySlice = new ReadOnlySpan<char>(a, 2, 0);
             Assert.True(span.Contains(emptySlice, StringComparison.Ordinal));
@@ -1150,8 +1164,17 @@ namespace System.Tests
         public static void SameSpanContains_StringComparison()
         {            
             string s1 = "456";
-            Assert.True(s1.Contains(s1));
-            
+
+            #if !netfx
+            Assert.True(s1.Contains(s1, StringComparison.Ordinal));
+
+            Assert.True(s1.Contains(s1, StringComparison.CurrentCulture));	
+            Assert.True(s1.Contains(s1, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.Contains(s1, StringComparison.InvariantCulture));	
+            Assert.True(s1.Contains(s1, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.Contains(s1, StringComparison.OrdinalIgnoreCase));
+            #endif
+
             ReadOnlySpan<char> span = s1.AsSpan();
             Assert.True(span.Contains(span, StringComparison.Ordinal));
 
@@ -1167,10 +1190,18 @@ namespace System.Tests
         {
             string value = "456";
 
+            #if !netfx
             string s1 = value.Substring(0, 2);
             string s2 = value.Substring(0, 3);
-            Assert.False(s1.Contains(s2));
-            
+            Assert.False(s1.Contains(s2, StringComparison.Ordinal));
+
+            Assert.False(s1.Contains(s2, StringComparison.CurrentCulture));	
+            Assert.False(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.False(s1.Contains(s2, StringComparison.InvariantCulture));	
+            Assert.False(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.False(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));            
+            #endif
+
             ReadOnlySpan<char> span = value.AsSpan(0, 2);
             ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             Assert.False(span.Contains(slice, StringComparison.Ordinal));
@@ -1187,10 +1218,18 @@ namespace System.Tests
         {
             string value = "456";
 
+            #if !netfx
             string s1 = value.Substring(0, 3);
             string s2 = value.Substring(0, 2);
-            Assert.True(s1.Contains(s2));
-            
+            Assert.True(s1.Contains(s2, StringComparison.Ordinal));
+
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+            #endif
+
             ReadOnlySpan<char> span = value.AsSpan(0, 3);
             ReadOnlySpan<char> slice = value.AsSpan(0 ,2);
             Assert.True(span.Contains(slice, StringComparison.Ordinal));
@@ -1208,10 +1247,18 @@ namespace System.Tests
             string value1 = "4567";
             string value2 = "456";
 
+            #if !netfx
             string s1 = value1.Substring(0, 3);
             string s2 = value2.Substring(0, 3);
-            Assert.True(s1.Contains(s2));
-            
+            Assert.True(s1.Contains(s2, StringComparison.Ordinal));
+
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+            #endif
+
             ReadOnlySpan<char> span = value1.AsSpan(0, 3);
             ReadOnlySpan<char> slice = value2.AsSpan(0, 3);
             Assert.True(span.Contains(slice, StringComparison.Ordinal));
@@ -1239,10 +1286,28 @@ namespace System.Tests
 
                     second[mismatchIndex] = (char)(second[mismatchIndex] + 1);
 
+                    #if !netfx
                     string s1 = new string(first);
                     string s2 = new string(second);
-                    Assert.False(s1.Contains(s2));
+                    Assert.False(s1.Contains(s2, StringComparison.Ordinal));
                     
+                    Assert.False(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+
+                    // Different behavior depending on OS	
+                    Assert.Equal(	
+                        s1.ToString().StartsWith(s2.ToString(), StringComparison.CurrentCulture),	
+                        s1.Contains(s2, StringComparison.CurrentCulture));	
+                    Assert.Equal(	
+                        s1.ToString().StartsWith(s2.ToString(), StringComparison.CurrentCulture),	
+                        s1.Contains(s2, StringComparison.CurrentCulture));	
+                    Assert.Equal(	
+                        s1.ToString().StartsWith(s2.ToString(), StringComparison.InvariantCulture),	
+                        s1.Contains(s2, StringComparison.InvariantCulture));	
+                    Assert.Equal(	
+                        s1.ToString().StartsWith(s2.ToString(), StringComparison.InvariantCultureIgnoreCase),	
+                        s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));
+                    #endif
+
                     var firstSpan = new ReadOnlySpan<char>(first);
                     var secondSpan = new ReadOnlySpan<char>(second);
                     Assert.False(firstSpan.Contains(secondSpan, StringComparison.Ordinal));
@@ -1278,10 +1343,18 @@ namespace System.Tests
                 second[0] = (char)100;
                 second[length + 1] = (char)100;
 
+                #if !netfx
                 string s1 = new string(first, 1, length);
                 string s2 = new string(second, 1, length);
-                Assert.True(s1.Contains(s2));
-                
+                Assert.True(s1.Contains(s2, StringComparison.Ordinal));
+
+                Assert.True(s1.Contains(s2, StringComparison.CurrentCulture));	
+                Assert.True(s1.Contains(s2, StringComparison.CurrentCultureIgnoreCase));	
+                Assert.True(s1.Contains(s2, StringComparison.InvariantCulture));	
+                Assert.True(s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase));	
+                Assert.True(s1.Contains(s2, StringComparison.OrdinalIgnoreCase));
+                #endif
+
                 var span1 = new ReadOnlySpan<char>(first, 1, length);
                 var span2 = new ReadOnlySpan<char>(second, 1, length);
                 Assert.True(span1.Contains(span2, StringComparison.Ordinal));
@@ -1297,7 +1370,15 @@ namespace System.Tests
         [Fact]
         public static void ContainsUnknownComparisonType_StringComparison()
         {                        
-            ReadOnlySpan<char> span = "456".AsSpan();
+            string s = "456";
+
+            #if !netfx
+            Assert.Throws<ArgumentException>(() => s.Contains(s, StringComparison.CurrentCulture - 1));	
+            Assert.Throws<ArgumentException>(() => s.Contains(s, StringComparison.OrdinalIgnoreCase + 1));	
+            Assert.Throws<ArgumentException>(() => s.Contains(s, (StringComparison)6));
+            #endif
+
+            ReadOnlySpan<char> span = s.AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.CurrentCulture - 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, (StringComparison)6));

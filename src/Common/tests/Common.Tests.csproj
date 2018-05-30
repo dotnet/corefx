@@ -5,6 +5,7 @@
     <ProjectGuid>{C72FD34C-539A-4447-9796-62A229571199}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants Condition="'$(TargetGroup)'=='netfx'">$(DefineConstants);netfx</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
