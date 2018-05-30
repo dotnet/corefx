@@ -917,7 +917,6 @@ namespace System.Collections.Concurrent
                 ThrowValueNullException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowValueNullException()
         {
             throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
