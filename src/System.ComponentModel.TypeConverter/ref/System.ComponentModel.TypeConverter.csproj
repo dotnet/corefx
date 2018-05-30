@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
     <ProjectReference Include="..\..\System.ComponentModel\ref\System.ComponentModel.csproj" />
+    <ProjectReference Include="..\..\System.Drawing.Common\ref\System.Drawing.Common.csproj" />
     <ProjectReference Include="..\..\System.Drawing.Primitives\ref\System.Drawing.Primitives.csproj" />
     <ProjectReference Include="..\..\System.ComponentModel.Primitives\ref\System.ComponentModel.Primitives.csproj" />
     <ProjectReference Include="..\..\System.ObjectModel\ref\System.ObjectModel.csproj" />
