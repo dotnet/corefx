@@ -45,7 +45,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostRewindableStreamContentMultipleTimes_StreamContentFullySent(Uri serverUri)
         {
-            string requestBody = "ABC";
+            const string requestBody = "ABC";
 
             using (var client = new HttpClient())
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody)))
