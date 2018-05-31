@@ -15,6 +15,11 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+            if (source is ICollection<TSource> collection)
+            {
+                return collection.Count > 0;
+            }
+
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 return e.MoveNext();
@@ -33,11 +38,24 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            foreach (TSource element in source)
+            if (source is IList<TSource> list)
             {
-                if (predicate(element))
+                for (var i = 0; i < list.Count; i++)
                 {
-                    return true;
+                    if (predicate(list[i]))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                foreach (TSource element in source)
+                {
+                    if (predicate(element))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -56,11 +74,24 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            foreach (TSource element in source)
+            if (source is IList<TSource> list)
             {
-                if (!predicate(element))
+                for (var i = 0; i < list.Count; i++)
                 {
-                    return false;
+                    if (!predicate(list[i]))
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                foreach (TSource element in source)
+                {
+                    if (!predicate(element))
+                    {
+                        return false;
+                    }
                 }
             }
 
