@@ -9,13 +9,13 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
 {
     public class ActiveDirectoryInterSiteTransportTests
     {
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FindByTransportType_NullContext_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(null, ActiveDirectoryTransportType.Rpc));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Getting information about domain is denied inside App")]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/21553", TargetFrameworkMonikers.UapAot)]
@@ -28,14 +28,14 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException()
         {
             var context = new DirectoryContext(DirectoryContextType.Forest, "server:port");
             AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException_NoUap()
         {
@@ -47,7 +47,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void FindByTransportType_DomainNoDomainAssociatedWithoutName_ThrowsArgumentException()
         {
             var context = new DirectoryContext(DirectoryContextType.Domain);
@@ -70,7 +70,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
                         $"We got unrecognized exception {exception}");
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Getting information about domain is denied inside App")]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/21553", TargetFrameworkMonikers.UapAot)]
@@ -80,7 +80,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Throws<ActiveDirectoryOperationException>(() => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(ActiveDirectoryTransportType.Rpc - 1)]
         [InlineData(ActiveDirectoryTransportType.Smtp + 1)]
         public void FindByTransportType_InvalidTransport_ThrowsInvalidEnumArgumentException(ActiveDirectoryTransportType transport)

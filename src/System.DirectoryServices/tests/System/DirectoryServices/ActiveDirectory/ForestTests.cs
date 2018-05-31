@@ -8,13 +8,13 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
 {
     public class ForestTests
     {
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetForest_NullContext_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("context", () => Forest.GetForest(null));
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.ApplicationPartition)]
         [InlineData(DirectoryContextType.ConfigurationSet)]
         [InlineData(DirectoryContextType.Domain)]
@@ -24,7 +24,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentException>("context", () => Forest.GetForest(context));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void GetForest_NullNameAndNotRootedDomain_ThrowsActiveDirectoryOperationException()
