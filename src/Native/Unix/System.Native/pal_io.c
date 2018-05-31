@@ -273,6 +273,11 @@ static int32_t ConvertOpenFlags(int32_t flags)
 
 intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 {
+// these two ifdefs are for platforms where we dont have the open version of CLOEXEC and thus
+// must simulate it by doing a fcntl with the SETFFD version after the open instead
+#if !defined(O_CLOEXEC)
+    int32_t old_flags = flags;
+#endif
     flags = ConvertOpenFlags(flags);
     if (flags == -1)
     {
@@ -283,9 +288,7 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
     int result;
     while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
 #if !defined(O_CLOEXEC)
-    // the versions of AIX and PASE we target don't all have O_CLOEXEC,
-    // so simulate it
-    if (flags & PAL_O_CLOEXEC)
+    if (old_flags & PAL_O_CLOEXEC)
     {
         fcntl(result, F_SETFD, FD_CLOEXEC);
     }
