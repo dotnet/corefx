@@ -23,7 +23,7 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AcceptWebSocketAsync_NullSubProtocol_Succeeds()
         {
             if (PlatformDetection.IsWindows7)
