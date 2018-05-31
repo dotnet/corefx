@@ -6,8 +6,8 @@ namespace System.Diagnostics
 {
     // This class uses high-resolution performance counter if the installed
     // hardware supports it. Otherwise, the class will fall back to DateTime
-    // class and uses ticks as a measurement.
-    
+    // and uses ticks as a measurement.
+
     public partial class Stopwatch
     {
         private const long TicksPerMillisecond = 10000;
