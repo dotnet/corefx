@@ -301,7 +301,13 @@ int32_t SystemNative_Close(intptr_t fd)
 intptr_t SystemNative_Dup(intptr_t oldfd)
 {
     int result;
+#if defined(F_DUPFD_CLOEXEC)
     while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR);
+#else
+    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD, 0)) < 0 && errno == EINTR);
+    // do CLOEXEC here too
+    fcntl(result, F_SETFD, FD_CLOEXEC);
+#endif
     return result;
 }
 
