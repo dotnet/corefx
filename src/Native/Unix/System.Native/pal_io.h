@@ -15,10 +15,9 @@ BEGIN_EXTERN_C
 #include <dirent.h>
 #include <sys/types.h>
 
-#if defined(_AIX) && !defined(O_CLOEXEC)
+#if defined(_AIX) && !defined(F_DUPFD_CLOEXEC)
 // HACK: Try to get AIX 6.1 & i 7.1 working; AIX 7.1 & i (claims) 7.2 has these but we target
-// these older versions too.
-// Nop this out
+// these older versions too, so nop this define out.
 #define F_DUPFD_CLOEXEC 0
 #endif
 
