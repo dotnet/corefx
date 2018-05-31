@@ -519,7 +519,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             // File which is not readable by the current user.
             string unreadableFileName = Path.Combine(sslCertDir, "2.pem");
             File.WriteAllText(unreadableFileName, string.Empty);
-            chmod(unreadableFileName, 0);
+            Assert.Equal(0, chmod(unreadableFileName, 0));
 
             // Valid file.
             File.WriteAllBytes(Path.Combine(sslCertDir, "3.pem"), TestData.SelfSigned2PemBytes);
