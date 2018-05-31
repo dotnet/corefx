@@ -6,8 +6,15 @@
   <PropertyGroup>
     <BinPlaceRef>true</BinPlaceRef>
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
-    <NETCoreAppPackageVersion>2.0.0</NETCoreAppPackageVersion>
+    <NETCoreAppPackageVersion>2.0.7</NETCoreAppPackageVersion>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
+    <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
+    <RidSpecificAssets>true</RidSpecificAssets>
+    <BinPlaceRuntime>true</BinPlaceRuntime>
+    <NuGetDeploySourceItem>ReferenceCopyLocalPaths</NuGetDeploySourceItem>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +26,8 @@
   <ItemGroup>
     <!-- for all configurations this project provides refs for that configuration -->
     <BinPlaceConfiguration Include="$(Configuration)">
-      <RefPath>$(RefPath)</RefPath>
+      <RefPath Condition="'$(TargetsWindows)' != 'true'">$(RefPath)</RefPath>
+      <RuntimePath Condition="'$(TargetsWindows)' == 'true'">$(ShimsTargetRuntimePath)</RuntimePath>
     </BinPlaceConfiguration>
 
     <FileToExclude Include="System.ComponentModel.Composition" />

@@ -2,6 +2,28 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="dir.props" />
 
+  <PropertyGroup>
+    <PackageConfigurations>
+      netcoreapp2.0-Windows_NT;
+    </PackageConfigurations>
+    <BuildConfigurations>
+      $(BuildConfigurations);
+      $(PackageConfigurations);
+    </BuildConfigurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ShimsToInclude Include="System.Configuration.dll" />
+    <ShimsToInclude Include="System.Core.dll" />
+    <ShimsToInclude Include="System.Drawing.dll" />
+    <ShimsToInclude Include="System.Net.dll" />
+    <ShimsToInclude Include="System.Security.dll" />
+    <ShimsToInclude Include="System.ServiceModel.Web.dll" />
+    <ShimsToInclude Include="System.ServiceProcess.dll" />
+    <ShimsToInclude Include="System.Transactions.dll" />
+    <ShimsToInclude Include="WindowsBase.dll" />
+  </ItemGroup>
+
   <Target Name="GetGenFacadesInputs">
     <ItemGroup>
       <NetFxContracts Include="@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')" Condition="'$(TargetGroup)' != 'netfx'">
@@ -93,6 +115,13 @@
       <RuntimeBinplaceItem Include="@(BinPlaceItemNames->'$(GenFacadesOutputPath)%(Identity).dll')" />
       <FileWrites Include="@(BinPlaceItem)" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="GetCompatibilityShimsToPackage"
+          BeforeTargets="GetFilesToPackage">
+    <PropertyGroup>
+      <TargetPath>@(ShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')</TargetPath>
+    </PropertyGroup>
   </Target>
 </Project>
 
