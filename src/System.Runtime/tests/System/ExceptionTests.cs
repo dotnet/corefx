@@ -21,20 +21,6 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void Exception_SetHResult()
-        {
-            var exception = new Exception("Created exception");
-            
-            int COR_E_FIELDACCESS = unchecked((int)0x80131507);            
-            exception.HResult = COR_E_FIELDACCESS;
-            Assert.Equal(COR_E_FIELDACCESS, exception.HResult);
-
-            int COR_E_ARGUMENT = unchecked((int)0x80070057);
-            exception.HResult = COR_E_ARGUMENT;
-            Assert.Equal(COR_E_ARGUMENT, exception.HResult);
-        }
-
-        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception.TargetSite always returns null on UapAot.")]
         public static void Exception_TargetSite_Jit()
         {
