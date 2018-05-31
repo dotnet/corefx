@@ -112,26 +112,41 @@ namespace System.Net.Http.Functional.Tests
 
                     Task clientCopyTask = Task.Run(async delegate
                     {
-                        byte[] buffer = new byte[8000];
-                        int bytesRead;
-                        while ((bytesRead = await clientStream.ReadAsync(buffer)) > 0)
+                        try
                         {
-                            await serverStream.WriteAsync(buffer, 0, bytesRead);
+                            byte[] buffer = new byte[8000];
+                            int bytesRead;
+                            while ((bytesRead = await clientStream.ReadAsync(buffer)) > 0)
+                            {
+                                await serverStream.WriteAsync(buffer, 0, bytesRead);
+                            }
+                            serverStream.Flush();
+                            serverSocket.Shutdown(SocketShutdown.Send);
                         }
-                       serverStream.Flush();
-                       serverSocket.Shutdown(SocketShutdown.Send);
+                        catch (IOException)
+                        {
+                            // Ignore rude disconnects from either side.
+                        }
                     });
                     Task serverCopyTask = Task.Run(async delegate
                     {
-                        byte[] buffer = new byte[8000];
-                        int bytesRead;
-                        while ((bytesRead = await serverStream.ReadAsync(buffer)) > 0)
+                        try
                         {
-                            await clientStream.WriteAsync(buffer, 0, bytesRead);
+                            byte[] buffer = new byte[8000];
+                            int bytesRead;
+                            while ((bytesRead = await serverStream.ReadAsync(buffer)) > 0)
+                            {
+                                await clientStream.WriteAsync(buffer, 0, bytesRead);
+                            }
+                            clientStream.Flush();
+                            clientSocket.Shutdown(SocketShutdown.Send);
                         }
-                        clientStream.Flush();
-                        clientSocket.Shutdown(SocketShutdown.Send);
+                        catch (IOException)
+                        {
+                            // Ignore rude disconnects from either side.
+                        }
                     });
+
                     // Relay bidirectional data including close.
                     await new[] { clientCopyTask, serverCopyTask }.WhenAllOrAnyFailed().ConfigureAwait(false);
                     return result;

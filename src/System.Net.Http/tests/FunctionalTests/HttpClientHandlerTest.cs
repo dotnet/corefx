@@ -3209,15 +3209,22 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl);
             using (var client = new HttpClient(handler))
-            using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer))
             {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+                // The current LoopbackGetRequestHttpProxy test server doesn't stop CONNECT tunneling unless
+                // the connections get closed by either side. So, we force that by adding Connection: close
+                // to the outbound request.
+                client.DefaultRequestHeaders.Connection.Add("close");
 
-            await proxyTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
-            LoopbackGetRequestHttpProxy.ProxyResult proxyResult = proxyTask.Result;
-            _output.WriteLine($"Proxy request line: {proxyResult.RequestLine}");
-            Assert.Contains("CONNECT", proxyResult.RequestLine);
+                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                    await proxyTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
+                    LoopbackGetRequestHttpProxy.ProxyResult proxyResult = proxyTask.Result;
+                    _output.WriteLine($"Proxy request line: {proxyResult.RequestLine}");
+                    Assert.Contains("CONNECT", proxyResult.RequestLine);
+                }
+            }
         }
 
         [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
