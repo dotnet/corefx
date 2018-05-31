@@ -91,7 +91,7 @@ c_static_assert(PAL_S_IFSOCK == S_IFSOCK);
 // Validate that our enum for inode types is the same as what is
 // declared by the dirent.h header on the local system.
 // (AIX doesn't have dirent d_type, so none of this there)
-#if !defined(_AIX)
+#if !defined(DT_UNKNOWN)
 c_static_assert(PAL_DT_UNKNOWN == DT_UNKNOWN);
 c_static_assert(PAL_DT_FIFO == DT_FIFO);
 c_static_assert(PAL_DT_CHR == DT_CHR);
@@ -248,17 +248,13 @@ static int32_t ConvertOpenFlags(int32_t flags)
             return -1;
     }
 
-#if defined(_AIX)
-    if (flags & ~(PAL_O_ACCESS_MODE_MASK | PAL_O_CREAT | PAL_O_EXCL | PAL_O_TRUNC | PAL_O_SYNC))
-#else
     if (flags & ~(PAL_O_ACCESS_MODE_MASK | PAL_O_CLOEXEC | PAL_O_CREAT | PAL_O_EXCL | PAL_O_TRUNC | PAL_O_SYNC))
-#endif
     {
         assert_msg(false, "Unknown Open flag", (int)flags);
         return -1;
     }
 
-#if !defined(_AIX)
+#if defined(O_CLOEXEC)
     if (flags & PAL_O_CLOEXEC)
         ret |= O_CLOEXEC;
 #endif
@@ -286,8 +282,8 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 
     int result;
     while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
-#if defined(_AIX)
-    // the versions of AIX and PASE we target don't all have O_CLOEXEC
+#if !defined(O_CLOEXEC)
+    // the versions of AIX and PASE we target don't all have O_CLOEXEC,
     // so simulate it
     if (flags & PAL_O_CLOEXEC)
     {
@@ -354,7 +350,7 @@ static void ConvertDirent(const struct dirent* entry, struct DirectoryEntry* out
     // the start of the unmanaged string. Give the caller back a pointer to the
     // location of the start of the string that exists in their own byte buffer.
     outputEntry->Name = entry->d_name;
-#if defined(_AIX)
+#if !defined(DT_UNKNOWN)
     /* AIX has no d_type, make a substitute */
     struct stat s;
     stat(entry->d_name, &s);
@@ -487,7 +483,9 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
         case 0:
             break;
         case PAL_O_CLOEXEC:
+#if defined(O_CLOEXEC)
             flags = O_CLOEXEC;
+#endif
             break;
         default:
             assert_msg(false, "Unknown pipe flag", (int)flags);
@@ -504,7 +502,11 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     while ((result = pipe(pipeFds)) < 0 && errno == EINTR);
 
     // Then, if O_CLOEXEC was specified, use fcntl to configure the file descriptors appropriately.
+#if defined(O_CLOEXEC)
     if ((flags & O_CLOEXEC) != 0 && result == 0)
+#else
+    if ((flags & PAL_O_CLOEXEC) != 0 && result == 0)
+#endif
     {
         while ((result = fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
         if (result == 0)

@@ -130,7 +130,7 @@ int32_t SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
             return Error_ENOTCONN;
         case ENOTDIR:
             return Error_ENOTDIR;
-#if !defined(_AIX)
+#if ENOTEMPTY != EEXIST // AIX defines this
         case ENOTEMPTY:
             return Error_ENOTEMPTY;
 #endif
