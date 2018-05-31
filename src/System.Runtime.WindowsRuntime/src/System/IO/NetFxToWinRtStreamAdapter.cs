@@ -192,7 +192,7 @@ namespace System.IO
             if (str == null)
             {
                 ObjectDisposedException ex = new ObjectDisposedException(SR.ObjectDisposed_CannotPerformOperation);
-                ex.HResult = __HResults.RO_E_CLOSED;
+                ex.SetErrorCode(__HResults.RO_E_CLOSED);
                 throw ex;
             }
 
@@ -233,14 +233,14 @@ namespace System.IO
             if (count < 0 || Int32.MaxValue < count)
             {
                 ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(count));
-                ex.HResult = __HResults.E_INVALIDARG;
+                ex.SetErrorCode(__HResults.E_INVALIDARG);
                 throw ex;
             }
 
             if (buffer.Capacity < count)
             {
                 ArgumentException ex = new ArgumentException(SR.Argument_InsufficientBufferCapacity);
-                ex.HResult = __HResults.E_INVALIDARG;
+                ex.SetErrorCode(__HResults.E_INVALIDARG);
                 throw ex;
             }
 
@@ -248,7 +248,7 @@ namespace System.IO
             {
                 ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(options),
                                                                                  SR.ArgumentOutOfRange_InvalidInputStreamOptionsEnumValue);
-                ex.HResult = __HResults.E_INVALIDARG;
+                ex.SetErrorCode(__HResults.E_INVALIDARG);
                 throw ex;
             }
 
@@ -299,7 +299,7 @@ namespace System.IO
             if (buffer.Capacity < buffer.Length)
             {
                 ArgumentException ex = new ArgumentException(SR.Argument_BufferLengthExceedsCapacity);
-                ex.HResult = __HResults.E_INVALIDARG;
+                ex.SetErrorCode(__HResults.E_INVALIDARG);
                 throw ex;
             }
 
@@ -334,7 +334,7 @@ namespace System.IO
             if (position > Int64.MaxValue)
             {
                 ArgumentException ex = new ArgumentException(SR.IO_CannotSeekBeyondInt64MaxValue);
-                ex.HResult = __HResults.E_INVALIDARG;
+                ex.SetErrorCode(__HResults.E_INVALIDARG);
                 throw ex;
             }
 
@@ -399,7 +399,7 @@ namespace System.IO
                 if (value > Int64.MaxValue)
                 {
                     ArgumentException ex = new ArgumentException(SR.IO_CannotSetSizeBeyondInt64MaxValue);
-                    ex.HResult = __HResults.E_INVALIDARG;
+                    ex.SetErrorCode(__HResults.E_INVALIDARG);
                     throw ex;
                 }
 
@@ -411,7 +411,7 @@ namespace System.IO
                 if (!str.CanWrite)
                 {
                     InvalidOperationException ex = new InvalidOperationException(SR.InvalidOperation_CannotSetStreamSizeCannotWrite);
-                    ex.HResult = __HResults.E_ILLEGAL_METHOD_CALL;
+                    ex.SetErrorCode(__HResults.E_ILLEGAL_METHOD_CALL);
                     throw ex;
                 }
 
@@ -440,7 +440,7 @@ namespace System.IO
         private static void ThrowCloningNotSupported(String methodName)
         {
             NotSupportedException nse = new NotSupportedException(SR.Format(SR.NotSupported_CloningNotSupported, methodName));
-            nse.HResult = __HResults.E_NOTIMPL;
+            nse.SetErrorCode(__HResults.E_NOTIMPL);
             throw nse;
         }
 

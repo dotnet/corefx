@@ -91,7 +91,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 if (hr != __HResults.S_OK)
                 {
                     Exception ex = new Exception(String.Format("{0} ({1}!RoGetBufferMarshaler)", SR.WinRtCOM_Error, WinTypesDLL));
-                    ex.HResult = hr;
+                    ex.SetErrorCode(hr);
                     throw ex;
                 }
 
@@ -241,7 +241,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 if (value > ((IBuffer)this).Capacity)
                 {
                     ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(value), SR.Argument_BufferLengthExceedsCapacity);
-                    ex.HResult = __HResults.E_BOUNDS;
+                    ex.SetErrorCode(__HResults.E_BOUNDS);
                     throw ex;
                 }
 
