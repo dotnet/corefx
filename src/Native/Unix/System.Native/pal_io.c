@@ -121,12 +121,16 @@ c_static_assert(PAL_SEEK_CUR == SEEK_CUR);
 c_static_assert(PAL_SEEK_END == SEEK_END);
 
 // Validate our PollFlags enum values are correct for the platform
+// HACK: AIX values are different; this file doesn't actually use POLL* yet, so
+// nop out the check there.
+#if !defined(_AIX)
 c_static_assert(PAL_POLLIN == POLLIN);
 c_static_assert(PAL_POLLPRI == POLLPRI);
 c_static_assert(PAL_POLLOUT == POLLOUT);
 c_static_assert(PAL_POLLERR == POLLERR);
 c_static_assert(PAL_POLLHUP == POLLHUP);
 c_static_assert(PAL_POLLNVAL == POLLNVAL);
+#endif
 
 // Validate our FileAdvice enum values are correct for the platform
 #if HAVE_POSIX_ADVISE
