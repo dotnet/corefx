@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Text;
 
 using CFStringRef = System.IntPtr;
 using FSEventStreamRef = System.IntPtr;
@@ -186,7 +187,7 @@ namespace System.IO
                 }
             }
 
-            internal void Start()
+            internal unsafe void Start()
             {
                 // Make sure _fullPath doesn't contain a link or alias
                 // since the OS will give back the actual, non link'd or alias'd paths
@@ -307,17 +308,17 @@ namespace System.IO
                 }
             }
 
-            private void FileSystemEventCallback(
+            private unsafe void FileSystemEventCallback(
                 FSEventStreamRef streamRef, 
                 IntPtr clientCallBackInfo, 
                 size_t numEvents, 
-                String[] eventPaths,
+                byte** eventPaths,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 Interop.EventStream.FSEventStreamEventFlags[] eventFlags,
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
                 FSEventStreamEventId[] eventIds)
             {
-                Debug.Assert((numEvents.ToInt32() == eventPaths.Length) && (numEvents.ToInt32() == eventFlags.Length) && (numEvents.ToInt32() == eventIds.Length));
+                Debug.Assert((eventPaths != null) && (numEvents.ToInt32() == eventFlags.Length) && (numEvents.ToInt32() == eventIds.Length));
 
                 // Try to get the actual watcher from our weak reference.  We maintain a weak reference most of the time
                 // so as to avoid a rooted cycle that would prevent our processing loop from ever ending
@@ -336,12 +337,18 @@ namespace System.IO
 
                 for (long i = 0; i < numEvents.ToInt32(); i++)
                 {
-                    Debug.Assert(eventPaths[i].Length > 0, "Empty events are not supported");
-                    Debug.Assert(eventPaths[i][eventPaths[i].Length - 1] != '/', "Trailing slashes on events is not supported");
+                    Debug.Assert(eventPaths[i] != null);
+                    int endPoint = new ReadOnlySpan<byte>(eventPaths[i], 255).IndexOf<byte>(0);
+
+                    Debug.Assert(endPoint > 0, "Empty events are not supported");
+                    ReadOnlySpan<byte> eventBytes = new ReadOnlySpan<byte>(eventPaths[i], endPoint);
+
+                    Span<char> buffer = new char[Encoding.UTF8.GetMaxCharCount(255)];
+                    int charCount = Encoding.UTF8.GetChars(eventBytes, buffer);
+                    ReadOnlySpan<char> path = buffer.Slice(0, charCount);
+                    Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
 
                     // Match Windows and don't notify us about changes to the Root folder
-                    ReadOnlySpan<char> path = eventPaths[i].AsSpan();
-
                     if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
@@ -386,7 +393,7 @@ namespace System.IO
                         if (((eventType & WatcherChangeTypes.Renamed) > 0))
                         {
                             // Find the rename that is paired to this rename, which should be the next rename in the list
-                            long pairedId = FindRenameChangePairedChange(i, eventPaths, eventFlags, eventIds);
+                            long pairedId = FindRenameChangePairedChange(i, eventFlags);
                             if (pairedId == long.MinValue)
                             {
                                 // Getting here means we have a rename without a pair, meaning it should be a create for the 
@@ -409,7 +416,10 @@ namespace System.IO
                             {
                                 // Remove the base directory prefix and add the paired event to the list of 
                                 // events to skip and notify the user of the rename 
-                                ReadOnlySpan<char> newPathRelativeName = eventPaths[pairedId].AsSpan(_fullDirectory.Length);
+                                eventBytes = new ReadOnlySpan<byte>(eventPaths[pairedId], new ReadOnlySpan<byte>(eventPaths[pairedId], 255).IndexOf<byte>(0));
+                                Span<char> renameBuffer = new char[Encoding.UTF8.GetMaxCharCount(255)];
+                                charCount = Encoding.UTF8.GetChars(eventBytes, renameBuffer);
+                                ReadOnlySpan<char> newPathRelativeName =  renameBuffer.Slice(_fullDirectory.Length, charCount - _fullDirectory.Length);
                                 watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
 
                                 // Create a new list, if necessary, and add the event
@@ -482,28 +492,15 @@ namespace System.IO
 
             private bool CheckIfPathIsNested(ReadOnlySpan<char> eventPath)
             {
-                bool doesPathPass = true;
-
-                // If we shouldn't include subdirectories, check if this path's parent is the watch directory
-                if (_includeChildren == false)
-                {
-                    // Check if the parent is the root. If so, then we'll continue processing based on the name.
-                    // If it isn't, then this will be set to false and we'll skip the name processing since it's irrelevant.
-                    ReadOnlySpan<char> parent = System.IO.Path.GetDirectoryName(eventPath);
-                    doesPathPass = _fullDirectory.Length < parent.Length ? false : parent.Equals(_fullDirectory.AsSpan(0, parent.Length), StringComparison.OrdinalIgnoreCase);
-                }
-
-                return doesPathPass;
+                return _includeChildren || _fullDirectory.AsSpan().StartsWith(System.IO.Path.GetDirectoryName(eventPath), StringComparison.OrdinalIgnoreCase);
             }
 
             private long FindRenameChangePairedChange(
                 long currentIndex, 
-                String[] eventPaths,
-                Interop.EventStream.FSEventStreamEventFlags[] eventFlags,
-                FSEventStreamEventId[] eventIds)
+                Interop.EventStream.FSEventStreamEventFlags[] eventFlags)
             {
                 // Start at one past the current index and try to find the next Rename item, which should be the old path.
-                for (long i = currentIndex + 1; i < eventPaths.Length; i++)
+                for (long i = currentIndex + 1; i < eventFlags.Length; i++)
                 {
                     if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     {
