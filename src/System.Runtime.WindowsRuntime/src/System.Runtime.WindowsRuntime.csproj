@@ -86,7 +86,6 @@
     <Compile Include="System\WindowsRuntimeSystemExtensions.CoreRT.cs" />
   </ItemGroup>
   <ItemGroup>
-    
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ResolveLocaleName.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.ResolveLocaleName.cs</Link>
     </Compile>
