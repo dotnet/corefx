@@ -2221,7 +2221,6 @@ namespace System.Net.Http.Functional.Tests
             server => server.AcceptConnectionSendResponseAndCloseAsync());
         }
 
-        [OuterLoop("Multiple connections")]
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
@@ -3215,7 +3214,7 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
-            await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { proxyTask }, TestHelper.PassingTestTimeoutMilliseconds);
+            await proxyTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
             LoopbackGetRequestHttpProxy.ProxyResult proxyResult = proxyTask.Result;
             _output.WriteLine($"Proxy request line: {proxyResult.RequestLine}");
             Assert.Contains("CONNECT", proxyResult.RequestLine);
