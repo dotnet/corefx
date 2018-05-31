@@ -25,7 +25,6 @@ namespace System.Net.Sockets.Tests
         [InlineData(AddressFamily.DataLink)]
         [InlineData(AddressFamily.NetBios)]
         [InlineData(AddressFamily.Unix)]
-        [InlineData(AddressFamily.Unknown)]
         public void Ctor_InvalidFamily_Throws(AddressFamily family)
         {
             AssertExtensions.Throws<ArgumentException>("family", () => new TcpClient(family));
@@ -427,6 +426,28 @@ namespace System.Net.Sockets.Tests
                 sw.Stop();
 
                 Assert.Null(client.Client); // should be nulled out after Dispose
+            }
+        }
+
+        [Fact]
+        public void Connect_Dual_Success()
+        {
+            if (!Socket.OSSupportsIPv6)
+            {
+                return;
+            }
+
+            using (var server = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // Set up a server socket to which to connect
+                server.Bind(new IPEndPoint(IPAddress.IPv6Loopback, 0));
+                server.Listen(1);
+                var endpoint = (IPEndPoint)server.LocalEndPoint;
+
+                using (TcpClient client = new TcpClient())
+                {
+                    client.Connect(endpoint);
+                }
             }
         }
 
