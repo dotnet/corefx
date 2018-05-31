@@ -20,6 +20,8 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
+#else
+#include <sys/poll.h>
 #endif
 #include <errno.h>
 #include <netdb.h>
@@ -39,14 +41,18 @@
 #endif
 #include <unistd.h>
 #include <pwd.h>
+#if !defined(_AIX)
 #if HAVE_SENDFILE_4
 #include <sys/sendfile.h>
 #elif HAVE_SENDFILE_6
 #include <sys/uio.h>
 #endif
+#endif
 #if !HAVE_IN_PKTINFO
 #include <net/if.h>
+#if !defined(_AIX)
 #include <ifaddrs.h>
+#endif
 #endif
 
 #if HAVE_KQUEUE
@@ -782,6 +788,8 @@ static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, struct I
     ConvertInAddrToByteArray(&packetInfo->Address.Address[0], NUM_BYTES_IN_IPV4_ADDRESS, &pktinfo->ipi_addr);
 #if HAVE_IN_PKTINFO
     packetInfo->InterfaceIndex = (int32_t)pktinfo->ipi_ifindex;
+#elif defined(_AIX)
+    // TODO: SIOCGIFCONF based fallback
 #else
     packetInfo->InterfaceIndex = 0;
 
@@ -2247,7 +2255,32 @@ static int32_t WaitForSocketEventsInner(int32_t port, struct SocketEvent* buffer
 }
 
 #else
-#error Asynchronous sockets require epoll or kqueue support.
+// TODO: Poll fallback
+static const size_t SocketEventBufferElementSize = sizeof(struct pollmsg);
+
+static enum SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
+{
+    return SocketEvents_SA_NONE;
+}
+static int32_t CloseSocketEventPortInner(int32_t port)
+{
+    return Error_ENOSYS;
+}
+static int32_t CreateSocketEventPortInner(int32_t* port)
+{
+    return Error_ENOSYS;
+}
+static int32_t TryChangeSocketEventRegistrationInner(
+    int32_t port, int32_t socket, enum SocketEvents currentEvents, enum SocketEvents newEvents,
+uintptr_t data)
+{
+    return Error_ENOSYS;
+}
+static int32_t WaitForSocketEventsInner(int32_t port, struct SocketEvent* buffer, int32_t* count)
+{
+    return Error_ENOSYS;
+}
+
 #endif
 
 int32_t SystemNative_CreateSocketEventPort(intptr_t* port)
@@ -2413,7 +2446,7 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     *sent = 0;
     return SystemNative_ConvertErrorPlatformToPal(errno);
 
-#elif HAVE_SENDFILE_6
+#elif HAVE_SENDFILE_6 && !defined(_AIX) /* why is AIX getting this? */
     *sent = 0;
     while (1) // in case we need to retry for an EINTR
     {
