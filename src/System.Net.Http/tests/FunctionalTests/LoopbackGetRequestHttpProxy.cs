@@ -20,6 +20,7 @@ namespace System.Net.Http.Functional.Tests
     {
         public struct ProxyResult
         {
+            public string RequestLine;
             public byte[] ResponseContent;
             public string AuthenticationHeaderValue;
         }
@@ -57,7 +58,8 @@ namespace System.Net.Http.Functional.Tests
                     clientReader = new StreamReader(clientStream, Encoding.ASCII);
                     headers.Clear();
 
-                    var requestTokens = clientReader.ReadLine().Split(' ');
+                    result.RequestLine = clientReader.ReadLine();
+                    string[] requestTokens = result.RequestLine.Split(' ');
                     method = requestTokens[0];
                     url = requestTokens[1];
                     string line;
