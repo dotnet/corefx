@@ -18,7 +18,6 @@ BEGIN_EXTERN_C
 #if defined(_AIX) && !defined(O_CLOEXEC)
 // HACK: Try to get AIX 6.1 & i 7.1 working; AIX 7.1 & i (claims) 7.2 has these but we target
 // these older versions too.
-// (i 7.2 at least defines O_CLOEXEC as 0x0000001000000000LL)
 // Nop this out
 #define F_DUPFD_CLOEXEC 0
 #endif

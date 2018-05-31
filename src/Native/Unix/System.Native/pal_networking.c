@@ -41,16 +41,14 @@
 #endif
 #include <unistd.h>
 #include <pwd.h>
-#if !defined(_AIX)
 #if HAVE_SENDFILE_4
 #include <sys/sendfile.h>
 #elif HAVE_SENDFILE_6
 #include <sys/uio.h>
 #endif
-#endif
 #if !HAVE_IN_PKTINFO
 #include <net/if.h>
-#if !defined(_AIX)
+#if HAVE_GETIFADDRS
 #include <ifaddrs.h>
 #endif
 #endif
@@ -788,9 +786,7 @@ static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, struct I
     ConvertInAddrToByteArray(&packetInfo->Address.Address[0], NUM_BYTES_IN_IPV4_ADDRESS, &pktinfo->ipi_addr);
 #if HAVE_IN_PKTINFO
     packetInfo->InterfaceIndex = (int32_t)pktinfo->ipi_ifindex;
-#elif defined(_AIX)
-    // TODO: SIOCGIFCONF based fallback
-#else
+#elif HAVE_GETIFADDRS
     packetInfo->InterfaceIndex = 0;
 
     struct ifaddrs* addrs;
@@ -2446,7 +2442,7 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     *sent = 0;
     return SystemNative_ConvertErrorPlatformToPal(errno);
 
-#elif HAVE_SENDFILE_6 && !defined(_AIX) /* why is AIX getting this? */
+#elif HAVE_SENDFILE_6
     *sent = 0;
     while (1) // in case we need to retry for an EINTR
     {

@@ -91,7 +91,7 @@ c_static_assert(PAL_S_IFSOCK == S_IFSOCK);
 // Validate that our enum for inode types is the same as what is
 // declared by the dirent.h header on the local system.
 // (AIX doesn't have dirent d_type, so none of this there)
-#if !defined(DT_UNKNOWN)
+#if defined(DT_UNKNOWN)
 c_static_assert(PAL_DT_UNKNOWN == DT_UNKNOWN);
 c_static_assert(PAL_DT_FIFO == DT_FIFO);
 c_static_assert(PAL_DT_CHR == DT_CHR);
