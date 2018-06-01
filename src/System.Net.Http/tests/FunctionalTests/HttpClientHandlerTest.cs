@@ -2599,6 +2599,31 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
+        {
+            if (IsNetfxHandler)
+            {
+                // NetfxHandler defaults ExpectContinue to true and doesn't send
+                // Expect: 100-continue for GET requests, which it doesn't let
+                // have content anyway.
+                return;
+            }
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = CreateHttpClient())
+                {
+                    client.DefaultRequestHeaders.ExpectContinue = true;
+                    await client.GetStringAsync(uri);
+                }
+            }, async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync();
+                Assert.Contains("Expect: 100-continue", headers);
+            });
+        }
+
         [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(false)]
