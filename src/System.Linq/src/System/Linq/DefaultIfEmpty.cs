@@ -23,6 +23,30 @@ namespace System.Linq
             return new DefaultIfEmptyIterator<TSource>(source, defaultValue);
         }
 
+        public static IEnumerable<TSource> DefaultIfEmpty<TSource>(this IEnumerable<TSource> source, IEnumerable<TSource> defaultEnumeration)
+        {
+            if (source == null) throw Error.ArgumentNull("source");
+
+            using (IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                if (e.MoveNext())
+                {
+                    do
+                    {
+                        yield return e.Current;
+                    }
+                    while (e.MoveNext());
+                }
+                else
+                {
+                    foreach (var item in defaultEnumeration)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+
         private sealed class DefaultIfEmptyIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
         {
             private readonly IEnumerable<TSource> _source;
