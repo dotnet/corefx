@@ -2211,7 +2211,10 @@ namespace System.Diagnostics.Tracing
                         break;
                     default:
                         if (innerEx != null)
+                        {
+                            innerEx = innerEx.GetBaseException();
                             ReportOutOfBandMessage(errorPrefix + ": " + innerEx.GetType() + ":" + innerEx.Message, true);
+                        }
                         else
                             ReportOutOfBandMessage(errorPrefix, true);
                         if (ThrowOnEventWriteErrors) throw new EventSourceException(innerEx);
@@ -3168,7 +3171,7 @@ namespace System.Diagnostics.Tracing
 
             if ((flags & EventManifestOptions.Strict) != 0 && (manifest.Errors.Count > 0 || exception != null))
             {
-                string msg = String.Empty;
+                string msg = string.Empty;
                 if (manifest.Errors.Count > 0)
                 {
                     bool firstError = true;
@@ -3550,7 +3553,7 @@ namespace System.Diagnostics.Tracing
             {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
                 // send message to debugger without delay
-                System.Diagnostics.Debugger.Log(0, null, String.Format("EventSource Error: {0}{1}", msg, Environment.NewLine));
+                System.Diagnostics.Debugger.Log(0, null, string.Format("EventSource Error: {0}{1}", msg, Environment.NewLine));
 #endif
 
                 // Send it to all listeners.
@@ -4231,7 +4234,7 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// Gets the arguments for the callback.
         /// </summary>
-        public IDictionary<String, String> Arguments { get; internal set; }
+        public IDictionary<string, string> Arguments { get; internal set; }
 
         /// <summary>
         /// Enables the event that has the specified identifier.

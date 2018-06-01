@@ -13,6 +13,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
     public abstract class HttpClientHandler_Cancellation_Test : HttpClientTestBase
     {
         [Theory]
@@ -362,7 +363,7 @@ namespace System.Net.Http.Functional.Tests
                     "Expected cancellation exception, got:" + Environment.NewLine + error);
             }
 
-            Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 30), $"Elapsed time {stopwatch.Elapsed} should be less than 30 seconds, was {stopwatch.Elapsed.TotalSeconds}");
+            Assert.True(stopwatch.Elapsed < new TimeSpan(0, 0, 60), $"Elapsed time {stopwatch.Elapsed} should be less than 60 seconds, was {stopwatch.Elapsed.TotalSeconds}");
         }
 
         private static void Cancel(CancellationMode mode, HttpClient client, CancellationTokenSource cts)
