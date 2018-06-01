@@ -188,7 +188,7 @@ namespace System.Buffers
                     startIndex += (int)start;
                     begin = new SequencePosition(startObject, startIndex);
 
-                    end = GetEndPosition(startSegment, startObject, startIndex, endObject, endIndex, length);
+                    end = GetEndPosition(startSegment, startIndex, endObject, endIndex, length);
                 }
                 else
                 {
@@ -203,7 +203,7 @@ namespace System.Buffers
                     if (beginObject != endObject)
                     {
                         Debug.Assert(beginObject != null);
-                        end = GetEndPosition((ReadOnlySequenceSegment<T>)beginObject, beginObject, beginIndex, endObject, endIndex, length);
+                        end = GetEndPosition((ReadOnlySequenceSegment<T>)beginObject, beginIndex, endObject, endIndex, length);
                     }
                     else
                     {
@@ -287,7 +287,7 @@ namespace System.Buffers
             int currentLength = startSegment.Memory.Length - (int)startIndex;
 
             // Position not in startSegment
-            if (currentLength <= start)
+            if (currentLength < start || currentLength == start && startSegment != sliceEndObject)
             {
                 if (currentLength < 0)
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -363,7 +363,7 @@ namespace System.Buffers
             int currentLength = sliceStartSegment.Memory.Length - (int)sliceStartIndex;
 
             // Position not in startSegment
-            if (currentLength < length)
+            if (currentLength < length || currentLength == length && sliceStartSegment != endObject)
             {
                 if (currentLength < 0)
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -431,9 +431,6 @@ namespace System.Buffers
         {
             if (start < 0)
                 ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
-
-            if (start == 0)
-                return this;
 
             SequencePosition begin = Seek(_sequenceStart, _sequenceEnd, start, ExceptionArgument.start);
             return SliceImpl(begin, _sequenceEnd);

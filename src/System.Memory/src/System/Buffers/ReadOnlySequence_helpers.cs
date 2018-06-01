@@ -285,13 +285,13 @@ namespace System.Buffers
             }
         }
 
-        private static SequencePosition GetEndPosition(ReadOnlySequenceSegment<T> startSegment, object startObject, int startIndex, object endObject, int endIndex, long length)
+        private static SequencePosition GetEndPosition(ReadOnlySequenceSegment<T> startSegment, int startIndex, object endObject, int endIndex, long length)
         {
             int currentLength = startSegment.Memory.Length - startIndex;
 
             if (currentLength > length)
             {
-                return new SequencePosition(startObject, startIndex + (int)length);
+                return new SequencePosition(startSegment, startIndex + (int)length);
             }
 
             if (currentLength < 0)
