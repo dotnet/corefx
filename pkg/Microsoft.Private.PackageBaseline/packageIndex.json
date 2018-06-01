@@ -2480,17 +2480,11 @@
       ],
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0",
-        "monoandroid10": "Any",
-        "monotouch10": "Any",
-        "uap10.0.16300": "4.1.0.0",
-        "xamarinios10": "Any",
-        "xamarinmac20": "Any",
-        "xamarintvos10": "Any",
-        "xamarinwatchos10": "Any"
+        "uap10.0.16300": "4.1.0.0"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0",
-        "4.0.1.0": "4.5.0"
+        "4.0.1.0": "4.5.1"
       }
     },
     "System.Messaging": {
