@@ -8,44 +8,12 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class FormattableStringTests : RemoteExecutorTestBase
+    public partial class FormattableStringTests : RemoteExecutorTestBase
     {
-        [Fact]
-        public static void CurrentCulture_ImplicityAndExplicitMethodsReturnSameString()
-        {
-            double d = 123.456;
-            string text1 = $"This will be formatted using current culture {d}";
-            string text2 = FormattableString.CurrentCulture($"This will be formatted using current culture {d}");
-            Assert.Equal(text1, text2);
-        }
-
-        [Fact]
-        public static void CurrentCulture_Null_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => FormattableString.CurrentCulture(null));
-        }
-
-        [Fact]
-        public static void CurrentCulture_DutchCulture_FormatsDoubleBasedOnCurrentCulture()
-        {
-            RemoteInvoke(
-                () =>
-                {
-                    var dutchCulture = new CultureInfo("nl");
-                    CultureInfo.CurrentCulture = dutchCulture;
-                    double d = 123.456;
-                    string expected = string.Format(dutchCulture, "Dutch decimal separator is comma {0}", d);
-                    string actual = FormattableString.CurrentCulture($"Dutch decimal separator is comma {d}");
-                    Assert.Equal(expected, actual);
-
-                    return SuccessExitCode;
-                }).Dispose();
-        }
-
         [Fact]
         public static void Invariant_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => FormattableString.Invariant(null));
+            AssertExtensions.Throws<ArgumentNullException>("formattable", () => FormattableString.Invariant(null));
         }
 
         [Fact]
