@@ -8,7 +8,6 @@ namespace System.Text.RegularExpressions.Tests
     class GroupCollectionReadOnlyDictionaryTests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
         public static void IReadOnlyDictionary_TryGetValueSuccess()
         {
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
@@ -23,6 +22,24 @@ namespace System.Text.RegularExpressions.Tests
             else
             {
                 Assert.True(false, "Value should exist");
+            }
+        }
+
+        [Fact]
+        public static void IReadOnlyDictionary_TryGetValue_DoesntExist()
+        {
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            Match match = regex.Match("aaabbccccccccccaaaabc");
+
+            var groups = match.Groups;
+
+            if (groups.TryGetValue("A1", out Group value))
+            {
+                Assert.True(false, "Value should not exist");
+            }
+            else
+            {
+                Assert.Null(value);
             }
         }
 
