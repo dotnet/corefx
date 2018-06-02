@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -127,6 +128,10 @@ namespace System.ComponentModel
             [typeof(Guid)] = typeof(GuidConverter),
             [typeof(Uri)] = typeof(UriTypeConverter),
             [typeof(Color)] = typeof(ColorConverter),
+            [typeof(Font)] = typeof(FontConverter),
+            [typeof(Icon)] = typeof(IconConverter),
+            [typeof(Image)] = typeof(ImageConverter),
+            [typeof(ImageFormat)] = typeof(ImageFormatConverter),
             [typeof(Point)] = typeof(PointConverter),
             [typeof(Rectangle)] = typeof(RectangleConverter),
             [typeof(Size)] = typeof(SizeConverter),

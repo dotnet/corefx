@@ -250,7 +250,7 @@ namespace System.ComponentModel
         public System.Type ReceiverType { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
-        public override bool IsDefaultAttribute() { throw null; }        
+        public override bool IsDefaultAttribute() { throw null; }
     }
     public partial class GuidConverter : System.ComponentModel.TypeConverter
     {
@@ -456,7 +456,7 @@ namespace System.ComponentModel
         void System.Collections.IDictionary.Clear() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         void System.Collections.IList.Clear() { throw null; }
-        void System.Collections.IList.RemoveAt(int index) { throw null; }     
+        void System.Collections.IList.RemoveAt(int index) { throw null; }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple = true)]
     public sealed partial class ProvidePropertyAttribute : System.Attribute
@@ -688,7 +688,7 @@ namespace System.ComponentModel
         public static System.ComponentModel.Design.IDesigner CreateDesigner(IComponent component, Type designerBaseType) { throw null; }
 #pragma warning disable 0618
         [ObsoleteAttribute("This property has been deprecated.  Use a type description provider to supply type information for COM types instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
-        public static IComNativeDescriptorHandler ComNativeDescriptorHandler { get; set; }        
+        public static IComNativeDescriptorHandler ComNativeDescriptorHandler { get; set; }
 #pragma warning restore 0618
     }
     public abstract partial class TypeListConverter : System.ComponentModel.TypeConverter
@@ -725,6 +725,63 @@ namespace System.Drawing
         public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
         public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, System.Type destinationType) { throw null; }
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+        public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+    }
+    public class FontConverter : System.ComponentModel.TypeConverter
+    {
+        public FontConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object CreateInstance(System.ComponentModel.ITypeDescriptorContext context, System.Collections.IDictionary propertyValues) { throw null; }
+        public override bool GetCreateInstanceSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+        public override System.ComponentModel.PropertyDescriptorCollection GetProperties(System.ComponentModel.ITypeDescriptorContext context, object value, Attribute[] attributes) { throw null; }
+        public override bool GetPropertiesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+
+        public sealed class FontNameConverter : System.ComponentModel.TypeConverter, IDisposable
+        {
+            public FontNameConverter() { }
+            void IDisposable.Dispose() { }
+            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+            public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+            public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+            public override bool GetStandardValuesExclusive(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+            public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+        }
+
+        public class FontUnitConverter : System.ComponentModel.EnumConverter
+        {
+            public FontUnitConverter() : base(typeof(object)) { }
+            public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+        }
+    }
+    public class IconConverter : System.ComponentModel.ExpandableObjectConverter
+    {
+        public IconConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+    }
+    public class ImageConverter : System.ComponentModel.TypeConverter
+    {
+        public ImageConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+        public override System.ComponentModel.PropertyDescriptorCollection GetProperties(System.ComponentModel.ITypeDescriptorContext context, object value, Attribute[] attributes) { throw null; }
+        public override bool GetPropertiesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
+    }
+    public class ImageFormatConverter : System.ComponentModel.TypeConverter
+    {
+        public ImageFormatConverter() { }
+        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType) { throw null; }
+        public override bool CanConvertTo(System.ComponentModel.ITypeDescriptorContext context, Type destinationType) { throw null; }
+        public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) { throw null; }
+        public override object ConvertTo(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) { throw null; }
+        public override StandardValuesCollection GetStandardValues(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
         public override bool GetStandardValuesSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
     }
     public partial class PointConverter : System.ComponentModel.TypeConverter
