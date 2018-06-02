@@ -98,12 +98,30 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void ExtendedProtectionPolicy_NoCustomServiceNames_ToString()
+        public void ExtendedProtectionPolicy_NoCustomServiceNamesAndNoCustomChannelBinding_ToString()
         {
             // Arrange
             var policyEnforcementParam = PolicyEnforcement.Always;
             var extendedProtectionPolicy = new ExtendedProtectionPolicy(policyEnforcementParam);
             var expectedString = $"ProtectionScenario={extendedProtectionPolicy.ProtectionScenario}; PolicyEnforcement={policyEnforcementParam}; CustomChannelBinding=<null>; ServiceNames=<null>";
+
+            // Act
+            var result = extendedProtectionPolicy.ToString();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedString, result);
+        }
+
+        [Fact]
+        public void ExtendedProtectionPolicy_NoCustomServiceNames_ToString()
+        {
+            // Arrange
+            var policyEnforcementParam = PolicyEnforcement.Always;
+            var channelBinding = new MockCustomChannelBinding();
+            var extendedProtectionPolicy = new ExtendedProtectionPolicy(policyEnforcementParam, channelBinding);
+            var expectedChannelBindingString = channelBinding.ToString();
+            var expectedString = $"ProtectionScenario={extendedProtectionPolicy.ProtectionScenario}; PolicyEnforcement={policyEnforcementParam}; CustomChannelBinding={expectedChannelBindingString}; ServiceNames=<null>";
 
             // Act
             var result = extendedProtectionPolicy.ToString();
