@@ -17,7 +17,7 @@ namespace System.Text.RegularExpressions
     /// </summary>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(CollectionDebuggerProxy<Group>))]
-    public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList
+    public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList, IReadOnlyDictionary<string, Group>
     {
         private readonly Match _match;
         private readonly Hashtable _captureMap;
@@ -250,5 +250,69 @@ namespace System.Text.RegularExpressions
 
             void IDisposable.Dispose() { }
         }
+
+        public bool TryGetValue(string key, out Group value)
+        {
+            if (ContainsKey(key))
+            {
+                value = this[key];
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _match._regex.GroupNumberFromName(key) >= 0;
+        }
+
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                return _match._regex.GetGroupNames();
+            }
+        }
+
+        public IEnumerable<Group> Values
+        {
+            get
+            {
+                return this._groups;
+            }
+        }
+
+        private sealed class EnumeratorKeyValue : IEnumerator<KeyValuePair<string, Group>>
+        {
+            private Enumerator _collectionEnumerator;
+
+            public EnumeratorKeyValue(GroupCollection collection)
+            {
+                _collectionEnumerator = new Enumerator(collection);
+            }
+
+            public KeyValuePair<string, Group> Current
+            {
+                get
+                {
+                    var value = _collectionEnumerator.Current;
+
+                    return new KeyValuePair<string, Group>(value.Name, value);
+                }
+            }
+
+            bool IEnumerator.MoveNext() => _collectionEnumerator.MoveNext();
+
+            void IDisposable.Dispose() => ((IDisposable)_collectionEnumerator).Dispose();
+            void IEnumerator.Reset() => ((IEnumerator)_collectionEnumerator).Reset();
+            object IEnumerator.Current => Current;
+        }
+
+        IEnumerator<KeyValuePair<string, Group>> IEnumerable<KeyValuePair<string, Group>>.GetEnumerator()
+        {
+            return new EnumeratorKeyValue(this);
+        }
     }
+
 }
