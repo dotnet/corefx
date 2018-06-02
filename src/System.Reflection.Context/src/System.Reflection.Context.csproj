@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{404DB891-B5AF-41E6-B89D-29E3F4573C4F}</ProjectGuid>
     <!-- Only supported on .NET Framework and .NET Core -->
-    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard1.1'">SR.PlatformNotSupported_ReflectionContext</GeneratePlatformNotSupportedAssemblyMessage>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard1.1' OR '$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_ReflectionContext</GeneratePlatformNotSupportedAssemblyMessage>
     <!-- Xamarin frameworks claim to support PCL profiles which include this assembly,
          but do not include this assembly in their framework.
          This causes NuGet to give them the placeholder from the portable-* folder.
@@ -15,6 +15,8 @@
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.1-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
