@@ -720,7 +720,7 @@ namespace System.Text
                         // be careful about the sign extension
                         ch = (int)(((uint)ch) >> 16);
                     }
-		    else
+                    else
                     {
                         ch = (char)ch;
                     }
@@ -1145,8 +1145,8 @@ namespace System.Text
                         }
 
                         // Unfortunately, this is endianess sensitive
-			if (!BitConverter.IsLittleEndian)
-			{
+                        if (!BitConverter.IsLittleEndian)
+                        {
                             *pTarget = (byte)(ch>>16);
                             *(pTarget+1) = (byte)ch;
                             pSrc += 4;
@@ -1154,8 +1154,8 @@ namespace System.Text
                             *(pTarget+3) = (byte)chc;
                             pTarget += 4;
                         }
-			else
-			{
+                        else
+                        {
                             *pTarget = (byte)ch;
                             *(pTarget + 1) = (byte)(ch >> 16);
                             pSrc += 4;
@@ -1168,12 +1168,12 @@ namespace System.Text
 
                 LongCodeWithMask:
                     if (!BitConverter.IsLittleEndian)
-		    { 
+                    {
                         // be careful about the sign extension
                         ch = (int)(((uint)ch) >> 16);
                     }
-		    else
-		    {
+                    else
+                    {
                         ch = (char)ch;
                     }
                     pSrc++;
@@ -1574,24 +1574,24 @@ namespace System.Text
                     break;
 
                 LongCodeWithMask32:
-		    if (!BitConverter.IsLittleEndian)
-		    {
+                    if (!BitConverter.IsLittleEndian)
+                    {
                         // be careful about the sign extension
                         ch = (int)(((uint)ch) >> 16);
-		    }
-		    else
-		    {
+                    }
+                    else
+                    {
                         ch &= 0xFF;
-		    }
+                    }
                 LongCodeWithMask16:
-		    if (!BitConverter.IsLittleEndian)
-		    {
+                    if (!BitConverter.IsLittleEndian)
+                    {
                         ch = (int)(((uint)ch) >> 8);
-		    }
-		    else
-		    {
+                    }
+                    else
+                    {
                         ch &= 0xFF;
-		    }
+                    }
 
                     pSrc++;
                     if (ch <= 0x7F)
@@ -2067,14 +2067,14 @@ namespace System.Text
 
                         // Unfortunately, this is endianess sensitive
                         if (!BitConverter.IsLittleEndian)
-			{
+                        {
                             *pTarget = (char)((ch >> 8) & 0x7F);
                             pSrc += 2;
                             *(pTarget+1) = (char)(ch & 0x7F);
                             pTarget += 2;
                         }
-			else
-			{
+                        else
+                        {
                             *pTarget = (char)(ch & 0x7F);
                             pSrc += 2;
                             *(pTarget + 1) = (char)((ch >> 8) & 0x7F);
@@ -2094,7 +2094,7 @@ namespace System.Text
 
                         // Unfortunately, this is endianess sensitive
                         if (!BitConverter.IsLittleEndian)
-			{
+                        {
                             *pTarget = (char)((ch >> 24) & 0x7F);
                             *(pTarget+1) = (char)((ch >> 16) & 0x7F);
                             *(pTarget+2) = (char)((ch >> 8) & 0x7F);
@@ -2106,8 +2106,8 @@ namespace System.Text
                             *(pTarget+7) = (char)(chb & 0x7F);
                             pTarget += 8;
                         }
-			else
-			{
+                        else
+                        {
                             *pTarget = (char)(ch & 0x7F);
                             *(pTarget + 1) = (char)((ch >> 8) & 0x7F);
                             *(pTarget + 2) = (char)((ch >> 16) & 0x7F);
@@ -2123,12 +2123,12 @@ namespace System.Text
                     break;
 
                 LongCodeWithMask32:
-		    if (!BitConverter.IsLittleEndian)
-		    {
+                    if (!BitConverter.IsLittleEndian)
+                    {
                         // be careful about the sign extension
                         ch = (int)(((uint)ch) >> 16);
                     }
-		    else
+                    else
                     {
                         ch &= 0xFF;
                     }
@@ -2137,7 +2137,7 @@ namespace System.Text
                     {
                         ch = (int)(((uint)ch) >> 8);
                     }
-		    else
+                    else
                     {
                         ch &= 0xFF;
                     }
