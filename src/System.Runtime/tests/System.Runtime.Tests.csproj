@@ -55,7 +55,6 @@
     <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
       <Link>System\SpanTestHelpers.cs</Link>
     </Compile>
-    <Compile Include="System\FormattableStringTests.cs" />
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttributeTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
@@ -85,6 +84,7 @@
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
+    <Compile Include="System\FormattableStringTests.cs" />
     <Compile Include="System\GCTests.cs" />
     <Compile Include="System\GuidTests.cs" />
     <Compile Include="System\HandleTests.cs" />
