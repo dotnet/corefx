@@ -27,6 +27,14 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public void Constructor_PolicyEnforcementChannelBinding_NeverParam()
+        {
+            var customChannelBinding = new MockCustomChannelBinding();
+            var ex = AssertExtensions.Throws<ArgumentException>("policyEnforcement", () => new ExtendedProtectionPolicy(PolicyEnforcement.Never, customChannelBinding));
+            Assert.Equal(typeof(ArgumentException), ex.GetType());
+        }
+
+        [Fact]
         public void Constructor_ChannelBinding_NullParam()
         {
             var ex = AssertExtensions.Throws<ArgumentNullException>("customChannelBinding", () => new ExtendedProtectionPolicy(PolicyEnforcement.Always, null));
