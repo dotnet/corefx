@@ -41,6 +41,7 @@ namespace System.Tests
                     return SuccessExitCode;
                 }).Dispose();
         }
+
         [Fact]
         public static void Invariant_Null_ThrowsArgumentNullException()
         {
@@ -62,6 +63,5 @@ namespace System.Tests
                     return SuccessExitCode;
                 }).Dispose();
         }
-
     }
 }
