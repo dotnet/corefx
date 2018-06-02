@@ -205,6 +205,43 @@ namespace System.Text.RegularExpressions
             set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
         }
 
+        IEnumerator<KeyValuePair<string, Group>> IEnumerable<KeyValuePair<string, Group>>.GetEnumerator()
+        {
+            return new EnumeratorKeyValue(this);
+        }
+
+        public bool TryGetValue(string key, out Group value)
+        {
+            if (ContainsKey(key))
+            {
+                value = this[key];
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _match._regex.GroupNumberFromName(key) >= 0;
+        }
+
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                return _match._regex.GetGroupNames();
+            }
+        }
+
+        public IEnumerable<Group> Values
+        {
+            get
+            {
+                return this._groups;
+            }
+        }
+
         private sealed class Enumerator : IEnumerator<Group>
         {
             private readonly GroupCollection _collection;
@@ -251,38 +288,6 @@ namespace System.Text.RegularExpressions
             void IDisposable.Dispose() { }
         }
 
-        public bool TryGetValue(string key, out Group value)
-        {
-            if (ContainsKey(key))
-            {
-                value = this[key];
-                return true;
-            }
-            value = null;
-            return false;
-        }
-
-        public bool ContainsKey(string key)
-        {
-            return _match._regex.GroupNumberFromName(key) >= 0;
-        }
-
-        public IEnumerable<string> Keys
-        {
-            get
-            {
-                return _match._regex.GetGroupNames();
-            }
-        }
-
-        public IEnumerable<Group> Values
-        {
-            get
-            {
-                return this._groups;
-            }
-        }
-
         private sealed class EnumeratorKeyValue : IEnumerator<KeyValuePair<string, Group>>
         {
             private Enumerator _collectionEnumerator;
@@ -308,11 +313,5 @@ namespace System.Text.RegularExpressions
             void IEnumerator.Reset() => ((IEnumerator)_collectionEnumerator).Reset();
             object IEnumerator.Current => Current;
         }
-
-        IEnumerator<KeyValuePair<string, Group>> IEnumerable<KeyValuePair<string, Group>>.GetEnumerator()
-        {
-            return new EnumeratorKeyValue(this);
-        }
     }
-
 }
