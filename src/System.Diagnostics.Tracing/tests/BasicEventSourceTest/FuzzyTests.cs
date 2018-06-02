@@ -4,9 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #if USE_MDT_EVENTSOURCE
 using Microsoft.Diagnostics.Tracing;
 #else
@@ -22,14 +19,28 @@ namespace BasicEventSourceTests
     public class FuzzyTests
     {
         /// <summary>
-        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism).  
+        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism) for not Windows Nano server.
         /// </summary>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
-        public void Test_Write_Fuzzy()
+        public void Test_Write_Fuzzy_IsNotWindowsNanoServer()
         {
             TestFixture((logger, tests) =>
             {
-#if USE_ETW
+                using (var listener = new EventListenerListener())
+                {
+                    EventTestHarness.RunTests(tests, listener, logger);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism) for Windows platform.
+        /// </summary>
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
+        public void Test_Write_Fuzzy_IsWindows()
+        {
+            TestFixture((logger, tests) =>
+            {
                 if (TestUtilities.IsProcessElevated)
                 {
                     using (var listener = new EtwListener())
@@ -37,7 +48,7 @@ namespace BasicEventSourceTests
                         EventTestHarness.RunTests(tests, listener, logger);
                     }
                 }
-#endif // USE_ETW
+
                 using (var listener = new EventListenerListener())
                 {
                     EventTestHarness.RunTests(tests, listener, logger);
