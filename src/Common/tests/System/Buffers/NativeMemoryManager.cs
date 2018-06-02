@@ -16,6 +16,11 @@ namespace System.Buffers
 
         public NativeMemoryManager(int length)
         {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+
             _length = length;
             _ptr = Marshal.AllocHGlobal(length);
         }
