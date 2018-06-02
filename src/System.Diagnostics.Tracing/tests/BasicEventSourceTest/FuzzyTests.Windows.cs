@@ -1,5 +1,4 @@
-﻿using Microsoft.Diagnostics.Tracing.Session;
-using System;
+﻿using System;
 using Xunit;
 
 namespace BasicEventSourceTests
