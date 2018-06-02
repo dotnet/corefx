@@ -67,24 +67,25 @@ namespace System
             }
             return sb.ToString();
         }
-
-        private static char HexDigit(int num) =>
-            (char)((num < 10) ? (num + '0') : (num + ('A' - 10)));
         
         private static string EncodeHexString(byte[] sArray) 
         {
             if (sArray == null) return null;
 
-            Span<char> hexOrder = stackalloc char[sArray.Length * 2];
+            return string.Create(sArray.Length * 2, sArray, (chars, arr) =>
+            {
+                for (int i = 0, j = 0; i < arr.Length; i++)
+                {
+                    int digit = (arr[i] & 0xf0) >> 4;
+                    chars[j++] = HexDigit(digit);
 
-            for(int i = 0, j = 0; i < sArray.Length; i++) {
-                int digit = (int)((sArray[i] & 0xf0) >> 4);
-                hexOrder[j++] = HexDigit(digit);
+                    digit = arr[i] & 0x0f;
+                    chars[j++] = HexDigit(digit);
+                }
+            });
 
-                digit = (int)(sArray[i] & 0x0f);
-                hexOrder[j++] = HexDigit(digit);
-            }
-            return new string(hexOrder);
+            char HexDigit(int num) =>
+                (char)((num < 10) ? (num + '0') : (num + ('A' - 10)));
         }
  
         public override bool Equals (object o)
