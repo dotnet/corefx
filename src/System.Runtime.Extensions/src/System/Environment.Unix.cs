@@ -50,7 +50,7 @@ namespace System
                 result.Append(name.AsSpan(lastPos, pos - lastPos));
                 lastPos = pos;
             }
-            result.Append(name.Substring(lastPos));
+            result.Append(name.AsSpan(lastPos));
 
             return result.ToString();
         }
