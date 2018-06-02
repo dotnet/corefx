@@ -47,7 +47,7 @@ namespace System
                         continue;
                     }
                 }
-                result.Append(name.Substring(lastPos, pos - lastPos));
+                result.Append(name.AsSpan(lastPos, pos - lastPos));
                 lastPos = pos;
             }
             result.Append(name.Substring(lastPos));

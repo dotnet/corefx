@@ -56,7 +56,7 @@ namespace System
             if (_publicKeyToken != null)
             {
                 sb.Append(", publicKeyToken=\"");
-                sb.Append(EncodeHexString(_publicKeyToken));
+                EncodeHexString(_publicKeyToken, ref sb);
                 sb.Append('"');
             }
             if (ProcessorArchitecture != null)
@@ -67,27 +67,22 @@ namespace System
             }
             return sb.ToString();
         }
-        
-        private static string EncodeHexString(byte[] sArray) 
+
+        private static void EncodeHexString(byte[] sArray, ref ValueStringBuilder stringBuilder)
         {
-            if (sArray == null) return null;
-
-            return string.Create(sArray.Length * 2, sArray, (chars, arr) =>
+            for (int i = 0; i < sArray.Length; i++)
             {
-                for (int i = 0, j = 0; i < arr.Length; i++)
-                {
-                    int digit = (arr[i] & 0xf0) >> 4;
-                    chars[j++] = HexDigit(digit);
+                int digit = (sArray[i] & 0xf0) >> 4;
+                stringBuilder.Append(HexDigit(digit));
 
-                    digit = arr[i] & 0x0f;
-                    chars[j++] = HexDigit(digit);
-                }
-            });
+                digit = sArray[i] & 0x0f;
+                stringBuilder.Append(HexDigit(digit));
+            }
 
             char HexDigit(int num) =>
                 (char)((num < 10) ? (num + '0') : (num + ('A' - 10)));
         }
- 
+
         public override bool Equals (object o)
         {
             ApplicationId other = (o as ApplicationId);
