@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Net.Primitives.Functional.Tests
@@ -106,6 +106,31 @@ namespace System.Net.Primitives.Functional.Tests
             CookieCollection cc = new CookieCollection();
 
             Assert.Throws<ArgumentNullException>(() => cc.Add((CookieCollection)null));
+        }
+
+        [Fact]
+        public static void Clear_Success()
+        {
+            ICollection<Cookie> cc = CreateCookieCollection1();
+            cc.Clear();
+            Assert.Equal(0, cc.Count);
+        }
+
+        [Fact]
+        public static void Contains_Success()
+        {
+            ICollection<Cookie> cc = new CookieCollection();
+            cc.Add(c1);
+            Assert.True(cc.Contains(c1));
+            Assert.False(cc.Contains(c2));
+        }
+
+        [Fact]
+        public static void Remove_Success()
+        {
+            ICollection<Cookie> cc = CreateCookieCollection1();
+            Assert.True(cc.Remove(c1));
+            Assert.False(cc.Contains(c1));
         }
 
         [Fact]

@@ -13,7 +13,7 @@ namespace System.Net
     // A list of cookies maintained in Sorted order. Only one cookie with matching Name/Domain/Path
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public class CookieCollection : ICollection
+    public class CookieCollection : ICollection<Cookie>, IReadOnlyCollection<Cookie>, ICollection
     {
         internal enum Stamp
         {
@@ -23,7 +23,7 @@ namespace System.Net
             SetToMaxUsed = 3,
         }
 
-        private readonly ArrayList m_list = new ArrayList();
+        private readonly List<Cookie> m_list = new List<Cookie>();
 
         private int m_version; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
         private DateTime m_TimeStamp = DateTime.MinValue; // Do not rename (binary serialization)
@@ -41,7 +41,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                return m_list[index] as Cookie;
+                return m_list[index];
             }
         }
 
@@ -93,6 +93,28 @@ namespace System.Net
             {
                 Add(cookie);
             }
+        }
+
+        public void Clear()
+        {
+            m_list.Clear();
+        }
+
+        public bool Contains(Cookie cookie)
+        {
+            var idx = IndexOf(cookie);
+            return idx >= 0;
+        }
+
+        public bool Remove(Cookie cookie)
+        {
+            var idx = IndexOf(cookie);
+            if (idx == -1)
+            {
+                return false;
+            }
+            m_list.RemoveAt(idx);
+            return true;
         }
 
         public bool IsReadOnly
@@ -241,9 +263,14 @@ namespace System.Net
             m_list.RemoveAt(idx);
         }
 
-        public IEnumerator GetEnumerator()
+        public IEnumerator<Cookie> GetEnumerator()
         {
             return m_list.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

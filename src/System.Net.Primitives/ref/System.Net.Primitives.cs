@@ -43,7 +43,7 @@ namespace System.Net
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
-    public partial class CookieCollection : System.Collections.ICollection, System.Collections.IEnumerable
+    public partial class CookieCollection : System.Collections.Generic.ICollection<System.Net.Cookie>, System.Collections.Generic.IReadOnlyCollection<System.Net.Cookie>, System.Collections.Generic.IEnumerable<System.Net.Cookie>, System.Collections.ICollection, System.Collections.IEnumerable
     {
         public CookieCollection() { }
         public int Count { get { throw null; } }
@@ -53,7 +53,11 @@ namespace System.Net
         public object SyncRoot { get { throw null; } }
         public void Add(System.Net.Cookie cookie) { }
         public void Add(System.Net.CookieCollection cookies) { }
-        public System.Collections.IEnumerator GetEnumerator() { throw null; }
+        public void Clear() { }
+        public bool Contains(System.Net.Cookie cookie) { throw null; }
+        public bool Remove(System.Net.Cookie cookie) { throw null; }
+        public System.Collections.Generic.IEnumerator<System.Net.Cookie> GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public void CopyTo(System.Array array, int index) { }
         public void CopyTo(Cookie[] array, int index) { }
         public bool IsReadOnly { get { throw null; } }
