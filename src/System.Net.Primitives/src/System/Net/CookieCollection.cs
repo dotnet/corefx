@@ -23,7 +23,7 @@ namespace System.Net
             SetToMaxUsed = 3,
         }
 
-        private readonly List<Cookie> m_list = new List<Cookie>();
+        private readonly ArrayList m_list = new ArrayList();
 
         private int m_version; // Do not rename (binary serialization). This field only exists for netfx serialization compatibility.
         private DateTime m_TimeStamp = DateTime.MinValue; // Do not rename (binary serialization)
@@ -41,7 +41,7 @@ namespace System.Net
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
-                return m_list[index];
+                return m_list[index] as Cookie;
             }
         }
 
@@ -264,12 +264,15 @@ namespace System.Net
 
         IEnumerator<Cookie> IEnumerable<Cookie>.GetEnumerator()
         {
-            return m_list.GetEnumerator();
+            foreach (Cookie cookie in m_list)
+            {
+                yield return cookie;
+            }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable<Cookie>)this).GetEnumerator();
+            return m_list.GetEnumerator();
         }
     }
 }
