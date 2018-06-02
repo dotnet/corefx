@@ -41,7 +41,7 @@ namespace System
 
         public override string ToString ()
         {
-            Span<char> charSpan = stackalloc char[127];
+            Span<char> charSpan = stackalloc char[128];
             var sb = new ValueStringBuilder(charSpan);
             sb.Append(Name);
             if (Culture != null)
