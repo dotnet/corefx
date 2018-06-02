@@ -56,7 +56,7 @@ namespace System.Tests
                     CultureInfo.CurrentCulture = new CultureInfo("nl"); // would be 123,456 in Dutch
                     double d = 123.456;
                     string expected = string.Format(CultureInfo.InvariantCulture, "Invariant culture is used {0}", d);
-                    string actual = FormattableString.CurrentCulture($"Invariant culture is used {d}");
+                    string actual = FormattableString.Invariant($"Invariant culture is used {d}");
                     Assert.Equal(expected, actual);
 
                     return SuccessExitCode;
