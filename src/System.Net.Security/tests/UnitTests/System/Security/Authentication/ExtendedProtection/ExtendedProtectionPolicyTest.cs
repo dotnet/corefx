@@ -45,6 +45,21 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public void Constructor_PolicyEnforcement_MembersAreSet()
+        {
+            // Arrange
+            PolicyEnforcement expectedPolicyEnforcement = PolicyEnforcement.Never;
+            ProtectionScenario expectedProtectionScenario = ProtectionScenario.TransportSelected;
+
+            // Act
+            var sut = new ExtendedProtectionPolicy(expectedPolicyEnforcement);
+
+            // Assert
+            Assert.Equal(expectedPolicyEnforcement, sut.PolicyEnforcement);
+            Assert.Equal(expectedProtectionScenario, sut.ProtectionScenario);
+        }
+
+        [Fact]
         public void ExtendedProtectionPolicy_OSSupportsExtendedProtection()
         {
             Assert.True(ExtendedProtectionPolicy.OSSupportsExtendedProtection);
