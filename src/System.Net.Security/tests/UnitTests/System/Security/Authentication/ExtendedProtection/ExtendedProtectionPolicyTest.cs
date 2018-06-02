@@ -14,31 +14,27 @@ namespace System.Net.Security.Tests
         [Fact]
         public void Constructor_PolicyEnforcement_NeverParam()
         {
-            var ex = AssertExtensions.Throws<ArgumentException>("policyEnforcement", () => new ExtendedProtectionPolicy(PolicyEnforcement.Never, ProtectionScenario.TransportSelected, null));
-            Assert.Equal(typeof(ArgumentException), ex.GetType());
+            AssertExtensions.Throws<ArgumentException>("policyEnforcement", () => new ExtendedProtectionPolicy(PolicyEnforcement.Never, ProtectionScenario.TransportSelected, null));
         }
 
         [Fact]
         public void Constructor_ServiceNameCollection_ZeroElementsParam()
         {
             var paramValue = new ServiceNameCollection(new List<string>());
-            var ex = AssertExtensions.Throws<ArgumentException>("customServiceNames", () => new ExtendedProtectionPolicy(PolicyEnforcement.Always, ProtectionScenario.TransportSelected, paramValue));
-            Assert.Equal(typeof(ArgumentException), ex.GetType());
+            AssertExtensions.Throws<ArgumentException>("customServiceNames", () => new ExtendedProtectionPolicy(PolicyEnforcement.Always, ProtectionScenario.TransportSelected, paramValue));
         }
 
         [Fact]
         public void Constructor_PolicyEnforcementChannelBinding_NeverParam()
         {
             var customChannelBinding = new MockCustomChannelBinding();
-            var ex = AssertExtensions.Throws<ArgumentException>("policyEnforcement", () => new ExtendedProtectionPolicy(PolicyEnforcement.Never, customChannelBinding));
-            Assert.Equal(typeof(ArgumentException), ex.GetType());
+            AssertExtensions.Throws<ArgumentException>("policyEnforcement", () => new ExtendedProtectionPolicy(PolicyEnforcement.Never, customChannelBinding));
         }
 
         [Fact]
         public void Constructor_ChannelBinding_NullParam()
         {
-            var ex = AssertExtensions.Throws<ArgumentNullException>("customChannelBinding", () => new ExtendedProtectionPolicy(PolicyEnforcement.Always, null));
-            Assert.Equal(typeof(ArgumentNullException), ex.GetType());
+            AssertExtensions.Throws<ArgumentNullException>("customChannelBinding", () => new ExtendedProtectionPolicy(PolicyEnforcement.Always, null));
         }
 
         [Fact]
