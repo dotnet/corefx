@@ -1211,11 +1211,11 @@ namespace System
     {
         protected FormattableString() { }
         public abstract int ArgumentCount { get; }
+        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         public abstract string Format { get; }
         public abstract object GetArgument(int index);
         public abstract object[] GetArguments();
         public static string Invariant(System.FormattableString formattable) { throw null; }
-        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         string System.IFormattable.ToString(string ignored, System.IFormatProvider formatProvider) { throw null; }
         public override string ToString() { throw null; }
         public abstract string ToString(System.IFormatProvider formatProvider);
