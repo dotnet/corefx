@@ -91,6 +91,24 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
+        public static void TestAddValueOfDifferentType()
+        {
+            Action action = () =>
+            {
+                IDictionary dict = new ConcurrentDictionary<string, string>();
+                dict["key"] = 1;
+            };
+            Assert.Throws<ArgumentException>(action);
+
+            action = () =>
+            {
+                IDictionary dict = new ConcurrentDictionary<string, string>();
+                dict.Add("key", 1);
+            };
+            Assert.Throws<ArgumentException>(action);
+        }
+
+        [Fact]
         public static void TestAdd1()
         {
             TestAdd1(1, 1, 1, 10000);

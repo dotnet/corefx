@@ -1453,7 +1453,17 @@ namespace System.Collections.Concurrent
             if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
             ThrowIfNullAndNullsAreIllegal(value);
 
-            ((IDictionary<TKey, TValue>)this).Add((TKey)key, (TValue)value);
+            TValue typedValue;
+            try
+            {
+                typedValue = (TValue)value;
+            }
+            catch (InvalidCastException)
+            {
+                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
+            }
+
+            ((IDictionary<TKey, TValue>)this).Add((TKey)key, typedValue);
         }
 
         /// <summary>
@@ -1585,6 +1595,7 @@ namespace System.Collections.Concurrent
                 if (key == null) ThrowKeyNullException();
 
                 if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
+                if ((value != null) && !(value is TValue)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
                 ThrowIfNullAndNullsAreIllegal(value);
 
                 ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value;
