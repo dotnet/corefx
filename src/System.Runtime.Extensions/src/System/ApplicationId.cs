@@ -39,16 +39,9 @@ namespace System
 
         public ApplicationId Copy() => new ApplicationId(_publicKeyToken, Name, Version, ProcessorArchitecture, Culture);
 
-        private static readonly int constLength = nameof(Culture).Length + 5 + 
-                                                  nameof(Version).Length + 5 + 16 +
-                                                  nameof(_publicKeyToken).Length + 5 +
-                                                  nameof(ProcessorArchitecture).Length + 5;
-
         public override string ToString ()
         {
-            int variableLength = Name.Length + (Culture?.Length ?? 0) + _publicKeyToken.Length * 2 +
-                                 ProcessorArchitecture.Length;
-            Span<char> charSpan = stackalloc char[constLength + variableLength];
+            Span<char> charSpan = stackalloc char[255];
             var sb = new ValueStringBuilder(charSpan);
             sb.Append(Name);
             if (Culture != null)
