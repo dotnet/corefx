@@ -1,7 +1,4 @@
-﻿#if USE_ETW
-using Microsoft.Diagnostics.Tracing.Session;
-#endif
-
+﻿using Microsoft.Diagnostics.Tracing.Session;
 using System;
 using Xunit;
 

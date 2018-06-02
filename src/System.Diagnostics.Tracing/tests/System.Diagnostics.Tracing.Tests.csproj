@@ -13,10 +13,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
+    <Compile Condition="'$(TargetsWindows)' == 'true'" Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
       <DependentUpon>FuzzyTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs">
+    <Compile Condition="'$(TargetsWindows)' == 'true'" Include="BasicEventSourceTest\Harness\EtwListener.cs">
       <DependentUpon>Listeners.cs</DependentUpon>
     </Compile>
     <Compile Include="BasicEventSourceTest\Harness\EventListenerListener.cs">
