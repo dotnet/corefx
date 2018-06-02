@@ -45,10 +45,9 @@ namespace System.Net
                 return value;
             }
 
-            Span<char> charSpan = stackalloc char[value.Length];
-            var sb = new ValueStringBuilder(charSpan);
-            HtmlEncode(value, index, ref sb);
-            return sb.ToString();
+            StringBuilder sb = StringBuilderCache.Acquire(value.Length);
+            HtmlEncode(value, index, sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         public static void HtmlEncode(string value, TextWriter output)
@@ -56,9 +55,10 @@ namespace System.Net
             output.Write(HtmlEncode(value));
         }
 
-        private static unsafe void HtmlEncode(string value, int index, ref ValueStringBuilder output)
+        private static unsafe void HtmlEncode(string value, int index, StringBuilder output)
         {
             Debug.Assert(value != null);
+            Debug.Assert(output != null);
             Debug.Assert(0 <= index && index <= value.Length, "0 <= index && index <= value.Length");
 
             int cch = value.Length - index;
