@@ -290,28 +290,50 @@ namespace System.Text.RegularExpressions
 
         private sealed class EnumeratorKeyValue : IEnumerator<KeyValuePair<string, Group>>
         {
-            private Enumerator _collectionEnumerator;
+            private GroupCollection _collection;
+            private int _index;
 
             public EnumeratorKeyValue(GroupCollection collection)
             {
-                _collectionEnumerator = new Enumerator(collection);
+                Debug.Assert(collection != null, "collection cannot be null.");
+
+                _collection = collection;
+                _index = -1;
             }
 
             public KeyValuePair<string, Group> Current
             {
                 get
                 {
-                    var value = _collectionEnumerator.Current;
+                    if (_index < 0 || _index >= _collection.Count)
+                        throw new InvalidOperationException(SR.EnumNotStarted);
+
+                    var value = _collection[_index];
 
                     return new KeyValuePair<string, Group>(value.Name, value);
                 }
             }
 
-            bool IEnumerator.MoveNext() => _collectionEnumerator.MoveNext();
+            bool IEnumerator.MoveNext()
+            {
+                int size = _collection.Count;
 
-            void IDisposable.Dispose() => ((IDisposable)_collectionEnumerator).Dispose();
-            void IEnumerator.Reset() => ((IEnumerator)_collectionEnumerator).Reset();
+                if (_index >= size)
+                    return false;
+
+                _index++;
+
+                return _index < size;
+            }
+
             object IEnumerator.Current => Current;
+
+            void IEnumerator.Reset()
+            {
+                _index = -1;
+            }
+
+            void IDisposable.Dispose() { }
         }
     }
 }
