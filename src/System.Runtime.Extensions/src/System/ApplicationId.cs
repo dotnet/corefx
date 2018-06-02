@@ -39,9 +39,17 @@ namespace System
 
         public ApplicationId Copy() => new ApplicationId(_publicKeyToken, Name, Version, ProcessorArchitecture, Culture);
 
+        private static readonly int constLength = nameof(Culture).Length + 5 + 
+                                                  nameof(Version).Length + 5 + 16 +
+                                                  nameof(_publicKeyToken).Length + 5 +
+                                                  nameof(ProcessorArchitecture).Length + 5;
+
         public override string ToString ()
         {
-            StringBuilder sb = StringBuilderCache.Acquire();
+            int variableLength = Name.Length + (Culture?.Length ?? 0) + _publicKeyToken.Length * 2 +
+                                 ProcessorArchitecture.Length;
+            Span<char> charSpan = stackalloc char[constLength + variableLength];
+            var sb = new ValueStringBuilder(charSpan);
             sb.Append(Name);
             if (Culture != null)
             {
@@ -64,7 +72,7 @@ namespace System
                 sb.Append(ProcessorArchitecture);
                 sb.Append('"');
             }
-            return StringBuilderCache.GetStringAndRelease(sb);
+            return sb.ToString();
         }
 
         private static char HexDigit(int num) =>
@@ -72,22 +80,18 @@ namespace System
         
         private static string EncodeHexString(byte[] sArray) 
         {
-            string result = null;
-    
-            if (sArray != null)
-            {
-                char[] hexOrder = new char[sArray.Length * 2];
-            
-                int digit;
-                for(int i = 0, j = 0; i < sArray.Length; i++) {
-                    digit = (int)((sArray[i] & 0xf0) >> 4);
-                    hexOrder[j++] = HexDigit(digit);
-                    digit = (int)(sArray[i] & 0x0f);
-                    hexOrder[j++] = HexDigit(digit);
-                }
-                result = new string(hexOrder);
+            if (sArray == null) return null;
+
+            Span<char> hexOrder = stackalloc char[sArray.Length * 2];
+
+            for(int i = 0, j = 0; i < sArray.Length; i++) {
+                int digit = (int)((sArray[i] & 0xf0) >> 4);
+                hexOrder[j++] = HexDigit(digit);
+
+                digit = (int)(sArray[i] & 0x0f);
+                hexOrder[j++] = HexDigit(digit);
             }
-            return result;
+            return new string(hexOrder);
         }
  
         public override bool Equals (object o)
