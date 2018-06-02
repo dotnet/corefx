@@ -154,10 +154,9 @@ namespace System.Net
                 return value;
             }
 
-            Span<char> charSpan = stackalloc char[value.Length];
-            var sb = new ValueStringBuilder(charSpan);
-            HtmlDecode(value, ref sb);
-            return sb.ToString();
+            StringBuilder sb = StringBuilderCache.Acquire(value.Length);
+            HtmlDecode(value, sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         public static void HtmlDecode(string value, TextWriter output)
@@ -166,8 +165,10 @@ namespace System.Net
         }
 
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.UInt16.TryParse(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.UInt16@)", Justification = "UInt16.TryParse guarantees that result is zero if the parse fails.")]
-        private static void HtmlDecode(string value, ref ValueStringBuilder output)
+        private static void HtmlDecode(string value, StringBuilder output)
         {
+            Debug.Assert(output != null);
+
             int l = value.Length;
             for (int i = 0; i < l; i++)
             {
