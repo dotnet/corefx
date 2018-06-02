@@ -13,6 +13,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
+      <DependentUpon>FuzzyTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs">
+      <DependentUpon>Listeners.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BasicEventSourceTest\Harness\EventListenerListener.cs">
+      <DependentUpon>Listeners.cs</DependentUpon>
+    </Compile>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
     <Compile Include="BasicEventSourceTest\FuzzyTests.cs" />
     <Compile Include="BasicEventSourceTest\Harness\Listeners.cs" />
@@ -40,7 +49,7 @@
     <Compile Include="CustomEventSources\UseInterfaceEventSource.cs" />
   </ItemGroup>
   <ItemGroup>
-      <ReferenceFromRuntime Include="Microsoft.Diagnostics.Tracing.TraceEvent" />
+    <ReferenceFromRuntime Include="Microsoft.Diagnostics.Tracing.TraceEvent" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
