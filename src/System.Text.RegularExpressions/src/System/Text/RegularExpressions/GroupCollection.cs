@@ -207,18 +207,19 @@ namespace System.Text.RegularExpressions
 
         IEnumerator<KeyValuePair<string, Group>> IEnumerable<KeyValuePair<string, Group>>.GetEnumerator()
         {
-            return new EnumeratorKeyValue(this);
+            return new Enumerator(this);
         }
 
         public bool TryGetValue(string key, out Group value)
         {
-            if (ContainsKey(key))
+            var group = this[key];
+            if (group == Group.s_emptyGroup)
             {
-                value = this[key];
-                return true;
+                value = null;
+                return false;
             }
-            value = null;
-            return false;
+            value = group;
+            return true;
         }
 
         public bool ContainsKey(string key)
@@ -230,7 +231,12 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                return _match._regex.GetGroupNames();
+                var enumerator = new Enumerator(this);
+
+                while (enumerator.MoveNext())
+                {
+                    yield return enumerator.Current.Name;
+                }
             }
         }
 
@@ -238,11 +244,16 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                return this._groups;
+                var enumerator = new Enumerator(this);
+
+                while (enumerator.MoveNext())
+                {
+                    yield return enumerator.Current;
+                }
             }
         }
 
-        private sealed class Enumerator : IEnumerator<Group>
+        private sealed class Enumerator : IEnumerator<Group>, IEnumerator<KeyValuePair<string, Group>>
         {
             private readonly GroupCollection _collection;
             private int _index;
@@ -278,30 +289,7 @@ namespace System.Text.RegularExpressions
                 }
             }
 
-            object IEnumerator.Current => Current;
-
-            void IEnumerator.Reset()
-            {
-                _index = -1;
-            }
-
-            void IDisposable.Dispose() { }
-        }
-
-        private sealed class EnumeratorKeyValue : IEnumerator<KeyValuePair<string, Group>>
-        {
-            private GroupCollection _collection;
-            private int _index;
-
-            public EnumeratorKeyValue(GroupCollection collection)
-            {
-                Debug.Assert(collection != null, "collection cannot be null.");
-
-                _collection = collection;
-                _index = -1;
-            }
-
-            public KeyValuePair<string, Group> Current
+            KeyValuePair<string, Group> IEnumerator<KeyValuePair<string, Group>>.Current
             {
                 get
                 {
@@ -311,19 +299,8 @@ namespace System.Text.RegularExpressions
                     var value = _collection[_index];
 
                     return new KeyValuePair<string, Group>(value.Name, value);
+
                 }
-            }
-
-            bool IEnumerator.MoveNext()
-            {
-                int size = _collection.Count;
-
-                if (_index >= size)
-                    return false;
-
-                _index++;
-
-                return _index < size;
             }
 
             object IEnumerator.Current => Current;
