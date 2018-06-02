@@ -56,8 +56,8 @@ namespace System.Net
         public void Clear() { }
         public bool Contains(System.Net.Cookie cookie) { throw null; }
         public bool Remove(System.Net.Cookie cookie) { throw null; }
-        public System.Collections.Generic.IEnumerator<System.Net.Cookie> GetEnumerator() { throw null; }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        System.Collections.Generic.IEnumerator<System.Net.Cookie> System.Collections.Generic.IEnumerable<System.Net.Cookie>.GetEnumerator() { throw null; }
+        public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void CopyTo(System.Array array, int index) { }
         public void CopyTo(Cookie[] array, int index) { }
         public bool IsReadOnly { get { throw null; } }

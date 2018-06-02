@@ -15,6 +15,7 @@
   <ItemGroup>
     <Compile Include="CookieTest.cs" />
     <Compile Include="CookieCollectionTest.cs" />
+    <Compile Include="CookieCollectionTest.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'"/>
     <Compile Include="CookieContainerTest.cs" />
     <Compile Include="CookieTest\CookieContainerTest.cs" />
     <Compile Include="CookieTest\CookiePortTest.cs" />

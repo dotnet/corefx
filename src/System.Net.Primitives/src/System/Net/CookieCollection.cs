@@ -102,13 +102,12 @@ namespace System.Net
 
         public bool Contains(Cookie cookie)
         {
-            var idx = IndexOf(cookie);
-            return idx >= 0;
+            return IndexOf(cookie) >= 0;
         }
 
         public bool Remove(Cookie cookie)
         {
-            var idx = IndexOf(cookie);
+            int idx = IndexOf(cookie);
             if (idx == -1)
             {
                 return false;
@@ -263,14 +262,14 @@ namespace System.Net
             m_list.RemoveAt(idx);
         }
 
-        public IEnumerator<Cookie> GetEnumerator()
+        IEnumerator<Cookie> IEnumerable<Cookie>.GetEnumerator()
         {
             return m_list.GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
-            return GetEnumerator();
+            return ((IEnumerable<Cookie>)this).GetEnumerator();
         }
     }
 }

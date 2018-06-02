@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Net.Primitives.Functional.Tests
 {
-    public static class CookieCollectionTest
+    public static partial class CookieCollectionTest
     {
         //These cookies are designed to have some similar and different properties so that each is unique in the eyes of a CookieComparer object
         private static Cookie c1 = new Cookie("name1", "value");
@@ -106,31 +106,6 @@ namespace System.Net.Primitives.Functional.Tests
             CookieCollection cc = new CookieCollection();
 
             Assert.Throws<ArgumentNullException>(() => cc.Add((CookieCollection)null));
-        }
-
-        [Fact]
-        public static void Clear_Success()
-        {
-            ICollection<Cookie> cc = CreateCookieCollection1();
-            cc.Clear();
-            Assert.Equal(0, cc.Count);
-        }
-
-        [Fact]
-        public static void Contains_Success()
-        {
-            ICollection<Cookie> cc = new CookieCollection();
-            cc.Add(c1);
-            Assert.True(cc.Contains(c1));
-            Assert.False(cc.Contains(c2));
-        }
-
-        [Fact]
-        public static void Remove_Success()
-        {
-            ICollection<Cookie> cc = CreateCookieCollection1();
-            Assert.True(cc.Remove(c1));
-            Assert.False(cc.Contains(c1));
         }
 
         [Fact]
