@@ -60,11 +60,11 @@ namespace System.Net.Security.Tests
             var expectedProtectionScenario = ProtectionScenario.TransportSelected;
 
             // Act
-            ExtendedProtectionPolicy sut = new ExtendedProtectionPolicy(expectedPolicyEnforcement);
+            var extendedProtectionPolicy = new ExtendedProtectionPolicy(expectedPolicyEnforcement);
 
             // Assert
-            Assert.Equal(expectedPolicyEnforcement, sut.PolicyEnforcement);
-            Assert.Equal(expectedProtectionScenario, sut.ProtectionScenario);
+            Assert.Equal(expectedPolicyEnforcement, extendedProtectionPolicy.PolicyEnforcement);
+            Assert.Equal(expectedProtectionScenario, extendedProtectionPolicy.ProtectionScenario);
         }
 
         [Fact]
@@ -76,12 +76,15 @@ namespace System.Net.Security.Tests
         [Fact]
         public void ExtendedProtectionPolicy_Properties()
         {
+            // Arrange
             var policyEnforcementParam = PolicyEnforcement.Always;
             var protectionScenarioParam = ProtectionScenario.TransportSelected;
             var customChannelBindingParam = new MockCustomChannelBinding();
 
+            // Act
             var extendedProtectionPolicy = new ExtendedProtectionPolicy(policyEnforcementParam, customChannelBindingParam);
 
+            // Assert
             Assert.Null(extendedProtectionPolicy.CustomServiceNames);
             Assert.Equal(policyEnforcementParam, extendedProtectionPolicy.PolicyEnforcement);
             Assert.Equal(protectionScenarioParam, extendedProtectionPolicy.ProtectionScenario);
@@ -91,6 +94,7 @@ namespace System.Net.Security.Tests
         [Fact]
         public void ExtendedProtectionPolicy_ToString()
         {
+            // Arrange
             var serviceName1 = "Test1";
             var serviceName2 = "Test2";
             var serviceNameCollectionParam = new ServiceNameCollection(new List<string> { serviceName1, serviceName2 });
@@ -99,8 +103,10 @@ namespace System.Net.Security.Tests
             var extendedProtectionPolicy = new ExtendedProtectionPolicy(policyEnforcementParam, protectionScenarioParam, serviceNameCollectionParam);
             var expectedString = $"ProtectionScenario={protectionScenarioParam}; PolicyEnforcement={policyEnforcementParam}; CustomChannelBinding=<null>; ServiceNames={serviceName1}, {serviceName2}";
 
+            // Act
             var result = extendedProtectionPolicy.ToString();
 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedString, result);
         }
