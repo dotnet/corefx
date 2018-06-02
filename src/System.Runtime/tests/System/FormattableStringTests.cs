@@ -34,7 +34,7 @@ namespace System.Tests
                     var dutchCulture = new CultureInfo("nl");
                     CultureInfo.CurrentCulture = dutchCulture;
                     double d = 123.456;
-                    string expected = string.Format("Dutch decimal separator is comma 123,456", dutchCulture);
+                    string expected = string.Format(dutchCulture, "Dutch decimal separator is comma {0}", d);
                     string actual = FormattableString.CurrentCulture($"Dutch decimal separator is comma {d}");
                     Assert.Equal(expected, actual);
 
