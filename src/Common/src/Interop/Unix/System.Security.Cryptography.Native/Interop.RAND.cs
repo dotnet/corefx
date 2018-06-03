@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
-        internal static bool GetRandomBytes(byte* pbBuffer, int count)
+        internal unsafe static bool GetRandomBytes(byte* pbBuffer, int count)
         {
             Debug.Assert(count >= 0);
 
