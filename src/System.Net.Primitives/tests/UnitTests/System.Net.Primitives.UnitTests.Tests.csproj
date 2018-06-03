@@ -71,6 +71,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Common\src\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
+    </Compile>
     <Compile Include="CookieCollectionTest.cs" />
     <Compile Include="Fakes\CookieException.cs" />
     <Compile Include="Fakes\HostInformation.cs" />

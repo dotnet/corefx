@@ -353,11 +353,11 @@ namespace System.Net.Primitives.Unit.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "UTC timezone not supported")]
         public void SetCookies_CookieWithUTCExpires_Success()
         {
             // RFC2616 states that the timezone MUST be stated as "GMT", however using a timezone
-            // of "UTC" is accepted by all major broswers, so check that "UTC" is accepted.
+            // of "UTC" is accepted by all major browsers, so check that "UTC" is accepted.
             CookieContainer cc = new CookieContainer();
             Uri uri = new Uri("http://url1.com");
             cc.SetCookies(uri, $"{CookieName1}={CookieValue1}; expires=Wed, 09 Jun 2021 10:18:14 UTC;");
