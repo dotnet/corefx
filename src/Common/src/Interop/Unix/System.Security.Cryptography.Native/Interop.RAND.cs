@@ -18,6 +18,6 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool CryptoNative_GetRandomBytes(byte* buf, int num);
+        private unsafe static extern bool CryptoNative_GetRandomBytes(byte* buf, int num);
     }
 }
