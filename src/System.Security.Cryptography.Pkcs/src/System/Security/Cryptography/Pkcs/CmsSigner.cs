@@ -30,7 +30,7 @@ namespace System.Security.Cryptography.Pkcs
             get { return _signerIdentifierType; }
             set
             {
-                if (value == SubjectIdentifierType.Unknown)
+                if (value < SubjectIdentifierType.IssuerAndSerialNumber || value > SubjectIdentifierType.NoSignature)
                     throw new ArgumentException(SR.Format(SR.Cryptography_Cms_Invalid_Subject_Identifier_Type, value));
                 _signerIdentifierType = value;
             }

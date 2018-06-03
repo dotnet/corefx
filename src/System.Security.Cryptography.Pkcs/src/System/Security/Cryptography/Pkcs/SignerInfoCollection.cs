@@ -41,7 +41,7 @@ namespace System.Security.Cryptography.Pkcs
         {
             get
             {
-                if (index < 0 || index > _signerInfos.Length)
+                if (index < 0 || index >= _signerInfos.Length)
                     throw new ArgumentOutOfRangeException("index");
                 return _signerInfos[index];
             }
