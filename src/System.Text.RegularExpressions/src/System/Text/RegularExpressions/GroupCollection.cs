@@ -296,7 +296,7 @@ namespace System.Text.RegularExpressions
                     if (_index < 0 || _index >= _collection.Count)
                         throw new InvalidOperationException(SR.EnumNotStarted);
 
-                    var value = _collection[_index];
+                    Group value = _collection[_index];
 
                     return new KeyValuePair<string, Group>(value.Name, value);
 
