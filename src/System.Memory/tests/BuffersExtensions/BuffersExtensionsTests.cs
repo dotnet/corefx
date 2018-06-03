@@ -30,31 +30,21 @@ namespace System.Buffers.Tests
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
         {
-            byte[] _buffer = new byte[1000];
-            int _written = 0;
-
-            public Span<byte> GetBuffer => _buffer;
+            private byte[] _buffer = new byte[1000];
+            private int _written = 0;
 
             public void Advance(int bytes)
             {
                 _written += bytes;
             }
 
-            public Memory<byte> GetMemory(int minimumLength = 0)
-            {
-                return ((Memory<byte>)_buffer).Slice(_written);
-            }
+            public Memory<byte> GetMemory(int sizeHint  = 0) => _buffer.AsMemory().Slice(_written);
 
-            public Span<byte> GetSpan(int minimumLength)
-            {
-                return ((Span<byte>)_buffer).Slice(_written);
-            }
-
-            public int MaxBufferSize { get; } = Int32.MaxValue;
+            public Span<byte> GetSpan(int sizeHint) => _buffer.AsSpan().Slice(_written);
 
             public override string ToString()
             {
-                return Encoding.UTF8.GetString(_buffer.AsSpan(0, _written));
+                return Encoding.UTF8.GetString(_buffer.AsSpan(0, _written).ToArray());
             }
         }
 
@@ -71,43 +61,39 @@ namespace System.Buffers.Tests
                 _current = new byte[0];
             }
 
-            public Memory<byte> GetMemory(int minimumLength = 0)
+            public Memory<byte> GetMemory(int sizeHint  = 0)
             {
-                if (minimumLength == 0)
-                    minimumLength = _current.Length + 1;
-                if (minimumLength < _current.Length)
+                if (sizeHint  == 0)
+                    sizeHint  = _current.Length + 1;
+                if (sizeHint  < _current.Length)
                     throw new InvalidOperationException();
-                var newBuffer = new byte[minimumLength];
+                var newBuffer = new byte[sizeHint ];
                 _current.CopyTo(newBuffer.AsSpan());
                 _current = newBuffer;
                 return _current;
             }
 
-            public Span<byte> GetSpan(int minimumLength)
+            public Span<byte> GetSpan(int sizeHint)
             {
-                if (minimumLength == 0)
-                    minimumLength = _current.Length + 1;
-                if (minimumLength < _current.Length)
+                if (sizeHint == 0)
+                    sizeHint = _current.Length + 1;
+                if (sizeHint < _current.Length)
                     throw new InvalidOperationException();
-                var newBuffer = new byte[minimumLength];
+                var newBuffer = new byte[sizeHint];
                 _current.CopyTo(newBuffer.AsSpan());
                 _current = newBuffer;
                 return _current;
             }
-
-            public int MaxBufferSize { get; } = Int32.MaxValue;
 
             public override string ToString()
             {
                 var builder = new StringBuilder();
-                foreach (var buffer in _commited)
+                foreach (byte[] buffer in _commited)
                 {
                     builder.Append(Encoding.UTF8.GetString(buffer));
                 }
                 return builder.ToString();
             }
         }
-    }
-
-  
+    }  
 }
