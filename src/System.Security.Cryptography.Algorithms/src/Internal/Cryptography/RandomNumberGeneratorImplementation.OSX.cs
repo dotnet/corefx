@@ -8,11 +8,11 @@ namespace System.Security.Cryptography
 {
     partial class RandomNumberGeneratorImplementation
     {
-        private static unsafe void GetBytes(byte* pbBuffer, int count)
+        private static void GetBytes(ref byte pbBuffer, int count)
         {
             Debug.Assert(count > 0);
 
-            Interop.BCrypt.BCryptGenRandom(IntPtr.Zero, pbBuffer, count, Interop.BCrypt.BCRYPT_USE_SYSTEM_PREFERRED_RNG);            
+            Interop.AppleCrypto.GetRandomBytes(ref pbBuffer, count);
         }
     }
 }
