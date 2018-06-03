@@ -2494,6 +2494,35 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't send content for get requests")]
+        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
+        {
+            const string ExpectedContent = "Hello, expecting and continuing world.";
+            var clientCompleted = new TaskCompletionSource<bool>();
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = CreateHttpClient())
+                {
+                    client.DefaultRequestHeaders.ExpectContinue = true;
+                    Assert.Equal(ExpectedContent, await client.GetStringAsync(uri));
+                    clientCompleted.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    List<string> headers = await connection.ReadRequestHeaderAsync();
+                    Assert.Contains("Expect: 100-continue", headers);
+
+                    await connection.Writer.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");
+                    await connection.SendResponseAsync(content: ExpectedContent);
+                    await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
+                });
+            });
+        }
+
         [OuterLoop]
         [Theory]
         [InlineData(false)]
