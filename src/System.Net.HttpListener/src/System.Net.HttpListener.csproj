@@ -49,6 +49,9 @@
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\src\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
+    </Compile>
     <Compile Include="System\Net\BoundaryType.cs" />
     <Compile Include="System\Net\EntitySendFormat.cs" />
     <Compile Include="System\Net\HttpListenerPrefixCollection.cs" />
