@@ -353,6 +353,28 @@ namespace System.Net.Primitives.Unit.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void SetCookies_CookieWithUTCExpires_Success()
+        {
+            // RFC2616 states that the timezone MUST be stated as "GMT", however using a timezone
+            // of "UTC" is accepted by all major broswers, so check that "UTC" is accepted.
+            CookieContainer cc = new CookieContainer();
+            Uri uri = new Uri("http://url1.com");
+            cc.SetCookies(uri, $"{CookieName1}={CookieValue1}; expires=Wed, 09 Jun 2021 10:18:14 UTC;");
+            Cookie expectedCookie = new Cookie(CookieName1, CookieValue1)
+            {
+                Expires = new DateTime(2021, 6, 9, 10, 18, 14, DateTimeKind.Utc)
+            };
+
+            CookieCollection cookiesCollection = cc.GetCookies(uri);
+            Assert.Equal(1, cookiesCollection.Count);
+            Cookie cookie = cookiesCollection[0];
+            Assert.Equal(expectedCookie.Name, cookie.Name);
+            Assert.Equal(expectedCookie.Value, cookie.Value);
+            Assert.Equal(expectedCookie.Expires, cookie.Expires.ToUniversalTime());
+        }
+
+        [Fact]
         public void Add_CookieVersion1AndRootDomainWithNoLeadingDot_ThrowsCookieException()
         {
             const string SchemePrefix = "http://";

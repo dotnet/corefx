@@ -667,6 +667,17 @@ namespace System.Net
                                         {
                                             cookie.Expires = expires;
                                         }
+                                        else if (DateTime.TryParseExact(CheckQuoted(_tokenizer.Value),
+                                            "d MMM yyyy HH:mm:ss UTC",
+                                            CultureInfo.InvariantCulture,
+                                            DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal,
+                                            out DateTime expiresUTC))
+                                        {
+                                            // RFC2616 states that the timezone MUST be stated as "GMT",
+                                            // however using a timezone of "UTC" is accepted by all major
+                                            // broswers, so accept "UTC" here as well.
+                                            cookie.Expires = expiresUTC;
+                                        }
                                         else
                                         {
                                             // This cookie will be rejected
