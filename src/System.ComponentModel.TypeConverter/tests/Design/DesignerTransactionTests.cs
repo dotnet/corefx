@@ -11,10 +11,12 @@ namespace System.ComponentModel.Design.Tests
         [Fact]
         public void Ctor_Default()
         {
-            var transaction = new TestDesignerTransaction();
-            Assert.Empty(transaction.Description);
-            Assert.False(transaction.Canceled);
-            Assert.False(transaction.Committed);
+            using (var transaction = new TestDesignerTransaction())
+            {
+                Assert.Empty(transaction.Description);
+                Assert.False(transaction.Canceled);
+                Assert.False(transaction.Committed);
+            }
         }
 
         [Theory]
@@ -22,62 +24,72 @@ namespace System.ComponentModel.Design.Tests
         [InlineData("Description")]
         public void Ctor_Default(string description)
         {
-            var transaction = new TestDesignerTransaction(description);
-            Assert.Same(description, transaction.Description);
-            Assert.False(transaction.Canceled);
-            Assert.False(transaction.Committed);
+            using (var transaction = new TestDesignerTransaction(description))
+            {
+                Assert.Same(description, transaction.Description);
+                Assert.False(transaction.Canceled);
+                Assert.False(transaction.Committed);
+            }
         }
 
         [Fact]
         public void Cancel_NotCommitted_Success()
         {
-            var transaction = new TestDesignerTransaction();
-            transaction.Cancel();
-            Assert.Equal(1, transaction.CancelCount);
-            Assert.True(transaction.Canceled);
+            using (var transaction = new TestDesignerTransaction())
+            {
+                transaction.Cancel();
+                Assert.Equal(1, transaction.CancelCount);
+                Assert.True(transaction.Canceled);
 
-            transaction.Cancel();
-            Assert.Equal(1, transaction.CancelCount);
-            Assert.True(transaction.Canceled);
+                transaction.Cancel();
+                Assert.Equal(1, transaction.CancelCount);
+                Assert.True(transaction.Canceled);
+            }
         }
 
         [Fact]
         public void Cancel_Committed_Success()
         {
-            var transaction = new TestDesignerTransaction();
-            transaction.Commit();
+            using (var transaction = new TestDesignerTransaction())
+            {
+                transaction.Commit();
 
-            transaction.Cancel();
-            Assert.Equal(0, transaction.CancelCount);
-            Assert.False(transaction.Canceled);
+                transaction.Cancel();
+                Assert.Equal(0, transaction.CancelCount);
+                Assert.False(transaction.Canceled);
+            }
         }
 
         [Fact]
         public void Commit_NotCommitted_Success()
         {
-            var transaction = new TestDesignerTransaction();
-            transaction.Commit();
-            Assert.Equal(1, transaction.CommitCount);
-            Assert.True(transaction.Committed);
+            using (var transaction = new TestDesignerTransaction())
+            {
+                transaction.Commit();
+                Assert.Equal(1, transaction.CommitCount);
+                Assert.True(transaction.Committed);
 
-            transaction.Commit();
-            Assert.Equal(1, transaction.CommitCount);
-            Assert.True(transaction.Committed);
+                transaction.Commit();
+                Assert.Equal(1, transaction.CommitCount);
+                Assert.True(transaction.Committed);
+            }
         }
 
         [Fact]
         public void Commit_Cancelled_Success()
         {
-            var transaction = new TestDesignerTransaction();
-            transaction.Cancel();
+            using (var transaction = new TestDesignerTransaction())
+            {
+                transaction.Cancel();
 
-            transaction.Commit();
-            Assert.Equal(0, transaction.CommitCount);
-            Assert.False(transaction.Committed);
+                transaction.Commit();
+                Assert.Equal(0, transaction.CommitCount);
+                Assert.False(transaction.Committed);
+            }
         }
 
         [Fact]
-        public void Dispose_FinalizeSurpressed_Success()
+        public void Dispose_FinalizeSuppressed_Success()
         {
             var transaction = new NonDisposingDesignerTransaction();
             transaction.Cancel();
