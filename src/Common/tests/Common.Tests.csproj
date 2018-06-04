@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{C72FD34C-539A-4447-9796-62A229571199}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
@@ -107,9 +107,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
-    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.netcoreapp.cs">
-      <Link>ReadOnlySpan\StringTests.netcoreapp.cs</Link>
-    </Compile>
+    <Compile Include="Tests\System\StringTests.netcoreapp.cs" />    
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)'=='true'">
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
