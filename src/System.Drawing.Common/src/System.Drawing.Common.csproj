@@ -378,5 +378,8 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Drawing\Internal\GpPathData.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
