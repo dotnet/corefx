@@ -1059,6 +1059,7 @@ namespace System.Net.Http.Functional.Tests
             }, secure.ToString()).Dispose();
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [Fact]
         public async Task ProxyAuth_SameConnection_Succeeds()
         {
@@ -1071,7 +1072,7 @@ namespace System.Net.Http.Functional.Tests
                         "Content-Length: 0\r\n" +
                         "\r\n";
 
-                using  (HttpClientHandler handler = new HttpClientHandler())
+                using  (var handler = new HttpClientHandler())
                 {
                     handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, new NetworkCredential("abc", "def"));
 
@@ -1087,12 +1088,12 @@ namespace System.Net.Http.Functional.Tests
                             await connection.ReadRequestHeaderAndSendResponseAsync(content:"OK").ConfigureAwait(false);
                         });
 
-                        String response = await request;
+                        string response = await request;
                         Assert.Equal("OK", response);
                     }
                 }
             });
-            await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { serverTask }, TestHelper.PassingTestTimeoutMilliseconds);
+            await serverTask.TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds);
         }
     }
 
