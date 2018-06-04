@@ -130,6 +130,30 @@ dxIPtH9l/q9OgdaCrPE8KBqcwXsfNlFwYGjkqmN/v7WaysBRdblHcoWmry3YsaK2
 -----END CERTIFICATE-----
 ");
 
+        // 'cert.pem' generated using 'openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365'
+        public static readonly byte[] SelfSigned3PemBytes = ByteUtils.AsciiBytes(
+            @"-----BEGIN CERTIFICATE-----
+MIIDWjCCAkKgAwIBAgIJANzv9IQvr0bwMA0GCSqGSIb3DQEBCwUAMEIxCzAJBgNV
+BAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQg
+Q29tcGFueSBMdGQwHhcNMTgwNjA0MTMzMjIxWhcNMTkwNjA0MTMzMjIxWjBCMQsw
+CQYDVQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZh
+dWx0IENvbXBhbnkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+wy+py+hFxSmCGTZmHrQm1Yobzxf34l+J8VD33ObGV1qIFFulxz8pnUU4gKf6FQNU
+wAbezJ78Eqsjt4c7mwnGTdavWSZyDJ136bQzn52wsTOGRfUBe1vt+SMy7h8Nhhf3
+ejRHQVsZKNfiGOekmjBKFLliavo6I8j80UsmpvAJ+TWnYpVQBf/EzBQ21ddIF6jD
+nl2ZhcvWHvS63utWwXW68xkDXsLvjiat22YScRKnkkNAIvbBY4rvV1KwahUPaMTS
+zWywr6caHxlKp7McZ4MJVIqUAeZUn4KYgSksi2IsfPA7qi8WpSaKGsOZFBD79DJC
+wqzdLLBzEtg6okzgC5nFtwIDAQABo1MwUTAdBgNVHQ4EFgQUgKAUBaaA1XD8KqGg
+1XEr74W4lrkwHwYDVR0jBBgwFoAUgKAUBaaA1XD8KqGg1XEr74W4lrkwDwYDVR0T
+AQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEArNBpG8oCDKX9ERbMgvgm3qWk
+FKmx+h58aiZVoMwfBsf2njZ6BzRoEOvluMDPe+pt8hhST5yaOsMUYIqrn+s692I9
+17JRfrFhCp+4GT8oe/ZnSNTPm2zOzm0VXFkfDF53YGzdGTWXLH+pJpw4drCNoBoA
+yloyF/JJGJ2ZMbnwuDtsPbpjup8qHLiQYjxj4hUWyXU+nbytGK/i8z8HHc7acOpd
+9+MXEcKwUkthXzG0M/0bzz4GwWZ6PPmbI5EEqFGBzMef58/mbHDigl9/o3kUlJtB
+tcCZhP5KEu6XKKc1GcTqbyA0vi92YyyZViUa36hhVrNqPxtpclir+lcnNgnlqg==
+-----END CERTIFICATE-----
+");
+
         public const string PfxDataPassword = "12345";
 
         public static SecureString CreatePfxDataPasswordSecureString()

@@ -518,11 +518,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             // File which is not readable by the current user.
             string unreadableFileName = Path.Combine(sslCertDir, "2.pem");
-            File.WriteAllText(unreadableFileName, string.Empty);
+            File.WriteAllBytes(unreadableFileName, TestData.SelfSigned2PemBytes);
             Assert.Equal(0, chmod(unreadableFileName, 0));
 
             // Valid file.
-            File.WriteAllBytes(Path.Combine(sslCertDir, "3.pem"), TestData.SelfSigned2PemBytes);
+            File.WriteAllBytes(Path.Combine(sslCertDir, "3.pem"), TestData.SelfSigned3PemBytes);
 
             var psi = new ProcessStartInfo();
             psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
