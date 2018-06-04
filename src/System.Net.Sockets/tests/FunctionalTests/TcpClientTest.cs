@@ -446,7 +446,12 @@ namespace System.Net.Sockets.Tests
 
                 using (TcpClient client = new TcpClient())
                 {
-                    client.Connect(endpoint);
+                    // Some platforms may not support IPv6 dual mode and they should fall-back to IPv4
+                    // without throwing exception. However in such case attempt to connect to IPv6 would still fail.
+                    if (client.Client.AddressFamily == AddressFamily.InterNetworkV6 && client.Client.DualMode)
+                    {
+                        client.Connect(endpoint);
+                    }
                 }
             }
         }
