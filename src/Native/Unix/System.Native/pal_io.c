@@ -367,21 +367,36 @@ static void ConvertDirent(const struct dirent* entry, struct DirectoryEntry* out
     /* AIX has no d_type, make a substitute */
     struct stat s;
     stat(entry->d_name, &s);
-    if (S_ISDIR(s.st_mode)) {
+    if (S_ISDIR(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_DIR;
-    } else if (S_ISFIFO(s.st_mode)) {
+    }
+    else if (S_ISFIFO(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_FIFO;
-    } else if (S_ISCHR(s.st_mode)) {
+    }
+    else if (S_ISCHR(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_CHR;
-    } else if (S_ISBLK(s.st_mode)) {
+    }
+    else if (S_ISBLK(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_BLK;
-    } else if (S_ISREG(s.st_mode)) {
+    }
+    else if (S_ISREG(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_REG;
-    } else if (S_ISLNK(s.st_mode)) {
+    }
+    else if (S_ISLNK(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_LNK;
-    } else if (S_ISSOCK(s.st_mode)) {
+    }
+    else if (S_ISSOCK(s.st_mode))
+    {
         outputEntry->InodeType = PAL_DT_SOCK;
-    } else {
+    }
+    else
+    {
         outputEntry->InodeType = PAL_DT_UNKNOWN;
     }
 #else
