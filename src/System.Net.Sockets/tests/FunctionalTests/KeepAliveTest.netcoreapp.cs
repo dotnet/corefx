@@ -56,7 +56,7 @@ namespace System.Net.Sockets.Tests
 
         private bool IsKeepAliveEnabled(Socket socket)
         {
-            return (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) == 1;
+            return (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive) != 0;
         }
 
         private int GetTcpOption(Socket socket, SocketOptionName socketOptionName)
