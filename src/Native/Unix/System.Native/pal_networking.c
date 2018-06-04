@@ -2251,8 +2251,8 @@ static int32_t WaitForSocketEventsInner(int32_t port, struct SocketEvent* buffer
 }
 
 #else
-// TODO: Poll fallback
-static const size_t SocketEventBufferElementSize = sizeof(struct pollmsg);
+#warning epoll/kqueue not detected; building with stub socket events support
+static const size_t SocketEventBufferElementSize = sizeof(struct pollfd);
 
 static enum SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
 {

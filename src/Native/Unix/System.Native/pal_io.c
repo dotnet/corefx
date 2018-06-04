@@ -42,7 +42,7 @@
 #include <sys/inotify.h>
 #endif
 
-#if defined(_AIX)
+#ifdef _AIX
 #include <alloca.h>
 // Somehow, AIX mangles the definition for this behind a C++ def
 // Redeclare it here
@@ -121,9 +121,8 @@ c_static_assert(PAL_SEEK_CUR == SEEK_CUR);
 c_static_assert(PAL_SEEK_END == SEEK_END);
 
 // Validate our PollFlags enum values are correct for the platform
-// HACK: AIX values are different; this file doesn't actually use POLL* yet, so
-// nop out the check there.
-#if !defined(_AIX)
+// HACK: AIX values are different; we convert them between PAL_POLL and POLL now
+#ifndef (_AIX)
 c_static_assert(PAL_POLLIN == POLLIN);
 c_static_assert(PAL_POLLPRI == POLLPRI);
 c_static_assert(PAL_POLLOUT == POLLOUT);
