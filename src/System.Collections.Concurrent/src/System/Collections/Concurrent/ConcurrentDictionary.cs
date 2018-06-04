@@ -906,15 +906,20 @@ namespace System.Collections.Concurrent
         }
 
 
-        // Allow nulls for reference types and Nullable<U>, but not for value types.
-        // Aggressively inline so the jit evaluates the if in place and either drops the call altogether
-        // Or just leaves null test and call to the Non-returning ThrowValueNullException
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ThrowIfNullAndNullsAreIllegal(object value)
+        private static void ThrowIfInvalidObjectValue(object value)
         {
-            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
-            if (!(default(TValue) == null) && value == null)
+            if (value != null)
+            {
+                if (!(value is TValue))
+                {
+                    ThrowValueNullException();
+                }
+            }
+            else if (default(TValue) != null)
+            {
                 ThrowValueNullException();
+            }
         }
 
         private static void ThrowValueNullException()
@@ -1451,19 +1456,9 @@ namespace System.Collections.Concurrent
         {
             if (key == null) ThrowKeyNullException();
             if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
-            ThrowIfNullAndNullsAreIllegal(value);
+            ThrowIfInvalidObjectValue(value);
 
-            TValue typedValue;
-            try
-            {
-                typedValue = (TValue)value;
-            }
-            catch (InvalidCastException)
-            {
-                throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-            }
-
-            ((IDictionary<TKey, TValue>)this).Add((TKey)key, typedValue);
+            ((IDictionary<TKey, TValue>)this).Add((TKey)key, (TValue)value);
         }
 
         /// <summary>
@@ -1595,8 +1590,7 @@ namespace System.Collections.Concurrent
                 if (key == null) ThrowKeyNullException();
 
                 if (!(key is TKey)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfKeyIncorrect);
-                if ((value != null) && !(value is TValue)) throw new ArgumentException(SR.ConcurrentDictionary_TypeOfValueIncorrect);
-                ThrowIfNullAndNullsAreIllegal(value);
+                ThrowIfInvalidObjectValue(value);
 
                 ((ConcurrentDictionary<TKey, TValue>)this)[(TKey)key] = (TValue)value;
             }
