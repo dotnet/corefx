@@ -87,6 +87,20 @@ check_c_source_compiles(
     "
     HAVE_FLOCK64)
 
+check_symbol_exists(
+    O_CLOEXEC
+    fcntl.h
+    HAVE_O_CLOEXEC)
+
+check_symbol_exists(
+    F_DUPFD_CLOEXEC
+    fcntl.h
+    HAVE_F_DUPFD_CLOEXEC)
+
+check_function_exists(
+    getifaddrs
+    HAVE_GETIFADDRS)
+
 check_function_exists(
     lseek64
     HAVE_LSEEK64)

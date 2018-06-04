@@ -804,6 +804,9 @@ static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, struct I
         }
         freeifaddrs(addrs_head);
     }
+#else
+    // assume the first interface, we have no other methods
+    packetInfo->InterfaceIndex = 0;
 #endif
 
     return 1;

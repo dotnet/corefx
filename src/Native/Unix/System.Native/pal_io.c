@@ -257,7 +257,7 @@ static int32_t ConvertOpenFlags(int32_t flags)
         return -1;
     }
 
-#if defined(O_CLOEXEC)
+#if HAVE_O_CLOEXEC
     if (flags & PAL_O_CLOEXEC)
         ret |= O_CLOEXEC;
 #endif
@@ -278,7 +278,7 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 {
 // these two ifdefs are for platforms where we dont have the open version of CLOEXEC and thus
 // must simulate it by doing a fcntl with the SETFFD version after the open instead
-#if !defined(O_CLOEXEC)
+#if !HAVE_O_CLOEXEC
     int32_t old_flags = flags;
 #endif
     flags = ConvertOpenFlags(flags);
@@ -290,7 +290,7 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 
     int result;
     while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
-#if !defined(O_CLOEXEC)
+#if !HAVE_O_CLOEXEC
     if (old_flags & PAL_O_CLOEXEC)
     {
         fcntl(result, F_SETFD, FD_CLOEXEC);
@@ -307,7 +307,7 @@ int32_t SystemNative_Close(intptr_t fd)
 intptr_t SystemNative_Dup(intptr_t oldfd)
 {
     int result;
-#if defined(F_DUPFD_CLOEXEC)
+#if HAVE_F_DUPFD_CLOEXEC
     while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR);
 #else
     while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD, 0)) < 0 && errno == EINTR);
@@ -510,7 +510,7 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
         case 0:
             break;
         case PAL_O_CLOEXEC:
-#if defined(O_CLOEXEC)
+#if HAVE_O_CLOEXEC
             flags = O_CLOEXEC;
 #endif
             break;
@@ -529,7 +529,7 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     while ((result = pipe(pipeFds)) < 0 && errno == EINTR);
 
     // Then, if O_CLOEXEC was specified, use fcntl to configure the file descriptors appropriately.
-#if defined(O_CLOEXEC)
+#if HAVE_O_CLOEXEC
     if ((flags & O_CLOEXEC) != 0 && result == 0)
 #else
     if ((flags & PAL_O_CLOEXEC) != 0 && result == 0)
