@@ -115,14 +115,14 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public unsafe void EnsureAllocatesSpan()
         {
-            unchecked
-            {
-                int* p = (int*)0xFF004324;
-                int q = *p;
-            }
+            // unchecked
+            // {
+            //     int* p = (int*)0xFF004324;
+            //     int q = *p;
+            // }
 
-            var ptr = new IntPtr(42);
-            Marshal.StructureToPtr(42, ptr, true);
+            // var ptr = new IntPtr(42);
+            // Marshal.StructureToPtr(42, ptr, true);
 
             while (true)
             {
