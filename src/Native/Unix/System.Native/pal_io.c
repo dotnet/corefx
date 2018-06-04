@@ -122,7 +122,7 @@ c_static_assert(PAL_SEEK_END == SEEK_END);
 
 // Validate our PollFlags enum values are correct for the platform
 // HACK: AIX values are different; we convert them between PAL_POLL and POLL now
-#ifndef (_AIX)
+#ifndef _AIX
 c_static_assert(PAL_POLLIN == POLLIN);
 c_static_assert(PAL_POLLPRI == POLLPRI);
 c_static_assert(PAL_POLLOUT == POLLOUT);
