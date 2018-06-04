@@ -58,22 +58,34 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
-        public static void TestAddNullValue()
+        public static void TestAddNullValue_ConcurrentDictionaryOfString_null()
         {
             // using ConcurrentDictionary<TKey, TValue> class
             ConcurrentDictionary<string, string> dict1 = new ConcurrentDictionary<string, string>();
             dict1["key"] = null;
+        }
 
+        [Fact]
+        public static void TestAddNullValue_IDictionaryOfString_null()
+        {
             // using IDictionary<TKey, TValue> interface
             IDictionary<string, string> dict2 = new ConcurrentDictionary<string, string>();
             dict2["key"] = null;
             dict2.Add("key2", null);
+        }
 
+        [Fact]
+        public static void TestAddNullValue_IDictionary_ReferenceType_null()
+        {
             // using IDictionary interface
             IDictionary dict3 = new ConcurrentDictionary<string, string>();
             dict3["key"] = null;
             dict3.Add("key2", null);
+        }
 
+        [Fact]
+        public static void TestAddNullValue_IDictionary_ValueType_null_indexer()
+        {
             // using IDictionary interface and value type values
             Action action = () =>
             {
@@ -81,8 +93,12 @@ namespace System.Collections.Concurrent.Tests
                 dict4["key"] = null;
             };
             Assert.Throws<ArgumentException>(action);
+        }
 
-            action = () =>
+        [Fact]
+        public static void TestAddNullValue_IDictionary_ValueType_null_add()
+        {
+            Action action = () =>
             {
                 IDictionary dict5 = new ConcurrentDictionary<string, int>();
                 dict5.Add("key", null);
