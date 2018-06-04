@@ -1165,7 +1165,7 @@ namespace System
         public Exception(string message, System.Exception innerException) { }
         public virtual System.Collections.IDictionary Data { get { throw null; } }
         public virtual string HelpLink { get { throw null; } set { } }
-        public int HResult { get { throw null; } protected set { } }
+        public int HResult { get { throw null; } set { } }
         public System.Exception InnerException { get { throw null; } }
         public virtual string Message { get { throw null; } }
         public virtual string Source { get { throw null; } set { } }
@@ -1211,6 +1211,7 @@ namespace System
     {
         protected FormattableString() { }
         public abstract int ArgumentCount { get; }
+        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         public abstract string Format { get; }
         public abstract object GetArgument(int index);
         public abstract object[] GetArguments();
@@ -6279,7 +6280,7 @@ namespace System.Reflection
     public delegate bool TypeFilter(System.Type m, object filterCriteria);
     public abstract partial class TypeInfo : System.Type, System.Reflection.IReflectableType
     {
-        internal TypeInfo() { }
+        protected TypeInfo() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> DeclaredConstructors { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> DeclaredEvents { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> DeclaredFields { get { throw null; } }

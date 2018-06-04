@@ -2,15 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-internal partial class Interop
+using System.Runtime.InteropServices;
+
+namespace System
 {
-    internal partial class Kernel32
+    internal static class InternalHelpers
     {
-        internal enum FINDEX_INFO_LEVELS : uint
+        internal static void SetErrorCode(this Exception ex, int code)
         {
-            FindExInfoStandard = 0x0u,
-            FindExInfoBasic = 0x1u,
-            FindExInfoMaxInfoLevel = 0x2u,
+            ex.HResult = code;
         }
     }
 }
