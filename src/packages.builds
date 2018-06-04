@@ -24,6 +24,24 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="*\pkg\**\System.Data.SqlClient.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="*\pkg\**\System.IO.Pipes.AccessControl.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="*\pkg\**\System.Memory.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="*\pkg\**\System.Reflection.DispatchProxy.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="*\pkg\**\System.Runtime.CompilerServices.Unsafe.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="*\pkg\**\System.Threading.Tasks.Extensions.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
