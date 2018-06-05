@@ -212,7 +212,7 @@ namespace System.Text.RegularExpressions
 
         public bool TryGetValue(string key, out Group value)
         {
-            var group = this[key];
+            Group group = this[key];
             if (group == Group.s_emptyGroup)
             {
                 value = null;
@@ -244,7 +244,7 @@ namespace System.Text.RegularExpressions
             {
                 for (int i = 0; i < Count; ++i)
                 {
-                    yield return this[i].Value;
+                    yield return this[i];
                 }
             }
         }
