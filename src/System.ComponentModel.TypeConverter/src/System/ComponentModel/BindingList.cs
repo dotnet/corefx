@@ -279,8 +279,8 @@ namespace System.ComponentModel
         /// Add operations are cancellable via the <see cref='ICancelAddNew'> interface. The position of the
         /// new item is tracked until the add operation is either cancelled by a call to <see cref='CancelNew'>,
         /// explicitly commited by a call to <see cref='EndNew'>, or implicitly commmited some other operation
-        ///   changes the contents of the list (such as an Insert or Remove). When an add operation is
-        ///     cancelled, the new item is removed from the list.
+        /// changes the contents of the list (such as an Insert or Remove). When an add operation is
+        /// cancelled, the new item is removed from the list.
         /// </summary>
         public T AddNew() => (T)((this as IBindingList).AddNew());
 
@@ -332,7 +332,7 @@ namespace System.ComponentModel
         {
             get
             {
-                // If the user set AllowNew, return what they set.  If we have a default constructor, allowNew will be 
+                // If the user set AllowNew, return what they set. If we have a default constructor, allowNew will be 
                 // true and we should just return true.
                 if (userSetAllowNew || allowNew)
                 {
