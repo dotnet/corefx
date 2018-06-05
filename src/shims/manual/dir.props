@@ -2,10 +2,9 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageConfigurations>
-      netcoreapp2.0-Windows_NT;
+      netcoreapp2.0;
     </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations);
       netcoreapp;
       uap;
     </BuildConfigurations>
@@ -26,7 +25,5 @@
     <HasMatchingContract>true</HasMatchingContract>
     <ContractAssemblyPath>$(NetFxRefPath)$(MSBuildProjectName).dll</ContractAssemblyPath>
     <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
-    <!-- Though we build as windows specific we ship these in the package as RID-less so that we don't have to cross-compile the compat pack shims and move it up the stack -->
-    <PackageTargetRuntime/>
   </PropertyGroup>
 </Project>

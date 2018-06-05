@@ -11,7 +11,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
-    <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
+    <!-- We use the win implementation to create the shims shipped inside the compat pack -->
+    <NugetRuntimeIdentifier>win-x64</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
     <BinPlaceRuntime>true</BinPlaceRuntime>
     <NuGetDeploySourceItem>ReferenceCopyLocalPaths</NuGetDeploySourceItem>

@@ -16,8 +16,6 @@
   <PropertyGroup>
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsUAP>true</IsUAP>
-    <!-- Though we build as windows specific we ship these in the package as RID-less so that we don't have to cross-compile the compat pack shims and move it up the stack -->
-    <PackageTargetRuntime/>
   </PropertyGroup>
 
   <PropertyGroup>

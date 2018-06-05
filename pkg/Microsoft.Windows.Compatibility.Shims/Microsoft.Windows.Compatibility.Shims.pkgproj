@@ -16,7 +16,15 @@
     </File>
 
     <File Include="$(PlaceHolderFile)">
+      <TargetPath>/ref/netstandard2.0</TargetPath>
+    </File>
+
+    <File Include="$(PlaceHolderFile)">
       <TargetPath>/lib/netcoreapp2.1</TargetPath>
+    </File>
+
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>/ref/netcoreapp2.1</TargetPath>
     </File>
 
     <ProjectReference Include="..\..\src\shims\shims.proj" />
@@ -24,5 +32,11 @@
     <ProjectReference Include="..\..\src\shims\manual\System.csproj" />
     <ProjectReference Include="..\..\src\shims\manual\System.Data.csproj" />
   </ItemGroup>
+
+  <Target Name="ClearDependencies" BeforeTargets="GenerateNuSpec">
+    <ItemGroup>
+      <Dependency Remove="@(Dependency)" />
+    </ItemGroup>
+  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

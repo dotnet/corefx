@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <PackageConfigurations>
-      netcoreapp2.0-Windows_NT;
+      netcoreapp2.0;
     </PackageConfigurations>
     <BuildConfigurations>
       $(BuildConfigurations);
@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Implementation shims to include in the compat pack produced by this project -->
     <ShimsToInclude Include="System.Configuration.dll" />
     <ShimsToInclude Include="System.Core.dll" />
     <ShimsToInclude Include="System.Drawing.dll" />
@@ -22,6 +23,12 @@
     <ShimsToInclude Include="System.ServiceProcess.dll" />
     <ShimsToInclude Include="System.Transactions.dll" />
     <ShimsToInclude Include="WindowsBase.dll" />
+
+    <!-- ref shims to be included by this project -->
+    <RefShimsToInclude Include="@(ShimsToInclude)" />
+    <RefShimsToInclude Include="mscorlib.dll" />
+    <RefShimsToInclude Include="System.dll" />
+    <RefShimsToInclude Include="System.Data.dll" />
   </ItemGroup>
 
   <Target Name="GetGenFacadesInputs">
@@ -122,6 +129,12 @@
     <PropertyGroup>
       <TargetPath>@(ShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')</TargetPath>
     </PropertyGroup>
+    <ItemGroup>
+      <FilesToPackage Include="@(RefShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')">
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <TargetPath>/ref/netcoreapp2.0/</TargetPath>
+      </FilesToPackage>
+    </ItemGroup>
   </Target>
 </Project>
 
