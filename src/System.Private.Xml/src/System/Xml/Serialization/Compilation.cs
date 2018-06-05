@@ -254,6 +254,7 @@ namespace System.Xml.Serialization
             return null;
         }
 
+#if !FEATURE_SERIALIZATION_UAPAOT
         private static bool IsSerializerVersionMatch(Assembly serializer, Type type, string defaultNamespace)
         {
             if (serializer == null)
