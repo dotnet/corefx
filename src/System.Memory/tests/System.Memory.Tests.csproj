@@ -120,7 +120,6 @@
     <Compile Include="ReadOnlySpan\IndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfAny.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
-    <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\IsWhiteSpace.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfAny.byte.cs" />

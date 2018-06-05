@@ -2898,6 +2898,203 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void IndexOfSequenceMatchAtStart_Char()
+        {
+            string s1 = "5172377457778667789";
+            string s2 = "517";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(0, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5', '1', '7' });
+            index = span.IndexOf(value);
+            Assert.Equal(0, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceMultipleMatch_Char()
+        {
+            string s1 = "123123123";
+            string s2 = "23";
+
+            int index = s1.IndexOf(s2);
+            Assert.Equal(1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '1', '2', '3', '1', '2', '3', '1', '2', '3' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2', '3' });
+            index = span.IndexOf(value);
+            Assert.Equal(1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceRestart_Char()
+        {
+            string s1 = "5172377457778667789";
+            string s2 = "778";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(10, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8' });
+            index = span.IndexOf(value);
+            Assert.Equal(10, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceNoMatch_Char()
+        {
+            string s1 = "0172377457778667789";
+            string s2 = "778X";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8', 'X' });
+            index = span.IndexOf(value);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceNotEvenAHeadMatch_Char()
+        {
+            string s1 = "0172377457778667789";
+            string s2 = "X789";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { 'X', '7', '8', '9' });
+            index = span.IndexOf(value);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceMatchAtVeryEnd_Char()
+        {
+            string s1 = "012345";
+            string s2 = "345";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(3, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            index = span.IndexOf(value);
+            Assert.Equal(3, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceJustPastVeryEnd_Char()
+        {
+            string s1 = new string(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            string s2 = "345";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            index = span.IndexOf(value);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceZeroLengthValue_Char()
+        {
+            string s1 = "0172377457778667789";
+            string s2 = string.Empty;
+            int index = s1.IndexOf(s2);
+            Assert.Equal(0, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(Array.Empty<char>());
+            index = span.IndexOf(value);
+            Assert.Equal(0, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceZeroLengthSpan_Char()
+        {
+            string s1 = string.Empty;
+            string s2 = "123";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '1', '2', '3' });
+            index = span.IndexOf(value);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceLengthOneValue_Char()
+        {
+            string s1 = "012345";
+            string s2 = "2";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(2, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2' });
+            index = span.IndexOf(value);
+            Assert.Equal(2, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceLengthOneValueAtVeryEnd_Char()
+        {
+            string s1 = "012345";
+            string s2 = "5";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(5, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            index = span.IndexOf(value);
+            Assert.Equal(5, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public static void IndexOfSequenceLengthOneValueJustPasttVeryEnd_Char()
+        {
+            string s1 = new string(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            string s2 = "5";
+            int index = s1.IndexOf(s2);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            index = span.IndexOf(value);
+            Assert.Equal(-1, index);
+            Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
+        }
+
+        [Fact]
         public static void TestMatch_Char()
         {
             for (int length = 0; length < 32; length++)
