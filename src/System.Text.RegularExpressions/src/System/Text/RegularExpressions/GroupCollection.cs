@@ -231,11 +231,9 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                var enumerator = new Enumerator(this);
-
-                while (enumerator.MoveNext())
+                for (int i = 0; i < Count; ++i)
                 {
-                    yield return enumerator.Current.Name;
+                    yield return this[i].Name;
                 }
             }
         }
@@ -244,11 +242,9 @@ namespace System.Text.RegularExpressions
         {
             get
             {
-                var enumerator = new Enumerator(this);
-
-                while (enumerator.MoveNext())
+                for (int i = 0; i < Count; ++i)
                 {
-                    yield return enumerator.Current;
+                    yield return this[i].Value;
                 }
             }
         }
