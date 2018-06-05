@@ -210,6 +210,12 @@ namespace System.Xml.Serialization
 
                     return null;
                 }
+
+                if(!IsSerializerVersionMatch(serializer, type, defaultNamespace))
+                {
+                    throw new Exception(SR.Format(SR.XmlSerializerExpiredDetails, serializerName, type.FullName));
+                }
+
             }
             else
             {
@@ -246,6 +252,20 @@ namespace System.Xml.Serialization
                 return serializer;
 
             return null;
+        }
+
+        private static bool IsSerializerVersionMatch(Assembly serializer, Type type, string defaultNamespace)
+        {
+            if (serializer == null)
+                return false;
+            object[] attrs = serializer.GetCustomAttributes(typeof(XmlSerializerVersionAttribute), false);
+            if (attrs.Length != 1)
+                return false;
+
+            XmlSerializerVersionAttribute assemblyInfo = (XmlSerializerVersionAttribute)attrs[0];
+            if (assemblyInfo.ParentAssemblyId == GenerateAssemblyId(type) && assemblyInfo.Namespace == defaultNamespace)
+                return true;
+            return false;
         }
 
 #if !FEATURE_SERIALIZATION_UAPAOT
