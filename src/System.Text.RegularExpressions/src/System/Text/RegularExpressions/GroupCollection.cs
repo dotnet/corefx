@@ -233,7 +233,7 @@ namespace System.Text.RegularExpressions
             {
                 for (int i = 0; i < Count; ++i)
                 {
-                    yield return this[i].Name;
+                    yield return GetGroup(i).Name;
                 }
             }
         }
@@ -244,7 +244,7 @@ namespace System.Text.RegularExpressions
             {
                 for (int i = 0; i < Count; ++i)
                 {
-                    yield return this[i];
+                    yield return GetGroup(i);
                 }
             }
         }
