@@ -20,13 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
+    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />
     <Compile Include="TInt.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TestMemory.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="BuffersExtensions\BuffersExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Span\AsSpan.cs" />
@@ -85,10 +86,6 @@
     <Compile Include="Span\ToString.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.byte.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Default.cs" />
-    <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Empty.cs" />    
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.byte.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceFactory.char.cs" />
@@ -101,13 +98,16 @@
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsSpan.cs" />
     <Compile Include="ReadOnlySpan\BinarySearch.cs" />
+    <Compile Include="ReadOnlySpan\Contains.cs" />
     <Compile Include="ReadOnlySpan\CopyTo.cs" />
     <Compile Include="ReadOnlySpan\CtorArray.cs" />
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
     <Compile Include="ReadOnlySpan\CtorPointerInt.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.char.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.long.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.StringComparison.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\Equals.cs" />
@@ -162,12 +162,7 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\Tests\System\StringTests.cs">
       <Link>ReadOnlySpan\StringTests.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
-    <Compile Include="$(CommonTestPath)\Tests\System\StringTests.netcoreapp.cs">
-      <Link>ReadOnlySpan\StringTests.netcoreapp.cs</Link>
-    </Compile>
+    </Compile>    
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Memory\AsMemory.cs" />
