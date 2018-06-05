@@ -60,7 +60,7 @@ namespace System.Net
         private bool m_secure = false; // Do not rename (binary serialization)
         [System.Runtime.Serialization.OptionalField]
         private bool m_httpOnly = false; // Do not rename (binary serialization)
-        private DateTime m_timeStamp = DateTime.Now; // Do not rename (binary serialization)
+        private DateTime m_timeStamp = DateTime.UtcNow; // Do not rename (binary serialization)
         private string m_value = string.Empty; // Do not rename (binary serialization)
         private int m_version = 0; // Do not rename (binary serialization)
 
@@ -203,13 +203,13 @@ namespace System.Net
         {
             get
             {
-                return (m_expires != DateTime.MinValue) && (m_expires.ToLocalTime() <= DateTime.Now);
+                return (m_expires != DateTime.MinValue) && (m_expires.ToUniversalTime() <= DateTime.UtcNow);
             }
             set
             {
                 if (value == true)
                 {
-                    m_expires = DateTime.Now;
+                    m_expires = DateTime.UtcNow;
                 }
             }
         }
@@ -876,7 +876,7 @@ namespace System.Net
             }
             if (Expires != DateTime.MinValue)
             {
-                int seconds = (int)(Expires.ToLocalTime() - DateTime.Now).TotalSeconds;
+                int seconds = (int)(Expires.ToUniversalTime() - DateTime.UtcNow).TotalSeconds;
                 if (seconds < 0)
                 {
                     // This means that the cookie has already expired. Set Max-Age to 0
