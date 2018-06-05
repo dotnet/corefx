@@ -327,6 +327,46 @@ namespace System.IO.Compression.Tests
             }
         }
 
+        [Theory]
+        [InlineData(1000, CompressionLevel.Fastest)]
+        [InlineData(1000, CompressionLevel.Optimal)]
+        [InlineData(1000, CompressionLevel.NoCompression)]
+        public static void Roundtrip_WriteByte_ReadByte_Success(int totalLength, CompressionLevel level)
+        {
+            byte[] correctUncompressedBytes = Enumerable.Range(0, totalLength).Select(i => (byte)i).ToArray();
+
+            byte[] compressedBytes;
+            using (var ms = new MemoryStream())
+            {
+                var bs = new BrotliStream(ms, level);
+                foreach (byte b in correctUncompressedBytes)
+                {
+                    bs.WriteByte(b);
+                }
+                bs.Dispose();
+                compressedBytes = ms.ToArray();
+            }
+
+            byte[] decompressedBytes = new byte[correctUncompressedBytes.Length];
+            using (var ms = new MemoryStream(compressedBytes))
+            using (var bs = new BrotliStream(ms, CompressionMode.Decompress))
+            {
+                for (int i = 0; i < decompressedBytes.Length; i++)
+                {
+                    int b = bs.ReadByte();
+                    Assert.InRange(b, 0, 255);
+                    decompressedBytes[i] = (byte)b;
+                }
+                Assert.Equal(-1, bs.ReadByte());
+                Assert.Equal(-1, bs.ReadByte());
+            }
+
+            for (int i = 0; i < correctUncompressedBytes.Length; i++)
+            {
+                Assert.Equal(correctUncompressedBytes[i], decompressedBytes[i]);
+            }
+        }
+
         public static void Compress_WithState(ReadOnlySpan<byte> input, Span<byte> output)
         {
             BrotliEncoder encoder;
