@@ -2885,6 +2885,92 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => "foo".IndexOfAny(new char[] { 'o' }, startIndex, count));
         }
 
+        [Fact]
+        public static void ZeroLengthIndexOf_Char()
+        {
+            string empty = string.Empty;
+            int idx = empty.IndexOf((char)0);
+            Assert.Equal(-1, idx);
+
+            ReadOnlySpan<char> sp = new ReadOnlySpan<char>(Array.Empty<char>());
+            idx = sp.IndexOf((char)0);
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void TestMatch_Char()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+
+                string s = new string(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = a[targetIndex];
+                    int idx = s.IndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    char target = a[targetIndex];
+                    int idx = span.IndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestMultipleMatch_Char()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (char)(i + 1);
+                }
+
+                a[length - 1] = (char)200;
+                a[length - 2] = (char)200;
+
+                string s = new string(a);
+                int idx = s.IndexOf((char)200);
+                Assert.Equal(length - 2, idx);
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                idx = span.IndexOf((char)200);
+                Assert.Equal(length - 2, idx);
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoChecksGoOutOfRange_Char()
+        {
+            for (int length = 0; length < 100; length++)
+            {
+                char[] a = new char[length + 2];
+                a[0] = '9';
+                a[length + 1] = '9';
+
+                string s = new string(a, 1, length);
+                int index = s.IndexOf('9');
+                Assert.Equal(-1, index);
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a, 1, length);
+                index = span.IndexOf('9');
+                Assert.Equal(-1, index);
+            }
+        }
+
         [Theory]
         [InlineData("Hello", 0, "!$%", "!$%Hello")]
         [InlineData("Hello", 1, "!$%", "H!$%ello")]
