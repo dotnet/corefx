@@ -666,7 +666,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            fixed(PointF* p = points)
+            fixed (PointF* p = points)
             {
                 CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawLines(
                     new HandleRef(this, NativeGraphics),
@@ -812,7 +812,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            fixed(PointF* p = points)
+            fixed (PointF* p = points)
             {
                 CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawBeziers(
                     new HandleRef(this, NativeGraphics),
@@ -844,7 +844,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            fixed(Point* p = points)
+            fixed (Point* p = points)
             {
                 CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawBeziersI(
                     new HandleRef(this, NativeGraphics),

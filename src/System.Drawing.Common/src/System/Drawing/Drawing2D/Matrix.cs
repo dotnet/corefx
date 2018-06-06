@@ -325,7 +325,7 @@ namespace System.Drawing.Drawing2D
             if (pts == null)
                 throw new ArgumentNullException(nameof(pts));
 
-            fixed(Point* p = pts)
+            fixed (Point* p = pts)
             {
                 int status = SafeNativeMethods.Gdip.GdipVectorTransformMatrixPointsI(
                     new HandleRef(this, nativeMatrix),
