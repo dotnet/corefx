@@ -357,10 +357,10 @@ namespace System.Net.NetworkInformation
         }
 
 #if DEBUG
- static Ping()
- {
- Debug.Assert(Marshal.SizeOf<IcmpHeader>() == 8, "The size of an ICMP Header must be 8 bytes.");
- }
+        static Ping()
+        {
+            Debug.Assert(Marshal.SizeOf<IcmpHeader>() == 8, "The size of an ICMP Header must be 8 bytes.");
+        }
 #endif
 
         // Must be 8 bytes total.

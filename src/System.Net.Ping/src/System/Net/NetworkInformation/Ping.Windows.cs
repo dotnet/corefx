@@ -96,7 +96,7 @@ namespace System.Net.NetworkInformation
             if (isAsync)
                 return tcs.Task;
 
-            Cleanup(isAsync: true, isComplete: true);
+            Cleanup(isAsync: false, isComplete: true);
             return Task.FromResult(CreatePingReply());
         }
 
