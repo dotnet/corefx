@@ -3702,6 +3702,193 @@ namespace System.Tests
             }
         }
 
+        [Fact]
+        public static void LastIndexOfSequenceMatchAtStart_Char()
+        { 
+            string s1 = "5172377457778667789";
+            string s2 = "517";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(0, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5', '1', '7' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(0, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceMultipleMatch_Char()
+        {
+            string s1 = "1231231231";
+            string s2 = "23";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(7, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '1', '2', '3', '1', '2', '3', '1', '2', '3', '1' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2', '3' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(7, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceRestart_Char()
+        {
+            string s1 = "5172377457778667769701";
+            string s2 = "778";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(10, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '6', '9', '7', '0', '1' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(10, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceNoMatch_Char()
+        {
+            string s1 = "0172377457778667789";
+            string s2 = "778X";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(-1, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8', 'X' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(-1, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceNotEvenAHeadMatch_Char()
+        {
+            string s1 = "'0172377457778667789";
+            string s2 = "X789";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(-1, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { 'X', '7', '8', '9' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(-1, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceMatchAtVeryEnd_Char()
+        {
+            string s1 = "012345";
+            string s2 = "345";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(3, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(3, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceJustPastVeryEnd_Char()
+        {
+            string s1 = new string(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            string s2 = "345";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(-1, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(-1, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceZeroLengthValue_Char()
+        {
+            string s1 = "0172377457778667789";
+            string s2 = string.Empty;
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(0, index);
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(Array.Empty<char>());
+            index = span.LastIndexOf(value);
+            Assert.Equal(0, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceZeroLengthSpan_Char()
+        {
+            string s1 = string.Empty;
+            string s2 = "123";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(-1, index);
+
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '1', '2', '3' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(-1, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceLengthOneValue_Char()
+        {
+            string s1 = "012345";
+            string s2 = "2";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(2, index);
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(2, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceLengthOneValueAtVeryEnd_Char()
+        {
+            string s1 = "012345";
+            string s2 = "5";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(5, index);
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(5, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceLengthOneValueMultipleTimes_Char()
+        {
+            string s1 = "015345";
+            string s2 = "5";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(5, index);
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '5', '3', '4', '5' });
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(5, index);
+        }
+
+        [Fact]
+        public static void LastIndexOfSequenceLengthOneValueJustPasttVeryEnd_Char()
+        {
+            string s1 = new string(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            string s2 = "5";
+            int index = s1.LastIndexOf(s2);
+            Assert.Equal(-1, index);
+
+            // A zero-length value is always "found" at the start of the span.
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
+            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            index = span.LastIndexOf(value);
+            Assert.Equal(-1, index);
+        }
+
         [Theory]
         [InlineData("Hello", 5, ' ', "Hello")]
         [InlineData("Hello", 7, ' ', "  Hello")]

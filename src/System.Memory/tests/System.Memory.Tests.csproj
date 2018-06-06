@@ -127,7 +127,6 @@
     <Compile Include="ReadOnlySpan\LastIndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.byte.cs" />
-    <Compile Include="ReadOnlySpan\LastIndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
