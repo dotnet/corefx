@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.ComponentModel
@@ -14,6 +15,7 @@ namespace System.ComponentModel
     {
         private int _data;
 
+        [ExcludeFromCodeCoverage]
         public InterlockedBitVector32(int data)
         {
             _data = data;
@@ -49,8 +51,10 @@ namespace System.ComponentModel
             return previous == 0 ? 1 : previous << 1;
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object o) => o is InterlockedBitVector32 ? _data == ((InterlockedBitVector32)o)._data : false;
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode() => base.GetHashCode();
     }
 }
