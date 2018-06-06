@@ -274,11 +274,11 @@ namespace System.ComponentModel
         #region IBindingList interface
 
         /// <summary>
-        /// Adds a new item to the list. Calls <see cref='AddNewCore'> to create and add the item.
+        /// Adds a new item to the list. Calls <see cref="AddNewCore" /> to create and add the item.
         ///
-        /// Add operations are cancellable via the <see cref='ICancelAddNew'> interface. The position of the
-        /// new item is tracked until the add operation is either cancelled by a call to <see cref='CancelNew'>,
-        /// explicitly commited by a call to <see cref='EndNew'>, or implicitly commmited some other operation
+        /// Add operations are cancellable via the <see cref="ICancelAddNew" /> interface. The position of the
+        /// new item is tracked until the add operation is either cancelled by a call to <see cref="CancelNew" />,
+        /// explicitly commited by a call to <see cref="EndNew" />, or implicitly commmited some other operation
         /// changes the contents of the list (such as an Insert or Remove). When an add operation is
         /// cancelled, the new item is removed from the list.
         /// </summary>
@@ -544,7 +544,7 @@ namespace System.ComponentModel
         #region IRaiseItemChangedEvents interface
 
         /// <summary>
-        /// Returns false to indicate that BindingList<T> does NOT raise ListChanged events
+        /// Returns false to indicate that BindingList&lt;T&gt; does NOT raise ListChanged events
         /// of type ItemChanged as a result of property changes on individual list items
         /// unless those items support INotifyPropertyChanged.
         /// </summary>

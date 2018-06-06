@@ -5,10 +5,10 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    // suppose that you have some data that can be indexed by use of string:
-    // then there are two types of errors:
-    // 1. an error for each piece of data that can be indexed
-    // 2. an error that is valid on the entire data
+    /// Suppose that you have some data that can be indexed by use of string:
+    /// then there are two types of errors:
+    /// 1. an error for each piece of data that can be indexed
+    /// 2. an error that is valid on the entire data
     /// </summary>
     public interface IDataErrorInfo
     {

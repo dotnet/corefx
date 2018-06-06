@@ -56,8 +56,8 @@ namespace System.ComponentModel.Design.Serialization.Tests
             Assert.Throws<ArgumentNullException>("sourceOwner", () => service[null, member]);
             Assert.Throws<ArgumentNullException>("sourceOwner", () => service[null, member] = new MemberRelationship());
 
-            Assert.Throws<ArgumentNullException>("Owner", () => service[new FakeMemberRelationsip { Owner = null, Member = member }.ToActual()]);
-            Assert.Throws<ArgumentNullException>("Owner", () => service[new FakeMemberRelationsip { Owner = null, Member = member }.ToActual()] = new MemberRelationship());
+            Assert.Throws<ArgumentNullException>("Owner", () => service[new MemberRelationship()]);
+            Assert.Throws<ArgumentNullException>("Owner", () => service[new MemberRelationship()] = new MemberRelationship());
         }
 
         [Fact]
@@ -66,9 +66,6 @@ namespace System.ComponentModel.Design.Serialization.Tests
             var service = new TestMemberRelationshipService();
             Assert.Throws<ArgumentNullException>("sourceMember", () => service[new object(), null]);
             Assert.Throws<ArgumentNullException>("sourceMember", () => service[new object(), null] = new MemberRelationship());
-
-            Assert.Throws<ArgumentNullException>("Member", () => service[new FakeMemberRelationsip { Owner = new object(), Member = null }.ToActual()]);
-            Assert.Throws<ArgumentNullException>("Member", () => service[new FakeMemberRelationsip { Owner = new object(), Member = null }.ToActual()] = new MemberRelationship());
         }
 
         public static IEnumerable<object[]> IndexerSource_TestData()
@@ -105,26 +102,6 @@ namespace System.ComponentModel.Design.Serialization.Tests
         private class TestMemberRelationshipService : MemberRelationshipService
         {
             public override bool SupportsRelationship(MemberRelationship source, MemberRelationship relationship) => true;
-        }
-
-        private struct FakeMemberRelationsip
-        {
-            public object Owner;
-            public MemberDescriptor Member;
-
-            public MemberRelationship ToActual()
-            {
-                MemberRelationshipWrapper wrapper = default;
-                wrapper.Fake = this;
-                return wrapper.Actual;
-            }
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct MemberRelationshipWrapper
-        {
-            [FieldOffset(0)] public MemberRelationship Actual;
-            [FieldOffset(0)] public FakeMemberRelationsip Fake;
         }
     }
 }

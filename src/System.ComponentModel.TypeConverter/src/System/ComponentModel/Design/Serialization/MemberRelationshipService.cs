@@ -40,37 +40,36 @@ namespace System.ComponentModel.Design.Serialization
         {
             get
             {
+                // The Owner and Member properties can be null if the MemberRelationship is constructed
+                // using the default constructor. However there is no situation in which one is null
+                // and not the other as the main constructor performs argument validation.
                 if (source.Owner == null)
                 {
                     throw new ArgumentNullException(nameof(MemberRelationship.Owner));
                 }
-                if (source.Member == null)
-                {
-                    throw new ArgumentNullException(nameof(MemberRelationship.Member));
-                }
 
+                Debug.Assert(source.Member != null);
                 return GetRelationship(source);
             }
             set
             {
+                // The Owner and Member properties can be null if the MemberRelationship is constructed
+                // using the default constructor. However there is no situation in which one is null
+                // and not the other as the main constructor performs argument validation.
                 if (source.Owner == null)
                 {
                     throw new ArgumentNullException(nameof(MemberRelationship.Owner));
                 }
-                if (source.Member == null)
-                {
-                    throw new ArgumentNullException(nameof(MemberRelationship.Member));
-                }
 
+                Debug.Assert(source.Member != null);
                 SetRelationship(source, value);
             }
         }
 
         /// <summary>
-        /// Returns the current relationship associated with the source, or null if
-        /// there is no relationship. Also sets a relationship between two objects. Null
-        /// can be passed as the property value, in which case the relationship will
-        /// be cleared.
+        /// Returns the current relationship associated with the source, or null if there is no relationship.
+        /// Also sets a relationship between two objects. Null can be passed as the property value, in which
+        /// case the relationship will be cleared.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional")]
         public MemberRelationship this[object sourceOwner, MemberDescriptor sourceMember]
@@ -109,9 +108,7 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         protected virtual MemberRelationship GetRelationship(MemberRelationship source)
         {
-            RelationshipEntry retVal;
-
-            if (_relationships != null && _relationships.TryGetValue(new RelationshipEntry(source), out retVal) && retVal._owner.IsAlive)
+            if (_relationships.TryGetValue(new RelationshipEntry(source), out RelationshipEntry retVal) && retVal._owner.IsAlive)
             {
                 return new MemberRelationship(retVal._owner.Target, retVal._member);
             }
@@ -167,9 +164,8 @@ namespace System.ComponentModel.Design.Serialization
 
             public override bool Equals(object o)
             {
-                if (o is RelationshipEntry)
+                if (o is RelationshipEntry e)
                 {
-                    RelationshipEntry e = (RelationshipEntry)o;
                     return this == e;
                 }
 
@@ -197,9 +193,6 @@ namespace System.ComponentModel.Design.Serialization
     /// </summary>
     public readonly struct MemberRelationship
     {
-        private readonly object _owner;
-        private readonly MemberDescriptor _member;
-
         public static readonly MemberRelationship Empty = new MemberRelationship();
 
         /// <summary>
@@ -207,8 +200,8 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         public MemberRelationship(object owner, MemberDescriptor member)
         {
-            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
-            _member = member ?? throw new ArgumentNullException(nameof(member));
+            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            Member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
         /// <summary>
@@ -219,12 +212,12 @@ namespace System.ComponentModel.Design.Serialization
         /// <summary>
         /// The member in this relationship.
         /// </summary>
-        public MemberDescriptor Member => _member;
+        public MemberDescriptor Member { get; }
 
         /// <summary>
         /// The object owning the member.
         /// </summary>
-        public object Owner => _owner;
+        public object Owner { get; }
 
         /// <summary>
         /// Infrastructure support to make this a first class struct
