@@ -3806,7 +3806,7 @@ namespace System.Tests
             string s1 = "0172377457778667789";
             string s2 = string.Empty;
             int index = s1.LastIndexOf(s2);
-            Assert.Equal(0, index);
+            Assert.Equal(s1.Length - 1, index);
 
             // A zero-length value is always "found" at the start of the span.
             ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
