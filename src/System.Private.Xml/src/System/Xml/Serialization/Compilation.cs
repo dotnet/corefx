@@ -211,11 +211,12 @@ namespace System.Xml.Serialization
                     return null;
                 }
 
-                if(!IsSerializerVersionMatch(serializer, type, defaultNamespace))
+#if !FEATURE_SERIALIZATION_UAPAOT
+                if (!IsSerializerVersionMatch(serializer, type, defaultNamespace))
                 {
-                    throw new Exception(SR.Format(SR.XmlSerializerExpiredDetails, serializerName, type.FullName));
+                    return null;
                 }
-
+#endif
             }
             else
             {
