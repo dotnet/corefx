@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
-#else
+#elif HAVE_POLL
 #include <sys/poll.h>
 #endif
 #include <errno.h>

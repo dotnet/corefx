@@ -317,6 +317,10 @@ check_function_exists(
     HAVE_FCOPYFILE)
 
 check_function_exists(
+    poll
+    HAVE_POLL)
+
+check_function_exists(
     epoll_create1
     HAVE_EPOLL)
 
