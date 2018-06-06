@@ -712,7 +712,11 @@ check_c_source_compiles(
 check_c_source_compiles(
     "
     #include <netinet/tcp.h>
-    int main() { int x = TCP_KEEPALIVE; return x; }
+    int main()
+    {
+        int x = TCP_KEEPALIVE;
+        return x;
+    }
     "
     HAVE_TCP_H_TCP_KEEPALIVE
 )
