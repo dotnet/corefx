@@ -2357,7 +2357,7 @@ namespace System.ComponentModel
             }
             if (type != null)
             {
-                result = (IDesigner)SecurityUtils.SecureCreateInstance(type);
+                result = (IDesigner)Activator.CreateInstance(type);
             }
             return result;
         }

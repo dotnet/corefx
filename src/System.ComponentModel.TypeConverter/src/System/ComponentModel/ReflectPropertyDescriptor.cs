@@ -564,7 +564,7 @@ namespace System.ComponentModel
                 if (site != null)
                 {
                     changeService = (IComponentChangeService)site.GetService(typeof(IComponentChangeService));
-                    Debug.Assert(!CompModSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
+                    Debug.Assert(!ComponentModelSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
                 }
 
                 // Make sure that it is ok to send the onchange events
@@ -612,7 +612,7 @@ namespace System.ComponentModel
                 if (site != null)
                 {
                     changeService = (IComponentChangeService)site.GetService(typeof(IComponentChangeService));
-                    Debug.Assert(!CompModSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
+                    Debug.Assert(!ComponentModelSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
                 }
 
                 // Make sure that it is ok to send the onchange events
@@ -1026,14 +1026,14 @@ namespace System.ComponentModel
                 if (site != null)
                 {
                     changeService = (IComponentChangeService)site.GetService(typeof(IComponentChangeService));
-                    Debug.Assert(!CompModSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
+                    Debug.Assert(!ComponentModelSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
                 }
 
                 // Make sure that it is ok to send the onchange events
                 if (changeService != null)
                 {
                     // invokee might be a type from mscorlib or system, GetMethodValue might return a NonPublic method
-                    oldValue = SecurityUtils.MethodInfoInvoke(GetMethodValue, invokee, (object[])null);
+                    oldValue = GetMethodValue.Invoke(invokee, null);
                     try
                     {
                         changeService.OnComponentChanging(component, this);
@@ -1050,12 +1050,12 @@ namespace System.ComponentModel
 
                 if (ResetMethodValue != null)
                 {
-                    SecurityUtils.MethodInfoInvoke(ResetMethodValue, invokee, (object[])null);
+                    ResetMethodValue.Invoke(invokee, null);
 
                     // Now notify the change service that the change was successful.
                     if (changeService != null)
                     {
-                        newValue = SecurityUtils.MethodInfoInvoke(GetMethodValue, invokee, (object[])null);
+                        newValue = GetMethodValue.Invoke(invokee, null);
                         changeService.OnComponentChanged(component, this, oldValue, newValue);
                     }
                 }
@@ -1089,13 +1089,13 @@ namespace System.ComponentModel
                     if (site != null)
                     {
                         changeService = (IComponentChangeService)site.GetService(typeof(IComponentChangeService));
-                        Debug.Assert(!CompModSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
+                        Debug.Assert(!ComponentModelSwitches.CommonDesignerServices.Enabled || changeService != null, "IComponentChangeService not found");
                     }
 
                     // Make sure that it is ok to send the onchange events
                     if (changeService != null)
                     {
-                        oldValue = SecurityUtils.MethodInfoInvoke(GetMethodValue, invokee, (object[])null);
+                        oldValue = GetMethodValue.Invoke(invokee, null);
                         try
                         {
                             changeService.OnComponentChanging(component, this);

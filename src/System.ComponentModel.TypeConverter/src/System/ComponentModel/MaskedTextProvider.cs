@@ -496,7 +496,7 @@ namespace System.ComponentModel
                     AsciiOnly
                 };
 
-                clonedProvider = SecurityUtils.SecureCreateInstance(providerType, parameters) as MaskedTextProvider;
+                clonedProvider = Activator.CreateInstance(providerType, parameters) as MaskedTextProvider;
             }
 
             clonedProvider.ResetOnPrompt = false;

@@ -130,7 +130,7 @@ namespace System.ComponentModel
                     LockContext(s_selfLock);
                     try
                     {
-                        created = SecurityUtils.SecureCreateInstance(type, args);
+                        created = Activator.CreateInstance(type, args);
                     }
                     catch (TargetInvocationException e)
                     {
@@ -275,8 +275,7 @@ namespace System.ComponentModel
                 if (attr != null)
                 {
                     Type providerType = attr.LicenseProvider;
-                    provider = GetCachedProviderInstance(providerType) ??
-                               (LicenseProvider)SecurityUtils.SecureCreateInstance(providerType);
+                    provider = GetCachedProviderInstance(providerType) ?? (LicenseProvider)Activator.CreateInstance(providerType);
                 }
 
                 CacheProvider(type, provider);
