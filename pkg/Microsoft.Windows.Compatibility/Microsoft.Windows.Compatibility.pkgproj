@@ -68,10 +68,6 @@
   <ItemGroup>
     <Dependency Include="@(LibraryPackage)" />
     <Dependency Include="@(PrereleaseLibraryPackage)" />
-    <!-- Include dependency to shims package -->
-    <Dependency Include="Microsoft.Windows.Compatibility.Shims">
-      <Version>$(CompatibilityShimsPackageVersion)</Version>
-    </Dependency>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

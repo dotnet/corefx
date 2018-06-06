@@ -8,10 +8,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
+    <ExcludedReferences Include="$(_RuntimePath)Microsoft.Diagnostics.Tracing.TraceEvent.dll;$(_RuntimePath)Microsoft.DiaSymReader.Native.*.dll" />
+
+    <!-- System.ValueTuple has a netstandard configuration so it is bin placed in the target runtime when generating facades for 2.0 and it conflicts with the already defined type in System.Private.CoreLib -->
+    <ExcludedReferences Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(_RuntimePath)System.ValueTuple.dll" />
     <ReferencePath
       Include="$(_RuntimePath)System.*.dll;$(_RuntimePath)Microsoft.*.dll"
-      Exclude="$(_RuntimePath)Microsoft.Diagnostics.Tracing.TraceEvent.dll;$(_RuntimePath)Microsoft.DiaSymReader.Native.*.dll;$(_RuntimePath)System.ValueTuple.dll" />
-      <!-- System.ValueTuple has a netstandard configuration so it is bin placed in the target runtime when generating facades for 2.0 and it conflicts with the already defined type in System.Private.CoreLib -->
+      Exclude="@(ExcludedReferences)" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
