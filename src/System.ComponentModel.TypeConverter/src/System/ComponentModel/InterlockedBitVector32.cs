@@ -21,7 +21,7 @@ namespace System.ComponentModel
 
         public bool this[int bit]
         {
-            get { return (Volatile.Read(ref _data) & bit) == bit; }
+            get => (Volatile.Read(ref _data) & bit) == bit;
             set
             {
                 while (true)
@@ -36,11 +36,10 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>Sets or unsets the specified bit, without using interlocked operations.</summary>
-        public void DangerousSet(int bit, bool value)
-        {
-            _data = value ? _data | bit : _data & ~bit;
-        }
+        /// <summary>
+        /// Sets or unsets the specified bit, without using interlocked operations.
+        /// </summary>
+        public void DangerousSet(int bit, bool value) => _data = value ? _data | bit : _data & ~bit;
 
         public static int CreateMask() => CreateMask(0);
 

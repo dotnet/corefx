@@ -326,8 +326,6 @@ namespace System.ComponentModel
             return newItem;
         }
 
-        /// <summary>
-        /// </summary>
         public bool AllowNew
         {
             get

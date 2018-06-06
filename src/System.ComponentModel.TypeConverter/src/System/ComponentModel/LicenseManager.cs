@@ -270,8 +270,6 @@ namespace System.ComponentModel
             if (provider == null && !GetCachedNoLicenseProvider(type))
             {
                 // NOTE : Must look directly at the class, we want no inheritance.
-                //
-
                 LicenseProviderAttribute attr = (LicenseProviderAttribute)Attribute.GetCustomAttribute(type, typeof(LicenseProviderAttribute), false);
 
                 if (attr != null)
