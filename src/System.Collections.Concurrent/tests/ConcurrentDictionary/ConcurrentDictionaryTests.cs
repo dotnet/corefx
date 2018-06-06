@@ -75,6 +75,7 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing bug fix in https://github.com/dotnet/corefx/pull/28115")]
         public static void TestAddNullValue_IDictionary_ReferenceType_null()
         {
             // using IDictionary interface
@@ -96,6 +97,7 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing bug fix in https://github.com/dotnet/corefx/pull/28115")]
         public static void TestAddNullValue_IDictionary_ValueType_null_add()
         {
             Action action = () =>
