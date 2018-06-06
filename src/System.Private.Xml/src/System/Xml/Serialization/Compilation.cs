@@ -269,7 +269,6 @@ namespace System.Xml.Serialization
             return false;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         private static string GenerateAssemblyId(Type type)
         {
             Module[] modules = type.Assembly.GetModules();
