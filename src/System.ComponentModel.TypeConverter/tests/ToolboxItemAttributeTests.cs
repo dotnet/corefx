@@ -18,7 +18,14 @@ namespace System.ComponentModel
             if (defaultType)
             {
                 Assert.Equal("System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", attribute.ToolboxItemTypeName);
-                AssertExtensions.Throws<ArgumentException>(null, () => attribute.ToolboxItemType);
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.NotNull(attribute.ToolboxItemType);
+                }
+                else
+                {
+                    AssertExtensions.Throws<ArgumentException>(null, () => attribute.ToolboxItemType);
+                }
             }
             else
             {
@@ -82,7 +89,14 @@ namespace System.ComponentModel
             ToolboxItemAttribute attribute = ToolboxItemAttribute.Default;
             Assert.Same(attribute, ToolboxItemAttribute.Default);
             Assert.Equal("System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", attribute.ToolboxItemTypeName);
-            AssertExtensions.Throws<ArgumentException>(null, () => attribute.ToolboxItemType);
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.NotNull(attribute.ToolboxItemType);
+            }
+            else
+            {
+                AssertExtensions.Throws<ArgumentException>(null, () => attribute.ToolboxItemType);
+            }
             Assert.True(attribute.IsDefaultAttribute());
         }
 

@@ -15,8 +15,15 @@ namespace System.Timers.Tests
         public void Ctor_String(string description)
         {
             var attribute = new TimersDescriptionAttribute(description);
-            Assert.Equal(description, attribute.Description);
-            Assert.Same(attribute.Description, attribute.Description);
+            if (PlatformDetection.IsFullFramework && description == string.Empty)
+            {
+                Assert.Null(attribute.Description);
+            }
+            else
+            {
+                Assert.Equal(description, attribute.Description);
+                Assert.Same(attribute.Description, attribute.Description);
+            }
         }
 
         [Fact]
@@ -32,7 +39,8 @@ namespace System.Timers.Tests
         public void Description_GetWithNullDescription_ThrowsArgumentNullException()
         {
             var attribute = new TimersDescriptionAttribute(null);
-            AssertExtensions.Throws<ArgumentNullException>("format", () => attribute.Description);
+            AssertExtensions.Throws<ArgumentNullException>("name", () => attribute.Description);
+            Assert.Null(attribute.Description);
         }
     }
 }

@@ -36,16 +36,10 @@ namespace System.ComponentModel.Design.Tests
         public void Add_ValidValue_Success()
         {
             var verb = new DesignerVerb("Text", null);
-            var collection = new DesignerVerbCollection { verb };
-            Assert.Equal(1, collection.Count);
+            var collection = new DesignerVerbCollection { verb, null };
+            Assert.Equal(2, collection.Count);
             Assert.Same(verb, collection[0]);
-        }
-
-        [Fact]
-        public void Add_NullValue_ThrowsArgumentNullException()
-        {
-            var collection = new DesignerVerbCollection();
-            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.Add(null));
+            Assert.Null(collection[1]);
         }
 
         [Fact]
@@ -56,13 +50,10 @@ namespace System.ComponentModel.Design.Tests
             collection.Insert(0, verb);
             Assert.Equal(2, collection.Count);
             Assert.Same(verb, collection[0]);
-        }
 
-        [Fact]
-        public void Insert_NullValue_ThrowsArgumentNullException()
-        {
-            var collection = new DesignerVerbCollection();
-            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.Insert(0, null));
+            collection.Insert(0, null);
+            Assert.Equal(3, collection.Count);
+            Assert.Null(collection[0]);
         }
 
         [Fact]
@@ -71,15 +62,11 @@ namespace System.ComponentModel.Design.Tests
             var verb = new DesignerVerb("Text", null);
             var collection = new DesignerVerbCollection { verb };
             collection.Remove(verb);
-
             Assert.Empty(collection);
-        }
 
-        [Fact]
-        public void Remove_NullValue_ThrowsArgumentNullException()
-        {
-            var collection = new DesignerVerbCollection();
-            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.Remove(null));
+            collection.Add(null);
+            collection.Remove(null);
+            Assert.Empty(collection);
         }
 
         [Fact]
@@ -91,13 +78,9 @@ namespace System.ComponentModel.Design.Tests
 
             Assert.Equal(1, collection.Count);
             Assert.Same(verb, collection[0]);
-        }
 
-        [Fact]
-        public void Item_SetNullValue_ThrowsArgumentNullException()
-        {
-            var collection = new DesignerVerbCollection() { new DesignerVerb("Text", null) };
-            AssertExtensions.Throws<ArgumentNullException>("value", () => collection[0] = null);
+            collection[0] = null;
+            Assert.Null(collection[0]);
         }
 
         [Fact]

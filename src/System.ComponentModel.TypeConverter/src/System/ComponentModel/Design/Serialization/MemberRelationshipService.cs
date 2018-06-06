@@ -197,6 +197,9 @@ namespace System.ComponentModel.Design.Serialization
     /// </summary>
     public readonly struct MemberRelationship
     {
+        private readonly object _owner;
+        private readonly MemberDescriptor _member;
+
         public static readonly MemberRelationship Empty = new MemberRelationship();
 
         /// <summary>
@@ -204,8 +207,8 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         public MemberRelationship(object owner, MemberDescriptor member)
         {
-            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-            Member = member ?? throw new ArgumentNullException(nameof(member));
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            _member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
         /// <summary>
@@ -216,12 +219,12 @@ namespace System.ComponentModel.Design.Serialization
         /// <summary>
         /// The member in this relationship.
         /// </summary>
-        public MemberDescriptor Member { get; }
+        public MemberDescriptor Member => _member;
 
         /// <summary>
         /// The object owning the member.
         /// </summary>
-        public object Owner { get; }
+        public object Owner => _owner;
 
         /// <summary>
         /// Infrastructure support to make this a first class struct

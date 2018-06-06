@@ -109,8 +109,8 @@ namespace System.ComponentModel.Design.Serialization.Tests
 
         private struct FakeMemberRelationsip
         {
-            public MemberDescriptor Member;
             public object Owner;
+            public MemberDescriptor Member;
 
             public MemberRelationship ToActual()
             {
