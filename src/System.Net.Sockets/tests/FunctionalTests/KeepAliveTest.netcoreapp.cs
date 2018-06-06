@@ -45,7 +45,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsUnixOrWindowsAtLeast1703))]
-        public void Socket_KeepAliveState_Set_RetryCount_Success()
+        public void Socket_Set_KeepAlive_RetryCount_Success()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -55,7 +55,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsWindowsBelow1703))]
-        public void Socket_KeepAliveState_Set_RetryCount_Failure()
+        public void Socket_Set_KeepAlive_RetryCount_Failure()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -65,7 +65,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public void Socket_KeepAliveState_Set_Time_Success()
+        public void Socket_Set_KeepAlive_Time_Success()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -75,7 +75,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsUnixOrWindowsAtLeast1709))]
-        public void Socket_KeepAliveState_Set_Interval_Success()
+        public void Socket_Set_KeepAlive_Interval_Success()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -85,7 +85,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsWindowsBelow1709))]
-        public void Socket_KeepAliveState_Set_Interval_Failure()
+        public void Socket_Set_KeepAlive_Interval_Failure()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
