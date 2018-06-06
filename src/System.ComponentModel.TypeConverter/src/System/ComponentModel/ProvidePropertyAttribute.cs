@@ -44,12 +44,10 @@ namespace System.ComponentModel
             {
                 return true;
             }
-            if (!(obj is ProvidePropertyAttribute other))
-            {
-                return false;
-            }
 
-            return other.PropertyName == PropertyName && other.ReceiverTypeName == ReceiverTypeName;
+            return obj is ProvidePropertyAttribute other
+                && other.PropertyName == PropertyName
+                && other.ReceiverTypeName == ReceiverTypeName;
         }
 
         public override int GetHashCode() => PropertyName.GetHashCode() ^ ReceiverTypeName.GetHashCode();

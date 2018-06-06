@@ -16,13 +16,12 @@ namespace System.ComponentModel
         /// </summary>
         internal static ExtenderProvidedPropertyAttribute Create(PropertyDescriptor extenderProperty, Type receiverType, IExtenderProvider provider)
         {
-            ExtenderProvidedPropertyAttribute e = new ExtenderProvidedPropertyAttribute
+            return new ExtenderProvidedPropertyAttribute
             {
                 ExtenderProperty = extenderProperty,
                 ReceiverType = receiverType,
                 Provider = provider
             };
-            return e;
         }
 
         /// <summary>
@@ -53,12 +52,11 @@ namespace System.ComponentModel
             {
                 return true;
             }
-            if (!(obj is ExtenderProvidedPropertyAttribute other))
-            {
-                return false;
-            }
 
-            return other.ExtenderProperty.Equals(ExtenderProperty) && other.Provider.Equals(Provider) && other.ReceiverType.Equals(ReceiverType);
+            return obj is ExtenderProvidedPropertyAttribute other
+                && other.ExtenderProperty.Equals(ExtenderProperty)
+                && other.Provider.Equals(Provider)
+                && other.ReceiverType.Equals(ReceiverType);
         }
 
         public override int GetHashCode() => base.GetHashCode();

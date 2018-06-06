@@ -11,11 +11,11 @@ namespace System.Timers.Tests
     {
         [Theory]
         [InlineData("")]
-        [InlineData("newObject")]
+        [InlineData("description")]
         public void Ctor_String(string description)
         {
             var attribute = new TimersDescriptionAttribute(description);
-            if (PlatformDetection.IsFullFramework && description == string.Empty)
+            if (PlatformDetection.IsFullFramework)
             {
                 Assert.Null(attribute.Description);
             }
@@ -39,7 +39,9 @@ namespace System.Timers.Tests
         public void Description_GetWithNullDescription_ThrowsArgumentNullException()
         {
             var attribute = new TimersDescriptionAttribute(null);
-            AssertExtensions.Throws<ArgumentNullException>("name", () => attribute.Description);
+            AssertExtensions.Throws<ArgumentNullException>("format", "name", () => attribute.Description);
+
+            // Only the first call fails.
             Assert.Null(attribute.Description);
         }
     }

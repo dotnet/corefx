@@ -122,7 +122,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void FromExisting_NullAttributeInNewAttributes_ThrowsArgumentNullException()
         {
-            Attribute[] existingAttributes = GetAttributes().Take(2).ToArray();
+            Attribute[] existingAttributes = GetAttributes().Take(5).ToArray();
             var existing = new AttributeCollection(existingAttributes);
             var newAttributes = new Attribute[] { null };
 
@@ -132,7 +132,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void FromExisting_NullNewAttributes_Success()
         {
-            Attribute[] existingAttributes = GetAttributes().Take(2).ToArray();
+            Attribute[] existingAttributes = GetAttributes().Take(5).ToArray();
             var existing = new AttributeCollection(existingAttributes);
 
             AttributeCollection attributeCollection = AttributeCollection.FromExisting(existing, null);

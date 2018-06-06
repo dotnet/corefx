@@ -81,12 +81,7 @@ namespace System.ComponentModel
                 return true;
             }
 
-            if (!(obj is BindableAttribute other))
-            {
-                return false;
-            }
-
-            return other.Bindable == Bindable;
+            return obj is BindableAttribute other && other.Bindable == Bindable;
         }
 
         public override int GetHashCode() => Bindable.GetHashCode();

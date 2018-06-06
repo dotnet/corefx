@@ -231,12 +231,7 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is MemberRelationship rel))
-            {
-                return false;
-            }
-
-            return rel.Owner == Owner && rel.Member == Member;
+            return obj is MemberRelationship rel && rel.Owner == Owner && rel.Member == Member;
         }
 
         /// <summary>

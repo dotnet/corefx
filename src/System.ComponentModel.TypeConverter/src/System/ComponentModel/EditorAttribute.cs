@@ -13,8 +13,8 @@ namespace System.ComponentModel
         private string _typeId;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class with the default editor, which is
-        /// no editor.
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class
+        /// with the default editor, which is no editor.
         /// </summary>
         public EditorAttribute()
         {
@@ -28,7 +28,7 @@ namespace System.ComponentModel
         /// </summary>
         public EditorAttribute(string typeName, string baseTypeName)
         {
-            EditorTypeName = typeName ?? throw new NullReferenceException();
+            EditorTypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
             EditorBaseTypeName = baseTypeName;
         }
 
@@ -37,7 +37,7 @@ namespace System.ComponentModel
         /// </summary>
         public EditorAttribute(string typeName, Type baseType)
         {
-            EditorTypeName = typeName ?? throw new NullReferenceException();
+            EditorTypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }
 
@@ -92,12 +92,9 @@ namespace System.ComponentModel
                 return true;
             }
 
-            if (!(obj is EditorAttribute other))
-            {
-                return false;
-            }
-
-            return other.EditorTypeName == EditorTypeName && other.EditorBaseTypeName == EditorBaseTypeName;
+            return obj is EditorAttribute other
+                && other.EditorTypeName == EditorTypeName
+                && other.EditorBaseTypeName == EditorBaseTypeName;
         }
 
         public override int GetHashCode() => base.GetHashCode();

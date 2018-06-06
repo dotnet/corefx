@@ -20,7 +20,7 @@ namespace System.ComponentModel
         /// </summary>
         public DesignerAttribute(string designerTypeName)
         {
-            DesignerTypeName = designerTypeName ?? throw new NullReferenceException();
+            DesignerTypeName = designerTypeName ?? throw new ArgumentNullException(nameof(designerTypeName));
             DesignerBaseTypeName = typeof(IDesigner).FullName;
         }
 
@@ -40,7 +40,7 @@ namespace System.ComponentModel
         /// </summary>
         public DesignerAttribute(string designerTypeName, string designerBaseTypeName)
         {
-            DesignerTypeName = designerTypeName ?? throw new NullReferenceException();
+            DesignerTypeName = designerTypeName ?? throw new ArgumentNullException(nameof(designerTypeName));
             DesignerBaseTypeName = designerBaseTypeName;
         }
 
@@ -50,7 +50,7 @@ namespace System.ComponentModel
         /// </summary>
         public DesignerAttribute(string designerTypeName, Type designerBaseType)
         {
-            DesignerTypeName = designerTypeName ?? throw new NullReferenceException();
+            DesignerTypeName = designerTypeName ?? throw new ArgumentNullException(nameof(designerTypeName));
             DesignerBaseTypeName = designerBaseType.AssemblyQualifiedName;
         }
 
@@ -106,12 +106,9 @@ namespace System.ComponentModel
                 return true;
             }
 
-            if (!(obj is DesignerAttribute other))
-            {
-                return false;
-            }
-
-            return other.DesignerBaseTypeName == DesignerBaseTypeName && other.DesignerTypeName == DesignerTypeName;
+            return obj is DesignerAttribute other
+                && other.DesignerBaseTypeName == DesignerBaseTypeName
+                && other.DesignerTypeName == DesignerTypeName;
         }
 
         public override int GetHashCode() => DesignerTypeName.GetHashCode() ^ DesignerBaseTypeName.GetHashCode();

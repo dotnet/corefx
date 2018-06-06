@@ -36,11 +36,6 @@ namespace System.Timers
                 if (!_replaced)
                 {
                     _replaced = true;
-                    if (base.Description == null)
-                    {
-                        throw new ArgumentNullException("name");
-                    }
-
                     DescriptionValue = SR.Format(base.Description);
                 }
                 return base.Description;

@@ -66,11 +66,11 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public void Ctor_NullDesignerTypeName_ThrowsNullReferenceException()
+        public void Ctor_NullDesignerTypeName_ThrowsArgumentNullExceptionException()
         {
-            Assert.Throws<NullReferenceException>(() => new DesignerAttribute((string)null));
-            Assert.Throws<NullReferenceException>(() => new DesignerAttribute(null, "designerBaseTypeName"));
-            Assert.Throws<NullReferenceException>(() => new DesignerAttribute((string)null, typeof(int)));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(() => new DesignerAttribute((string)null));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(() => new DesignerAttribute(null, "designerBaseTypeName"));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(() => new DesignerAttribute((string)null, typeof(int)));
         }
 
         [Fact]

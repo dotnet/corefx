@@ -7,8 +7,8 @@ using System.Globalization;
 namespace System.ComponentModel.Design
 {
     /// <summary>
-    /// Represents a numeric Command ID and globally unique
-    /// ID (GUID) menu identifier that together uniquely identify a command.
+    /// Represents a numeric Command ID and globally unique ID (GUID) menu
+    /// identifier that together uniquely identify a command.
     /// </summary>
     public class CommandID
     {
@@ -32,12 +32,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is CommandID cid))
-            {
-                return false;
-            }
-
-            return cid.Guid.Equals(Guid) && cid.ID == ID;
+            return obj is CommandID cid && cid.Guid.Equals(Guid) && cid.ID == ID;
         }
 
         public override int GetHashCode() => Guid.GetHashCode() << 2 | ID;
@@ -45,7 +40,6 @@ namespace System.ComponentModel.Design
         /// <summary>
         /// Gets or sets the globally unique ID (GUID) of the menu group that the
         /// menu command this CommandID represents belongs to.
-        /// 
         /// </summary>
         public virtual Guid Guid { get; }
 

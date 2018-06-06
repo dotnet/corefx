@@ -49,7 +49,7 @@ namespace System.ComponentModel
         /// </summary>
         public ToolboxItemAttribute(string toolboxItemTypeName)
         {
-            _toolboxItemTypeName = toolboxItemTypeName ?? throw new NullReferenceException();
+            _toolboxItemTypeName = toolboxItemTypeName ?? throw new ArgumentNullException(nameof(toolboxItemTypeName));
         }
 
         /// <summary>

@@ -47,4 +47,3 @@ namespace System.ComponentModel.Design.Serialization
         bool CanReloadWithErrors { get; set; }
     }
 }
-

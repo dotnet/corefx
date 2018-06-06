@@ -52,10 +52,10 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        public void Ctor_NullEditorTypeName_ThrowsNullReferenceException()
+        public void Ctor_NullEditorTypeName_ThrowsArgumentNullException()
         {
-            Assert.Throws<NullReferenceException>(() => new EditorAttribute(null, "baseTypeName"));
-            Assert.Throws<NullReferenceException>(() => new EditorAttribute((string)null, typeof(int)));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(() => new EditorAttribute(null, "baseTypeName"));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(() => new EditorAttribute((string)null, typeof(int)));
         }
 
         [Fact]

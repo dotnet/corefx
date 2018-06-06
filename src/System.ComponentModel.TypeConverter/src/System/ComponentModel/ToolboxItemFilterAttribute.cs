@@ -38,7 +38,6 @@ namespace System.ComponentModel
     /// each other's components from being enabled. This is a useful restriction because,
     /// since each has several duplicate class names, it may be confusing to users and
     /// they may not know which controls to choose.
-    /// 
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public sealed class ToolboxItemFilterAttribute : Attribute
@@ -86,12 +85,10 @@ namespace System.ComponentModel
             {
                 return true;
             }
-            if (!(obj is ToolboxItemFilterAttribute other))
-            {
-                return false;
-            }
 
-            return other.FilterType.Equals(FilterType) && other.FilterString.Equals(FilterString);
+            return obj is ToolboxItemFilterAttribute other
+                && other.FilterType.Equals(FilterType)
+                && other.FilterString.Equals(FilterString);
         }
 
         public override int GetHashCode()
@@ -102,18 +99,8 @@ namespace System.ComponentModel
 
         public override bool Match(object obj)
         {
-            if (!(obj is ToolboxItemFilterAttribute other))
-            {
-                return false;
-            }
-
-            // Different filter string kills a match immediately.
-            if (!other.FilterString.Equals(FilterString))
-            {
-                return false;
-            }
-
-            return true;
+            return obj is ToolboxItemFilterAttribute other
+                && other.FilterString.Equals(FilterString);
         }
 
         public override string ToString() => FilterString + "," + Enum.GetName(typeof(ToolboxItemFilterType), FilterType);

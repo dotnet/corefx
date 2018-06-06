@@ -32,7 +32,6 @@ namespace System.ComponentModel.Design
         private static readonly Guid s_ndpCommandSet = new Guid("{74D21313-2AEE-11d1-8BFB-00A0C90F26F7}");
 
         private const int CmdidDesignerVerbFirst = 0x2000;
-
         private const int CmdidDesignerVerbLast = 0x2100;
 
         // Component Tray Menu commands...
@@ -244,6 +243,7 @@ namespace System.ComponentModel.Design
 
         /// <summary>
         /// Gets the GUID/integer value pair for the MultiLevelUndo command. Read only.
+        /// </summary>
         public static readonly CommandID MultiLevelUndo = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidMultiLevelUndo);
 
         /// <summary>
@@ -323,8 +323,7 @@ namespace System.ComponentModel.Design
         public static readonly CommandID VerbFirst = new CommandID(s_ndpCommandSet, CmdidDesignerVerbFirst);
 
         /// <summary>
-        ///  Gets the last of a set of verbs.
-        /// Read only.
+        /// Gets the last of a set of verbs.Read only.
         /// </summary>
         public static readonly CommandID VerbLast = new CommandID(s_ndpCommandSet, CmdidDesignerVerbLast);
 
