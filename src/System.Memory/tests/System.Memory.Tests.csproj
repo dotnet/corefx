@@ -125,7 +125,6 @@
     <Compile Include="ReadOnlySpan\LastIndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfAny.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.byte.cs" />
-    <Compile Include="ReadOnlySpan\LastIndexOf.char.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.char.cs" />
