@@ -1659,10 +1659,11 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     return true;
 
                 case SocketOptionName_SO_TCP_KEEPALIVE_TIME:
+                    *optName =
                     #if HAVE_TCP_H_TCP_KEEPALIVE
-                    *optName = TCP_KEEPALIVE;
+                        TCP_KEEPALIVE;
                     #else
-                    *optName = TCP_KEEPIDLE;
+                        TCP_KEEPIDLE;
                     #endif
                     return true;
 
