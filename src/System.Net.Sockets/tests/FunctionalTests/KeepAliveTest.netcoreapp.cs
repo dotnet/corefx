@@ -51,7 +51,7 @@ namespace System.Net.Sockets.Tests
             {
                 socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, RetryCount);
                 Assert.Equal<int>(RetryCount, (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount));
-            }            
+            }
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsWindowsBelow1703))]
@@ -61,27 +61,17 @@ namespace System.Net.Sockets.Tests
             {
                 Assert.Throws<SocketException>(() => socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, RetryCount));
                 Assert.Throws<SocketException>(() => socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount));
-            }            
+            }
         }
 
-        [ConditionalFact(typeof(KeepAliveTest), nameof(IsUnixOrWindowsAtLeast1709))]
+        [Fact]
         public void Socket_KeepAliveState_Set_Time_Success()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, Time);
                 Assert.Equal<int>(Time, (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime));
-            }            
-        }
-
-        [ConditionalFact(typeof(KeepAliveTest), nameof(IsWindowsBelow1709))]
-        public void Socket_KeepAliveState_Set_Time_Failure()
-        {
-            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                Assert.Throws<SocketException>(() => socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, Time));
-                Assert.Throws<SocketException>(() => socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime));
-            }            
+            }
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsUnixOrWindowsAtLeast1709))]
@@ -91,7 +81,7 @@ namespace System.Net.Sockets.Tests
             {
                 socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, Interval);
                 Assert.Equal<int>(Interval, (int)socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval));
-            }            
+            }
         }
 
         [ConditionalFact(typeof(KeepAliveTest), nameof(IsWindowsBelow1709))]
@@ -101,7 +91,7 @@ namespace System.Net.Sockets.Tests
             {
                 Assert.Throws<SocketException>(() => socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, Interval));
                 Assert.Throws<SocketException>(() => socket.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval));
-            }            
+            }
         }
     }
 }
