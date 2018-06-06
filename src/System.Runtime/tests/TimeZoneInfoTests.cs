@@ -274,6 +274,53 @@ namespace System.Tests
             Assert.Equal(serialized, deserializedTimeZone.ToSerializedString());
         }
 
+        [Fact]
+        public static void TimeZoneInfo_DoesNotCreateAdjustmentRulesWithOffsetOutsideOfRange()
+        {
+            // On some OSes this time zone contains old adjustment rules which have offset higher than 14h
+            // Assert.DoesNotThrow
+            DateTimeOffset.FromFileTime(0);
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DoesConvertTimeForOldDatesOfTimeZonesWithExceedingMaxRange()
+        {
+            // On some OSes this time zone contains old adjustment rules which have offset higher than 14h
+            TimeZoneInfo tzi = TryGetSystemTimeZone("Asia/Manila");
+            if (tzi == null)
+            {
+                // Time zone could not be found
+                return;
+            }
+
+            // Assert.DoesNotThrow
+            TimeZoneInfo.ConvertTime(DateTimeOffset.MinValue, tzi);
+        }
+
+        [Fact]
+        public static void GetSystemTimeZones_AllTimeZonesHaveOffsetInValidRange()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                foreach (TimeZoneInfo.AdjustmentRule ar in tzi.GetAdjustmentRules())
+                {
+                    Assert.True(Math.Abs((ar.DaylightDelta + tzi.BaseUtcOffset).TotalHours) <= 14.0);
+                }
+            }
+        }
+
+        static TimeZoneInfo TryGetSystemTimeZone(string id)
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(id);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return null;
+            }
+        }
+
         private static TimeZoneInfo CreateCustomLondonTimeZone()
         {
             TimeZoneInfo.TransitionTime start = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 1, 0, 0), 3, 5, DayOfWeek.Sunday);
