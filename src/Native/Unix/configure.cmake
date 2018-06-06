@@ -316,9 +316,9 @@ check_function_exists(
     fcopyfile
     HAVE_FCOPYFILE)
 
-check_function_exists(
-    poll
-    HAVE_POLL)
+check_include_files(
+     "sys/poll.h"
+     HAVE_SYS_POLL_H)
 
 check_function_exists(
     epoll_create1
