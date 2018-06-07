@@ -561,55 +561,60 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        public static void DecryptUsingCertificateWithSameSubjectKeyIdentifierButDifferentKeyPair()
+        public void DecryptEnvelopedOctetStringWithDefiniteLength()
         {
-            using (X509Certificate2 recipientCert = Certificates.RSAKeyTransfer4_ExplicitSki.GetCertificate())
-            using (X509Certificate2 otherRecipientWithSameSki = Certificates.RSAKeyTransfer5_ExplicitSkiOfRSAKeyTransfer4.TryGetCertificateWithPrivateKey())
-            using (X509Certificate2 realRecipientCert = Certificates.RSAKeyTransfer4_ExplicitSki.TryGetCertificateWithPrivateKey())
-            {
-                Assert.Equal(recipientCert, realRecipientCert);
-                Assert.NotEqual(recipientCert, otherRecipientWithSameSki);
-                Assert.Equal(GetSubjectKeyIdentifier(recipientCert), GetSubjectKeyIdentifier(otherRecipientWithSameSki));
+            // enveloped content consists of 5 bytes: <id: 1 byte><length: 1 byte><content: 3 bytes>
+            // <id>:
+            //   04 - Octet string
+            //   30 - Sequence
+            // <length>: 03 => length is 3 (encoded with definite length)
+            // <content>: 010203
+            // Note: we expect invalid ASN.1 sequence
+            byte[] content = "0403010203".HexToByteArray();
+            byte[] expectedContent = "3003010203".HexToByteArray();
 
-                byte[] plainText = new byte[] { 1, 3, 7, 9 };
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
 
-                ContentInfo content = new ContentInfo(plainText);
-                EnvelopedCms ecms = new EnvelopedCms(content);
-
-                CmsRecipient recipient = new CmsRecipient(SubjectIdentifierType.SubjectKeyIdentifier, recipientCert);
-                ecms.Encrypt(recipient);
-                byte[] encoded = ecms.Encode();
-
-                ecms = new EnvelopedCms();
-                ecms.Decode(encoded);
-
-                Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(new X509Certificate2Collection(otherRecipientWithSameSki)));
-                ecms.Decrypt(new X509Certificate2Collection(realRecipientCert));
-
-                Assert.Equal(plainText, ecms.ContentInfo.Content);
-            }
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
         }
 
-        private static string GetSubjectKeyIdentifier(X509Certificate2 cert)
+        [Fact]
+        public void DecryptEnvelopedOctetStringWithIndefiniteLength()
         {
-            foreach (var ext in cert.Extensions)
-            {
-                X509SubjectKeyIdentifierExtension skiExt = ext as X509SubjectKeyIdentifierExtension;
-                if (skiExt != null)
-                {
-                    return skiExt.SubjectKeyIdentifier;
-                }
-            }
+            // enveloped content consists of 5 or 6 bytes: <id: 1 byte><length: 1 or 2 bytes><content: 3 bytes>
+            // <id>:
+            //   04 - Octet string
+            //   30 - Sequence
+            // <length>: 03    => length is 3 (encoded with definite length)
+            //           81 03 => length is 3 (encoded with indefinite length)
+            // <content>: 010203
+            // Note: we expect invalid ASN.1 sequence
+            byte[] content = "048103010203".HexToByteArray();
+            byte[] expectedContent = "3003010203".HexToByteArray();
 
-            Assert.False(true, "Subject Key Identifier not found");
-            return null;
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
         }
 
-        private void TestSimpleDecrypt_RoundTrip(CertLoader certLoader, ContentInfo contentInfo, string algorithmOidValue, SubjectIdentifierType type)
+        [Fact]
+        public void DecryptEnvelopedDataWithNonPkcs7Oid()
+        {
+            byte[] content = "3003010203".HexToByteArray();
+            string nonPkcs7Oid = "0.0";
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(nonPkcs7Oid), content);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
+        }
+
+        private void TestSimpleDecrypt_RoundTrip(CertLoader certLoader, ContentInfo contentInfo, string algorithmOidValue, SubjectIdentifierType type, ContentInfo expectedContentInfo = null)
         {
             // Deep-copy the contentInfo since the real ContentInfo doesn't do this. This defends against a bad implementation changing
             // our "expectedContentInfo" to match what it produces.
-            ContentInfo expectedContentInfo = new ContentInfo(new Oid(contentInfo.ContentType), (byte[])(contentInfo.Content.Clone()));
+            expectedContentInfo = expectedContentInfo ?? new ContentInfo(new Oid(contentInfo.ContentType), (byte[])(contentInfo.Content.Clone()));
 
             string certSubjectName;
             byte[] encodedMessage;

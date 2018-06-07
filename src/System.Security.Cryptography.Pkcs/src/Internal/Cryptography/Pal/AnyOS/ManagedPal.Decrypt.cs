@@ -157,18 +157,37 @@ namespace Internal.Cryptography.Pal.AnyOS
                 }
                 else
                 {
-                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+                    try
                     {
-                        writer.PushSequence();
-                        AsnReader reader = new AsnReader(decrypted, AsnEncodingRules.BER);
-
-                        while (reader.HasData)
+                        using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
                         {
-                            writer.WriteEncodedValue(reader.GetEncodedValue());
-                        }
+                            writer.PushSequence();
+                            AsnReader reader = new AsnReader(decrypted, AsnEncodingRules.BER);
 
-                        writer.PopSequence();
-                        decrypted = writer.Encode();
+                            while (reader.HasData)
+                            {
+                                writer.WriteEncodedValue(reader.GetEncodedValue());
+                            }
+
+                            writer.PopSequence();
+                            decrypted = writer.Encode();
+                        }
+                    }
+                    catch (CryptographicException)
+                    {
+                        // Decrypted data is not ASN.1 as expected.
+                        // For compatibility with Windows we will wrap it with the sequence tag
+                        // and create invalid sequence (content is not ASN.1)
+                        using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+                        {
+                            // Writer does not have a way to create an invalid ASN.1.
+                            // We will encode it as octet string to bypass validation
+                            // and replace octet string tag (0x04) with sequence tag (0x30)
+                            writer.WriteOctetString(decrypted);
+                            decrypted = writer.Encode();
+                            Debug.Assert(decrypted[0] == 0x04);
+                            decrypted[0] = 0x30;
+                        }
                     }
                 }
 
