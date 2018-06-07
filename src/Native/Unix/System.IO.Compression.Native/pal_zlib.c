@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#include <stdlib.h>
 #include "pal_zlib.h"
 #include "pal_utilities.h"
-#include "pal_compiler.h"
 
 #include <assert.h>
+#include <stdlib.h>
 #include <zlib.h>
 
 c_static_assert(PAL_Z_NOFLUSH == Z_NO_FLUSH);
@@ -34,7 +33,7 @@ Initializes the PAL_ZStream by creating and setting its underlying z_stream.
 */
 static int32_t Init(PAL_ZStream* stream)
 {
-    z_stream* zStream =  (z_stream*)malloc(sizeof(z_stream));
+    z_stream* zStream = (z_stream*)malloc(sizeof(z_stream));
     stream->internalState = zStream;
 
     if (zStream != NULL)
