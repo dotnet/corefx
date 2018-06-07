@@ -9,7 +9,6 @@
     <InboxOnTargetFramework Include="net45">
       <AsFrameworkReference>true</AsFrameworkReference>
     </InboxOnTargetFramework>
-    <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
 
     <HarvestIncludePaths Include="ref/netcore50;lib/netcore50;ref/portable-net45+win8;lib/portable-net45+win8" />
   </ItemGroup>

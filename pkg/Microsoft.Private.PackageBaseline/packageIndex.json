@@ -3179,14 +3179,7 @@
         "net45": "4.0.0.0",
         "portable46-net451+win81": "4.0.0.0",
         "portable45-net45+win8": "4.0.0.0",
-        "win8": "4.0.0.0",
-        "monoandroid10": "Any",
-        "monotouch10": "Any",
-        "xamarinios10": "Any",
-        "xamarinmac20": "Any",
-        "xamarintvos10": "Any",
-        "xamarinwatchos10": "Any"
-
+        "win8": "4.0.0.0"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
