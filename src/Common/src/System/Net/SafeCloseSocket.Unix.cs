@@ -304,7 +304,7 @@ namespace System.Net.Sockets
                     errorCode = SocketError.Success;
 
                     // The socket was created successfully; enable IPV6_V6ONLY by default for AF_INET6 sockets.
-                    if (addressFamily == AddressFamily.InterNetworkV6)
+                    if (addressFamily == AddressFamily.InterNetworkV6 && socketType != SocketType.Raw)
                     {
                         int on = 1;
                         error = Interop.Sys.SetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
