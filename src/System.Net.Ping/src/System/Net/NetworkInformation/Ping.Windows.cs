@@ -171,9 +171,9 @@ namespace System.Net.NetworkInformation
                     IntPtr.Zero,
                     IntPtr.Zero,
 #pragma warning disable CS0618 // Address is marked obsolete
-                        (uint)address.Address,
+                    (uint)address.Address,
 #pragma warning restore CS0618
-                        _requestBuffer,
+                    _requestBuffer,
                     (ushort)buffer.Length,
                     ref ipOptions,
                     _replyBuffer,
@@ -379,7 +379,7 @@ namespace System.Net.NetworkInformation
             return new PingReply(address, default(PingOptions), ipStatus, rtt, buffer);
         }
 
-        /*private*/ static partial void InitializeSockets()
+        static partial void InitializeSockets()
         {
             if (!Volatile.Read(ref s_socketInitialized))
             {
