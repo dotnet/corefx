@@ -277,7 +277,8 @@ namespace System.Tests
         [Fact]
         public static void TimeZoneInfo_DoesNotCreateAdjustmentRulesWithOffsetOutsideOfRange()
         {
-            // On some OSes this time zone contains old adjustment rules which have offset higher than 14h
+            // On some OSes with some time zones setting
+            // time zone may contain old adjustment rule which have offset higher than 14h
             // Assert.DoesNotThrow
             DateTimeOffset.FromFileTime(0);
         }
@@ -294,7 +295,7 @@ namespace System.Tests
             }
 
             // Assert.DoesNotThrow
-            TimeZoneInfo.ConvertTime(DateTimeOffset.MinValue, tzi);
+            TimeZoneInfo.ConvertTime(new DateTimeOffset(1800, 4, 4, 10, 10, 4, 2, TimeSpan.Zero), tzi);
         }
 
         [Fact]
@@ -304,12 +305,12 @@ namespace System.Tests
             {
                 foreach (TimeZoneInfo.AdjustmentRule ar in tzi.GetAdjustmentRules())
                 {
-                    Assert.True(Math.Abs((ar.DaylightDelta + tzi.BaseUtcOffset).TotalHours) <= 14.0);
+                    Assert.True(Math.Abs((tzi.GetUtcOffset(ar.DateStart)).TotalHours) <= 14.0);
                 }
             }
         }
 
-        static TimeZoneInfo TryGetSystemTimeZone(string id)
+        private static TimeZoneInfo TryGetSystemTimeZone(string id)
         {
             try
             {
