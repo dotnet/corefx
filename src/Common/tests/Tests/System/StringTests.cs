@@ -2906,8 +2906,8 @@ namespace System.Tests
             Assert.Equal(0, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5', '1', '7' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(0, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -2923,8 +2923,8 @@ namespace System.Tests
             Assert.Equal(1, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '1', '2', '3', '1', '2', '3', '1', '2', '3' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2', '3' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -2939,8 +2939,8 @@ namespace System.Tests
             Assert.Equal(10, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(10, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -2955,8 +2955,8 @@ namespace System.Tests
             Assert.Equal(-1, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8', 'X' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(-1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -2971,8 +2971,8 @@ namespace System.Tests
             Assert.Equal(-1, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { 'X', '7', '8', '9' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(-1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -2987,8 +2987,8 @@ namespace System.Tests
             Assert.Equal(3, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(3, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3003,8 +3003,8 @@ namespace System.Tests
             Assert.Equal(-1, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(-1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3020,8 +3020,8 @@ namespace System.Tests
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(Array.Empty<char>());
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(0, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3036,8 +3036,8 @@ namespace System.Tests
             Assert.Equal(-1, index);
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '1', '2', '3' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(-1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3053,8 +3053,8 @@ namespace System.Tests
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(2, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3070,8 +3070,8 @@ namespace System.Tests
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(5, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3087,8 +3087,8 @@ namespace System.Tests
             Assert.Equal(index, s1.IndexOf(s2, StringComparison.Ordinal));
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.IndexOf(value);
             Assert.Equal(-1, index);
             Assert.Equal(index, span.IndexOf(value, StringComparison.Ordinal));
@@ -3114,7 +3114,7 @@ namespace System.Tests
                     Assert.Equal(targetIndex, idx);
                 }
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                ReadOnlySpan<char> span = s.AsSpan();
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
@@ -3143,7 +3143,7 @@ namespace System.Tests
                 int idx = s.IndexOf((char)200);
                 Assert.Equal(length - 2, idx);
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                ReadOnlySpan<char> span = s.AsSpan();
                 idx = span.IndexOf((char)200);
                 Assert.Equal(length - 2, idx);
             }
@@ -3162,7 +3162,7 @@ namespace System.Tests
                 int index = s.IndexOf('9');
                 Assert.Equal(-1, index);
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a, 1, length);
+                ReadOnlySpan<char> span = s.AsSpan();
                 index = span.IndexOf('9');
                 Assert.Equal(-1, index);
             }
@@ -3648,7 +3648,7 @@ namespace System.Tests
                     Assert.Equal(targetIndex, idx);
                 }
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                ReadOnlySpan<char> span = s1.AsSpan();
 
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
@@ -3677,7 +3677,7 @@ namespace System.Tests
                 int idx = s1.LastIndexOf((char)200);
                 Assert.Equal(length - 1, idx);
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                ReadOnlySpan<char> span = s1.AsSpan();
                 idx = span.LastIndexOf((char)200);
                 Assert.Equal(length - 1, idx);
             }
@@ -3696,7 +3696,7 @@ namespace System.Tests
                 int index = s1.LastIndexOf('9');
                 Assert.Equal(-1, index);
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a, 1, length);
+                ReadOnlySpan<char> span = s1.AsSpan();
                 index = span.LastIndexOf('9');
                 Assert.Equal(-1, index);
             }
@@ -3710,8 +3710,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(0, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5', '1', '7' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(0, index);
         }
@@ -3724,8 +3724,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(7, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '1', '2', '3', '1', '2', '3', '1', '2', '3', '1' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2', '3' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(7, index);
         }
@@ -3738,8 +3738,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(10, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '5', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '6', '9', '7', '0', '1' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(10, index);
         }
@@ -3752,8 +3752,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(-1, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '7', '7', '8', 'X' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -3766,8 +3766,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(-1, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { 'X', '7', '8', '9' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -3780,8 +3780,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(3, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(3, index);
         }
@@ -3794,8 +3794,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(-1, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '3', '4', '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -3809,8 +3809,8 @@ namespace System.Tests
             Assert.Equal(s1.Length - 1, index);
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '7', '2', '3', '7', '7', '4', '5', '7', '7', '7', '8', '6', '6', '7', '7', '8', '9' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(Array.Empty<char>());
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(0, index);
         }
@@ -3823,8 +3823,8 @@ namespace System.Tests
             int index = s1.LastIndexOf(s2);
             Assert.Equal(-1, index);
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '1', '2', '3' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(-1, index);
         }
@@ -3838,8 +3838,8 @@ namespace System.Tests
             Assert.Equal(2, index);
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '2' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(2, index);
         }
@@ -3853,8 +3853,8 @@ namespace System.Tests
             Assert.Equal(5, index);
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(5, index);
         }
@@ -3868,8 +3868,8 @@ namespace System.Tests
             Assert.Equal(5, index);
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '5', '3', '4', '5' });
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(5, index);
         }
@@ -3883,8 +3883,8 @@ namespace System.Tests
             Assert.Equal(-1, index);
 
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(new char[] { '0', '1', '2', '3', '4', '5' }, 0, 5);
-            ReadOnlySpan<char> value = new ReadOnlySpan<char>(new char[] { '5' });
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> value = s2.AsSpan();
             index = span.LastIndexOf(value);
             Assert.Equal(-1, index);
         }
