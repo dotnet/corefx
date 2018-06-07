@@ -108,6 +108,7 @@
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
+    <Compile Include="System\StringComparerTests.cs" />
     <Compile Include="System\StringGetHashCodeTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
