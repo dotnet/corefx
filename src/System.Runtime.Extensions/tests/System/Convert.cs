@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class IsDBNullTests
+    public class ConvertTests
     {
         [Fact]
         public static void ChangeTypeTest()
