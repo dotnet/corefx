@@ -10,6 +10,8 @@
       <AsFrameworkReference>true</AsFrameworkReference>
     </InboxOnTargetFramework>
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+
+    <HarvestIncludePaths Include="ref/netcore50;lib/netcore50;ref/portable-net45+win8;lib/portable-net45+win8" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
