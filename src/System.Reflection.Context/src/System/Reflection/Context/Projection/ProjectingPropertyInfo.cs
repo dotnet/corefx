@@ -3,18 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
     // Recursively 'projects' any assemblies, modules, types and members returned by a given property
     internal class ProjectingPropertyInfo : DelegatingPropertyInfo, IProjectable
-	{
+    {
         public ProjectingPropertyInfo(PropertyInfo property, Projector projector)
             : base(property)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             Projector = projector;
         }
@@ -92,11 +92,9 @@ namespace System.Reflection.Context.Projection
 
         public override bool Equals(object o)
         {
-            var other = o as ProjectingPropertyInfo;
-
-            return other != null &&
-                   Projector == other.Projector &&
-                   UnderlyingProperty.Equals(other.UnderlyingProperty);
+            return o is ProjectingPropertyInfo other &&
+                Projector == other.Projector &&
+                UnderlyingProperty.Equals(other.UnderlyingProperty);
         }
 
         public override int GetHashCode()

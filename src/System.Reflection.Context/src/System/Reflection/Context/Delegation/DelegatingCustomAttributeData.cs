@@ -3,15 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Delegation
 {
     internal class DelegatingCustomAttributeData : CustomAttributeData
-	{
+    {
         public DelegatingCustomAttributeData(CustomAttributeData attribute)
         {
-            Contract.Requires(null != attribute);
+            Debug.Assert(null != attribute);
 
             UnderlyingAttribute = attribute;
         }

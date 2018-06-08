@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Delegation
 {
@@ -11,7 +11,7 @@ namespace System.Reflection.Context.Delegation
     {
         public DelegatingModule(Module module)
         {
-            Contract.Requires(null != module);
+            Debug.Assert(null != module);
 
             UnderlyingModule = module;
         }

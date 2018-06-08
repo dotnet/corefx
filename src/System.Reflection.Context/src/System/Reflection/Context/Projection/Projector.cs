@@ -3,18 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Projection
 {
     internal abstract class Projector
     {
-        //private readonly ConditionalWeakTable<object, object> _cache = new ConditionalWeakTable<object, object>();
-
-        protected Projector()
-        {
-        }
-
         public IList<T> Project<T>(IList<T> values, Func<T, T> project)
         {
             if (values == null || values.Count == 0)
@@ -38,7 +32,7 @@ namespace System.Reflection.Context.Projection
             if (NeedsProjection(value))
             {
                 // NeedsProjection should guarantee this.
-                Contract.Assert(!(value is IProjectable) || ((IProjectable)value).Projector != this);
+                Debug.Assert(!(value is IProjectable) || ((IProjectable)value).Projector != this);
 
                 return project(value);
             }
@@ -90,7 +84,7 @@ namespace System.Reflection.Context.Projection
 
         public bool NeedsProjection(object value)
         {
-            Contract.Assert(value != null);
+            Debug.Assert(value != null);
 
             if (value == null)
                 return false;
@@ -108,9 +102,8 @@ namespace System.Reflection.Context.Projection
 
         private T[] ProjectAll<T>(IList<T> values, Func<T, T> project)
         {
-            Contract.Requires(null != project);
-
-            Contract.Requires(values != null && values.Count > 0);
+            Debug.Assert(null != project);
+            Debug.Assert(values != null && values.Count > 0);
 
             var projected = new T[values.Count];
 
@@ -118,7 +111,7 @@ namespace System.Reflection.Context.Projection
             {
                 T value = values[i];
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
                 projected[i] = project(value);
             }
 

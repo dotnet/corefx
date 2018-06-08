@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
-using System.Diagnostics.Contracts;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Reflection.Context.Custom;
 
 namespace System.Reflection.Context.Virtual
@@ -19,7 +19,7 @@ namespace System.Reflection.Context.Virtual
             public PropertyGetter(VirtualPropertyBase property, Func<object, object> getter, IEnumerable<Attribute> getterAttributes)
                 : base(property)
             {
-                Contract.Requires(null != getter);
+                Debug.Assert(null != getter);
 
                 _getter = getter;
                 _attributes = getterAttributes ?? CollectionServices.Empty<Attribute>();

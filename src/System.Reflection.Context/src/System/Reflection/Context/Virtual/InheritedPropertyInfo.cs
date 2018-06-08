@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Virtual
 {
@@ -11,15 +11,16 @@ namespace System.Reflection.Context.Virtual
     internal partial class InheritedPropertyInfo : DelegatingPropertyInfo
     {
         private readonly Type _reflectedType;
+
         public InheritedPropertyInfo(PropertyInfo baseProperty, Type reflectedType)
             : base(baseProperty)
         {
-            Contract.Requires(reflectedType != null);
-            Contract.Requires(reflectedType.IsSubclassOf(baseProperty.DeclaringType));
-            Contract.Requires(baseProperty is VirtualPropertyBase);
+            Debug.Assert(reflectedType != null);
+            Debug.Assert(reflectedType.IsSubclassOf(baseProperty.DeclaringType));
+            Debug.Assert(baseProperty is VirtualPropertyBase);
 
             // Should we require that baseProperty is a declared property?
-            Contract.Requires(baseProperty.ReflectedType.Equals(baseProperty.DeclaringType));
+            Debug.Assert(baseProperty.ReflectedType.Equals(baseProperty.DeclaringType));
 
             _reflectedType = reflectedType;
         }
@@ -52,10 +53,9 @@ namespace System.Reflection.Context.Virtual
 
         public override bool Equals(object o)
         {
-            InheritedPropertyInfo other = o as InheritedPropertyInfo;
-            return other != null &&
-                   UnderlyingProperty.Equals(other.UnderlyingProperty) &&
-                   ReflectedType.Equals(other.ReflectedType);
+            return o is InheritedPropertyInfo other &&
+                UnderlyingProperty.Equals(other.UnderlyingProperty) &&
+                ReflectedType.Equals(other.ReflectedType);
         }
 
         public override int GetHashCode()

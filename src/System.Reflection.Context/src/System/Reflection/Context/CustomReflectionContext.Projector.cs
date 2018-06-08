@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Context.Projection;
+using System.Diagnostics;
 using System.Reflection.Context.Custom;
-using System.Diagnostics.Contracts;
+using System.Reflection.Context.Projection;
 
 namespace System.Reflection.Context
 {
@@ -24,7 +24,7 @@ namespace System.Reflection.Context
                 if (NeedsProjection(value))
                 {
                     // Map the assembly to the underlying context first
-                    Contract.Assert(ReflectionContext.SourceContext != null);
+                    Debug.Assert(ReflectionContext.SourceContext != null);
                     value = ReflectionContext.SourceContext.MapType(value);
                     return ProjectType(value);
                 }
@@ -37,7 +37,7 @@ namespace System.Reflection.Context
                 if (NeedsProjection(value))
                 {
                     // Map the assembly to the underlying context first
-                    Contract.Assert(ReflectionContext.SourceContext != null);
+                    Debug.Assert(ReflectionContext.SourceContext != null);
                     value = ReflectionContext.SourceContext.MapAssembly(value);
 
                     return ProjectAssembly(value);
@@ -51,7 +51,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomType(value, ReflectionContext);
             }
@@ -61,7 +61,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomAssembly(value, ReflectionContext);
             }
@@ -71,7 +71,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomModule(value, ReflectionContext);
             }
@@ -81,7 +81,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomFieldInfo(value, ReflectionContext);
             }
@@ -91,7 +91,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomEventInfo(value, ReflectionContext);
             }
@@ -101,7 +101,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomConstructorInfo(value, ReflectionContext);
             }
@@ -111,7 +111,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomMethodInfo(value, ReflectionContext);
             }
@@ -137,7 +137,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomPropertyInfo(value, ReflectionContext);
             }
@@ -147,7 +147,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new CustomParameterInfo(value, ReflectionContext);
             }
@@ -157,7 +157,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new ProjectingMethodBody(value, this);
             }
@@ -167,7 +167,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new ProjectingLocalVariableInfo(value, this);
             }
@@ -177,7 +177,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new ProjectingExceptionHandlingClause(value, this);
             }
@@ -187,7 +187,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new ProjectingCustomAttributeData(value, this);
             }
@@ -197,7 +197,7 @@ namespace System.Reflection.Context
                 if (value == null)
                     return null;
 
-                Contract.Assert(NeedsProjection(value));
+                Debug.Assert(NeedsProjection(value));
 
                 return new ProjectingManifestResourceInfo(value, this);
             }

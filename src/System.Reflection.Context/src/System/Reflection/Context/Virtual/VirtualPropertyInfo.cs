@@ -2,15 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Custom;
 
 namespace System.Reflection.Context.Virtual
 {
     // Represents a func-based 'PropertyInfo'
     internal partial class VirtualPropertyInfo : VirtualPropertyBase
-	{
+    {
         private readonly PropertyGetter _getter;
         private readonly PropertySetter _setter;
         private readonly IEnumerable<Attribute> _attributes;
@@ -45,14 +45,14 @@ namespace System.Reflection.Context.Virtual
         public override MethodInfo GetGetMethod(bool nonPublic)
         {
             // Current we don't support adding nonpulbic getters
-            Contract.Assert(_getter == null || _getter.IsPublic);
+            Debug.Assert(_getter == null || _getter.IsPublic);
             return _getter;
         }
 
         public override MethodInfo GetSetMethod(bool nonPublic)
         {
             // Current we don't support adding nonpulbic setters
-            Contract.Assert(_setter == null || _setter.IsPublic);
+            Debug.Assert(_setter == null || _setter.IsPublic);
             return _setter;
         }
 

@@ -3,18 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
     // Recursively 'projects' any assemblies, modules, types and members returned by a given constructor
     internal class ProjectingConstructorInfo : DelegatingConstructorInfo, IProjectable
-	{
+    {
         public ProjectingConstructorInfo(ConstructorInfo constructor, Projector projector)
             : base(constructor)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             Projector = projector;
         }
@@ -73,6 +73,7 @@ namespace System.Reflection.Context.Projection
         public override bool Equals(object o)
         {
             ProjectingConstructorInfo other = o as ProjectingConstructorInfo;
+
             return other != null &&
                    Projector == other.Projector &&
                    UnderlyingConstructor.Equals(other.UnderlyingConstructor);

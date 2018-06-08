@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Virtual
 {
@@ -15,12 +15,12 @@ namespace System.Reflection.Context.Virtual
         public InheritedMethodInfo(MethodInfo baseMethod, Type reflectedType)
             : base(baseMethod)
         {
-            Contract.Requires(reflectedType != null);
-            Contract.Requires(reflectedType.IsSubclassOf(baseMethod.DeclaringType));
-            Contract.Requires(baseMethod is VirtualMethodBase);
+            Debug.Assert(reflectedType != null);
+            Debug.Assert(reflectedType.IsSubclassOf(baseMethod.DeclaringType));
+            Debug.Assert(baseMethod is VirtualMethodBase);
 
             // Should we require that baseMethod is a declared method?
-            Contract.Requires(baseMethod.ReflectedType.Equals(baseMethod.DeclaringType));
+            Debug.Assert(baseMethod.ReflectedType.Equals(baseMethod.DeclaringType));
 
             _reflectedType = reflectedType;
         }

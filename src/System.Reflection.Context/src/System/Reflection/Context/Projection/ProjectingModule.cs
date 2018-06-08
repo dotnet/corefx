@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
@@ -14,7 +14,7 @@ namespace System.Reflection.Context.Projection
         public ProjectingModule(Module module, Projector projector)
             : base(module)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             Projector = projector;
         }

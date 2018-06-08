@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Virtual
 {
@@ -12,7 +12,7 @@ namespace System.Reflection.Context.Virtual
         {
             protected FuncPropertyAccessorBase(VirtualPropertyBase declaringProperty)
             {
-                Contract.Requires(null != declaringProperty);
+                Debug.Assert(null != declaringProperty);
 
                 DeclaringProperty = declaringProperty;
             }

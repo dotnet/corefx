@@ -4,16 +4,16 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Delegation
 {
     // Recursively 'projects' any assemblies, modules, types and members returned by a given method
     internal class DelegatingMethodInfo : MethodInfo
-	{
+    {
         public DelegatingMethodInfo(MethodInfo method)
         {
-            Contract.Requires(null != method);
+            Debug.Assert(null != method);
 
             UnderlyingMethod = method;
         }

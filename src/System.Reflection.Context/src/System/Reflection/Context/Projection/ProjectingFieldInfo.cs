@@ -3,18 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
     // Recursively 'projects' any assemblies, modules, types and members for a given field
     internal class ProjectingFieldInfo : DelegatingFieldInfo, IProjectable
-	{
+    {
         public ProjectingFieldInfo(FieldInfo field, Projector projector)
             : base(field)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             Projector = projector;
         }

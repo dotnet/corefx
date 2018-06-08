@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Context.Projection;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
+using System.Reflection.Context.Projection;
 using System.Reflection.Context.Virtual;
 
 namespace System.Reflection.Context.Custom
@@ -265,7 +265,7 @@ namespace System.Reflection.Context.Custom
 
             if (types == null || getPropertyGetter)
             {
-                Contract.Assert(types == null || types.Length == 0);
+                Debug.Assert(types == null || types.Length == 0);
 
                 // matches any signature
                 if (matchingMethods.Count == 1)
@@ -275,7 +275,7 @@ namespace System.Reflection.Context.Custom
             }
             else
             {
-                Contract.Assert(getPropertySetter && types != null && types.Length == 1);
+                Debug.Assert(getPropertySetter && types != null && types.Length == 1);
 
                 if (binder == null)
                     binder = Type.DefaultBinder;

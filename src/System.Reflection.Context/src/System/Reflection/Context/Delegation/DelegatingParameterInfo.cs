@@ -3,15 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Delegation
 {
     internal class DelegatingParameterInfo : ParameterInfo
-	{
+    {
         public DelegatingParameterInfo(ParameterInfo parameter)
         {
-            Contract.Requires(null != parameter);
+            Debug.Assert(null != parameter);
 
             UnderlyingParameter = parameter;
         }

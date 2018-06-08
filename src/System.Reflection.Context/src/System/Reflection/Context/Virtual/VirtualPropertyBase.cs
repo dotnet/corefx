@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Virtual
 {
@@ -19,17 +19,15 @@ namespace System.Reflection.Context.Virtual
         protected VirtualPropertyBase(Type propertyType, string name, CustomReflectionContext context)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             if (name.Length == 0)
-                throw new ArgumentException("name");
+                throw new ArgumentException("", nameof(name));
 
             if (propertyType == null)
-                throw new ArgumentNullException("propertyType");
-            Contract.EndContractBlock();
+                throw new ArgumentNullException(nameof(propertyType));
 
-            Contract.Assert(propertyType != null);
-            Contract.Assert(context != null);
+            Debug.Assert(context != null);
 
             _propertyType = propertyType;
             _name = name;
@@ -88,7 +86,7 @@ namespace System.Reflection.Context.Virtual
             MethodInfo getMethod = GetGetMethod(nonPublic);
             MethodInfo setMethod = GetSetMethod(nonPublic);
 
-            Contract.Assert(getMethod != null || setMethod != null);
+            Debug.Assert(getMethod != null || setMethod != null);
 
             if (getMethod == null || setMethod == null)
             {
@@ -179,13 +177,9 @@ namespace System.Reflection.Context.Virtual
 
         public override bool Equals(object obj)
         {
-            VirtualPropertyBase other = obj as VirtualPropertyBase;
-            if (other == null)
-                return false;
-
             // We don't need to compare the getters and setters.
             // But do we need to compare the contexts and return types?
-            return
+            return obj is VirtualPropertyBase other &&
                 _name == other._name &&
                 _declaringType.Equals(other._declaringType) &&
                 _propertyType == other._propertyType &&
@@ -194,8 +188,7 @@ namespace System.Reflection.Context.Virtual
 
         public override int GetHashCode()
         {
-            return
-                _name.GetHashCode() ^
+            return _name.GetHashCode() ^
                 _declaringType.GetHashCode() ^
                 _propertyType.GetHashCode() ^
                 CollectionServices.GetArrayHashCode(GetIndexParametersNoCopy());
@@ -224,7 +217,7 @@ namespace System.Reflection.Context.Virtual
                 {
                     method = GetSetMethod(true);
 
-                    Contract.Assert(null != method);
+                    Debug.Assert(null != method);
                     _indexedParameters = VirtualParameter.CloneParameters(this, method.GetParameters(), skipLastParameter: true);
                 }
             }

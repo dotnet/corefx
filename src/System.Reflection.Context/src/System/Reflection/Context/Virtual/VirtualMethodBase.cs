@@ -11,10 +11,6 @@ namespace System.Reflection.Context.Virtual
     {
         private ParameterInfo _returnParameter;
 
-        protected VirtualMethodBase()
-        {
-        }
-
         protected abstract Type[] GetParameterTypes();
 
         public override MethodAttributes Attributes
@@ -119,13 +115,9 @@ namespace System.Reflection.Context.Virtual
 
         public override bool Equals(object obj)
         {
-            VirtualMethodBase other = obj as VirtualMethodBase;
-            if (other == null)
-                return false;
-
             // We don't need to compare the invokees
             // But do we need to compare the contexts and return types?
-            return
+            return obj is VirtualMethodBase other &&
                 Name == other.Name &&
                 DeclaringType.Equals(other.DeclaringType) &&
                 CollectionServices.CompareArrays(GetParameterTypes(), other.GetParameterTypes());
@@ -133,40 +125,35 @@ namespace System.Reflection.Context.Virtual
 
         public override int GetHashCode()
         {
-            return
-                Name.GetHashCode() ^
+            return Name.GetHashCode() ^
                 DeclaringType.GetHashCode() ^
                 CollectionServices.GetArrayHashCode(GetParameterTypes());
         }
 
         public override string ToString()
         {
-            var toString = new StringBuilder();
+            var sb = new StringBuilder();
 
-            toString.Append(ReturnType.ToString());
-            toString.Append(" ");
-            toString.Append(Name);
-            toString.Append("(");
+            sb.Append(ReturnType.ToString());
+            sb.Append(" ");
+            sb.Append(Name);
+            sb.Append("(");
 
             Type[] parameterTypes = GetParameterTypes();
-
-            string comma = "";
-
-            foreach (Type t in parameterTypes)
+            for (int i = 0; i < parameterTypes.Length; i++)
             {
-                toString.Append(comma);
-                toString.Append(t.ToString());
-
-                comma = ", ";
+                if (i > 0)
+                    sb.Append(", ");
+                sb.Append(parameterTypes[i].ToString());
             }
 
             if ((CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
             {
-                toString.Append(comma);
-                toString.Append("...");
+                sb.Append(comma);
+                sb.Append("...");
             }
 
-            return toString.ToString();
+            return sb.ToString();
         }
     }
 }

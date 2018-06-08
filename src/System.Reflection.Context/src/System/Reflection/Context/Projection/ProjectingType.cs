@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
@@ -16,7 +16,7 @@ namespace System.Reflection.Context.Projection
         public ProjectingType(Type type, Projector projector)
             :  base(type)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             _projector = projector;
         }
@@ -163,6 +163,7 @@ namespace System.Reflection.Context.Projection
         public override bool IsInstanceOfType(object o)
         {
             Type objectType = _projector.ProjectType(o.GetType());
+
             return IsAssignableFrom(objectType);
         }
 
@@ -251,7 +252,7 @@ namespace System.Reflection.Context.Projection
             Array.Copy(fields, 0, members, i, fields.Length); i += fields.Length;
             Array.Copy(nestedTypes, 0, members, i, nestedTypes.Length); i += nestedTypes.Length;
 
-            Contract.Assert(i == members.Length);
+            Debug.Assert(i == members.Length);
 
             return members;
         }
@@ -320,11 +321,9 @@ namespace System.Reflection.Context.Projection
 
         public override bool Equals(object o)
         {
-            var other = o as ProjectingType;
-
-            return other != null &&
-                   Projector == other.Projector &&
-                   UnderlyingType.Equals(other.UnderlyingType);
+            return o is ProjectingType other &&
+                Projector == other.Projector &&
+                UnderlyingType.Equals(other.UnderlyingType);
         }
 
         public override int GetHashCode()

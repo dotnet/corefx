@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
-using System.Diagnostics.Contracts;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Reflection.Context.Custom;
 
 namespace System.Reflection.Context.Virtual
@@ -20,7 +20,7 @@ namespace System.Reflection.Context.Virtual
             public PropertySetter(VirtualPropertyBase property, Action<object, object> setter, IEnumerable<Attribute> setterAttributes)
                 : base(property)
             {
-                Contract.Requires(null != setter);
+                Debug.Assert(null != setter);
 
                 _setter = setter;
                 _valueParameter = new VirtualParameter(this, property.PropertyType, "value", 0);
@@ -51,6 +51,7 @@ namespace System.Reflection.Context.Virtual
                     throw new ArgumentException(SR.Format(SR.Argument_ObjectArgumentMismatch, value.GetType(), ReturnType));
 
                 _setter(obj, value);
+
                 return null;
             }
 

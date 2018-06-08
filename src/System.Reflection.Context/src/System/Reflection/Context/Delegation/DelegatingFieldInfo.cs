@@ -3,16 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Delegation
 {
     internal class DelegatingFieldInfo : FieldInfo
-	{
+    {
         public DelegatingFieldInfo(FieldInfo field)
         {
-            Contract.Requires(null != field);
+            Debug.Assert(null != field);
 
             UnderlyingField = field;
         }
@@ -128,6 +128,7 @@ namespace System.Reflection.Context.Delegation
         {
             UnderlyingField.SetValueDirect(obj, value);
         }
+
         public override string ToString()
         {
             return UnderlyingField.ToString();

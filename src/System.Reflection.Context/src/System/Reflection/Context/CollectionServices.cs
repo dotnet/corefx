@@ -10,7 +10,7 @@ namespace System.Reflection.Context
     {
         public static T[] Empty<T>()
         {
-            return new T[0];
+            return Array.Empty<T>();
         }
 
         public static bool CompareArrays<T>(T[] left, T[] right)
@@ -41,6 +41,8 @@ namespace System.Reflection.Context
             // Mimic the behavior of GetCustomAttributes in runtime reflection.
             if (arrayType.HasElementType || arrayType.IsValueType || arrayType.ContainsGenericParameters)
                 return list.ToArray();
+
+            return list.ToArray();
 
             // Converts results to typed array.
             Array typedArray = Array.CreateInstance(arrayType, list.Count);

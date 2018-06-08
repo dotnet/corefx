@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Delegation
 {
@@ -12,7 +12,7 @@ namespace System.Reflection.Context.Delegation
     {
         public DelegatingPropertyInfo(PropertyInfo property)
         {
-            Contract.Requires(null != property);
+            Debug.Assert(null != property);
 
             UnderlyingProperty = property;
         }

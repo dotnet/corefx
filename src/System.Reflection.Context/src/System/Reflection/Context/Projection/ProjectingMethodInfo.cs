@@ -3,18 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
     // Recursively 'projects' any assemblies, modules, types and members returned by a given method
     internal class ProjectingMethodInfo : DelegatingMethodInfo, IProjectable
-	{
+    {
         public ProjectingMethodInfo(MethodInfo method, Projector projector)
             : base(method)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             Projector = projector;
         }
@@ -48,8 +48,7 @@ namespace System.Reflection.Context.Projection
                 // We should just return MethodInfo.ReturnParameter here
                 // but DynamicMethod returns a fake ICustomAttributeProvider.
                 ICustomAttributeProvider provider = base.ReturnTypeCustomAttributes;
-                ParameterInfo parameter = provider as ParameterInfo;
-                if (parameter != null)
+                if (provider is ParameterInfo)
                     return Projector.ProjectParameter(ReturnParameter);
                 else
                     return provider;

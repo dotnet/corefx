@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Context.Custom;
 using System.Collections.Generic;
-using System.Reflection.Context.Virtual;
+using System.Reflection.Context.Custom;
 using System.Reflection.Context.Projection;
+using System.Reflection.Context.Virtual;
 
 namespace System.Reflection.Context
 {
@@ -14,6 +14,7 @@ namespace System.Reflection.Context
         public override Assembly MapAssembly(Assembly assembly) { return assembly; }
         public override TypeInfo MapType(TypeInfo type) { return type; }
     }
+
     public abstract partial class CustomReflectionContext : ReflectionContext
     {
         private readonly ReflectionContextProjector _projector;

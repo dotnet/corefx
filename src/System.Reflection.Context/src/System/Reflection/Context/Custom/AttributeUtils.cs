@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Custom
 {
@@ -154,14 +154,13 @@ namespace System.Reflection.Context.Custom
             foreach (object newAttribute in inheritedAttributes)
             {
                 // derived attributes should have already been filtered
-                Contract.Assert(attributeFilterType.IsInstanceOfType(newAttribute));
+                Debug.Assert(attributeFilterType.IsInstanceOfType(newAttribute));
 
                 Type attributeType = newAttribute.GetType();
 
                 if (attributeType != attributeFilterType)
                 {
-                    Contract.Assert(attributeFilterType.IsAssignableFrom(attributeType));
-
+                    Debug.Assert(attributeFilterType.IsAssignableFrom(attributeType));
                     GetAttributeUsage(attributeType, out inherited, out allowMultiple);
                 }
 

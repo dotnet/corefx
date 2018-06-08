@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Security;
-using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Delegation
 {
@@ -17,7 +17,7 @@ namespace System.Reflection.Context.Delegation
 
         public DelegatingAssembly(Assembly assembly)
         {
-            Contract.Requires(null != assembly);
+            Debug.Assert(null != assembly);
 
             UnderlyingAssembly = assembly;
         }

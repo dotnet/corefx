@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Delegation
 {
@@ -15,7 +15,7 @@ namespace System.Reflection.Context.Delegation
 
         public DelegatingType(Type type)
         {
-            Contract.Requires(null != type);
+            Debug.Assert(null != type);
 
             _typeInfo = type.GetTypeInfo();
             if(_typeInfo == null)
@@ -350,18 +350,9 @@ namespace System.Reflection.Context.Delegation
         protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
         {
             // Unfortunately we cannot directly call the protected GetMethodImpl on _typeInfo.
-
-            MethodInfo method;
-            if (types == null)
-            {
-                method = _typeInfo.GetMethod(name, bindingAttr);
-            }
-            else
-            {                
-                method = _typeInfo.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
-            }
-
-            return method;
+            return (types == null) ?
+                _typeInfo.GetMethod(name, bindingAttr) :
+                _typeInfo.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
         }
 
         public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
@@ -392,15 +383,16 @@ namespace System.Reflection.Context.Delegation
             if (types == null)
             {
                 // if types is null, we can ignore binder and modifiers
-
                 if (returnType == null)
+                {
                     property = _typeInfo.GetProperty(name, bindingAttr);
+                }
                 else
                 {
                     // Ideally we should call a GetProperty overload that takes name, returnType, and bindingAttr, but not types.
                     // But such an overload doesn't exist. On the other hand, this also guarantees that bindingAttr will be
                     // the default lookup flags if types is null but returnType is not.
-                    Contract.Assert(bindingAttr == (BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public));
+                    Debug.Assert(bindingAttr == (BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public));
 
                     property = _typeInfo.GetProperty(name, returnType);
                 }

@@ -2,18 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Virtual
 {
     internal class VirtualParameter : ParameterInfo
-	{
+    {
         public VirtualParameter(MemberInfo member, Type parameterType, string name, int position)
         {
-            Contract.Assert(position >= -1);
+            Debug.Assert(position >= -1);
 
-            ClassImpl = parameterType ?? throw new ArgumentNullException("parameterType");
-            MemberImpl = member ?? throw new ArgumentNullException("member");
+            ClassImpl = parameterType ?? throw new ArgumentNullException(nameof(parameterType));
+            MemberImpl = member ?? throw new ArgumentNullException(nameof(member));
             NameImpl = name;
             PositionImpl = position;
         }
@@ -39,13 +39,8 @@ namespace System.Reflection.Context.Virtual
 
         public override bool Equals(object obj)
         {
-            var other = obj as VirtualParameter;
-
-            if (other == null)
-                return false;
-
             // Do we need to compare Name and ParameterType?
-            return
+            return obj is VirtualParameter other &&
                 Member == other.Member &&
                 Position == other.Position &&
                 ParameterType == other.ParameterType;
@@ -53,8 +48,7 @@ namespace System.Reflection.Context.Virtual
 
         public override int GetHashCode()
         {
-            return
-                Member.GetHashCode() ^
+            return Member.GetHashCode() ^
                 Position.GetHashCode() ^
                 ParameterType.GetHashCode();
         }

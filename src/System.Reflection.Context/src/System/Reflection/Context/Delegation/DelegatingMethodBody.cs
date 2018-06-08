@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Reflection.Context.Delegation
 {
@@ -13,7 +13,7 @@ namespace System.Reflection.Context.Delegation
 
         public DelegatingMethodBody(MethodBody body)
         {
-            Contract.Requires(null != body);
+            Debug.Assert(null != body);
 
             _body = body;
         }

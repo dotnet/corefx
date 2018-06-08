@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection.Context.Delegation;
-using System.Diagnostics.Contracts;
 
 namespace System.Reflection.Context.Projection
 {
@@ -15,7 +15,7 @@ namespace System.Reflection.Context.Projection
         public ProjectingExceptionHandlingClause(ExceptionHandlingClause clause, Projector projector)
             : base(clause)
         {
-            Contract.Requires(null != projector);
+            Debug.Assert(null != projector);
 
             _projector = projector;
         }
