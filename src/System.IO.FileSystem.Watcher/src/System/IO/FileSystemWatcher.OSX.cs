@@ -309,20 +309,6 @@ namespace System.IO
                 }
             }
 
-            private unsafe static int GetIndex(byte* eventPath)
-            {
-                Debug.Assert(eventPath != null);
-                int i = 0;
-
-                // Finds the position of null character.
-                while(*eventPath != 0)
-                {
-                    eventPath++;
-                    i++;
-                }
-                return i;
-            }
-
             private unsafe void FileSystemEventCallback(
                 FSEventStreamRef streamRef, 
                 IntPtr clientCallBackInfo, 
@@ -443,20 +429,27 @@ namespace System.IO
                         ArrayPool<char>.Shared.Return(underlyingArray.Array);
                 }
 
-                unsafe void ProcessEvents()
+                void ProcessEvents()
                 {
                     for (int i = 0; i < events.Length; i++)
                     {
-                        int endPoint = GetIndex(eventPaths[i]);
-                        Debug.Assert(endPoint > 0, "Empty events are not supported");
-                        events[i] = new Memory<char>(ArrayPool<char>.Shared.Rent(endPoint));
+                        int byteCount = 0;
+                        Debug.Assert(eventPaths[i] != null);
+                        byte* temp = eventPaths[i];
+
+                        // Finds the position of null character.
+                        while(*temp != 0)
+                        {
+                            temp++;
+                            byteCount++;
+                        }
+
+                        Debug.Assert(byteCount > 0, "Empty events are not supported");
+                        events[i] = new Memory<char>(ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount)));
                         int charCount;
 
                         // Converting an array of bytes to UTF-8 char array
-                        fixed(char* temp = &MemoryMarshal.GetReference(events[i].Span))
-                        {
-                            charCount = Encoding.UTF8.GetChars(eventPaths[i], endPoint, temp, endPoint);
-                        }
+                        charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(eventPaths[i], byteCount), events[i].Span);
                         events[i] = events[i].Slice(0, charCount);
                     }
                 }
@@ -547,51 +540,17 @@ namespace System.IO
 
             private static bool DoesItemExist(ReadOnlySpan<char> path, bool isFile)
             {
-                Interop.ErrorInfo ignored;
-
-                try
-                {
-                    if (path.IsEmpty || path.Length == 0)
-                        return false;
-
-                    if(!isFile)
-                    {
-                        return Exists(path, Interop.Sys.FileTypes.S_IFDIR, out ignored);
-                    }
-
-                    return path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1])
-                        ? false
-                        : Exists(path, Interop.Sys.FileTypes.S_IFREG, out ignored);
-                }
-                catch (ArgumentException) { }
-                catch (IOException) { }
-                catch (UnauthorizedAccessException) { }
-                return false;
-            }
-
-            private static bool Exists(ReadOnlySpan<char> path, int fileType, out Interop.ErrorInfo errorInfo)
-            {
-                Debug.Assert(fileType == Interop.Sys.FileTypes.S_IFREG || fileType == Interop.Sys.FileTypes.S_IFDIR);
-
-                Interop.Sys.FileStatus fileinfo;
-                errorInfo = default(Interop.ErrorInfo);
-
-                // First use stat, as we want to follow symlinks.  If that fails, it could be because the symlink
-                // is broken, we don't have permissions, etc., in which case fall back to using LStat to evaluate
-                // based on the symlink itself.
-                if (Interop.Sys.Stat(path, out fileinfo) < 0 &&
-                    Interop.Sys.LStat(path, out fileinfo) < 0)
-                {
-                    errorInfo = Interop.Sys.GetLastErrorInfo();
+                if (path.IsEmpty || path.Length == 0)
                     return false;
+
+                if(!isFile)
+                {
+                    return  FileSystem.DirectoryExists(path);
                 }
 
-                // Something exists at this path.  If the caller is asking for a directory, return true if it's
-                // a directory and false for everything else.  If the caller is asking for a file, return false for
-                // a directory and true for everything else.
-                return
-                    (fileType == Interop.Sys.FileTypes.S_IFDIR) ==
-                    ((fileinfo.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR);
+                return PathInternal.IsDirectorySeparator(path[path.Length - 1])
+                    ? false
+                    : FileSystem.FileExists(path);
             }
         }
     }
