@@ -58,7 +58,7 @@ namespace Internal.Cryptography.Pal.Windows
             }
         }
 
-        private static void ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref byte[] encodedContent)
+        private static unsafe void ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref byte[] encodedContent)
         {
             AsnReader reader = new AsnReader(encodedContent, AsnEncodingRules.BER);
             Asn1Tag tag = reader.ReadTagAndLength(out int? contentsLength, out int _);
@@ -69,11 +69,24 @@ namespace Internal.Cryptography.Pal.Windows
                 return;
             }
 
-            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+            byte[] oldContent = encodedContent;
+
+            // Pin the content to prevent it from getting copied during heap compaction.
+            fixed (byte* pinnedOldContent = oldContent)
             {
-                // Tag doesn't matter here as we won't write it into the document
-                writer.WriteOctetString(reader.PeekContentBytes().Span);
-                encodedContent = writer.Encode();
+                try
+                {
+                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+                    {
+                        // Tag doesn't matter here as we won't write it into the document
+                        writer.WriteOctetString(reader.PeekContentBytes().Span);
+                        encodedContent = writer.Encode();
+                    }
+                }
+                finally
+                {
+                    Array.Clear(oldContent, 0, oldContent.Length);
+                }
             }
         }
 
