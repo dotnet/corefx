@@ -110,13 +110,9 @@ namespace System.Net.NetworkInformation
 
         private static IPAddress GetAddressSnapshot(IPAddress address)
         {
-            IPAddress addressSnapshot = (address.AddressFamily == AddressFamily.InterNetwork) ?
-#pragma warning disable CS0618 // IPAddress.Address is obsoleted, but it's the most efficient way to get the Int32 IPv4 address
-                new IPAddress(address.Address) :
-#pragma warning restore CS0618
+            return address.AddressFamily == AddressFamily.InterNetwork ?
+                new IPAddress(address.GetAddressBytes()) :
                 new IPAddress(address.GetAddressBytes(), address.ScopeId);
-
-            return addressSnapshot;
         }
 
         private void Finish()
