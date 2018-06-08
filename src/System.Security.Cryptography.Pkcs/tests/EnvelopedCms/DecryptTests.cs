@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     {
         private bool _useExplicitPrivateKey;
         public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
-        public static bool SupportsIndefiniteLengthEncoding { get; } = !PlatformDetection.IsWindows;
+        public static bool SupportsIndefiniteLengthEncoding { get; } = !PlatformDetection.IsFullFramework;
 
         public DecryptTests(bool useExplicitPrivateKey)
         {
@@ -601,6 +601,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx does not allow it")]
         public void DecryptEnvelopedEmptyArray()
         {
             byte[] content = Array.Empty<byte>();

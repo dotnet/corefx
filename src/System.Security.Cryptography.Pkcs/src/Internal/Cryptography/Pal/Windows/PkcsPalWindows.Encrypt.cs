@@ -15,6 +15,7 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Microsoft.Win32.SafeHandles;
 
 using static Interop.Crypt32;
+using System.Security.Cryptography.Asn1;
 
 namespace Internal.Cryptography.Pal.Windows
 {
@@ -44,12 +45,35 @@ namespace Internal.Cryptography.Pal.Windows
 
                 if (encodedContent.Length > 0)
                 {
+                    // Windows will throw if it encounters indefinite length encoding.
+                    // Let's reencode if that is the case
+                    ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref encodedContent);
+
                     if (!Interop.Crypt32.CryptMsgUpdate(hCryptMsg, encodedContent, encodedContent.Length, fFinal: true))
                         throw Marshal.GetLastWin32Error().ToCryptographicException();
                 }
 
                 byte[] encodedMessage = hCryptMsg.GetMsgParamAsByteArray(CryptMsgParamType.CMSG_CONTENT_PARAM);
                 return encodedMessage;
+            }
+        }
+
+        private static void ReencodeIfUsingIndefiniteLengthEncodingOnOuterStructure(ref byte[] encodedContent)
+        {
+            AsnReader reader = new AsnReader(encodedContent, AsnEncodingRules.BER);
+            Asn1Tag tag = reader.ReadTagAndLength(out int? contentsLength, out int _);
+
+            if (contentsLength != null)
+            {
+                // definite length, do nothing
+                return;
+            }
+
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
+            {
+                // Tag doesn't matter here as we won't write it into the document
+                writer.WriteOctetString(reader.PeekContentBytes().Span);
+                encodedContent = writer.Encode();
             }
         }
 
