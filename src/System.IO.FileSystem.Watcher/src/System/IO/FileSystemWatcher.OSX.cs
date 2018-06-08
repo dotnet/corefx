@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -308,6 +309,20 @@ namespace System.IO
                 }
             }
 
+            private unsafe static int GetIndex(byte* eventPath)
+            {
+                Debug.Assert(eventPath != null);
+                int i = 0;
+
+                // Finds the position of null character.
+                while(*eventPath != 0)
+                {
+                    eventPath++;
+                    i++;
+                }
+                return i;
+            }
+
             private unsafe void FileSystemEventCallback(
                 FSEventStreamRef streamRef, 
                 IntPtr clientCallBackInfo, 
@@ -334,18 +349,12 @@ namespace System.IO
                 // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll add it to this
                 // list so when the for-loop comes across it, we'll skip it since it's already been processed as part of the original of the pair.
                 List<FSEventStreamEventId> handledRenameEvents = null;
+                Memory<char>[] events = new Memory<char>[numEvents.ToInt32()];
+                ProcessEvents();
 
                 for (long i = 0; i < numEvents.ToInt32(); i++)
                 {
-                    Debug.Assert(eventPaths[i] != null);
-                    int endPoint = new ReadOnlySpan<byte>(eventPaths[i], 255).IndexOf<byte>(0);
-
-                    Debug.Assert(endPoint > 0, "Empty events are not supported");
-                    ReadOnlySpan<byte> eventBytes = new ReadOnlySpan<byte>(eventPaths[i], endPoint);
-
-                    Span<char> buffer = new char[Encoding.UTF8.GetMaxCharCount(255)];
-                    int charCount = Encoding.UTF8.GetChars(eventBytes, buffer);
-                    ReadOnlySpan<char> path = buffer.Slice(0, charCount);
+                    ReadOnlySpan<char> path = events[i].Span;
                     Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
 
                     // Match Windows and don't notify us about changes to the Root folder
@@ -400,7 +409,7 @@ namespace System.IO
                                 // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
                                 // Check if the item exists on disk to check which it is
                                 // Don't send a new notification if we already sent one for this event.
-                                if (DoesItemExist(path.ToString(), IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                 {
                                     if ((eventType & WatcherChangeTypes.Created) == 0)
                                     {
@@ -416,10 +425,7 @@ namespace System.IO
                             {
                                 // Remove the base directory prefix and add the paired event to the list of 
                                 // events to skip and notify the user of the rename 
-                                eventBytes = new ReadOnlySpan<byte>(eventPaths[pairedId], new ReadOnlySpan<byte>(eventPaths[pairedId], 255).IndexOf<byte>(0));
-                                Span<char> renameBuffer = new char[Encoding.UTF8.GetMaxCharCount(255)];
-                                charCount = Encoding.UTF8.GetChars(eventBytes, renameBuffer);
-                                ReadOnlySpan<char> newPathRelativeName =  renameBuffer.Slice(_fullDirectory.Length, charCount - _fullDirectory.Length);
+                                ReadOnlySpan<char> newPathRelativeName = events[pairedId].Span.Slice(_fullDirectory.Length);
                                 watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
 
                                 // Create a new list, if necessary, and add the event
@@ -430,6 +436,28 @@ namespace System.IO
                                 handledRenameEvents.Add(eventIds[pairedId]);
                             }
                         }
+                    }
+
+                    ArraySegment<char> underlyingArray;
+                    if (MemoryMarshal.TryGetArray(events[i], out underlyingArray))
+                        ArrayPool<char>.Shared.Return(underlyingArray.Array);
+                }
+
+                unsafe void ProcessEvents()
+                {
+                    for (int i = 0; i < events.Length; i++)
+                    {
+                        int endPoint = GetIndex(eventPaths[i]);
+                        Debug.Assert(endPoint > 0, "Empty events are not supported");
+                        events[i] = new Memory<char>(ArrayPool<char>.Shared.Rent(endPoint));
+                        int charCount;
+
+                        // Converting an array of bytes to UTF-8 char array
+                        fixed(char* temp = &MemoryMarshal.GetReference(events[i].Span))
+                        {
+                            charCount = Encoding.UTF8.GetChars(eventPaths[i], endPoint, temp, endPoint);
+                        }
+                        events[i] = events[i].Slice(0, charCount);
                     }
                 }
             }
@@ -517,12 +545,53 @@ namespace System.IO
                 return (value & flags) == value;
             }
 
-            private static bool DoesItemExist(string path, bool isFile)
+            private static bool DoesItemExist(ReadOnlySpan<char> path, bool isFile)
             {
-                if (isFile)
-                    return File.Exists(path);
-                else
-                    return Directory.Exists(path);
+                Interop.ErrorInfo ignored;
+
+                try
+                {
+                    if (path.IsEmpty || path.Length == 0)
+                        return false;
+
+                    if(!isFile)
+                    {
+                        return Exists(path, Interop.Sys.FileTypes.S_IFDIR, out ignored);
+                    }
+
+                    return path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1])
+                        ? false
+                        : Exists(path, Interop.Sys.FileTypes.S_IFREG, out ignored);
+                }
+                catch (ArgumentException) { }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
+                return false;
+            }
+
+            private static bool Exists(ReadOnlySpan<char> path, int fileType, out Interop.ErrorInfo errorInfo)
+            {
+                Debug.Assert(fileType == Interop.Sys.FileTypes.S_IFREG || fileType == Interop.Sys.FileTypes.S_IFDIR);
+
+                Interop.Sys.FileStatus fileinfo;
+                errorInfo = default(Interop.ErrorInfo);
+
+                // First use stat, as we want to follow symlinks.  If that fails, it could be because the symlink
+                // is broken, we don't have permissions, etc., in which case fall back to using LStat to evaluate
+                // based on the symlink itself.
+                if (Interop.Sys.Stat(path, out fileinfo) < 0 &&
+                    Interop.Sys.LStat(path, out fileinfo) < 0)
+                {
+                    errorInfo = Interop.Sys.GetLastErrorInfo();
+                    return false;
+                }
+
+                // Something exists at this path.  If the caller is asking for a directory, return true if it's
+                // a directory and false for everything else.  If the caller is asking for a file, return false for
+                // a directory and true for everything else.
+                return
+                    (fileType == Interop.Sys.FileTypes.S_IFDIR) ==
+                    ((fileinfo.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR);
             }
         }
     }
