@@ -194,7 +194,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(AddressFamily.InterNetwork)]
         [InlineData(AddressFamily.InterNetworkV6)]
-        public void TtlSet_Succeeds(AddressFamily af)
+        public void Ttl_Set_Succeeds(AddressFamily af)
         {
             using (Socket socket = new Socket(af, SocketType.Dgram, ProtocolType.Udp))
             {
