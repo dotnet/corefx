@@ -614,7 +614,7 @@ namespace System.IO
                                 // parent and previousEventName is the name of the directory to be removed.
                                 foreach (WatchedDirectory child in previousEventParent.Children)
                                 {
-                                    if (previousEventName.SequenceEqual(child.Name))
+                                    if (previousEventName.Equals(child.Name, StringComparison.Ordinal))
                                     {
                                         RemoveWatchedDirectory(child);
                                         break;

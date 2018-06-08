@@ -513,6 +513,9 @@ namespace System.IO
 
             private bool CheckIfPathIsNested(ReadOnlySpan<char> eventPath)
             {
+                // If we shouldn't include subdirectories, check if this path's parent is the watch directory
+                // Check if the parent is the root. If so, then we'll continue processing based on the name.
+                // If it isn't, then this will be set to false and we'll skip the name processing since it's irrelevant.
                 return _includeChildren || _fullDirectory.AsSpan().StartsWith(System.IO.Path.GetDirectoryName(eventPath), StringComparison.OrdinalIgnoreCase);
             }
 
@@ -543,10 +546,8 @@ namespace System.IO
                 if (path.IsEmpty || path.Length == 0)
                     return false;
 
-                if(!isFile)
-                {
+                if (!isFile)
                     return  FileSystem.DirectoryExists(path);
-                }
 
                 return PathInternal.IsDirectorySeparator(path[path.Length - 1])
                     ? false
