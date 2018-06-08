@@ -229,8 +229,7 @@ namespace System.Net.NetworkInformation
                 Finish();
             }
         }
-
-        /*private*/
+        
         partial void InternalDisposeCore()
         {
             if (_handlePingV4 != null)
