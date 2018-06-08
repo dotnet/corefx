@@ -23,6 +23,7 @@ namespace System.Xml.Serialization
     using System.Xml.Extensions;
     using System.Linq;
     using System.Xml.Serialization;
+    using System.Security.Permissions;
 
     internal class TempAssembly
     {
@@ -193,6 +194,7 @@ namespace System.Xml.Serialization
                     {
                         throw;
                     }
+                    Log(e.Message, EventLogEntryType.Information);
                     byte[] token = name.GetPublicKeyToken();
                     if (token != null && token.Length > 0)
                     {
@@ -207,13 +209,14 @@ namespace System.Xml.Serialization
                     {
                         throw new Exception(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
                     }
-
+                    Log(SR.Format(SR.Format(SR.XmlPregenCannotLoad, serializerName)), EventLogEntryType.Information);
                     return null;
                 }
 
 #if !FEATURE_SERIALIZATION_UAPAOT
                 if (!IsSerializerVersionMatch(serializer, type, defaultNamespace))
                 {
+                    Log(SR.Format(SR.XmlSerializerExpiredDetails, serializerName, type.FullName), EventLogEntryType.Error);
                     return null;
                 }
 #endif
@@ -251,8 +254,14 @@ namespace System.Xml.Serialization
             contract = (XmlSerializerImplementation)Activator.CreateInstance(contractType);
             if (contract.CanSerialize(type))
                 return serializer;
-
+            Log(SR.Format(SR.XmlSerializerExpiredDetails, serializerName, type.FullName), EventLogEntryType.Error);
             return null;
+        }
+
+        private static void Log(string message, EventLogEntryType type)
+        {
+            new EventLogPermission(PermissionState.Unrestricted).Assert();
+            EventLog.WriteEntry("XmlSerializer", message, type);
         }
 
 #if !FEATURE_SERIALIZATION_UAPAOT
