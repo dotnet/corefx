@@ -3447,10 +3447,4 @@ Usage: dotnet {0} [--assembly &lt;assembly file path&gt;] [--type &lt;type name&
   <data name="GenerateSerializerNotFound" xml:space="preserve">
     <value>Method 'System.Xml.Serialization.XmlSerializer.GenerateSerializer' was not found. This is likely because you are using an older version of the framework. Please update to .NET Core v2.1 or later.</value>
   </data>
-  <data name="XmlSerializerExpiredDetails" xml:space="preserve">  
-    <value>Pre-generated serializer '{0}' has expired. You need to re-generate serializer for '{1}'.</value>  
-  </data>
-  <data name="XmlPregenCannotLoad" xml:space="preserve">  
-    <value>Could not load file or assembly '{0}' or one of its dependencies. The system cannot find the file specified.</value> 
-  </data>
 </root>

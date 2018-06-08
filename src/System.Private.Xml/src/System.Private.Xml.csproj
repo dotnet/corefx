@@ -517,11 +517,8 @@
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Collections.Specialized" />
-    <Reference Include="System.ComponentModel" />
-    <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.Console" />
     <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.EventLog" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.IO.FileSystem" />
@@ -538,7 +535,6 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
-    <Reference Include="System.Security.Permissions" />
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
