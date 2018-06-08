@@ -5,6 +5,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -29,11 +30,8 @@ namespace System.Threading.Tasks
 
         internal AsyncInfoToTaskBridge(CancellationToken cancellationToken)
         {
-            if (AsyncCausalityTracer.LoggingOn)
-                AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, this.Task.Id, "WinRT Operation as Task", 0);
-
-            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
-                System.Threading.Tasks.Task.AddToActiveTasks(this.Task);
+            TraceOperationCreation(CausalityTraceLevel.Required, this.Task.Id, "WinRT Operation as Task", 0);
+            AddToActiveTasks(this.Task);
 
             _ct = cancellationToken;
         }
@@ -70,7 +68,7 @@ namespace System.Threading.Tasks
                     }
 
                     if (disposeOfCtr)
-                        ctr.Unregister();
+                        ctr.Dispose();
                 }
             }
             catch (Exception ex)
@@ -122,11 +120,8 @@ namespace System.Threading.Tasks
                 throw new ArgumentNullException(nameof(asyncInfo));
             Contract.EndContractBlock();
             
-            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
-			{
-				System.Threading.Tasks.Task.RemoveFromActiveTasks(base.Task.Id);
-			}
-
+            RemoveFromActiveTasks(base.Task.Id);
+            
             try
             {
                 Debug.Assert(asyncInfo.Status == asyncStatus,
@@ -150,7 +145,7 @@ namespace System.Threading.Tasks
                     ctr = _ctr; // under lock to avoid torn reads
                     _ctr = default(CancellationTokenRegistration);
                 }
-                ctr.Unregister(); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
+                ctr.Dispose(); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
 
                 try
                 {
@@ -204,10 +199,7 @@ namespace System.Threading.Tasks
                     switch (asyncStatus)
                     {
                         case AsyncStatus.Completed:
-                            if (AsyncCausalityTracer.LoggingOn)
-                            {
-                                AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Task.Id, AsyncCausalityStatus.Completed);
-                            }
+                            AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Task.Id, AsyncCausalityStatus.Completed);
                             success = base.TrySetResult(result);
                             break;
 
@@ -224,15 +216,12 @@ namespace System.Threading.Tasks
                     Debug.Assert(success, "Expected the outcome to be successfully transfered to the task.");
                 }
                 catch (Exception exc)
-                {                    
+                {
                     // This really shouldn't happen, but could in a variety of misuse cases
                     // such as a faulty underlying IAsyncInfo implementation.
                     Debug.Assert(false, string.Format("Unexpected exception in Complete: {0}", exc.ToString()));
                     
-                    if (AsyncCausalityTracer.LoggingOn)
-					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Task.Id, AsyncCausalityStatus.Error);
-					}
+                    TraceOperationCompletion(CausalityTraceLevel.Required, base.Task.Id, AsyncCausalityStatus.Error);
 
                     // For these cases, store the exception into the task so that it makes its way
                     // back to the caller.  Only if something went horribly wrong and we can't store the exception
@@ -252,5 +241,140 @@ namespace System.Threading.Tasks
                     Marshal.ReleaseComObject(asyncInfo);
             }
         }  // private void Complete(..)
+
+        private static Type s_asyncCausalityTracerType;
+        private static PropertyInfo s_LoggingOn;
+        private static MethodInfo s_TraceOperationCreationMethodInfo;
+        private static MethodInfo s_TraceOperationCompletionMethodInfo; 
+        private bool IsAsyncCausalityTracerLoggingOn()
+        {
+            if (s_asyncCausalityTracerType == null)
+            {
+                s_asyncCausalityTracerType = Type.GetType("System.Threading.Tasks.AsyncCausalityTracer");
+            }
+
+            if(s_asyncCausalityTracerType != null)
+            {
+                if (s_LoggingOn == null)
+                {
+                    s_LoggingOn = s_asyncCausalityTracerType.GetProperty("LoggingOn", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                }
+
+                if (s_LoggingOn!= null)
+                {
+                    return (bool) s_LoggingOn.GetValue(null, null);
+                }
+            }
+            return false;
+        }
+
+        private void TraceOperationCreation(CausalityTraceLevel causalityTraceLevel, int taskId, string operationName, ulong relatedContext)
+        {
+            if (IsAsyncCausalityTracerLoggingOn())
+            {
+                if(s_TraceOperationCreationMethodInfo == null)
+                {
+                    s_TraceOperationCreationMethodInfo = s_asyncCausalityTracerType.GetMethod(
+                        "TraceOperationCreation", 
+                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
+                        null, 
+                        new Type[] { typeof(CausalityTraceLevel), typeof(int), typeof(string), typeof(ulong) }, 
+                        null 
+                    );
+                }
+
+                if(s_TraceOperationCreationMethodInfo != null)
+                {
+                    s_TraceOperationCreationMethodInfo.Invoke(null, new Object[]{ causalityTraceLevel, taskId, operationName, relatedContext });
+                }
+            }
+        }
+
+        private void TraceOperationCompletion(CausalityTraceLevel causalityTraceLevel, int taskId, AsyncCausalityStatus asyncCausalityStatus)
+        {
+            if (IsAsyncCausalityTracerLoggingOn())
+            {
+                if (s_TraceOperationCompletionMethodInfo == null)
+                {
+                    s_TraceOperationCompletionMethodInfo = s_asyncCausalityTracerType.GetMethod(
+                        "TraceOperationCompletion", 
+                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
+                        null, 
+                        new Type[] { typeof(CausalityTraceLevel), typeof(int), typeof(AsyncCausalityStatus) }, 
+                        null
+                    );
+                }
+
+                if (s_TraceOperationCompletionMethodInfo != null)
+                {
+                    s_TraceOperationCompletionMethodInfo.Invoke(null, new Object[] { causalityTraceLevel, taskId, asyncCausalityStatus });
+                }
+            }
+        }
+
+        private static Type s_TaskType;
+        private static PropertyInfo s_asyncDebuggingEnabledPropertyInfo;
+        private static MethodInfo s_AddToActiveTasksMethodInfo;
+        private static MethodInfo s_RemoveFromActiveTasksMethodInfo;
+        private bool IsAsyncDebuggingEnabled()
+        {
+            if (s_TaskType == null)
+            {
+                s_TaskType = Type.GetType("System.Threading.Tasks.Task");
+            }
+
+            if (s_TaskType != null)
+            {
+                if (s_asyncDebuggingEnabledPropertyInfo != null)
+                    s_asyncDebuggingEnabledPropertyInfo = s_TaskType.GetProperty("s_asyncDebuggingEnabled");
+
+                if (s_asyncDebuggingEnabledPropertyInfo != null)
+                    return (bool) s_asyncDebuggingEnabledPropertyInfo.GetValue(null, null);
+            }
+            return false;
+        }
+
+        private void AddToActiveTasks(Task task)
+        {
+            if (IsAsyncDebuggingEnabled())
+            {
+                if (s_AddToActiveTasksMethodInfo == null)
+                {
+                    s_AddToActiveTasksMethodInfo = s_TaskType.GetMethod(
+                        "AddToActiveTasks", 
+                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
+                        null, 
+                        new Type[]{ typeof(Task) }, 
+                        null );
+                }
+                
+                if (s_AddToActiveTasksMethodInfo != null)
+                {
+                    s_AddToActiveTasksMethodInfo.Invoke(null, new Object[]{ this.Task });
+                }
+            }
+        }
+
+        private void RemoveFromActiveTasks(int id)
+        {
+            if (IsAsyncDebuggingEnabled())
+            {
+                if (s_RemoveFromActiveTasksMethodInfo == null)
+                {
+                    s_RemoveFromActiveTasksMethodInfo = s_TaskType.GetMethod(
+                        "RemoveFromActiveTasks", 
+                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
+                        null, 
+                        new Type[]{ typeof(int) },
+                        null 
+                    );
+                }
+
+                if (s_RemoveFromActiveTasksMethodInfo != null)
+                {
+                    s_RemoveFromActiveTasksMethodInfo.Invoke(null, new Object[]{ base.Task.Id });
+                }
+            }
+        }
     }  // class AsyncInfoToTaskBridge<TResult, TProgress>
 }  // namespace
