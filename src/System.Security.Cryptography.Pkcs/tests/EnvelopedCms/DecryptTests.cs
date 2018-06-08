@@ -648,7 +648,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [ConditionalFact(nameof(SupportsIndefiniteLengthEncoding))]
-        public void EncryptEnvelopedEmptyOctetStringWithIndefiniteLength()
+        public void DecryptEnvelopedEmptyOctetStringWithIndefiniteLength()
         {
             byte[] content = "30800000".HexToByteArray();
             byte[] expectedContent = "3000".HexToByteArray();
@@ -660,10 +660,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [ConditionalFact(nameof(SupportsIndefiniteLengthEncoding))]
-        public void EncryptEnvelopedOctetStringWithIndefiniteLength()
+        public void DecryptEnvelopedOctetStringWithIndefiniteLength()
         {
             byte[] content = "308004000000".HexToByteArray();
-            byte[] expectedContent = "3000".HexToByteArray();
+            byte[] expectedContent = "30020400".HexToByteArray();
 
             ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
             ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
