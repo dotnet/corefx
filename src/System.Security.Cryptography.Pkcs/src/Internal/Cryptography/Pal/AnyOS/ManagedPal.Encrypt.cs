@@ -182,30 +182,14 @@ namespace Internal.Cryptography.Pal.AnyOS
                 }
                 else
                 {
-                    using (MemoryStream memoryStream = new MemoryStream())
+                    if (contentInfo.Content.Length == 0)
                     {
-                        using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
-                        {
-                            AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.BER);
-                            AsnReader innerReader = reader.ReadSequence();
-
-                            if (reader.HasData)
-                            {
-                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                            }
-
-                            while (innerReader.HasData)
-                            {
-#if netcoreapp
-                                cryptoStream.Write(innerReader.GetEncodedValue().Span);
-#else
-                                byte[] encoded = innerReader.GetEncodedValue().ToArray();
-                                cryptoStream.Write(encoded, 0, encoded.Length);
-#endif
-                            }
-                        }
-
-                        return memoryStream.ToArray();
+                        return encryptor.OneShot(contentInfo.Content);
+                    }
+                    else
+                    {
+                        AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.BER);
+                        return encryptor.OneShot(reader.PeekContentBytes().ToArray());
                     }
                 }
             }

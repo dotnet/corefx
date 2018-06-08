@@ -16,6 +16,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     {
         private bool _useExplicitPrivateKey;
         public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
+        public static bool SupportsIndefiniteLengthEncoding { get; } = !PlatformDetection.IsWindows;
 
         public DecryptTests(bool useExplicitPrivateKey)
         {
@@ -580,18 +581,54 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        public void DecryptEnvelopedOctetStringWithIndefiniteLength()
+        public void DecryptEnvelopedOctetStringWithInefficientlyEncodedLength()
         {
             // enveloped content consists of 5 or 6 bytes: <id: 1 byte><length: 1 or 2 bytes><content: 3 bytes>
             // <id>:
             //   04 - Octet string
             //   30 - Sequence
             // <length>: 03    => length is 3 (encoded with definite length)
-            //           81 03 => length is 3 (encoded with indefinite length)
+            //           81 03 => length is 3 (encoded with inefficiently encoded length)
             // <content>: 010203
             // Note: we expect invalid ASN.1 sequence
             byte[] content = "048103010203".HexToByteArray();
             byte[] expectedContent = "3003010203".HexToByteArray();
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
+        }
+
+        [Fact]
+        public void DecryptEnvelopedEmptyArray()
+        {
+            byte[] content = Array.Empty<byte>();
+            byte[] expectedContent = "3000".HexToByteArray();
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
+        }
+
+        [Fact]
+        public void DecryptEnvelopedEmptyOctetString()
+        {
+            byte[] content = "0400".HexToByteArray();
+            byte[] expectedContent = "3000".HexToByteArray();
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
+        }
+
+        [Fact]
+        public void DecryptEnvelopedOctetStringWithExtraData()
+        {
+            byte[] content = "04010203".HexToByteArray();
+            byte[] expectedContent = "300102".HexToByteArray();
 
             ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
             ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
@@ -608,6 +645,30 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ContentInfo contentInfo = new ContentInfo(new Oid(nonPkcs7Oid), content);
 
             TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber);
+        }
+
+        [ConditionalFact(nameof(SupportsIndefiniteLengthEncoding))]
+        public void EncryptEnvelopedEmptyOctetStringWithIndefiniteLength()
+        {
+            byte[] content = "30800000".HexToByteArray();
+            byte[] expectedContent = "3000".HexToByteArray();
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
+        }
+
+        [ConditionalFact(nameof(SupportsIndefiniteLengthEncoding))]
+        public void EncryptEnvelopedOctetStringWithIndefiniteLength()
+        {
+            byte[] content = "308004000000".HexToByteArray();
+            byte[] expectedContent = "3000".HexToByteArray();
+
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+            ContentInfo expectedContentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), expectedContent);
+
+            TestSimpleDecrypt_RoundTrip(Certificates.RSAKeyTransferCapi1, contentInfo, Oids.Aes256, SubjectIdentifierType.IssuerAndSerialNumber, expectedContentInfo);
         }
 
         private void TestSimpleDecrypt_RoundTrip(CertLoader certLoader, ContentInfo contentInfo, string algorithmOidValue, SubjectIdentifierType type, ContentInfo expectedContentInfo = null)

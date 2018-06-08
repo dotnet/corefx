@@ -17,6 +17,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
 
+        public static bool NotSupportsIndefiniteLengthEncoding { get; } = PlatformDetection.IsWindows;
+
         [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCase()
@@ -510,6 +512,70 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             object ignore;
             Assert.Throws<InvalidOperationException>(() => ignore = new CryptographicAttributeObject(wrongOid, col));
+        }
+
+        [Fact]
+        public static void EncryptEnvelopedOctetStringWithIncompleteContent()
+        {
+            byte[] content = "04040203".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
+        }
+
+        [Fact]
+        public static void EncryptEnvelopedOneByteArray()
+        {
+            byte[] content = "04".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
+        }
+
+        [ConditionalFact(nameof(NotSupportsIndefiniteLengthEncoding))]
+        public static void EncryptEnvelopedEmptyOctetStringWithIndefiniteLength()
+        {
+            byte[] content = "30800000".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
+        }
+
+        [ConditionalFact(nameof(NotSupportsIndefiniteLengthEncoding))]
+        public static void EncryptEnvelopedOctetStringWithIndefiniteLength()
+        {
+            byte[] content = "308004000000".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
         }
     }
 }
