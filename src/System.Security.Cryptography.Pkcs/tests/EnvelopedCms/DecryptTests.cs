@@ -680,6 +680,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             string certSubjectName;
             byte[] encodedMessage;
+            byte[] originalCopy = (byte[])(contentInfo.Content.Clone());
             using (X509Certificate2 certificate = certLoader.GetCertificate())
             {
                 certSubjectName = certificate.Subject;
@@ -687,6 +688,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
                 CmsRecipient cmsRecipient = new CmsRecipient(type, certificate);
                 ecms.Encrypt(cmsRecipient);
+                Assert.Equal(originalCopy.ByteArrayToHex(), ecms.ContentInfo.Content.ByteArrayToHex());
                 encodedMessage = ecms.Encode();
             }
 

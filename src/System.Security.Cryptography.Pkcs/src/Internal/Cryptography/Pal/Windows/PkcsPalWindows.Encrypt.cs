@@ -64,7 +64,7 @@ namespace Internal.Cryptography.Pal.Windows
                         {
                             if (!object.ReferenceEquals(encodedContent, contentInfo.Content))
                             {
-                                CryptographicOperations.ZeroMemory(encodedContent);
+                                Array.Clear(encodedContent, 0, encodedContent.Length);
                             }
                         }
                     }
