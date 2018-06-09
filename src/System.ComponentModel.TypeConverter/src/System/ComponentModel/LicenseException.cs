@@ -16,7 +16,7 @@ namespace System.ComponentModel
     [SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors")] // must not, a Type is required in all constructors.
     public class LicenseException : SystemException
     {
-        private const int License = unchecked((int)0x80131901);
+        private const int LicenseHResult = unchecked((int)0x80131901);
 
         private object _instance;
 
@@ -42,7 +42,7 @@ namespace System.ComponentModel
         {
             LicensedType = type;
             _instance = instance;
-            HResult = License;
+            HResult = LicenseHResult;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace System.ComponentModel
         {
             LicensedType = type;
             _instance = instance;
-            HResult = License;
+            HResult = LicenseHResult;
         }
 
         /// <summary>

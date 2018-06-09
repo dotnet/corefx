@@ -9,17 +9,12 @@ using System.Threading;
 namespace System.ComponentModel
 {
     /// <summary>
-    /// Provides a subset of the <see cref="BitVector32"/> surface area, using volatile operations for reads and interlocked operations for writes. 
+    /// Provides a subset of the <see cref="BitVector32"/> surface area, using volatile
+    /// operations for reads and interlocked operations for writes. 
     /// </summary>
     internal struct InterlockedBitVector32
     {
         private int _data;
-
-        [ExcludeFromCodeCoverage]
-        public InterlockedBitVector32(int data)
-        {
-            _data = data;
-        }
 
         public bool this[int bit]
         {
@@ -51,10 +46,10 @@ namespace System.ComponentModel
             return previous == 0 ? 1 : previous << 1;
         }
 
-        [ExcludeFromCodeCoverage]
-        public override bool Equals(object o) => o is InterlockedBitVector32 ? _data == ((InterlockedBitVector32)o)._data : false;
+        [ExcludeFromCodeCoverage] // Not used, but overriding Equals on a struct is important.
+        public override bool Equals(object o) => o is InterlockedBitVector32 vector && _data == vector._data;
 
-        [ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage] // Not used, but overriding Equals on a struct is important.
         public override int GetHashCode() => base.GetHashCode();
     }
 }
