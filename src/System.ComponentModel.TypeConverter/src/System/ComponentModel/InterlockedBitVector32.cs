@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.ComponentModel
@@ -46,10 +45,8 @@ namespace System.ComponentModel
             return previous == 0 ? 1 : previous << 1;
         }
 
-        [ExcludeFromCodeCoverage] // Not used, but overriding Equals on a struct is important.
         public override bool Equals(object o) => o is InterlockedBitVector32 vector && _data == vector._data;
 
-        [ExcludeFromCodeCoverage] // Not used, but overriding Equals on a struct is important.
         public override int GetHashCode() => base.GetHashCode();
     }
 }
