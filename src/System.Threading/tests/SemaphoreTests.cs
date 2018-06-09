@@ -26,11 +26,10 @@ namespace System.Threading.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // named semaphores aren't supported on Unix
-        [Fact]
-        public void Ctor_ValidName_Windows()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void Ctor_ValidName_Windows(string name)
         {
-            string name = Guid.NewGuid().ToString("N");
-
             new Semaphore(0, 1, name).Dispose();
 
             bool createdNew;
@@ -72,15 +71,6 @@ namespace System.Threading.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("initialCount", () => new Semaphore(-2, 1, "CtorSemaphoreTest", out createdNew));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("maximumCount", () => new Semaphore(0, 0, "CtorSemaphoreTest", out createdNew));
             AssertExtensions.Throws<ArgumentException>(null, () => new Semaphore(2, 1, "CtorSemaphoreTest", out createdNew));
-        }
-
-        [PlatformSpecific(TestPlatforms.Windows)]  // named semaphores aren't supported on Unix
-        [Fact]
-        public void Ctor_InvalidNames()
-        {
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000)));
-            bool createdNew;
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000), out createdNew));
         }
 
         [Fact]
@@ -214,7 +204,6 @@ namespace System.Threading.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => Semaphore.OpenExisting(null));
             AssertExtensions.Throws<ArgumentException>("name", null, () => Semaphore.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", null, () => Semaphore.OpenExisting(new string('a', 10000)));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // named semaphores aren't supported on Unix
@@ -241,10 +230,10 @@ namespace System.Threading.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // named semaphores aren't supported on Unix
-        [Fact]
-        public void OpenExisting_SameAsOriginal_Windows()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void OpenExisting_SameAsOriginal_Windows(string name)
         {
-            string name = Guid.NewGuid().ToString("N");
             bool createdNew;
             using (Semaphore s1 = new Semaphore(0, Int32.MaxValue, name, out createdNew))
             {
@@ -317,5 +306,11 @@ namespace System.Threading.Tests
 
             return SuccessExitCode;
         }
+
+        public static TheoryData<string> GetValidNames => new TheoryData<string>()
+        {
+            { Guid.NewGuid().ToString("N") },
+            { Guid.NewGuid().ToString("N") + new string('a', 1000) }
+        };
     }
 }

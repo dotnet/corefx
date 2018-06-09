@@ -27,10 +27,15 @@ namespace System.Threading.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // names aren't supported on Unix
-        [Fact]
-        public void Ctor_InvalidNames()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void Ctor_ValidNames(string name)
         {
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new EventWaitHandle(true, EventResetMode.AutoReset, new string('a', 1000)));
+            bool createdNew;
+            using (var ewh = new EventWaitHandle(true, EventResetMode.AutoReset, name, out createdNew))
+            {
+                Assert.True(createdNew);
+            }
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // names aren't supported on Unix
@@ -101,11 +106,10 @@ namespace System.Threading.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // OpenExisting not supported on Unix
-        [Fact]
-        public void OpenExisting_Windows()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void OpenExisting_Windows(string name)
         {
-            string name = Guid.NewGuid().ToString("N");
-
             EventWaitHandle resultHandle;
             Assert.False(EventWaitHandle.TryOpenExisting(name, out resultHandle));
             Assert.Null(resultHandle);
@@ -146,7 +150,6 @@ namespace System.Threading.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => EventWaitHandle.OpenExisting(null));
             AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", null, () => EventWaitHandle.OpenExisting(new string('a', 10000)));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // OpenExisting not supported on Unix
@@ -224,5 +227,10 @@ namespace System.Threading.Tests
             return SuccessExitCode;
         }
 
+        public static TheoryData<string> GetValidNames => new TheoryData<string>()
+        {
+            { Guid.NewGuid().ToString("N") },
+            { Guid.NewGuid().ToString("N") + new string('a', 1000) }
+        };
     }
 }

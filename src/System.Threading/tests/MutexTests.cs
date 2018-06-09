@@ -36,16 +36,10 @@ namespace System.Threading.Tests
             }
         }
 
-        [Fact]
-        public void Ctor_InvalidName()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void Ctor_ValidName(string name)
         {
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new Mutex(false, new string('a', 1000)));
-        }
-
-        [Fact]
-        public void Ctor_ValidName()
-        {
-            string name = Guid.NewGuid().ToString("N");
             bool createdNew;
             using (Mutex m1 = new Mutex(false, name, out createdNew))
             {
@@ -96,11 +90,10 @@ namespace System.Threading.Tests
                 Assert.Throws<UnauthorizedAccessException>(() => new Mutex(false, "Global\\" + Guid.NewGuid().ToString("N"))));
         }
 
-        [Fact]
-        public void OpenExisting()
+        [Theory]
+        [MemberData(nameof(GetValidNames))]
+        public void OpenExisting(string name)
         {
-            string name = Guid.NewGuid().ToString("N");
-
             Mutex resultHandle;
             Assert.False(Mutex.TryOpenExisting(name, out resultHandle));
 
@@ -128,7 +121,6 @@ namespace System.Threading.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => Mutex.OpenExisting(null));
             AssertExtensions.Throws<ArgumentException>("name", null, () => Mutex.OpenExisting(string.Empty));
-            AssertExtensions.Throws<ArgumentException>("name", null, () => Mutex.OpenExisting(new string('a', 10000)));
         }
 
         [Fact]
@@ -269,6 +261,12 @@ namespace System.Threading.Tests
                 finally { mutex.ReleaseMutex(); }
             }
         }
+
+        public static TheoryData<string> GetValidNames => new TheoryData<string>()
+        {
+            { Guid.NewGuid().ToString("N") },
+            { Guid.NewGuid().ToString("N") + new string('a', 1000) }
+        };
 
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentThread();
