@@ -23,8 +23,7 @@ namespace System.Drawing
         public IntPtr GetHdc()
         {
             IntPtr hdc = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipGetDC(new HandleRef(this, NativeGraphics), out hdc);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipGetDC(new HandleRef(this, NativeGraphics), out hdc));
 
             _nativeHdc = hdc; // need to cache the hdc to be able to release with a call to IDeviceContext.ReleaseHdc().
             return _nativeHdc;
@@ -45,9 +44,7 @@ namespace System.Drawing
         /// </summary>
         public void Flush(FlushIntention intention)
         {
-            int status = SafeNativeMethods.Gdip.GdipFlush(new HandleRef(this, NativeGraphics), intention);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipFlush(new HandleRef(this, NativeGraphics), intention));
             FlushCore();
         }
 
@@ -56,30 +53,32 @@ namespace System.Drawing
         public void SetClip(Graphics g, CombineMode combineMode)
         {
             if (g == null)
-            {
                 throw new ArgumentNullException(nameof(g));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipSetClipGraphics(new HandleRef(this, NativeGraphics), new HandleRef(g, g.NativeGraphics), combineMode);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipGraphics(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(g, g.NativeGraphics),
+                combineMode));
         }
 
         public void SetClip(Rectangle rect) => SetClip(rect, CombineMode.Replace);
 
         public void SetClip(Rectangle rect, CombineMode combineMode)
         {
-            int status = SafeNativeMethods.Gdip.GdipSetClipRectI(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                  rect.Width, rect.Height, combineMode);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRectI(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                combineMode));
         }
 
         public void SetClip(RectangleF rect) => SetClip(rect, CombineMode.Replace);
 
         public void SetClip(RectangleF rect, CombineMode combineMode)
         {
-            int status = SafeNativeMethods.Gdip.GdipSetClipRect(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                 rect.Width, rect.Height, combineMode);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRect(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                combineMode));
         }
 
         public void SetClip(GraphicsPath path) => SetClip(path, CombineMode.Replace);
@@ -87,87 +86,84 @@ namespace System.Drawing
         public void SetClip(GraphicsPath path, CombineMode combineMode)
         {
             if (path == null)
-            {
                 throw new ArgumentNullException(nameof(path));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipSetClipPath(new HandleRef(this, NativeGraphics), new HandleRef(path, path.nativePath), combineMode);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipPath(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(path, path._nativePath),
+                combineMode));
         }
 
         public void SetClip(Region region, CombineMode combineMode)
         {
             if (region == null)
-            {
                 throw new ArgumentNullException(nameof(region));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipSetClipRegion(new HandleRef(this, NativeGraphics), new HandleRef(region, region._nativeRegion), combineMode);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRegion(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(region, region._nativeRegion),
+                combineMode));
         }
 
         public void IntersectClip(Rectangle rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipSetClipRectI(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                  rect.Width, rect.Height, CombineMode.Intersect);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRectI(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                CombineMode.Intersect));
         }
 
         public void IntersectClip(RectangleF rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipSetClipRect(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                 rect.Width, rect.Height, CombineMode.Intersect);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRect(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                CombineMode.Intersect));
         }
 
         public void IntersectClip(Region region)
         {
             if (region == null)
-            {
                 throw new ArgumentNullException(nameof(region));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipSetClipRegion(new HandleRef(this, NativeGraphics), new HandleRef(region, region._nativeRegion),
-                                                   CombineMode.Intersect);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRegion(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(region, region._nativeRegion),
+                CombineMode.Intersect));
         }
 
         public void ExcludeClip(Rectangle rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipSetClipRectI(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                  rect.Width, rect.Height, CombineMode.Exclude);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRectI(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                CombineMode.Exclude));
         }
 
         public void ExcludeClip(Region region)
         {
             if (region == null)
-            {
                 throw new ArgumentNullException(nameof(region));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipSetClipRegion(new HandleRef(this, NativeGraphics),
-                                                   new HandleRef(region, region._nativeRegion),
-                                                   CombineMode.Exclude);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetClipRegion(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(region, region._nativeRegion),
+                CombineMode.Exclude));
         }
 
         public void ResetClip()
         {
-            int status = SafeNativeMethods.Gdip.GdipResetClip(new HandleRef(this, NativeGraphics));
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipResetClip(new HandleRef(this, NativeGraphics)));
         }
 
         public void TranslateClip(float dx, float dy)
         {
-            int status = SafeNativeMethods.Gdip.GdipTranslateClip(new HandleRef(this, NativeGraphics), dx, dy);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipTranslateClip(new HandleRef(this, NativeGraphics), dx, dy));
         }
 
         public void TranslateClip(int dx, int dy)
         {
-            int status = SafeNativeMethods.Gdip.GdipTranslateClip(new HandleRef(this, NativeGraphics), dx, dy);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipTranslateClip(new HandleRef(this, NativeGraphics), dx, dy));
         }
 
         public Region Clip
@@ -175,8 +171,9 @@ namespace System.Drawing
             get
             {
                 var region = new Region();
-                int status = SafeNativeMethods.Gdip.GdipGetClip(new HandleRef(this, NativeGraphics), new HandleRef(region, region._nativeRegion));
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipGetClip(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(region, region._nativeRegion)));
 
                 return region;
             }
@@ -188,8 +185,7 @@ namespace System.Drawing
             get
             {
                 var rect = new GPRECTF();
-                int status = SafeNativeMethods.Gdip.GdipGetClipBounds(new HandleRef(this, NativeGraphics), ref rect);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipGetClipBounds(new HandleRef(this, NativeGraphics), ref rect));
 
                 return rect.ToRectangleF();
             }
@@ -199,9 +195,7 @@ namespace System.Drawing
         {
             get
             {
-                int isEmpty;
-                int status = SafeNativeMethods.Gdip.GdipIsClipEmpty(new HandleRef(this, NativeGraphics), out isEmpty);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsClipEmpty(new HandleRef(this, NativeGraphics), out int isEmpty));
 
                 return isEmpty != 0;
             }
@@ -211,22 +205,20 @@ namespace System.Drawing
         {
             get
             {
-                int isEmpty;
-                int status = SafeNativeMethods.Gdip.GdipIsVisibleClipEmpty(new HandleRef(this, NativeGraphics), out isEmpty);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsVisibleClipEmpty(new HandleRef(this, NativeGraphics), out int isEmpty));
 
                 return isEmpty != 0;
             }
         }
 
-
         public bool IsVisible(int x, int y) => IsVisible(new Point(x, y));
 
         public bool IsVisible(Point point)
         {
-            int isVisible;
-            int status = SafeNativeMethods.Gdip.GdipIsVisiblePointI(new HandleRef(this, NativeGraphics), point.X, point.Y, out isVisible);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsVisiblePointI(
+                new HandleRef(this, NativeGraphics),
+                point.X, point.Y,
+                out int isVisible));
 
             return isVisible != 0;
         }
@@ -235,9 +227,10 @@ namespace System.Drawing
 
         public bool IsVisible(PointF point)
         {
-            int isVisible;
-            int status = SafeNativeMethods.Gdip.GdipIsVisiblePoint(new HandleRef(this, NativeGraphics), point.X, point.Y, out isVisible);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsVisiblePoint(
+                new HandleRef(this, NativeGraphics),
+                point.X, point.Y,
+                out int isVisible));
 
             return isVisible != 0;
         }
@@ -249,10 +242,10 @@ namespace System.Drawing
 
         public bool IsVisible(Rectangle rect)
         {
-            int isVisible;
-            int status = SafeNativeMethods.Gdip.GdipIsVisibleRectI(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                    rect.Width, rect.Height, out isVisible);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsVisibleRectI(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                out int isVisible));
 
             return isVisible != 0;
         }
@@ -264,10 +257,10 @@ namespace System.Drawing
 
         public bool IsVisible(RectangleF rect)
         {
-            int isVisible;
-            int status = SafeNativeMethods.Gdip.GdipIsVisibleRect(new HandleRef(this, NativeGraphics), rect.X, rect.Y,
-                                                   rect.Width, rect.Height, out isVisible);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipIsVisibleRect(
+                new HandleRef(this, NativeGraphics),
+                rect.X, rect.Y, rect.Width, rect.Height,
+                out int isVisible));
 
             return isVisible != 0;
         }
@@ -280,17 +273,17 @@ namespace System.Drawing
             get
             {
                 var matrix = new Matrix();
-                int status = SafeNativeMethods.Gdip.GdipGetWorldTransform(new HandleRef(this, NativeGraphics),
-                                                           new HandleRef(matrix, matrix.nativeMatrix));
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipGetWorldTransform(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(matrix, matrix.nativeMatrix)));
 
                 return matrix;
             }
             set
             {
-                int status = SafeNativeMethods.Gdip.GdipSetWorldTransform(new HandleRef(this, NativeGraphics),
-                                                           new HandleRef(value, value.nativeMatrix));
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipSetWorldTransform(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(value, value.nativeMatrix)));
             }
         }
 
@@ -299,8 +292,7 @@ namespace System.Drawing
         /// </summary>
         public void ResetTransform()
         {
-            int status = SafeNativeMethods.Gdip.GdipResetWorldTransform(new HandleRef(this, NativeGraphics));
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipResetWorldTransform(new HandleRef(this, NativeGraphics)));
         }
 
         /// <summary>
@@ -314,38 +306,33 @@ namespace System.Drawing
         public void MultiplyTransform(Matrix matrix, MatrixOrder order)
         {
             if (matrix == null)
-            {
                 throw new ArgumentNullException(nameof(matrix));
-            }
 
-            int status = SafeNativeMethods.Gdip.GdipMultiplyWorldTransform(new HandleRef(this, NativeGraphics),
-                                                            new HandleRef(matrix, matrix.nativeMatrix),
-                                                            order);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipMultiplyWorldTransform(
+                new HandleRef(this, NativeGraphics),
+                new HandleRef(matrix, matrix.nativeMatrix),
+                order));
         }
 
         public void TranslateTransform(float dx, float dy) => TranslateTransform(dx, dy, MatrixOrder.Prepend);
 
         public void TranslateTransform(float dx, float dy, MatrixOrder order)
         {
-            int status = SafeNativeMethods.Gdip.GdipTranslateWorldTransform(new HandleRef(this, NativeGraphics), dx, dy, order);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipTranslateWorldTransform(new HandleRef(this, NativeGraphics), dx, dy, order));
         }
 
         public void ScaleTransform(float sx, float sy) => ScaleTransform(sx, sy, MatrixOrder.Prepend);
 
         public void ScaleTransform(float sx, float sy, MatrixOrder order)
         {
-            int status = SafeNativeMethods.Gdip.GdipScaleWorldTransform(new HandleRef(this, NativeGraphics), sx, sy, order);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipScaleWorldTransform(new HandleRef(this, NativeGraphics), sx, sy, order));
         }
 
         public void RotateTransform(float angle) => RotateTransform(angle, MatrixOrder.Prepend);
 
         public void RotateTransform(float angle, MatrixOrder order)
         {
-            int status = SafeNativeMethods.Gdip.GdipRotateWorldTransform(new HandleRef(this, NativeGraphics), angle, order);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipRotateWorldTransform(new HandleRef(this, NativeGraphics), angle, order));
         }
     }
 }
