@@ -19,6 +19,7 @@ namespace System.Tests
     public partial class StringTests : RemoteExecutorTestBase
     {
         private const string SoftHyphen = "\u00AD";
+        private static readonly char[] s_whiteSpaceCharacters = { '\u0009', '\u000a', '\u000b', '\u000c', '\u000d', '\u0020', '\u0085', '\u00a0', '\u1680' };
 
         [Theory]
         [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0' }, "abcdefgh")]
@@ -3224,6 +3225,144 @@ namespace System.Tests
         public static void IsNullOrWhitespace(string value, bool expected)
         {
             Assert.Equal(expected, string.IsNullOrWhiteSpace(value));
+            Assert.Equal(string.IsNullOrWhiteSpace(value),value.AsSpan().IsWhiteSpace());
+        }
+
+        [Fact]
+        public static void ZeroLengthIsWhiteSpace()
+        {
+            string s1 = string.Empty;
+            bool result = string.IsNullOrWhiteSpace(s1);
+            Assert.True(result);
+
+            var span = s1.AsSpan();
+            result = span.IsWhiteSpace();
+            Assert.Equal(string.IsNullOrWhiteSpace(string.Empty), result);
+        }
+
+        [Fact]
+        public static void IsWhiteSpaceTrueLatin1()
+        {
+            Random rand = new Random(42);
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length - 1)];
+                }
+
+                string s1 = new string(a);
+                bool result = string.IsNullOrWhiteSpace(s1);
+                Assert.True(result);
+
+                for (int i = 0; i < s_whiteSpaceCharacters.Length - 1; i++)
+                {
+                    s1 = new string(Enumerable.Repeat(s_whiteSpaceCharacters[i], a.Length).ToArray());
+                    Assert.True(string.IsNullOrWhiteSpace(s1));
+                }
+
+                var span = new Span<char>(a);
+                result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(a)), result);
+
+                for (int i = 0; i < s_whiteSpaceCharacters.Length - 1; i++)
+                {
+                    span.Fill(s_whiteSpaceCharacters[i]);
+                    Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), ((ReadOnlySpan<char>)span).IsWhiteSpace());
+                }
+            }
+        }
+
+        [Fact]
+        public static void IsWhiteSpaceTrue()
+        {
+            Random rand = new Random(42);
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
+                }
+
+                string s1 = new string(a);
+                bool result = string.IsNullOrWhiteSpace(s1);
+                Assert.True(result);
+
+                var span = s1.AsSpan();
+                result = span.IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+            }
+        }
+
+        [Fact]
+        public static void IsWhiteSpaceFalse()
+        {
+            Random rand = new Random(42);
+            for (int length = 1; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
+                }
+                var span = new Span<char>(a);
+
+                // first character is not a white-space character
+                a[0] = 'a';
+                string s1 = new string(a);
+                bool result = string.IsNullOrWhiteSpace(s1);
+                Assert.False(result);
+                result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+                a[0] = ' ';
+
+                // last character is not a white-space character
+                a[length - 1] = 'a';
+                s1 = new string(a);
+                result = string.IsNullOrWhiteSpace(s1);
+                Assert.False(result);
+                result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+                a[length - 1] = ' ';
+
+                // character in the middle is not a white-space character
+                a[length / 2] = 'a';
+                s1 = new string(a);
+                result = string.IsNullOrWhiteSpace(s1);
+                Assert.False(result);
+                result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+                a[length / 2] = ' ';
+
+                // no character is a white-space character
+                span.Fill('a');
+                s1 = new string(span);
+                result = string.IsNullOrWhiteSpace(s1);
+                Assert.False(result);
+                result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoIsWhiteSpaceChecksGoOutOfRange()
+        {
+            for (int length = 3; length < 64; length++)
+            {
+                char[] first = new char[length];
+                first[0] = ' ';
+                first[length - 1] = ' ';
+
+                string s1 = new string(first, 1, length - 2);
+                bool result = string.IsNullOrWhiteSpace(s1);
+                Assert.False(result);
+
+                var span = s1.AsSpan();
+                result = span.IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
+            }
         }
 
         [Theory]
