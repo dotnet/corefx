@@ -5,6 +5,7 @@
       netcoreapp2.0;
     </PackageConfigurations>
     <BuildConfigurations>
+      $(PackageConfigurations);
       netcoreapp;
       uap;
     </BuildConfigurations>
@@ -15,7 +16,7 @@
   <Import Project="..\..\..\dir.props" />
   <PropertyGroup>
     <_RuntimePath Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">$(RuntimePath)</_RuntimePath>
-    <_RuntimePath Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(ShimsTargetRuntimePath)</_RuntimePath>
+    <_RuntimePath Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(ShimsTargetRuntimeRoot)netcoreapp2.0/</_RuntimePath>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AssemblyKey>ECMA</AssemblyKey>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>

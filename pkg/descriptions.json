@@ -75,7 +75,7 @@
   },
   {
     "Name": "Microsoft.Windows.Compatibility.Shims",
-    "Description": "This package provides facade assemblies in order to make the Microsoft.Windows.Compatibility package work across all .NET implementations. This package should only be referenced when using the Microsoft.Windows.Compatibility package.",
+    "Description": "This package provides infrastructure services and shouldn't be referenced directly from your code. It provides facade assemblies in order to make the Microsoft.Windows.Compatibility package work across all .NET implementations.",
     "CommonTypes": []
   },
   {

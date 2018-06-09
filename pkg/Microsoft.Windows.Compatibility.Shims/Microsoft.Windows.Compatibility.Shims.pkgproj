@@ -7,18 +7,11 @@
     <_ShimsLocationPath>$(BaseIntermediateOutputPath)shims/netcoreapp/facades/</_ShimsLocationPath>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
+    <OmitDependencies>true</OmitDependencies>
   </PropertyGroup>
 
   <ItemGroup>
-
-    <File Include="$(PlaceHolderFile)">
-      <TargetPath>/lib/netstandard2.0</TargetPath>
-    </File>
-
-    <File Include="$(PlaceHolderFile)">
-      <TargetPath>/ref/netstandard2.0</TargetPath>
-    </File>
-
+    <!-- We include placeholder files so that it is installable but takes the inbox shims in netcoreapp2.1 -->
     <File Include="$(PlaceHolderFile)">
       <TargetPath>/lib/netcoreapp2.1</TargetPath>
     </File>
@@ -27,16 +20,8 @@
       <TargetPath>/ref/netcoreapp2.1</TargetPath>
     </File>
 
-    <ProjectReference Include="..\..\src\shims\shims.proj" />
-    <ProjectReference Include="..\..\src\shims\manual\mscorlib.csproj" />
-    <ProjectReference Include="..\..\src\shims\manual\System.csproj" />
-    <ProjectReference Include="..\..\src\shims\manual\System.Data.csproj" />
+    <ProjectReference Include="..\..\src\shims\**\*.*proj"
+                      Exclude="..\..\src\shims\ApiCompat.proj" />
   </ItemGroup>
-
-  <Target Name="ClearDependencies" BeforeTargets="GenerateNuSpec">
-    <ItemGroup>
-      <Dependency Remove="@(Dependency)" />
-    </ItemGroup>
-  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

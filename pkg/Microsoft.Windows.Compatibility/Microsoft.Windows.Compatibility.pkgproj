@@ -66,8 +66,20 @@
     </LibraryPackage>
   </ItemGroup>
   <ItemGroup>
-    <Dependency Include="@(LibraryPackage)" />
-    <Dependency Include="@(PrereleaseLibraryPackage)" />
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netcoreapp2.0</TargetFramework>
+    </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netcoreapp2.1</TargetFramework>
+    </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
+      <TargetFramework>netstandard2.0</TargetFramework>
+    </Dependency>
+    <!-- Include dependency to shims package -->
+    <Dependency Include="Microsoft.Windows.Compatibility.Shims">
+      <Version>$(CompatibilityShimsPackageVersion)</Version>
+      <TargetFramework>netcoreapp2.0</TargetFramework>
+    </Dependency>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

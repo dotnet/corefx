@@ -23,12 +23,6 @@
     <ShimsToInclude Include="System.ServiceProcess.dll" />
     <ShimsToInclude Include="System.Transactions.dll" />
     <ShimsToInclude Include="WindowsBase.dll" />
-
-    <!-- ref shims to be included by this project -->
-    <RefShimsToInclude Include="@(ShimsToInclude)" />
-    <RefShimsToInclude Include="mscorlib.dll" />
-    <RefShimsToInclude Include="System.dll" />
-    <RefShimsToInclude Include="System.Data.dll" />
   </ItemGroup>
 
   <Target Name="GetGenFacadesInputs">
@@ -130,7 +124,10 @@
       <TargetPath>@(ShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')</TargetPath>
     </PropertyGroup>
     <ItemGroup>
-      <FilesToPackage Include="@(RefShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')">
+      <_manualShimProjects Include="manual\*.csproj" />
+      <_manualShims Include="@(_manualShimProjects->'%(FileName).dll')" />
+      <_refShims Include="@(ShimsToInclude);@(_manualShims)"/>
+      <FilesToPackage Include="@(_refShims->'$(GenFacadesOutputPath)%(Identity)')">
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <TargetPath>/ref/netcoreapp2.0/</TargetPath>
       </FilesToPackage>
