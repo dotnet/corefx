@@ -3338,7 +3338,7 @@ namespace System.Tests
 
                 // no character is a white-space character
                 span.Fill('a');
-                s1 = new string(span);
+                s1 = new string(span.ToArray());
                 result = string.IsNullOrWhiteSpace(s1);
                 Assert.False(result);
                 result = ((ReadOnlySpan<char>)span).IsWhiteSpace();
