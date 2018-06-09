@@ -3225,7 +3225,7 @@ namespace System.Tests
         public static void IsNullOrWhitespace(string value, bool expected)
         {
             Assert.Equal(expected, string.IsNullOrWhiteSpace(value));
-            Assert.Equal(string.IsNullOrWhiteSpace(value),value.AsSpan().IsWhiteSpace());
+            Assert.Equal(string.IsNullOrWhiteSpace(value), value.AsSpan().IsWhiteSpace());
         }
 
         [Fact]
