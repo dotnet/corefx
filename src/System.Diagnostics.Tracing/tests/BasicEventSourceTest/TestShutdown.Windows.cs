@@ -14,10 +14,8 @@ using Microsoft.Diagnostics.Tracing;
 using System.Diagnostics.Tracing;
 #endif
 using Xunit;
-#if USE_ETW
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
-#endif
 using System.IO;
 using System.Threading;
 
@@ -25,9 +23,8 @@ namespace BasicEventSourceTests
 {
     public class TestShutdown
     {
-
         // TODO: Depends on desktop APIs (AppDomainSetup and Evidence).
-#if USE_ETW && FALSE
+#if FALSE
         /// <summary>
         /// Test for manifest event being logged during AD/Process shutdown during EventSource Dispose(bool) method.
         /// </summary>
@@ -103,7 +100,7 @@ namespace BasicEventSourceTests
 
             logger.Dispose();
         }
-#endif //USE_ETW
+#endif
 
         public sealed class ADShutdownEventSourceTester //: MarshalByRefObject
         {
