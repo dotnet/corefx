@@ -91,14 +91,10 @@ endif()
 
 # App-Container builds require a more specific linking to ensure the APIs imported pass WACK
 if ($ENV{__appContainer} STREQUAL true AND UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
-    set(__LinkCustomCRT true)
     set(__LinkArgs "${__LinkArgs} /LTCG")
-endif()
-
-if (__LinkCustomCRT STREQUAL "true" AND $ENV{__BuildArch} STREQUAL "arm" )
-    set(__LinkArgs "${__LinkArgs} /DEFAULTLIB:ole32.lib")
-elseif(__LinkCustomCRT STREQUAL "true" AND NOT $ENV{__BuildArch} STREQUAL "arm" )
-    set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB")
+    if ($ENV{__BuildArch} STREQUAL "arm" )
+        set(__LinkArgs "${__LinkArgs} /DEFAULTLIB:ole32.lib")
+    endif()
 endif()
 
 # Linker flags
@@ -112,10 +108,6 @@ set(__LinkArgs "${__LinkArgs} /DEBUGTYPE:cv,fixup")     #debugging format
 set(__LinkArgs "${__LinkArgs} /PDBCOMPRESS")            #shrink pdb size
 set(__LinkArgs "${__LinkArgs} /DEBUG")
 set(__LinkArgs "${__LinkArgs} /IGNORE:4197,4013,4254,4070,4221")
-
-if ($ENV{__BuildArch} STREQUAL "x86" OR $ENV{__BuildArch} STREQUAL "x86_64" )
-    set(__LinkArgs "${__LinkArgs} /SUBSYSTEM:WINDOWS,6.00") #windows subsystem
-endif()
 
 if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # Release build specific flags
