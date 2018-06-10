@@ -73,6 +73,15 @@ namespace System.Threading.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new Semaphore(2, 1, "CtorSemaphoreTest", out createdNew));
         }
 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Full framework throws argument exception on long names")]
+        [Fact]
+        public void Ctor_InvalidNames()
+        {
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000)));
+            bool createdNew;
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Semaphore(0, 1, new string('a', 10000), out createdNew));
+        }
+
         [Fact]
         public void CanWaitWithoutBlockingUntilNoCount()
         {
@@ -307,10 +316,14 @@ namespace System.Threading.Tests
             return SuccessExitCode;
         }
 
-        public static TheoryData<string> GetValidNames => new TheoryData<string>()
+        public static TheoryData<string> GetValidNames()
         {
-            { Guid.NewGuid().ToString("N") },
-            { Guid.NewGuid().ToString("N") + new string('a', 1000) }
-        };
+            var names  =  new TheoryData<string>() { Guid.NewGuid().ToString("N") };
+
+            if (!PlatformDetection.IsFullFramework)
+                names.Add(Guid.NewGuid().ToString("N") + new string('a', 1000));
+
+            return names;
+        }
     }
 }

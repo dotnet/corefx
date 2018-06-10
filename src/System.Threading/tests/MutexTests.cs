@@ -36,6 +36,20 @@ namespace System.Threading.Tests
             }
         }
 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Full framework throws argument exception on long names")]
+        [Fact]
+        public void Ctor_InvalidNames_Windows()
+        {
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Mutex(false, new string('a', 1000), out bool createdNew));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void Ctor_InvalidNames_Unix()
+        {
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new Mutex(false, new string('a', 1000), out bool createdNew));
+        }
+
         [Theory]
         [MemberData(nameof(GetValidNames))]
         public void Ctor_ValidName(string name)
@@ -262,11 +276,15 @@ namespace System.Threading.Tests
             }
         }
 
-        public static TheoryData<string> GetValidNames => new TheoryData<string>()
+        public static TheoryData<string> GetValidNames()
         {
-            { Guid.NewGuid().ToString("N") },
-            { Guid.NewGuid().ToString("N") + new string('a', 1000) }
-        };
+            var names  =  new TheoryData<string>() { Guid.NewGuid().ToString("N") };
+
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsFullFramework)
+                names.Add(Guid.NewGuid().ToString("N") + new string('a', 1000));
+
+            return names;
+        }
 
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentThread();
