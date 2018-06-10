@@ -1603,6 +1603,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have the fix for this bug")]
         public static new void GetHashCode()
         {
             var dict = new Dictionary<string, (int hash, string value)>();
