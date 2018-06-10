@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{7E0E1B11-FF70-461E-99F7-C0AF252C0C60}</ProjectGuid>
-    <!-- <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">$(DefineConstants);USE_ETW</DefineConstants> -->
+    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">$(DefineConstants);USE_ETW</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
@@ -12,7 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
 
   <!--Windows only files -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+  <ItemGroup>
     <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
       <DependentUpon>FuzzyTests.cs</DependentUpon>
     </Compile>
