@@ -16,7 +16,7 @@ namespace BasicEventSourceTests
 {
     public class EventListenerListener : Listener
     {
-        private EventListener _listener;
+        private readonly EventListener _listener;
         private Action<EventSource> _onEventSourceCreated;
 
         public event EventHandler<EventSourceCreatedEventArgs> EventSourceCreated

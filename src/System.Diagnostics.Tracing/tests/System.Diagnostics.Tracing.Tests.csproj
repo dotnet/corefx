@@ -10,20 +10,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Condition="'$(TargetsWindows)' == 'true'" Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
       <DependentUpon>FuzzyTests.cs</DependentUpon>
     </Compile>
     <Compile Condition="'$(TargetsWindows)' == 'true'" Include="BasicEventSourceTest\Harness\EtwListener.cs">
       <DependentUpon>Listeners.cs</DependentUpon>
     </Compile>
-    <Compile Include="BasicEventSourceTest\Harness\EventListenerListener.cs">
-      <DependentUpon>Listeners.cs</DependentUpon>
+     <Compile Include="BasicEventSourceTest\TestEventCounter.Windows.cs">
+      <DependentUpon>TestEventCounter.cs</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
     <Compile Include="BasicEventSourceTest\FuzzyTests.cs" />
     <Compile Include="BasicEventSourceTest\Harness\Listeners.cs" />
     <Compile Include="BasicEventSourceTest\TestEventCounter.cs" />
+    <Compile Include="BasicEventSourceTest\Harness\EventListenerListener.cs">
+      <DependentUpon>Listeners.cs</DependentUpon>
+    </Compile>
     <Compile Include="BasicEventSourceTest\TestFilter.cs" />
     <Compile Include="BasicEventSourceTest\TestShutdown.cs" />
     <Compile Include="BasicEventSourceTest\TestsEventSourceLifetime.cs" />
