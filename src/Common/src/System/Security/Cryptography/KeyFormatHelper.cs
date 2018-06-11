@@ -69,7 +69,7 @@ namespace System.Security.Cryptography
             if (typeof(TParsed) == typeof(ReadOnlyMemory<byte>))
             {
                 ReadOnlyMemory<byte> tmp = spki.SubjectPublicKey;
-                parsed = Unsafe.As<ReadOnlyMemory<byte>, TParsed>(ref tmp);
+                parsed = (TParsed)(object)tmp;
             }
             else
             {
