@@ -29,7 +29,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicEventSourceTest\Harness\EventListenerListener.cs" />
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
     <Compile Include="BasicEventSourceTest\FuzzyTests.cs" />
     <Compile Include="BasicEventSourceTest\Harness\Listeners.cs" />
