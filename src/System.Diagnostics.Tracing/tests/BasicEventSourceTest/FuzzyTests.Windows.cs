@@ -12,7 +12,7 @@ namespace BasicEventSourceTests
         /// <summary>
         /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism) for Windows platform.
         /// </summary>
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
+        [Fact]
         public void Test_Write_Fuzzy_IsWindows()
         {
             TestFixture((logger, tests) =>

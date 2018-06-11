@@ -4,18 +4,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #if USE_MDT_EVENTSOURCE
 using Microsoft.Diagnostics.Tracing;
 #else
 using System.Diagnostics.Tracing;
 #endif
 using Xunit;
-#if USE_ETW
-using Microsoft.Diagnostics.Tracing.Session;
-#endif
 using System.Diagnostics;
 
 namespace BasicEventSourceTests
@@ -30,16 +24,8 @@ namespace BasicEventSourceTests
     internal enum ColorUInt64 : ulong { Red, Blue, Green };
 
 
-    public class TestsWrite
+    public partial  class TestsWrite
     {
-#if USE_ETW
-        // Specifies whether the process is elevated or not.
-        private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
-        private static bool IsProcessElevated => s_isElevated.Value;
-        private static bool IsProcessElevatedAndNotWindowsNanoServer =>
-            IsProcessElevated && PlatformDetection.IsNotWindowsNanoServer; // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
-#endif // USE_ETW
-
         [EventData]
         private struct PartB_UserInfo
         {
@@ -71,20 +57,6 @@ namespace BasicEventSourceTests
             Test_Write_T(new EventListenerListener(true));
         }
 
-#if USE_ETW
-        /// <summary>
-        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism).  
-        /// Tests the ETW code path
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_Write_T_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_Write_T(listener);
-            }
-        }
-#endif //USE_ETW
         /// <summary>
         /// Te
         /// </summary>
