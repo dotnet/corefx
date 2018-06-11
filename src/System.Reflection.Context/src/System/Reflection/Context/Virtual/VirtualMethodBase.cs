@@ -149,8 +149,7 @@ namespace System.Reflection.Context.Virtual
 
             if ((CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
             {
-                sb.Append(comma);
-                sb.Append("...");
+                sb.Append(", ...");
             }
 
             return sb.ToString();

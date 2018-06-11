@@ -41,9 +41,7 @@ namespace System.Reflection.Context
             // Mimic the behavior of GetCustomAttributes in runtime reflection.
             if (arrayType.HasElementType || arrayType.IsValueType || arrayType.ContainsGenericParameters)
                 return list.ToArray();
-
-            return list.ToArray();
-
+            
             // Converts results to typed array.
             Array typedArray = Array.CreateInstance(arrayType, list.Count);
 
