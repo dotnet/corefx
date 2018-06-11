@@ -1498,7 +1498,7 @@ namespace System.Tests
 
             string s1 = new string(a, 1, 0);
             string s2 = new string(a, 2, 0);
-            bool b = s1.Equals(s2);
+            bool b = s1.SequenceEqual(s2);
             Assert.True(b);
 
             ReadOnlySpan<char> first = s1.AsSpan();
@@ -1513,7 +1513,7 @@ namespace System.Tests
             char[] a = { '4', '5', '6' };
 
             string s1 = new string(a);
-            bool b = s1.Equals(s1);
+            bool b = s1.SequenceEqual(s1);
             Assert.True(b);
 
             ReadOnlySpan<char> span = s1.AsSpan();
@@ -1528,7 +1528,7 @@ namespace System.Tests
 
             string s1 = new string(a, 0, 3);
             string s2 = new string(a, 0, 2);
-            bool b = s1.Equals(s2);
+            bool b = s1.SequenceEqual(s2);
             Assert.False(b);
 
             ReadOnlySpan<char> first = s1.AsSpan();
@@ -1555,7 +1555,7 @@ namespace System.Tests
 
                     string s1 = new string(first);
                     string s2 = new string(second);
-                    bool b = s1.Equals(s2);
+                    bool b = s1.SequenceEqual(s2);
                     Assert.False(b);
 
                     ReadOnlySpan<char> firstSpan = s1.AsSpan();
@@ -1580,7 +1580,7 @@ namespace System.Tests
 
                 string s1 = new string(first, 1, length);
                 string s2 = new string(second, 1, length);
-                bool b = s1.Equals(s2);
+                bool b = s1.SequenceEqual(s2);
                 Assert.True(b);
 
                 ReadOnlySpan<char> span1 = s1.AsSpan();
