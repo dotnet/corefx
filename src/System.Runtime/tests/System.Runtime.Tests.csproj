@@ -210,6 +210,7 @@
     <Compile Include="System\Collections\Generic\KeyValuePairTests.netcoreapp.cs" />
     <Compile Include="System\LazyTests.netcoreapp.cs" />
     <Compile Include="System\SByteTests.netcoreapp.cs" />
+    <Compile Include="System\StringComparerTests.netcoreapp.cs" />
     <Compile Include="System\StringTests.netcoreapp.cs" />
     <Compile Include="System\TimeSpanTests.netcoreapp.cs" />
     <Compile Include="System\TypeTests.netcoreapp.cs" />

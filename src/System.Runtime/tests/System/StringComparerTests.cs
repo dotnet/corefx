@@ -7,13 +7,12 @@ using Xunit;
 
 namespace System.Tests
 {
-    public class StringComparerTests
+    public partial class StringComparerTests
     {
         [Fact]
         public void Create_InvalidArguments_Throws()
         {
             AssertExtensions.Throws<ArgumentNullException>("culture", () => StringComparer.Create(null, ignoreCase: true));
-            Assert.Throws<ArgumentException>(() => StringComparer.Create(null, CompareOptions.None));
         }
 
         [Fact]
@@ -31,13 +30,6 @@ namespace System.Tests
             Assert.True(c.Equals((object)"hello", (object)String.Copy("hello")));
             Assert.False(c.Equals((object)"hello", (object)"HEllO"));
             Assert.False(c.Equals("hello", "HEllO"));
-            Assert.False(c.Equals((object)"bello", (object)"HEllO"));
-            Assert.False(c.Equals("bello", "HEllO"));
-
-            c = StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
-            Assert.NotNull(c);
-            Assert.True(c.Equals((object)"hello", (object)"HEllO"));
-            Assert.True(c.Equals("hello", "HEllO"));
             Assert.False(c.Equals((object)"bello", (object)"HEllO"));
             Assert.False(c.Equals("bello", "HEllO"));
 
