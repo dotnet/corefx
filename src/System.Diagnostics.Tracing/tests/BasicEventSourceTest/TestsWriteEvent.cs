@@ -105,7 +105,8 @@ namespace BasicEventSourceTests
 
                 /*************************************************************************/
                 tests.Add(new SubTest("WriteEvent/Basic/EventII",
-                    delegate () { logger.EventII(10, 11); },
+                    delegate ()
+                    { logger.EventII(10, 11); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -115,7 +116,8 @@ namespace BasicEventSourceTests
                     }));
                 /*************************************************************************/
                 tests.Add(new SubTest("WriteEvent/Basic/EventSS",
-                    delegate () { logger.EventSS("one", "two"); },
+                    delegate ()
+                    { logger.EventSS("one", "two"); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -123,27 +125,6 @@ namespace BasicEventSourceTests
                         Assert.Equal(evt.PayloadValue(0, "arg1"), "one");
                         Assert.Equal(evt.PayloadValue(1, "arg2"), "two");
                     }));
-#if USE_ETW
-                /*************************************************************************/
-                if(IsProcessElevated)
-                {
-                    tests.Add(new SubTest("Write/Basic/EventWithManyTypeArgs",
-                        delegate ()
-                        {
-                            logger.EventWithManyTypeArgs("Hello", 1, 2, 3, 'a', 4, 5, 6, 7,
-                                                     (float)10.0, (double)11.0, logger.Guid);
-                        },
-                        delegate (Event evt)
-                        {
-                            Assert.Equal(logger.Name, evt.ProviderName);
-                            Assert.Equal("EventWithManyTypeArgs", evt.EventName);
-                            Assert.Equal("Hello", evt.PayloadValue(0, "msg"));
-                            Assert.Equal((float)10.0, evt.PayloadValue(9, "f"));
-                            Assert.Equal((double)11.0, evt.PayloadValue(10, "d"));
-                            Assert.Equal(logger.Guid, evt.PayloadValue(11, "guid"));
-                        }));
-                }
-#endif // USE_ETW
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Basic/EventWith7Strings",
                     delegate ()
@@ -170,33 +151,9 @@ namespace BasicEventSourceTests
                         Assert.Equal("s0", (string)evt.PayloadValue(0, "s0"));
                         Assert.Equal("s8", (string)evt.PayloadValue(8, "s8"));
                     }));
-#if USE_ETW
                 /*************************************************************************/
-                if(IsProcessElevated)
-                {
-                    tests.Add(new SubTest("Write/Activity/EventWithXferWeirdArgs",
-                        delegate ()
-                        {
-                            var actid = Guid.NewGuid();
-                            logger.EventWithXferWeirdArgs(actid,
-                                (IntPtr)128,
-                                true,
-                                SdtEventSources.MyLongEnum.LongVal1);
-                        },
-                        delegate (Event evt)
-                        {
-                            Assert.Equal(logger.Name, evt.ProviderName);
-                
-                            // We log EventWithXferWeirdArgs in one case and 
-                            // WorkWeirdArgs/Send in the other
-                            Assert.True(evt.EventName.Contains("WeirdArgs"));
+                Test_WriteEvent_AddEtwTests(tests, logger);
 
-                            Assert.Equal("128", evt.PayloadValue(0, "iptr").ToString());
-                            Assert.Equal(true, (bool)evt.PayloadValue(1, "b"));
-                            Assert.Equal((long)SdtEventSources.MyLongEnum.LongVal1, ((IConvertible)evt.PayloadValue(2, "le")).ToInt64(null));
-                        }));
-                }
-#endif // USE_ETW
                 /*************************************************************************/
                 /*************************** ENUM TESTING *******************************/
                 /*************************************************************************/
@@ -233,7 +190,8 @@ namespace BasicEventSourceTests
                    }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithIntIntString",
-                    delegate () { logger.EventWithIntIntString(10, 11, "test"); },
+                    delegate ()
+                    { logger.EventWithIntIntString(10, 11, "test"); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -244,7 +202,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithIntLongString",
-                    delegate () { logger.EventWithIntLongString(10, (long)11, "test"); },
+                    delegate ()
+                    { logger.EventWithIntLongString(10, (long)11, "test"); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -255,7 +214,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithString",
-                    delegate () { logger.EventWithString(null); },
+                    delegate ()
+                    { logger.EventWithString(null); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -265,7 +225,8 @@ namespace BasicEventSourceTests
 
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithIntAndString",
-                    delegate () { logger.EventWithIntAndString(12, null); },
+                    delegate ()
+                    { logger.EventWithIntAndString(12, null); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -275,7 +236,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithLongAndString",
-                    delegate () { logger.EventWithLongAndString(120L, null); },
+                    delegate ()
+                    { logger.EventWithLongAndString(120L, null); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -285,7 +247,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithStringAndInt",
-                    delegate () { logger.EventWithStringAndInt(null, 12); },
+                    delegate ()
+                    { logger.EventWithStringAndInt(null, 12); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -295,7 +258,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithStringAndIntAndInt",
-                    delegate () { logger.EventWithStringAndIntAndInt(null, 12, 13); },
+                    delegate ()
+                    { logger.EventWithStringAndIntAndInt(null, 12, 13); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -306,7 +270,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithStringAndLong",
-                    delegate () { logger.EventWithStringAndLong(null, 120L); },
+                    delegate ()
+                    { logger.EventWithStringAndLong(null, 120L); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -316,7 +281,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithStringAndString",
-                    delegate () { logger.EventWithStringAndString(null, null); },
+                    delegate ()
+                    { logger.EventWithStringAndString(null, null); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -326,7 +292,8 @@ namespace BasicEventSourceTests
                     }));
 
                 tests.Add(new SubTest("WriteEvent/Basic/EventWithStringAndStringAndString",
-                    delegate () { logger.EventWithStringAndStringAndString(null, null, null); },
+                    delegate ()
+                    { logger.EventWithStringAndStringAndString(null, null, null); },
                     delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
@@ -344,7 +311,8 @@ namespace BasicEventSourceTests
                    )
                 {
                     tests.Add(new SubTest("WriteEvent/Basic/EventVarArgsWithString",
-                        delegate () { logger.EventVarArgsWithString(1, 2, 12, null); },
+                        delegate ()
+                        { logger.EventVarArgsWithString(1, 2, 12, null); },
                         delegate (Event evt)
                         {
                             Assert.Equal(logger.Name, evt.ProviderName);
@@ -355,7 +323,7 @@ namespace BasicEventSourceTests
                             Assert.Equal("", evt.PayloadValue(3, null));
                         }));
                 }
-                
+
                 // Probably belongs in the user TestUsersErrors.cs.  
                 if (!useSelfDescribingEvents)
                 {
@@ -393,6 +361,8 @@ namespace BasicEventSourceTests
                 EventTestHarness.RunTests(tests, listener, logger);
             }
         }
+
+        static partial void Test_WriteEvent_AddEtwTests(List<SubTest> tests, EventSourceTest logger);
 
         /**********************************************************************/
         /// <summary>
@@ -531,7 +501,7 @@ namespace BasicEventSourceTests
                             Assert.Equal(1000, (int)evt.PayloadValue(1, "n"));
                         }
                     }));
- 
+
                 if (!useSelfDescribingEvents)
                 {
                     /*************************************************************************/
@@ -544,7 +514,7 @@ namespace BasicEventSourceTests
                         {
                             Assert.Equal(logger.Name, evt.ProviderName);
                             Assert.Equal("EventWithBytePtrArg", evt.EventName);
-                            
+
                             if (evt.IsEtw)
                             {
                                 Assert.Equal(2, evt.PayloadCount);

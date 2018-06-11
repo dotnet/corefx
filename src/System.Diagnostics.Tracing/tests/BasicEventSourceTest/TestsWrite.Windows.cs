@@ -48,7 +48,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        static partial void AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger)
+        static partial void Test_Write_T_AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger)
         {
             if (listener is EtwListener)
             {

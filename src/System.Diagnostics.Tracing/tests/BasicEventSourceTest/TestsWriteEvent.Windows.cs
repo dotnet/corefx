@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
+using SdtEventSources;
 using Xunit;
 
 namespace BasicEventSourceTests
@@ -80,6 +82,52 @@ namespace BasicEventSourceTests
             {
                 Test_WriteEvent_ByteArray(true, listener);
             }
+        }
+
+        static partial void Test_WriteEvent_AddEtwTests(List<SubTest> tests, EventSourceTest logger)
+        {
+            if (!IsProcessElevated)
+            {
+                return;
+            }
+
+            tests.Add(new SubTest("Write/Basic/EventWithManyTypeArgs",
+                delegate ()
+                {
+                    logger.EventWithManyTypeArgs("Hello", 1, 2, 3, 'a', 4, 5, 6, 7,
+                        (float)10.0, (double)11.0, logger.Guid);
+                },
+                delegate (Event evt)
+                {
+                    Assert.Equal(logger.Name, evt.ProviderName);
+                    Assert.Equal("EventWithManyTypeArgs", evt.EventName);
+                    Assert.Equal("Hello", evt.PayloadValue(0, "msg"));
+                    Assert.Equal((float)10.0, evt.PayloadValue(9, "f"));
+                    Assert.Equal((double)11.0, evt.PayloadValue(10, "d"));
+                    Assert.Equal(logger.Guid, evt.PayloadValue(11, "guid"));
+                }));
+
+            tests.Add(new SubTest("Write/Activity/EventWithXferWeirdArgs",
+                delegate ()
+                {
+                    var actid = Guid.NewGuid();
+                    logger.EventWithXferWeirdArgs(actid,
+                        (IntPtr)128,
+                        true,
+                        SdtEventSources.MyLongEnum.LongVal1);
+                },
+                delegate (Event evt)
+                {
+                    Assert.Equal(logger.Name, evt.ProviderName);
+
+                    // We log EventWithXferWeirdArgs in one case and 
+                    // WorkWeirdArgs/Send in the other
+                    Assert.True(evt.EventName.Contains("WeirdArgs"));
+
+                    Assert.Equal("128", evt.PayloadValue(0, "iptr").ToString());
+                    Assert.Equal(true, (bool)evt.PayloadValue(1, "b"));
+                    Assert.Equal((long)SdtEventSources.MyLongEnum.LongVal1, ((IConvertible)evt.PayloadValue(2, "le")).ToInt64(null));
+                }));
         }
     }
 }

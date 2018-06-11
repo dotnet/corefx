@@ -367,7 +367,7 @@ namespace BasicEventSourceTests
 
                 // This test only applies to ETW and will fail on EventListeners due to different behavior
                 // for strings with embedded NULL characters.
-                AddEtwTests(listener, tests, logger);
+                Test_Write_T_AddEtwTests(listener, tests, logger);
 
                 Guid activityId = new Guid("00000000-0000-0000-0000-000000000001");
                 Guid relActivityId = new Guid("00000000-0000-0000-0000-000000000002");
@@ -395,7 +395,7 @@ namespace BasicEventSourceTests
             TestUtilities.CheckNoEventSourcesRunning("Stop");
         }
 
-        static partial void AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger);
+        static partial void Test_Write_T_AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger);
 
         [Fact]
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
