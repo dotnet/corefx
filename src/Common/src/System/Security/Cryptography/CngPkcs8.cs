@@ -48,12 +48,7 @@ namespace System.Security.Cryptography
                 return key.ExportEncryptedPkcs8PrivateKey(ReadOnlySpan<char>.Empty, pbeParameters);
             }
 
-            AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(
-                key,
-                passwordBytes,
-                pbeParameters);
-
-            using (writer)
+            using (AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(key, passwordBytes, pbeParameters))
             {
                 return writer.Encode();
             }
@@ -76,12 +71,7 @@ namespace System.Security.Cryptography
                     out bytesWritten);
             }
 
-            AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(
-                key,
-                passwordBytes,
-                pbeParameters);
-
-            using (writer)
+            using (AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(key, passwordBytes, pbeParameters))
             {
                 return writer.TryEncode(destination, out bytesWritten);
             }
