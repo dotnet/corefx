@@ -4,11 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Threading;
 using Xunit;
 
 #if USE_MDT_EVENTSOURCE
@@ -17,33 +12,12 @@ using Microsoft.Diagnostics.Tracing;
 using System.Diagnostics.Tracing;
 #endif
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 using SdtEventSources;
 
 namespace BasicEventSourceTests
 {
-    public class TestsWriteEvent
+    public partial class TestsWriteEvent
     {
-#if USE_ETW
-        // Specifies whether the process is elevated or not.
-        private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
-        private static bool IsProcessElevated => s_isElevated.Value;
-        private static bool IsProcessElevatedAndNotWindowsNanoServer =>
-            IsProcessElevated && PlatformDetection.IsNotWindowsNanoServer; // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
-
-        /// <summary>
-        /// Tests WriteEvent using the manifest based mechanism.   
-        /// Tests the ETW path. 
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_WriteEvent_Manifest_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_WriteEvent(listener, false);
-            }
-        }
-#endif // USE_ETW
         /// <summary>
         /// Tests WriteEvent using the manifest based mechanism.   
         /// Tests bTraceListener path. 
@@ -68,20 +42,7 @@ namespace BasicEventSourceTests
         {
             Test_WriteEvent(new EventListenerListener(true), false);
         }
-#if USE_ETW
-        /// <summary>
-        /// Tests WriteEvent using the self-describing mechanism.   
-        /// Tests both the ETW and TraceListener paths. 
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_WriteEvent_SelfDescribing_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_WriteEvent(listener, true);
-            }
-        }
-#endif
+
         /// <summary>
         /// Tests WriteEvent using the self-describing mechanism.   
         /// Tests both the ETW and TraceListener paths. 
@@ -447,21 +408,6 @@ namespace BasicEventSourceTests
             }
         }
 
-#if USE_ETW
-        /// <summary>
-        /// Tests sending complex data (class, arrays etc) from WriteEvent 
-        /// Tests the EventListener case
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_WriteEvent_ComplexData_SelfDescribing_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_WriteEvent_ComplexData_SelfDescribing(listener);
-            }
-        }
-#endif // USE_ETW
-
         private void Test_WriteEvent_ComplexData_SelfDescribing(Listener listener)
         {
             using (var logger = new EventSourceTestSelfDescribingOnly())
@@ -536,21 +482,7 @@ namespace BasicEventSourceTests
             Test_WriteEvent_ByteArray(false, new EventListenerListener(true));
         }
 
-#if USE_ETW
-        /// <summary>
-        /// Tests sending complex data (class, arrays etc) from WriteEvent 
-        /// Uses Manifest format
-        /// Tests the EventListener case
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_WriteEvent_ByteArray_Manifest_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_WriteEvent_ByteArray(false, listener);
-            }
-        }
-#endif // USE_ETW
+
 
         /// <summary>
         /// Tests sending complex data (class, arrays etc) from WriteEvent 
@@ -565,22 +497,6 @@ namespace BasicEventSourceTests
                 Test_WriteEvent_ByteArray(true, listener);
             }
         }
-
-#if USE_ETW
-        /// <summary>
-        /// Tests sending complex data (class, arrays etc) from WriteEvent 
-        /// Uses Self-Describing format
-        /// Tests the EventListener case 
-        /// </summary>
-        [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
-        public void Test_WriteEvent_ByteArray_SelfDescribing_ETW()
-        {
-            using (var listener = new EtwListener())
-            {
-                Test_WriteEvent_ByteArray(true, listener);
-            }
-        }
-#endif // USE_ETW
 
         private void Test_WriteEvent_ByteArray(bool useSelfDescribingEvents, Listener listener)
         {
