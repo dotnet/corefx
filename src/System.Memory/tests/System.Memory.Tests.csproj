@@ -145,8 +145,6 @@
     <Compile Include="ReadOnlySpan\ToLower.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
     <Compile Include="ReadOnlySpan\ToUpper.cs" />
-    <Compile Include="ReadOnlySpan\TrimManyCharacters.cs" />
-    <Compile Include="ReadOnlySpan\TrimWhiteSpace.cs" />
     <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
       <Link>ReadOnlySpan\SpanTestHelpers.cs</Link>
     </Compile>
