@@ -556,7 +556,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadOnlyMemory<byte> pkcs1 = KeyFormatHelper.ReadSubjectPublicKeyInfo(
                         s_validOids,
@@ -573,7 +573,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     RSAPublicKey key = AsnSerializer.Deserialize<RSAPublicKey>(
                         manager.Memory,
@@ -596,7 +596,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     RSAPrivateKeyAsn key =
                         AsnSerializer.Deserialize<RSAPrivateKeyAsn>(
@@ -619,7 +619,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadOnlyMemory<byte> pkcs1 = KeyFormatHelper.ReadPkcs8(
                         s_validOids,

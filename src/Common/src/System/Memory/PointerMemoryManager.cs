@@ -4,12 +4,12 @@
 
 namespace System.Buffers
 {
-    internal unsafe class PinnedSpanMemoryManager<T> : MemoryManager<T> where T : struct
+    internal unsafe class PointerMemoryManager<T> : MemoryManager<T> where T : struct
     {
         private readonly void* _pointer;
         private readonly int _length;
 
-        internal PinnedSpanMemoryManager(void* pointer, int length)
+        internal PointerMemoryManager(void* pointer, int length)
         {
             _pointer = pointer;
             _length = length;
@@ -26,7 +26,7 @@ namespace System.Buffers
 
         public override MemoryHandle Pin(int elementIndex = 0)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void Unpin()

@@ -44,8 +44,8 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal struct CRYPT_PKCS12_PBE_PARAMS
         {
-            internal int iIterations;        /* iteration count              */
-            internal int cbSalt;             /* byte size of the salt        */
+            internal int iIterations;
+            internal int cbSalt;
         }
 
         [StructLayout(LayoutKind.Sequential)]

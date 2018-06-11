@@ -92,12 +92,7 @@ namespace System.Security.Cryptography
             ReadOnlySpan<char> password,
             PbeParameters pbeParameters)
         {
-            AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(
-                key,
-                password,
-                pbeParameters);
-
-            using (writer)
+            using (AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(key, password, pbeParameters))
             {
                 return writer.Encode();
             }
@@ -110,12 +105,7 @@ namespace System.Security.Cryptography
             Span<byte> destination,
             out int bytesWritten)
         {
-            AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(
-                key,
-                password,
-                pbeParameters);
-
-            using (writer)
+            using (AsnWriter writer = RewriteEncryptedPkcs8PrivateKey(key, password, pbeParameters))
             {
                 return writer.TryEncode(destination, out bytesWritten);
             }
@@ -127,7 +117,7 @@ namespace System.Security.Cryptography
 
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
                     len = reader.GetEncodedValue().Length;
@@ -145,7 +135,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     // Since there's no bytes-based-password PKCS8 import in CNG, just do the decryption
                     // here and call the unencrypted PKCS8 import.
@@ -180,7 +170,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
                     int len = reader.GetEncodedValue().Length;

@@ -71,7 +71,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(key))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, key.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, key.Length))
                 {
                     ECPrivateKey parsedKey =
                         AsnSerializer.Deserialize<ECPrivateKey>(manager.Memory, AsnEncodingRules.BER, out bytesRead);

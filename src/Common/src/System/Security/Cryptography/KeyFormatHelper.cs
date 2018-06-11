@@ -23,7 +23,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadSubjectPublicKeyInfo(validOids, manager.Memory, keyReader, out bytesRead, out ret);
                 }
@@ -92,7 +92,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadPkcs8(validOids, manager.Memory, keyReader, out bytesRead, out ret);
                 }
@@ -150,7 +150,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadEncryptedPkcs8(validOids, manager.Memory, password, keyReader, out bytesRead, out ret);
                 }
@@ -167,7 +167,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadEncryptedPkcs8(validOids, manager.Memory, passwordBytes, keyReader, out bytesRead, out ret);
                 }
@@ -221,7 +221,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, source.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
                 {
                     ReadEncryptedPkcs8(
                         validOids,
@@ -473,7 +473,7 @@ namespace System.Security.Cryptography
         {
             fixed (byte* ptr = &MemoryMarshal.GetReference(encodedValue))
             {
-                using (MemoryManager<byte> manager = new PinnedSpanMemoryManager<byte>(ptr, encodedValue.Length))
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, encodedValue.Length))
                 {
                     writer.WriteEncodedValue(manager.Memory);
                 }
