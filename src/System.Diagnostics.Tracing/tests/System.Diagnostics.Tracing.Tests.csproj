@@ -25,6 +25,9 @@
     <Compile Include="BasicEventSourceTest\TestsWrite.Windows.cs">
       <DependentUpon>TestsWrite.cs</DependentUpon>
     </Compile>
+    <Compile Include="BasicEventSourceTest\TestsUserErrors.Windows.cs">
+      <DependentUpon>TestsUserErrors.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
