@@ -23,7 +23,6 @@ namespace BasicEventSourceTests
     internal enum ColorInt64 : long { Red, Blue, Green };
     internal enum ColorUInt64 : ulong { Red, Blue, Green };
 
-
     public partial class TestsWrite
     {
         [EventData]
@@ -366,26 +365,9 @@ namespace BasicEventSourceTests
                     Assert.Equal(evt.PayloadValue(1, "b"), "");
                 }));
 
-#if USE_ETW
                 // This test only applies to ETW and will fail on EventListeners due to different behavior
                 // for strings with embedded NULL characters.
-                if (listener is EtwListener)
-                {
-                    tests.Add(new SubTest("Write/Basic/WriteOfTWithEmbeddedNullString",
-                    delegate ()
-                    {
-                        string nullString = null;
-                        logger.Write("EmbeddedNullStringEvent", new { a = "Hello" + '\0' + "World!", b = nullString });
-                    },
-                    delegate (Event evt)
-                    {
-                        Assert.Equal(logger.Name, evt.ProviderName);
-                        Assert.Equal("EmbeddedNullStringEvent", evt.EventName);
-                        Assert.Equal(evt.PayloadValue(0, "a"), "Hello");
-                        Assert.Equal(evt.PayloadValue(1, "b"), "");
-                    }));
-                }
-#endif // USE_ETW
+                AddEtwTests(listener, tests, logger);
 
                 Guid activityId = new Guid("00000000-0000-0000-0000-000000000001");
                 Guid relActivityId = new Guid("00000000-0000-0000-0000-000000000002");
@@ -413,6 +395,7 @@ namespace BasicEventSourceTests
             TestUtilities.CheckNoEventSourcesRunning("Stop");
         }
 
+        static partial void AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger);
 
         [Fact]
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using Xunit;
 
 namespace BasicEventSourceTests
@@ -39,11 +40,31 @@ namespace BasicEventSourceTests
             {
                 var listenerGenerators = new List<Func<Listener>>
                 {
-                    () => eventListener, 
+                    () => eventListener,
                     () => etwListener
                 };
 
                 Test_Write_T_In_Manifest_Serialization_Impl(listenerGenerators);
+            }
+        }
+
+        static partial void AddEtwTests(Listener listener, List<SubTest> tests, EventSource logger)
+        {
+            if (listener is EtwListener)
+            {
+                tests.Add(new SubTest("Write/Basic/WriteOfTWithEmbeddedNullString",
+                    delegate
+                    {
+                        string nullString = null;
+                        logger.Write("EmbeddedNullStringEvent", new { a = "Hello" + '\0' + "World!", b = nullString });
+                    },
+                    delegate (Event evt)
+                    {
+                        Assert.Equal(logger.Name, evt.ProviderName);
+                        Assert.Equal("EmbeddedNullStringEvent", evt.EventName);
+                        Assert.Equal(evt.PayloadValue(0, "a"), "Hello");
+                        Assert.Equal(evt.PayloadValue(1, "b"), "");
+                    }));
             }
         }
     }
