@@ -1458,6 +1458,7 @@ namespace System.Tests
         public static class BigIntegerMod
         {
             [Fact]
+            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have fixes for https://github.com/dotnet/coreclr/issues/12605")]
             public static void Test()
             {
                 int overflowBudget = 1000;
@@ -1865,7 +1866,7 @@ namespace System.Tests
 
             public BigDecimal Mod(BigDecimal den, out bool overflow)
             {
-                if (den.Integer.Sign == 0)
+                if (den.Integer.IsZero)
                 {
                     throw new DivideByZeroException();
                 }
@@ -1920,13 +1921,10 @@ namespace System.Tests
                 // See if the result has crossed 0
                 if (!res.Integer.IsZero && res.Integer.Sign != sign)
                 {
-                    if (res.Scale == 28 && BigInteger.Abs(res.Integer) <= 10 || res.Scale == 27 && BigInteger.Abs(res.Integer) == 1)
+                    if (res.Scale == 28 && BigInteger.Abs(res.Integer) == 1)
                     {
                         // Certain Remainder operations on decimals with 28 significant digits round to [+-]0.0000000000000000000000000001m instead of [+-]0m during the intermediate calculations.
                         // This might give incorrectly rounded results (e.g., 5 % 0.0000000000000000000000000003m = 0.0000000000000000000000000002m but returns 0.0000000000000000000000000001m)
-
-                        // Due to an additional bug in Decimal.Remainder, this check is actually done against scale 27 (not 28) and this might produce more incorrect values.
-                        // e.g., 5.94499443m % 0.0000000000000000000000000007m = 0.0000000000000000000000000005m but returns 0.0000000000000000000000000002m
                         res = -res;
                     }
                     else
