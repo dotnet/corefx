@@ -20,7 +20,7 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task NegotiateStream_StreamContractTest_Success()
         {
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
@@ -57,7 +57,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_EndReadEndWriteInvalidParameter_Throws()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
@@ -96,7 +96,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_ConcurrentAsyncReadOrWrite_ThrowsNotSupportedException()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
@@ -121,7 +121,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_ConcurrentSyncReadOrWrite_ThrowsNotSupportedException()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
@@ -146,7 +146,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_DisposeTooEarly_Throws()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
@@ -166,7 +166,7 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task NegotiateStream_InvalidParametersForReadWrite_Throws()
         {
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
             byte[] buffer = s_sampleMsg;
             int offset = 0;
             int count = s_sampleMsg.Length;

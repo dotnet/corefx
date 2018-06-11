@@ -275,7 +275,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_ReadWriteLongMsgSync_Success()
         {
             byte[] recvBuf = new byte[s_longMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
             int bytesRead = 0;
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
@@ -302,7 +302,7 @@ namespace System.Net.Security.Tests
         public async Task NegotiateStream_ReadWriteLongMsgAsync_Success()
         {
             byte[] recvBuf = new byte[s_longMsg.Length];
-            VirtualNetwork network = new VirtualNetwork();
+            var network = new VirtualNetwork();
             int bytesRead = 0;
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
