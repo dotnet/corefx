@@ -13,24 +13,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <!--Windows only files -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">
-    <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs">
-      <DependentUpon>FuzzyTests.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs">
-      <DependentUpon>Listeners.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BasicEventSourceTest\TestEventCounter.Windows.cs">
-      <DependentUpon>TestEventCounter.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BasicEventSourceTest\TestsWrite.Windows.cs">
-      <DependentUpon>TestsWrite.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BasicEventSourceTest\TestsUserErrors.Windows.cs">
-      <DependentUpon>TestsUserErrors.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BasicEventSourceTest\TestsWriteEvent.Windows.cs">
-      <DependentUpon>TestsWriteEvent.cs</DependentUpon>
-    </Compile>
+    <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs" />
+    <Compile Include="BasicEventSourceTest\TestEventCounter.Windows.cs" />
+    <Compile Include="BasicEventSourceTest\TestsWrite.Windows.cs" />
+    <Compile Include="BasicEventSourceTest\TestsUserErrors.Windows.cs" />
+    <Compile Include="BasicEventSourceTest\TestsWriteEvent.Windows.cs" />
+    <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
