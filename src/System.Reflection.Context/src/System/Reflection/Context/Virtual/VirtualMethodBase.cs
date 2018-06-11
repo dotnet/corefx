@@ -140,16 +140,21 @@ namespace System.Reflection.Context.Virtual
             sb.Append("(");
 
             Type[] parameterTypes = GetParameterTypes();
-            for (int i = 0; i < parameterTypes.Length; i++)
+
+            string comma = "";
+
+            foreach (Type t in parameterTypes)
             {
-                if (i > 0)
-                    sb.Append(", ");
-                sb.Append(parameterTypes[i].ToString());
+                sb.Append(comma);
+                sb.Append(t.ToString());
+
+                comma = ", ";
             }
 
             if ((CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
             {
-                sb.Append(", ...");
+                sb.Append(comma);
+                sb.Append("...");
             }
 
             return sb.ToString();
