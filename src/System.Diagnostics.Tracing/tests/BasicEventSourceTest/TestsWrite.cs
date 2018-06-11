@@ -24,7 +24,7 @@ namespace BasicEventSourceTests
     internal enum ColorUInt64 : ulong { Red, Blue, Green };
 
 
-    public partial  class TestsWrite
+    public partial class TestsWrite
     {
         [EventData]
         private struct PartB_UserInfo
@@ -109,7 +109,7 @@ namespace BasicEventSourceTests
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("DateTime", evt.EventName);
                         var eventNow = evt.PayloadValue(0, "nowTime");
-                        
+
                         Assert.Equal(eventNow, now);
                     }));
                 /*************************************************************************/
@@ -185,7 +185,7 @@ namespace BasicEventSourceTests
                 /*************************************************************************/
 
                 /*************************************************************************/
-                
+
                 GenerateArrayTest<Boolean>(ref tests, logger, new Boolean[] { false, true, false });
                 GenerateArrayTest<byte>(ref tests, logger, new byte[] { 1, 10, 100 });
                 GenerateArrayTest<sbyte>(ref tests, logger, new sbyte[] { 1, 10, 100 });
@@ -211,14 +211,16 @@ namespace BasicEventSourceTests
 
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Dict/EventWithStringDict_C",
-                    delegate()
+                    delegate ()
                     {
                         // log a dictionary
-                        logger.Write("EventWithStringDict_C", new { 
-                            myDict = dict, 
-                            s = "end" });
+                        logger.Write("EventWithStringDict_C", new
+                        {
+                            myDict = dict,
+                            s = "end"
+                        });
                     },
-                    delegate(Event evt)
+                    delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("EventWithStringDict_C", evt.EventName);
@@ -231,15 +233,17 @@ namespace BasicEventSourceTests
                     }));
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Dict/EventWithStringDict_BC",
-                    delegate()
+                    delegate ()
                     {
                         // log a PartB and a dictionary as a PartC
-                        logger.Write("EventWithStringDict_BC", new { 
-                            PartB_UserInfo = new { UserName = "Me", LogTime = "Now" }, 
-                            PartC_Dict = dict, 
-                            s = "end" });
+                        logger.Write("EventWithStringDict_BC", new
+                        {
+                            PartB_UserInfo = new { UserName = "Me", LogTime = "Now" },
+                            PartC_Dict = dict,
+                            s = "end"
+                        });
                     },
-                    delegate(Event evt)
+                    delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("EventWithStringDict_BC", evt.EventName);
@@ -260,16 +264,18 @@ namespace BasicEventSourceTests
                     }));
                 /*************************************************************************/
                 tests.Add(new SubTest("Write/Dict/EventWithIntDict_BC",
-                    delegate()
+                    delegate ()
                     {
                         // log a Dict<string, int> as a PartC
-                        logger.Write("EventWithIntDict_BC", new { 
-                            PartB_UserInfo = new { UserName = "Me", LogTime = "Now" }, 
+                        logger.Write("EventWithIntDict_BC", new
+                        {
+                            PartB_UserInfo = new { UserName = "Me", LogTime = "Now" },
                             PartC_Dict = dictInt,
-                            s = "end" });
+                            s = "end"
+                        });
 
                     },
-                    delegate(Event evt)
+                    delegate (Event evt)
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("EventWithIntDict_BC", evt.EventName);
@@ -407,12 +413,7 @@ namespace BasicEventSourceTests
             TestUtilities.CheckNoEventSourcesRunning("Stop");
         }
 
-        /// <summary>
-        /// This is not a user error but it is something unusual.   
-        /// You can use the Write API in a EventSource that was did not
-        /// Declare SelfDescribingSerialization.  In that case THOSE
-        /// events MUST use SelfDescribing serialization.  
-        /// </summary>
+
         [Fact]
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/27106")]
@@ -420,53 +421,44 @@ namespace BasicEventSourceTests
         {
             using (var eventListener = new EventListenerListener())
             {
-#if USE_ETW
-                EtwListener etwListener = null;
-#endif
-                try
+                var listenerGenerators = new List<Func<Listener>> { () => eventListener };
+
+                Test_Write_T_In_Manifest_Serialization_Impl(listenerGenerators);
+            }
+        }
+
+        /// <summary>
+        /// This is not a user error but it is something unusual.   
+        /// You can use the Write API in a EventSource that was did not
+        /// Declare SelfDescribingSerialization.  In that case THOSE
+        /// events MUST use SelfDescribing serialization.  
+        /// </summary>
+        private static void Test_Write_T_In_Manifest_Serialization_Impl(
+            IEnumerable<Func<Listener>> listenerGenerators)
+        {
+            foreach (var listenerGenerator in listenerGenerators)
+            {
+                var events = new List<Event>();
+                using (var listener = listenerGenerator())
                 {
-                    var listenerGenerators = new List<Func<Listener>>();
-                    listenerGenerators.Add(() => eventListener);
-#if USE_ETW
-                    if(IsProcessElevated)
+                    Debug.WriteLine("Testing Listener " + listener);
+                    // Create an eventSource with manifest based serialization
+                    using (var logger = new SdtEventSources.EventSourceTest())
                     {
-                        etwListener = new EtwListener();
-                        listenerGenerators.Add(() => etwListener);
-                    }
-#endif // USE_ETW
+                        listener.OnEvent = delegate (Event data)
+                        { events.Add(data); };
+                        listener.EventSourceSynchronousEnable(logger);
 
-                    foreach (Func<Listener> listenerGenerator in listenerGenerators)
-                    {
-                        var events = new List<Event>();
-                        using (var listener = listenerGenerator())
-                        {
-                            Debug.WriteLine("Testing Listener " + listener);
-                            // Create an eventSource with manifest based serialization
-                            using (var logger = new SdtEventSources.EventSourceTest())
-                            {
-                                listener.OnEvent = delegate (Event data) { events.Add(data); };
-                                listener.EventSourceSynchronousEnable(logger);
-
-                                // Use the Write<T> API.   This is OK
-                                logger.Write("MyTestEvent", new { arg1 = 3, arg2 = "hi" });
-                            }
-                        }
-                        Assert.Equal(events.Count, 1);
-                        Event _event = events[0];
-                        Assert.Equal("MyTestEvent", _event.EventName);
-                        Assert.Equal(3, (int)_event.PayloadValue(0, "arg1"));
-                        Assert.Equal("hi", (string)_event.PayloadValue(1, "arg2"));
+                        // Use the Write<T> API.   This is OK
+                        logger.Write("MyTestEvent", new { arg1 = 3, arg2 = "hi" });
                     }
                 }
-                finally
-                {
-#if USE_ETW
-                    if(etwListener != null)
-                    {
-                        etwListener.Dispose();
-                    }
-#endif // USE_ETW
-                }
+
+                Assert.Equal(events.Count, 1);
+                Event _event = events[0];
+                Assert.Equal("MyTestEvent", _event.EventName);
+                Assert.Equal(3, (int)_event.PayloadValue(0, "arg1"));
+                Assert.Equal("hi", (string)_event.PayloadValue(1, "arg2"));
             }
         }
 
