@@ -2,11 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#ifdef _AIX
-// For getline (declare this before stdio)
-#define _GETDELIM 1
-#endif
-
 #include "pal_compiler.h"
 #include "pal_config.h"
 #include "pal_errno.h"
@@ -47,6 +42,11 @@
 // Somehow, AIX mangles the definition for this behind a C++ def
 // Redeclare it here
 extern int     getpeereid(int, uid_t *__restrict__, gid_t *__restrict__);
+// GCC "fix"includes removes this definition from stdio.h entirely, even if you
+// opt into using getline via the `_GETDELIM` definition. (as it can conflict
+// with some existing code, so it's hidden behind a define) As such, redefine
+// it from the system headers into here.
+extern ssize_t  getline(char **, size_t *, FILE *);
 #endif
 
 #if HAVE_STAT64
