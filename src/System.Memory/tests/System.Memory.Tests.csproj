@@ -142,7 +142,6 @@
     <Compile Include="ReadOnlySpan\StartsWith.long.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
-    <Compile Include="ReadOnlySpan\ToLower.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
     <Compile Include="ReadOnlySpan\ToUpper.cs" />
     <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
