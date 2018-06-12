@@ -39,6 +39,7 @@ namespace System.Net.Http
 
             if (proxyHelper.AutoSettingsUsed)
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Info(proxyHelper, $"AutoSettingsUsed, calling {nameof(Interop.WinHttp.WinHttpOpen)}");
                 sessionHandle = Interop.WinHttp.WinHttpOpen(
                     IntPtr.Zero,
                     Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY,
@@ -49,6 +50,7 @@ namespace System.Net.Http
                 if (sessionHandle.IsInvalid)
                 {
                     // Proxy failures are currently ignored by managed handler.
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(proxyHelper, $"{nameof(Interop.WinHttp.WinHttpOpen)} returned invalid handle");
                     return false;
                 }
             }
@@ -135,11 +137,11 @@ namespace System.Net.Http
                                             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
                             _bypass.Add(re);
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             if (NetEventSource.IsEnabled)
                             {
-                                NetEventSource.Info(this, "Failed to process " + tmp + " from bypass list.");
+                                NetEventSource.Error(this, $"Failed to process {tmp} from bypass list: {ex}");
                             }
                         }
                     }
@@ -324,20 +326,25 @@ namespace System.Net.Http
                 return (uri.Scheme == UriScheme.Https || uri.Scheme == UriScheme.Wss) ? _secureProxyUri : _insecureProxyUri;
             }
 
-            // For anything else ask WinHTTP.
-            var proxyInfo = new Interop.WinHttp.WINHTTP_PROXY_INFO();
-            try
+            // For anything else ask WinHTTP. To improve performance, we don't call into
+            // WinHTTP if there was a recent failure to detect a PAC file on the network.
+            if (!_proxyHelper.RecentAutoDetectionFailure)
             {
-                if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                var proxyInfo = new Interop.WinHttp.WINHTTP_PROXY_INFO();
+                try
                 {
-                    return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                    if (_proxyHelper.GetProxyForUrl(_sessionHandle, uri, out proxyInfo))
+                    {
+                        return GetUriFromString(Marshal.PtrToStringUni(proxyInfo.Proxy));
+                    }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(proxyInfo.Proxy);
+                    Marshal.FreeHGlobal(proxyInfo.ProxyBypass);
                 }
             }
-            finally
-            {
-                Marshal.FreeHGlobal(proxyInfo.Proxy);
-                Marshal.FreeHGlobal(proxyInfo.ProxyBypass);
-            }
+
             return null;
         }
 

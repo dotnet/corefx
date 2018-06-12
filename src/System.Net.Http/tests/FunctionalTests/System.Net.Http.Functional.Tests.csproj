@@ -72,6 +72,9 @@
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs">
       <Link>Common\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\TrackingSynchronizationContext.cs">
+      <Link>Common\System\Threading\TrackingSynchronizationContext.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
@@ -86,6 +89,7 @@
     <Compile Include="HttpClientHandlerTest.cs" />
     <Compile Include="HttpClientHandlerTest.Cancellation.cs" />
     <Compile Include="HttpClientHandlerTest.ClientCertificates.cs" />
+    <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
     <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
     <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
     <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
@@ -158,7 +162,7 @@
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
     <TestCommandLines Include="ulimit -Sn 4096" />
   </ItemGroup>
-  <ItemGroup >
+  <ItemGroup>
     <EmbeddedResource Include="SelectedSitesTest.txt">
       <Link>SelectedSitesTest.txt</Link>
     </EmbeddedResource>

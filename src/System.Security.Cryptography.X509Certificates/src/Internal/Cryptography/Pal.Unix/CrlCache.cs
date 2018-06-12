@@ -13,6 +13,8 @@ namespace Internal.Cryptography.Pal
 {
     internal static class CrlCache
     {
+        private const ulong X509_R_CERT_ALREADY_IN_HASH_TABLE = 0x0B07D065;
+
         public static void AddCrlForCertificate(
             X509Certificate2 cert,
             SafeX509StoreHandle store,
@@ -50,6 +52,7 @@ namespace Internal.Cryptography.Pal
             {
                 if (bio.IsInvalid)
                 {
+                    Interop.Crypto.ErrClearError();
                     return false;
                 }
 
@@ -59,6 +62,7 @@ namespace Internal.Cryptography.Pal
                 {
                     if (crl.IsInvalid)
                     {
+                        Interop.Crypto.ErrClearError();
                         return false;
                     }
 
@@ -83,9 +87,18 @@ namespace Internal.Cryptography.Pal
                         return false;
                     }
 
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
+                    }
 
                     return true;
                 }
@@ -111,9 +124,18 @@ namespace Internal.Cryptography.Pal
                 // null is a valid return (e.g. no remainingDownloadTime)
                 if (crl != null && !crl.IsInvalid)
                 {
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
+                    }
 
                     // Saving the CRL to the disk is just a performance optimization for later requests to not
                     // need to use the network again, so failure to save shouldn't throw an exception or mark
@@ -124,9 +146,10 @@ namespace Internal.Cryptography.Pal
 
                         using (SafeBioHandle bio = Interop.Crypto.BioNewFile(crlFile, "wb"))
                         {
-                            if (!bio.IsInvalid)
+                            if (bio.IsInvalid || Interop.Crypto.PemWriteBioX509Crl(bio, crl) == 0)
                             {
-                                Interop.Crypto.PemWriteBioX509Crl(bio, crl);
+                                // No bio, or write failed
+                                Interop.Crypto.ErrClearError();
                             }
                         }
                     }
@@ -147,6 +170,11 @@ namespace Internal.Cryptography.Pal
             // X509_issuer_name_hash returns "unsigned long", which is marshalled as ulong.
             // But it only sets 32 bits worth of data, so force it down to uint just... in case.
             ulong persistentHashLong = Interop.Crypto.X509IssuerNameHash(pal.SafeHandle);
+            if (persistentHashLong == 0)
+            {
+                Interop.Crypto.ErrClearError();
+            }
+
             uint persistentHash = unchecked((uint)persistentHashLong);
 
             // OpenSSL's hashed filename algorithm is the 8-character hex version of the 32-bit value

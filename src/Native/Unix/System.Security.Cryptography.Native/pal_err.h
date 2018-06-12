@@ -6,6 +6,11 @@
 #include "opensslshim.h"
 
 /*
+Shims the ERR_clear_error method.
+*/
+extern "C" void CryptoNative_ErrClearError();
+
+/*
 Shims the ERR_get_error method.
 */
 extern "C" uint64_t CryptoNative_ErrGetError();
@@ -15,6 +20,10 @@ Shim to ERR_get_error which also returns whether the error
 was caused by an allocation failure.
 */
 extern "C" uint64_t CryptoNative_ErrGetErrorAlloc(int32_t* isAllocFailure);
+
+extern "C" uint64_t CryptoNative_ErrPeekError(void);
+
+extern "C" uint64_t CryptoNative_ErrPeekLastError(void);
 
 /*
 Shims the ERR_reason_error_string method.

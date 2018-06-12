@@ -143,7 +143,7 @@ namespace System
             // This space intentionally left blank.
         }
 
-        public static void Validate<T>(this Memory<T> memory, params T[] expected) where T : struct, IEquatable<T>
+        public static void Validate<T>(this Memory<T> memory, params T[] expected) where T : IEquatable<T>
         {
             Assert.True(memory.Span.SequenceEqual(expected));
         }
@@ -159,7 +159,7 @@ namespace System
             }
         }
 
-        public static void Validate<T>(this ReadOnlyMemory<T> memory, params T[] expected) where T : struct, IEquatable<T>
+        public static void Validate<T>(this ReadOnlyMemory<T> memory, params T[] expected) where T : IEquatable<T>
         {
             Assert.True(memory.Span.SequenceEqual(expected));
         }
@@ -394,12 +394,6 @@ namespace System
             }
         }
 
-        // @todo: https://github.com/dotnet/corefx/issues/26894 - these emulate MemoryExtension apis that we removed. Clean up the callsites and remove this class.
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this Span<T> span) => span;
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) => new ReadOnlySpan<T>(array);
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> segment) => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
-        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) => memory;
-
         /// <summary>Creates a <see cref="Memory{T}"/> with the specified values in its backing field.</summary>
         public static Memory<T> DangerousCreateMemory<T>(object obj, int offset, int length)
         {
@@ -415,6 +409,6 @@ namespace System
 
         /// <summary>Creates a <see cref="ReadOnlyMemory{T}"/> with the specified values in its backing field.</summary>
         public static ReadOnlyMemory<T> DangerousCreateReadOnlyMemory<T>(object obj, int offset, int length) =>
-            DangerousCreateMemory<T>(obj, offset, length).AsReadOnlyMemory();
+            DangerousCreateMemory<T>(obj, offset, length);
     }
 }

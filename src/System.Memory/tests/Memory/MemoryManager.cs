@@ -28,6 +28,23 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void MemoryManagerMemoryCtorInvalid()
+        {
+            int[] a = { 91, 92, -93, 94 };
+            CustomMemoryForTest<int> manager = new CustomMemoryForTest<int>(a);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(0, a.Length + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(a.Length + 1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.Memory.Slice(1, a.Length));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => manager.CreateMemoryForTest(-1, -1));
+        }
+
+        [Fact]
         public static void ReadOnlyMemoryFromMemoryFromMemoryManagerInt()
         {
             int[] a = { 91, 92, -93, 94 };
@@ -150,6 +167,5 @@ namespace System.MemoryTests
             Assert.Throws<ObjectDisposedException>(() => manager.GetSpan());
         }
     }
-
 }
 

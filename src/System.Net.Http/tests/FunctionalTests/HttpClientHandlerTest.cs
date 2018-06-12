@@ -122,6 +122,15 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public void CookieContainer_SetNull_ThrowsArgumentNullException()
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                Assert.Throws<ArgumentNullException>(() => handler.CookieContainer = null);
+            }
+        }
+
+        [Fact]
         public void Ctor_ExpectedDefaultPropertyValues_CommonPlatform()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -352,7 +361,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(28749)]
         [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // TODO: make unconditional after #26813 and #26476 are fixed
@@ -1645,6 +1653,7 @@ namespace System.Net.Http.Functional.Tests
                         getResponseTask,
                         server.AcceptConnectionSendCustomResponseAndCloseAsync(
                             "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
                             "Transfer-Encoding: chunked\r\n" +
                             (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader\r\n" : "") +
                             "\r\n" +
@@ -1686,6 +1695,7 @@ namespace System.Net.Http.Functional.Tests
                         getResponseTask,
                         server.AcceptConnectionSendCustomResponseAndCloseAsync(
                             "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
                             "Transfer-Encoding: chunked\r\n" +
                             "\r\n" +
                             "4    \r\n" + // whitespace after size
@@ -1762,6 +1772,7 @@ namespace System.Net.Http.Functional.Tests
                 }
             }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
                 "HTTP/1.1 200 OK\r\n" +
+                "Connection: close\r\n" +
                 "Transfer-Encoding: chunked\r\n" +
                 "\r\n" +
                 "5\r\n" +
@@ -2222,11 +2233,29 @@ namespace System.Net.Http.Functional.Tests
                     await server.AcceptConnectionSendCustomResponseAndCloseAsync(
                             $"HTTP/1.1 {statusCode}\r\n" +
                             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "Connection: close\r\n" +
                             "\r\n");
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => getResponseTask);
                 }
             });
+        }
+
+        [OuterLoop]
+        [Fact]
+        public async Task GetAsync_UnicodeHostName_SuccessStatusCodeInResponse()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                // international version of the Starbucks website
+                // punycode: xn--oy2b35ckwhba574atvuzkc.com                
+                string server = "http://\uc2a4\ud0c0\ubc85\uc2a4\ucf54\ub9ac\uc544.com";
+                using (HttpResponseMessage response = await client.GetAsync(server))
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+            }
         }
 
         #region Post Methods Tests
@@ -3156,18 +3185,23 @@ namespace System.Net.Http.Functional.Tests
                 {
                     handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, proxyCreds);
 
-                    // URL does not matter. We will get response from "proxy" code bellow.
-                    Task<HttpResponseMessage> responseTask = client.GetAsync("http://notatrealserver.com/");
+                    // URL does not matter. We will get response from "proxy" code below.
+                    Task<HttpResponseMessage> clientTask = client.GetAsync($"http://notarealserver.com/");
 
                     //  Send Digest challenge.
-                    await proxyServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.ProxyAuthenticationRequired, authHeader);
-                    // Verify user & password.
-                    var task = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("");
-                    await TestHelper.WhenAllCompletedOrAnyFailedWithTimeout(TestHelper.PassingTestTimeoutMilliseconds, task);
+                    Task<List<string>> serverTask = proxyServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.ProxyAuthenticationRequired, authHeader);
+                    if (clientTask == await Task.WhenAny(clientTask, serverTask).TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds))
+                    {
+                        // Client task shouldn't have completed successfully; propagate failure.
+                        Assert.NotEqual(TaskStatus.RanToCompletion, clientTask.Status);
+                        await clientTask;
+                    }
 
-                    await TestHelper.WhenAllCompletedOrAnyFailedWithTimeout(TestHelper.PassingTestTimeoutMilliseconds, responseTask);
-                    HttpResponseMessage response = responseTask.Result;
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    // Verify user & password.
+                    serverTask = proxyServer.AcceptConnectionPerformAuthenticationAndCloseAsync("");
+                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }, TestHelper.PassingTestTimeoutMilliseconds);
+
+                    Assert.Equal(HttpStatusCode.OK, clientTask.Result.StatusCode);
                 }
             }, options);
 

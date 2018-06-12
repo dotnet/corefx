@@ -102,7 +102,10 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
 #endif
 
     SSL_CTX_set_options(ctx, protocolOptions);
-    TrySetECDHNamedCurve(ctx);
+    if (TrySetECDHNamedCurve(ctx) == 0)
+    {
+        ERR_clear_error();
+    }
 }
 
 extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
@@ -414,13 +417,31 @@ err:
     return 0;
 }
 
+// Controls if ERR_clear_error is going to be called before SSL_write/SSL_read
+static bool g_forceErrorQueueCleanupBeforeWriteRead = false;
+
+extern "C" void CryptoNative_ForceErrorQueueCleanupBeforeWriteRead()
+{
+    g_forceErrorQueueCleanupBeforeWriteRead = true;
+}
+
 extern "C" int32_t CryptoNative_SslWrite(SSL* ssl, const void* buf, int32_t num)
 {
+    if (g_forceErrorQueueCleanupBeforeWriteRead)
+    {
+        ERR_clear_error();
+    }
+
     return SSL_write(ssl, buf, num);
 }
 
 extern "C" int32_t CryptoNative_SslRead(SSL* ssl, void* buf, int32_t num)
 {
+    if (g_forceErrorQueueCleanupBeforeWriteRead)
+    {
+        ERR_clear_error();
+    }
+
     return SSL_read(ssl, buf, num);
 }
 

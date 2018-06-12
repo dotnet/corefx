@@ -49,7 +49,8 @@ internal static partial class Interop
         private static extern IntPtr SslGetVersion(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetTlsExtHostName")]
-        internal static extern int SslSetTlsExtHostName(SafeSslHandle ssl, string host);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool SslSetTlsExtHostName(SafeSslHandle ssl, string host);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGet0AlpnSelected")]
         internal static extern void SslGetAlpnSelected(SafeSslHandle ssl, out IntPtr protocol, out int len);
@@ -81,6 +82,9 @@ internal static partial class Interop
             out int dataHashAlg,
             out int dataKeySize,
             out int hashKeySize);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ForceErrorQueueCleanupBeforeWriteRead")]
+        internal static extern void ForceErrorQueueCleanupBeforeWriteRead();
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslWrite")]
         internal static extern unsafe int SslWrite(SafeSslHandle ssl, byte* buf, int num);
@@ -125,6 +129,7 @@ internal static partial class Interop
         internal static extern int SslGetFinished(SafeSslHandle ssl, IntPtr buf, int count);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSessionReused")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool SslSessionReused(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslAddExtraChainCert")]
@@ -158,6 +163,7 @@ internal static partial class Interop
                 Crypto.CheckValidOpenSslHandle(dupCertHandle);
                 if (!SslAddExtraChainCert(sslContext, dupCertHandle))
                 {
+                    Crypto.ErrClearError();
                     dupCertHandle.Dispose(); // we still own the safe handle; clean it up
                     return false;
                 }
@@ -317,6 +323,12 @@ namespace Microsoft.Win32.SafeHandles
             {
                 // Do a bi-directional shutdown.
                 retVal = Interop.Ssl.SslShutdown(handle);
+            }
+
+            if (retVal < 0)
+            {
+                // Clean up the errors
+                Interop.Crypto.ErrClearError();
             }
         }
 
