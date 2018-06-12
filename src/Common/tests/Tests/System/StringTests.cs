@@ -4830,7 +4830,7 @@ namespace System.Tests
             }
             {
                 string s1 = new string(a);                                
-                Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());     
+                Assert.Equal(expected, s1.ToLowerInvariant().ToArray());     
 
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
@@ -4862,7 +4862,7 @@ namespace System.Tests
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
                 string s1 = new string(a, 1, 3);                
-                Assert.Equal(expectedDestination, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
+                Assert.Equal(expectedDestination, s1.ToLowerInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
                 var destination = new Span<char>(a, 3, 3);
@@ -4880,7 +4880,7 @@ namespace System.Tests
                                 
                 string s1 = "aBc";                
                 var expectedDestinationString = "abc";
-                Assert.Equal(expectedDestinationString, s1.ToLower());
+                Assert.Equal(expectedDestinationString, s1.ToLowerInvariant());
 
                 ReadOnlySpan<char> source = s1.AsSpan();
 
@@ -4899,7 +4899,7 @@ namespace System.Tests
 
                 string s1 = "aBc";
                 var expectedDestinationString = "abc";
-                Assert.Equal(expectedDestinationString, s1.ToLower());
+                Assert.Equal(expectedDestinationString, s1.ToLowerInvariant());
 
                 ReadOnlySpan<char> source = s1.AsSpan();
 
@@ -5028,6 +5028,278 @@ namespace System.Tests
             {
                 Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
             }
+        }
+
+        [Fact]
+        public static void ZeroLengthToUpper()
+        {
+            char[] expectedSource = { 'a', 'B', 'c' };
+            char[] a = { 'a', 'B', 'c' };
+            var expectedDestination = new char[1] { 'a' };
+            var expectedDestinationString = new char[0];
+            Span<char> destination = new char[1] { 'a' };
+
+            string s1 = new string(a, 2, 0);            
+            Assert.Equal(expectedDestinationString, s1.ToUpperInvariant().ToArray());            
+
+            ReadOnlySpan<char> source = s1.AsSpan();                       
+            Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+            Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+            Assert.Equal(expectedDestination, destination.ToArray());
+            Assert.Equal(expectedSource, a);
+
+            s1 = string.Empty;            
+            Assert.Equal(expectedDestinationString, s1.ToUpperInvariant().ToArray()); 
+         
+            source = s1.AsSpan();
+            Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+            Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+            Assert.Equal(expectedDestination, destination.ToArray());
+            Assert.Equal(expectedSource, a);
+        }
+
+        [Fact]
+        public static void SameSpanToUpper()
+        {
+            var expected = new char[3] { 'A', 'B', 'C' };
+            var a = new char[3] { 'a', 'B', 'c' };
+            {
+                string s1 = new string(a);                                
+                Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());                
+
+                ReadOnlySpan<char> source = a;
+                Span<char> destination = a;
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expected, destination.ToArray());
+                Assert.Equal(expected, source.ToArray());
+            }
+            {
+                string s1 = new string(a);                                
+                Assert.Equal(expected, s1.ToUpperInvariant().ToArray());     
+
+                ReadOnlySpan<char> source = a;
+                Span<char> destination = a;
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expected, destination.ToArray());
+                Assert.Equal(expected, source.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void ToUpperOverlapping()
+        {
+            var expectedSource = new char[3] { 'b', 'C', 'B' };
+            var expectedDestination = new char[3] { 'B', 'C', 'B' };
+
+            {                
+                char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
+
+                string s1 = new string(a, 1, 3);                
+                Assert.Equal(expectedDestination, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
+
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+            {
+                char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
+
+                string s1 = new string(a, 1, 3);                
+                Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToArray());
+
+                var source = new ReadOnlySpan<char>(a, 1, 3);
+                var destination = new Span<char>(a, 3, 3);
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void LengthMismatchToUpper()
+        {
+            {
+                var expectedSource = new char[3] { 'a', 'B', 'c' };
+                                
+                string s1 = "aBc";                
+                var expectedDestinationString = "ABC";
+                Assert.Equal(expectedDestinationString, s1.ToUpperInvariant());
+
+                ReadOnlySpan<char> source = s1.AsSpan();
+
+                var expectedDestination = new char[1] { 'a' };
+                Span<char> destination = new char[1] { 'a' };
+
+                Assert.Equal(-1, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(-1, source.ToUpperInvariant(destination));
+
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+
+            {
+                var expectedSource = new char[3] { 'a', 'B', 'c' };
+
+                string s1 = "aBc";
+                var expectedDestinationString = "ABC";
+                Assert.Equal(expectedDestinationString, s1.ToUpperInvariant());
+
+                ReadOnlySpan<char> source = s1.AsSpan();
+
+                var expectedDestination = new char[4] { 'A', 'B', 'C', 'd' };
+                Span<char> destination = new char[4] { 'x', 'Y', 'z', 'd' };
+
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void ToUpper()
+        {
+            var expectedSource = new char[3] { 'a', 'B', 'c' };
+            var expectedDestination = new char[3] { 'A', 'B', 'C' };
+
+            {
+                string s1 = "aBc";
+                Assert.Equal(expectedDestination, s1.ToUpper(CultureInfo.CurrentCulture).ToCharArray());
+
+                ReadOnlySpan<char> source = s1.AsSpan();
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+
+            {
+                string s1 = "aBc";
+                Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToCharArray());
+
+                ReadOnlySpan<char> source = s1.AsSpan();
+                Span<char> destination = new char[3] { 'x', 'Y', 'z' };
+
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoToUpperChecksGoOutOfRange()
+        {
+            for (int length = 0; length < 100; length++)
+            {
+                var first = new char[length + 2];
+                var second = new char[length + 2];
+
+                for (int i = 0; i < first.Length; i++)
+                {
+                    first[i] = 'a';
+                    second[i] = 'b';
+                }
+
+                first[0] = 'Z';
+                first[length + 1] = 'Z';
+
+                second[0] = 'Y';
+                second[length + 1] = 'Y';
+
+                var expectedSource = new char[length];
+                var expectedDestination = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    expectedSource[i] = 'a';
+                    expectedDestination[i] = 'A';
+                }
+
+                string s1 = new string(first, 1, length);
+                Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToCharArray());
+
+                Assert.Equal('Z', first[0]);
+                Assert.Equal('Z', first[length + 1]);
+                Assert.Equal('Y', second[0]);
+                Assert.Equal('Y', second[length + 1]);
+
+                ReadOnlySpan<char> source = s1.AsSpan();
+                var destination = new Span<char>(second, 1, length);
+                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
+                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
+                Assert.Equal(expectedDestination, destination.ToArray());
+                Assert.Equal(expectedSource, source.ToArray());
+
+                Assert.Equal('Z', first[0]);
+                Assert.Equal('Z', first[length + 1]);
+                Assert.Equal('Y', second[0]);
+                Assert.Equal('Y', second[length + 1]);
+            }
+        }
+
+        [Fact]
+        public static void ToUpperNullCulture()
+        {
+            string s1 = "aBc";
+
+            try
+            {               
+                s1.ToUpper(null);
+                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
+            }
+            catch (ArgumentNullException)
+            {
+            }
+            catch (Exception wrongException)
+            {
+                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
+            }
+
+            ReadOnlySpan<char> source = s1.AsSpan();
+            Span<char> destination = new char[3] { 'a', 'B', 'c' };
+
+            try
+            {               
+                source.ToUpper(destination, null);
+                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
+            }
+            catch (ArgumentNullException)
+            {
+            }
+            catch (Exception wrongException)
+            {
+                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
+            }
+        }
+
+        private static IEnumerable<object[]> ToUpper_Culture_TestData()
+        {
+            yield return new object[] { "h\u0069 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
+            yield return new object[] { "h\u0131 world", "H\u0049 WORLD", new CultureInfo("tr-TR") };
+
+            yield return new object[] { "h\u0069 world", "H\u0049 WORLD", new CultureInfo("en-US") };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", new CultureInfo("en-US") };
+            yield return new object[] { "h\u0131 world", "H\u0049 WORLD", new CultureInfo("en-US") };
+
+            yield return new object[] { "h\u0069 world", "H\u0049 WORLD", CultureInfo.InvariantCulture };
+            yield return new object[] { "h\u0130 world", "H\u0130 WORLD", CultureInfo.InvariantCulture };
+            yield return new object[] { "h\u0131 world", "H\u0131 WORLD", CultureInfo.InvariantCulture };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToUpper_Culture_TestData))]
+        public static void Test_ToUpper_Culture(string actual, string expected, CultureInfo culture)
+        {
+            Assert.Equal(expected, actual.ToUpper(culture));
+
+            ReadOnlySpan<char> source = actual.AsSpan();
+            Span<char> destination = new char[source.Length];
+            Assert.Equal(source.Length, source.ToUpper(destination, culture));
+            Assert.Equal(expected, destination.ToString());
         }
 
         [Theory]
