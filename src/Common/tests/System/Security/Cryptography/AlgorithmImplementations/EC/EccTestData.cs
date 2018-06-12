@@ -198,7 +198,7 @@ namespace System.Security.Cryptography.Tests
             };
         }
 
-        internal static ECParameters GetNistP521ReferenceKey()
+        internal static ECParameters GetNistP256ReferenceKey()
         {
             // From Suite B Implementers's Guide to FIPS 186-3 (ECDSA)
             // Section D.1.1

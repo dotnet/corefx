@@ -148,7 +148,7 @@ m8STNpW+zSpHWlpHpWHgXGq4wrUKJifxOv6Rm5KTYcvUT38=";
                     PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
                     HashAlgorithmName.SHA1,
                     1024),
-                EccTestData.GetNistP521ReferenceKey());
+                EccTestData.GetNistP256ReferenceKey());
         }
 
         [Fact]
@@ -161,7 +161,7 @@ NfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==";
 
             ReadWriteBase64ECPrivateKey(
                 base64,
-                EccTestData.GetNistP521ReferenceKey());
+                EccTestData.GetNistP256ReferenceKey());
         }
 
         [Fact]
