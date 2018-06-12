@@ -40,6 +40,38 @@ namespace System.Net.Http
 
         public static async ValueTask<(Socket, Stream)> ConnectAsync(string host, int port, CancellationToken cancellationToken)
         {
+            CancellationTokenSource cancelIPv6 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task<(Socket, Stream)> tryConnectAsyncIPv6 = ConnectAsyncInternal(host, port, AddressFamily.InterNetworkV6, cancelIPv6.Token);
+
+            if (await Task.WhenAny(tryConnectAsyncIPv6, Task.Delay(200)).ConfigureAwait(false) == tryConnectAsyncIPv6 && tryConnectAsyncIPv6.IsCompletedSuccessfully)
+            {
+                return await tryConnectAsyncIPv6.ConfigureAwait(false);
+            }
+
+            CancellationTokenSource cancelIPv4 = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task<(Socket, Stream)> tryConnectAsyncIPv4 = ConnectAsyncInternal(host, port, AddressFamily.InterNetwork, cancelIPv4.Token);
+            if (await Task.WhenAny(tryConnectAsyncIPv6, tryConnectAsyncIPv4).ConfigureAwait(false) == tryConnectAsyncIPv6)
+            {
+                if (tryConnectAsyncIPv6.IsCompletedSuccessfully)
+                {
+                    cancelIPv4.Cancel();
+                    return await tryConnectAsyncIPv6.ConfigureAwait(false);
+                }
+                return await tryConnectAsyncIPv4.ConfigureAwait(false);
+            }
+            else
+            {
+                if (tryConnectAsyncIPv4.IsCompletedSuccessfully)
+                {
+                    cancelIPv6.Cancel();
+                    return await tryConnectAsyncIPv4.ConfigureAwait(false);
+                }
+                return await tryConnectAsyncIPv6.ConfigureAwait(false);
+            }
+        }
+
+        public static async Task<(Socket, Stream)> ConnectAsyncInternal(string host, int port, AddressFamily family, CancellationToken cancellationToken)
+        {
             // Rather than creating a new Socket and calling ConnectAsync on it, we use the static
             // Socket.ConnectAsync with a SocketAsyncEventArgs, as we can then use Socket.CancelConnectAsync
             // to cancel it if needed. Rent or allocate one.
@@ -54,7 +86,7 @@ namespace System.Net.Http
                 saea.Initialize(cancellationToken);
 
                 // Configure which server to which to connect.
-                saea.RemoteEndPoint = new DnsEndPoint(host, port);
+                saea.RemoteEndPoint = new DnsEndPoint(host, port, family);
 
                 // Initiate the connection.
                 if (Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, saea))
