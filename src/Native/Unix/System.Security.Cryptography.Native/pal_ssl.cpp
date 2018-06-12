@@ -417,31 +417,13 @@ err:
     return 0;
 }
 
-// Controls if ERR_clear_error is going to be called before SSL_write/SSL_read
-static bool g_forceErrorQueueCleanupBeforeWriteRead = false;
-
-extern "C" void CryptoNative_ForceErrorQueueCleanupBeforeWriteRead()
-{
-    g_forceErrorQueueCleanupBeforeWriteRead = true;
-}
-
 extern "C" int32_t CryptoNative_SslWrite(SSL* ssl, const void* buf, int32_t num)
 {
-    if (g_forceErrorQueueCleanupBeforeWriteRead)
-    {
-        ERR_clear_error();
-    }
-
     return SSL_write(ssl, buf, num);
 }
 
 extern "C" int32_t CryptoNative_SslRead(SSL* ssl, void* buf, int32_t num)
 {
-    if (g_forceErrorQueueCleanupBeforeWriteRead)
-    {
-        ERR_clear_error();
-    }
-
     return SSL_read(ssl, buf, num);
 }
 
@@ -528,7 +510,9 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 // delimiter ":" is used to allow more than one strings
 // below string is corresponding to "AllowNoEncryption"
 #define SSL_TXT_Separator ":"
+#define SSL_TXT_Exclusion "!"
 #define SSL_TXT_AllIncludingNull SSL_TXT_ALL SSL_TXT_Separator SSL_TXT_eNULL
+#define SSL_TXT_NotAnon SSL_TXT_Separator SSL_TXT_Exclusion SSL_TXT_aNULL
 
 extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 {
@@ -536,7 +520,7 @@ extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPoli
     switch (policy)
     {
         case EncryptionPolicy::RequireEncryption:
-            cipherString = SSL_TXT_ALL;
+            cipherString = SSL_TXT_ALL SSL_TXT_NotAnon;
             break;
 
         case EncryptionPolicy::AllowNoEncryption:
