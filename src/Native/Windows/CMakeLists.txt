@@ -92,9 +92,6 @@ endif()
 # App-Container builds require a more specific linking to ensure the APIs imported pass WACK
 if ($ENV{__appContainer} STREQUAL true AND UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     set(__LinkArgs "${__LinkArgs} /LTCG")
-    if ($ENV{__BuildArch} STREQUAL "arm" )
-        set(__LinkArgs "${__LinkArgs} /DEFAULTLIB:ole32.lib")
-    endif()
 endif()
 
 # Linker flags
