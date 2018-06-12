@@ -101,35 +101,32 @@ namespace System.Net.NetworkInformation
         {
             byte type, code;
             reply = null;
-            unsafe
+
+            if (socketConfig.IsIpv4)
             {
-                fixed (byte* bytesPtr = &receiveBuffer[0])
+                // Determine actual size of IP header
+                byte ihl = (byte)(receiveBuffer[0] & 0x0f); // Internet Header Length
+                ipHeaderLength = 4 * ihl;
+                if (bytesReceived - ipHeaderLength < IcmpHeaderLengthInBytes)
                 {
-                    if (socketConfig.IsIpv4)
-                    {
-                        // Determine actual size of IP header
-                        byte ihl = (byte)(bytesPtr[0] & 0x0f); // Internet Header Length
-                        ipHeaderLength = 4 * ihl;
-                        if (bytesReceived - ipHeaderLength < IcmpHeaderLengthInBytes)
-                        {
-                            return false; // Not enough bytes to reconstruct actual IP header + ICMP header.
-                        }
-                    }
-
-                    int icmpHeaderOffset = ipHeaderLength;
-                    IcmpHeader receivedHeader = *((IcmpHeader*)(bytesPtr + icmpHeaderOffset)); // Skip IP header.
-                    type = receivedHeader.Type;
-                    code = receivedHeader.Code;
-
-                    if (socketConfig.Identifier != receivedHeader.Identifier
-                        || type == (byte)IcmpV4MessageType.EchoRequest
-                        || type == (byte)IcmpV6MessageType.EchoRequest) // Echo Request, ignore
-                    {
-                        return false;
-                    }
+                    return false; // Not enough bytes to reconstruct actual IP header + ICMP header.
                 }
             }
 
+            int icmpHeaderOffset = ipHeaderLength;
+
+            // Skip IP header.
+            IcmpHeader receivedHeader = MemoryMarshal.Cast<byte, IcmpHeader>(receiveBuffer.AsSpan(icmpHeaderOffset))[0];
+            type = receivedHeader.Type;
+            code = receivedHeader.Code;
+
+            if (socketConfig.Identifier != receivedHeader.Identifier
+                || type == (byte)IcmpV4MessageType.EchoRequest
+                || type == (byte)IcmpV6MessageType.EchoRequest) // Echo Request, ignore
+            {
+                return false;
+            }
+            
             sw.Stop();
             long roundTripTime = sw.ElapsedMilliseconds;
             int dataOffset = ipHeaderLength + IcmpHeaderLengthInBytes;
