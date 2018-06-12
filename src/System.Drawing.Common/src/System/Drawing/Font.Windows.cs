@@ -17,7 +17,6 @@ namespace System.Drawing
         private const int LogFontNameOffset = 28;
 
         private float _fontSize;
-        private FontStyle _fontStyle;
         private FontFamily _fontFamily;
         private GraphicsUnit _fontUnit;
         private byte _gdiCharSet = SafeNativeMethods.DEFAULT_CHARSET;
@@ -357,7 +356,7 @@ namespace System.Drawing
             _fontFamily = family;
 
             // GDI+ creates ref-counted singleton FontFamily objects based on the family name so all managed 
-            // objects with same family name share the underlying GDI+ native pointer.  The unmanged object is
+            // objects with same family name share the underlying GDI+ native pointer. The unmanged object is
             // destroyed when its ref-count gets to zero.
             // Make sure this.fontFamily is not finalized so the underlying singleton object is kept alive.
             GC.SuppressFinalize(_fontFamily);
@@ -403,11 +402,6 @@ namespace System.Drawing
 
         private static bool IsVerticalName(string familyName) => familyName?.Length > 0 && familyName[0] == '@';
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='System.Drawing.Font'/> is bold.
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Bold => (Style & FontStyle.Bold) != 0;
 
         /// <summary>
         /// Returns the GDI char set for this instance of a font. This will only
@@ -419,45 +413,6 @@ namespace System.Drawing
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public byte GdiCharSet => _gdiCharSet;
-
-        /// <summary>
-        /// Determines if this font was created to represent a GDI vertical font. This will only be valid if this font
-        /// was created from a classic GDIfont definition, like a LOGFONT or HFONT, or it was passed into the constructor.
-        ///
-        /// This is here for compatibility with native Win32 intrinsic controls on non-Unicode platforms.
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool GdiVerticalFont => _gdiVerticalFont;
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is Italic.
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Italic => (Style & FontStyle.Italic) != 0;
-
-        /// <summary>
-        /// Gets the face name of this <see cref='Font'/> .
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string Name => FontFamily.Name;
-
-        /// <summary>
-        /// This property is required by the framework and not intended to be used directly.
-        /// </summary>
-        [Browsable(false)]
-        public string OriginalFontName => _originalFontName;
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is strikeout (has a line through it).
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Strikeout => (Style & FontStyle.Strikeout) != 0;
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is underlined.
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Underline => (Style & FontStyle.Underline) != 0;
 
         /// <summary>
         /// Returns a value indicating whether the specified object is a <see cref='Font'/> equivalent to this
@@ -633,12 +588,6 @@ namespace System.Drawing
 
             return height;
         }
-
-        /// <summary>
-        /// Gets style information for this <see cref='Font'/>.
-        /// </summary>
-        [Browsable(false)]
-        public FontStyle Style => _fontStyle;
 
         // Return value is in Unit (the unit the font was created in)
         /// <summary>

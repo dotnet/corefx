@@ -163,25 +163,11 @@ namespace System.Drawing
 
             // MS throws ArgumentException, if unit is set to GraphicsUnit.Display
             _unit = unit;
-            _style = style;
+            _fontStyle = style;
             _gdiCharSet = charSet;
             _gdiVerticalFont = isVertical;
 
             unitConversion(unit, GraphicsUnit.Point, emSize, out _sizeInPoints);
-
-            _bold = _italic = _strikeout = _underline = false;
-
-            if ((style & FontStyle.Bold) == FontStyle.Bold)
-                _bold = true;
-
-            if ((style & FontStyle.Italic) == FontStyle.Italic)
-                _italic = true;
-
-            if ((style & FontStyle.Strikeout) == FontStyle.Strikeout)
-                _strikeout = true;
-
-            if ((style & FontStyle.Underline) == FontStyle.Underline)
-                _underline = true;
         }
 
         public static Font FromHfont(IntPtr hfont)
@@ -341,20 +327,10 @@ namespace System.Drawing
         {
             systemFontName = systemName;
         }
+
         public object Clone()
         {
             return new Font(this, Style);
-        }
-
-        private bool _bold;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Bold
-        {
-            get
-            {
-                return _bold;
-            }
         }
 
         private FontFamily _fontFamily;
@@ -408,17 +384,6 @@ namespace System.Drawing
             }
         }
 
-        private bool _italic;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Italic
-        {
-            get
-            {
-                return _italic;
-            }
-        }
-
         private string _name;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -453,28 +418,6 @@ namespace System.Drawing
             }
         }
 
-        private bool _strikeout;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Strikeout
-        {
-            get
-            {
-                return _strikeout;
-            }
-        }
-
-        private FontStyle _style;
-
-        [Browsable(false)]
-        public FontStyle Style
-        {
-            get
-            {
-                return _style;
-            }
-        }
-
         [Browsable(false)]
         public string SystemFontName
         {
@@ -492,17 +435,6 @@ namespace System.Drawing
                 return originalFontName;
             }
         }
-        private bool _underline;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool Underline
-        {
-            get
-            {
-                return _underline;
-            }
-        }
-
         private GraphicsUnit _unit;
 
 #if !NETCORE

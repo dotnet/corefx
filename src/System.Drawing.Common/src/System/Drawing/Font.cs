@@ -15,6 +15,38 @@ namespace System.Drawing
     {
         private IntPtr _nativeFont;
 
+        private FontStyle _fontStyle;
+
+        /// <summary>
+        /// Gets style information for this <see cref='Font'/>.
+        /// </summary>
+        [Browsable(false)]
+        public FontStyle Style => _fontStyle;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref='System.Drawing.Font'/> is bold.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Bold => (Style & FontStyle.Bold) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref='Font'/> is Italic.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Italic => (Style & FontStyle.Italic) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref='Font'/> is strikeout (has a line through it).
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Strikeout => (Style & FontStyle.Strikeout) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref='Font'/> is underlined.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Underline => (Style & FontStyle.Underline) != 0;
+
         /// <summary>
         /// Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet.
         /// </summary>
