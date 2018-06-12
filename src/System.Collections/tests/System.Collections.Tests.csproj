@@ -119,6 +119,7 @@
     <Compile Include="Generic\List\List.Generic.Tests.ForEach.cs" />
     <Compile Include="Generic\List\List.Generic.cs" />
     <Compile Include="Generic\List\List.Generic.Tests.cs" />
+    <Compile Include="Generic\List\List.Generic.Tests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="Generic\List\List.Generic.Tests.IndexOf.cs" />
     <Compile Include="Generic\List\List.Generic.Tests.Misc.cs" />
     <Compile Include="Generic\List\List.Generic.Tests.Reverse.cs" />
