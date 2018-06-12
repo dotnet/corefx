@@ -6,40 +6,75 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace System.Reflection.Context
+namespace System.Reflection.Context.Tests
 {
     public class CustomReflectionContextTests
     {
         [Fact]
-        public void CustomContext()
+        public void Ctor_Null_Throws()
         {
-            var customReflectionContext = new MyCRC();
-            Type type = typeof(string);
+            AssertExtensions.Throws<ArgumentNullException>("source", () => new FaultyTestCustomReflectionContext());
+        }
 
-            //A representation of the type in the custom reflection context.
-            TypeInfo customTypeInfo = customReflectionContext.MapType(type.GetTypeInfo());
-            
-            //The "ToString" member as represented in the custom reflection context.
-            MemberInfo customMemberInfo = customTypeInfo.GetDeclaredMethods("ToString").First();
-            
+        [Fact]
+        public void MapAssembly_Null_Throws()
+        {
+            var customReflectionContext = new TestCustomReflectionContext();
+            AssertExtensions.Throws<ArgumentNullException>("assembly", () => customReflectionContext.MapAssembly(null));
+        }
+
+        [Fact]
+        public void MapType_Null_Throws()
+        {
+            var customReflectionContext = new TestCustomReflectionContext();
+            AssertExtensions.Throws<ArgumentNullException>("type", () => customReflectionContext.MapType(null));
+        }
+
+        [Fact]
+        public void MapType_MemberAttributes_Success()
+        {
+            var customReflectionContext = new TestCustomReflectionContext();
+            TypeInfo typeInfo = typeof(TestObject).GetTypeInfo();
+
+            TypeInfo customTypeInfo = customReflectionContext.MapType(typeInfo);
+            MemberInfo customMemberInfo = customTypeInfo.GetDeclaredMethod("GetMessage");
             IEnumerable<Attribute> results = customMemberInfo.GetCustomAttributes();
+
             Assert.Single(results);
-            Assert.IsType<CustomAttribute>(results.First());
+            Assert.IsType<TestAttribute>(results.First());
         }
 
-        internal class CustomAttribute : Attribute
+        [Fact]
+        public void MapType_ParameterAttributes_Success()
         {
+            var customReflectionContext = new TestCustomReflectionContext();
+            TypeInfo typeInfo = typeof(TestObject).GetTypeInfo();
+
+            TypeInfo customTypeInfo = customReflectionContext.MapType(typeInfo);
+            ConstructorInfo ctor = customTypeInfo.GetConstructor(new Type[] { typeof(string) });
+            ParameterInfo[] parameters = ctor.GetParameters();
+
+            Assert.Single(parameters);
+            IEnumerable<Attribute> results = parameters[0].GetCustomAttributes();
+
+            Assert.Single(results);
+            Assert.IsType<TestAttribute>(results.First());
         }
 
-        internal class MyCRC : CustomReflectionContext
+        [Fact]
+        public void MapType_Interface_Throws()
         {
-            protected override IEnumerable<object> GetCustomAttributes(MemberInfo member, IEnumerable<object> declaredAttributes)
-            {
-                if (member.Name.StartsWith("To"))
-                {
-                    yield return new CustomAttribute();
-                }
-            }
+            var customReflectionContext = new TestCustomReflectionContext();
+            TypeInfo typeInfo = typeof(ICloneable).GetTypeInfo();
+
+            TypeInfo customTypeInfo = customReflectionContext.MapType(typeInfo);
+            MethodInfo customMemberInfo = customTypeInfo.GetDeclaredMethod("Clone");
+
+            IEnumerable<Attribute> results = customMemberInfo.GetCustomAttributes();
+            Assert.Empty(results);
+
+            IEnumerable<PropertyInfo> props = customTypeInfo.DeclaredProperties;
+            Assert.Empty(props);
         }
     }
 }

@@ -64,13 +64,13 @@
     <Compile Include="System\Reflection\Context\Virtual\InheritedPropertyInfo.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualMethodBase.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualParameter.cs" />
-    <Compile Include="System\Reflection\Context\Virtual\VirtualProperty.PropertyGetter.cs" />
-    <Compile Include="System\Reflection\Context\Virtual\VirtualProperty.PropertySetter.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyBase.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyBase.FuncPropertyAccessorBase.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyBase.PropertyGetterBase.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyBase.PropertySetterBase.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyInfo.cs" />
+    <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyInfo.PropertyGetter.cs" />
+    <Compile Include="System\Reflection\Context\Virtual\VirtualPropertyInfo.PropertySetter.cs" />
     <Compile Include="System\Reflection\Context\Virtual\VirtualReturnParameter.cs" />
   </ItemGroup>
   <ItemGroup>
