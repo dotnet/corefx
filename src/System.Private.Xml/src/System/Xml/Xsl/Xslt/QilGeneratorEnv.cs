@@ -405,11 +405,10 @@ namespace System.Xml.Xsl.Xslt
 
             if (name.NodeType == QilNodeType.LiteralString)
             {
-                string keyName = (string)(QilLiteral)name;
-                string nsUri;
+                string keyName = (QilLiteral)name;
 
                 _compiler.ParseQName(keyName, out string prefix, out string local, new ThrowErrorHelper());
-                nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/true, prefix);
+                string nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/true, prefix);
                 QilName qname = _f.QName(local, nsUri, prefix);
 
                 if (!_compiler.Keys.Contains(qname))
@@ -639,11 +638,9 @@ namespace System.Xml.Xsl.Xslt
 
         private XmlQualifiedName ResolveQNameThrow(bool ignoreDefaultNs, QilNode qilName)
         {
-            string name = (string)(QilLiteral)qilName;
-            string nsUri;
-
+            string name = (QilLiteral)qilName;
             _compiler.ParseQName(name, out string prefix, out string local, new ThrowErrorHelper());
-            nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/ignoreDefaultNs, prefix);
+            string nsUri = ResolvePrefixThrow(/*ignoreDefaultNs:*/ignoreDefaultNs, prefix);
 
             return new XmlQualifiedName(local, nsUri);
         }
