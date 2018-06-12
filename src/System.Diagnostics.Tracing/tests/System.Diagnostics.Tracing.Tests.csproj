@@ -16,7 +16,6 @@
     <Compile Include="BasicEventSourceTest\TestsWrite.Windows.cs" />
     <Compile Include="BasicEventSourceTest\TestsUserErrors.Windows.cs" />
     <Compile Include="BasicEventSourceTest\TestsWriteEvent.Windows.cs" />
-    <Compile Include="BasicEventSourceTest\FuzzyTests.Windows.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
