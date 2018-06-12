@@ -44,9 +44,8 @@ namespace System.Drawing
     [Editor ("System.Drawing.Design.FontEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
     [TypeConverter (typeof (FontConverter))]
 #endif
-    public sealed partial class Font : MarshalByRefObject, ISerializable, ICloneable, IDisposable
+    public sealed partial class Font
     {
-        private IntPtr fontObject = IntPtr.Zero;
         private string systemFontName;
         private string originalFontName;
         private float _size;
@@ -70,7 +69,7 @@ namespace System.Drawing
             }
 
             setProperties(family, emSize, style, unit, charSet, isVertical);
-            int status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out fontObject);
+            int status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out _nativeFont);
 
             if (status == SafeNativeMethods.Gdip.FontStyleNotFound)
                 throw new ArgumentException(string.Format("Style {0} isn't supported by font {1}.", style.ToString(), familyName));
@@ -85,10 +84,10 @@ namespace System.Drawing
 
         public void Dispose()
         {
-            if (fontObject != IntPtr.Zero)
+            if (_nativeFont != IntPtr.Zero)
             {
-                int status = SafeNativeMethods.Gdip.GdipDeleteFont(fontObject);
-                fontObject = IntPtr.Zero;
+                int status = SafeNativeMethods.Gdip.GdipDeleteFont(_nativeFont);
+                _nativeFont = IntPtr.Zero;
                 GC.SuppressFinalize(this);
                 // check the status code (throw) at the last step
                 SafeNativeMethods.Gdip.CheckStatus(status);
@@ -238,13 +237,13 @@ namespace System.Drawing
 
         public IntPtr ToHfont()
         {
-            if (fontObject == IntPtr.Zero)
+            if (_nativeFont == IntPtr.Zero)
                 throw new ArgumentException("Object has been disposed.");
 
-            return fontObject;
+            return _nativeFont;
         }
 
-        internal Font(IntPtr newFontObject, string familyName, FontStyle style, float size)
+        internal Font(IntPtr nativeFont, string familyName, FontStyle style, float size)
         {
             FontFamily fontFamily;
 
@@ -258,7 +257,7 @@ namespace System.Drawing
             }
 
             setProperties(fontFamily, size, style, GraphicsUnit.Pixel, 0, false);
-            fontObject = newFontObject;
+            _nativeFont = nativeFont;
         }
 
         public Font(Font prototype, FontStyle newStyle)
@@ -266,7 +265,7 @@ namespace System.Drawing
             // no null checks, MS throws a NullReferenceException if original is null
             setProperties(prototype.FontFamily, prototype.Size, newStyle, prototype.Unit, prototype.GdiCharSet, prototype.GdiVerticalFont);
 
-            int status = SafeNativeMethods.Gdip.GdipCreateFont(_fontFamily.NativeFamily, Size, Style, Unit, out fontObject);
+            int status = SafeNativeMethods.Gdip.GdipCreateFont(_fontFamily.NativeFamily, Size, Style, Unit, out _nativeFont);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -308,7 +307,7 @@ namespace System.Drawing
 
             int status;
             setProperties(family, emSize, style, unit, gdiCharSet, gdiVerticalFont);
-            status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out fontObject);
+            status = SafeNativeMethods.Gdip.GdipCreateFont(family.NativeFamily, emSize, style, unit, out _nativeFont);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -345,14 +344,6 @@ namespace System.Drawing
         public object Clone()
         {
             return new Font(this, Style);
-        }
-
-        internal IntPtr NativeObject
-        {
-            get
-            {
-                return fontObject;
-            }
         }
 
         private bool _bold;
@@ -624,7 +615,7 @@ namespace System.Drawing
                 {
                     Marshal.StructureToPtr(logFont, copy, false);
 
-                    status = SafeNativeMethods.Gdip.GdipGetLogFont(NativeObject, graphics.NativeObject, logFont);
+                    status = SafeNativeMethods.Gdip.GdipGetLogFont(NativeFont, graphics.NativeObject, logFont);
                     if (status != SafeNativeMethods.Gdip.Ok)
                     {
                         // reset to original values
@@ -671,7 +662,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(graphics));
 
             float size;
-            int status = SafeNativeMethods.Gdip.GdipGetFontHeight(fontObject, graphics.NativeObject, out size);
+            int status = SafeNativeMethods.Gdip.GdipGetFontHeight(_nativeFont, graphics.NativeObject, out size);
             SafeNativeMethods.Gdip.CheckStatus(status);
             return size;
         }
@@ -679,7 +670,7 @@ namespace System.Drawing
         public float GetHeight(float dpi)
         {
             float size;
-            int status = SafeNativeMethods.Gdip.GdipGetFontHeightGivenDPI(fontObject, dpi, out size);
+            int status = SafeNativeMethods.Gdip.GdipGetFontHeightGivenDPI(_nativeFont, dpi, out size);
             SafeNativeMethods.Gdip.CheckStatus(status);
             return size;
         }

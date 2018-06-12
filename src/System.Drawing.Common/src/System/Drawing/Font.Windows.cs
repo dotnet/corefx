@@ -11,15 +11,11 @@ using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Defines a particular format for text, including font face, size, and style attributes.
-    /// </summary>
-    public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable, ISerializable
+    public sealed partial class Font
     {
         private const int LogFontCharSetOffset = 23;
         private const int LogFontNameOffset = 28;
 
-        private IntPtr _nativeFont;
         private float _fontSize;
         private FontStyle _fontStyle;
         private FontFamily _fontFamily;
@@ -342,11 +338,6 @@ namespace System.Drawing
 
             return new Font(clonedFont, _gdiCharSet, _gdiVerticalFont);
         }
-
-        /// <summary>
-        /// Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet.
-        /// </summary>
-        internal IntPtr NativeFont => _nativeFont;
 
         /// <summary>
         /// Gets the <see cref='Drawing.FontFamily'/> of this <see cref='Font'/>.
