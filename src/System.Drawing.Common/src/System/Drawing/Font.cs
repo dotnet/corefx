@@ -15,7 +15,20 @@ namespace System.Drawing
     {
         private IntPtr _nativeFont;
 
+        private float _fontSize;
         private FontStyle _fontStyle;
+        private FontFamily _fontFamily;
+        private GraphicsUnit _fontUnit;
+        private byte _gdiCharSet = SafeNativeMethods.DEFAULT_CHARSET;
+        private bool _gdiVerticalFont;
+        private string _systemFontName = "";
+        private string _originalFontName;
+
+        // Return value is in Unit (the unit the font was created in)
+        /// <summary>
+        /// Gets the size of this <see cref='Font'/>.
+        /// </summary>
+        public float Size => _fontSize;
 
         /// <summary>
         /// Gets style information for this <see cref='Font'/>.
@@ -46,6 +59,74 @@ namespace System.Drawing
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Underline => (Style & FontStyle.Underline) != 0;
+
+        /// <summary>
+        /// Gets the <see cref='Drawing.FontFamily'/> of this <see cref='Font'/>.
+        /// </summary>
+        [Browsable(false)]
+        public FontFamily FontFamily => _fontFamily;
+
+        /// <summary>
+        /// Gets the face name of this <see cref='Font'/> .
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+#if !NETCORE
+        [Editor ("System.Drawing.Design.FontNameEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
+        [TypeConverter (typeof (FontConverter.FontNameConverter))]
+#endif
+        public string Name => FontFamily.Name;
+
+        /// <summary>
+        /// Gets the unit of measure for this <see cref='Font'/>.
+        /// </summary>
+#if !NETCORE
+        [TypeConverter (typeof (FontConverter.FontUnitConverter))]
+#endif
+        public GraphicsUnit Unit => _fontUnit;
+
+        /// <summary>
+        /// Returns the GDI char set for this instance of a font. This will only
+        /// be valid if this font was created from a classic GDI font definition,
+        /// like a LOGFONT or HFONT, or it was passed into the constructor.
+        ///
+        /// This is here for compatibility with native Win32 intrinsic controls
+        /// on non-Unicode platforms.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public byte GdiCharSet => _gdiCharSet;
+
+        /// <summary>
+        /// Determines if this font was created to represent a GDI vertical font. This will only be valid if this font
+        /// was created from a classic GDIfont definition, like a LOGFONT or HFONT, or it was passed into the constructor.
+        ///
+        /// This is here for compatibility with native Win32 intrinsic controls on non-Unicode platforms.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool GdiVerticalFont => _gdiVerticalFont;
+
+        /// <summary>
+        /// This property is required by the framework and not intended to be used directly.
+        /// </summary>
+        [Browsable(false)]
+        public string OriginalFontName => _originalFontName;
+
+        /// <summary>
+        /// Gets the name of this <see cref='Drawing.SystemFont'/>.
+        /// </summary>
+        [Browsable(false)]
+        public string SystemFontName => _systemFontName;
+
+        /// <summary>
+        /// Returns true if this <see cref='Font'/> is a SystemFont.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsSystemFont => !string.IsNullOrEmpty(_systemFontName);
+
+        /// <summary>
+        /// Gets the height of this <see cref='Font'/>.
+        /// </summary>
+        [Browsable(false)]
+        public int Height => (int)Math.Ceiling(GetHeight());
 
         /// <summary>
         /// Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet.

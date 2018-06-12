@@ -16,14 +16,6 @@ namespace System.Drawing
         private const int LogFontCharSetOffset = 23;
         private const int LogFontNameOffset = 28;
 
-        private float _fontSize;
-        private FontFamily _fontFamily;
-        private GraphicsUnit _fontUnit;
-        private byte _gdiCharSet = SafeNativeMethods.DEFAULT_CHARSET;
-        private bool _gdiVerticalFont;
-        private string _systemFontName = "";
-        private string _originalFontName;
-
         ///<summary>
         /// Creates the GDI+ native font object.
         ///</summary>
@@ -338,19 +330,6 @@ namespace System.Drawing
             return new Font(clonedFont, _gdiCharSet, _gdiVerticalFont);
         }
 
-        /// <summary>
-        /// Gets the <see cref='Drawing.FontFamily'/> of this <see cref='Font'/>.
-        /// </summary>
-        [Browsable(false)]
-        public FontFamily FontFamily
-        {
-            get
-            {
-                Debug.Assert(_fontFamily != null, "fontFamily should never be null");
-                return _fontFamily;
-            }
-        }
-
         private void SetFontFamily(FontFamily family)
         {
             _fontFamily = family;
@@ -401,18 +380,6 @@ namespace System.Drawing
         }
 
         private static bool IsVerticalName(string familyName) => familyName?.Length > 0 && familyName[0] == '@';
-
-
-        /// <summary>
-        /// Returns the GDI char set for this instance of a font. This will only
-        /// be valid if this font was created from a classic GDI font definition,
-        /// like a LOGFONT or HFONT, or it was passed into the constructor.
-        ///
-        /// This is here for compatibility with native Win32 intrinsic controls
-        /// on non-Unicode platforms.
-        /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public byte GdiCharSet => _gdiCharSet;
 
         /// <summary>
         /// Returns a value indicating whether the specified object is a <see cref='Font'/> equivalent to this
@@ -589,12 +556,6 @@ namespace System.Drawing
             return height;
         }
 
-        // Return value is in Unit (the unit the font was created in)
-        /// <summary>
-        /// Gets the size of this <see cref='Font'/>.
-        /// </summary>
-        public float Size => _fontSize;
-
         /// <summary>
         /// Gets the size, in points, of this <see cref='Font'/>.
         /// </summary>
@@ -626,29 +587,6 @@ namespace System.Drawing
                 }
             }
         }
-
-        /// <summary>
-        /// Gets the unit of measure for this <see cref='Font'/>.
-        /// </summary>
-        public GraphicsUnit Unit => _fontUnit;
-
-        /// <summary>
-        /// Gets the height of this <see cref='Font'/>.
-        /// </summary>
-        [Browsable(false)]
-        public int Height => (int)Math.Ceiling(GetHeight());
-
-        /// <summary>
-        /// Returns true if this <see cref='Font'/> is a SystemFont.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsSystemFont => !string.IsNullOrEmpty(_systemFontName);
-
-        /// <summary>
-        /// Gets the name of this <see cref='Drawing.SystemFont'/>.
-        /// </summary>
-        [Browsable(false)]
-        public string SystemFontName => _systemFontName;
 
         // This is used by SystemFonts when constructing a system Font objects.
         internal void SetSystemFontName(string systemFontName) => _systemFontName = systemFontName;

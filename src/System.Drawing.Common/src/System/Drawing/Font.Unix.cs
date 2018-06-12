@@ -46,16 +46,12 @@ namespace System.Drawing
 #endif
     public sealed partial class Font
     {
-        private string systemFontName;
-        private string originalFontName;
-        private float _size;
-
         private const byte DefaultCharSet = 1;
         private static int CharSetOffset = -1;
 
         private void CreateFont(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte charSet, bool isVertical)
         {
-            originalFontName = familyName;
+            _originalFontName = familyName;
             FontFamily family;
             // NOTE: If family name is null, empty or invalid,
             // MS creates Microsoft Sans Serif font.
@@ -96,7 +92,7 @@ namespace System.Drawing
 
         internal void SetSystemFontName(string newSystemFontName)
         {
-            systemFontName = newSystemFontName;
+            _systemFontName = newSystemFontName;
         }
 
         internal void unitConversion(GraphicsUnit fromUnit, GraphicsUnit toUnit, float nSrc, out float nTrg)
@@ -157,17 +153,16 @@ namespace System.Drawing
 
         void setProperties(FontFamily family, float emSize, FontStyle style, GraphicsUnit unit, byte charSet, bool isVertical)
         {
-            _name = family.Name;
             _fontFamily = family;
-            _size = emSize;
+            _fontSize = emSize;
 
             // MS throws ArgumentException, if unit is set to GraphicsUnit.Display
-            _unit = unit;
+            _fontUnit = unit;
             _fontStyle = style;
             _gdiCharSet = charSet;
             _gdiVerticalFont = isVertical;
 
-            unitConversion(unit, GraphicsUnit.Point, emSize, out _sizeInPoints);
+            unitConversion(unit, GraphicsUnit.Point, emSize, out _fontSizeInPoints);
         }
 
         public static Font FromHfont(IntPtr hfont)
@@ -325,7 +320,7 @@ namespace System.Drawing
         internal Font(string familyName, float emSize, string systemName)
             : this(familyName, emSize, FontStyle.Regular, GraphicsUnit.Point, DefaultCharSet, false)
         {
-            systemFontName = systemName;
+            _systemFontName = systemName;
         }
 
         public object Clone()
@@ -333,120 +328,10 @@ namespace System.Drawing
             return new Font(this, Style);
         }
 
-        private FontFamily _fontFamily;
+        private float _fontSizeInPoints;
 
         [Browsable(false)]
-        public FontFamily FontFamily
-        {
-            get
-            {
-                return _fontFamily;
-            }
-        }
-
-        private byte _gdiCharSet;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public byte GdiCharSet
-        {
-            get
-            {
-                return _gdiCharSet;
-            }
-        }
-
-        private bool _gdiVerticalFont;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool GdiVerticalFont
-        {
-            get
-            {
-                return _gdiVerticalFont;
-            }
-        }
-
-        [Browsable(false)]
-        public int Height
-        {
-            get
-            {
-                return (int)Math.Ceiling(GetHeight());
-            }
-        }
-
-        [Browsable(false)]
-        public bool IsSystemFont
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(systemFontName);
-            }
-        }
-
-        private string _name;
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#if !NETCORE
-        [Editor ("System.Drawing.Design.FontNameEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
-        [TypeConverter (typeof (FontConverter.FontNameConverter))]
-#endif
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
-
-        public float Size
-        {
-            get
-            {
-                return _size;
-            }
-        }
-
-        private float _sizeInPoints;
-
-        [Browsable(false)]
-        public float SizeInPoints
-        {
-            get
-            {
-                return _sizeInPoints;
-            }
-        }
-
-        [Browsable(false)]
-        public string SystemFontName
-        {
-            get
-            {
-                return systemFontName;
-            }
-        }
-
-        [Browsable(false)]
-        public string OriginalFontName
-        {
-            get
-            {
-                return originalFontName;
-            }
-        }
-        private GraphicsUnit _unit;
-
-#if !NETCORE
-        [TypeConverter (typeof (FontConverter.FontUnitConverter))]
-#endif
-        public GraphicsUnit Unit
-        {
-            get
-            {
-                return _unit;
-            }
-        }
+        public float SizeInPoints => _fontSizeInPoints;
 
         public override bool Equals(object obj)
         {
