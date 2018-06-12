@@ -21,13 +21,13 @@ namespace System.Net.Tests
 
         public void Dispose() => _factory.Dispose();
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public static void Supported_True()
         {
             Assert.True(HttpListener.IsSupported);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_StartStop_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -43,7 +43,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_StartCloseAbort_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -59,7 +59,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_StartAbortClose_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -75,7 +75,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_StopNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
@@ -83,21 +83,21 @@ namespace System.Net.Tests
             listener.Close();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_CloseNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
             listener.Close();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_AbortNoStart_NoException()
         {
             HttpListener listener = new HttpListener();
             listener.Abort();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void BasicTest_StartThrowsAbortCalledInFinally_AbortDoesntThrow()
         {
             HttpListener listener = new HttpListener();
@@ -117,10 +117,10 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public Task UnknownHeaders_Success_Large() => UnknownHeaders_Success(1000);
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(100)]
         public async Task UnknownHeaders_Success(int numHeaders)
         {

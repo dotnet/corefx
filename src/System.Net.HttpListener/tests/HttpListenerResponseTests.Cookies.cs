@@ -11,7 +11,7 @@ namespace System.Net.Tests
 {
     public class HttpListenerResponseCookiesTests : HttpListenerResponseTestBase
     {
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Cookies_GetSet_ReturnsExpected()
         {
             HttpListenerResponse response = await GetResponse();
@@ -87,7 +87,7 @@ namespace System.Net.Tests
             };
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Cookies_TestData))]
         public async Task Cookies_SetAndSend_ClientReceivesExpectedHeaders(CookieCollection cookies, int expectedBytes, string expectedSetCookie, string expectedSetCookie2)
         {
@@ -119,7 +119,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Cookies_SetInHeader_ClientReceivesExpectedHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -133,7 +133,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nSet-Cookie2: name2=value2\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Cookies_SetCookie2InHeadersButNotInCookies_RemovesFromHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -152,7 +152,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nSet-Cookie2: name3=value3; Port=\"200\"; Version=1\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Cookies_SetCookieInHeadersButNotInCookies_RemovesFromHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -171,7 +171,7 @@ namespace System.Net.Tests
             Assert.DoesNotContain("Set-Cookie2", clientResponse);
         }
   
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Cookies_AddMultipleInHeader_ClientReceivesExpectedHeaders()
         {
             HttpListenerResponse response = await GetResponse();
@@ -189,7 +189,7 @@ namespace System.Net.Tests
             Assert.Contains("\r\nSet-Cookie: name4=value4\r\n", clientResponse);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AppendCookie_ValidCookie_AddsCookieToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -210,14 +210,14 @@ namespace System.Net.Tests
             Assert.Equal("value3", response.Cookies[0].Value);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task AppendCookie_NullCookie_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
             AssertExtensions.Throws<ArgumentNullException>("cookie", () => response.AppendCookie(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SetCookie_ValidCookie_AddsCookieToCollection()
         {
             HttpListenerResponse response = await GetResponse();
@@ -230,7 +230,7 @@ namespace System.Net.Tests
             Assert.Equal(new Cookie[] { cookie1, cookie2 }, response.Cookies.Cast<Cookie>());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SetCookie_ValidCookie_ClonesCookie()
         {
             HttpListenerResponse response = await GetResponse();
@@ -242,14 +242,14 @@ namespace System.Net.Tests
             Assert.Equal("value", response.Cookies[0].Value);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SetCookie_NullCookie_ThrowsArgumentNullException()
         {
             HttpListenerResponse response = await GetResponse();
             AssertExtensions.Throws<ArgumentNullException>("cookie", () => response.SetCookie(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SetCookie_CookieDoesntExist_ThrowsArgumentException()
         {
             HttpListenerResponse response = await GetResponse();
