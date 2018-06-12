@@ -337,7 +337,7 @@ namespace System.Security.Cryptography
             System.Text.Encoding encoding = System.Text.Encoding.UTF8;
             int requiredBytes = encoding.GetByteCount(password);
             Span<byte> passwordBytes = stackalloc byte[0];
-            byte[] rentedPasswordBytes = Array.Empty<byte>();
+            byte[] rentedPasswordBytes;
 
             if (requiredBytes > 128)
             {
@@ -346,12 +346,13 @@ namespace System.Security.Cryptography
             }
             else
             {
+                rentedPasswordBytes = Array.Empty<byte>();
                 passwordBytes = stackalloc byte[requiredBytes];
             }
 
-            try
+            fixed (byte* bytePtr = rentedPasswordBytes)
             {
-                fixed (byte* bytePtr = rentedPasswordBytes)
+                try
                 {
                     int written = encoding.GetBytes(password, passwordBytes);
 
@@ -369,14 +370,14 @@ namespace System.Security.Cryptography
                         pkcs8Writer,
                         pbeParameters);
                 }
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(passwordBytes);
-
-                if (rentedPasswordBytes.Length > 0)
+                finally
                 {
-                    ArrayPool<byte>.Shared.Return(rentedPasswordBytes);
+                    CryptographicOperations.ZeroMemory(passwordBytes);
+
+                    if (rentedPasswordBytes.Length > 0)
+                    {
+                        ArrayPool<byte>.Shared.Return(rentedPasswordBytes);
+                    }
                 }
             }
         }
@@ -408,17 +409,19 @@ namespace System.Security.Cryptography
                 out string encryptionAlgorithmOid,
                 out bool isPkcs12);
 
-            // We need at least one block size beyond the input data size.
-            byte[] encryptedRent = ArrayPool<byte>.Shared.Rent(
-                checked(pkcs8Span.Length + (cipher.BlockSize / 8)));
-
+            byte[] encryptedRent = null;
             Span<byte> encryptedSpan = default;
             AsnWriter writer = null;
 
             try
             {
+                Debug.Assert(cipher.BlockSize <= 128, $"Encountered unexpected block size: {cipher.BlockSize}");
                 Span<byte> iv = stackalloc byte[cipher.BlockSize / 8];
                 Span<byte> salt = stackalloc byte[16];
+
+                // We need at least one block size beyond the input data size.
+                encryptedRent = ArrayPool<byte>.Shared.Rent(
+                    checked(pkcs8Span.Length + (cipher.BlockSize / 8)));
 
                 RandomNumberGenerator.Fill(salt);
 
