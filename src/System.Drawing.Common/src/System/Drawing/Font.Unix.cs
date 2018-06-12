@@ -348,28 +348,6 @@ namespace System.Drawing
                 return false;
         }
 
-        private int _hashCode;
-
-        public override int GetHashCode()
-        {
-            if (_hashCode == 0)
-            {
-                _hashCode = 17;
-                unchecked
-                {
-                    _hashCode = _hashCode * 23 + _name.GetHashCode();
-                    _hashCode = _hashCode * 23 + FontFamily.GetHashCode();
-                    _hashCode = _hashCode * 23 + _size.GetHashCode();
-                    _hashCode = _hashCode * 23 + _unit.GetHashCode();
-                    _hashCode = _hashCode * 23 + _style.GetHashCode();
-                    _hashCode = _hashCode * 23 + _gdiCharSet;
-                    _hashCode = _hashCode * 23 + _gdiVerticalFont.GetHashCode();
-                }
-            }
-
-            return _hashCode;
-        }
-
         public static Font FromHdc(IntPtr hdc)
         {
             throw new NotImplementedException();
@@ -490,11 +468,6 @@ namespace System.Drawing
             int status = SafeNativeMethods.Gdip.GdipGetFontHeightGivenDPI(_nativeFont, dpi, out size);
             SafeNativeMethods.Gdip.CheckStatus(status);
             return size;
-        }
-
-        public override String ToString()
-        {
-            return String.Format("[Font: Name={0}, Size={1}, Units={2}, GdiCharSet={3}, GdiVerticalFont={4}]", _name, Size, (int)_unit, _gdiCharSet, _gdiVerticalFont);
         }
     }
 }

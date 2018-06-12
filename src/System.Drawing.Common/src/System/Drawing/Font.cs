@@ -132,3 +132,29 @@ namespace System.Drawing
         /// Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet.
         /// </summary>
         internal IntPtr NativeFont => _nativeFont;
+
+        /// <summary>
+        /// Gets the hash code for this <see cref='Font'/>.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return unchecked((int)((((uint)_fontStyle << 13) | ((uint)_fontStyle >> 19)) ^
+                         (((uint)_fontUnit << 26) | ((uint)_fontUnit >> 6)) ^
+                         (((uint)_fontSize << 7) | ((uint)_fontSize >> 25))));
+        }
+
+        /// <summary>
+        /// Returns a human-readable string representation of this <see cref='Font'/>.
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format(CultureInfo.CurrentCulture, "[{0}: Name={1}, Size={2}, Units={3}, GdiCharSet={4}, GdiVerticalFont={5}]",
+                                    GetType().Name,
+                                    FontFamily.Name,
+                                    _fontSize,
+                                    (int)_fontUnit,
+                                    _gdiCharSet,
+                                    _gdiVerticalFont);
+        }
+    }
+}
