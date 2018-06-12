@@ -214,6 +214,7 @@ namespace System.Xml.Serialization
 #if !FEATURE_SERIALIZATION_UAPAOT
                 if (!IsSerializerVersionMatch(serializer, type, defaultNamespace))
                 {
+                    XmlSerializationEventSource.Log.Trace(SR.Format(SR.XmlSerializerExpiredDetails, serializerName, type.FullName));
                     return null;
                 }
 #endif
