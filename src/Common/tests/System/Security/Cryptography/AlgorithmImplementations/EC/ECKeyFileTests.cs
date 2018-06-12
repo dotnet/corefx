@@ -204,19 +204,23 @@ Ji0iy6T3Y16v8maAqNihK6YdWZI19n2ctNWPF4PTykPnjwpauqYkB5k2wMOp");
                 Assert.ThrowsAny<CryptographicException>(
                     () => ImportECPrivateKey(key, explicitECPrivateKey, out _));
 
-                Assert.ThrowsAny<CryptographicException>(
-                    () => key.ImportPkcs8PrivateKey(explicitPkcs8, out _));
+                // Win10 supports explicit curve PKCS8 on the CNG types. 
+                if (!PlatformDetection.IsWindows10Version1607OrGreater)
+                {
+                    Assert.ThrowsAny<CryptographicException>(
+                        () => key.ImportPkcs8PrivateKey(explicitPkcs8, out _));
 
-                Pkcs8PrivateKeyInfo builder = Pkcs8PrivateKeyInfo.Decode(explicitPkcs8, out _, skipCopy: true);
-                byte[] explicitEncryptedPkcs8 = builder.Encrypt(
-                    "asdf",
-                    new PbeParameters(
-                        PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
-                        HashAlgorithmName.SHA1,
-                        2048));
+                    Pkcs8PrivateKeyInfo builder = Pkcs8PrivateKeyInfo.Decode(explicitPkcs8, out _, skipCopy: true);
+                    byte[] explicitEncryptedPkcs8 = builder.Encrypt(
+                        "asdf",
+                        new PbeParameters(
+                            PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
+                            HashAlgorithmName.SHA1,
+                            2048));
 
-                Assert.ThrowsAny<CryptographicException>(
-                    () => key.ImportEncryptedPkcs8PrivateKey("asdf", explicitEncryptedPkcs8, out _));
+                    Assert.ThrowsAny<CryptographicException>(
+                        () => key.ImportEncryptedPkcs8PrivateKey("asdf", explicitEncryptedPkcs8, out _));
+                }
             }
         }
 
