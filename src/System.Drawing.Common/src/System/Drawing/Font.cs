@@ -14,7 +14,6 @@ namespace System.Drawing
     public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
         private IntPtr _nativeFont;
-
         private float _fontSize;
         private FontStyle _fontStyle;
         private FontFamily _fontFamily;
