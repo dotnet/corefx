@@ -67,15 +67,16 @@ namespace System.IO
             ReadOnlySpan<char> trimmedCurrentPath = PathInternal.TrimEndingDirectorySeparator(FullPath.AsSpan());
 
             // We want to make sure the requested directory is actually under the subdirectory.
-            if (!trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
+            if (trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
                 // Allow the exact same path, but prevent allowing "..\FooBar" through when the directory is "Foo"
-                || ((trimmedNewPath.Length > trimmedCurrentPath.Length) && !PathInternal.IsDirectorySeparator(newPath[trimmedCurrentPath.Length])))
+                && ((trimmedNewPath.Length == trimmedCurrentPath.Length) || PathInternal.IsDirectorySeparator(newPath[trimmedCurrentPath.Length])))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
+                FileSystem.CreateDirectory(newPath);
+                return new DirectoryInfo(newPath);
             }
 
-            FileSystem.CreateDirectory(newPath);
-            return new DirectoryInfo(newPath);
+            // We weren't nested
+            throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
         }
 
         public void Create() => FileSystem.CreateDirectory(FullPath);
