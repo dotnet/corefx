@@ -1423,7 +1423,7 @@ namespace System.Xml.Serialization
         internal const string UrType = "anyType";
         internal const string Array = "Array";
         internal const string ArrayType = "arrayType";
-}
+    }
 
     internal class Soap12
     {

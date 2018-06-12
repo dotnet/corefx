@@ -23,12 +23,14 @@ namespace System.Xml.Xsl.XsltOld
         }
         internal void ReplaceVariables(VariableAction[] vars) { _variables = vars; }
 
+        // static Empty:
+        private static DbgData s_nullDbgData = new DbgData();
         private DbgData()
         {
             StyleSheet = null;
             _variables = Array.Empty<VariableAction>();
         }
-        public static DbgData Empty { get; } = new DbgData();
+        public static DbgData Empty { get { return s_nullDbgData; }
     }
 
     internal class DbgCompiler : Compiler
