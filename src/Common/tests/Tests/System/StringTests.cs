@@ -1327,8 +1327,8 @@ namespace System.Tests
             int result = s1.CompareTo(s1);
             Assert.Equal(0, result);
 
-            var first = new ReadOnlySpan<char>(a, 1, 0);
-            var second = new ReadOnlySpan<char>(a, 2, 0);
+            ReadOnlySpan<char> first = s1.AsSpan();
+            ReadOnlySpan<char> second = s2.AsSpan();
             result = first.SequenceCompareTo<char>(second);
             Assert.Equal(0, result);
         }
@@ -1394,8 +1394,8 @@ namespace System.Tests
             result = s2.CompareTo(s1);
             Assert.True(result > 0);
 
-            ReadOnlySpan<char> first = value.AsSpan(0, 2);
-            ReadOnlySpan<char> second = value.AsSpan(0, 3);
+            ReadOnlySpan<char> first = s1.AsSpan();
+            ReadOnlySpan<char> second = s2.AsSpan();
             result = first.SequenceCompareTo<char>(second);
             Assert.True(result < 0);
 
@@ -5046,7 +5046,7 @@ namespace System.Tests
             Assert.True(s1.SequenceEqual(s1.TrimStart('a')));
             Assert.True(s1.SequenceEqual(s1.TrimEnd('a')));
 
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
+            ReadOnlySpan<char> span = s1.AsSpan();
             Assert.True(span.SequenceEqual(span.Trim('a')));
             Assert.True(span.SequenceEqual(span.TrimStart('a')));
             Assert.True(span.SequenceEqual(span.TrimEnd('a')));
