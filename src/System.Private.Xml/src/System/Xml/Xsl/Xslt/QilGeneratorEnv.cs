@@ -27,6 +27,11 @@ namespace System.Xml.Xsl.Xslt
                 Debug.Assert(args == null || args.Length == 0, "Error message must already be composed in res");
                 throw new XslLoadException(SR.Xml_UserException, res);
             }
+
+            public void ReportWarning(string res, params string[] args)
+            {
+                Debug.Fail("Should never get here");
+            }
         }
 
         // -------------------------------- IXPathEnvironment --------------------------------
