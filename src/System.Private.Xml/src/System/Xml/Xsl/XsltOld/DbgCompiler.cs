@@ -30,7 +30,7 @@ namespace System.Xml.Xsl.XsltOld
             StyleSheet = null;
             _variables = Array.Empty<VariableAction>();
         }
-        public static DbgData Empty { get { return s_nullDbgData; }
+        public static DbgData Empty { get { return s_nullDbgData; } }
     }
 
     internal class DbgCompiler : Compiler
