@@ -89,11 +89,6 @@ else()
     set(DYNAMIC_UCRT_LIB "ucrtd.lib")
 endif()
 
-# App-Container builds require a more specific linking to ensure the APIs imported pass WACK
-if ($ENV{__appContainer} STREQUAL true AND UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
-    set(__LinkArgs "${__LinkArgs} /LTCG")
-endif()
-
 # Linker flags
 set(__LinkArgs "${__LinkArgs} /INCREMENTAL:NO")
 set(__LinkArgs "${__LinkArgs} /MANIFEST:NO")            #Do not create Side-by-Side Assembly Manifest
