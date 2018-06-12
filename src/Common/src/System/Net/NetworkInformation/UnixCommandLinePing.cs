@@ -76,6 +76,7 @@ namespace System.Net.NetworkInformation
                     // Linux uses -t ttl for both IPv4 & IPv6
                     sb.Append(" -t ");
                 }
+
                 sb.Append(ttl);
             }
 
