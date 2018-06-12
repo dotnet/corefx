@@ -68,7 +68,12 @@ namespace System.Net.NetworkInformation
             {
                 socket.ReceiveTimeout = timeout;
                 socket.SendTimeout = timeout;
-                // Setting Socket.DontFragment and .Ttl is not supported on Unix, so ignore the PingOptions parameter.
+                // Setting Socket.DontFragment is not supported on Unix, so ignore the PingOptions parameter.
+
+                if (options != null && options.Ttl > 0)
+                {
+                    socket.Ttl = (short)options.Ttl;
+                }
 
                 int ipHeaderLength = isIpv4 ? MinIpHeaderLengthInBytes : 0;
                 await socket.SendToAsync(new ArraySegment<byte>(sendBuffer), SocketFlags.None, endPoint).ConfigureAwait(false);
@@ -160,7 +165,7 @@ namespace System.Net.NetworkInformation
                 throw new PlatformNotSupportedException(SR.net_ping_utility_not_found);
             }
 
-            string processArgs = UnixCommandLinePing.ConstructCommandLine(buffer.Length, address.ToString(), isIpv4);
+            string processArgs = UnixCommandLinePing.ConstructCommandLine(buffer.Length, address.ToString(), isIpv4, options?.Ttl ?? 0);
             ProcessStartInfo psi = new ProcessStartInfo(pingExecutable, processArgs);
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
