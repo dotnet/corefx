@@ -90,6 +90,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void SubdirectoryOverlappingName_ThrowsArgumentException()
         {
             // What we're looking for here is trying to create C:\FooBar under C:\Foo by passing "..\FooBar"
