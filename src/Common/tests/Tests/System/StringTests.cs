@@ -1340,7 +1340,7 @@ namespace System.Tests
             int result = s1.CompareTo(s1);
             Assert.Equal(0, result);
 
-            var span = s1.AsSpan();
+            ReadOnlySpan<char> span = s1.AsSpan();
             result = span.SequenceCompareTo<char>(span);
             Assert.Equal(0, result);
         }
@@ -1352,7 +1352,7 @@ namespace System.Tests
             int result = s1.CompareTo(s1);
             Assert.Equal(0, result);
 
-            var first = s1.AsSpan(0, 3);            
+            ReadOnlySpan<char> first = s1.AsSpan(0, 3);            
             result = first.SequenceCompareTo<char>(s1.AsSpan());
             Assert.Equal(0, result);
         }
@@ -1367,7 +1367,7 @@ namespace System.Tests
             string s1 = new string(src, 0, 3);
             int result = s1.CompareTo(segment.ToString());
 
-            var first = s1.AsSpan();
+            ReadOnlySpan<char> first = s1.AsSpan();
             result = first.SequenceCompareTo<char>(segment);
             Assert.Equal(0, result);
         }
@@ -1394,8 +1394,8 @@ namespace System.Tests
             result = s2.CompareTo(s1);
             Assert.True(result > 0);
 
-            var first = value.AsSpan(0, 2);
-            var second = value.AsSpan(0, 3);
+            ReadOnlySpan<char> first = value.AsSpan(0, 2);
+            ReadOnlySpan<char> second = value.AsSpan(0, 3);
             result = first.SequenceCompareTo<char>(second);
             Assert.True(result < 0);
 
@@ -1436,8 +1436,8 @@ namespace System.Tests
                     result = string.Compare(s2, s1, StringComparison.Ordinal);
                     Assert.True(result > 0);
 
-                    var firstSpan = s1.AsSpan();
-                    var secondSpan = s2.AsSpan();
+                    ReadOnlySpan<char> firstSpan = s1.AsSpan();
+                    ReadOnlySpan<char> secondSpan = s2.AsSpan();
                     result = firstSpan.SequenceCompareTo<char>(secondSpan);
                     Assert.True(result < 0);
 
@@ -1469,8 +1469,8 @@ namespace System.Tests
                 result = string.Compare(s2, s1, StringComparison.Ordinal);
                 Assert.True(result > 0);
 
-                var firstSpan = s1.AsSpan();
-                var secondSpan = s2.AsSpan();
+                ReadOnlySpan<char> firstSpan = s1.AsSpan();
+                ReadOnlySpan<char> secondSpan = s2.AsSpan();
                 result = firstSpan.SequenceCompareTo<char>(secondSpan);
                 Assert.True(result < 0);
 
@@ -1497,8 +1497,8 @@ namespace System.Tests
                 int result = string.Compare(s1, s2);
                 Assert.Equal(0, result);
 
-                var span1 = s1.AsSpan();
-                var span2 = s2.AsSpan();
+                ReadOnlySpan<char> span1 = s1.AsSpan();
+                ReadOnlySpan<char> span2 = s2.AsSpan();
                 result = span1.SequenceCompareTo<char>(span2);
                 Assert.Equal(0, result);
             }
@@ -3581,7 +3581,7 @@ namespace System.Tests
             bool result = string.IsNullOrWhiteSpace(s1);
             Assert.True(result);
 
-            var span = s1.AsSpan();
+            ReadOnlySpan<char> span = s1.AsSpan();
             result = span.IsWhiteSpace();
             Assert.Equal(string.IsNullOrWhiteSpace(string.Empty), result);
         }
@@ -3636,7 +3636,7 @@ namespace System.Tests
                 bool result = string.IsNullOrWhiteSpace(s1);
                 Assert.True(result);
 
-                var span = s1.AsSpan();
+                ReadOnlySpan<char> span = s1.AsSpan();
                 result = span.IsWhiteSpace();
                 Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
             }
@@ -3705,7 +3705,7 @@ namespace System.Tests
                 bool result = string.IsNullOrWhiteSpace(s1);
                 Assert.False(result);
 
-                var span = s1.AsSpan();
+                ReadOnlySpan<char> span = s1.AsSpan();
                 result = span.IsWhiteSpace();
                 Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
             }
@@ -5250,7 +5250,7 @@ namespace System.Tests
                 Assert.True(s1.SequenceEqual(s1.TrimStart('a')));
                 Assert.True(s1.SequenceEqual(s1.TrimEnd('a')));
 
-                var span = s1.AsSpan();
+                ReadOnlySpan<char> span = s1.AsSpan();
                 Assert.True(span.SequenceEqual(span.Trim('a')));
                 Assert.True(span.SequenceEqual(span.TrimStart('a')));
                 Assert.True(span.SequenceEqual(span.TrimEnd('a')));
@@ -5620,7 +5620,7 @@ namespace System.Tests
                 Assert.True(s1.SequenceEqual(s1.TrimStart(chars)), "B :" + s1.Length);
                 Assert.True(s1.SequenceEqual(s1.TrimEnd(chars)));
 
-                var span = s1.AsSpan();
+                ReadOnlySpan<char> span = s1.AsSpan();
                 Assert.Equal(span.ToArray().Length, span.Trim(chars).ToArray().Length);
                 Assert.True(span.SequenceEqual(span.Trim(chars)), "A : " + span.Length);
                 Assert.True(span.SequenceEqual(span.TrimStart(chars)), "B :" + span.Length);
@@ -5854,7 +5854,7 @@ namespace System.Tests
                 Assert.True(s1.SequenceEqual(s1.TrimStart()));
                 Assert.True(s1.SequenceEqual(s1.TrimEnd()));
 
-                var span = s1.AsSpan();
+                ReadOnlySpan<char> span = s1.AsSpan();
                 Assert.True(span.SequenceEqual(span.Trim()));
                 Assert.True(span.SequenceEqual(span.TrimStart()));
                 Assert.True(span.SequenceEqual(span.TrimEnd()));
@@ -6048,7 +6048,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static unsafe void ConstructorsTest()
+        public static unsafe void Ctor_SByte()
         {
             string s = "This is a string constructor test";
             byte [] encodedBytes = Encoding.Default.GetBytes(s);
@@ -6083,8 +6083,8 @@ namespace System.Tests
             Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-            var span = s1.AsSpan();
-            var slice = s2.AsSpan();
+            ReadOnlySpan<char> span = s1.AsSpan();
+            ReadOnlySpan<char> slice = s2.AsSpan();
             Assert.True(span.StartsWith(slice, StringComparison.Ordinal));
 
             Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));
@@ -6130,8 +6130,8 @@ namespace System.Tests
                         s1.ToString().StartsWith(s2.ToString(), StringComparison.InvariantCultureIgnoreCase),
                         s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));
 
-                    var firstSpan = s1.AsSpan();
-                    var secondSpan = s2.AsSpan();
+                    ReadOnlySpan<char> firstSpan = s1.AsSpan();
+                    ReadOnlySpan<char> secondSpan = s2.AsSpan();
                     Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.Ordinal));
 
                     Assert.False(firstSpan.StartsWith(secondSpan, StringComparison.OrdinalIgnoreCase));
@@ -6175,8 +6175,8 @@ namespace System.Tests
                 Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));
                 Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-                var span1 = s1.AsSpan();
-                var span2 = s2.AsSpan();
+                ReadOnlySpan<char> span1 = s1.AsSpan();
+                ReadOnlySpan<char> span2 = s2.AsSpan();
                 Assert.True(span1.StartsWith(span2, StringComparison.Ordinal));
 
                 Assert.True(span1.StartsWith(span2, StringComparison.CurrentCulture));
@@ -6195,7 +6195,7 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => s1.StartsWith(s1, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => s1.StartsWith(s1, (StringComparison)6));
 
-            var span = s1.AsSpan();
+            ReadOnlySpan<char> span = s1.AsSpan();
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.CurrentCulture - 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
             SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, (StringComparison)6));
