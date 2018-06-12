@@ -20,7 +20,7 @@ namespace System.Net.Http
 
         public static HttpResponseMessage CreateResponseMessage(
             WinHttpRequestState state,
-            bool doManualDecompressionCheck)
+            DecompressionMethods manuallyProcessedDecompressionMethods)
         {
             HttpRequestMessage request = state.RequestMessage;
             SafeWinHttpHandle requestHandle = state.RequestHandle;
@@ -46,8 +46,8 @@ namespace System.Net.Http
                 {
                     int versionLength = GetResponseHeader(requestHandle, Interop.WinHttp.WINHTTP_QUERY_VERSION, buffer);
                     response.Version =
-                        CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.1", buffer, 0, versionLength) ? HttpVersionInternal.Version11 :
-                        CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.0", buffer, 0, versionLength) ? HttpVersionInternal.Version10 :
+                        CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.1", buffer, 0, versionLength) ? HttpVersion.Version11 :
+                        CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.0", buffer, 0, versionLength) ? HttpVersion.Version10 :
                         WinHttpHandler.HttpVersionUnknown;
                 }
 
@@ -65,7 +65,7 @@ namespace System.Net.Http
                 state.RequestHandle = null; // ownership successfully transfered to WinHttpResponseStram.
                 Stream decompressedStream = responseStream;
 
-                if (doManualDecompressionCheck)
+                if (manuallyProcessedDecompressionMethods != DecompressionMethods.None)
                 {
                     int contentEncodingStartIndex = 0;
                     int contentEncodingLength = GetResponseHeader(
@@ -77,14 +77,14 @@ namespace System.Net.Http
 
                     if (contentEncodingLength > 0)
                     {
-                        if (CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(
-                            EncodingNameGzip, buffer, contentEncodingStartIndex, contentEncodingLength))
+                        if ((manuallyProcessedDecompressionMethods & DecompressionMethods.GZip) == DecompressionMethods.GZip &&
+                            CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(EncodingNameGzip, buffer, contentEncodingStartIndex, contentEncodingLength))
                         {
                             decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
                             stripEncodingHeaders = true;
                         }
-                        else if (CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(
-                            EncodingNameDeflate, buffer, contentEncodingStartIndex, contentEncodingLength))
+                        else if ((manuallyProcessedDecompressionMethods & DecompressionMethods.Deflate) == DecompressionMethods.Deflate &&
+                                 CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase(EncodingNameDeflate, buffer, contentEncodingStartIndex, contentEncodingLength))
                         {
                             decompressedStream = new DeflateStream(responseStream, CompressionMode.Decompress);
                             stripEncodingHeaders = true;
@@ -348,7 +348,7 @@ namespace System.Net.Http
             {
                 if ((data & Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2) != 0)
                 {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.IsResponseHttp2: return true");
+                    if (NetEventSource.IsEnabled) NetEventSource.Info(requestHandle, nameof(Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2));
                     return true;
                 }
             }

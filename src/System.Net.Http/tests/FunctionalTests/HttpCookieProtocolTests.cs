@@ -151,6 +151,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(30051, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsync_AddMultipleCookieHeaders_CookiesSent()
         {
@@ -200,8 +201,8 @@ namespace System.Net.Http.Functional.Tests
 
             if (IsCurlHandler)
             {
-                // Issue #26983
                 // CurlHandler ignores container cookies when custom Cookie header is set.
+                // SocketsHttpHandler behaves the expected way. Not worth fixing in CurlHandler as it is going away.
                 return;
             }
 
@@ -231,6 +232,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(30051, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsync_SetCookieContainerAndMultipleCookieHeaders_BothCookiesSent()
         {
@@ -242,8 +244,8 @@ namespace System.Net.Http.Functional.Tests
 
             if (IsCurlHandler)
             {
-                // Issue #26983
                 // CurlHandler ignores container cookies when custom Cookie header is set.
+                // SocketsHttpHandler behaves the expected way. Not worth fixing in CurlHandler as it is going away.
                 return;
             }
 
@@ -427,6 +429,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(30051, TargetFrameworkMonikers.Uap)] // fails to remove cookie
         [Fact]
         public async Task GetAsync_ReceiveSetCookieHeader_CookieRemoved()
         {
@@ -448,6 +451,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(30051, TargetFrameworkMonikers.Uap)] // only adds one cookie
         [Fact]
         public async Task GetAsync_ReceiveInvalidSetCookieHeader_ValidCookiesAdded()
         {
@@ -529,6 +533,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ActiveIssue(30050, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsyncWithBasicAuth_ReceiveSetCookie_CookieSent()
         {

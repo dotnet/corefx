@@ -196,6 +196,27 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(29865, TargetFrameworkMonikers.UapNotUapAot)]
+        public void TestSetEnvironmentOnChildProcess()
+        {
+            const string name = "b5a715d3-d74f-465d-abb7-2abe844750c9";
+            Environment.SetEnvironmentVariable(name, "parent-process-value");
+
+            Process p = CreateProcess(() =>
+            {
+                if (Environment.GetEnvironmentVariable(name) != "child-process-value") 
+                    return 1;
+
+                return SuccessExitCode;
+            });
+            p.StartInfo.Environment.Add(name, "child-process-value");
+            p.Start();
+
+            Assert.True(p.WaitForExit(WaitInMS));
+            Assert.Equal(SuccessExitCode, p.ExitCode);
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Retrieving information about local processes is not supported on uap")]
         public void TestEnvironmentOfChildProcess()
         {
@@ -494,7 +515,7 @@ namespace System.Diagnostics.Tests
             Assert.False(psi.Environment.Contains(new KeyValuePair<string, string>("NewKey3", "NewValue3")));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano does not support these verbs
         [PlatformSpecific(TestPlatforms.Windows)]  // Test case is specific to Windows
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Verbs_GetWithExeExtension_ReturnsExpected()
@@ -509,11 +530,8 @@ namespace System.Diagnostics.Tests
             }
 
             Assert.Contains("open", psi.Verbs, StringComparer.OrdinalIgnoreCase);
-            if (PlatformDetection.IsNotWindowsNanoServer)
-            {
-                Assert.Contains("runas", psi.Verbs, StringComparer.OrdinalIgnoreCase);
-                Assert.Contains("runasuser", psi.Verbs, StringComparer.OrdinalIgnoreCase);
-            }
+            Assert.Contains("runas", psi.Verbs, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("runasuser", psi.Verbs, StringComparer.OrdinalIgnoreCase);
             Assert.DoesNotContain("printto", psi.Verbs, StringComparer.OrdinalIgnoreCase);
             Assert.DoesNotContain("closed", psi.Verbs, StringComparer.OrdinalIgnoreCase);
         }

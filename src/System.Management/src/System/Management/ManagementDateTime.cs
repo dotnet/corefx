@@ -195,16 +195,13 @@ namespace System.Management
             }
 
 
-            // Construct a new System.DateTime object
-            var datetime = new DateTime(year, month, day, hour, minute, second, 0, DateTimeKind.Utc);
+            // Construct a new System.DateTime object, netfx uses date kind unspecified so use the same
+            var datetime = new DateTime(year, month, day, hour, minute, second, 0, DateTimeKind.Unspecified);
             // Then add the ticks calculated from the microseconds
             datetime = datetime.AddTicks(ticks);
-            // Then subtruct offset in minutes
-            datetime = datetime.AddMinutes(-utcOffset);
+            // Then adjust the offset, using a manual calulation to keep the same possible range as netfx
+            datetime = datetime.AddMinutes(-(utcOffset - TimeZoneInfo.Local.GetUtcOffset(datetime).Ticks / TimeSpan.TicksPerMinute));
 
-            // Convert to local Time
-            datetime = datetime.ToLocalTime();
-            
             return datetime;
         }
 
@@ -239,9 +236,8 @@ namespace System.Management
         {
             string UtcString = String.Empty;
             // Fill up the UTC field in the DMTF date with the current
-            // zones UTC value
-            System.TimeZone curZone = System.TimeZone.CurrentTimeZone;
-            System.TimeSpan tickOffset = curZone.GetUtcOffset(date);
+            // zones UTC value. If date kind is UTC use offset of zero to match netfx (i.e.: TimeZone.GetUtcOffset)
+            TimeSpan tickOffset = date.Kind == DateTimeKind.Utc ? TimeSpan.Zero : TimeZoneInfo.Local.GetUtcOffset(date);
             long OffsetMins = (tickOffset.Ticks / System.TimeSpan.TicksPerMinute);
             IFormatProvider frmInt32 = (IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.Int32));
 
@@ -325,19 +321,19 @@ namespace System.Management
 
             if (dmtfts == null) 
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
             if (dmtfts.Length == 0) 
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
             if(dmtfts.Length != SIZEOFDMTFDATETIME)
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
             if(dmtfts.Substring(21,4) != ":000")
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
 
             System.Int64 ticks = 0;
@@ -363,12 +359,12 @@ namespace System.Management
             }
             catch
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
 
             if( days < 0 || hours < 0 || minutes < 0 || seconds < 0 || ticks < 0 )
             {
-                throw new System.ArgumentOutOfRangeException("dmtfTimespan");
+                throw new System.ArgumentOutOfRangeException(nameof(dmtfTimespan));
             }
 
             timespan = new System.TimeSpan(days, hours, minutes, seconds, 0);

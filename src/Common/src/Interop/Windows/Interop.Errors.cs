@@ -23,6 +23,9 @@ internal partial class Interop
         internal const int ERROR_SHARING_VIOLATION = 0x20;
         internal const int ERROR_LOCK_VIOLATION = 0x21;
         internal const int ERROR_HANDLE_EOF = 0x26;
+        internal const int ERROR_BAD_NETPATH = 0x35;
+        internal const int ERROR_NETWORK_ACCESS_DENIED = 0x41;
+        internal const int ERROR_BAD_NET_NAME = 0x43;
         internal const int ERROR_FILE_EXISTS = 0x50;
         internal const int ERROR_INVALID_PARAMETER = 0x57;
         internal const int ERROR_BROKEN_PIPE = 0x6D;
@@ -45,6 +48,7 @@ internal partial class Interop
         internal const int ERROR_PIPE_NOT_CONNECTED = 0xE9;
         internal const int ERROR_MORE_DATA = 0xEA;
         internal const int ERROR_NO_MORE_ITEMS = 0x103;
+        internal const int ERROR_DIRECTORY = 0x10B;
         internal const int ERROR_PARTIAL_COPY = 0x12B;
         internal const int ERROR_ARITHMETIC_OVERFLOW = 0x216;
         internal const int ERROR_PIPE_CONNECTED = 0x217;
@@ -59,6 +63,7 @@ internal partial class Interop
         internal const int ERROR_DDE_FAIL = 0x484;
         internal const int ERROR_DLL_NOT_FOUND = 0x485;
         internal const int ERROR_NOT_FOUND = 0x490;
+        internal const int ERROR_NETWORK_UNREACHABLE = 0x4CF;
         internal const int ERROR_NON_ACCOUNT_SID = 0x4E9;
         internal const int ERROR_NOT_ALL_ASSIGNED = 0x514;
         internal const int ERROR_UNKNOWN_REVISION = 0x519;
