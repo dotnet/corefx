@@ -127,6 +127,12 @@ namespace System.Security.Cryptography
                 throw errorCode.ToCryptographicException();
             }
 
+            if (numBytesNeeded == 0)
+            {
+                // This is rather unlikely, but prevents an error from ref buffer[0].
+                return Array.Empty<byte>();
+            }
+
             byte[] buffer = new byte[numBytesNeeded];
 
             errorCode = Interop.NCrypt.NCryptExportKey(
@@ -144,7 +150,14 @@ namespace System.Security.Cryptography
                 throw errorCode.ToCryptographicException();
             }
 
-            Array.Resize(ref buffer, numBytesNeeded);
+            if (buffer.Length != numBytesNeeded)
+            {
+                Span<byte> writtenPortion = buffer.AsSpan(0, numBytesNeeded);
+                byte[] tmp = writtenPortion.ToArray();
+                CryptographicOperations.ZeroMemory(writtenPortion);
+                return tmp;
+            }
+
             return buffer;
         }
 
@@ -182,6 +195,12 @@ namespace System.Security.Cryptography
             {
                 bytesWritten = 0;
                 return false;
+            }
+
+            if (written == 0)
+            {
+                bytesWritten = 0;
+                return true;
             }
 
             errorCode = Interop.NCrypt.NCryptExportKey(

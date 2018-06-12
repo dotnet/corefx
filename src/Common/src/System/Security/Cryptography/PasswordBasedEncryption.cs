@@ -19,7 +19,7 @@ namespace System.Security.Cryptography
 
         private static CryptographicException AlgorithmKdfRequiresChars(string algId)
         {
-            throw new CryptographicException(SR.Cryptography_AlgKdfRequiresChars, algId);
+            return new CryptographicException(SR.Cryptography_AlgKdfRequiresChars, algId);
         }
 
         internal static void ValidatePbeParameters(
@@ -476,17 +476,20 @@ namespace System.Security.Cryptography
                     requestedKeyLength,
                     ref iv);
 
-                byte[] key = pbkdf2.GetBytes(cipher.KeySize / 8);
-
-                fixed (byte* keyPtr = key)
+                using (cipher)
                 {
-                    try
+                    byte[] key = pbkdf2.GetBytes(cipher.KeySize / 8);
+
+                    fixed (byte* keyPtr = key)
                     {
-                        return Decrypt(cipher, key, iv, encryptedData, destination);
-                    }
-                    finally
-                    {
-                        CryptographicOperations.ZeroMemory(key);
+                        try
+                        {
+                            return Decrypt(cipher, key, iv, encryptedData, destination);
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(key);
+                        }
                     }
                 }
             }

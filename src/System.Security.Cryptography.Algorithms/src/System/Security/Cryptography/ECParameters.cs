@@ -212,17 +212,25 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> algIdParameters = algId.Parameters.Value.Span;
                 byte[] verify = ArrayPool<byte>.Shared.Rent(algIdParameters.Length);
 
-                // X.509 SubjectPublicKeyInfo specifies DER encoding.
-                // RFC 5915 specifies DER encoding for EC Private Keys.
-                // So we can compare as DER.
-                using (AsnWriter writer = AsnSerializer.Serialize(keyParameters.Value, AsnEncodingRules.DER))
+                try
                 {
-                    if (!writer.TryEncode(verify, out int written) ||
-                        written != algIdParameters.Length ||
-                        !algIdParameters.SequenceEqual(verify.AsSpan(0, written)))
+                    // X.509 SubjectPublicKeyInfo specifies DER encoding.
+                    // RFC 5915 specifies DER encoding for EC Private Keys.
+                    // So we can compare as DER.
+                    using (AsnWriter writer = AsnSerializer.Serialize(keyParameters.Value, AsnEncodingRules.DER))
                     {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        if (!writer.TryEncode(verify, out int written) ||
+                            written != algIdParameters.Length ||
+                            !algIdParameters.SequenceEqual(verify.AsSpan(0, written)))
+                        {
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
                     }
+                }
+                finally
+                {
+                    // verify contains public information and does not need to be cleared.
+                    ArrayPool<byte>.Shared.Return(verify);
                 }
             }
         }
