@@ -5792,7 +5792,7 @@ namespace System.Tests
                 Assert.True(s1.SequenceEqual(s1.TrimStart()));
                 Assert.True(s1.SequenceEqual(s1.TrimEnd()));
 
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                ReadOnlySpan<char> span = s1.AsSpan();
                 Assert.True(span.SequenceEqual(span.Trim()));
                 Assert.True(span.SequenceEqual(span.TrimStart()));
                 Assert.True(span.SequenceEqual(span.TrimEnd()));
