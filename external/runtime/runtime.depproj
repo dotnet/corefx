@@ -46,6 +46,19 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
+  <ItemGroup>
+    <!-- For coverage runs of any crossgen dll from CoreClr we need the respective IL, the pdbs are already in place -->
+    <!-- Make backups of the crossgen dlls that do not have .ni. in their names, so they can be restored after coverage runs  -->
+    <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
+      <ItemName>CoreCLRILFiles</ItemName>
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)/il</RuntimePath>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
+      <ItemName>CoreCLRCrossGenFiles</ItemName>
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)/ni</RuntimePath>
+    </BinPlaceConfiguration>
+  </ItemGroup>
+  
   <!-- Setup the testing shared framework host -->
   <Target Name="SetupTestingHost" AfterTargets="ResolveNuGetPackages" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
 
@@ -106,6 +119,11 @@
         <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
         <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.dbg" />
         <ReferenceCopyLocalPaths Include="@(_CoreCLRSymbolFiles)"/>
+
+        <CoreCLRILFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/il/*.*">
+          <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/</CrossGenAssemblyPath>
+        </CoreCLRILFiles>
+        <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
       </ItemGroup>
   </Target>
 
@@ -120,6 +138,7 @@
     <ItemGroup>
       <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
       <CoreCLRILFiles Include="$(CoreCLROverridePath)/IL/*.*" />
+      <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')" />
       <CoreCLRPDBFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb" />
 
       <_ReferenceCopyLocalPathsToRemove Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'" />
@@ -133,18 +152,6 @@
       <ReferenceCopyLocalPathsNativeImages Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(Filename)%(Extension)').Contains('.ni.'))" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPathsNativeImages)" />
     </ItemGroup>
-
-    <!-- For coverage runs of any crossgen dll from CoreClr we need the respective IL, the pdbs are already in place -->
-    <Copy SourceFiles="@(CoreCLRILFiles)"
-          DestinationFolder="$(NETCoreAppTestSharedFrameworkPath)/il"
-          SkipUnchangedFiles="true"
-          UseHardlinksIfPossible="$(BinPlaceUseHardlinksIfPossible)" />
-
-    <!-- Make backups of the crossgen dlls that do not have .ni. in their names, so they can be restored after coverage runs  -->
-    <Copy SourceFiles="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')"
-          DestinationFolder="$(NETCoreAppTestSharedFrameworkPath)/ni"
-          SkipUnchangedFiles="true"
-          UseHardlinksIfPossible="$(BinPlaceUseHardlinksIfPossible)" />
 
   </Target>
 </Project>
