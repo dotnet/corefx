@@ -7,58 +7,57 @@
 #include "pal_hmac.h"
 
 #include <assert.h>
-#include <memory>
 
-extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD* md)
+HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_MD* md)
 {
-    assert(key != nullptr || keyLen == 0);
+    assert(key != NULL || keyLen == 0);
     assert(keyLen >= 0);
-    assert(md != nullptr);
+    assert(md != NULL);
 
-    std::unique_ptr<HMAC_CTX> ctx(new (std::nothrow) HMAC_CTX);
-    if (ctx == nullptr)
+    HMAC_CTX* ctx = (HMAC_CTX*)malloc(sizeof(HMAC_CTX));
+    if (ctx == NULL)
     {
         // Allocation failed
-        return nullptr;
+        return NULL;
     }
 
-    // NOTE: We can't pass nullptr as empty key since HMAC_Init_ex will interpret
+    // NOTE: We can't pass NULL as empty key since HMAC_Init_ex will interpret
     // that as request to reuse the "existing" key.
     uint8_t _;
     if (keyLen == 0)
         key = &_;
 
-    HMAC_CTX_init(ctx.get());
-    int ret = HMAC_Init_ex(ctx.get(), key, keyLen, md, nullptr);
+    HMAC_CTX_init(ctx);
+    int ret = HMAC_Init_ex(ctx, key, keyLen, md, NULL);
 
     if (!ret)
     {
-        return nullptr;
+        return NULL;
     }
 
-    return ctx.release();
+    return ctx;
 }
 
-extern "C" void CryptoNative_HmacDestroy(HMAC_CTX* ctx)
+void CryptoNative_HmacDestroy(HMAC_CTX* ctx)
 {
-    if (ctx != nullptr)
+    if (ctx != NULL)
     {
         HMAC_CTX_cleanup(ctx);
-        delete ctx;
+        free(ctx);
     }
 }
 
-extern "C" int32_t CryptoNative_HmacReset(HMAC_CTX* ctx)
+int32_t CryptoNative_HmacReset(HMAC_CTX* ctx)
 {
-    assert(ctx != nullptr);
+    assert(ctx != NULL);
 
-    return HMAC_Init_ex(ctx, nullptr, 0, nullptr, nullptr);
+    return HMAC_Init_ex(ctx, NULL, 0, NULL, NULL);
 }
 
-extern "C" int32_t CryptoNative_HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
+int32_t CryptoNative_HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
 {
-    assert(ctx != nullptr);
-    assert(data != nullptr || len == 0);
+    assert(ctx != NULL);
+    assert(data != NULL || len == 0);
     assert(len >= 0);
 
     if (len < 0)
@@ -66,23 +65,23 @@ extern "C" int32_t CryptoNative_HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, i
         return 0;
     }
 
-    return HMAC_Update(ctx, data, UnsignedCast(len));
+    return HMAC_Update(ctx, data, (size_t)len);
 }
 
-extern "C" int32_t CryptoNative_HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
+int32_t CryptoNative_HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
 {
-    assert(ctx != nullptr);
-    assert(len != nullptr);
-    assert(md != nullptr || *len == 0);
+    assert(ctx != NULL);
+    assert(len != NULL);
+    assert(md != NULL || *len == 0);
     assert(*len >= 0);
 
-    if (len == nullptr || *len < 0)
+    if (len == NULL || *len < 0)
     {
         return 0;
     }
 
-    unsigned int unsignedLen = UnsignedCast(*len);
+    unsigned int unsignedLen = (unsigned int)*len;
     int ret = HMAC_Final(ctx, md, &unsignedLen);
-    *len = SignedCast(unsignedLen);
+    *len = (int32_t)unsignedLen;
     return ret;
 }

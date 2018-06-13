@@ -5,17 +5,17 @@
 #include "pal_err.h"
 #include "pal_utilities.h"
 
-extern "C" void CryptoNative_ErrClearError()
+void CryptoNative_ErrClearError()
 {
     ERR_clear_error();
 }
 
-extern "C" uint64_t CryptoNative_ErrGetError()
+uint64_t CryptoNative_ErrGetError()
 {
     return ERR_get_error();
 }
 
-extern "C" uint64_t CryptoNative_ErrGetErrorAlloc(int32_t* isAllocFailure)
+uint64_t CryptoNative_ErrGetErrorAlloc(int32_t* isAllocFailure)
 {
     unsigned long err = ERR_get_error();
 
@@ -27,22 +27,22 @@ extern "C" uint64_t CryptoNative_ErrGetErrorAlloc(int32_t* isAllocFailure)
     return err;
 }
 
-extern "C" uint64_t CryptoNative_ErrPeekError()
+uint64_t CryptoNative_ErrPeekError()
 {
     return ERR_peek_error();
 }
 
-extern "C" uint64_t CryptoNative_ErrPeekLastError()
+uint64_t CryptoNative_ErrPeekLastError()
 {
     return ERR_peek_last_error();
 }
 
-extern "C" const char* CryptoNative_ErrReasonErrorString(uint64_t error)
+const char* CryptoNative_ErrReasonErrorString(uint64_t error)
 {
-    return ERR_reason_error_string(static_cast<unsigned long>(error));
+    return ERR_reason_error_string((unsigned long)error);
 }
 
-extern "C" void CryptoNative_ErrErrorStringN(uint64_t e, char* buf, int32_t len)
+void CryptoNative_ErrErrorStringN(uint64_t e, char* buf, int32_t len)
 {
-    ERR_error_string_n(static_cast<unsigned long>(e), buf, UnsignedCast(len));
+    ERR_error_string_n((unsigned long)e, buf, (size_t)len);
 }
