@@ -174,7 +174,6 @@ namespace System.Net.NetworkInformation
                     }
                     catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        sw.Stop();
                         return CreateTimedOutPingReply();
                     }
 
@@ -190,7 +189,6 @@ namespace System.Net.NetworkInformation
                 }
 
                 // We have exceeded our timeout duration, and no reply has been received.
-                sw.Stop();
                 return CreateTimedOutPingReply();
             }
         }
@@ -226,7 +224,6 @@ namespace System.Net.NetworkInformation
                     cts.Cancel();
                     if (finished != receiveTask)
                     {
-                        sw.Stop();
                         return CreateTimedOutPingReply();
                     }
 
@@ -244,7 +241,6 @@ namespace System.Net.NetworkInformation
                 }
 
                 // We have exceeded our timeout duration, and no reply has been received.
-                sw.Stop();
                 return CreateTimedOutPingReply();
             }
         }
