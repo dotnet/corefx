@@ -13,16 +13,11 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             Match match = regex.Match("aaabbccccccccccaaaabc");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            if (groups.TryGetValue("A1", out Group value))
-            {
-                Assert.Equal("aaa", value?.Value);
-            }
-            else
-            {
-                Assert.True(false, "Value should exist");
-            }
+            Assert.True(groups.TryGetValue("A1", out Group value));
+            Assert.NotNull(value);
+            Assert.Equal("aaa", value.Value);
         }
 
         [Fact]
@@ -31,16 +26,10 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             Match match = regex.Match("aaabbccccccccccaaaabc");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            if (groups.TryGetValue("INVALID", out Group value))
-            {
-                Assert.True(false, "Value should not exist");
-            }
-            else
-            {
-                Assert.Null(value);
-            }
+            Assert.False(groups.TryGetValue("INVALID", out Group value));
+            Assert.Null(value);
         }
 
         [Fact]
@@ -49,16 +38,10 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a+)(?<A2>b+)(?<A3>c+)");
             Match match = regex.Match("def");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            if (groups.TryGetValue("A1", out Group value))
-            {
-                Assert.True(false, "Value should not exist");
-            }
-            else
-            {
-                Assert.Null(value);
-            }
+            Assert.False(groups.TryGetValue("A1", out Group value));
+            Assert.Null(value);
         }
 
         [Fact]
@@ -67,17 +50,11 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             Match match = regex.Match("def");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            if (groups.TryGetValue("0", out Group value))
-            {
-                Assert.NotNull(value);
-                Assert.True(value.Success);
-            }
-            else
-            {
-                Assert.True(false, "Value should exist");
-            }
+            Assert.True(groups.TryGetValue("0", out Group value));
+            Assert.NotNull(value);
+            Assert.True(value.Success);
         }
 
         [Fact]
@@ -86,11 +63,12 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             Match match = regex.Match("aaabbbcccabc");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            var keys = groups.Keys.ToArray();
+            string[] keys = groups.Keys.ToArray();
 
             Assert.Equal(4, keys.Length);
+            Assert.Equal("0", keys[0]);
             Assert.Equal("A1", keys[1]);
             Assert.Equal("A2", keys[2]);
             Assert.Equal("A3", keys[3]);
@@ -102,11 +80,14 @@ namespace System.Text.RegularExpressions.Tests
             Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
             Match match = regex.Match("aaabbbcccabc");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
-            var values = groups.Values.ToArray();
+            Group[] values = groups.Values.ToArray();
 
             Assert.Equal(4, values.Length);
+
+            Assert.Equal("0", values[0].Name);
+            Assert.Equal("aaabbbccc", values[0].Value);
 
             Assert.Equal("A1", values[1].Name);
             Assert.Equal("aaa", values[1].Value);
@@ -125,21 +106,20 @@ namespace System.Text.RegularExpressions.Tests
             Match match = regex.Match("aaabbccccccccccaaaabc");
 
             IReadOnlyDictionary<string, Group> groups = match.Groups;
-            var enumerator = groups.GetEnumerator();
+            IEnumerator<KeyValuePair<string, Group>> enumerator = groups.GetEnumerator();
             for (int i = 0; i < 2; i++)
             {
                 int counter = 0;
                 while (enumerator.MoveNext())
                 {
-                    var result = enumerator.Current;
-                    Assert.NotNull(result);
-                    var group = match.Groups[counter];
+                    KeyValuePair<string, Group> result = enumerator.Current;
+                    Group group = match.Groups[counter];
                     Assert.Equal(group, result.Value);
                     Assert.Equal(group.Name, result.Key);
                     counter++;
                 }
                 Assert.False(enumerator.MoveNext());
-                Assert.Equal(groups.Count, counter);
+                Assert.Equal(counter, groups.Count);
                 enumerator.Reset();
             }
         }
@@ -155,8 +135,7 @@ namespace System.Text.RegularExpressions.Tests
 
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
-            while (enumerator.MoveNext())
-                ;
+            while (enumerator.MoveNext());
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
             enumerator.Reset();
@@ -170,24 +149,24 @@ namespace System.Text.RegularExpressions.Tests
 
             Match match = regex.Match("aaabbbccc");
 
-            var groups = match.Groups;
+            GroupCollection groups = match.Groups;
 
             Assert.True(match.Success);
 
             Assert.Equal(4, groups.Count);
 
-            var bByName = groups["B"];
+            Group bByName = groups["B"];
             Assert.Equal("bbb", bByName.Value);
             Assert.Equal("B", bByName.Name);
 
-            var bByIndex = groups[2];
+            Group bByIndex = groups[2];
             Assert.Equal("bbb", bByIndex.Value);
             Assert.Equal("B", bByIndex.Name);
 
-            var groupZero = groups[0];
+            Group groupZero = groups[0];
             Assert.Equal("aaabbbccc", groupZero.Value);
 
-            var groupC = groups[3];
+            Group groupC = groups[3];
             Assert.True(groupC.Success);
         }
     }
