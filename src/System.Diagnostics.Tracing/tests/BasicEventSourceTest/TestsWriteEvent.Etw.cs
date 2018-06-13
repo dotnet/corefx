@@ -26,7 +26,7 @@ namespace BasicEventSourceTests
         {
             using (var listener = new EtwListener())
             {
-                Test_WriteEvent(listener, false);
+                Test_WriteEvent(listener, false, true);
             }
         }
 
@@ -39,7 +39,7 @@ namespace BasicEventSourceTests
         {
             using (var listener = new EtwListener())
             {
-                Test_WriteEvent(listener, true);
+                Test_WriteEvent(listener, true, true);
             }
         }
 

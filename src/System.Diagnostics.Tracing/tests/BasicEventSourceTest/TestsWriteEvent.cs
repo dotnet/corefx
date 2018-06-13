@@ -40,7 +40,8 @@ namespace BasicEventSourceTests
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
         public void Test_WriteEvent_Manifest_EventListener_UseEvents()
         {
-            Test_WriteEvent(new EventListenerListener(true), false);
+            Listener listener = new EventListenerListener(true);
+            Test_WriteEvent(listener, false);
         }
 
         /// <summary>
@@ -66,7 +67,8 @@ namespace BasicEventSourceTests
         [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
         public void Test_WriteEvent_SelfDescribing_EventListener_UseEvents()
         {
-            Test_WriteEvent(new EventListenerListener(true), true);
+            Listener listener = new EventListenerListener(true);
+            Test_WriteEvent(listener, true);
         }
 
         [Fact]
@@ -97,9 +99,9 @@ namespace BasicEventSourceTests
         /// <summary>
         /// Helper method for the two tests above.  
         /// </summary>
-        private void Test_WriteEvent(Listener listener, bool useSelfDescribingEvents)
+        private void Test_WriteEvent(Listener listener, bool useSelfDescribingEvents, bool isEtwListener = false)
         {
-            using (var logger = new SdtEventSources.EventSourceTest(useSelfDescribingEvents))
+            using (var logger = new EventSourceTest(useSelfDescribingEvents))
             {
                 var tests = new List<SubTest>();
 
@@ -177,7 +179,7 @@ namespace BasicEventSourceTests
                 tests.Add(new SubTest("WriteEvent/Enum/EventEnum1",
                    delegate ()
                    {
-                       logger.EventEnum1(SdtEventSources.MyColor.Blue);
+                       logger.EventEnum1(MyColor.Blue);
                    },
                    delegate (Event evt)
                    {
@@ -304,11 +306,7 @@ namespace BasicEventSourceTests
                     }));
 
                 // Self-describing ETW does not support NULL arguments.
-                if (useSelfDescribingEvents
-#if USE_ETW
-                    && !(listener is EtwListener)
-#endif // USE_ETW
-                   )
+                if (useSelfDescribingEvents && !(isEtwListener))
                 {
                     tests.Add(new SubTest("WriteEvent/Basic/EventVarArgsWithString",
                         delegate ()
@@ -451,8 +449,6 @@ namespace BasicEventSourceTests
         {
             Test_WriteEvent_ByteArray(false, new EventListenerListener(true));
         }
-
-
 
         /// <summary>
         /// Tests sending complex data (class, arrays etc) from WriteEvent 
@@ -630,6 +626,7 @@ namespace BasicEventSourceTests
     public sealed class EventSourceTestByteArray : EventSource
     {
         public EventSourceTestByteArray(EventSourceSettings settings) : base(settings) { }
+        
         // byte[] args not supported on 4.5
         [Event(1, Level = EventLevel.Informational, Message = "Int arg after byte array: {1}")]
         public void EventWithByteArrayArg(byte[] blob, int n)
@@ -661,6 +658,7 @@ namespace BasicEventSourceTests
                 }
             }
         }
+        
         [Event(3, Level = EventLevel.Informational, Message = "long after byte array: {1}")]
         public void EventWithLongByteArray(byte[] blob, long lng)
         { WriteEvent(3, blob, lng); }
