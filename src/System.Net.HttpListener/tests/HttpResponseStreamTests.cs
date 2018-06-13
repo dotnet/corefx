@@ -32,7 +32,7 @@ namespace System.Net.Tests
             _helper.Dispose();
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task SimpleRequest_WriteAsynchronously_Succeeds(bool sendChunked)
@@ -70,7 +70,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task SimpleRequest_WriteSynchronouslyNonEmpty_Succeeds(bool sendChunked)
@@ -108,7 +108,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SimpleRequest_WriteAsynchronouslyInParts_Succeeds()
         {
             const string expectedResponse = "hello from HttpListener";
@@ -137,7 +137,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SimpleRequest_WriteSynchronouslyInParts_Succeeds()
         {
             const string expectedResponse = "hello from HttpListener";
@@ -166,7 +166,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SimpleRequest_WriteAynchronouslyEmpty_Succeeds()
         {
             Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();
@@ -189,7 +189,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task SimpleRequest_WriteSynchronouslyEmpty_Succeeds()
         {
             Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();
@@ -212,7 +212,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task CanSeek_Get_ReturnsFalse()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -230,7 +230,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task CanRead_Get_ReturnsFalse()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -244,7 +244,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task CanWrite_Get_ReturnsTrue()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -258,7 +258,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task Write_NullBuffer_ThrowsArgumentNullException()
         {
             using (HttpListenerResponse response = await _helper.GetResponse())
@@ -269,7 +269,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(-1)]
         [InlineData(3)]
         public async Task Write_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset)
@@ -282,7 +282,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(0, 3)]
         [InlineData(1, 2)]
         [InlineData(2, 1)]
@@ -296,7 +296,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooMuch_ThrowsProtocolViolationException()
         {
             using (HttpClient client = new HttpClient())
@@ -324,7 +324,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleAsynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())
@@ -350,7 +350,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementationAndNotOnNano))] // [ActiveIssue(20201, TestPlatforms.AnyUnix)]
         public async Task Write_TooLittleSynchronouslyAndClose_ThrowsInvalidOperationException()
         {
             using (HttpClient client = new HttpClient())
@@ -378,7 +378,7 @@ namespace System.Net.Tests
 
         [ActiveIssue(20246)] // CI hanging frequently
         [ActiveIssue(19534, TestPlatforms.OSX)]
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Write_HeadersToClosedConnectionAsynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
@@ -417,7 +417,7 @@ namespace System.Net.Tests
 
         [ActiveIssue(20246)] // CI hanging frequently
         [ActiveIssue(19534, TestPlatforms.OSX)]
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Write_HeadersToClosedConnectionSynchronously_ThrowsHttpListenerException(bool ignoreWriteExceptions)
@@ -456,7 +456,7 @@ namespace System.Net.Tests
         }
 
         [ActiveIssue(19534, TestPlatforms.OSX)]
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
@@ -496,7 +496,7 @@ namespace System.Net.Tests
         }
 
         [ActiveIssue(19534, TestPlatforms.OSX)]
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(18188, platforms: TestPlatforms.Windows)] // Indeterminate failure - socket not always fully disconnected.
@@ -535,7 +535,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(true)]
         [InlineData(false)]
         public async Task EndWrite_NullAsyncResult_ThrowsArgumentNullException(bool ignoreWriteExceptions)
@@ -548,7 +548,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task EndWrite_InvalidAsyncResult_ThrowsArgumentException()
         {
             using (HttpListenerResponse response1 = await _helper.GetResponse())
@@ -563,7 +563,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public async Task EndWrite_CalledTwice_ThrowsInvalidOperationException()
         {
             using (HttpListenerResponse response1 = await _helper.GetResponse())

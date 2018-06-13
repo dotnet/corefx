@@ -11,9 +11,9 @@ namespace System.Net.Tests
 {
     public class HttpListenerPrefixCollectionTests
     {
-        public static bool IsNonZeroLowerBoundArraySupported => PlatformDetection.IsNonZeroLowerBoundArraySupported;
+        public static bool IsNonZeroLowerBoundArraySupported => PlatformDetection.IsNonZeroLowerBoundArraySupported && Helpers.IsNotNanoServer;
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Prefixes_Get_ReturnsEmpty()
         {
             var listener = new HttpListener();
@@ -24,7 +24,7 @@ namespace System.Net.Tests
             Assert.Same(listener.DefaultServiceNames, listener.DefaultServiceNames);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
         public void CopyTo_StringArray_ReturnsExpected(int offset)
@@ -45,7 +45,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(0)]
         [InlineData(1)]
         public void CopyTo_Array_ReturnsExpected(int offset)
@@ -66,7 +66,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void CopyTo_DisposedListener_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -77,7 +77,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => prefixes.CopyTo(new string[1], 0));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core fixes a bug where HttpListenerPrefixCollection.CopyTo(null) throws an NRE.")]
         public void CopyTo_NullArray_ThrowsArgumentNullExceptionOnNetCore()
         {
@@ -86,7 +86,7 @@ namespace System.Net.Tests
             Assert.Throws<ArgumentNullException>(() => listener.Prefixes.CopyTo(null, 0));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Core fixes a bug where HttpListenerPrefixCollection.CopyTo(null) throws an NRE.")]
         public void CopyTo_NullArray_ThrowsNullReferenceExceptionOnNetFx()
         {
@@ -95,7 +95,7 @@ namespace System.Net.Tests
             Assert.Throws<NullReferenceException>(() => listener.Prefixes.CopyTo(null, 0));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void CopyTo_MultidimensionalArray_ThrowsIndexOutOfRangeException()
         {
             var listener = new HttpListener();
@@ -122,7 +122,7 @@ namespace System.Net.Tests
             Assert.Throws<IndexOutOfRangeException>(() => listener.Prefixes.CopyTo(array, 0));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void CopyTo_InvalidArrayType_ThrowsInvalidCastException()
         {
             var listener = new HttpListener();
@@ -135,7 +135,7 @@ namespace System.Net.Tests
             Assert.Throws<InvalidCastException>(() => listener.Prefixes.CopyTo(new int[1], 0));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void CopyTo_ArrayTooSmall_ThrowsArgumentOutOfRangeException()
         {
             var listener = new HttpListener();
@@ -144,7 +144,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("array", () => listener.Prefixes.CopyTo(new string[0], 0));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData(1)]
         [InlineData(2)]
         public void CopyTo_InvalidOffset_ThrowsArgumentOutOfRangeException(int offset)
@@ -155,21 +155,21 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => listener.Prefixes.CopyTo(new string[1], offset));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsSynchronized_Get_ReturnsFalse()
         {
             var listener = new HttpListener();
             Assert.False(listener.Prefixes.IsSynchronized);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsReadOnly_Get_ReturnsFalse()
         {
             var listener = new HttpListener();
             Assert.False(listener.Prefixes.IsReadOnly);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("http://*/")]
         [InlineData("http://+/")]
         [InlineData("http://localhost/")]
@@ -189,7 +189,7 @@ namespace System.Net.Tests
             Assert.All(listener.DefaultServiceNames.Cast<string>(), serviceNames => Assert.StartsWith("HTTP/", serviceNames));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Add_AlreadyStarted_ReturnsExpected()
         {
             using (var factory = new HttpListenerFactory())
@@ -217,7 +217,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndNotStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -232,7 +232,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredWithDifferentPathAndNotStarted_Works(string hostname)
         {
@@ -249,7 +249,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_PrefixAlreadyRegisteredAndStarted_ThrowsHttpListenerException(string hostname)
         {
@@ -275,7 +275,7 @@ namespace System.Net.Tests
             }
         }
         
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerNotStarted_Works(string host)
         {
@@ -294,7 +294,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerStarted_Works(string host)
         {
@@ -322,7 +322,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathMultipleStarted_Success(string host)
         {
@@ -368,7 +368,7 @@ namespace System.Net.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Issue #19619
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(InvalidPrefix_TestData))]
         public void Add_InvalidPrefixNotStarted_ThrowsHttpListenerExceptionOnStart(string uriPrefix)
         {
@@ -381,7 +381,7 @@ namespace System.Net.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Issue #19619
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [MemberData(nameof(InvalidPrefix_TestData))]
         public void Add_InvalidPrefixAlreadyStarted_ThrowsHttpListenerExceptionOnAdd(string uriPrefix)
         {
@@ -394,7 +394,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("")]
         [InlineData("http")]
         [InlineData("https")]
@@ -417,14 +417,14 @@ namespace System.Net.Tests
             Assert.Empty(listener.DefaultServiceNames);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Add_NullPrefix_ThrowsArgumentNullException()
         {
             var listener = new HttpListener();
             AssertExtensions.Throws<ArgumentNullException>("uriPrefix", () => listener.Prefixes.Add(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Add_LongHost_ThrowsArgumentOutOfRangeException()
         {
             var listener = new HttpListener();
@@ -439,7 +439,7 @@ namespace System.Net.Tests
             Assert.Throws<HttpListenerException>(() => listener.Start());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Add_DisposedListener_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -450,7 +450,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => prefixes.Add("http://localhost:9200/"));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("")]
         [InlineData("http://localhost:80/")]
         [InlineData("http://localhost:9200")]
@@ -463,14 +463,14 @@ namespace System.Net.Tests
             Assert.False(listener.Prefixes.Contains(uriPrefix));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Contains_NullPrefix_ThrowsArgumentNullException()
         {
             var listener = new HttpListener();
             AssertExtensions.Throws<ArgumentNullException>("key", () => listener.Prefixes.Contains(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Remove_PrefixExistsNotStarted_ReturnsTrue()
         {
             var listener = new HttpListener();
@@ -481,7 +481,7 @@ namespace System.Net.Tests
             Assert.Equal(0, listener.Prefixes.Count);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Remove_PrefixExistsStarted_ReturnsTrue()
         {
             using (var factory = new HttpListenerFactory())
@@ -498,7 +498,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         [InlineData("")]
         [InlineData("http://localhost:80/")]
         [InlineData("http://localhost:9200")]
@@ -511,7 +511,7 @@ namespace System.Net.Tests
             Assert.False(listener.Prefixes.Remove(uriPrefix));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Remove_DisposedListener_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -521,14 +521,14 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => prefixes.Remove("http://localhost:9200/"));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Remove_NullPrefix_ThrowsArgumentNullException()
         {
             var listener = new HttpListener();
             AssertExtensions.Throws<ArgumentNullException>("uriPrefix", () => listener.Prefixes.Remove(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Clear_NonEmpty_Success()
         {
             var listener = new HttpListener();
@@ -539,7 +539,7 @@ namespace System.Net.Tests
             Assert.Equal(0, listener.Prefixes.Count);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Clear_DisposedListener_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -549,7 +549,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => prefixes.Clear());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void GetEnumeratorGeneric_ResetMultipleTimes_ReturnsExpected()
         {
             var listener = new HttpListener();
@@ -574,7 +574,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void GetEnumeratorNonGeneric_ResetMultipleTimes_ReturnsExpected()
         {
             var listener = new HttpListener();

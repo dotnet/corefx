@@ -9,7 +9,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
 {
     public class DirectoryContextTests
     {
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.Domain)]
         [InlineData(DirectoryContextType.Forest)]
         public void Ctor_ContextType(DirectoryContextType contextType)
@@ -20,7 +20,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Null(context.UserName);
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.Domain, null, null)]
         [InlineData(DirectoryContextType.Forest, "UserName", "Password")]
         public void Ctor_ContextType_UserName_Password(DirectoryContextType contextType, string userName, string password)
@@ -31,7 +31,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Equal(userName, context.UserName);
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.ApplicationPartition)]
         [InlineData(DirectoryContextType.ConfigurationSet)]
         [InlineData(DirectoryContextType.DirectoryServer)]
@@ -41,7 +41,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentException>("contextType", () => new DirectoryContext(contextType, "username", "password"));
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.ApplicationPartition, "Name")]
         [InlineData(DirectoryContextType.ConfigurationSet, "Name")]
         [InlineData(DirectoryContextType.DirectoryServer, "Name")]
@@ -55,7 +55,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Null(context.UserName);
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.ApplicationPartition, "Name", null, null)]
         [InlineData(DirectoryContextType.ConfigurationSet, "Name", "", "")]
         [InlineData(DirectoryContextType.DirectoryServer, "Name", "UserName", "Password")]
@@ -69,7 +69,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Equal(userName, context.UserName);
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(DirectoryContextType.Domain - 1)]
         [InlineData(DirectoryContextType.ApplicationPartition + 1)]
         public void Ctor_InvalidContextType_ThrowsInvalidEnumArgumentException(DirectoryContextType contextType)
@@ -78,14 +78,14 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<InvalidEnumArgumentException>("contextType", () => new DirectoryContext(contextType, "name", "userName", "password"));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_NullName_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("name", () => new DirectoryContext(DirectoryContextType.ConfigurationSet, null));
             AssertExtensions.Throws<ArgumentNullException>("name", () => new DirectoryContext(DirectoryContextType.ConfigurationSet, null, "userName", "password"));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Ctor_EmptyName_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>("name", () => new DirectoryContext(DirectoryContextType.ConfigurationSet, string.Empty));

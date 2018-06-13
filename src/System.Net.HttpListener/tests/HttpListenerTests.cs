@@ -13,7 +13,7 @@ namespace System.Net.Tests
 {
     public class HttpListenerTests
     {
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IgnoreWriteExceptions_SetDisposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -22,7 +22,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.IgnoreWriteExceptions = false);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Stop_Disposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -31,7 +31,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.Stop());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsListening_NotStarted_ReturnsFalse()
         {
             using (var listener = new HttpListener())
@@ -40,7 +40,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsListening_Disposed_ReturnsFalse()
         {
             var listener = new HttpListener();
@@ -51,7 +51,7 @@ namespace System.Net.Tests
             Assert.False(listener.IsListening);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsListening_Aborted_ReturnsFalse()
         {
             var listener = new HttpListener();
@@ -62,7 +62,7 @@ namespace System.Net.Tests
             Assert.False(listener.IsListening);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void IsListening_Stopped_ReturnsFalse()
         {
             var listener = new HttpListener();
@@ -73,7 +73,7 @@ namespace System.Net.Tests
             Assert.False(listener.IsListening);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void Start_Disposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -82,7 +82,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.Start());
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void GetContext_Disposed_ThrowsObjectDisposedException()
         {
             var listener = new HttpListener();
@@ -92,7 +92,7 @@ namespace System.Net.Tests
             Assert.Throws<ObjectDisposedException>(() => listener.BeginGetContext(null, null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void GetContext_NotStarted_ThrowsInvalidOperationException()
         {
             using (var listener = new HttpListener())
@@ -102,7 +102,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void GetContext_NoPrefixes_ThrowsInvalidOperationException()
         {
             using (var listener = new HttpListener())
@@ -113,7 +113,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void EndGetContext_NullAsyncResult_ThrowsArgumentNullException()
         {
             using (var listener = new HttpListener())
@@ -122,7 +122,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void EndGetContext_InvalidAsyncResult_ThrowsArgumentException()
         {
             using (var listener1 = new HttpListener())
@@ -137,7 +137,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsNotNanoServer))]
         public void EndGetContext_AlreadyCalled_ThrowsInvalidOperationException()
         {
             using (var listenerFactory = new HttpListenerFactory())
