@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -113,15 +114,25 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void EnsureAllocatesSpan()
+        public unsafe void EnsureAllocatesSpan()
         {
-            PipeWriter writer = Pipe.Writer;
-            var span = writer.GetSpan(10);
+            // unchecked
+            // {
+            //     int* p = (int*)0xFF004324;
+            //     int q = *p;
+            // }
 
-            Assert.True(span.Length >= 10);
-            // 0 byte Flush would not complete the reader so we complete.
-            Pipe.Writer.Complete();
-            Assert.Equal(new byte[] { }, Read());
+            // var ptr = new IntPtr(42);
+            // Marshal.StructureToPtr(42, ptr, true);
+
+            while (true)
+            {
+                PipeWriter writer = Pipe.Writer;
+                Span<byte> span = writer.GetSpan(10);
+
+                Assert.True(span.Length >= 10);
+                //System.Diagnostics.Debugger.Launch();
+            }
         }
 
         [Fact]
