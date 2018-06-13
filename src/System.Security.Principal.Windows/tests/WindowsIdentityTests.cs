@@ -146,7 +146,6 @@ public class WindowsIdentityTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void BeginTask(RunImpersonatedAsyncTestInfo testInfo)
     {
-        testInfo.task = null;
         testInfo.continueTask = new SemaphoreSlim(0, 1);
         using (SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken)
         {
