@@ -143,7 +143,9 @@ namespace System.Drawing
                 {
                     throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(InterpolationMode));
                 }
-    
+
+                // GDI+ interprets the value of InterpolationMode and sets a value accordingly.
+                // Libgdiplus does not, so do this manually here.
                 switch (value)
                 {
                     case InterpolationMode.Default:
@@ -201,6 +203,7 @@ namespace System.Drawing
 
             set
             {
+                // Libgdiplus doesn't perform argument validation, so do this here for compatability.
                 if (value <= 0 || value > 1000000032)
                 {
                     throw new ArgumentException(SR.GdiplusInvalidParameter);
@@ -228,6 +231,8 @@ namespace System.Drawing
                     throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(GraphicsUnit));
                 }
 
+                // GDI+ doesn't allow GraphicsUnit.World as a valid value for PageUnit.
+                // Libgdiplus doesn't perform argument validation, so do this here.
                 if (value == GraphicsUnit.World)
                 {
                     throw new ArgumentException(SR.GdiplusInvalidParameter);
@@ -255,6 +260,8 @@ namespace System.Drawing
                     throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PixelOffsetMode));
                 }
 
+                // GDI+ doesn't allow PixelOffsetMode.Invalid as a valid value for PixelOffsetMode.
+                // Libgdiplus doesn't perform argument validation, so do this here.
                 if (value == PixelOffsetMode.Invalid)
                 {
                     throw new ArgumentException(SR.GdiplusInvalidParameter);
@@ -299,6 +306,8 @@ namespace System.Drawing
                     throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(SmoothingMode));
                 }
 
+                // GDI+ interprets the value of SmoothingMode and sets a value accordingly.
+                // Libgdiplus does not, so do this manually here.
                 switch (value)
                 {
                     case SmoothingMode.Default:
@@ -609,6 +618,9 @@ namespace System.Drawing
             {
                 throw new ArgumentNullException(nameof(matrix));
             }
+
+            // Multiplying the transform by a disposed matrix is a nop in GDI+, but throws
+            // with the libgdiplus backend. Simulate a nop for compatability with GDI+.
             if (matrix.nativeMatrix == IntPtr.Zero)
             {
                 return;
