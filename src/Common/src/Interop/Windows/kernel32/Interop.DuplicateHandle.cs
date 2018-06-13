@@ -19,5 +19,15 @@ internal static partial class Interop
             uint dwDesiredAccess,
             bool bInheritHandle,
             uint dwOptions);
+
+        [DllImport(Interop.Libraries.Kernel32, SetLastError = true)]
+        internal static extern bool DuplicateHandle(
+            IntPtr hSourceProcessHandle,
+            SafeAccessTokenHandle hSourceHandle,
+            IntPtr hTargetProcessHandle,
+            ref SafeAccessTokenHandle lpTargetHandle,
+            uint dwDesiredAccess,
+            bool bInheritHandle,
+            uint dwOptions);
     }
 }

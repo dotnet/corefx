@@ -230,15 +230,25 @@ namespace System.Security.Principal
 
         private static SafeAccessTokenHandle DuplicateAccessToken(SafeAccessTokenHandle accessToken)
         {
-            Debug.Assert(accessToken != null);
-
             if (accessToken.IsInvalid)
             {
                 return accessToken;
             }
 
-            SafeAccessTokenHandle duplicateAccessToken = DuplicateAccessToken(accessToken.DangerousGetHandle());
-            GC.KeepAlive(accessToken);
+            SafeAccessTokenHandle duplicateAccessToken = SafeAccessTokenHandle.InvalidHandle;
+            IntPtr currentProcessHandle = Interop.Kernel32.GetCurrentProcess();
+            if (!Interop.Kernel32.DuplicateHandle(
+                    currentProcessHandle,
+                    accessToken,
+                    currentProcessHandle,
+                    ref duplicateAccessToken,
+                    0,
+                    true,
+                    Interop.DuplicateHandleOptions.DUPLICATE_SAME_ACCESS))
+            {
+                throw new SecurityException(new Win32Exception().Message);
+            }
+
             return duplicateAccessToken;
         }
 
