@@ -42,13 +42,10 @@
 // Somehow, AIX mangles the definition for this behind a C++ def
 // Redeclare it here
 extern int     getpeereid(int, uid_t *__restrict__, gid_t *__restrict__);
-// GCC "fix"includes removes this definition from stdio.h entirely, even if you
-// opt into using getline via the `_GETDELIM` definition. (as it can conflict
-// with some existing code, so it's hidden behind a define) Adding to the
-// tragedy, the define we need for the runtime (`_ALL_SOURCE`) sets the other
-// necessary definition (`_XOPEN_SOURCE=700`) to 600, overriding it. As such,
-// redefine getline function declaration here and cut the gordian knot caused
-// by commercial Unix and GNU.
+// This function declaration is hidden behind `_XOPEN_SOURCE=700`, but we need
+// `_ALL_SOURCE` to build the runtime, and that resets that definition to 600.
+// Instead of trying to wrangle ifdefs in system headers with more definitions,
+// just declare it here.
 extern ssize_t  getline(char **, size_t *, FILE *);
 #endif
 
