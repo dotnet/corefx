@@ -303,24 +303,14 @@ namespace System.Net.Security.Tests
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
-                try
-                {
-                    // ProtectionLevel not match.
-                    await TestConfiguration.WhenAllOrAnyFailedWithTimeout(
+                // ProtectionLevel not match.
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(
+                    Assert.ThrowsAsync<AuthenticationException>(() =>
                         client.AuthenticateAsClientAsync((NetworkCredential)CredentialCache.DefaultCredentials,
-                            TargetName, ProtectionLevel.None, TokenImpersonationLevel.Identification),
+                            TargetName, ProtectionLevel.None, TokenImpersonationLevel.Identification)),
+                    Assert.ThrowsAsync<AuthenticationException>(() =>
                         server.AuthenticateAsServerAsync((NetworkCredential)CredentialCache.DefaultCredentials,
-                            ProtectionLevel.Sign, TokenImpersonationLevel.Identification));
-                }
-                catch (AggregateException e)
-                {
-                    ReadOnlyCollection<Exception> exceptions = e.InnerExceptions;
-                    Assert.Equal(2, exceptions.Count);
-                    foreach (Exception ex in exceptions)
-                    {
-                        Assert.Equal(typeof(AuthenticationException), ex.InnerException.GetType());
-                    }
-                }
+                            ProtectionLevel.Sign, TokenImpersonationLevel.Identification)));
 
                 Assert.Throws<AuthenticationException>(() => client.Write(s_sampleMsg, 0, s_sampleMsg.Length));
             }

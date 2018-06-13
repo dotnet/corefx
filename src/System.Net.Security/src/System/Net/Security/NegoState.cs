@@ -53,6 +53,8 @@ namespace System.Net.Security
 
         internal NegoState(Stream innerStream, bool leaveStreamOpen)
         {
+            Debug.Assert(innerStream != null);
+
             _innerStream = innerStream;
             _leaveStreamOpen = leaveStreamOpen;
         }
