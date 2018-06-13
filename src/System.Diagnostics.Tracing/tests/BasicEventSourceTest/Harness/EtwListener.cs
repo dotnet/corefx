@@ -13,7 +13,6 @@ using Microsoft.Diagnostics.Tracing;
 using System.Diagnostics.Tracing;
 #endif
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
