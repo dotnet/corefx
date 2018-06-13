@@ -137,11 +137,14 @@
     <!-- For coverage runs of any crossgen dll from CoreClr we need the respective IL, the pdbs are already in place -->
     <Copy SourceFiles="@(CoreCLRILFiles)"
           DestinationFolder="$(NETCoreAppTestSharedFrameworkPath)/il"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="$(BinPlaceUseHardlinksIfPossible)" />
+
     <!-- Make backups of the crossgen dlls that do not have .ni. in their names, so they can be restored after coverage runs  -->
     <Copy SourceFiles="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')"
           DestinationFolder="$(NETCoreAppTestSharedFrameworkPath)/ni"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="$(BinPlaceUseHardlinksIfPossible)" />
 
   </Target>
 </Project>
