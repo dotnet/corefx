@@ -34,6 +34,7 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
         public void JoinTwoPaths(string path1, string path2, string expected)
         {
+            Assert.Equal(expected, Path.Join(path1.AsSpan(), path2.AsSpan()));
             Assert.Equal(expected, Path.Join(path1, path2));
         }
 
@@ -84,6 +85,7 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(TestData_JoinThreePaths))]
         public void JoinThreePaths(string path1, string path2, string path3, string expected)
         {
+            Assert.Equal(expected, Path.Join(path1.AsSpan(), path2.AsSpan(), path3.AsSpan()));
             Assert.Equal(expected, Path.Join(path1, path2, path3));
         }
 
