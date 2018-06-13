@@ -12,10 +12,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <!--Windows only files -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">
-    <Compile Include="BasicEventSourceTest\TestEventCounter.Windows.cs" />
-    <Compile Include="BasicEventSourceTest\TestsWrite.Windows.cs" />
-    <Compile Include="BasicEventSourceTest\TestsUserErrors.Windows.cs" />
-    <Compile Include="BasicEventSourceTest\TestsWriteEvent.Windows.cs" />
+    <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs" />
+    <Compile Include="BasicEventSourceTest\TestEventCounter.Etw.cs" />
+    <Compile Include="BasicEventSourceTest\TestsWrite.Etw.cs" />
+    <Compile Include="BasicEventSourceTest\TestsUserErrors.Etw.cs" />
+    <Compile Include="BasicEventSourceTest\TestsWriteEvent.Etw.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicEventSourceTest\Harness\EventTestHarness.cs" />
