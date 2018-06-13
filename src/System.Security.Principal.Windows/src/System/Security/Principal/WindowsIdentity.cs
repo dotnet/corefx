@@ -235,21 +235,19 @@ namespace System.Security.Principal
                 return accessToken;
             }
 
-            SafeAccessTokenHandle duplicateAccessToken = SafeAccessTokenHandle.InvalidHandle;
-            IntPtr currentProcessHandle = Interop.Kernel32.GetCurrentProcess();
-            if (!Interop.Kernel32.DuplicateHandle(
-                    currentProcessHandle,
-                    accessToken,
-                    currentProcessHandle,
-                    ref duplicateAccessToken,
-                    0,
-                    true,
-                    Interop.DuplicateHandleOptions.DUPLICATE_SAME_ACCESS))
+            bool refAdded = false;
+            try
             {
-                throw new SecurityException(new Win32Exception().Message);
+                accessToken.DangerousAddRef(ref refAdded);
+                return DuplicateAccessToken(accessToken.DangerousGetHandle());
             }
-
-            return duplicateAccessToken;
+            finally
+            {
+                if (refAdded)
+                {
+                    accessToken.DangerousRelease();
+                }
+            }
         }
 
         private void CreateFromToken(IntPtr userToken)
