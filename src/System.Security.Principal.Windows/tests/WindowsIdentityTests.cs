@@ -136,7 +136,7 @@ public class WindowsIdentityTests
         GC.WaitForPendingFinalizers();
 
         testData.continueTask.Release();
-        testData.task.Wait();
+        testData.task.CheckedWait();
         if (testData.exception != null)
         {
             throw new AggregateException(testData.exception);
