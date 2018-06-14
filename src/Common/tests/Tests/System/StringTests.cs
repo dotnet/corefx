@@ -5061,14 +5061,14 @@ namespace System.Tests
             string s1 = new string(a);
             Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToUpperInvariant().ToArray());
-            {               
+            {
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToArray());
                 Assert.Equal(expected, source.ToArray());
             }
-            {                
+            {
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToUpperInvariant(destination));
