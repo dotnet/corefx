@@ -27,6 +27,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
+                // Check if a specialized blob for >=netfx472 is present and return if found.
+                if (PlatformDetection.IsNetfx472OrNewer)
+                {
+                    int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx472);
+
+                    if (index >= 0)
+                        return index;
+                }
+
                 // Check if a specialized blob for >=netfx471 is present and return if found.
                 if (PlatformDetection.IsNetfx471OrNewer)
                 {
@@ -57,14 +66,5 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             return -1;
         }
-    }
-
-    // The values represent platforms where there was change in the serialization for one or more types.
-    public enum TargetFrameworkMoniker
-    {
-        netfx461,
-        netfx471,
-        netcoreapp20,
-        netcoreapp21,
     }
 }

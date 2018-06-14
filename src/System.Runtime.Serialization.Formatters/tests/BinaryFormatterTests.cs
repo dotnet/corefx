@@ -105,7 +105,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
 
-                int index = tmpList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx461 || b.Platform == TargetFrameworkMoniker.netfx471);
+                int index = tmpList.FindIndex(b => b.Platform.IsNetfxPlatform());
                 if (index >= 0)
                     tmpList.RemoveAt(index);
 
