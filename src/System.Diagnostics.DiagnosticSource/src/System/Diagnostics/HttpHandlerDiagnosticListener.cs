@@ -653,11 +653,12 @@ namespace System.Diagnostics
         {
             if (request.AllowAutoRedirect)
             {
-                if (statusCode == HttpStatusCode.Ambiguous       ||  // 300
-                    statusCode == HttpStatusCode.Moved           ||  // 301
-                    statusCode == HttpStatusCode.Redirect        ||  // 302
-                    statusCode == HttpStatusCode.RedirectMethod  ||  // 303
-                    statusCode == HttpStatusCode.RedirectKeepVerb)   // 307
+                if (statusCode == HttpStatusCode.Ambiguous          ||  // 300
+                    statusCode == HttpStatusCode.Moved              ||  // 301
+                    statusCode == HttpStatusCode.Redirect           ||  // 302
+                    statusCode == HttpStatusCode.RedirectMethod     ||  // 303
+                    statusCode == HttpStatusCode.RedirectKeepVerb   ||  // 307
+                    statusCode == HttpStatusCode.PermanentRedirect) ||  // 308
                 {
                     return s_autoRedirectsAccessor(request) >= request.MaximumAutomaticRedirections;
                 }

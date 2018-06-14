@@ -1053,6 +1053,38 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(RedirectStatusCodes))]
+        public async Task GetAsync_TooManyRedirects_ThrowsForAllRedirectTypes(int statusCode)
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+
+            // This can be any number, as long as it is less than the number of hops specified below.
+            handler.MaxAutomaticRedirections = 2;
+
+            using (var client = new HttpClient(handler))
+            {
+                Task<HttpResponseMessage> t = client.GetAsync(Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.RemoteEchoServer,
+                    hops: 3));
+
+                if (UseSocketsHttpHandler || PlatformDetection.IsFullFramework)
+                {
+                    using (HttpResponseMessage response = await t)
+                    {
+                        Assert.Equal(statusCode, (int)response.StatusCode);
+                    }
+                }
+                else
+                {
+                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                }
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithRelativeLocation()
