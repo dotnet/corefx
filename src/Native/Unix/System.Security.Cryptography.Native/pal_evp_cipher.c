@@ -31,6 +31,7 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
     int ret = EVP_CipherInit_ex(ctx, type, NULL, NULL, NULL, 0);
     if (!ret)
     {
+        free(ctx);
         return NULL;
     }
 
@@ -40,6 +41,7 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
         ret = EVP_CIPHER_CTX_set_key_length(ctx, keyLength / 8);
         if (!ret)
         {
+            free(ctx);
             return NULL;
         }
     }
@@ -50,6 +52,7 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
         ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_SET_RC2_KEY_BITS, effectiveKeyLength, NULL);
         if (ret <= 0)
         {
+            free(ctx);
             return NULL;
         }
     }
@@ -58,6 +61,7 @@ CryptoNative_EvpCipherCreate2(const EVP_CIPHER* type, uint8_t* key, int32_t keyL
     ret = EVP_CipherInit_ex(ctx, NULL, NULL, key, iv, enc);
     if (!ret)
     {
+        free(ctx);
         return NULL;
     }
 

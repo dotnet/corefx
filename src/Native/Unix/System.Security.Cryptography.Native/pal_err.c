@@ -44,5 +44,5 @@ const char* CryptoNative_ErrReasonErrorString(uint64_t error)
 
 void CryptoNative_ErrErrorStringN(uint64_t e, char* buf, int32_t len)
 {
-    ERR_error_string_n((unsigned long)e, buf, (size_t)len);
+    ERR_error_string_n((unsigned long)e, buf, Int32ToSizeT(len));
 }

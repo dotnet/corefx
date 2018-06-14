@@ -335,7 +335,7 @@ int32_t CryptoNative_GetAsn1StringBytes(ASN1_STRING* asn1, uint8_t* pBuf, int32_
         return -length;
     }
 
-    memcpy_s(pBuf, (size_t)cBuf, asn1->data, (size_t)length);
+    memcpy_s(pBuf, Int32ToSizeT(cBuf), asn1->data, Int32ToSizeT(length));
     return 1;
 }
 
@@ -386,7 +386,7 @@ int32_t CryptoNative_GetX509NameRawBytes(X509_NAME* x509Name, uint8_t* pBuf, int
         return -length;
     }
 
-    memcpy_s(pBuf, (size_t)cBuf, x509Name->bytes->data, (size_t)length);
+    memcpy_s(pBuf, Int32ToSizeT(cBuf), x509Name->bytes->data, Int32ToSizeT(length));
     return 1;
 }
 
@@ -1331,7 +1331,14 @@ int32_t CryptoNative_EnsureOpenSslInitialized()
     }
 
     // Create the locks array
-    g_locks = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t) * (size_t)numLocks);
+    size_t allocationSize = 0;
+    if (!multiply_s(sizeof(pthread_mutex_t), (size_t)numLocks, &allocationSize))
+    {
+        ret = 2;
+        goto done;
+    }
+
+    g_locks = (pthread_mutex_t*)malloc(allocationSize);
     if (g_locks == NULL)
     {
         ret = 2;

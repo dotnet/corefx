@@ -346,7 +346,7 @@ static bool GetSslConnectionInfoFromDescription(const SSL_CIPHER* cipher,
                                                 HashAlgorithmType* dataHashAlg,
                                                 DataHashSize* hashKeySize)
 {
-    char description[descriptionLength];
+    char description[descriptionLength] = { 0 };
     SSL_CIPHER_description(cipher, description, descriptionLength - 1); // ensure description is NULL-terminated
 
     const char* keyExchange;

@@ -156,7 +156,7 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
     }
 
     unsigned int unsignedSigLen = 0;
-    int32_t ret = RSA_sign(type, m, (unsigned int)mlen, sigret, &unsignedSigLen, rsa);
+    int32_t ret = RSA_sign(type, m, Int32ToUint32(mlen), sigret, &unsignedSigLen, rsa);
     assert(unsignedSigLen <= INT32_MAX);
     *siglen = (int32_t)unsignedSigLen;
     return ret;
@@ -165,7 +165,7 @@ CryptoNative_RsaSign(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigr
 int32_t
 CryptoNative_RsaVerify(int32_t type, const uint8_t* m, int32_t mlen, uint8_t* sigbuf, int32_t siglen, RSA* rsa)
 {
-    return RSA_verify(type, m, (unsigned int)mlen, sigbuf, (unsigned int)siglen, rsa);
+    return RSA_verify(type, m, Int32ToUint32(mlen), sigbuf, Int32ToUint32(siglen), rsa);
 }
 
 int32_t CryptoNative_GetRsaParameters(const RSA* rsa,

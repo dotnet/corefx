@@ -32,6 +32,7 @@ HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen, const EVP_
 
     if (!ret)
     {
+        free(ctx);
         return NULL;
     }
 
@@ -65,7 +66,7 @@ int32_t CryptoNative_HmacUpdate(HMAC_CTX* ctx, const uint8_t* data, int32_t len)
         return 0;
     }
 
-    return HMAC_Update(ctx, data, (size_t)len);
+    return HMAC_Update(ctx, data, Int32ToSizeT(len));
 }
 
 int32_t CryptoNative_HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
@@ -80,8 +81,8 @@ int32_t CryptoNative_HmacFinal(HMAC_CTX* ctx, uint8_t* md, int32_t* len)
         return 0;
     }
 
-    unsigned int unsignedLen = (unsigned int)*len;
+    unsigned int unsignedLen = Int32ToUint32(*len);
     int ret = HMAC_Final(ctx, md, &unsignedLen);
-    *len = (int32_t)unsignedLen;
+    *len = Uint32ToInt32(unsignedLen);
     return ret;
 }
