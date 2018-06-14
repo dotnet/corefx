@@ -125,6 +125,20 @@ public class WindowsIdentityTests
     }
 
     [Fact]
+    public static void RunImpersonatedTest_InvalidHandle()
+    {
+        Assert.Throws<ArgumentException>(() =>
+        {
+            using (var mutex = new Mutex())
+            {
+                WindowsIdentity.RunImpersonated(
+                    new SafeAccessTokenHandle(mutex.SafeWaitHandle.DangerousGetHandle()),
+                    () => { });
+            }
+        });
+    }
+
+    [Fact]
     public static void RunImpersonatedAsyncTest()
     {
         var testData = new RunImpersonatedAsyncTestInfo();
