@@ -4790,23 +4790,22 @@ namespace System.Tests
         {
             char[] expectedSource = { 'a', 'B', 'c' };
             char[] a = { 'a', 'B', 'c' };
-            var expectedDestination = new char[1] { 'a' };
-            var expectedDestinationString = new char[0];
+            var expectedDestination = new char[1] { 'a' };            
             Span<char> destination = new char[1] { 'a' };
 
-            string s1 = new string(a, 2, 0);            
-            Assert.Equal(expectedDestinationString, s1.ToLowerInvariant().ToArray());            
+            string empty = new string(a, 2, 0);            
+            Assert.Equal("", empty.ToLowerInvariant());            
 
-            ReadOnlySpan<char> source = s1.AsSpan();                       
+            ReadOnlySpan<char> source = empty.AsSpan();                       
             Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
             Assert.Equal(source.Length, source.ToLowerInvariant(destination));
             Assert.Equal(expectedDestination, destination.ToArray());
             Assert.Equal(expectedSource, a);
 
-            s1 = string.Empty;            
-            Assert.Equal(expectedDestinationString, s1.ToLowerInvariant().ToArray()); 
+            empty = string.Empty;            
+            Assert.Equal("", empty.ToLowerInvariant()); 
          
-            source = s1.AsSpan();
+            source = empty.AsSpan();
             Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
             Assert.Equal(source.Length, source.ToLowerInvariant(destination));
             Assert.Equal(expectedDestination, destination.ToArray());
@@ -4818,20 +4817,17 @@ namespace System.Tests
         {
             var expected = new char[3] { 'a', 'b', 'c' };
             var a = new char[3] { 'a', 'B', 'c' };
+            string s1 = new string(a);
+            Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
+            Assert.Equal(expected, s1.ToLowerInvariant().ToArray());
             {
-                string s1 = new string(a);                                
-                Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());                
-
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToArray());
                 Assert.Equal(expected, source.ToArray());
             }
-            {
-                string s1 = new string(a);                                
-                Assert.Equal(expected, s1.ToLowerInvariant().ToArray());     
-
+            {                
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToLowerInvariant(destination));
@@ -5035,23 +5031,22 @@ namespace System.Tests
         {
             char[] expectedSource = { 'a', 'B', 'c' };
             char[] a = { 'a', 'B', 'c' };
-            var expectedDestination = new char[1] { 'a' };
-            var expectedDestinationString = new char[0];
+            var expectedDestination = new char[1] { 'a' };            
             Span<char> destination = new char[1] { 'a' };
 
-            string s1 = new string(a, 2, 0);            
-            Assert.Equal(expectedDestinationString, s1.ToUpperInvariant().ToArray());            
+            string empty = new string(a, 2, 0);            
+            Assert.Equal("", empty.ToUpperInvariant());            
 
-            ReadOnlySpan<char> source = s1.AsSpan();                       
+            ReadOnlySpan<char> source = empty.AsSpan();                       
             Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
             Assert.Equal(source.Length, source.ToUpperInvariant(destination));
             Assert.Equal(expectedDestination, destination.ToArray());
             Assert.Equal(expectedSource, a);
 
-            s1 = string.Empty;            
-            Assert.Equal(expectedDestinationString, s1.ToUpperInvariant().ToArray()); 
+            empty = string.Empty;            
+            Assert.Equal("", empty.ToUpperInvariant()); 
          
-            source = s1.AsSpan();
+            source = empty.AsSpan();
             Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
             Assert.Equal(source.Length, source.ToUpperInvariant(destination));
             Assert.Equal(expectedDestination, destination.ToArray());
@@ -5063,20 +5058,17 @@ namespace System.Tests
         {
             var expected = new char[3] { 'A', 'B', 'C' };
             var a = new char[3] { 'a', 'B', 'c' };
-            {
-                string s1 = new string(a);                                
-                Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());                
-
+            string s1 = new string(a);
+            Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
+            Assert.Equal(expected, s1.ToUpperInvariant().ToArray());
+            {               
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
                 Assert.Equal(expected, destination.ToArray());
                 Assert.Equal(expected, source.ToArray());
             }
-            {
-                string s1 = new string(a);                                
-                Assert.Equal(expected, s1.ToUpperInvariant().ToArray());     
-
+            {                
                 ReadOnlySpan<char> source = a;
                 Span<char> destination = a;
                 Assert.Equal(source.Length, source.ToUpperInvariant(destination));
