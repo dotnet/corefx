@@ -14,20 +14,4 @@ namespace System.Runtime.Serialization.Formatters.Tests
         netcoreapp20,
         netcoreapp21,
     }
-
-    public static class PlatformExtensions
-    {
-        public static bool IsNetfxPlatform(this TargetFrameworkMoniker targetFrameworkMoniker)
-        {
-            switch (targetFrameworkMoniker)
-            {
-                case TargetFrameworkMoniker.netfx461:
-                case TargetFrameworkMoniker.netfx471:
-                case TargetFrameworkMoniker.netfx472:
-                    return true;
-            }
-
-            return false;
-        }
-    }
 }
