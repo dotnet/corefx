@@ -1054,7 +1054,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
-        [OuterLoop] // TODO: Issue #11345
+        [Outerloop("Use external server")]
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_TooManyRedirects_ThrowsForAllRedirectTypes(int statusCode)
         {
