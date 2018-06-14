@@ -62,7 +62,8 @@ namespace System.Net.Http.Functional.Tests
             new object[] { 301 },
             new object[] { 302 },
             new object[] { 303 },
-            new object[] { 307 }
+            new object[] { 307 },
+            new object[] { 308 }
         };
 
         public static readonly object[][] RedirectStatusCodesOldMethodsNewMethods = {
@@ -85,6 +86,10 @@ namespace System.Net.Http.Functional.Tests
             new object[] { 307, "GET", "GET" },
             new object[] { 307, "POST", "POST" },
             new object[] { 307, "HEAD", "HEAD" },
+
+            new object[] { 308, "GET", "GET" },
+            new object[] { 308, "POST", "POST" },
+            new object[] { 308, "HEAD", "HEAD" },
         };
 
         // Standard HTTP methods defined in RFC7231: http://tools.ietf.org/html/rfc7231#section-4.3
