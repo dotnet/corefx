@@ -7,17 +7,21 @@ using System.Diagnostics.Tracing;
 
 namespace System.Xml.Serialization
 {
-    [EventSource(Name = "System.Xml.Serialzation.XmlSerializationEventSource")]
+    [EventSource(Name = "System.Xml.Serialzation.XmlSerialization")]
     internal class XmlSerializationEventSource : EventSource
     {
         internal static XmlSerializationEventSource Log = new XmlSerializationEventSource();
 
-        private const int TraceEventId = 1;
-
-        [Event(TraceEventId, Level = EventLevel.Informational)]
-        internal void Trace(string message)
+        [Event(EventIds.XmlSerializerExpired, Level = EventLevel.Informational, 
+            Message = "Pre-generated serializer '{0}' has expired. You need to re-generate serializer for '{1}'")]
+        internal void XmlSerializerExpired(string serializerName, string type)
         {
-            WriteEvent(TraceEventId, message);
+            WriteEvent(EventIds.XmlSerializerExpired, serializerName, type);
+        }
+
+        public class EventIds
+        {
+            public const int XmlSerializerExpired = 1;
         }
     }
 }
