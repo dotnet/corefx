@@ -4793,8 +4793,8 @@ namespace System.Tests
             var expectedDestination = new char[1] { 'a' };            
             Span<char> destination = new char[1] { 'a' };
 
-            string emptyString = new string(a, 2, 0);            
-            Assert.Equal("", emptyString.ToLowerInvariant());            
+            string emptyString = new string(a, 2, 0);
+            Assert.Equal("", emptyString.ToLowerInvariant());
 
             ReadOnlySpan<char> source = emptyString.AsSpan();                       
             Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
