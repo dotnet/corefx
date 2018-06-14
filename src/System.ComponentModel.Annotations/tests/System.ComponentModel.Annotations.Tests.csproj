@@ -9,6 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="AssociatedMetadataTypeTypeDescriptionProviderTests.cs" />
     <Compile Include="UIHintAttributeTests.cs" />
     <Compile Include="FilterUIHintAttributeTests.cs" />
     <Compile Include="DisplayAttributeTests.cs" />
@@ -26,6 +27,7 @@
     <Compile Include="EnumDataTypeAttributeTests.cs" />
     <Compile Include="FileExtensionsAttributeTests.cs" />
     <Compile Include="MaxLengthAttributeTests.cs" />
+    <Compile Include="MetadataTypeAttributeTests.cs" />
     <Compile Include="MinLengthAttributeTests.cs" />
     <Compile Include="PhoneAttributeTests.cs" />
     <Compile Include="RangeAttributeTests.cs" />

@@ -13,6 +13,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
+    <Compile Include="System\ComponentModel\DataAnnotations\AssociatedMetadataTypeTypeDescriptor.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\AssociatedMetadataTypeTypeDescriptionProvider.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\AssociationAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\CompareAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\ConcurrencyCheckAttribute.cs" />
@@ -32,6 +34,8 @@
     <Compile Include="System\ComponentModel\DataAnnotations\KeyAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\LocalizableString.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\MaxLengthAttribute.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\MetadataPropertyDescriptorWrapper.cs" />
+    <Compile Include="System\ComponentModel\DataAnnotations\MetadataTypeAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\MinLengthAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\PhoneAttribute.cs" />
     <Compile Include="System\ComponentModel\DataAnnotations\RangeAttribute.cs" />
