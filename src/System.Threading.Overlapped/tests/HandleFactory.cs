@@ -68,19 +68,14 @@ internal static partial class HandleFactory
             $"    File path: {filePath}{Environment.NewLine}";
         if (Directory.Exists(Path.GetDirectoryName(filePath)))
         {
-            bool success = false;
             try
             {
                 File.WriteAllText(filePath, string.Empty);
-                success = true;
+                message += "    Successfully wrote to the file.";
             }
             catch (Exception ex)
             {
                 message += $"    Failed to write to the file: {ex}";
-            }
-            if (success)
-            {
-                message += "    Successfully wrote to the file.";
             }
         }
         else
