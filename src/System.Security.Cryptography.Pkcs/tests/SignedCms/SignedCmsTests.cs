@@ -933,5 +933,40 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => cms.SignerInfos[-1]);
             Assert.Throws<ArgumentOutOfRangeException>(() => cms.SignerInfos[1]);
         }
+
+        [Theory]
+        [InlineData(SubjectIdentifierType.IssuerAndSerialNumber)]
+        [InlineData(SubjectIdentifierType.SubjectKeyIdentifier)]
+        public static void SignEnveloped(SubjectIdentifierType signerType)
+        {
+            using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
+            {
+                EnvelopedCms envelopedCms = new EnvelopedCms(new ContentInfo(new byte[] { 3 }));
+                envelopedCms.Encrypt(new CmsRecipient(signerType, cert));
+                
+                SignedCms signedCms = new SignedCms(
+                    new ContentInfo(new Oid(Oids.Pkcs7Enveloped), envelopedCms.Encode()));
+
+                signedCms.ComputeSignature(new CmsSigner(cert));
+                signedCms.CheckSignature(true);
+
+                SignerInfoCollection signers = signedCms.SignerInfos;
+                Assert.Equal(1, signers.Count);
+
+                CryptographicAttributeObjectCollection attrs = signers[0].SignedAttributes;
+                Assert.Equal(2, attrs.Count);
+
+                CryptographicAttributeObject firstAttrSet = attrs[0];
+                Assert.Equal(Oids.ContentType, firstAttrSet.Oid.Value);
+                Assert.Equal(1, firstAttrSet.Values.Count);
+                Assert.Equal(Oids.ContentType, firstAttrSet.Values[0].Oid.Value);
+                Assert.Equal("06092A864886F70D010703", firstAttrSet.Values[0].RawData.ByteArrayToHex());
+
+                CryptographicAttributeObject secondAttrSet = attrs[1];
+                Assert.Equal(Oids.MessageDigest, secondAttrSet.Oid.Value);
+                Assert.Equal(1, secondAttrSet.Values.Count);
+                Assert.Equal(Oids.MessageDigest, secondAttrSet.Values[0].Oid.Value);
+            }
+        }
     }
 }
