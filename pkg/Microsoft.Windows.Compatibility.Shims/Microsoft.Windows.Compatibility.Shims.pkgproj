@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <PackageVersion>$(CompatibilityShimsPackageVersion)</PackageVersion>
-    <_ShimsLocationPath>$(BaseIntermediateOutputPath)shims/netcoreapp/facades/</_ShimsLocationPath>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
     <OmitDependencies>true</OmitDependencies>

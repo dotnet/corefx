@@ -12,19 +12,6 @@
     </BuildConfigurations>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Implementation shims to include in the compat pack produced by this project -->
-    <ShimsToInclude Include="System.Configuration.dll" />
-    <ShimsToInclude Include="System.Core.dll" />
-    <ShimsToInclude Include="System.Drawing.dll" />
-    <ShimsToInclude Include="System.Net.dll" />
-    <ShimsToInclude Include="System.Security.dll" />
-    <ShimsToInclude Include="System.ServiceModel.Web.dll" />
-    <ShimsToInclude Include="System.ServiceProcess.dll" />
-    <ShimsToInclude Include="System.Transactions.dll" />
-    <ShimsToInclude Include="WindowsBase.dll" />
-  </ItemGroup>
-
   <Target Name="GetGenFacadesInputs">
     <ItemGroup>
       <NetFxContracts Include="@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')" Condition="'$(TargetGroup)' != 'netfx'">
@@ -120,18 +107,23 @@
 
   <Target Name="GetCompatibilityShimsToPackage"
           BeforeTargets="GetFilesToPackage">
-    <PropertyGroup>
-      <TargetPath>@(ShimsToInclude->'$(GenFacadesOutputPath)%(Identity)')</TargetPath>
-    </PropertyGroup>
     <ItemGroup>
-      <_manualShimProjects Include="manual\*.csproj" />
-      <_manualShims Include="@(_manualShimProjects->'%(FileName).dll')" />
-      <_refShims Include="@(ShimsToInclude);@(_manualShims)"/>
-      <FilesToPackage Include="@(_refShims->'$(GenFacadesOutputPath)%(Identity)')">
+      <!-- All the shims defined in netfxreference.props produced by this project need to be included in the ref path. -->
+      <FilesToPackage Include="@(NetFxReference->'$(GenFacadesOutputPath)%(Identity).dll')">
         <TargetFramework>netcoreapp2.0</TargetFramework>
-        <TargetPath>/ref/netcoreapp2.0/</TargetPath>
+        <TargetPath>/ref/netcoreapp2.0</TargetPath>
       </FilesToPackage>
+
+      <!-- For the implementation path in the package we only want to include the non-manual shims produced by this project
+      and the manual shims that we produce against the 2.0.0 implementation will be included to the shims package through
+      a project reference, therefore we need to exclude them here.     -->
+      <_manualShimProjects Include="manual\*.csproj" />
+      <_manualShims Include="@(_manualShimProjects->'%(FileName)')" />
+      <_libShims Include="@(NetFxReference)" Exclude="@(_manualShims)" />
     </ItemGroup>
+    <PropertyGroup>
+      <TargetPath>@(_libShims->'$(GenFacadesOutputPath)%(Identity).dll')</TargetPath>
+    </PropertyGroup>
   </Target>
 </Project>
 
