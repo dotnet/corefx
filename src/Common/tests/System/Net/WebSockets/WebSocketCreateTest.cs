@@ -35,7 +35,7 @@ namespace System.Net.WebSockets.Tests
         [InlineData(1)]
         [InlineData(14)]
         [InlineData(4096)]
-        public void CreateFromStream_ValidBufferSizes_Succeed(int bufferSize)
+        public void CreateFromStream_ValidBufferSizes_CreatesWebSocket(int bufferSize)
         {
             Assert.NotNull(CreateFromStream(new MemoryStream(), false, null, Timeout.InfiniteTimeSpan));
             Assert.NotNull(CreateFromStream(new MemoryStream(), true, null, Timeout.InfiniteTimeSpan));
@@ -44,7 +44,7 @@ namespace System.Net.WebSockets.Tests
         [OuterLoop] // Connects to external server.
         [Theory]
         [MemberData(nameof(EchoServers))]
-        public async Task WebSocketProtocol_CreateFromConnectedStream_Succeeds(Uri echoUri)
+        public async Task WebSocketProtocol_CreateFromConnectedStream_CanSendReceiveData(Uri echoUri)
         {
             using (var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -99,7 +99,7 @@ namespace System.Net.WebSockets.Tests
         }
 
         [Fact]
-        public async Task ReceiveAsync_UTF8SplitAcrossMultipleBuffers_Success()
+        public async Task ReceiveAsync_UTF8SplitAcrossMultipleBuffers_ValidDataReceived()
         {
             // 1 character - 2 bytes
             byte[] payload = Encoding.UTF8.GetBytes("\u00E6");
@@ -128,7 +128,7 @@ namespace System.Net.WebSockets.Tests
         }
 
         [Fact]
-        public async Task ReceiveASync_ServerSplitHeader_Succeeds()
+        public async Task ReceiveAsync_ServerSplitHeader_ValidDataReceived()
         {
             using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
