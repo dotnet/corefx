@@ -177,9 +177,20 @@ namespace Internal.Cryptography.Pal.AnyOS
                 if (contentInfo.ContentType.Value == Oids.Pkcs7Data)
                 {
                     toEncrypt = EncodeOctetString(toEncrypt);
+                    return encryptor.OneShot(toEncrypt);
                 }
-
-                return encryptor.OneShot(toEncrypt);
+                else
+                {
+                    if (contentInfo.Content.Length == 0)
+                    {
+                        return encryptor.OneShot(contentInfo.Content);
+                    }
+                    else
+                    {
+                        AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.BER);
+                        return encryptor.OneShot(reader.PeekContentBytes().ToArray());
+                    }
+                }
             }
         }
     }
