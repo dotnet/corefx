@@ -327,9 +327,9 @@ namespace System.IO.Compression.Tests
         [InlineData("NullCharFileName_FromWindows")]
         [InlineData("NullCharFileName_FromUnix")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks Unix-specific invalid file path
-        public void Unix_ZipWithInvalidFileNames_ThrowsIOException(string zipName)
+        public void Unix_ZipWithInvalidFileNames_ThrowsArgumentException(string zipName)
         {
-            Assert.Throws<IOException>(() => ZipFile.ExtractToDirectory(compat(zipName) + ".zip", GetTestFilePath()));
+            Assert.Throws<ArgumentException>(() => ZipFile.ExtractToDirectory(compat(zipName) + ".zip", GetTestFilePath()));
         }
 
         [Fact]
