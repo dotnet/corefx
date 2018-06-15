@@ -17,4 +17,3 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Globalization.RegionInfo))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Globalization.StringInfo))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Globalization.TextElementEnumerator))]
-[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Globalization.ISOWeek))]

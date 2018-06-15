@@ -12,7 +12,7 @@ namespace System.Globalization
     {
         // The following 71 years in a 400-year cycle have 53 weeks (371 days).
         // Years not listed have 52 weeks (364 days). Add 2000 for current years.
-        private static readonly HashSet<int> s_YearsWith53Weeks = new HashSet<int>
+        private static readonly HashSet<int> s_yearsWith53Weeks = new HashSet<int>
         {
             004, 009, 015, 020, 026,
             032, 037, 043, 048, 054,
@@ -30,72 +30,63 @@ namespace System.Globalization
         };
 
         // From https://en.wikipedia.org/wiki/ISO_week_date#Relation_with_the_Gregorian_calendar.
-        private static readonly DateData[] s_DateData =
+        private static readonly DateData[] s_dateData =
         {
-            new DateData("0001-01-01", "0001-W01-1"),
-            new DateData("2005-01-01", "2004-W53-6"),
-            new DateData("2005-01-02", "2004-W53-7"),
-            new DateData("2005-12-31", "2005-W52-6"),
-            new DateData("2006-01-01", "2005-W52-7"),
-            new DateData("2006-01-02", "2006-W01-1"),
-            new DateData("2006-12-31", "2006-W52-7"),
-            new DateData("2007-01-01", "2007-W01-1"),
-            new DateData("2007-12-30", "2007-W52-7"),
-            new DateData("2007-12-31", "2008-W01-1"),
-            new DateData("2008-01-01", "2008-W01-2"),
-            new DateData("2008-12-28", "2008-W52-7"),
-            new DateData("2008-12-29", "2009-W01-1"),
-            new DateData("2008-12-30", "2009-W01-2"),
-            new DateData("2008-12-31", "2009-W01-3"),
-            new DateData("2009-01-01", "2009-W01-4"),
-            new DateData("2009-12-31", "2009-W53-4"),
-            new DateData("2010-01-01", "2009-W53-5"),
-            new DateData("2010-01-02", "2009-W53-6"),
-            new DateData("2010-01-03", "2009-W53-7"),
-            new DateData("9999-12-31", "9999-W52-5"),
+            new DateData(new DateTime(0001, 01, 01), 0001, 01, DayOfWeek.Monday),
+            new DateData(new DateTime(2005, 01, 01), 2004, 53, DayOfWeek.Saturday),
+            new DateData(new DateTime(2005, 01, 02), 2004, 53, DayOfWeek.Sunday),
+            new DateData(new DateTime(2005, 12, 31), 2005, 52, DayOfWeek.Saturday),
+            new DateData(new DateTime(2006, 01, 01), 2005, 52, DayOfWeek.Sunday),
+            new DateData(new DateTime(2006, 01, 02), 2006, 01, DayOfWeek.Monday),
+            new DateData(new DateTime(2006, 12, 31), 2006, 52, DayOfWeek.Sunday),
+            new DateData(new DateTime(2007, 01, 01), 2007, 01, DayOfWeek.Monday),
+            new DateData(new DateTime(2007, 12, 30), 2007, 52, DayOfWeek.Sunday),
+            new DateData(new DateTime(2007, 12, 31), 2008, 01, DayOfWeek.Monday),
+            new DateData(new DateTime(2008, 01, 01), 2008, 01, DayOfWeek.Tuesday),
+            new DateData(new DateTime(2008, 12, 28), 2008, 52, DayOfWeek.Sunday),
+            new DateData(new DateTime(2008, 12, 29), 2009, 01, DayOfWeek.Monday),
+            new DateData(new DateTime(2008, 12, 30), 2009, 01, DayOfWeek.Tuesday),
+            new DateData(new DateTime(2008, 12, 31), 2009, 01, DayOfWeek.Wednesday),
+            new DateData(new DateTime(2009, 01, 01), 2009, 01, DayOfWeek.Thursday),
+            new DateData(new DateTime(2009, 12, 31), 2009, 53, DayOfWeek.Thursday),
+            new DateData(new DateTime(2010, 01, 01), 2009, 53, DayOfWeek.Friday),
+            new DateData(new DateTime(2010, 01, 02), 2009, 53, DayOfWeek.Saturday),
+            new DateData(new DateTime(2010, 01, 03), 2009, 53, DayOfWeek.Sunday),
+            new DateData(new DateTime(9999, 12, 31), 9999, 52, DayOfWeek.Friday),
         };
 
-        private static readonly YearData[] s_YearData =
+        private static readonly YearData[] s_yearData =
         {
-            new YearData(2005, "2005-01-03", "2006-01-01"),
-            new YearData(2006, "2006-01-02", "2006-12-31"),
-            new YearData(2007, "2007-01-01", "2007-12-30"),
-            new YearData(2008, "2007-12-31", "2008-12-28"),
-            new YearData(2009, "2008-12-29", "2010-01-03"),
+            new YearData(2005, new DateTime(2005, 01, 03), new DateTime(2006, 01, 01)),
+            new YearData(2006, new DateTime(2006, 01, 02), new DateTime(2006, 12, 31)),
+            new YearData(2007, new DateTime(2007, 01, 01), new DateTime(2007, 12, 30)),
+            new YearData(2008, new DateTime(2007, 12, 31), new DateTime(2008, 12, 28)),
+            new YearData(2009, new DateTime(2008, 12, 29), new DateTime(2010, 01, 03)),
         };
-
-        public static IEnumerable<object[]> WeeksInYear_TestData()
-        {
-            for (int year = 0; year <= 400; year++)
-            {
-                bool isLong = s_YearsWith53Weeks.Contains(year);
-                yield return new object[] { 2000 + year, isLong };
-            }
-        }
 
         public static IEnumerable<object[]> GetWeekOfYear_TestData()
         {
-            return s_DateData.Select(x => new object[] {x.Date, x.Week});
+            return s_dateData.Select(x => new object[] {x.Date, x.Week});
         }
 
         public static IEnumerable<object[]> GetYear_TestData()
         {
-            return s_DateData.Select(x => new object[] {x.Date, x.Year});
+            return s_dateData.Select(x => new object[] {x.Date, x.Year});
         }
 
         public static IEnumerable<object[]> ToDateTime_TestData()
         {
-            return s_DateData.Select(x => new object[] {x.Year, x.Week, x.DayOfWeek, x.Date});
+            return s_dateData.Select(x => new object[] {x.Year, x.Week, x.DayOfWeek, x.Date});
         }
 
         public static IEnumerable<object[]> GetYearStart_TestData()
         {
-            return s_YearData.Select(x => new object[] {x.Year, x.StartDate});
+            return s_yearData.Select(x => new object[] {x.Year, x.StartDate});
         }
 
         public static IEnumerable<object[]> GetYearEnd_TestData()
         {
-            return s_YearData.Select(x => new object[] {x.Year, x.EndDate});
+            return s_yearData.Select(x => new object[] {x.Year, x.EndDate});
         }
 
         [Theory, MemberData(nameof(GetWeekOfYear_TestData))]
@@ -121,7 +112,7 @@ namespace System.Globalization
         [InlineData(10000)]
         public static void ToDateTime_WithInvalidYear_Throws(int year)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => ISOWeek.ToDateTime(year, 1, DayOfWeek.Friday));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(year), () => ISOWeek.ToDateTime(year, 1, DayOfWeek.Friday));
         }
 
         [Theory]
@@ -129,7 +120,7 @@ namespace System.Globalization
         [InlineData(54)]
         public static void ToDateTime_WithInvalidWeek_Throws(int week)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => ISOWeek.ToDateTime(2018, week, DayOfWeek.Friday));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(week), () => ISOWeek.ToDateTime(2018, week, DayOfWeek.Friday));
         }
 
         [Theory]
@@ -137,13 +128,17 @@ namespace System.Globalization
         [InlineData(8)]
         public static void ToDateTime_WithInvalidDayOfWeek_Throws(int dayOfWeek)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => ISOWeek.ToDateTime(2018, 1, (DayOfWeek)dayOfWeek));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(dayOfWeek), () => ISOWeek.ToDateTime(2018, 1, (DayOfWeek)dayOfWeek));
         }
 
-        [Theory, MemberData(nameof(WeeksInYear_TestData))]
-        public static void GetWeeksInYear(int year, bool isLong)
+        [Fact]
+        public static void GetWeeksInYear()
         {
-            Assert.Equal(isLong ? 53 : 52, ISOWeek.GetWeeksInYear(year));
+            for (int year = 0; year <= 400; year++)
+            {
+                int expected = s_yearsWith53Weeks.Contains(year) ? 53 : 52;
+                Assert.Equal(expected, ISOWeek.GetWeeksInYear(2000 + year));
+            }
         }
 
         [Theory]
@@ -151,7 +146,7 @@ namespace System.Globalization
         [InlineData(10000)]
         public static void GetWeeksInYear_WithInvalidYear_Throws(int year)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => ISOWeek.GetWeeksInYear(year));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(nameof(year), () => ISOWeek.GetWeeksInYear(year));
         }
 
         [Theory, MemberData(nameof(GetYearStart_TestData))]
@@ -166,11 +161,6 @@ namespace System.Globalization
             Assert.Equal(expected, ISOWeek.GetYearEnd(year));
         }
 
-        private static DateTime ParseIsoDate(string date)
-        {
-            return DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-        }
-
         private struct DateData
         {
             public readonly DateTime Date;
@@ -181,18 +171,12 @@ namespace System.Globalization
 
             public readonly DayOfWeek DayOfWeek;
 
-            public DateData(string date, string week)
+            public DateData(DateTime date, int year, int week, DayOfWeek dayOfWeek)
             {
-                Date = ParseIsoDate(date);
-                ParseWeekString(week, out Year, out Week, out DayOfWeek);
-            }
-
-            private static void ParseWeekString(string value, out int year, out int week, out DayOfWeek day)
-            {
-                var parts = value.Split('-');
-                year = int.Parse(parts[0]);
-                week = int.Parse(parts[1].Substring(1));
-                day = (DayOfWeek) ((int.Parse(parts[2]) + 7) % 7);
+                Date = date;
+                Year = year;
+                Week = week;
+                DayOfWeek = dayOfWeek;
             }
         }
 
@@ -204,11 +188,11 @@ namespace System.Globalization
 
             public readonly DateTime EndDate;
 
-            public YearData(int year, string startDate, string endDate)
+            public YearData(int year, DateTime startDate, DateTime endDate)
             {
                 Year = year;
-                StartDate = ParseIsoDate(startDate);
-                EndDate = ParseIsoDate(endDate);
+                StartDate = startDate;
+                EndDate = endDate;
             }
         }
     }
