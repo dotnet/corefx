@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
@@ -25,13 +26,28 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static int GetPlatformIndex(this TypeSerializableValue[] blobs)
         {
+            bool IsNetfx472PatchedOrNewer()
+            {
+                if (!PlatformDetection.IsNetfx472OrNewer)
+                    return false;
+
+                // .NET Framework 4.7.3062.0 is min patched.
+                string versionRaw = RuntimeInformation.FrameworkDescription.Replace(".NET Framework", "").Trim();
+                if (Version.TryParse(versionRaw, out Version version))
+                {
+                    return version.Minor >= 7 && version.Build >= 3062;
+                }
+
+                return false;
+            }
+
             List<TypeSerializableValue> blobList = blobs.ToList();
 
             // .NET Framework
             if (PlatformDetection.IsFullFramework)
             {
                 // Check if a specialized blob for >=netfx472 is present and return if found.
-                if (PlatformDetection.IsNetfx472OrNewer)
+                if (IsNetfx472PatchedOrNewer())
                 {
                     int index = blobList.FindIndex(b => b.Platform == TargetFrameworkMoniker.netfx472);
 
