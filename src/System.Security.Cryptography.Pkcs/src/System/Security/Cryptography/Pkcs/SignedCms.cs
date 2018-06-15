@@ -24,6 +24,7 @@ namespace System.Security.Cryptography.Pkcs
         // Due to the way the underlying Windows CMS API behaves a copy of the content
         // bytes will be held separate once the content is "bound" (first signature or decode)
         private ReadOnlyMemory<byte>? _heldContent;
+
         // During decode, if the PKCS#7 fallback for a missing OCTET STRING is present, this
         // becomes true and GetHashableContentSpan behaves differently.
         // See https://tools.ietf.org/html/rfc5652#section-5.2.1
