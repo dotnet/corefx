@@ -27,6 +27,7 @@ namespace System.Threading.Tasks.Tests
                         NeverCompletes();
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
+                        GC.WaitForPendingFinalizers();
                     });
 
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
