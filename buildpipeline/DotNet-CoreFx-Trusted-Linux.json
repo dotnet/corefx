@@ -278,6 +278,26 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": true,
+      "displayName": "Local copy MSBuild debug logs out of container",
+      "timeoutInMinutes": 0,
+      "condition": "succeededOrFailed()",
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "docker",
+        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f -name MSBuild_*.failure.txt -exec cp {} --target-directory=/docker_logs ;",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": true,
       "displayName": "Local publish artifact: BuildLogs",
       "timeoutInMinutes": 0,
       "condition": "succeededOrFailed()",
@@ -402,7 +422,7 @@
       "allowOverride": true
     },
     "PB_DockerCommonRunArgs": {
-      "value": "--rm --name $(PB_DockerContainerName) -v \"$(PB_DockerContainerName):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" -e \"PACKAGEVERSIONPROPSURL=$(PB_PackageVersionPropsUrl)\" $(PB_DockerImageName)"
+      "value": "--rm --name $(PB_DockerContainerName) -v \"$(PB_DockerContainerName):$(PB_DockerVolumeName)\" -w=\"$(PB_DockerVolumeName)\" -e \"PACKAGEVERSIONPROPSURL=$(PB_PackageVersionPropsUrl)\" -e \"MSBUILDDEBUGCOMM=1\" -e \"MSBUILDDEBUGPATH=$(PB_DockerVolumeName)\" $(PB_DockerImageName)"
     },
     "PB_DockerContainerName": {
       "value": "corefx-$(Build.BuildId)"
