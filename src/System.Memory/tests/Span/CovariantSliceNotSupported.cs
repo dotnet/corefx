@@ -9,7 +9,6 @@ namespace System.SpanTests
 {
     public static partial class SpanTests
     {
-
         [Fact]
         public static void CovariantSlicesNotSupported1()
         {
@@ -57,6 +56,5 @@ namespace System.SpanTests
                 Assert.True(ex is ArrayTypeMismatchException);
             }
         }
-
     }
 }

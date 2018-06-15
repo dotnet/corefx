@@ -60,7 +60,6 @@ namespace System.SpanTests
             }
         }
 
-
         [Fact]
         public static void SliceStartInt32Overflow()
         {
@@ -83,12 +82,10 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-
                     var span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
                     var slice = span.Slice(GuidTwoGiBLimit + 1);
                     slice[0] = guid;
-
                     slice = span.Slice(GuidOneGiBLimit).Slice(1).Slice(GuidOneGiBLimit);
                     Assert.Equal(guid, slice[0]);
                 }
@@ -120,11 +117,11 @@ namespace System.SpanTests
                         GuidThreeGiBLimit = (int)(ThreeGiB / sizeof(Guid)),
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
+
                     var span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
                     var slice = span.Slice((GuidTwoGiBLimit + 1));
                     slice[0] = guid;
-
                     slice = span.Slice(GuidOneGiBLimit).Slice(1).Slice(GuidOneGiBLimit);
                     Assert.Equal(guid, slice[0]);
                 }
@@ -168,6 +165,7 @@ namespace System.SpanTests
                         GuidThreeGiBLimit = (int)(ThreeGiB / sizeof(Guid)),
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
+
                     var mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
                     var span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
@@ -279,10 +277,7 @@ namespace System.SpanTests
         private const long TwoGiB = 2L * 1024L * 1024L * 1024L;
         private const long OneGiB = 1L * 1024L * 1024L * 1024L;
 
-        
-
         private static readonly int s_guidThreeGiBLimit = (int)(ThreeGiB / Unsafe.SizeOf<Guid>());  // sizeof(Guid) requires unsafe keyword and I don't want to mark the entire class unsafe.
         private static readonly int s_guidTwoGiBLimit = (int)(TwoGiB / Unsafe.SizeOf<Guid>());
     }
-
 }
