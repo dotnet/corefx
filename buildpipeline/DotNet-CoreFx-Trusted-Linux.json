@@ -268,7 +268,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f \\( -iname *.log -o -iname MSBUILD_*.failure.txt \\) -exec cp {} --target-directory=/docker_logs ;",
+        "arguments": "run --rm -v $(Build.StagingDirectory):/docker_logs $(PB_DockerCommonRunArgs) find . -type f ( -iname *.log -o -iname MSBUILD_*.failure.txt ) -exec cp {} --target-directory=/docker_logs ;",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
