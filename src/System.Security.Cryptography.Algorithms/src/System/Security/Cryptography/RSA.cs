@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.IO;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Asn1;
 using Internal.Cryptography;
@@ -512,44 +511,57 @@ namespace System.Security.Cryptography
             return writer;
         }
 
-        private AsnWriter WritePkcs1PrivateKey()
+        private unsafe AsnWriter WritePkcs1PrivateKey()
         {
             RSAParameters rsaParameters = ExportParameters(true);
 
-            if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
+            fixed (byte* dPin = rsaParameters.D)
+            fixed (byte* pPin = rsaParameters.P)
+            fixed (byte* qPin = rsaParameters.Q)
+            fixed (byte* dpPin = rsaParameters.DP)
+            fixed (byte* dqPin = rsaParameters.DQ)
+            fixed (byte* qInvPin = rsaParameters.InverseQ)
             {
-                throw new InvalidOperationException(SR.Cryptography_InvalidRsaParameters);
+                try
+                {
+                    if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
+                    {
+                        throw new InvalidOperationException(SR.Cryptography_InvalidRsaParameters);
+                    }
+
+                    if (rsaParameters.D == null ||
+                        rsaParameters.P == null ||
+                        rsaParameters.Q == null ||
+                        rsaParameters.DP == null ||
+                        rsaParameters.DQ == null ||
+                        rsaParameters.InverseQ == null)
+                    {
+                        throw new InvalidOperationException(SR.Cryptography_NotValidPrivateKey);
+                    }
+
+                    AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+
+                    writer.PushSequence();
+
+                    // Format version 0
+                    writer.WriteInteger(0);
+                    writer.WriteKeyParameterInteger(rsaParameters.Modulus);
+                    writer.WriteKeyParameterInteger(rsaParameters.Exponent);
+                    writer.WriteKeyParameterInteger(rsaParameters.D);
+                    writer.WriteKeyParameterInteger(rsaParameters.P);
+                    writer.WriteKeyParameterInteger(rsaParameters.Q);
+                    writer.WriteKeyParameterInteger(rsaParameters.DP);
+                    writer.WriteKeyParameterInteger(rsaParameters.DQ);
+                    writer.WriteKeyParameterInteger(rsaParameters.InverseQ);
+
+                    writer.PopSequence();
+                    return writer;
+                }
+                finally
+                {
+                    ClearPrivateParameters(rsaParameters);
+                }
             }
-
-            if (rsaParameters.D == null ||
-                rsaParameters.P == null ||
-                rsaParameters.Q == null ||
-                rsaParameters.DP == null ||
-                rsaParameters.DQ == null ||
-                rsaParameters.InverseQ == null)
-            {
-                throw new InvalidOperationException(SR.Cryptography_NotValidPrivateKey);
-            }
-
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-
-            writer.PushSequence();
-
-            // Format version 0
-            writer.WriteInteger(0);
-            writer.WriteKeyParameterInteger(rsaParameters.Modulus);
-            writer.WriteKeyParameterInteger(rsaParameters.Exponent);
-            writer.WriteKeyParameterInteger(rsaParameters.D);
-            writer.WriteKeyParameterInteger(rsaParameters.P);
-            writer.WriteKeyParameterInteger(rsaParameters.Q);
-            writer.WriteKeyParameterInteger(rsaParameters.DP);
-            writer.WriteKeyParameterInteger(rsaParameters.DQ);
-            writer.WriteKeyParameterInteger(rsaParameters.InverseQ);
-            
-            ClearPrivateParameters(rsaParameters);
-
-            writer.PopSequence();
-            return writer;
         }
 
         public override unsafe void ImportSubjectPublicKeyInfo(ReadOnlySpan<byte> source, out int bytesRead)
@@ -607,8 +619,22 @@ namespace System.Security.Cryptography
                     AlgorithmIdentifierAsn ignored = default;
                     FromPkcs1PrivateKey(key, ignored, out RSAParameters rsaParameters);
 
-                    ImportParameters(rsaParameters);
-                    ClearPrivateParameters(rsaParameters);
+                    fixed (byte* dPin = rsaParameters.D)
+                    fixed (byte* pPin = rsaParameters.P)
+                    fixed (byte* qPin = rsaParameters.Q)
+                    fixed (byte* dpPin = rsaParameters.DP)
+                    fixed (byte* dqPin = rsaParameters.DQ)
+                    fixed (byte* qInvPin = rsaParameters.InverseQ)
+                    {
+                        try
+                        {
+                            ImportParameters(rsaParameters);
+                        }
+                        finally
+                        {
+                            ClearPrivateParameters(rsaParameters);
+                        }
+                    }
 
                     bytesRead = localRead;
                 }
@@ -645,8 +671,22 @@ namespace System.Security.Cryptography
                 out int localRead,
                 out RSAParameters ret);
 
-            ImportParameters(ret);
-            ClearPrivateParameters(ret);
+            fixed (byte* dPin = ret.D)
+            fixed (byte* pPin = ret.P)
+            fixed (byte* qPin = ret.Q)
+            fixed (byte* dpPin = ret.DP)
+            fixed (byte* dqPin = ret.DQ)
+            fixed (byte* qInvPin = ret.InverseQ)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    ClearPrivateParameters(ret);
+                }
+            }
 
             bytesRead = localRead;
         }
@@ -664,8 +704,22 @@ namespace System.Security.Cryptography
                 out int localRead,
                 out RSAParameters ret);
 
-            ImportParameters(ret);
-            ClearPrivateParameters(ret);
+            fixed (byte* dPin = ret.D)
+            fixed (byte* pPin = ret.P)
+            fixed (byte* qPin = ret.Q)
+            fixed (byte* dpPin = ret.DP)
+            fixed (byte* dqPin = ret.DQ)
+            fixed (byte* qInvPin = ret.InverseQ)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    ClearPrivateParameters(ret);
+                }
+            }
 
             bytesRead = localRead;
         }
@@ -707,6 +761,7 @@ namespace System.Security.Cryptography
                 InverseQ = key.Coefficient.ExportKeyParameter(halfModulusLength),
             };
         }
+
         private static void ClearPrivateParameters(in RSAParameters rsaParameters)
         {
             CryptographicOperations.ZeroMemory(rsaParameters.D);

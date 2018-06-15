@@ -300,21 +300,29 @@ namespace System.Security.Cryptography
             }
         }
 
-        private AsnWriter WritePkcs8()
+        private unsafe AsnWriter WritePkcs8()
         {
             DSAParameters dsaParameters = ExportParameters(true);
 
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            fixed (byte* privPin = dsaParameters.X)
+            {
+                try
+                {
+                    AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
 
-            writer.PushSequence();
-            writer.WriteInteger(0);
-            WriteAlgorithmId(writer, dsaParameters);
-            WriteKeyComponent(writer, dsaParameters.X, bitString: false);
-            writer.PopSequence();
+                    writer.PushSequence();
+                    writer.WriteInteger(0);
+                    WriteAlgorithmId(writer, dsaParameters);
+                    WriteKeyComponent(writer, dsaParameters.X, bitString: false);
+                    writer.PopSequence();
 
-            CryptographicOperations.ZeroMemory(dsaParameters.X);
-
-            return writer;
+                    return writer;
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(dsaParameters.X);
+                }
+            }
         }
 
         private AsnWriter WriteSubjectPublicKeyInfo()
@@ -365,7 +373,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public override void ImportEncryptedPkcs8PrivateKey(
+        public override unsafe void ImportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<byte> passwordBytes,
             ReadOnlySpan<byte> source,
             out int bytesRead)
@@ -378,13 +386,22 @@ namespace System.Security.Cryptography
                 out int localRead,
                 out DSAParameters ret);
 
-            ImportParameters(ret);
-            CryptographicOperations.ZeroMemory(ret.X);
+            fixed (byte* privPin = ret.X)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(ret.X);
+                }
+            }
 
             bytesRead = localRead;
         }
 
-        public override void ImportEncryptedPkcs8PrivateKey(
+        public override unsafe void ImportEncryptedPkcs8PrivateKey(
             ReadOnlySpan<char> password,
             ReadOnlySpan<byte> source,
             out int bytesRead)
@@ -397,13 +414,22 @@ namespace System.Security.Cryptography
                 out int localRead,
                 out DSAParameters ret);
 
-            ImportParameters(ret);
-            CryptographicOperations.ZeroMemory(ret.X);
-
+            fixed (byte* privPin = ret.X)
+            {
+                try
+                {
+                    ImportParameters(ret);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(ret.X);
+                }
+            }
+            
             bytesRead = localRead;
         }
 
-        public override void ImportPkcs8PrivateKey(
+        public override unsafe void ImportPkcs8PrivateKey(
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
@@ -414,8 +440,17 @@ namespace System.Security.Cryptography
                 out int localRead,
                 out DSAParameters key);
 
-            ImportParameters(key);
-            CryptographicOperations.ZeroMemory(key.X);
+            fixed (byte* privPin = key.X)
+            {
+                try
+                {
+                    ImportParameters(key);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(key.X);
+                }
+            }
 
             bytesRead = localRead;
         }
