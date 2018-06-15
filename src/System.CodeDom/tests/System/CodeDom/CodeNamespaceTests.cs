@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.CodeDom.Tests
 {
-    public class CodeNamespaceTests : CodeObjectTestBase<CodeNamespace>
+	public class CodeNamespaceTests : CodeObjectTestBase<CodeNamespace>
 	{
 		[Fact]
 		public void Ctor_Default()

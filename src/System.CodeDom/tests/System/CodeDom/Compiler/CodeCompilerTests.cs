@@ -194,7 +194,7 @@ namespace System.CodeDom.Compiler.Tests
         public void CompileAssemblyFromFile_EmptyFileName_ThrowsArgumentException()
         {
             ICodeCompiler compiler = new Compiler();
-            AssertExtensions.Throws<ArgumentException>("path", () => compiler.CompileAssemblyFromFile(new CompilerParameters(), ""));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => compiler.CompileAssemblyFromFile(new CompilerParameters(), ""));
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace System.CodeDom.Compiler.Tests
         public void FromFile_EmptyFileName_ThrowsArgumentException()
         {
             var compiler = new Compiler();
-            AssertExtensions.Throws<ArgumentException>("path", () => compiler.FromFileEntryPoint(new CompilerParameters(), ""));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => compiler.FromFileEntryPoint(new CompilerParameters(), ""));
         }
 
         [Fact]
@@ -289,7 +289,7 @@ namespace System.CodeDom.Compiler.Tests
         public void CompileAssemblyFromFileBatch_EmptyFileNameInFileNames_ThrowsArgumentException()
         {
             ICodeCompiler compiler = new Compiler();
-            AssertExtensions.Throws<ArgumentException>("path", () => compiler.CompileAssemblyFromFileBatch(new CompilerParameters(), new string[] { "" }));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => compiler.CompileAssemblyFromFileBatch(new CompilerParameters(), new string[] { "" }));
         }
 
         [Fact]
