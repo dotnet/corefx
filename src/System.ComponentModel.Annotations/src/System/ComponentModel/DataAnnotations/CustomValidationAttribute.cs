@@ -83,8 +83,7 @@ namespace System.ComponentModel.DataAnnotations
         ///     <see cref="Method" />.
         /// </param>
         /// <param name="method">The name of the method to invoke in <paramref name="validatorType" />.</param>
-        public CustomValidationAttribute(Type validatorType, string method)
-            : base(() => SR.CustomValidationAttribute_ValidationError)
+        public CustomValidationAttribute(Type validatorType, string method) : base(SR.CustomValidationAttribute_ValidationError)
         {
             ValidatorType = validatorType;
             Method = method;
@@ -140,14 +139,11 @@ namespace System.ComponentModel.DataAnnotations
             object convertedValue;
             if (!TryConvertValue(value, out convertedValue))
             {
-                return
-                    new ValidationResult(
-                        string.Format(CultureInfo.CurrentCulture,
-                            SR.CustomValidationAttribute_Type_Conversion_Failed,
-                            (value != null ? value.GetType().ToString() : "null"),
-                            _firstParameterType,
-                            ValidatorType,
-                            Method));
+                return new ValidationResult(SR.Format(SR.CustomValidationAttribute_Type_Conversion_Failed,
+                                            (value != null ? value.GetType().ToString() : "null"),
+                                            _firstParameterType,
+                                            ValidatorType,
+                                            Method));
             }
 
             // Invoke the method.  Catch TargetInvocationException merely to unwrap it.
@@ -219,8 +215,7 @@ namespace System.ComponentModel.DataAnnotations
 
             if (!ValidatorType.IsVisible)
             {
-                return string.Format(CultureInfo.CurrentCulture,
-                    SR.CustomValidationAttribute_Type_Must_Be_Public, ValidatorType.Name);
+                return SR.Format(SR.CustomValidationAttribute_Type_Must_Be_Public, ValidatorType.Name);
             }
 
             return null;
@@ -243,16 +238,13 @@ namespace System.ComponentModel.DataAnnotations
                                     && m.IsPublic && m.IsStatic);
             if (methodInfo == null)
             {
-                return string.Format(CultureInfo.CurrentCulture,
-                    SR.CustomValidationAttribute_Method_Not_Found, Method, ValidatorType.Name);
+                return SR.Format(SR.CustomValidationAttribute_Method_Not_Found, Method, ValidatorType.Name);
             }
 
             // Method must return a ValidationResult
             if (methodInfo.ReturnType != typeof(ValidationResult))
             {
-                return string.Format(CultureInfo.CurrentCulture,
-                    SR.CustomValidationAttribute_Method_Must_Return_ValidationResult, Method,
-                    ValidatorType.Name);
+                return SR.Format(SR.CustomValidationAttribute_Method_Must_Return_ValidationResult, Method, ValidatorType.Name);
             }
 
             ParameterInfo[] parameterInfos = methodInfo.GetParameters();
@@ -260,8 +252,7 @@ namespace System.ComponentModel.DataAnnotations
             // Must declare at least one input parameter for the value and it cannot be ByRef
             if (parameterInfos.Length == 0 || parameterInfos[0].ParameterType.IsByRef)
             {
-                return string.Format(CultureInfo.CurrentCulture,
-                    SR.CustomValidationAttribute_Method_Signature, Method, ValidatorType.Name);
+                return SR.Format(SR.CustomValidationAttribute_Method_Signature, Method, ValidatorType.Name);
             }
 
             // We accept 2 forms:
@@ -273,9 +264,7 @@ namespace System.ComponentModel.DataAnnotations
             {
                 if ((parameterInfos.Length != 2) || (parameterInfos[1].ParameterType != typeof(ValidationContext)))
                 {
-                    return string.Format(CultureInfo.CurrentCulture,
-                        SR.CustomValidationAttribute_Method_Signature, Method,
-                        ValidatorType.Name);
+                    return SR.Format(SR.CustomValidationAttribute_Method_Signature, Method, ValidatorType.Name);
                 }
             }
 

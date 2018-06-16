@@ -18,8 +18,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
-        public RangeAttribute(int minimum, int maximum)
-            : base(() => SR.RangeAttribute_ValidationError)
+        public RangeAttribute(int minimum, int maximum) : base(SR.RangeAttribute_ValidationError)
         {
             Minimum = minimum;
             Maximum = maximum;
@@ -31,8 +30,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
-        public RangeAttribute(double minimum, double maximum)
-            : base(() => SR.RangeAttribute_ValidationError)
+        public RangeAttribute(double minimum, double maximum) : base(SR.RangeAttribute_ValidationError)
         {
             Minimum = minimum;
             Maximum = maximum;
@@ -46,8 +44,7 @@ namespace System.ComponentModel.DataAnnotations
         /// <param name="type">The type of the range parameters. Must implement IComparable.</param>
         /// <param name="minimum">The minimum allowable value.</param>
         /// <param name="maximum">The maximum allowable value.</param>
-        public RangeAttribute(Type type, string minimum, string maximum)
-            : base(() => SR.RangeAttribute_ValidationError)
+        public RangeAttribute(Type type, string minimum, string maximum) : base(SR.RangeAttribute_ValidationError)
         {
             OperandType = type;
             Minimum = minimum;
@@ -91,15 +88,13 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (minimum.CompareTo(maximum) > 0)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    SR.RangeAttribute_MinGreaterThanMax, maximum, minimum));
+                throw new InvalidOperationException(SR.Format(SR.RangeAttribute_MinGreaterThanMax, maximum, minimum));
             }
 
             Minimum = minimum;
             Maximum = maximum;
             Conversion = conversion;
         }
-
 
         /// <summary>
         ///     Returns true if the value falls between min and max, inclusive.
@@ -192,18 +187,14 @@ namespace System.ComponentModel.DataAnnotations
                     Type type = OperandType;
                     if (type == null)
                     {
-                        throw new InvalidOperationException(
-                            SR.RangeAttribute_Must_Set_Operand_Type);
+                        throw new InvalidOperationException(SR.RangeAttribute_Must_Set_Operand_Type);
                     }
                     Type comparableType = typeof(IComparable);
                     if (!comparableType.IsAssignableFrom(type))
                     {
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                SR.RangeAttribute_ArbitraryTypeNotIComparable,
-                                type.FullName,
-                                comparableType.FullName));
+                        throw new InvalidOperationException(SR.Format(SR.RangeAttribute_ArbitraryTypeNotIComparable,
+                                                            type.FullName,
+                                                            comparableType.FullName));
                     }
 
                     TypeConverter converter = TypeDescriptor.GetConverter(type);

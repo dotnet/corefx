@@ -373,10 +373,8 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (!CanBeAssigned(propertyType, value))
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture,
-                        SR.Validator_Property_Value_Wrong_Type, propertyName, propertyType),
-nameof(value));
+                throw new ArgumentException(SR.Format(SR.Validator_Property_Value_Wrong_Type, propertyName, propertyType),
+                                            nameof(value));
             }
         }
 
