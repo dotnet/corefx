@@ -5,11 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-[assembly: TestCaseOrderer("Xunit.NetCore.Extensions.BenchmarkFilter", "System.Drawing.Common.Performance.Tests")]
+// Usage: [assembly: TestCaseOrderer("Xunit.NetCore.Extensions.BenchmarkFilter", "System.Drawing.Common.Performance.Tests")]
 
 namespace Xunit.NetCore.Extensions
 {
