@@ -83,7 +83,8 @@ namespace System.ComponentModel.DataAnnotations
         ///     <see cref="Method" />.
         /// </param>
         /// <param name="method">The name of the method to invoke in <paramref name="validatorType" />.</param>
-        public CustomValidationAttribute(Type validatorType, string method) : base(SR.CustomValidationAttribute_ValidationError)
+        public CustomValidationAttribute(Type validatorType, string method)
+            : base(() => SR.CustomValidationAttribute_ValidationError)
         {
             ValidatorType = validatorType;
             Method = method;

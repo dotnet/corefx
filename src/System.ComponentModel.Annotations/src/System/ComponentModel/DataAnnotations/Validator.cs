@@ -145,7 +145,7 @@ namespace System.ComponentModel.DataAnnotations
             var result = true;
             var breakOnFirstError = (validationResults == null);
 
-            foreach (var err in GetObjectValidationErrors(instance, validationContext, validateAllProperties, breakOnFirstError))
+            foreach (ValidationError err in GetObjectValidationErrors(instance, validationContext, validateAllProperties, breakOnFirstError))
             {
                 result = false;
 

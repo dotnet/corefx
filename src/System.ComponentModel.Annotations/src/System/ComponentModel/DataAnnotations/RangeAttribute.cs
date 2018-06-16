@@ -18,7 +18,8 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
-        public RangeAttribute(int minimum, int maximum) : base(SR.RangeAttribute_ValidationError)
+        public RangeAttribute(int minimum, int maximum)
+            : base(() => SR.RangeAttribute_ValidationError)
         {
             Minimum = minimum;
             Maximum = maximum;
@@ -30,7 +31,8 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
-        public RangeAttribute(double minimum, double maximum) : base(SR.RangeAttribute_ValidationError)
+        public RangeAttribute(double minimum, double maximum)
+            : base(() => SR.RangeAttribute_ValidationError)
         {
             Minimum = minimum;
             Maximum = maximum;
@@ -44,7 +46,8 @@ namespace System.ComponentModel.DataAnnotations
         /// <param name="type">The type of the range parameters. Must implement IComparable.</param>
         /// <param name="minimum">The minimum allowable value.</param>
         /// <param name="maximum">The maximum allowable value.</param>
-        public RangeAttribute(Type type, string minimum, string maximum) : base(SR.RangeAttribute_ValidationError)
+        public RangeAttribute(Type type, string minimum, string maximum)
+            : base(() => SR.RangeAttribute_ValidationError)
         {
             OperandType = type;
             Minimum = minimum;
