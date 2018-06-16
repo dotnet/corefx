@@ -196,7 +196,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("fr-FR"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(null));
             }
         }
 
@@ -232,7 +232,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("en-US"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(null));
             }
 
             using (new TempCulture("fr-FR"))
@@ -249,7 +249,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("en-US"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(null));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(null));
             }
 
             using (new TempCulture("fr-FR"))
@@ -270,7 +270,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("fr-FR"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -294,7 +294,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -318,7 +318,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -361,7 +361,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("fr-FR"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -408,7 +408,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -445,7 +445,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("en-US"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -465,7 +465,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -474,7 +474,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -489,7 +489,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -514,7 +514,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -524,7 +524,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -541,7 +541,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("fr-FR"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -565,7 +565,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -589,7 +589,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -627,7 +627,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("en-US"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -647,7 +647,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -656,7 +656,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -671,7 +671,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -680,7 +680,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -696,7 +696,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -706,7 +706,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -718,7 +718,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             using (new TempCulture("en-US"))
             {
                 RangeAttribute range = new RangeAttribute(type, min, max);
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -738,7 +738,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -747,7 +747,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -762,7 +762,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -771,7 +771,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 {
                     ConvertValueInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 
@@ -787,7 +787,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
 
             using (new TempCulture("fr-FR"))
@@ -797,7 +797,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
                     ConvertValueInInvariantCulture = true,
                     ParseLimitsInInvariantCulture = true
                 };
-                Assert.Throws<ArgumentException>(() => range.IsValid(value));
+                AssertExtensions.Throws<ArgumentException>("value", () => range.IsValid(value));
             }
         }
 

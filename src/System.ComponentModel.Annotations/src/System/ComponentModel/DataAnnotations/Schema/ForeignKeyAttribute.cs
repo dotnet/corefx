@@ -26,7 +26,7 @@ namespace System.ComponentModel.DataAnnotations.Schema
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(SR.Format(SR.ArgumentIsNullOrWhitespace, nameof(name)));
+                throw new ArgumentException(SR.Format(SR.ArgumentIsNullOrWhitespace, nameof(name)), nameof(name));
             }
 
             Name = name;
