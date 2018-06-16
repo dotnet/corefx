@@ -217,13 +217,13 @@ namespace System.ComponentModel.DataAnnotations
                     Func<object, object> conversion;
                     if (ConvertValueInInvariantCulture)
                     {
-                        conversion = value => value?.GetType() == type
+                        conversion = value => value.GetType() == type
                             ? value
                             : converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
                     }
                     else
                     {
-                        conversion = value => value?.GetType() == type ? value : converter.ConvertFrom(value);
+                        conversion = value => value.GetType() == type ? value : converter.ConvertFrom(value);
                     }
 
                     Initialize(min, max, conversion);
