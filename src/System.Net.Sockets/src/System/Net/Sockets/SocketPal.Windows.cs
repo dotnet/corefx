@@ -708,7 +708,6 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        private static readonly IntPtr[] SharedZeroLengthFDSet = new IntPtr[1]; // first element of fd-set is length
         public static unsafe SocketError Select(IList checkRead, IList checkWrite, IList checkError, int microseconds)
         {
             bool ShouldStackAlloc(IList list, out Span<IntPtr> span)
@@ -716,7 +715,7 @@ namespace System.Net.Sockets
                 const int StackThreshold = 80; // arbitrary limit to avoid too much space on stack
                 if (list == null || list.Count == 0)
                 {
-                    span = SharedZeroLengthFDSet;
+                    span = default;
                     return false;
                 }
                 if (list.Count >= StackThreshold)
@@ -750,9 +749,9 @@ namespace System.Net.Sockets
 
             int socketCount;
             // note: these spans are always at least length 1, so this is well-defined
-            fixed (IntPtr* readPtr = &readfileDescriptorSet[0])
-            fixed (IntPtr* writePtr = &writefileDescriptorSet[0])
-            fixed (IntPtr* errPtr = &errfileDescriptorSet[0])
+            fixed (IntPtr* readPtr = &MemoryMarshal.GetReference(readfileDescriptorSet))
+            fixed (IntPtr* writePtr = &MemoryMarshal.GetReference(writefileDescriptorSet))
+            fixed (IntPtr* errPtr = &MemoryMarshal.GetReference(errfileDescriptorSet))
             {
                 if (microseconds != -1)
                 {
@@ -762,9 +761,9 @@ namespace System.Net.Sockets
                     socketCount =
                         Interop.Winsock.select(
                             0, // ignored value
-                            readfileDescriptorSet.Length == 1 ? null : readPtr,
-                            writefileDescriptorSet.Length == 1 ? null : writePtr,
-                            errfileDescriptorSet.Length == 1 ? null : errPtr,
+                            readPtr,
+                            writePtr,
+                            errPtr,
                             ref IOwait);
                 }
                 else
@@ -772,9 +771,9 @@ namespace System.Net.Sockets
                     socketCount =
                         Interop.Winsock.select(
                             0, // ignored value
-                            readfileDescriptorSet.Length == 1 ? null : readPtr,
-                            writefileDescriptorSet.Length == 1 ? null : writePtr,
-                            errfileDescriptorSet.Length == 1 ? null : errPtr,
+                            readPtr,
+                            writePtr,
+                            errPtr,
                             IntPtr.Zero);
                 }
             }
