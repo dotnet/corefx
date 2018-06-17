@@ -122,14 +122,13 @@ namespace System.Net.Sockets
             return transmitPackets(socketHandle, packetArray, elementCount, sendSize, overlapped, flags);
         }
 
-        internal static IntPtr[] SocketListToFileDescriptorSet(IList socketList)
+        internal static void SocketListToFileDescriptorSet(IList socketList, Span<IntPtr> fileDescriptorSet)
         {
             if (socketList == null || socketList.Count == 0)
             {
-                return null;
+                return;
             }
 
-            IntPtr[] fileDescriptorSet = new IntPtr[socketList.Count + 1];
             fileDescriptorSet[0] = (IntPtr)socketList.Count;
             for (int current = 0; current < socketList.Count; current++)
             {
@@ -140,12 +139,11 @@ namespace System.Net.Sockets
 
                 fileDescriptorSet[current + 1] = ((Socket)socketList[current])._handle.DangerousGetHandle();
             }
-            return fileDescriptorSet;
         }
 
         // Transform the list socketList such that the only sockets left are those
         // with a file descriptor contained in the array "fileDescriptorArray".
-        internal static void SelectFileDescriptor(IList socketList, IntPtr[] fileDescriptorSet)
+        internal static void SelectFileDescriptor(IList socketList, Span<IntPtr> fileDescriptorSet)
         {
             // Walk the list in order.
             //

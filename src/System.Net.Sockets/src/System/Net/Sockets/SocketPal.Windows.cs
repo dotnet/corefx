@@ -668,10 +668,10 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static SocketError Poll(SafeCloseSocket handle, int microseconds, SelectMode mode, out bool status)
+        public static unsafe SocketError Poll(SafeCloseSocket handle, int microseconds, SelectMode mode, out bool status)
         {
             IntPtr rawHandle = handle.DangerousGetHandle();
-            IntPtr[] fileDescriptorSet = new IntPtr[2] { (IntPtr)1, rawHandle };
+            IntPtr* fileDescriptorSet = stackalloc IntPtr[2] { (IntPtr)1, rawHandle };
             Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
 
             // A negative timeout value implies an indefinite wait.
@@ -708,11 +708,32 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static SocketError Select(IList checkRead, IList checkWrite, IList checkError, int microseconds)
+        private static readonly IntPtr[] SharedZeroLengthFDSet = new IntPtr[1]; // first element of fd-set is length
+        public static unsafe SocketError Select(IList checkRead, IList checkWrite, IList checkError, int microseconds)
         {
-            IntPtr[] readfileDescriptorSet = Socket.SocketListToFileDescriptorSet(checkRead);
-            IntPtr[] writefileDescriptorSet = Socket.SocketListToFileDescriptorSet(checkWrite);
-            IntPtr[] errfileDescriptorSet = Socket.SocketListToFileDescriptorSet(checkError);
+            bool ShouldStackAlloc(IList list, out Span<IntPtr> span)
+            {
+                const int StackThreshold = 80; // arbitrary limit to avoid too much space on stack
+                if (list == null || list.Count == 0)
+                {
+                    span = SharedZeroLengthFDSet;
+                    return false;
+                }
+                if (list.Count >= StackThreshold)
+                {
+                    span = new IntPtr[list.Count + 1];
+                    return false;
+                }
+                span = default;
+                return true;
+            }
+
+            var readfileDescriptorSet = ShouldStackAlloc(checkRead, out var tmp) ? stackalloc IntPtr[checkRead.Count + 1] : tmp;
+            Socket.SocketListToFileDescriptorSet(checkRead, readfileDescriptorSet);
+            var writefileDescriptorSet = ShouldStackAlloc(checkWrite, out tmp) ? stackalloc IntPtr[checkWrite.Count + 1] : tmp;
+            Socket.SocketListToFileDescriptorSet(checkWrite, writefileDescriptorSet);
+            var errfileDescriptorSet = ShouldStackAlloc(checkError, out tmp) ? stackalloc IntPtr[checkError.Count + 1] : tmp;
+            Socket.SocketListToFileDescriptorSet(checkError, errfileDescriptorSet);
 
             // This code used to erroneously pass a non-null timeval structure containing zeroes 
             // to select() when the caller specified (-1) for the microseconds parameter.  That 
@@ -726,31 +747,37 @@ namespace System.Net.Sockets
             // retains that behavior so that any app working around the original bug with, 
             // for example, (-2) specified for microseconds, will continue to get the same behavior.
 
+
             int socketCount;
-            if (microseconds != -1)
+            // note: these spans are always at least length 1, so this is well-defined
+            fixed (IntPtr* readPtr = &readfileDescriptorSet[0])
+            fixed (IntPtr* writePtr = &writefileDescriptorSet[0])
+            fixed (IntPtr* errPtr = &errfileDescriptorSet[0])
             {
-                Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
-                MicrosecondsToTimeValue((long)(uint)microseconds, ref IOwait);
+                if (microseconds != -1)
+                {
+                    Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
+                    MicrosecondsToTimeValue((long)(uint)microseconds, ref IOwait);
 
-                socketCount =
-                    Interop.Winsock.select(
-                        0, // ignored value
-                        readfileDescriptorSet,
-                        writefileDescriptorSet,
-                        errfileDescriptorSet,
-                        ref IOwait);
+                    socketCount =
+                        Interop.Winsock.select(
+                            0, // ignored value
+                            readfileDescriptorSet.Length == 1 ? null : readPtr,
+                            writefileDescriptorSet.Length == 1 ? null : writePtr,
+                            errfileDescriptorSet.Length == 1 ? null : errPtr,
+                            ref IOwait);
+                }
+                else
+                {
+                    socketCount =
+                        Interop.Winsock.select(
+                            0, // ignored value
+                            readfileDescriptorSet.Length == 1 ? null : readPtr,
+                            writefileDescriptorSet.Length == 1 ? null : writePtr,
+                            errfileDescriptorSet.Length == 1 ? null : errPtr,
+                            IntPtr.Zero);
+                }
             }
-            else
-            {
-                socketCount =
-                    Interop.Winsock.select(
-                        0, // ignored value
-                        readfileDescriptorSet,
-                        writefileDescriptorSet,
-                        errfileDescriptorSet,
-                        IntPtr.Zero);
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"Interop.Winsock.select returns socketCount:{socketCount}");
 
             if ((SocketError)socketCount == SocketError.SocketError)
