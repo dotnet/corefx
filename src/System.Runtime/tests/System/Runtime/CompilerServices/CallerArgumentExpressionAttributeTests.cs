@@ -8,6 +8,11 @@ namespace System.Runtime.CompilerServices.Tests
 {
     public static class CallerArgumentExpressionAttributeTests
     {
+        public static string IntParamMethod(int val, [CallerArgumentExpression("val")] string expr = null)
+        {
+            return expr;
+        }
+
         [Theory, InlineData("testParamName"), InlineData(""), InlineData(null)]
         public static void ArgumentToCallerArgumentExpressionSetsParameterNameProperty(string paramName)
         {
@@ -58,7 +63,20 @@ namespace System.Runtime.CompilerServices.Tests
             return expr;
         }
 
-        public static string IntParamMethod(int val, [CallerArgumentExpression("val")] string expr = null)
+        [Fact]
+        public static void OverloadedMethodPrecedence()
+        {
+            int notVal = 0;
+
+            Assert.Equal(OverloadedMethodReturn, OverloadedMethod(notVal));
+        }
+
+        private const string OverloadedMethodReturn = "not CallerArgumentExpression";
+        private static string OverloadedMethod(int val)
+        {
+            return OverloadedMethodReturn;
+        }
+        private static string OverloadedMethod(int val, [CallerArgumentExpression(null)] string expr = null)
         {
             return expr;
         }
