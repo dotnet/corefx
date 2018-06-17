@@ -72,10 +72,12 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         private const string OverloadedMethodReturn = "not CallerArgumentExpression";
+ 
         private static string OverloadedMethod(int val)
         {
             return OverloadedMethodReturn;
         }
+
         private static string OverloadedMethod(int val, [CallerArgumentExpression(null)] string expr = null)
         {
             return expr;
@@ -149,6 +151,7 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         private const string StringConst = "hello";
+
         private static string OptionalParamMethod(string val = StringConst + " string literal", [CallerArgumentExpression("val")] string expr = null)
         {
             return expr;
