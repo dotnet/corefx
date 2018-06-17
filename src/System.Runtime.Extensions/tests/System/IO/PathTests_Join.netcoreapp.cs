@@ -31,7 +31,7 @@ namespace System.IO.Tests
             { "a", $"a{AltSep}", $"a{Sep}a{AltSep}" },
             { null, null, ""},
             { null, "a", "a"},
-            { "a", null, "a"},
+            { "a", null, "a"}
         };
 
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
@@ -87,6 +87,7 @@ namespace System.IO.Tests
             { "a", null, null, "a" },
             { null, "a", null, "a" },
             { null, null, "a", "a" },
+            { "a", null, "a", $"a{Sep}a" }
         };
 
         [Theory, MemberData(nameof(TestData_JoinThreePaths))]
