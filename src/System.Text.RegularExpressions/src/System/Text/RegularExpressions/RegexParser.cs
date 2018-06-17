@@ -107,14 +107,25 @@ namespace System.Text.RegularExpressions
             {
                 if (IsMetachar(input[i]))
                 {
-                    StringBuilder sb = StringBuilderCache.Acquire();
+                    ReadOnlySpan<char> inputSpan = input.AsSpan();
+
+                    // For small inputs we allocate on the stack. In most cases a buffer three 
+                    // times larger the original string should be sufficient as usually not all 
+                    // characters need to be encoded.
+                    // For larger string we rent the input string's length plus a fixed 
+                    // conservative amount of chars from the ArrayPool.
+                    Span<char> buffer = input.Length <= 80 ? stackalloc char[256] : null;
+                    ValueStringBuilder vsb = buffer != null ?
+                        new ValueStringBuilder(buffer) :
+                        new ValueStringBuilder(input.Length + 200);
+
                     char ch = input[i];
                     int lastpos;
 
-                    sb.Append(input, 0, i);
+                    vsb.Append(inputSpan.Slice(0, i));
                     do
                     {
-                        sb.Append('\\');
+                        vsb.Append('\\');
                         switch (ch)
                         {
                             case '\n':
@@ -130,7 +141,7 @@ namespace System.Text.RegularExpressions
                                 ch = 'f';
                                 break;
                         }
-                        sb.Append(ch);
+                        vsb.Append(ch);
                         i++;
                         lastpos = i;
 
@@ -143,10 +154,10 @@ namespace System.Text.RegularExpressions
                             i++;
                         }
 
-                        sb.Append(input, lastpos, i - lastpos);
+                        vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
                     } while (i < input.Length);
 
-                    return StringBuilderCache.GetStringAndRelease(sb);
+                    return vsb.ToString();
                 }
             }
 
@@ -154,7 +165,7 @@ namespace System.Text.RegularExpressions
         }
 
         /*
-         * Escapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
+         * Unescapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
          */
         public static string Unescape(string input)
         {
@@ -162,26 +173,33 @@ namespace System.Text.RegularExpressions
             {
                 if (input[i] == '\\')
                 {
-                    StringBuilder sb = StringBuilderCache.Acquire();
+                    ReadOnlySpan<char> inputSpan = input.AsSpan();
                     RegexParser p = new RegexParser(CultureInfo.InvariantCulture);
                     int lastpos;
                     p.SetPattern(input);
+                    
+                    // In the worst case the escaped string has the same length.
+                    // For small inputs we use stack allocation.
+                    Span<char> buffer = input.Length <= 256 ? stackalloc char[input.Length] : null;
+                    ValueStringBuilder vsb = buffer != null ?
+                        new ValueStringBuilder(buffer) :
+                        new ValueStringBuilder(input.Length);
 
-                    sb.Append(input, 0, i);
+                    vsb.Append(inputSpan.Slice(0, i));
                     do
                     {
                         i++;
                         p.Textto(i);
                         if (i < input.Length)
-                            sb.Append(p.ScanCharEscape());
+                            vsb.Append(p.ScanCharEscape());
                         i = p.Textpos();
                         lastpos = i;
                         while (i < input.Length && input[i] != '\\')
                             i++;
-                        sb.Append(input, lastpos, i - lastpos);
+                        vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
                     } while (i < input.Length);
 
-                    return StringBuilderCache.GetStringAndRelease(sb);
+                    return vsb.ToString();
                 }
             }
 
@@ -2063,18 +2081,24 @@ namespace System.Text.RegularExpressions
 
             if (cch > 1)
             {
-                string str = _pattern.Substring(pos, cch);
-
+                string str;
                 if (UseOptionI() && !isReplacement)
                 {
-                    // We do the ToLower character by character for consistency.  With surrogate chars, doing
-                    // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
-                    // linguistically, but since Regex doesn't support surrogates, it's more important to be
-                    // consistent.
-                    StringBuilder sb = StringBuilderCache.Acquire(str.Length);
-                    for (int i = 0; i < str.Length; i++)
-                        sb.Append(_culture.TextInfo.ToLower(str[i]));
-                    str = StringBuilderCache.GetStringAndRelease(sb);
+                    str = string.Create(cch, (_pattern, _culture, pos, cch), (span, state) =>
+                    {
+                        ReadOnlySpan<char> input = state._pattern.AsSpan(pos, cch);
+
+                        // We do the ToLower character by character for consistency.  With surrogate chars, doing
+                        // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
+                        // linguistically, but since Regex doesn't support surrogates, it's more important to be
+                        // consistent.
+                        for (int i = 0; i < input.Length; i++)
+                            span[i] = state._culture.TextInfo.ToLower(input[i]);
+                    });
+                }
+                else
+                {
+                    str = _pattern.Substring(pos, cch);
                 }
 
                 node = new RegexNode(RegexNode.Multi, _options, str);
