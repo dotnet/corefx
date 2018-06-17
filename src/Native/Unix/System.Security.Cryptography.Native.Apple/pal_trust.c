@@ -4,8 +4,6 @@
 
 #include "pal_trust.h"
 
-const static SecTrustSettingsResult EmptySecTrustSettingsResult;
-
 static bool CheckTrustMatch(SecCertificateRef cert,
                             SecTrustSettingsDomain domain,
                             SecTrustSettingsResult result,
@@ -59,7 +57,8 @@ static bool CheckTrustMatch(SecCertificateRef cert,
                 if (val != NULL && CFGetTypeID(val) == numberTypeId)
                 {
                     CFNumberRef cfNum = (CFNumberRef)val;
-                    SecTrustSettingsResult trustValue = EmptySecTrustSettingsResult;
+                    SecTrustSettingsResult trustValue;
+                    memset(&trustValue, 0, sizeof(SecTrustSettingsResult));
 
                     if (CFNumberGetValue(cfNum, kCFNumberSInt32Type, &trustValue))
                     {

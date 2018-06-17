@@ -56,8 +56,6 @@ AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKey
     return (*pOSStatusOut == noErr);
 }
 
-const static SecItemImportExportKeyParameters EmptySecItemImportExportKeyParameters;
-
 PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_t cbData)
 {
     if (pbData == NULL || cbData < 0)
@@ -116,7 +114,9 @@ PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_
         itemType = kSecItemTypeAggregate;
         actualType = itemType;
 
-        SecItemImportExportKeyParameters importParams = EmptySecItemImportExportKeyParameters;
+        SecItemImportExportKeyParameters importParams;
+        memset(&importParams, 0, sizeof(SecItemImportExportKeyParameters));
+
         importParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
         importParams.passphrase = CFSTR("");
 
@@ -251,7 +251,9 @@ static int32_t ReadX509(uint8_t* pbData,
     CFMutableArrayRef keyAttributes = NULL;
     SecKeychainRef importKeychain = NULL;
 
-    SecItemImportExportKeyParameters importParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters importParams;
+    memset(&importParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     importParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
 
     if (contentType == PAL_Certificate)
@@ -467,7 +469,9 @@ int32_t AppleCryptoNative_X509ExportData(CFArrayRef data,
             return kErrorBadInput;
     }
 
-    SecItemImportExportKeyParameters keyParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters keyParams;
+    memset(&keyParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
     keyParams.passphrase = cfExportPassphrase;
 
@@ -487,7 +491,9 @@ int32_t AppleCryptoNative_X509GetRawData(SecCertificateRef cert, CFDataRef* ppDa
         return kErrorBadInput;
 
     SecExternalFormat dataFormat = kSecFormatX509Cert;
-    SecItemImportExportKeyParameters keyParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters keyParams;
+    memset(&keyParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
 
     *pOSStatus = SecItemExport(cert, dataFormat, 0, &keyParams, ppDataOut);
@@ -504,7 +510,9 @@ static OSStatus AddKeyToKeychain(SecKeyRef privateKey, SecKeychainRef targetKeyc
     SecExternalFormat dataFormat = kSecFormatWrappedPKCS8;
     CFDataRef exportData = NULL;
 
-    SecItemImportExportKeyParameters keyParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters keyParams;
+    memset(&keyParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
     keyParams.passphrase = CFSTR("ExportImportPassphrase");
 

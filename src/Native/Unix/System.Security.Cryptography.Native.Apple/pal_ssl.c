@@ -214,8 +214,6 @@ AppleCryptoNative_SslWrite(SSLContextRef sslContext, const uint8_t* buf, uint32_
     return PAL_TlsIo_Success;
 }
 
-const static SSLSessionState EmptySSLSessionState;
-
 PAL_TlsIo
 AppleCryptoNative_SslRead(SSLContextRef sslContext, uint8_t* buf, uint32_t bufLen, uint32_t* written)
 {
@@ -238,7 +236,8 @@ AppleCryptoNative_SslRead(SSLContextRef sslContext, uint8_t* buf, uint32_t bufLe
 
     if (writtenSize == 0 && status == errSSLWouldBlock)
     {
-        SSLSessionState state = EmptySSLSessionState;
+        SSLSessionState state;
+        memset(&state, 0, sizeof(SSLSessionState));
         OSStatus localStatus = SSLGetSessionState(sslContext, &state);
 
         if (localStatus == noErr && state == kSSLHandshake)
@@ -249,8 +248,6 @@ AppleCryptoNative_SslRead(SSLContextRef sslContext, uint8_t* buf, uint32_t bufLe
 
     return OSStatusToPAL_TlsIo(status);
 }
-
-const static SecTrustResultType EmptySecTrustResultType;
 
 int32_t
 AppleCryptoNative_SslIsHostnameMatch(SSLContextRef sslContext, CFStringRef cfHostname, CFDateRef notBefore)
@@ -318,7 +315,8 @@ AppleCryptoNative_SslIsHostnameMatch(SSLContextRef sslContext, CFStringRef cfHos
 
     if (osStatus == noErr)
     {
-        SecTrustResultType trustResult = EmptySecTrustResultType;
+        SecTrustResultType trustResult;
+        memset(&trustResult, 0, sizeof(SecTrustResultType));
 
         osStatus = SecTrustEvaluate(trust, &trustResult);
 

@@ -4,8 +4,6 @@
 
 #include "pal_seckey.h"
 
-const static SecItemImportExportKeyParameters EmptySecItemImportExportKeyParameters;
-
 int32_t AppleCryptoNative_SecKeyExport(
     SecKeyRef pKey, int32_t exportPrivate, CFStringRef cfExportPassphrase, CFDataRef* ppDataOut, int32_t* pOSStatus)
 {
@@ -20,7 +18,9 @@ int32_t AppleCryptoNative_SecKeyExport(
     }
 
     SecExternalFormat dataFormat = kSecFormatOpenSSL;
-    SecItemImportExportKeyParameters keyParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters keyParams;
+    memset(&keyParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
 
     if (exportPrivate)
@@ -145,7 +145,9 @@ OSStatus ExportImportKey(SecKeyRef* key, SecExternalItemType type)
     SecExternalFormat dataFormat = kSecFormatOpenSSL;
     CFDataRef exportData = NULL;
 
-    SecItemImportExportKeyParameters keyParams = EmptySecItemImportExportKeyParameters;
+    SecItemImportExportKeyParameters keyParams;
+    memset(&keyParams, 0, sizeof(SecItemImportExportKeyParameters));
+
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
     keyParams.passphrase = CFSTR("ExportImportPassphrase");
 
