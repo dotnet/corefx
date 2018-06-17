@@ -56,6 +56,7 @@
       <Link>System\SpanTestHelpers.cs</Link>
     </Compile>
     <Compile Include="CompareToTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttributeTests.cs" />
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttributeTests.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
