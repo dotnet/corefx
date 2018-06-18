@@ -61,6 +61,7 @@ namespace System.SpanTests
         }
 
         [Fact]
+        [OuterLoop()]
         public static void SliceStartInt32Overflow()
         {
             IntPtr huge;
