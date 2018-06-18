@@ -259,6 +259,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
@@ -735,6 +741,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = false;
             using (var client = new HttpClient(handler))
@@ -762,6 +774,12 @@ namespace System.Net.Http.Functional.Tests
                 // Known behavior: curl does not change method to "GET"
                 // https://github.com/dotnet/corefx/issues/26434
                 newMethod = "POST";
+            }
+
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -882,6 +900,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
             using (var client = new HttpClient(handler))
@@ -1049,38 +1073,6 @@ namespace System.Net.Http.Functional.Tests
                     {
                         await Assert.ThrowsAsync<HttpRequestException>(() => t);
                     }
-                }
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(RedirectStatusCodes))]
-        public async Task GetAsync_TooManyRedirects_ThrowsForAllRedirectTypes(int statusCode)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-
-            // This can be any number, as long as it is less than the number of hops specified below.
-            handler.MaxAutomaticRedirections = 2;
-
-            using (var client = new HttpClient(handler))
-            {
-                Task<HttpResponseMessage> t = client.GetAsync(Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: statusCode,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 3));
-
-                if (UseSocketsHttpHandler || PlatformDetection.IsFullFramework)
-                {
-                    using (HttpResponseMessage response = await t)
-                    {
-                        Assert.Equal(statusCode, (int)response.StatusCode);
-                    }
-                }
-                else
-                {
-                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
                 }
             }
         }
@@ -1271,6 +1263,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
         {
+            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            {
+                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
+                return;
+            }
+
             Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
             Uri redirectUri = Configuration.Http.RedirectUriForCreds(
                 secure: false,

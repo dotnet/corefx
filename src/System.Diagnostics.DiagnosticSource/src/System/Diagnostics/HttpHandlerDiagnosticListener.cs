@@ -658,7 +658,7 @@ namespace System.Diagnostics
                     statusCode == HttpStatusCode.Redirect         ||  // 302
                     statusCode == HttpStatusCode.RedirectMethod   ||  // 303
                     statusCode == HttpStatusCode.RedirectKeepVerb ||  // 307
-                    statusCode == HttpStatusCode.PermanentRedirect) // 308
+                    (int)statusCode == 308) // 308 Permanent Redirect is not in netfx yet, and so has to be specified this way.
                 {
                     return s_autoRedirectsAccessor(request) >= request.MaximumAutomaticRedirections;
                 }
