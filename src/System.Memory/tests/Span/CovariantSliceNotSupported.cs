@@ -14,15 +14,12 @@ namespace System.SpanTests
         {
             object[] array = new string[10];
 
-            try
-            {
+            Action testCode = () => {
                 var slice = new Span<object>(array);
                 Assert.True(false);
-            }
-            catch (Exception ex)
-            {
-                Assert.True(ex is ArrayTypeMismatchException);
-            }
+            };
+
+            Assert.Throws<ArrayTypeMismatchException>(testCode);
         }
 
         [Fact]
@@ -30,15 +27,12 @@ namespace System.SpanTests
         {
             object[] array = new string[10];
 
-            try
-            {
+            Action testCode = () => {
                 var slice = array.AsSpan().Slice(0);
                 Assert.True(false);
-            }
-            catch (Exception ex)
-            {
-                Assert.True(ex is ArrayTypeMismatchException);
-            }
+            };
+
+            Assert.Throws<ArrayTypeMismatchException>(testCode);
         }
 
         [Fact]
@@ -46,15 +40,12 @@ namespace System.SpanTests
         {
             object[] array = new string[10];
 
-            try
-            {
+            Action testCode = () => {
                 var slice = new Span<object>(array, 0, 10);
                 Assert.True(false);
-            }
-            catch (Exception ex)
-            {
-                Assert.True(ex is ArrayTypeMismatchException);
-            }
+            };
+
+            Assert.Throws<ArrayTypeMismatchException>(testCode);
         }
     }
 }
