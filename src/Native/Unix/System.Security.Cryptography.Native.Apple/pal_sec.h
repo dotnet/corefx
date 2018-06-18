@@ -5,13 +5,18 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_types.h"
 
 #include <Security/Security.h>
+
+BEGIN_EXTERN_C
 
 /*
 Get an error message for an OSStatus error from the security library.
 
 Returns NULL if no message is available for the code.
 */
-extern "C" CFStringRef AppleCryptoNative_SecCopyErrorMessageString(OSStatus osStatus);
+DLLEXPORT CFStringRef AppleCryptoNative_SecCopyErrorMessageString(OSStatus osStatus);
+
+END_EXTERN_C

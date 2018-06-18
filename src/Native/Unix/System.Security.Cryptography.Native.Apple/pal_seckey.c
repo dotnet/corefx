@@ -4,15 +4,15 @@
 
 #include "pal_seckey.h"
 
-extern "C" int32_t AppleCryptoNative_SecKeyExport(
+int32_t AppleCryptoNative_SecKeyExport(
     SecKeyRef pKey, int32_t exportPrivate, CFStringRef cfExportPassphrase, CFDataRef* ppDataOut, int32_t* pOSStatus)
 {
-    if (ppDataOut != nullptr)
-        *ppDataOut = nullptr;
-    if (pOSStatus != nullptr)
+    if (ppDataOut != NULL)
+        *ppDataOut = NULL;
+    if (pOSStatus != NULL)
         *pOSStatus = noErr;
 
-    if (pKey == nullptr || ppDataOut == nullptr || pOSStatus == nullptr)
+    if (pKey == NULL || ppDataOut == NULL || pOSStatus == NULL)
     {
         return kErrorBadInput;
     }
@@ -23,7 +23,7 @@ extern "C" int32_t AppleCryptoNative_SecKeyExport(
 
     if (exportPrivate)
     {
-        if (cfExportPassphrase == nullptr)
+        if (cfExportPassphrase == NULL)
         {
             return kErrorBadInput;
         }
@@ -37,22 +37,22 @@ extern "C" int32_t AppleCryptoNative_SecKeyExport(
     return (*pOSStatus == noErr);
 }
 
-extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
+int32_t AppleCryptoNative_SecKeyImportEphemeral(
     uint8_t* pbKeyBlob, int32_t cbKeyBlob, int32_t isPrivateKey, SecKeyRef* ppKeyOut, int32_t* pOSStatus)
 {
-    if (ppKeyOut != nullptr)
-        *ppKeyOut = nullptr;
-    if (pOSStatus != nullptr)
+    if (ppKeyOut != NULL)
+        *ppKeyOut = NULL;
+    if (pOSStatus != NULL)
         *pOSStatus = noErr;
 
-    if (pbKeyBlob == nullptr || cbKeyBlob < 0 || isPrivateKey < 0 || isPrivateKey > 1 || ppKeyOut == nullptr ||
-        pOSStatus == nullptr)
+    if (pbKeyBlob == NULL || cbKeyBlob < 0 || isPrivateKey < 0 || isPrivateKey > 1 || ppKeyOut == NULL ||
+        pOSStatus == NULL)
     {
         return kErrorBadInput;
     }
 
     int32_t ret = 0;
-    CFDataRef cfData = CFDataCreateWithBytesNoCopy(nullptr, pbKeyBlob, cbKeyBlob, kCFAllocatorNull);
+    CFDataRef cfData = CFDataCreateWithBytesNoCopy(NULL, pbKeyBlob, cbKeyBlob, kCFAllocatorNull);
 
     SecExternalFormat dataFormat = kSecFormatOpenSSL;
     SecExternalFormat actualFormat = dataFormat;
@@ -61,10 +61,10 @@ extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
     SecExternalItemType actualType = itemType;
 
     CFIndex itemCount;
-    CFArrayRef outItems = nullptr;
-    CFTypeRef outItem = nullptr;
+    CFArrayRef outItems = NULL;
+    CFTypeRef outItem = NULL;
 
-    *pOSStatus = SecItemImport(cfData, nullptr, &actualFormat, &actualType, 0, nullptr, nullptr, &outItems);
+    *pOSStatus = SecItemImport(cfData, NULL, &actualFormat, &actualType, 0, NULL, NULL, &outItems);
 
     if (*pOSStatus != noErr)
     {
@@ -78,7 +78,7 @@ extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
         goto cleanup;
     }
 
-    if (outItems == nullptr)
+    if (outItems == NULL)
     {
         ret = -3;
         goto cleanup;
@@ -100,7 +100,7 @@ extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
 
     outItem = CFArrayGetValueAtIndex(outItems, 0);
 
-    if (outItem == nullptr)
+    if (outItem == NULL)
     {
         ret = -6;
         goto cleanup;
@@ -113,11 +113,11 @@ extern "C" int32_t AppleCryptoNative_SecKeyImportEphemeral(
     }
 
     CFRetain(outItem);
-    *ppKeyOut = reinterpret_cast<SecKeyRef>(const_cast<void*>(outItem));
+    *ppKeyOut = (SecKeyRef)outItem;
     ret = 1;
 
 cleanup:
-    if (outItems != nullptr)
+    if (outItems != NULL)
     {
         CFRelease(outItems);
     }
@@ -126,9 +126,9 @@ cleanup:
     return ret;
 }
 
-extern "C" uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef publicKey)
+uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef publicKey)
 {
-    if (publicKey == nullptr)
+    if (publicKey == NULL)
     {
         return 0;
     }
@@ -139,7 +139,7 @@ extern "C" uint64_t AppleCryptoNative_SecKeyGetSimpleKeySizeInBytes(SecKeyRef pu
 OSStatus ExportImportKey(SecKeyRef* key, SecExternalItemType type)
 {
     SecExternalFormat dataFormat = kSecFormatOpenSSL;
-    CFDataRef exportData = nullptr;
+    CFDataRef exportData = NULL;
 
     SecItemImportExportKeyParameters keyParams = {};
     keyParams.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
@@ -147,24 +147,24 @@ OSStatus ExportImportKey(SecKeyRef* key, SecExternalItemType type)
 
     OSStatus status = SecItemExport(*key, dataFormat, 0, &keyParams, &exportData);
     CFRelease(*key);
-    *key = nullptr;
+    *key = NULL;
 
     SecExternalFormat actualFormat = dataFormat;
     SecExternalItemType actualType = type;
-    CFArrayRef outItems = nullptr;
+    CFArrayRef outItems = NULL;
 
     if (status == noErr)
     {
-        status = SecItemImport(exportData, nullptr, &actualFormat, &actualType, 0, nullptr, nullptr, &outItems);
+        status = SecItemImport(exportData, NULL, &actualFormat, &actualType, 0, NULL, NULL, &outItems);
     }
 
     CFRelease(exportData);
-    exportData = nullptr;
+    exportData = NULL;
 
     CFRelease(keyParams.passphrase);
-    keyParams.passphrase = nullptr;
+    keyParams.passphrase = NULL;
 
-    if (status == noErr && outItems != nullptr)
+    if (status == noErr && outItems != NULL)
     {
         CFIndex count = CFArrayGetCount(outItems);
 
@@ -175,7 +175,7 @@ OSStatus ExportImportKey(SecKeyRef* key, SecExternalItemType type)
             if (CFGetTypeID(outItem) == SecKeyGetTypeID())
             {
                 CFRetain(outItem);
-                *key = reinterpret_cast<SecKeyRef>(const_cast<void*>(outItem));
+                *key = (SecKeyRef)outItem;
 
                 return noErr;
             }
