@@ -124,13 +124,14 @@ namespace System.Net.Sockets
 
         internal static void SocketListToFileDescriptorSet(IList socketList, Span<IntPtr> fileDescriptorSet)
         {
-            if (socketList == null || socketList.Count == 0)
+            int count;
+            if (socketList == null || (count = socketList.Count) == 0)
             {
                 return;
             }
 
-            fileDescriptorSet[0] = (IntPtr)socketList.Count;
-            for (int current = 0; current < socketList.Count; current++)
+            fileDescriptorSet[0] = (IntPtr)count;
+            for (int current = 0; current < count; current++)
             {
                 if (!(socketList[current] is Socket))
                 {
@@ -150,12 +151,14 @@ namespace System.Net.Sockets
             // Note that the counter is not necessarily incremented at each step;
             // when the socket is removed, advancing occurs automatically as the
             // other elements are shifted down.
-            if (socketList == null || socketList.Count == 0)
+            int count;
+            if (socketList == null || (count = socketList.Count) == 0)
             {
                 return;
             }
 
-            if ((int)fileDescriptorSet[0] == 0)
+            int returnedCount = (int)fileDescriptorSet[0];
+            if (returnedCount == 0)
             {
                 // No socket present, will never find any socket, remove them all.
                 socketList.Clear();
@@ -164,13 +167,13 @@ namespace System.Net.Sockets
 
             lock (socketList)
             {
-                for (int currentSocket = 0; currentSocket < socketList.Count; currentSocket++)
+                for (int currentSocket = 0; currentSocket < count; currentSocket++)
                 {
                     Socket socket = socketList[currentSocket] as Socket;
 
                     // Look for the file descriptor in the array.
                     int currentFileDescriptor;
-                    for (currentFileDescriptor = 0; currentFileDescriptor < (int)fileDescriptorSet[0]; currentFileDescriptor++)
+                    for (currentFileDescriptor = 0; currentFileDescriptor < returnedCount; currentFileDescriptor++)
                     {
                         if (fileDescriptorSet[currentFileDescriptor + 1] == socket._handle.DangerousGetHandle())
                         {
@@ -178,10 +181,11 @@ namespace System.Net.Sockets
                         }
                     }
 
-                    if (currentFileDescriptor == (int)fileDescriptorSet[0])
+                    if (currentFileDescriptor == returnedCount)
                     {
                         // Descriptor not found: remove the current socket and start again.
                         socketList.RemoveAt(currentSocket--);
+                        count--;
                     }
                 }
             }
