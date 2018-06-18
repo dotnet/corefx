@@ -43,6 +43,13 @@ namespace System.Net.Http.Functional.Tests
             bool secureServer,
             bool proxyClosesConnectionAfterFirst407Response)
         {
+            if (PlatformDetection.IsFedora && IsCurlHandler)
+            {
+                // CurlHandler seems unstable on Fedora26 and returns error
+                // "System.Net.Http.CurlException : Failure when receiving data from the peer".
+                return;
+            }
+
             if (PlatformDetection.IsWindowsNanoServer && IsWinHttpHandler && proxyAuthScheme == AuthenticationSchemes.Digest)
             {
                 // WinHTTP doesn't support Digest very well and is disabled on Nano.
@@ -209,6 +216,13 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Proxy_SendSecureRequestThruProxy_ConnectTunnelUsed()
         {
+            if (PlatformDetection.IsFedora && IsCurlHandler)
+            {
+                // CurlHandler seems unstable on Fedora26 and returns error
+                // "System.Net.Http.CurlException : Failure when receiving data from the peer".
+                return;
+            }
+
             using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create())
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
