@@ -119,14 +119,13 @@ namespace System.Net.Sockets
 
         public static SocketError Send(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out int bytesTransferred)
         {
-            const int StackThreshold = 80; // arbitrary limit to avoid too much space on stack
-
             int count = buffers.Count;
-            Span<WSABuffer> WSABuffers = count < StackThreshold ? stackalloc WSABuffer[count] : new WSABuffer[count];
-            Span<GCHandle> objectsToPin = count < StackThreshold ? stackalloc GCHandle[count] : new GCHandle[count];
+            WSABuffer[] WSABuffers = new WSABuffer[count];
+            GCHandle[] objectsToPin = null;
 
             try
             {
+                objectsToPin = new GCHandle[count];
                 for (int i = 0; i < count; ++i)
                 {
                     ArraySegment<byte> buffer = buffers[i];
@@ -157,11 +156,14 @@ namespace System.Net.Sockets
             }
             finally
             {
-                for (int i = 0; i < objectsToPin.Length; ++i)
+                if (objectsToPin != null)
                 {
-                    if (objectsToPin[i].IsAllocated)
+                    for (int i = 0; i < objectsToPin.Length; ++i)
                     {
-                        objectsToPin[i].Free();
+                        if (objectsToPin[i].IsAllocated)
+                        {
+                            objectsToPin[i].Free();
+                        }
                     }
                 }
             }
@@ -237,15 +239,13 @@ namespace System.Net.Sockets
 
         public static SocketError Receive(SafeCloseSocket handle, IList<ArraySegment<byte>> buffers, ref SocketFlags socketFlags, out int bytesTransferred)
         {
-
-            const int StackThreshold = 80; // arbitrary limit to avoid too much space on stack
-
             int count = buffers.Count;
-            Span<WSABuffer> WSABuffers = count < StackThreshold ? stackalloc WSABuffer[count] : new WSABuffer[count];
-            Span<GCHandle> objectsToPin = count < StackThreshold ? stackalloc GCHandle[count] : new GCHandle[count];
+            WSABuffer[] WSABuffers = new WSABuffer[count];
+            GCHandle[] objectsToPin = null;
 
             try
             {
+                objectsToPin = new GCHandle[count];
                 for (int i = 0; i < count; ++i)
                 {
                     ArraySegment<byte> buffer = buffers[i];
@@ -276,11 +276,14 @@ namespace System.Net.Sockets
             }
             finally
             {
-                for (int i = 0; i < objectsToPin.Length; ++i)
+                if (objectsToPin != null)
                 {
-                    if (objectsToPin[i].IsAllocated)
+                    for (int i = 0; i < objectsToPin.Length; ++i)
                     {
-                        objectsToPin[i].Free();
+                        if (objectsToPin[i].IsAllocated)
+                        {
+                            objectsToPin[i].Free();
+                        }
                     }
                 }
             }
@@ -827,9 +830,10 @@ namespace System.Net.Sockets
             try
             {
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSASendSingle(
+                SocketError errorCode = Interop.Winsock.WSASend(
                     handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                     ref asyncResult._singleBuffer,
+                    1, // There is only ever 1 buffer being sent.
                     out bytesTransferred,
                     socketFlags,
                     asyncResult.DangerousOverlappedPointer, // SafeHandle was just created in SetUnmanagedStructures
@@ -961,9 +965,10 @@ namespace System.Net.Sockets
             try
             {
                 int bytesTransferred;
-                SocketError errorCode = Interop.Winsock.WSARecvSingle(
+                SocketError errorCode = Interop.Winsock.WSARecv(
                     handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                     ref asyncResult._singleBuffer,
+                    1,
                     out bytesTransferred,
                     ref socketFlags,
                     asyncResult.DangerousOverlappedPointer, // SafeHandle was just created in SetUnmanagedStructures
