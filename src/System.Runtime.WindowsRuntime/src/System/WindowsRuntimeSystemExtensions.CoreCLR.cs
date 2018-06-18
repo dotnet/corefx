@@ -114,7 +114,7 @@ namespace System
                     return Task.CompletedTask;
 
                 case AsyncStatus.Error:
-                    return Task.FromException(source.ErrorCode.AttachRestrictedErrorInfo());
+                    return Task.FromException(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -190,7 +190,7 @@ namespace System
                     return Task.FromResult(source.GetResults());
 
                 case AsyncStatus.Error:
-                    return Task.FromException<TResult>(source.ErrorCode.AttachRestrictedErrorInfo());
+                    return Task.FromException<TResult>(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled<TResult>(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -293,7 +293,7 @@ namespace System
                     return Task.CompletedTask;
 
                 case AsyncStatus.Error:
-                    return Task.FromException(source.ErrorCode.AttachRestrictedErrorInfo());
+                    return Task.FromException(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -402,7 +402,7 @@ namespace System
                     return Task.FromResult(source.GetResults());
 
                 case AsyncStatus.Error:
-                    return Task.FromException<TResult>(source.ErrorCode.AttachRestrictedErrorInfo());
+                    return Task.FromException<TResult>(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled<TResult>(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));

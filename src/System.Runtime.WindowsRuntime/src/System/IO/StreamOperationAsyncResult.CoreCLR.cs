@@ -11,7 +11,7 @@ namespace System.IO
     {
         private void ThrowWithIOExceptionDispatchInfo(Exception e)
         {
-            WinRtIOHelper.NativeExceptionToIOExceptionInfo(_completedOperation.ErrorCode.AttachRestrictedErrorInfo()).Throw();
+            WinRtIOHelper.NativeExceptionToIOExceptionInfo(ExceptionSupport.AttachRestrictedErrorInfo(_completedOperation.ErrorCode)).Throw();
         }
     }
 }

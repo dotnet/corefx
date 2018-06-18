@@ -177,7 +177,7 @@ namespace System.Threading.Tasks
                         }
                         else
                         {
-                            error = asyncInfo.ErrorCode.AttachRestrictedErrorInfo();
+                            error = ExceptionSupport.AttachRestrictedErrorInfo(asyncInfo.ErrorCode);
                         }
                     }
                     else if (asyncStatus == AsyncStatus.Completed && getResultsFunction != null)
