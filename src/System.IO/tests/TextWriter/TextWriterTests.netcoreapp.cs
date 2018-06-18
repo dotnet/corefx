@@ -86,7 +86,6 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-
         public async void WriteAsyncStringBuilderTest(bool isSynchronized)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
