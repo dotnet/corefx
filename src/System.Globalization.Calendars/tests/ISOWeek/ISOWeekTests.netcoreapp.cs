@@ -57,11 +57,13 @@ namespace System.Globalization
 
         private static readonly YearData[] s_yearData =
         {
+            new YearData(0001, new DateTime(0001, 01, 01), new DateTime(0001, 12, 30)),
             new YearData(2005, new DateTime(2005, 01, 03), new DateTime(2006, 01, 01)),
             new YearData(2006, new DateTime(2006, 01, 02), new DateTime(2006, 12, 31)),
             new YearData(2007, new DateTime(2007, 01, 01), new DateTime(2007, 12, 30)),
             new YearData(2008, new DateTime(2007, 12, 31), new DateTime(2008, 12, 28)),
             new YearData(2009, new DateTime(2008, 12, 29), new DateTime(2010, 01, 03)),
+            new YearData(9998, new DateTime(9997, 12, 29), new DateTime(9999, 01, 03)),
         };
 
         public static IEnumerable<object[]> GetWeekOfYear_TestData()
@@ -159,6 +161,12 @@ namespace System.Globalization
         public static void GetYearEnd(int year, DateTime expected)
         {
             Assert.Equal(expected, ISOWeek.GetYearEnd(year));
+        }
+
+        [Fact]
+        public static void GetYearEnd_ForYear9999_Throws()
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ISOWeek.GetYearEnd(9999));
         }
 
         private struct DateData
