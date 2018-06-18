@@ -4,17 +4,20 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_digest.h"
 #include "pal_seckey.h"
 
 #include <Security/Security.h>
+
+BEGIN_EXTERN_C
 
 /*
 Generate a signature for algorithms which require only the data hash blob, like DSA and ECDSA.
 
 Follows pal_seckey return conventions.
 */
-extern "C" int32_t AppleCryptoNative_GenerateSignature(
+DLLEXPORT int32_t AppleCryptoNative_GenerateSignature(
     SecKeyRef privateKey, uint8_t* pbDataHash, int32_t cbDataHash, CFDataRef* pSignatureOut, CFErrorRef* pErrorOut);
 
 /*
@@ -22,12 +25,12 @@ Generate a signature for algorithms which require the pair of (dataHash, algorit
 
 Follows pal_seckey return conventions.
 */
-extern "C" int32_t AppleCryptoNative_GenerateSignatureWithHashAlgorithm(SecKeyRef privateKey,
-                                                                        uint8_t* pbDataHash,
-                                                                        int32_t cbDataHash,
-                                                                        PAL_HashAlgorithm hashAlgorithm,
-                                                                        CFDataRef* pSignatureOut,
-                                                                        CFErrorRef* pErrorOut);
+DLLEXPORT int32_t AppleCryptoNative_GenerateSignatureWithHashAlgorithm(SecKeyRef privateKey,
+                                                                       uint8_t* pbDataHash,
+                                                                       int32_t cbDataHash,
+                                                                       PAL_HashAlgorithm hashAlgorithm,
+                                                                       CFDataRef* pSignatureOut,
+                                                                       CFErrorRef* pErrorOut);
 
 /*
 Verify a signature for algorithms which only require the data hash blob, like DSA and ECDSA.
@@ -35,13 +38,13 @@ Verify a signature for algorithms which only require the data hash blob, like DS
 Returns 1 when the signature is correct, 0 when it is incorrect, and otherwise
 follows pal_seckey return conventions.
 */
-extern "C" int32_t AppleCryptoNative_VerifySignatureWithHashAlgorithm(SecKeyRef publicKey,
-                                                                      uint8_t* pbDataHash,
-                                                                      int32_t cbDataHash,
-                                                                      uint8_t* pbSignature,
-                                                                      int32_t cbSignature,
-                                                                      PAL_HashAlgorithm hashAlgorithm,
-                                                                      CFErrorRef* pErrorOut);
+DLLEXPORT int32_t AppleCryptoNative_VerifySignatureWithHashAlgorithm(SecKeyRef publicKey,
+                                                                     uint8_t* pbDataHash,
+                                                                     int32_t cbDataHash,
+                                                                     uint8_t* pbSignature,
+                                                                     int32_t cbSignature,
+                                                                     PAL_HashAlgorithm hashAlgorithm,
+                                                                     CFErrorRef* pErrorOut);
 
 /*
 Verify a signature for algorithms which require the pair of (dataHash, algorithmId), like RSA.
@@ -49,9 +52,11 @@ Verify a signature for algorithms which require the pair of (dataHash, algorithm
 Returns 1 when the signature is correct, 0 when it is incorrect, and otherwise
 follows pal_seckey return conventions.
 */
-extern "C" int32_t AppleCryptoNative_VerifySignature(SecKeyRef publicKey,
-                                                     uint8_t* pbDataHash,
-                                                     int32_t cbDataHash,
-                                                     uint8_t* pbSignature,
-                                                     int32_t cbSignature,
-                                                     CFErrorRef* pErrorOut);
+DLLEXPORT int32_t AppleCryptoNative_VerifySignature(SecKeyRef publicKey,
+                                                    uint8_t* pbDataHash,
+                                                    int32_t cbDataHash,
+                                                    uint8_t* pbSignature,
+                                                    int32_t cbSignature,
+                                                    CFErrorRef* pErrorOut);
+
+END_EXTERN_C

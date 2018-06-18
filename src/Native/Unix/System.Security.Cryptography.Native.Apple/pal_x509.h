@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_digest.h"
 #include "pal_seckey.h"
 
 #include <Security/Security.h>
+
+BEGIN_EXTERN_C
 
 enum
 {
@@ -31,7 +34,7 @@ Output:
 pCertOut: If handle is a certificate, receives handle, otherwise NULL
 pIdentityut: If handle is an identity, receives handle, otherwise NULL
 */
-extern "C" int32_t
+DLLEXPORT int32_t
 AppleCryptoNative_X509DemuxAndRetainHandle(CFTypeRef handle, SecCertificateRef* pCertOut, SecIdentityRef* pIdentityOut);
 
 /*
@@ -43,7 +46,7 @@ Output:
 pPublicKeyOut: Receives a CFRetain()ed SecKeyRef for the public key
 pOSStatusOut: Receives the result of SecCertificateCopyPublicKey
 */
-extern "C" int32_t
+DLLEXPORT int32_t
 AppleCryptoNative_X509GetPublicKey(SecCertificateRef cert, SecKeyRef* pPublicKeyOut, int32_t* pOSStatusOut);
 
 /*
@@ -51,7 +54,7 @@ Determines the data type of the provided input.
 
 Returns the data (format) type of the provided input, PAL_X509Unknown if it cannot be determined.
 */
-extern "C" PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_t cbData);
+DLLEXPORT PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_t cbData);
 
 /*
 Extract a SecCertificateRef for the certificate from an identity handle.
@@ -61,7 +64,7 @@ Returns the result of SecIdentityCopyCertificate.
 Output:
 pCertOut: Receives a SecCertificateRef for the certificate associated with the identity
 */
-extern "C" int32_t AppleCryptoNative_X509CopyCertFromIdentity(SecIdentityRef identity, SecCertificateRef* pCertOut);
+DLLEXPORT int32_t AppleCryptoNative_X509CopyCertFromIdentity(SecIdentityRef identity, SecCertificateRef* pCertOut);
 
 /*
 Extract a SecKeyRef for the private key from an identity handle.
@@ -71,7 +74,7 @@ Returns the result of SecIdentityCopyPrivateKey
 Output:
 pPrivateKeyOut: Receives a SecKeyRef for the private key associated with the identity
 */
-extern "C" int32_t AppleCryptoNative_X509CopyPrivateKeyFromIdentity(SecIdentityRef identity, SecKeyRef* pPrivateKeyOut);
+DLLEXPORT int32_t AppleCryptoNative_X509CopyPrivateKeyFromIdentity(SecIdentityRef identity, SecKeyRef* pPrivateKeyOut);
 
 /*
 Read cbData bytes of data from pbData and interpret it to a collection of certificates (or identities).
@@ -89,14 +92,14 @@ pCollectionOut: Receives an array which contains SecCertificateRef, SecIdentityR
 read out of the provided blob
 pOSStatus: Receives the output of SecItemImport for the last attempted read
 */
-extern "C" int32_t AppleCryptoNative_X509ImportCollection(uint8_t* pbData,
-                                                          int32_t cbData,
-                                                          PAL_X509ContentType contentType,
-                                                          CFStringRef cfPfxPassphrase,
-                                                          SecKeychainRef keychain,
-                                                          int32_t exportable,
-                                                          CFArrayRef* pCollectionOut,
-                                                          int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_X509ImportCollection(uint8_t* pbData,
+                                                         int32_t cbData,
+                                                         PAL_X509ContentType contentType,
+                                                         CFStringRef cfPfxPassphrase,
+                                                         SecKeychainRef keychain,
+                                                         int32_t exportable,
+                                                         CFArrayRef* pCollectionOut,
+                                                         int32_t* pOSStatus);
 
 /*
 Read cbData bytes of data from pbData and interpret it to a single certificate (or identity).
@@ -119,15 +122,15 @@ pCertOut: If the best matched value was a certificate, receives the SecCertifica
 pIdentityOut: If the best matched value was an identity, receives the SecIdentityRef, otherwise receives NULL
 pOSStatus: Receives the return of the last call to SecItemImport
 */
-extern "C" int32_t AppleCryptoNative_X509ImportCertificate(uint8_t* pbData,
-                                                           int32_t cbData,
-                                                           PAL_X509ContentType contentType,
-                                                           CFStringRef cfPfxPassphrase,
-                                                           SecKeychainRef keychain,
-                                                           int32_t exportable,
-                                                           SecCertificateRef* pCertOut,
-                                                           SecIdentityRef* pIdentityOut,
-                                                           int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_X509ImportCertificate(uint8_t* pbData,
+                                                          int32_t cbData,
+                                                          PAL_X509ContentType contentType,
+                                                          CFStringRef cfPfxPassphrase,
+                                                          SecKeychainRef keychain,
+                                                          int32_t exportable,
+                                                          SecCertificateRef* pCertOut,
+                                                          SecIdentityRef* pIdentityOut,
+                                                          int32_t* pOSStatus);
 
 /*
 Export the certificates (or identities) in data to the requested format type.
@@ -140,11 +143,11 @@ Output:
 pExportOut: Receives a CFDataRef with the exported blob
 pOSStatus: Receives the result of SecItemExport
 */
-extern "C" int32_t AppleCryptoNative_X509ExportData(CFArrayRef data,
-                                                    PAL_X509ContentType type,
-                                                    CFStringRef cfExportPassphrase,
-                                                    CFDataRef* pExportOut,
-                                                    int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_X509ExportData(CFArrayRef data,
+                                                   PAL_X509ContentType type,
+                                                   CFStringRef cfExportPassphrase,
+                                                   CFDataRef* pExportOut,
+                                                   int32_t* pOSStatus);
 
 /*
 Extract the DER encoded value of a certificate (public portion only).
@@ -155,7 +158,7 @@ Output:
 ppDataOut: Receives a CFDataRef with the exported blob
 pOSStatus: Receives the result of SecItemExport
 */
-extern "C" int32_t AppleCryptoNative_X509GetRawData(SecCertificateRef cert, CFDataRef* ppDataOut, int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_X509GetRawData(SecCertificateRef cert, CFDataRef* ppDataOut, int32_t* pOSStatus);
 
 /*
 Find a SecIdentityRef for the given cert and private key in the target keychain.
@@ -168,8 +171,10 @@ Output:
 pIdentityOut: Receives the SecIdentityRef of the mated cert/key pair.
 pOSStatus: Receives the result of the last executed system call.
 */
-extern "C" int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
-                                                            SecKeyRef privateKey,
-                                                            SecKeychainRef targetKeychain,
-                                                            SecIdentityRef* pIdentityOut,
-                                                            int32_t* pOSStatus);
+DLLEXPORT int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
+                                                           SecKeyRef privateKey,
+                                                           SecKeychainRef targetKeychain,
+                                                           SecIdentityRef* pIdentityOut,
+                                                           int32_t* pOSStatus);
+
+END_EXTERN_C
