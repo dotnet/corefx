@@ -108,61 +108,66 @@ namespace System.Text.RegularExpressions
             {
                 if (IsMetachar(input[i]))
                 {
-                    ReadOnlySpan<char> inputSpan = input.AsSpan();
-
-                    // For small inputs we allocate on the stack. In most cases a buffer three 
-                    // times larger the original string should be sufficient as usually not all 
-                    // characters need to be encoded.
-                    // For larger string we rent the input string's length plus a fixed 
-                    // conservative amount of chars from the ArrayPool.
-                    Span<char> buffer = input.Length <= 80 ? stackalloc char[EscapeMaxBufferSize] : null;
-                    ValueStringBuilder vsb = buffer != null ?
-                        new ValueStringBuilder(buffer) :
-                        new ValueStringBuilder(input.Length + 200);
-
-                    char ch = input[i];
-                    int lastpos;
-
-                    vsb.Append(inputSpan.Slice(0, i));
-                    do
-                    {
-                        vsb.Append('\\');
-                        switch (ch)
-                        {
-                            case '\n':
-                                ch = 'n';
-                                break;
-                            case '\r':
-                                ch = 'r';
-                                break;
-                            case '\t':
-                                ch = 't';
-                                break;
-                            case '\f':
-                                ch = 'f';
-                                break;
-                        }
-                        vsb.Append(ch);
-                        i++;
-                        lastpos = i;
-
-                        while (i < input.Length)
-                        {
-                            ch = input[i];
-                            if (IsMetachar(ch))
-                                break;
-
-                            i++;
-                        }
-
-                        vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
-                    } while (i < input.Length);
-
-                    return vsb.ToString();
+                    return EscapeImpl(input, i);
                 }
             }
 
             return input;
+        }
+
+        private static string EscapeImpl(string input, int i)
+        {
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+
+            // For small inputs we allocate on the stack. In most cases a buffer three 
+            // times larger the original string should be sufficient as usually not all 
+            // characters need to be encoded.
+            // For larger string we rent the input string's length plus a fixed 
+            // conservative amount of chars from the ArrayPool.
+            Span<char> buffer = inputSpan.Length <= 80 ? stackalloc char[EscapeMaxBufferSize] : null;
+            ValueStringBuilder vsb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(inputSpan.Length + 200);
+
+            char ch = inputSpan[i];
+            int lastpos;
+
+            vsb.Append(inputSpan.Slice(0, i));
+            do
+            {
+                vsb.Append('\\');
+                switch (ch)
+                {
+                    case '\n':
+                        ch = 'n';
+                        break;
+                    case '\r':
+                        ch = 'r';
+                        break;
+                    case '\t':
+                        ch = 't';
+                        break;
+                    case '\f':
+                        ch = 'f';
+                        break;
+                }
+                vsb.Append(ch);
+                i++;
+                lastpos = i;
+
+                while (i < inputSpan.Length)
+                {
+                    ch = inputSpan[i];
+                    if (IsMetachar(ch))
+                        break;
+
+                    i++;
+                }
+
+                vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
+            } while (i < inputSpan.Length);
+
+            return vsb.ToString();
         }
 
         /*
@@ -174,37 +179,42 @@ namespace System.Text.RegularExpressions
             {
                 if (input[i] == '\\')
                 {
-                    ReadOnlySpan<char> inputSpan = input.AsSpan();
-                    RegexParser p = new RegexParser(CultureInfo.InvariantCulture);
-                    int lastpos;
-                    p.SetPattern(input);
-                    
-                    // In the worst case the escaped string has the same length.
-                    // For small inputs we use stack allocation.
-                    Span<char> buffer = input.Length <= EscapeMaxBufferSize ? stackalloc char[EscapeMaxBufferSize] : null;
-                    ValueStringBuilder vsb = buffer != null ?
-                        new ValueStringBuilder(buffer) :
-                        new ValueStringBuilder(input.Length);
-
-                    vsb.Append(inputSpan.Slice(0, i));
-                    do
-                    {
-                        i++;
-                        p.Textto(i);
-                        if (i < input.Length)
-                            vsb.Append(p.ScanCharEscape());
-                        i = p.Textpos();
-                        lastpos = i;
-                        while (i < input.Length && input[i] != '\\')
-                            i++;
-                        vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
-                    } while (i < input.Length);
-
-                    return vsb.ToString();
+                    return UnescapeImpl(input, i);
                 }
             }
 
             return input;
+        }
+
+        private static string UnescapeImpl(string input, int i)
+        {
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            RegexParser p = new RegexParser(CultureInfo.InvariantCulture);
+            int lastpos;
+            p.SetPattern(input);
+
+            // In the worst case the escaped string has the same length.
+            // For small inputs we use stack allocation.
+            Span<char> buffer = inputSpan.Length <= EscapeMaxBufferSize ? stackalloc char[EscapeMaxBufferSize] : null;
+            ValueStringBuilder vsb = buffer != null ?
+                new ValueStringBuilder(buffer) :
+                new ValueStringBuilder(inputSpan.Length);
+
+            vsb.Append(inputSpan.Slice(0, i));
+            do
+            {
+                i++;
+                p.Textto(i);
+                if (i < inputSpan.Length)
+                    vsb.Append(p.ScanCharEscape());
+                i = p.Textpos();
+                lastpos = i;
+                while (i < inputSpan.Length && inputSpan[i] != '\\')
+                    i++;
+                vsb.Append(inputSpan.Slice(lastpos, i - lastpos));
+            } while (i < inputSpan.Length);
+
+            return vsb.ToString();
         }
 
         /*
