@@ -119,13 +119,13 @@ DLLEXPORT int32_t SystemNative_GetSignalForBreak(void);
  */
 DLLEXPORT int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak);
 
-enum CtrlCode
+typedef enum
 {
     Interrupt = 0,
     Break = 1
-};
+} CtrlCode;
 
-typedef void (*CtrlCallback)(enum CtrlCode signalCode);
+typedef void (*CtrlCallback)(CtrlCode signalCode);
 /**
  * Called by pal_signal.cpp to reinitialize the console on SIGCONT/SIGCHLD.
  */

@@ -18,8 +18,6 @@ typedef enum
     AvailabilityChanged = 4,
 } NetworkChangeKind;
 
-typedef enum Error Error;
-
 typedef void (*NetworkChangeEvent)(int32_t sock, NetworkChangeKind notificationKind);
 
 DLLEXPORT void SystemNative_ReadEvents(int32_t sock, NetworkChangeEvent onNetworkChange);

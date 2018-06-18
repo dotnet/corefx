@@ -7,7 +7,7 @@
 #include "pal_compiler.h"
 #include "pal_config.h"
 
-enum TcpState
+typedef enum
 {
     TcpState_Unknown,
     TcpState_Closed,
@@ -22,6 +22,6 @@ enum TcpState
     TcpState_LastAck,
     TcpState_TimeWait,
     TcpState_DeleteTcb
-};
+} TcpState;
 
 DLLEXPORT int32_t SystemNative_MapTcpState(int32_t tcpState);

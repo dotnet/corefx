@@ -26,7 +26,7 @@
  * the same value so that callers cannot not take a dependency on
  * being able to distinguish between them.
  */
-enum Error
+typedef enum
 {
     Error_SUCCESS = 0,
 
@@ -121,7 +121,7 @@ enum Error
     // This one is not part of POSIX, but is a catch-all for the case
     // where we cannot convert the raw errno value to something above.
     Error_ENONSTANDARD = 0x1FFFF,
-};
+} Error;
 
 /**
  * Converts the given raw numeric value obtained via errno ->
