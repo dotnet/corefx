@@ -1,8 +1,5 @@
 project(System.Native)
 
-# We mark the function which needs exporting with DLLEXPORT
-add_compile_options(-fvisibility=hidden)
-
 set(NATIVE_SOURCES
     pal_console.c
     pal_errno.c

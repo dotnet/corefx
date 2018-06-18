@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 
 // Managed interface types
@@ -44,5 +41,3 @@ enum NetworkInterfaceType
 };
 
 uint16_t MapHardwareType(uint16_t nativeType);
-
-END_EXTERN_C

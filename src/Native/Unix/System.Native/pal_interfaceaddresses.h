@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_maphardwaretype.h"
 #include "pal_types.h"
 
@@ -39,5 +36,3 @@ DLLEXPORT  int32_t SystemNative_EnumerateInterfaceAddresses(
 #if HAVE_RT_MSGHDR
 DLLEXPORT int32_t SystemNative_EnumerateGatewayAddressesForInterface(uint32_t interfaceIndex, GatewayAddressFound onGatewayFound);
 #endif
-
-END_EXTERN_C

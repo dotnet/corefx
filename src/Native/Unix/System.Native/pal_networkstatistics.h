@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_tcpstate.h"
 
 // Exchange types used to normalize Network protocol statistics information
@@ -165,5 +162,3 @@ DLLEXPORT int32_t SystemNative_GetActiveUdpListeners(struct IPEndPointInfo* info
 DLLEXPORT int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct NativeIPInterfaceStatistics* retStats);
 
 DLLEXPORT int32_t SystemNative_GetNumRoutes(void);
-
-END_EXTERN_C

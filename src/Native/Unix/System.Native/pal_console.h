@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 
 /**
@@ -138,5 +135,3 @@ void ReinitializeConsole(void);
  * Called by pal_signal.cpp to uninitialize the console on SIGINT/SIGQUIT.
  */
 void UninitializeConsole(void);
-
-END_EXTERN_C

@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_config.h"
 
 enum TcpState
@@ -28,5 +25,3 @@ enum TcpState
 };
 
 DLLEXPORT int32_t SystemNative_MapTcpState(int32_t tcpState);
-
-END_EXTERN_C

@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 
 /**
@@ -58,5 +55,3 @@ DLLEXPORT uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
  * It could also be a custom handler registered by other code before us.
  */
 DLLEXPORT void SystemNative_RestoreAndHandleCtrl(enum CtrlCode ctrlCode);
-
-END_EXTERN_C

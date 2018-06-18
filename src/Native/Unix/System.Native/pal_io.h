@@ -5,9 +5,6 @@
 #pragma once
 
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 #include "pal_errno.h"
 #include <time.h>
@@ -707,5 +704,3 @@ DLLEXPORT int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
 DLLEXPORT int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType);
-
-END_EXTERN_C
