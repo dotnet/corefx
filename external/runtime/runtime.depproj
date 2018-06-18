@@ -47,15 +47,15 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 
   <ItemGroup>
-    <!-- For coverage runs of any crossgen dll from CoreClr we need the respective IL, the pdbs are already in place -->
-    <!-- Make backups of the crossgen dlls that do not have .ni. in their names, so they can be restored after coverage runs  -->
+    <!-- For IL rewrite tools of crossgen dll from CoreClr we need the respective IL and respective pdbs -->
+    <!-- For crossgen dlls save respective pdbs too -->
     <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
       <ItemName>CoreCLRILFiles</ItemName>
-      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)/il</RuntimePath>
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)il</RuntimePath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="$(Configuration)">
       <ItemName>CoreCLRCrossGenFiles</ItemName>
-      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)/ni</RuntimePath>
+      <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)ni</RuntimePath>
     </BinPlaceConfiguration>
   </ItemGroup>
   
@@ -124,6 +124,8 @@
           <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/</CrossGenAssemblyPath>
         </CoreCLRILFiles>
         <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
+        <CoreCLRILFiles Include="@(CoreCLRILFiles -> '%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/%(Filename).pdb')" />
+        <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
       </ItemGroup>
   </Target>
 
@@ -139,6 +141,8 @@
       <CoreCLRFiles Include="$(CoreCLROverridePath)/*.*" />
       <CoreCLRILFiles Include="$(CoreCLROverridePath)/IL/*.*" />
       <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')" />
+      <CoreCLRILFiles Include="@(CoreCLRILFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).pdb')" />
+      <CoreCLRCrossGenFiles Include="@(CoreCLRCrossGenFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).ni.pdb')" />
       <CoreCLRPDBFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb" />
 
       <_ReferenceCopyLocalPathsToRemove Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'" />
