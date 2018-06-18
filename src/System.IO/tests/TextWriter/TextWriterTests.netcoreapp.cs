@@ -56,58 +56,65 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void WriteStringBuilderTest(bool isSynchronized)
+        [MemberData(nameof(GetStringBuilderTestData))]
+        public void WriteStringBuilderTest(bool isSynchronized, string testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
                 TextWriter tw = isSynchronized ? TextWriter.Synchronized(ctw) : ctw;
-                tw.Write(new StringBuilder(new string(TestDataProvider.CharData)));
+                tw.Write(new StringBuilder(testData));
                 tw.Flush();
-                Assert.Equal(new string(TestDataProvider.CharData), ctw.Text);
+                Assert.Equal(testData, ctw.Text);
             }
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void WriteLineStringBuilderTest(bool isSynchronized)
+        [MemberData(nameof(GetStringBuilderTestData))]
+        public void WriteLineStringBuilderTest(bool isSynchronized, string testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
                 TextWriter tw = isSynchronized ? TextWriter.Synchronized(ctw) : ctw;
-                tw.Write(new StringBuilder(new string(TestDataProvider.CharData)));
+                tw.WriteLine(new StringBuilder(new string(testData)));
                 tw.Flush();
-                Assert.Equal(new string(TestDataProvider.CharData), ctw.Text);
+                Assert.Equal(testData + tw.NewLine, ctw.Text);
             }
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async void WriteAsyncStringBuilderTest(bool isSynchronized)
+        [MemberData(nameof(GetStringBuilderTestData))]
+        public async void WriteAsyncStringBuilderTest(bool isSynchronized, string testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
                 TextWriter tw = isSynchronized ? TextWriter.Synchronized(ctw) : ctw;
-                await tw.WriteAsync(new StringBuilder(new string(TestDataProvider.CharData)));
+                await tw.WriteAsync(new StringBuilder(testData));
                 tw.Flush();
-                Assert.Equal(new string(TestDataProvider.CharData), ctw.Text);
+                Assert.Equal(testData, ctw.Text);
             }
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async void WriteLineAsyncStringBuilderTest(bool isSynchronized)
+        [MemberData(nameof(GetStringBuilderTestData))]
+        public async void WriteLineAsyncStringBuilderTest(bool isSynchronized, string testData)
         {
             using (CharArrayTextWriter ctw = NewTextWriter)
             {
                 TextWriter tw = isSynchronized ? TextWriter.Synchronized(ctw) : ctw;
-                await tw.WriteLineAsync(new StringBuilder(new string(TestDataProvider.CharData)));
+                await tw.WriteLineAsync(new StringBuilder(testData));
                 tw.Flush();
-                Assert.Equal(new string(TestDataProvider.CharData) + tw.NewLine, ctw.Text);
+                Assert.Equal(testData + tw.NewLine, ctw.Text);
+            }
+        }
+
+        // Generate data for TextWriter.Write* methods that take a stringBuilder.  
+        // We test both the synchronized and unsynchronized variation, on strinbuilder swith 0, small and large values.    
+        public static IEnumerable<object[]> GetStringBuilderTestData()
+        {
+            foreach (string testData in new string[] { "", new string(TestDataProvider.CharData), new string(TestDataProvider.LargeData) })
+            {
+                foreach (bool isSynchronized in new bool[] { true, false })
+                    yield return new object[] { isSynchronized, testData };
             }
         }
     }
