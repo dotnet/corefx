@@ -668,10 +668,10 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static unsafe SocketError Poll(SafeCloseSocket handle, int microseconds, SelectMode mode, out bool status)
+        public static SocketError Poll(SafeCloseSocket handle, int microseconds, SelectMode mode, out bool status)
         {
             IntPtr rawHandle = handle.DangerousGetHandle();
-            IntPtr* fileDescriptorSet = stackalloc IntPtr[2] { (IntPtr)1, rawHandle };
+            Span<IntPtr> fileDescriptorSet = stackalloc IntPtr[2] { (IntPtr)1, rawHandle };
             Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
 
             // A negative timeout value implies an indefinite wait.
@@ -682,9 +682,9 @@ namespace System.Net.Sockets
                 socketCount =
                     Interop.Winsock.select(
                         0,
-                        mode == SelectMode.SelectRead ? fileDescriptorSet : null,
-                        mode == SelectMode.SelectWrite ? fileDescriptorSet : null,
-                        mode == SelectMode.SelectError ? fileDescriptorSet : null,
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectRead ? fileDescriptorSet : default),
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectWrite ? fileDescriptorSet : default),
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectError ? fileDescriptorSet : default),
                         ref IOwait);
             }
             else
@@ -692,9 +692,9 @@ namespace System.Net.Sockets
                 socketCount =
                     Interop.Winsock.select(
                         0,
-                        mode == SelectMode.SelectRead ? fileDescriptorSet : null,
-                        mode == SelectMode.SelectWrite ? fileDescriptorSet : null,
-                        mode == SelectMode.SelectError ? fileDescriptorSet : null,
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectRead ? fileDescriptorSet : default),
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectWrite ? fileDescriptorSet : default),
+                        ref MemoryMarshal.GetReference(mode == SelectMode.SelectError ? fileDescriptorSet : default),
                         IntPtr.Zero);
             }
 
@@ -708,7 +708,7 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static unsafe SocketError Select(IList checkRead, IList checkWrite, IList checkError, int microseconds)
+        public static SocketError Select(IList checkRead, IList checkWrite, IList checkError, int microseconds)
         {
             bool ShouldStackAlloc(IList list, out Span<IntPtr> span)
             {
@@ -748,34 +748,28 @@ namespace System.Net.Sockets
 
 
             int socketCount;
-            // note: these spans are always at least length 1, so this is well-defined
-            fixed (IntPtr* readPtr = &MemoryMarshal.GetReference(readfileDescriptorSet))
-            fixed (IntPtr* writePtr = &MemoryMarshal.GetReference(writefileDescriptorSet))
-            fixed (IntPtr* errPtr = &MemoryMarshal.GetReference(errfileDescriptorSet))
+            if (microseconds != -1)
             {
-                if (microseconds != -1)
-                {
-                    Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
-                    MicrosecondsToTimeValue((long)(uint)microseconds, ref IOwait);
+                Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
+                MicrosecondsToTimeValue((long)(uint)microseconds, ref IOwait);
 
-                    socketCount =
-                        Interop.Winsock.select(
-                            0, // ignored value
-                            readPtr,
-                            writePtr,
-                            errPtr,
-                            ref IOwait);
-                }
-                else
-                {
-                    socketCount =
-                        Interop.Winsock.select(
-                            0, // ignored value
-                            readPtr,
-                            writePtr,
-                            errPtr,
-                            IntPtr.Zero);
-                }
+                socketCount =
+                    Interop.Winsock.select(
+                        0, // ignored value
+                        ref MemoryMarshal.GetReference(readfileDescriptorSet),
+                        ref MemoryMarshal.GetReference(writefileDescriptorSet),
+                        ref MemoryMarshal.GetReference(errfileDescriptorSet),
+                        ref IOwait);
+            }
+            else
+            {
+                socketCount =
+                    Interop.Winsock.select(
+                        0, // ignored value
+                        ref MemoryMarshal.GetReference(readfileDescriptorSet),
+                        ref MemoryMarshal.GetReference(writefileDescriptorSet),
+                        ref MemoryMarshal.GetReference(errfileDescriptorSet),
+                        IntPtr.Zero);
             }
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"Interop.Winsock.select returns socketCount:{socketCount}");
 
