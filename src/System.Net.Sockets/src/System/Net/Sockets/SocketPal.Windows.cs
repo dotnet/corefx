@@ -748,7 +748,6 @@ namespace System.Net.Sockets
             // retains that behavior so that any app working around the original bug with, 
             // for example, (-2) specified for microseconds, will continue to get the same behavior.
 
-
             int socketCount;
             if (microseconds != -1)
             {
