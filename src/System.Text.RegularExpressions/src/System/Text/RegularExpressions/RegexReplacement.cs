@@ -13,7 +13,7 @@ namespace System.Text.RegularExpressions
 {
     internal sealed class RegexReplacement
     {
-        private const int ReplaceBufferSize = 256;
+        private const int ReplaceMaxBufferSize = 256;
 
         // Constants for special insertion patterns
         private const int Specials = 4;
@@ -35,7 +35,7 @@ namespace System.Text.RegularExpressions
             if (concat.Type() != RegexNode.Concatenate)
                 throw new ArgumentException(SR.ReplacementError);
 
-            Span<char> buffer = stackalloc char[256];
+            Span<char> buffer = stackalloc char[ReplaceMaxBufferSize];
             ValueStringBuilder vsb = new ValueStringBuilder(buffer);
             List<string> strings = new List<string>();
             List<int> rules = new List<int>();
@@ -206,7 +206,7 @@ namespace System.Text.RegularExpressions
             else
             {
                 ReadOnlySpan<char> inputSpan = input.AsSpan();
-                Span<char> charInitSpan = stackalloc char[ReplaceBufferSize];
+                Span<char> charInitSpan = stackalloc char[ReplaceMaxBufferSize];
                 var vsb = new ValueStringBuilder(charInitSpan);
 
                 if (!regex.RightToLeft)

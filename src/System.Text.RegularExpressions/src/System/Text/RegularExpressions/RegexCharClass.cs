@@ -1033,7 +1033,7 @@ namespace System.Text.RegularExpressions
             int rangeLen = _rangelist.Count * 2;
             int strGuessCount = rangeLen + _categories.Length + 3;
 
-            Span<char> buffer = strGuessCount <= 256 ? stackalloc char[strGuessCount] : null;
+            Span<char> buffer = strGuessCount <= 256 ? stackalloc char[256] : null;
             ValueStringBuilder vsb = buffer != null ?
                 new ValueStringBuilder(buffer) :
                 new ValueStringBuilder(strGuessCount);

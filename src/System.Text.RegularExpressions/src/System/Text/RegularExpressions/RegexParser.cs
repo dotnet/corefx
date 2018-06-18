@@ -20,6 +20,7 @@ namespace System.Text.RegularExpressions
 {
     internal sealed class RegexParser
     {
+        private const int EscapeMaxBufferSize = 256;
         private const int MaxValueDiv10 = int.MaxValue / 10;
         private const int MaxValueMod10 = int.MaxValue % 10;
 
@@ -114,7 +115,7 @@ namespace System.Text.RegularExpressions
                     // characters need to be encoded.
                     // For larger string we rent the input string's length plus a fixed 
                     // conservative amount of chars from the ArrayPool.
-                    Span<char> buffer = input.Length <= 80 ? stackalloc char[256] : null;
+                    Span<char> buffer = input.Length <= 80 ? stackalloc char[EscapeMaxBufferSize] : null;
                     ValueStringBuilder vsb = buffer != null ?
                         new ValueStringBuilder(buffer) :
                         new ValueStringBuilder(input.Length + 200);
@@ -180,7 +181,7 @@ namespace System.Text.RegularExpressions
                     
                     // In the worst case the escaped string has the same length.
                     // For small inputs we use stack allocation.
-                    Span<char> buffer = input.Length <= 256 ? stackalloc char[input.Length] : null;
+                    Span<char> buffer = input.Length <= EscapeMaxBufferSize ? stackalloc char[EscapeMaxBufferSize] : null;
                     ValueStringBuilder vsb = buffer != null ?
                         new ValueStringBuilder(buffer) :
                         new ValueStringBuilder(input.Length);
@@ -2092,8 +2093,9 @@ namespace System.Text.RegularExpressions
                         // a ToLower on the entire string could actually change the surrogate pair.  This is more correct
                         // linguistically, but since Regex doesn't support surrogates, it's more important to be
                         // consistent.
+                        TextInfo textInfo = state._culture.TextInfo;
                         for (int i = 0; i < input.Length; i++)
-                            span[i] = state._culture.TextInfo.ToLower(input[i]);
+                            span[i] = textInfo.ToLower(input[i]);
                     });
                 }
                 else
