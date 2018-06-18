@@ -83,9 +83,9 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-                    var span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
+                    Span<Guid> span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
-                    var slice = span.Slice(GuidTwoGiBLimit + 1);
+                    Span<Guid> slice = span.Slice(GuidTwoGiBLimit + 1);
                     slice[0] = guid;
                     slice = span.Slice(GuidOneGiBLimit).Slice(1).Slice(GuidOneGiBLimit);
                     Assert.Equal(guid, slice[0]);
@@ -119,9 +119,9 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-                    var span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
+                    Span<Guid> span = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
-                    var slice = span.Slice((GuidTwoGiBLimit + 1));
+                    Span<Guid> slice = span.Slice((GuidTwoGiBLimit + 1));
                     slice[0] = guid;
                     slice = span.Slice(GuidOneGiBLimit).Slice(1).Slice(GuidOneGiBLimit);
                     Assert.Equal(guid, slice[0]);
@@ -131,18 +131,6 @@ namespace System.SpanTests
             {
                 Marshal.FreeHGlobal(huge);
             }
-        }
-
-        [Fact]
-        public static void ArrayCtorStartOverflow()
-        {
-            var arr = new Guid[20];
-
-            var slice = arr.AsSpan().Slice(2);
-            Guid guid = Guid.NewGuid();
-            slice[1] = guid;
-
-            Assert.Equal(guid, arr[3]);
         }
 
         [Fact]
@@ -167,10 +155,10 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-                    var mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
-                    var span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
+                    Span<Guid> mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
+                    ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
-                    var slice = span.Slice(GuidTwoGiBLimit + 1);
+                    ReadOnlySpan<Guid> slice = span.Slice(GuidTwoGiBLimit + 1);
                     mutable[GuidTwoGiBLimit + 1] = guid;
                     Assert.Equal(guid, slice[0]);
 
@@ -206,10 +194,10 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-                    var mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
-                    var span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
+                    Span<Guid> mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
+                    ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
-                    var slice = span.Slice((GuidTwoGiBLimit + 1));
+                    ReadOnlySpan<Guid> slice = span.Slice((GuidTwoGiBLimit + 1));
                     mutable[GuidTwoGiBLimit + 1] = guid;
                     Assert.Equal(guid, slice[0]);
 
@@ -245,10 +233,10 @@ namespace System.SpanTests
                         GuidTwoGiBLimit = (int)(TwoGiB / sizeof(Guid)),
                         GuidOneGiBLimit = (int)(OneGiB / sizeof(Guid));
 
-                    var mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
-                    var span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
+                    Span<Guid> mutable = new Span<Guid>((void*)huge, GuidThreeGiBLimit);
+                    ReadOnlySpan<Guid> span = new ReadOnlySpan<Guid>((void*)huge, GuidThreeGiBLimit);
                     Guid guid = Guid.NewGuid();
-                    var slice = span.Slice(GuidTwoGiBLimit + 1, 20);
+                    ReadOnlySpan<Guid> slice = span.Slice(GuidTwoGiBLimit + 1, 20);
                     mutable[GuidTwoGiBLimit + 1] = guid;
                     Assert.Equal(guid, slice[0]);
 
@@ -267,7 +255,7 @@ namespace System.SpanTests
         {
             var arr = new Guid[20];
 
-            var slice = new ReadOnlySpan<Guid>(arr, 2, 2);
+            ReadOnlySpan<Guid> slice = new ReadOnlySpan<Guid>(arr, 2, 2);
             Guid guid = Guid.NewGuid();
             arr[3] = guid;
 
