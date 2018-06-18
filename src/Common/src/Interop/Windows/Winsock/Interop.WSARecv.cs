@@ -13,19 +13,18 @@ internal static partial class Interop
     internal static partial class Winsock
     {
         [DllImport(Interop.Libraries.Ws2_32, SetLastError = true)]
-        internal static unsafe extern SocketError WSARecv(
+        private static unsafe extern SocketError WSARecv(
             IntPtr socketHandle,
-            WSABuffer* buffer,
+            ref WSABuffer buffer,
             int bufferCount,
             out int bytesTransferred,
             ref SocketFlags socketFlags,
             NativeOverlapped* overlapped,
             IntPtr completionRoutine);
 
-        internal static unsafe SocketError WSARecv(
+        internal static unsafe SocketError WSARecvSingle(
             IntPtr socketHandle,
             ref WSABuffer buffer,
-            int bufferCount,
             out int bytesTransferred,
             ref SocketFlags socketFlags,
             NativeOverlapped* overlapped,
@@ -35,23 +34,20 @@ internal static partial class Interop
             // We don't want to cause a race in async scenarios.
             // The WSABuffer struct should be unchanged anyway.
             WSABuffer localBuffer = buffer;
-            return WSARecv(socketHandle, &localBuffer, bufferCount, out bytesTransferred, ref socketFlags, overlapped, completionRoutine);
+            return WSARecv(socketHandle, ref localBuffer, 1, out bytesTransferred, ref socketFlags, overlapped, completionRoutine);
         }
 
         internal static unsafe SocketError WSARecv(
             IntPtr socketHandle,
-            WSABuffer[] buffers,
-            int bufferCount,
+            Span<WSABuffer> buffers,
+            int bufferCount, // this is *not* necessarily #the same as buffers.Length; the field on SocketAsyncEventArgs can be over-sized
             out int bytesTransferred,
             ref SocketFlags socketFlags,
             NativeOverlapped* overlapped,
             IntPtr completionRoutine)
         {
-            Debug.Assert(buffers != null && buffers.Length > 0 );
-            fixed (WSABuffer* buffersPtr = &buffers[0])
-            {
-                return WSARecv(socketHandle, buffersPtr, bufferCount, out bytesTransferred, ref socketFlags, overlapped, completionRoutine);
-            }
+            Debug.Assert(!buffers.IsEmpty);
+            return WSARecv(socketHandle, ref MemoryMarshal.GetReference(buffers), bufferCount, out bytesTransferred, ref socketFlags, overlapped, completionRoutine);
         }
     }
 }

@@ -304,10 +304,9 @@ namespace System.Net.Sockets
                     var wsaBuffer = new WSABuffer { Length = _count, Pointer = (IntPtr)(bufferPtr + _offset) };
 
                     SocketFlags flags = _socketFlags;
-                    SocketError socketError = Interop.Winsock.WSARecv(
+                    SocketError socketError = Interop.Winsock.WSARecvSingle(
                         handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                         ref wsaBuffer,
-                        1,
                         out int bytesTransferred,
                         ref flags,
                         overlapped,
@@ -571,10 +570,9 @@ namespace System.Net.Sockets
                     _singleBufferHandleState = SingleBufferHandleState.InProcess;
                     var wsaBuffer = new WSABuffer { Length = _count, Pointer = (IntPtr)(bufferPtr + _offset) };
 
-                    SocketError socketError = Interop.Winsock.WSASend(
+                    SocketError socketError = Interop.Winsock.WSASendSingle(
                         handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
                         ref wsaBuffer,
-                        1,
                         out int bytesTransferred,
                         _socketFlags,
                         overlapped,
