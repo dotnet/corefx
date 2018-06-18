@@ -43,11 +43,6 @@ namespace System.Drawing
 
         private static readonly object s_syncObject = new object();
 
-        /// <summary>
-        /// Handle to native GDI+ graphics object. This object is created on demand.
-        /// </summary>
-        private IntPtr _nativeGraphics;
-
         // Object reference used for printing; it could point to a PrintPreviewGraphics to obtain the VisibleClipBounds, or 
         // a DeviceContext holding a printer DC.
         private object _printingHelper;
@@ -167,8 +162,6 @@ namespace System.Drawing
             return new Graphics(nativeGraphics) { _backingImage = image };
         }
 
-        internal IntPtr NativeGraphics => _nativeGraphics;
-
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void ReleaseHdcInternal(IntPtr hdc)
         {
@@ -246,157 +239,6 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// Gets or sets the <see cref='Drawing2D.CompositingMode'/> associated with this <see cref='Graphics'/>.
-        /// </summary>
-        public CompositingMode CompositingMode
-        {
-            get
-            {
-                int mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetCompositingMode(new HandleRef(this, NativeGraphics), out mode);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return (CompositingMode)mode;
-            }
-            set
-            {
-                if (value < CompositingMode.SourceOver || value > CompositingMode.SourceCopy)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(CompositingMode));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetCompositingMode(new HandleRef(this, NativeGraphics), unchecked((int)value));
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public Point RenderingOrigin
-        {
-            get
-            {
-                int x, y;
-                int status = SafeNativeMethods.Gdip.GdipGetRenderingOrigin(new HandleRef(this, NativeGraphics), out x, out y);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return new Point(x, y);
-            }
-            set
-            {
-                int status = SafeNativeMethods.Gdip.GdipSetRenderingOrigin(new HandleRef(this, NativeGraphics), value.X, value.Y);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public CompositingQuality CompositingQuality
-        {
-            get
-            {
-                CompositingQuality cq;
-                int status = SafeNativeMethods.Gdip.GdipGetCompositingQuality(new HandleRef(this, NativeGraphics), out cq);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return cq;
-            }
-            set
-            {
-                if (value < CompositingQuality.Invalid || value > CompositingQuality.AssumeLinear)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(CompositingQuality));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetCompositingQuality(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the rendering mode for text associated with this <see cref='Graphics'/>.
-        /// </summary>
-        public TextRenderingHint TextRenderingHint
-        {
-            get
-            {
-                TextRenderingHint hint = 0;
-
-                int status = SafeNativeMethods.Gdip.GdipGetTextRenderingHint(new HandleRef(this, NativeGraphics), out hint);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return hint;
-            }
-            set
-            {
-                if (value < TextRenderingHint.SystemDefault || value > TextRenderingHint.ClearTypeGridFit)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(TextRenderingHint));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetTextRenderingHint(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public int TextContrast
-        {
-            get
-            {
-                int textContrast = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetTextContrast(new HandleRef(this, NativeGraphics), out textContrast);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return textContrast;
-            }
-            set
-            {
-                int status = SafeNativeMethods.Gdip.GdipSetTextContrast(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public SmoothingMode SmoothingMode
-        {
-            get
-            {
-                SmoothingMode mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetSmoothingMode(new HandleRef(this, NativeGraphics), out mode);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return mode;
-            }
-            set
-            {
-                if (value < SmoothingMode.Invalid || value > SmoothingMode.AntiAlias)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(SmoothingMode));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetSmoothingMode(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public PixelOffsetMode PixelOffsetMode
-        {
-            get
-            {
-                PixelOffsetMode mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetPixelOffsetMode(new HandleRef(this, NativeGraphics), out mode);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return mode;
-            }
-            set
-            {
-                if (value < PixelOffsetMode.Invalid || value > PixelOffsetMode.Half)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PixelOffsetMode));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetPixelOffsetMode(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        /// <summary>
         /// Represents an object used in connection with the printing API, it is used to hold a reference to a
         /// PrintPreviewGraphics (fake graphics) or a printer DeviceContext (and maybe more in the future).
         /// </summary>
@@ -407,95 +249,6 @@ namespace System.Drawing
             {
                 Debug.Assert(_printingHelper == null, "WARNING: Overwritting the printing helper reference!");
                 _printingHelper = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the interpolation mode associated with this Graphics.
-        /// </summary>
-        public InterpolationMode InterpolationMode
-        {
-            get
-            {
-                int mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetInterpolationMode(new HandleRef(this, NativeGraphics), out mode);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return (InterpolationMode)mode;
-            }
-            set
-            {
-                if (value < InterpolationMode.Invalid || value > InterpolationMode.HighQualityBicubic)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(InterpolationMode));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetInterpolationMode(new HandleRef(this, NativeGraphics), unchecked((int)value));
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public GraphicsUnit PageUnit
-        {
-            get
-            {
-                int unit = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetPageUnit(new HandleRef(this, NativeGraphics), out unit);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return (GraphicsUnit)unit;
-            }
-            set
-            {
-                if (value < GraphicsUnit.World || value > GraphicsUnit.Millimeter)
-                {
-                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(GraphicsUnit));
-                }
-
-                int status = SafeNativeMethods.Gdip.GdipSetPageUnit(new HandleRef(this, NativeGraphics), unchecked((int)value));
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public float PageScale
-        {
-            get
-            {
-                var scale = new float[] { 0.0f };
-                int status = SafeNativeMethods.Gdip.GdipGetPageScale(new HandleRef(this, NativeGraphics), scale);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return scale[0];
-            }
-
-            set
-            {
-                int status = SafeNativeMethods.Gdip.GdipSetPageScale(new HandleRef(this, NativeGraphics), value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-            }
-        }
-
-        public float DpiX
-        {
-            get
-            {
-                var dpi = new float[] { 0.0f };
-                int status = SafeNativeMethods.Gdip.GdipGetDpiX(new HandleRef(this, NativeGraphics), dpi);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return dpi[0];
-            }
-        }
-
-        public float DpiY
-        {
-            get
-            {
-                var dpi = new float[] { 0.0f };
-                int status = SafeNativeMethods.Gdip.GdipGetDpiY(new HandleRef(this, NativeGraphics), dpi);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                return dpi[0];
             }
         }
 
@@ -583,57 +336,40 @@ namespace System.Drawing
             }
         }
 
-        public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)
+        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)
         {
             if (pts == null)
             {
                 throw new ArgumentNullException(nameof(pts));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(pts);
-            try
+            fixed (PointF* p = pts)
             {
-                int status = SafeNativeMethods.Gdip.GdipTransformPoints(new HandleRef(this, NativeGraphics), unchecked((int)destSpace),
-                                                         unchecked((int)srcSpace), buf, pts.Length);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                // must do an in-place copy because we only have a reference
-                PointF[] newPts = SafeNativeMethods.Gdip.ConvertGPPOINTFArrayF(buf, pts.Length);
-                for (int i = 0; i < pts.Length; i++)
-                {
-                    pts[i] = newPts[i];
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipTransformPoints(
+                    new HandleRef(this, NativeGraphics),
+                    (int)destSpace,
+                    (int)srcSpace,
+                    p,
+                    pts.Length));
             }
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] pts)
+        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] pts)
         {
             if (pts == null)
             {
                 throw new ArgumentNullException(nameof(pts));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(pts);
-            try
+            fixed (Point* p = pts)
             {
-                int status = SafeNativeMethods.Gdip.GdipTransformPointsI(new HandleRef(this, NativeGraphics), unchecked((int)destSpace),
-                                                          unchecked((int)srcSpace), buf, pts.Length);
-                SafeNativeMethods.Gdip.CheckStatus(status);
-
-                Point[] newPts = SafeNativeMethods.Gdip.ConvertGPPOINTArray(buf, pts.Length);
-                for (int i = 0; i < pts.Length; i++)
-                {
-                    pts[i] = newPts[i];
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                SafeNativeMethods.Gdip.CheckStatus(SafeNativeMethods.Gdip.GdipTransformPointsI(
+                    new HandleRef(this, NativeGraphics),
+                    (int)destSpace,
+                    (int)srcSpace,
+                    p,
+                    pts.Length));
             }
         }
 
@@ -671,7 +407,7 @@ namespace System.Drawing
         /// <summary>
         /// Draws a series of line segments that connect an array of points.
         /// </summary>
-        public void DrawLines(Pen pen, PointF[] points)
+        public unsafe void DrawLines(Pen pen, PointF[] points)
         {
             if (pen == null)
             {
@@ -683,16 +419,12 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
-            try
+            fixed (PointF* p = points)
             {
-                int status = SafeNativeMethods.Gdip.GdipDrawLines(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                                    new HandleRef(this, buf), points.Length);
-                CheckErrorStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawLines(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    p, points.Length));
             }
         }
 
@@ -722,7 +454,7 @@ namespace System.Drawing
         /// <summary>
         /// Draws a series of line segments that connect an array of points.
         /// </summary>
-        public void DrawLines(Pen pen, Point[] points)
+        public unsafe void DrawLines(Pen pen, Point[] points)
         {
             if (pen == null)
             {
@@ -734,16 +466,13 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
-            try
+            fixed (Point* p = points)
             {
-                int status = SafeNativeMethods.Gdip.GdipDrawLinesI(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                                    new HandleRef(this, buf), points.Length);
-                CheckErrorStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawLinesI(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    p,
+                    points.Length));
             }
         }
 
@@ -824,7 +553,7 @@ namespace System.Drawing
         /// <summary>
         /// Draws a series of cubic Bezier curves from an array of points.
         /// </summary>
-        public void DrawBeziers(Pen pen, PointF[] points)
+        public unsafe void DrawBeziers(Pen pen, PointF[] points)
         {
             if (pen == null)
             {
@@ -836,16 +565,12 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
-            try
+            fixed (PointF* p = points)
             {
-                int status = SafeNativeMethods.Gdip.GdipDrawBeziers(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                                     new HandleRef(this, buf), points.Length);
-                CheckErrorStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawBeziers(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    p, points.Length));
             }
         }
 
@@ -860,7 +585,7 @@ namespace System.Drawing
         /// <summary>
         /// Draws a series of cubic Bezier curves from an array of points.
         /// </summary>
-        public void DrawBeziers(Pen pen, Point[] points)
+        public unsafe void DrawBeziers(Pen pen, Point[] points)
         {
             if (pen == null)
             {
@@ -872,16 +597,13 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(points));
             }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
-            try
+            fixed (Point* p = points)
             {
-                int status = SafeNativeMethods.Gdip.GdipDrawBeziersI(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                                      new HandleRef(this, buf), points.Length);
-                CheckErrorStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
+                CheckErrorStatus(SafeNativeMethods.Gdip.GdipDrawBeziersI(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    p,
+                    points.Length));
             }
         }
 

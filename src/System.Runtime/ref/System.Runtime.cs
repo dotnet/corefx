@@ -1165,7 +1165,7 @@ namespace System
         public Exception(string message, System.Exception innerException) { }
         public virtual System.Collections.IDictionary Data { get { throw null; } }
         public virtual string HelpLink { get { throw null; } set { } }
-        public int HResult { get { throw null; } protected set { } }
+        public int HResult { get { throw null; } set { } }
         public System.Exception InnerException { get { throw null; } }
         public virtual string Message { get { throw null; } }
         public virtual string Source { get { throw null; } set { } }
@@ -1211,6 +1211,7 @@ namespace System
     {
         protected FormattableString() { }
         public abstract int ArgumentCount { get; }
+        public static string CurrentCulture(System.FormattableString formattable) { throw null; }
         public abstract string Format { get; }
         public abstract object GetArgument(int index);
         public abstract object[] GetArguments();
@@ -6279,7 +6280,7 @@ namespace System.Reflection
     public delegate bool TypeFilter(System.Type m, object filterCriteria);
     public abstract partial class TypeInfo : System.Type, System.Reflection.IReflectableType
     {
-        internal TypeInfo() { }
+        protected TypeInfo() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> DeclaredConstructors { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> DeclaredEvents { get { throw null; } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> DeclaredFields { get { throw null; } }
@@ -6385,6 +6386,12 @@ namespace System.Runtime.CompilerServices
         public void SetResult(TResult result) { }
         public void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine stateMachine) { }
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : System.Runtime.CompilerServices.IAsyncStateMachine { }
+    }
+    [System.AttributeUsage((System.AttributeTargets)(2048), AllowMultiple = false, Inherited = false)]
+    public sealed class CallerArgumentExpressionAttribute : System.Attribute
+    {
+        public CallerArgumentExpressionAttribute(string parameterName) { }
+        public string ParameterName { get { throw null; } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited=false)]
     public sealed partial class CallerFilePathAttribute : System.Attribute
@@ -7584,6 +7591,12 @@ namespace System.Text
         public System.Text.StringBuilder AppendJoin<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public System.Text.StringBuilder AppendLine() { throw null; }
         public System.Text.StringBuilder AppendLine(string value) { throw null; }
+        public struct ChunkEnumerator
+        {
+            public ChunkEnumerator GetEnumerator() { throw null; }
+            public bool MoveNext() { throw null; }
+            public ReadOnlyMemory<char> Current { get { throw null; } }
+        }
         public System.Text.StringBuilder Clear() { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
@@ -7613,6 +7626,7 @@ namespace System.Text
         public System.Text.StringBuilder Insert(int index, uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public System.Text.StringBuilder Insert(int index, ulong value) { throw null; }
+        public ChunkEnumerator GetChunks() { throw null; }
         public System.Text.StringBuilder Remove(int startIndex, int length) { throw null; }
         public System.Text.StringBuilder Replace(char oldChar, char newChar) { throw null; }
         public System.Text.StringBuilder Replace(char oldChar, char newChar, int startIndex, int count) { throw null; }
