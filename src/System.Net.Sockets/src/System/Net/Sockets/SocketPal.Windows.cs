@@ -131,14 +131,14 @@ namespace System.Net.Sockets
             {
                 WSABuffers = stackalloc WSABuffer[StackThreshold];
                 objectsToPin = stackalloc GCHandle[StackThreshold];
-                objectsToPin.Clear(); // note touched in "finally"
             }
             else
             {
                 WSABuffers = leasedWSA = ArrayPool<WSABuffer>.Shared.Rent(count);
                 objectsToPin = leasedGC = ArrayPool<GCHandle>.Shared.Rent(count);
-                Array.Clear(leasedGC, 0, count);
             }
+            objectsToPin = objectsToPin.Slice(0, count);
+            objectsToPin.Clear(); // note: touched in finally
 
             try
             {
@@ -269,14 +269,14 @@ namespace System.Net.Sockets
             {
                 WSABuffers = stackalloc WSABuffer[StackThreshold];
                 objectsToPin = stackalloc GCHandle[StackThreshold];
-                objectsToPin.Clear(); // note touched in "finally"
             }
             else
             {
                 WSABuffers = leasedWSA = ArrayPool<WSABuffer>.Shared.Rent(count);
                 objectsToPin = leasedGC = ArrayPool<GCHandle>.Shared.Rent(count);
-                Array.Clear(leasedGC, 0, count);
             }
+            objectsToPin = objectsToPin.Slice(0, count);
+            objectsToPin.Clear(); // note: touched in finally
 
             try
             {
