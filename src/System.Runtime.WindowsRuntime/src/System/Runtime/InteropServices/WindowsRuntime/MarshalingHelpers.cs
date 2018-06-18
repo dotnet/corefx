@@ -12,6 +12,7 @@ using System.Security;
 using System.Windows.Input;
 
 using Internal.Runtime.CompilerServices;
+using Internal.Runtime.InteropServices.WindowsRuntime;
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
@@ -89,7 +90,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (managedArgs == null)
                 return IntPtr.Zero;
 
-            return System.StubHelpers.EventArgsMarshaler.CreateNativeNCCEventArgsInstance(
+            return EventArgsMarshalerSupport.CreateNativeNCCEventArgsInstance(
                         (int)managedArgs.Action,
                         managedArgs.NewItems,
                         managedArgs.OldItems,
@@ -105,7 +106,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (nativeArgsIP == IntPtr.Zero)
                 return null;
 
-            object obj = System.StubHelpers.InterfaceMarshaler.ConvertToManagedWithoutUnboxing(nativeArgsIP);
+            object obj = InterfaceMarshalerSupport.ConvertToManagedWithoutUnboxing(nativeArgsIP);
             INotifyCollectionChangedEventArgs nativeArgs = (INotifyCollectionChangedEventArgs)obj;
 
             return CreateNotifyCollectionChangedEventArgs(
@@ -151,7 +152,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (managedArgs == null)
                 return IntPtr.Zero;
 
-            return System.StubHelpers.EventArgsMarshaler.CreateNativePCEventArgsInstance(managedArgs.PropertyName);
+            return EventArgsMarshalerSupport.CreateNativePCEventArgsInstance(managedArgs.PropertyName);
         }
 
         // Extracts properties from a WinRT PropertyChangedEventArgs and creates a new
@@ -162,7 +163,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (nativeArgsIP == IntPtr.Zero)
                 return null;
 
-            object obj = System.StubHelpers.InterfaceMarshaler.ConvertToManagedWithoutUnboxing(nativeArgsIP);
+            object obj = InterfaceMarshalerSupport.ConvertToManagedWithoutUnboxing(nativeArgsIP);
             IPropertyChangedEventArgs nativeArgs = (IPropertyChangedEventArgs)obj;
 
             return new PropertyChangedEventArgs(nativeArgs.PropertyName);
