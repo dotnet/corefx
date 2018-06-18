@@ -4,6 +4,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -130,6 +131,8 @@ namespace System.Net.Sockets
                 return;
             }
 
+            Debug.Assert(fileDescriptorSet.Length >= count + 1);
+
             fileDescriptorSet[0] = (IntPtr)count;
             for (int current = 0; current < count; current++)
             {
@@ -156,6 +159,8 @@ namespace System.Net.Sockets
             {
                 return;
             }
+
+            Debug.Assert(fileDescriptorSet.Length >= count + 1);
 
             int returnedCount = (int)fileDescriptorSet[0];
             if (returnedCount == 0)
