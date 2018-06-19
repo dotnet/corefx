@@ -166,7 +166,7 @@ namespace System.IO.Pipes
             State = PipeState.Disconnected;
         }
 
-        // Gets the username of the connected client.  Not that we will not have access to the client's 
+        // Gets the username of the connected client.  Note that we will not have access to the client's 
         // username until it has written at least once to the pipe (and has set its impersonationLevel 
         // argument appropriately). 
         public unsafe string GetImpersonationUserName()
