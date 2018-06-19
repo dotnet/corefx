@@ -36,6 +36,7 @@ namespace Generic.Dictionary
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[1]).TargetSite.Name);
                 //Remove is not resilient yet
                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1)).TargetSite.Name);
+                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1, out int value)).TargetSite.Name);
             });
             customThread.IsBackground = true;
             customThread.Start();
@@ -66,6 +67,7 @@ namespace Generic.Dictionary
                  Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[1]).TargetSite.Name);
                  //Remove is not resilient yet
                  //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1)).TargetSite.Name);
+                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1, out int value)).TargetSite.Name);
              });
             customThread.IsBackground = true;
             customThread.Start();
@@ -96,6 +98,7 @@ namespace Generic.Dictionary
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[new DummyRefType() { Value = 1 }]).TargetSite.Name);
                 //Remove is not resilient yet
                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 })).TargetSite.Name);
+                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value)).TargetSite.Name);
             });
             customThread.IsBackground = true;
             customThread.Start();
@@ -126,6 +129,7 @@ namespace Generic.Dictionary
                  Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[new DummyRefType() { Value = 1 }]).TargetSite.Name);
                  //Remove is not resilient yet
                  //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 })).TargetSite.Name);
+                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value)).TargetSite.Name);
              });
             customThread.IsBackground = true;
             customThread.Start();
