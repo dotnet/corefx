@@ -53,6 +53,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.NotEqual(sa1, sa4);
         }
 
+        [ActiveIssue(30523, TestPlatforms.AnyUnix)]
         [Fact]
         public static void ToString_Compare_Success()
         {
