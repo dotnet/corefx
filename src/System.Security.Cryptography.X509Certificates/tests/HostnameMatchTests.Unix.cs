@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -30,6 +31,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [InlineData("Too.Many.SomeDomain.TLD", true, false)]
         [InlineData("Now.Lower.SomeDomain.TLD", false, true)]
         [InlineData("Now.Lower.SomeDomain.TLD", true, true)]
+        [InlineData("Score.1812-Overture.somedomain.TLD", false, true)]
+        [InlineData("Score.1812-Overture.somedomain.TLD", true, true)]
+        [InlineData("1-800.Lower.somedomain.TLD", false, true)]
+        [InlineData("1-800.Lower.somedomain.TLD", true, true)]
         public static void MatchSubjectAltName(string targetName, bool mixedCase, bool expectedResult)
         {
             string[] sanEntries =
@@ -37,6 +42,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "Capitalized.SomeDomain.TLD",
                 "*.SomeDomain.TLD",
                 "*.lower.someDomain.Tld",
+                "*.1812-Overture.SomeDomain.Tld",
             };
 
             RunTest(targetName, "SAN Certificate", sanEntries, !mixedCase, expectedResult);
@@ -81,11 +87,55 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     foreach (string sanDnsName in sanDnsNames)
                     {
-                        builder.AddDnsName(FixCase(sanDnsName, flattenCase));
+                        builder.AddDnsName(sanDnsName);
                     }
 
                     X509Extension extension = builder.Build();
-                    Console.WriteLine(extension.ToString());
+
+                    // The SAN builder will have done DNS case normalization via IdnMapping.
+                    // We need to undo that here.
+                    if (!flattenCase)
+                    {
+                        UTF8Encoding encoding = new UTF8Encoding();
+
+                        byte[] extensionBytes = extension.RawData;
+                        Span<byte> extensionSpan = extensionBytes;
+
+                        foreach (string sanDnsName in sanDnsNames)
+                        {
+                            // If the string is longer than 127 then the quick DER encoding check
+                            // is not correct.
+                            Assert.InRange(sanDnsName.Length, 1, 127);
+
+                            byte[] lowerBytes = encoding.GetBytes(sanDnsName.ToLowerInvariant());
+                            byte[] mixedBytes = encoding.GetBytes(sanDnsName);
+
+                            // Only 7-bit ASCII should be here, no byte expansion.
+                            // (non-7-bit ASCII values require IdnMapping normalization)
+                            Assert.Equal(sanDnsName.Length, lowerBytes.Length);
+                            Assert.Equal(sanDnsName.Length, mixedBytes.Length);
+
+                            int idx = extensionSpan.IndexOf(lowerBytes);
+
+                            while (idx >= 0)
+                            {
+                                if (idx < 2 ||
+                                    extensionBytes[idx - 2] != 0x82 ||
+                                    extensionBytes[idx - 1] != sanDnsName.Length)
+                                {
+                                    int relativeIdx = extensionSpan.Slice(idx + 1).IndexOf(lowerBytes);
+                                    idx = idx + 1 + relativeIdx;
+                                    continue;
+                                }
+
+                                mixedBytes.AsSpan().CopyTo(extensionSpan.Slice(idx));
+                                break;
+                            }
+                        }
+
+                        extension.RawData = extensionBytes;
+                    }
+
                     request.CertificateExtensions.Add(extension);
                 }
 
