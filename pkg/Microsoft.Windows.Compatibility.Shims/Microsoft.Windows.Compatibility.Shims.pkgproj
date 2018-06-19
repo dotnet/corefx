@@ -7,6 +7,7 @@
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
     <OmitDependencies>true</OmitDependencies>
+    <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
 
   <ItemGroup>
