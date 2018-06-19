@@ -122,7 +122,7 @@ namespace System.Text.RegularExpressions
             // characters need to be encoded.
             // For larger string we rent the input string's length plus a fixed 
             // conservative amount of chars from the ArrayPool.
-            Span<char> buffer = input.Length <= 80 ? stackalloc char[EscapeMaxBufferSize] : default;
+            Span<char> buffer = input.Length <= (EscapeMaxBufferSize / 3) ? stackalloc char[EscapeMaxBufferSize] : default;
             ValueStringBuilder vsb = !buffer.IsEmpty ?
                 new ValueStringBuilder(buffer) :
                 new ValueStringBuilder(input.Length + 200);
