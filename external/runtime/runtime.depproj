@@ -124,7 +124,7 @@
           <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/</CrossGenAssemblyPath>
         </CoreCLRILFiles>
         <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
-        <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
+        <CoreCLRCrossGenFiles Condition="'$(OSGroup)'=='Windows_NT'" Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
         <CoreCLRILFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).pdb')" />
       </ItemGroup>
   </Target>
@@ -142,7 +142,7 @@
       <CoreCLRILFiles Include="$(CoreCLROverridePath)/IL/*.*" />
       <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '$(CoreCLROverridePath)/%(Filename)%(Extension)')" />
       <CoreCLRILFiles Include="@(CoreCLRILFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).pdb')" />
-      <CoreCLRCrossGenFiles Include="@(CoreCLRCrossGenFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).ni.pdb')" />
+      <CoreCLRCrossGenFiles Condition="'$(OSGroup)'=='Windows_NT'" Include="@(CoreCLRCrossGenFiles -> '$(CoreCLRPDBOverridePath)/%(Filename).ni.pdb')" />
       <CoreCLRPDBFiles Condition="'$(CoreCLRPDBOverridePath)' != ''" Include="$(CoreCLRPDBOverridePath)/*.pdb" />
 
       <_ReferenceCopyLocalPathsToRemove Include="@(ReferenceCopyLocalPaths)" Condition="'@(CoreCLRFiles->'%(FileName)%(Extension)')' == '%(FileName)%(Extension)'" />
