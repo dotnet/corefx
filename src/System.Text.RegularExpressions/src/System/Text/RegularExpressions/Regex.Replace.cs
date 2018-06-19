@@ -173,7 +173,6 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                ReadOnlySpan<char> inputSpan = input.AsSpan();
                 Span<char> charInitSpan = stackalloc char[ReplaceBufferSize];
                 var vsb = new ValueStringBuilder(charInitSpan);
 
@@ -184,7 +183,7 @@ namespace System.Text.RegularExpressions
                     do
                     {
                         if (match.Index != prevat)
-                            vsb.Append(inputSpan.Slice(prevat, match.Index - prevat));
+                            vsb.Append(input.AsSpan(prevat, match.Index - prevat));
 
                         prevat = match.Index + match.Length;
                         vsb.Append(evaluator(match));
@@ -196,7 +195,7 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat < input.Length)
-                        vsb.Append(inputSpan.Slice(prevat, input.Length - prevat));
+                        vsb.Append(input.AsSpan(prevat, input.Length - prevat));
                 }
                 else
                 {
@@ -209,7 +208,7 @@ namespace System.Text.RegularExpressions
                     do
                     {
                         if (match.Index + match.Length != prevat)
-                            vsb.AppendReversed(inputSpan.Slice(match.Index + match.Length, prevat - match.Index - match.Length));
+                            vsb.AppendReversed(input.AsSpan(match.Index + match.Length, prevat - match.Index - match.Length));
 
                         prevat = match.Index;
                         vsb.AppendReversed(evaluator(match));
@@ -221,7 +220,7 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat > 0)
-                        vsb.AppendReversed(inputSpan.Slice(0, prevat));
+                        vsb.AppendReversed(input.AsSpan(0, prevat));
 
                     vsb.Reverse();
                 }

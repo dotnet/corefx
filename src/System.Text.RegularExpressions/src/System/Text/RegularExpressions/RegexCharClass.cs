@@ -968,7 +968,7 @@ namespace System.Text.RegularExpressions
 
             return string.Create(category.Length, category, (span, _category) =>
             {
-                for (int i = 0; i < category.Length; i++)
+                for (int i = 0; i < _category.Length; i++)
                 {
                     short ch = (short)_category[i];
                     span[i] = unchecked((char)-ch);
