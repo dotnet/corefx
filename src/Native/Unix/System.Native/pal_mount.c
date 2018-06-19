@@ -144,7 +144,6 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
         }
 #else
         assert(formatType != NULL);
-        assert(stats.f_type <= INT_MAX);
         *formatType = (int64_t)(stats.f_type);
         SafeStringCopy(formatNameBuffer, Int32ToSizeT(bufferLength), "");
 #endif

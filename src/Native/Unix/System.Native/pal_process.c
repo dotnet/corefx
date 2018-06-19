@@ -593,7 +593,7 @@ int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask)
     intptr_t bits = *mask; 
     for (int cpu = 0; cpu < maxCpu; cpu++)
     {
-        if ((bits & (intptr_t)(1u << cpu)) != 0)
+        if ((bits & (((intptr_t)1u) << cpu)) != 0)
         {
             CPU_SET(cpu, &set);
         }
