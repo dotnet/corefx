@@ -1,4 +1,4 @@
-project(System.Native)
+project(System.Native C)
 
 set(NATIVE_SOURCES
     pal_console.c
