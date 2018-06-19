@@ -2952,4 +2952,20 @@ public static partial class XmlSerializerTests
         Assert.True(element.LastAttribute.Value == expectedAttribute, string.Format("{0}Test failed for wrong output from schema: {0}Expected Output: {1}{0}Actual Output: {2}",
                 Environment.NewLine, baseline, actualOutput));
     }
+
+    [Fact]
+    public static void NullableAttributeTest()
+    {
+        var value = new TestSerialize() { Attr = 1 };
+        TestSerialize actual = SerializeAndDeserialize(value,
+    @"<?xml version =""1.0""?><TestSerialize xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" Attr=""1"" />");
+    }
+
+    [Fact]
+    public static void NullableAttributeWithNullValueTest()
+    {
+        var value = new TestSerialize() { Attr = null };
+        TestSerialize actual = SerializeAndDeserialize(value,
+    @"<?xml version =""1.0""?><TestSerialize xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+    }
 }

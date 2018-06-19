@@ -1372,12 +1372,63 @@ namespace System.Xml.Serialization
                 else
                     throw new InvalidOperationException(SR.XmlInternalError);
             }
+            else if(attribute.Mapping is NullableMapping)
+            {
+                WriteNullableMappingForWriteAttribute(attribute.Name, attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : "", source, attribute.Mapping);
+            }
             else
             {
                 TypeDesc typeDesc = attribute.Mapping.TypeDesc;
                 source = source.CastTo(typeDesc);
                 WritePrimitive("WriteAttribute", attribute.Name, attribute.Form == XmlSchemaForm.Qualified ? attribute.Namespace : "", GetConvertedDefaultValue(source.Type, attribute.Default), source, attribute.Mapping, false, false, false);
             }
+        }
+
+        void WriteNullableMappingForWriteAttribute(string name, string ns, SourceInfo source, TypeMapping mapping)
+        {
+            TypeDesc typeDesc = mapping.TypeDesc;
+
+            MethodInfo Nullable_get_HasValue = mapping.TypeDesc.Type.GetMethod(
+                        "get_HasValue",
+                        CodeGenerator.InstanceBindingFlags,
+                        Array.Empty<Type>()
+                        );
+            source.LoadAddress(mapping.TypeDesc.Type);
+            ilg.Call(Nullable_get_HasValue);
+            ilg.If();
+            List<Type> argTypes = new List<Type>();
+            ilg.Ldarg(0);
+            argTypes.Add(typeof(String));
+            ilg.Ldstr(name);
+            if (ns != null)
+            {
+                argTypes.Add(typeof(String));
+                ilg.Ldstr(ns);
+            }
+            Type argType;
+            TypeDesc baseTypeDesc = typeDesc.BaseTypeDesc;
+            source.Load(baseTypeDesc.Type);
+            //Type argType = baseTypeDesc.Type;
+            MethodInfo XmlConvert_ToString = typeof(XmlConvert).GetMethod(
+                        "ToString",
+                        CodeGenerator.StaticBindingFlags,
+                        null,
+                        new Type[] { baseTypeDesc.Type },
+                        null
+                        );
+            ilg.Call(XmlConvert_ToString);
+            argType = XmlConvert_ToString.ReturnType;
+            argTypes.Add(argType);
+
+            MethodInfo XmlSerializationWriter_method = typeof(XmlSerializationWriter).GetMethod(
+               "WriteAttribute",
+               CodeGenerator.InstanceBindingFlags,
+               null,
+               argTypes.ToArray(),
+               null
+               );
+            ilg.Call(XmlSerializationWriter_method);
+            ilg.EndIf();
         }
 
         private static object GetConvertedDefaultValue(Type targetType, object rawDefaultValue)
