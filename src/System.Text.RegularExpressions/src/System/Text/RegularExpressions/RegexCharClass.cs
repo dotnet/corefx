@@ -1055,7 +1055,11 @@ namespace System.Text.RegularExpressions
 
             vsb[SETLENGTH] = (char)(vsb.Length - SETSTART);
 
-            vsb.Append(_categories.ToString());
+            // Append the categories string
+            foreach (ReadOnlyMemory<char> chunk in _categories.GetChunks())
+            {
+                vsb.Append(chunk.Span);
+            }
 
             if (_subtractor != null)
                 vsb.Append(_subtractor.ToStringClass());
