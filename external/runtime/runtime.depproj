@@ -124,8 +124,8 @@
           <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/</CrossGenAssemblyPath>
         </CoreCLRILFiles>
         <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
-        <CoreCLRILFiles Include="@(CoreCLRILFiles -> '%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/%(Filename).pdb')" />
         <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
+        <CoreCLRILFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).pdb')" />
       </ItemGroup>
   </Target>
 
