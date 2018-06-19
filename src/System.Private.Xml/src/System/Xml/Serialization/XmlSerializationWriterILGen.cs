@@ -1388,12 +1388,12 @@ namespace System.Xml.Serialization
         {
             TypeDesc typeDesc = mapping.TypeDesc;
 
-            MethodInfo Nullable_get_HasValue = mapping.TypeDesc.Type.GetMethod(
+            MethodInfo Nullable_get_HasValue = typeDesc.Type.GetMethod(
                         "get_HasValue",
                         CodeGenerator.InstanceBindingFlags,
                         Array.Empty<Type>()
                         );
-            source.LoadAddress(mapping.TypeDesc.Type);
+            source.LoadAddress(typeDesc.Type);
             ilg.Call(Nullable_get_HasValue);
             ilg.If();
             List<Type> argTypes = new List<Type>();
@@ -1408,7 +1408,7 @@ namespace System.Xml.Serialization
             Type argType;
             TypeDesc baseTypeDesc = typeDesc.BaseTypeDesc;
             source.Load(baseTypeDesc.Type);
-            //Type argType = baseTypeDesc.Type;
+
             MethodInfo XmlConvert_ToString = typeof(XmlConvert).GetMethod(
                         "ToString",
                         CodeGenerator.StaticBindingFlags,
