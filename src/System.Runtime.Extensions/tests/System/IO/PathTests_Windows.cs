@@ -72,7 +72,7 @@ namespace System.IO.Tests
         [Fact]
         public void GetTempPath_SetEnvVar()
         {
-            RemoteInvoke(() => 
+            RemoteInvoke(() =>
             {
                 foreach (string[] tempPath in GetTempPath_SetEnvVar_Data())
                 {
@@ -87,6 +87,22 @@ namespace System.IO.Tests
             // Windows cuts off any simple white space added to a path
             string path = "C:\\Test" + component;
             Assert.Equal("C:\\Test", Path.GetFullPath(path));
+        }
+
+        [Theory, MemberData(nameof(TestData_Spaces))]
+        public void TryGetFullPath_TrailingSpacesCut(string component)
+        {
+            // Windows cuts off any simple white space added to a path
+            string root = "C:\\Test";
+            string path = root + component;
+
+            int chars;
+            char[] arr = new char[root.Length];
+            Span<char> destination = new Span<char>(arr, 0, root.Length);
+
+            Assert.True(Path.TryGetFullPath(path, destination, out chars));
+            Assert.Equal(root, destination.ToString());
+            Assert.Equal(root.Length, chars);
         }
 
         [Fact]
@@ -154,16 +170,34 @@ namespace System.IO.Tests
             Assert.Throws<PathTooLongException>(() => Path.GetFullPath(@"C:\" + new string('a', short.MaxValue) + @"\"));
         }
 
+        public static TheoryData<string, string> GetFullPath_RelativeRoot_Data => new TheoryData<string, string>
+        {
+            {@"C:\", @"C:\" },
+            {@"C:\.", @"C:\" },
+            {@"C:\..", @"C:\" },
+            {@"C:\..\..", @"C:\" },
+            {@"C:\A\..", @"C:\" },
+            {@"C:\..\..\A\..", @"C:\" }
+        };
+
         [Theory,
-            InlineData(@"C:\", @"C:\"),
-            InlineData(@"C:\.", @"C:\"),
-            InlineData(@"C:\..", @"C:\"),
-            InlineData(@"C:\..\..", @"C:\"),
-            InlineData(@"C:\A\..", @"C:\"),
-            InlineData(@"C:\..\..\A\..", @"C:\")]
+            MemberData(nameof(GetFullPath_RelativeRoot_Data))]
         public void GetFullPath_RelativeRoot(string path, string expected)
         {
             Assert.Equal(Path.GetFullPath(path), expected);
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_RelativeRoot_Data))]
+        public void TryGetFullPath_RelativeRoot(string path, string expected)
+        {
+            int chars;
+            char[] arr = new char[expected.Length];
+            Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+            Assert.True(Path.TryGetFullPath(path.AsSpan(), destination, out chars));
+            Assert.Equal(expected, destination.ToString());
+            Assert.Equal(expected.Length, chars);
         }
 
         [Fact]
@@ -200,41 +234,46 @@ namespace System.IO.Tests
             }
         }
 
+        public static TheoryData<string> GetFullPath_ValidExtendedPaths_Data => new TheoryData<string>
+        {
+            {@"\\?\C:\ "},
+            {@"\\?\C:\ \ "},
+            {@"\\?\C:\ ."},
+            {@"\\?\C:\ .."},
+            {@"\\?\C:\..."},
+            {@"\\?\GLOBALROOT\"},
+            {@"\\?\"},
+            {@"\\?\."},
+            {@"\\?\.."},
+            {@"\\?\\"},
+            {@"\\?\C:\\"},
+            {@"\\?\C:\|"},
+            {@"\\?\C:\."},
+            {@"\\?\C:\.."},
+            {@"\\?\C:\Foo1\."},
+            {@"\\?\C:\Foo2\.."},
+            {@"\\?\UNC\"},
+            {@"\\?\UNC\server1"},
+            {@"\\?\UNC\server2\"},
+            {@"\\?\UNC\server3\\"},
+            {@"\\?\UNC\server4\.."},
+            {@"\\?\UNC\server5\share\."},
+            {@"\\?\UNC\server6\share\.."},
+            {@"\\?\UNC\a\b\\"},
+            {@"\\.\"},
+            {@"\\.\."},
+            {@"\\.\.."},
+            {@"\\.\\"},
+            {@"\\.\C:\\"},
+            {@"\\.\C:\|"},
+            {@"\\.\C:\."},
+            {@"\\.\C:\.."},
+            {@"\\.\C:\Foo1\."},
+            {@"\\.\C:\Foo2\.."}
+        };
+
         [Theory,
-            InlineData(@"\\?\C:\ "),
-            InlineData(@"\\?\C:\ \ "),
-            InlineData(@"\\?\C:\ ."),
-            InlineData(@"\\?\C:\ .."),
-            InlineData(@"\\?\C:\..."),
-            InlineData(@"\\?\GLOBALROOT\"),
-            InlineData(@"\\?\"),
-            InlineData(@"\\?\."),
-            InlineData(@"\\?\.."),
-            InlineData(@"\\?\\"),
-            InlineData(@"\\?\C:\\"),
-            InlineData(@"\\?\C:\|"),
-            InlineData(@"\\?\C:\."),
-            InlineData(@"\\?\C:\.."),
-            InlineData(@"\\?\C:\Foo1\."),
-            InlineData(@"\\?\C:\Foo2\.."),
-            InlineData(@"\\?\UNC\"),
-            InlineData(@"\\?\UNC\server1"),
-            InlineData(@"\\?\UNC\server2\"),
-            InlineData(@"\\?\UNC\server3\\"),
-            InlineData(@"\\?\UNC\server4\.."),
-            InlineData(@"\\?\UNC\server5\share\."),
-            InlineData(@"\\?\UNC\server6\share\.."),
-            InlineData(@"\\?\UNC\a\b\\"),
-            InlineData(@"\\.\"),
-            InlineData(@"\\.\."),
-            InlineData(@"\\.\.."),
-            InlineData(@"\\.\\"),
-            InlineData(@"\\.\C:\\"),
-            InlineData(@"\\.\C:\|"),
-            InlineData(@"\\.\C:\."),
-            InlineData(@"\\.\C:\.."),
-            InlineData(@"\\.\C:\Foo1\."),
-            InlineData(@"\\.\C:\Foo2\..")]
+            MemberData(nameof(GetFullPath_ValidExtendedPaths_Data))]
         public void GetFullPath_ValidExtendedPaths(string path)
         {
             if (PathFeatures.IsUsingLegacyPathNormalization())
@@ -256,6 +295,30 @@ namespace System.IO.Tests
         }
 
         [Theory,
+            MemberData(nameof(GetFullPath_ValidExtendedPaths_Data))]
+        public void TryGetFullPath_ValidExtendedPaths(string path)
+        {
+            if (PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                // Legacy Path doesn't support any of these paths.
+                AssertExtensions.ThrowsAny<ArgumentException, NotSupportedException>(() => Path.GetFullPath(path));
+                return;
+            }
+
+            // None of these should throw
+            if (path.StartsWith(@"\\?\"))
+            {
+                int chars;
+                char[] arr = new char[path.Length];
+                Span<char> destination = new Span<char>(arr, 0, path.Length);
+
+                Assert.True(Path.TryGetFullPath(path, destination, out chars));
+                Assert.Equal(path, destination.ToString());
+                Assert.Equal(path.Length, chars);
+            }
+        }
+
+        [Theory,
             InlineData(@"\\.\UNC\"),
             InlineData(@"\\.\UNC\LOCALHOST"),
             InlineData(@"\\.\UNC\localHOST\"),
@@ -270,27 +333,32 @@ namespace System.IO.Tests
             Path.GetFullPath(path);
         }
 
+        public static TheoryData<string, string> GetFullPath_UNC_Valid_Data => new TheoryData<string, string>
+        {
+            {@"\\LOCALHOST\share\test.txt.~SS", @"\\LOCALHOST\share\test.txt.~SS"},
+            {@"\\LOCALHOST\share1", @"\\LOCALHOST\share1"},
+            {@"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir"},
+            {@"\\LOCALHOST\share4\.", @"\\LOCALHOST\share4"},
+            {@"\\LOCALHOST\share5\..", @"\\LOCALHOST\share5"},
+            {@"\\LOCALHOST\share6\    ", @"\\LOCALHOST\share6\"},
+            {@"\\LOCALHOST\  share7\", @"\\LOCALHOST\  share7\"},
+            {@"\\?\UNC\LOCALHOST\share8\test.txt.~SS", @"\\?\UNC\LOCALHOST\share8\test.txt.~SS"},
+            {@"\\?\UNC\LOCALHOST\share9", @"\\?\UNC\LOCALHOST\share9"},
+            {@"\\?\UNC\LOCALHOST\shareA\dir", @"\\?\UNC\LOCALHOST\shareA\dir"},
+            {@"\\?\UNC\LOCALHOST\shareB\. ", @"\\?\UNC\LOCALHOST\shareB\. "},
+            {@"\\?\UNC\LOCALHOST\shareC\.. ", @"\\?\UNC\LOCALHOST\shareC\.. "},
+            {@"\\?\UNC\LOCALHOST\shareD\    ", @"\\?\UNC\LOCALHOST\shareD\    "},
+            {@"\\.\UNC\LOCALHOST\  shareE\", @"\\.\UNC\LOCALHOST\  shareE\"},
+            {@"\\.\UNC\LOCALHOST\shareF\test.txt.~SS", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS"},
+            {@"\\.\UNC\LOCALHOST\shareG", @"\\.\UNC\LOCALHOST\shareG"},
+            {@"\\.\UNC\LOCALHOST\shareH\dir", @"\\.\UNC\LOCALHOST\shareH\dir"},
+            {@"\\.\UNC\LOCALHOST\shareK\    ", @"\\.\UNC\LOCALHOST\shareK\"},
+            {@"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\"}
+        };
+
         [Theory,
             // https://github.com/dotnet/corefx/issues/11965
-            InlineData(@"\\LOCALHOST\share\test.txt.~SS", @"\\LOCALHOST\share\test.txt.~SS"),
-            InlineData(@"\\LOCALHOST\share1", @"\\LOCALHOST\share1"),
-            InlineData(@"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir"),
-            InlineData(@"\\LOCALHOST\share4\.", @"\\LOCALHOST\share4"),
-            InlineData(@"\\LOCALHOST\share5\..", @"\\LOCALHOST\share5"),
-            InlineData(@"\\LOCALHOST\share6\    ", @"\\LOCALHOST\share6\"),
-            InlineData(@"\\LOCALHOST\  share7\", @"\\LOCALHOST\  share7\"),
-            InlineData(@"\\?\UNC\LOCALHOST\share8\test.txt.~SS", @"\\?\UNC\LOCALHOST\share8\test.txt.~SS"),
-            InlineData(@"\\?\UNC\LOCALHOST\share9", @"\\?\UNC\LOCALHOST\share9"),
-            InlineData(@"\\?\UNC\LOCALHOST\shareA\dir", @"\\?\UNC\LOCALHOST\shareA\dir"),
-            InlineData(@"\\?\UNC\LOCALHOST\shareB\. ", @"\\?\UNC\LOCALHOST\shareB\. "),
-            InlineData(@"\\?\UNC\LOCALHOST\shareC\.. ", @"\\?\UNC\LOCALHOST\shareC\.. "),
-            InlineData(@"\\?\UNC\LOCALHOST\shareD\    ", @"\\?\UNC\LOCALHOST\shareD\    "),
-            InlineData(@"\\.\UNC\LOCALHOST\  shareE\", @"\\.\UNC\LOCALHOST\  shareE\"),
-            InlineData(@"\\.\UNC\LOCALHOST\shareF\test.txt.~SS", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS"),
-            InlineData(@"\\.\UNC\LOCALHOST\shareG", @"\\.\UNC\LOCALHOST\shareG"),
-            InlineData(@"\\.\UNC\LOCALHOST\shareH\dir", @"\\.\UNC\LOCALHOST\shareH\dir"),
-            InlineData(@"\\.\UNC\LOCALHOST\shareK\    ", @"\\.\UNC\LOCALHOST\shareK\"),
-            InlineData(@"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\")]
+            MemberData(nameof(GetFullPath_UNC_Valid_Data))]
         public void GetFullPath_UNC_Valid(string path, string expected)
         {
             if (path.StartsWith(@"\\?\") && PathFeatures.IsUsingLegacyPathNormalization())
@@ -300,6 +368,26 @@ namespace System.IO.Tests
             else
             {
                 Assert.Equal(expected, Path.GetFullPath(path));
+            }
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_UNC_Valid_Data))]
+        public void TryGetFullPath_UNC_Valid(string path, string expected)
+        {
+            if (path.StartsWith(@"\\?\") && PathFeatures.IsUsingLegacyPathNormalization())
+            {
+                AssertExtensions.Throws<ArgumentException>(null, () => Path.GetFullPath(path));
+            }
+            else
+            {
+                int chars;
+                char[] arr = new char[expected.Length];
+                Span<char> destination = new Span<char>(arr, 0, expected.Length);
+
+                Assert.True(Path.TryGetFullPath(path, destination, out chars));
+                Assert.Equal(expected, destination.ToString());
+                Assert.Equal(expected.Length, chars);
             }
         }
 
