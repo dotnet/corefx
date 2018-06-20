@@ -19,8 +19,8 @@ namespace Generic.Dictionary
             {
                 //break internal state
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                object entriesInstance = (Array)entriesType.GetValue(dictionary);                
-                Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });                
+                object entriesInstance = (Array)entriesType.GetValue(dictionary);
+                Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
                 entriesType.SetValue(dictionary, entryArray);
 
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
@@ -69,15 +69,17 @@ namespace Generic.Dictionary
                 new Dictionary<DummyRefType, DummyRefType>() :
                 new Dictionary<DummyRefType, DummyRefType>((customComparer = (IEqualityComparer<DummyRefType>)Activator.CreateInstance(comparerType)));
 
-            dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 });
+            var keyValueSample = new DummyRefType() { Value = 1 };
+
+            dic.Add(keyValueSample, keyValueSample);
 
             await DictionaryConcurrentAccessDetection(dic,
                 typeof(DummyRefType).IsValueType,
                 customComparer,
-                d => d.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 }),
-                d => { var v = d[new DummyRefType() { Value = 1 }]; },
-                d => d.Remove(new DummyRefType() { Value = 1 }),
-                d => d.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value));
+                d => d.Add(keyValueSample, keyValueSample),
+                d => { var v = d[keyValueSample]; },
+                d => d.Remove(keyValueSample),
+                d => d.Remove(keyValueSample, out DummyRefType value));
         }
     }
 
