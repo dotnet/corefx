@@ -34,9 +34,20 @@ namespace System.Security.Cryptography.Primitives.Tests
         [InlineData(null)]
         public static void HashAlgorithm_NotVerified(string algId)
         {
-            new PbeParameters(PbeEncryptionAlgorithm.Aes128Cbc, default(HashAlgorithmName), 1);
+            HashAlgorithmName hashName = new HashAlgorithmName(algId);
 
-            new PbeParameters(PbeEncryptionAlgorithm.Aes128Cbc, new HashAlgorithmName(algId), 1);
+            // Assert.NoThrows.
+            var pbeParams = new PbeParameters(PbeEncryptionAlgorithm.Aes128Cbc, hashName, 1);
+            Assert.Equal(hashName, pbeParams.HashAlgorithm);
+        }
+
+        [Fact]
+        public static void HashAlgorithm_NotVerified_DefaultValue()
+        {
+            // Assert.NoThrows.
+            var pbeParams = new PbeParameters(PbeEncryptionAlgorithm.Aes128Cbc, default(HashAlgorithmName), 1);
+
+            Assert.Equal(default(HashAlgorithmName), pbeParams.HashAlgorithm);
         }
 
         [Theory]
@@ -46,7 +57,15 @@ namespace System.Security.Cryptography.Primitives.Tests
         [InlineData(default)]
         public static void Pkcs12_NotVerifed_InCtor(string hashAlgName)
         {
-            new PbeParameters(PbeEncryptionAlgorithm.TripleDes3KeyPkcs12, new HashAlgorithmName(hashAlgName), 1);
+            HashAlgorithmName hashName = new HashAlgorithmName(hashAlgName);
+
+            // Assert.NoThrows.
+            var pbeParams = new PbeParameters(
+                PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
+                hashName,
+                1);
+
+            Assert.Equal(hashName, pbeParams.HashAlgorithm);
         }
     }
 }
