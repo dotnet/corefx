@@ -693,7 +693,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int iterationCount = ClampIterationCount(pbkdf2Params.IterationCount);
+            int iterationCount = NormalizeIterationCount(pbkdf2Params.IterationCount);
             ReadOnlyMemory<byte> saltMemory = pbkdf2Params.Salt.Specified.Value;
 
             byte[] tmpPassword = new byte[password.Length];
@@ -757,7 +757,7 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int iterationCount = ClampIterationCount(pbeParameters.IterationCount);
+            int iterationCount = NormalizeIterationCount(pbeParameters.IterationCount);
 
             // 2. Apply PBKDF1<hash>(P, S, c, 16) to produce a derived key DK of length 16 octets
             Span<byte> dk = stackalloc byte[16];
@@ -810,7 +810,7 @@ namespace System.Security.Cryptography
                 algorithmIdentifier.Parameters.Value,
                 AsnEncodingRules.BER);
 
-            int iterationCount = ClampIterationCount(pbeParameters.IterationCount);
+            int iterationCount = NormalizeIterationCount(pbeParameters.IterationCount);
             Span<byte> iv = stackalloc byte[cipher.BlockSize / 8];
             Span<byte> key = stackalloc byte[cipher.KeySize / 8];
             ReadOnlySpan<byte> saltSpan = pbeParameters.Salt.Span;
@@ -1019,7 +1019,7 @@ namespace System.Security.Cryptography
             writer.PopSequence();
         }
 
-        private static int ClampIterationCount(uint iterationCount)
+        private static int NormalizeIterationCount(uint iterationCount)
         {
             if (iterationCount == 0 || iterationCount > IterationLimit)
             {

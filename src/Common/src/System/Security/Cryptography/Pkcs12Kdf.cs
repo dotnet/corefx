@@ -93,6 +93,8 @@ namespace System.Security.Cryptography.Pkcs
 
             (int u, int v) = uv;
 
+            Debug.Assert(v <= 1024);
+
             //  1. Construct a string, D (the "diversifier"), by concatenating v/8 copies of ID.
             int vBytes = v >> 3;
             Span<byte> D = stackalloc byte[vBytes];
@@ -222,6 +224,8 @@ namespace System.Security.Cryptography.Pkcs
 
         private static void CircularCopy(ReadOnlySpan<byte> bytes, Span<byte> destination)
         {
+            Debug.Assert(bytes.Length > 0);
+
             while (destination.Length > 0)
             {
                 if (destination.Length >= bytes.Length)

@@ -15,8 +15,7 @@ namespace System.Security.Cryptography.Asn1
     //   },
     //   iterationCount INTEGER (1..MAX),
     //   keyLength INTEGER (1..MAX) OPTIONAL,
-    //   prf AlgorithmIdentifier {{PBKDF2-PRFs}} DEFAULT
-    //   algid-hmacWithSHA1
+    //   prf AlgorithmIdentifier {{PBKDF2-PRFs}} DEFAULT algid-hmacWithSHA1
     // }
     [StructLayout(LayoutKind.Sequential)]
     internal struct Pbkdf2Params

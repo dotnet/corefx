@@ -13,11 +13,15 @@ namespace System.Security.Cryptography
     {
         // Windows 7, 8, and 8.1 don't support PBES2 export, so use
         // the 3DES-192 scheme from PKCS12-PBE whenever deferring to the system.
+        //
+        // Since we're going to immediately re-encrypt the value when using this,
+        // and still have the password in memory while it's running,
+        // just use one iteration in the KDF and cut down on the CPU time involved.
         private static readonly PbeParameters s_platformParameters =
             new PbeParameters(
                 PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
                 HashAlgorithmName.SHA1,
-                10000);
+                1);
 
         internal static bool IsPlatformScheme(PbeParameters pbeParameters)
         {
