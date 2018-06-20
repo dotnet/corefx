@@ -18,11 +18,11 @@ namespace Generic.Dictionary
             Task task = Task.Factory.StartNew(() =>
             {
                 //break internal state
-                var entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                var entriesInstance = (Array)entriesType.GetValue(dictionary);
-                var field = entriesInstance.GetType().GetElementType();
-                var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
-                var entry = Activator.CreateInstance(field);
+                FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                object entriesInstance = (Array)entriesType.GetValue(dictionary);
+                Type field = entriesInstance.GetType().GetElementType();
+                Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
+                object entry = Activator.CreateInstance(field);
                 entriesType.SetValue(dictionary, entryArray);
 
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
