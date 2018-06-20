@@ -17,7 +17,10 @@ namespace Generic.Dictionary
         {
             Task task = Task.Factory.StartNew(() =>
             {
-                // set different entries array to simulate a dictionary corrupted by concurrent access
+                // Get the Dictionary into a corrupted state, as if it had been corrupted by concurrent access.
+                // We this deterministically by clearing the _entries array using reflection;
+                // this means that every Entry struct has a 'next' field of zero, which causes the infinite loop
+                // that we want Dictionary to break out of
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
                 Array entriesInstance = (Array)entriesType.GetValue(dictionary);
                 Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
@@ -32,7 +35,7 @@ namespace Generic.Dictionary
                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
             }, TaskCreationOptions.LongRunning);
 
-            // Wait max 60 seconds, could loop forever
+            // If Dictionary regresses, we do not want to hang here indefinitely
             Assert.True((await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(60))) == task) && task.IsCompletedSuccessfully);
         }
 
