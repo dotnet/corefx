@@ -3,179 +3,126 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using Common.System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Generic.Dictionary
 {
     public class DictionaryConcurrentAccessDetectionTests
     {
-        [Fact]
-        public static void Add_DictionaryConcurrentAccessDetection_NullComparer_ValueTypeKey()
+        async static Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
         {
-            Thread customThread = new Thread(() =>
+            Task task = Task.Factory.StartNew(() =>
             {
-                Dictionary<int, int> dic = new Dictionary<int, int>();
-                dic.Add(1, 1);
-
                 //break internal state
-                var entriesType = dic.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                var entriesInstance = (Array)entriesType.GetValue(dic);
+                var entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                var entriesInstance = (Array)entriesType.GetValue(dictionary);
                 var field = entriesInstance.GetType().GetElementType();
-                var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { dic.Count });
+                var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
                 var entry = Activator.CreateInstance(field);
-                entriesType.SetValue(dic, entryArray);
+                entriesType.SetValue(dictionary, entryArray);
 
-                Assert.Null(dic.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dic));
-                Assert.True(dic.GetType().GetGenericArguments()[0].IsValueType);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Add(1, 1)).TargetSite.Name);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[1]).TargetSite.Name);
+                Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
+                Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
+                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => add(dictionary)).TargetSite.Name);
+                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => get(dictionary)).TargetSite.Name);
                 //Remove is not resilient yet
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1)).TargetSite.Name);
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1, out int value)).TargetSite.Name);
-            });
-            customThread.IsBackground = true;
-            customThread.Start();
+                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
+                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
+            }, TaskCreationOptions.LongRunning);
 
-            //Wait max 5 seconds, could loop forever
-            Assert.True(customThread.Join(TimeSpan.FromSeconds(5)));            
+            //Wait max 60 seconds, could loop forever
+            Assert.True((await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(60))) == task) && task.IsCompletedSuccessfully);
         }
 
-        [Fact]
-        public static void Add_DictionaryConcurrentAccessDetection_Comparer_ValueTypeKey()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(CustomEqualityComparerInt32ValueType))]
+        async public static Task Add_DictionaryConcurrentAccessDetection_ValueTypeKey(Type comparerType)
         {
-            Thread customThread = new Thread(() =>
-             {
-                 Dictionary<int, int> dic = new Dictionary<int, int>(new CustomEqualityComparerInt32ValueType());
-                 dic.Add(1, 1);
+            IEqualityComparer<int> customComparer = null;
 
-                 //break internal state
-                 var entriesType = dic.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                 var entriesInstance = (Array)entriesType.GetValue(dic);
-                 var field = entriesInstance.GetType().GetElementType();
-                 var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { dic.Count });
-                 var entry = Activator.CreateInstance(field);
-                 entriesType.SetValue(dic, entryArray);
+            Dictionary<int, int> dic =
+                comparerType == null ?
+                new Dictionary<int, int>() :
+                new Dictionary<int, int>((customComparer = (IEqualityComparer<int>)Activator.CreateInstance(comparerType)));
 
-                 Assert.NotNull(dic.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dic));
-                 Assert.True(dic.GetType().GetGenericArguments()[0].IsValueType);
-                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Add(1, 1)).TargetSite.Name);
-                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[1]).TargetSite.Name);
-                 //Remove is not resilient yet
-                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1)).TargetSite.Name);
-                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(1, out int value)).TargetSite.Name);
-             });
-            customThread.IsBackground = true;
-            customThread.Start();
+            dic.Add(1, 1);
 
-            //Wait max 5 seconds, could loop forever
-            Assert.True(customThread.Join(TimeSpan.FromSeconds(5)));
+            await DictionaryConcurrentAccessDetection(dic,
+                typeof(int).IsValueType,
+                customComparer,
+                d => d.Add(1, 1),
+                d => { var v = d[1]; },
+                d => d.Remove(1),
+                d => d.Remove(1, out int value));
         }
 
-        [Fact]
-        public static void Add_DictionaryConcurrentAccessDetection_NullComparer_ReferenceTypeKey()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(CustomEqualityComparerDummyRefType))]
+        async public static Task Add_DictionaryConcurrentAccessDetection_ReferenceTypeKey(Type comparerType)
         {
-            Thread customThread = new Thread(() =>
-            {
-                Dictionary<DummyRefType, DummyRefType> dic = new Dictionary<DummyRefType, DummyRefType>();
-                dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 });
+            IEqualityComparer<DummyRefType> customComparer = null;
 
-                //break internal state
-                var entriesType = dic.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                var entriesInstance = (Array)entriesType.GetValue(dic);
-                var field = entriesInstance.GetType().GetElementType();
-                var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { dic.Count });
-                var entry = Activator.CreateInstance(field);
-                entriesType.SetValue(dic, entryArray);
+            Dictionary<DummyRefType, DummyRefType> dic =
+                comparerType == null ?
+                new Dictionary<DummyRefType, DummyRefType>() :
+                new Dictionary<DummyRefType, DummyRefType>((customComparer = (IEqualityComparer<DummyRefType>)Activator.CreateInstance(comparerType)));
 
-                Assert.Null(dic.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dic));
-                Assert.False(dic.GetType().GetGenericArguments()[0].IsValueType);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 })).TargetSite.Name);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[new DummyRefType() { Value = 1 }]).TargetSite.Name);
-                //Remove is not resilient yet
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 })).TargetSite.Name);
-                //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value)).TargetSite.Name);
-            });
-            customThread.IsBackground = true;
-            customThread.Start();
+            dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 });
 
-            //Wait max 5 seconds, could loop forever
-            Assert.True(customThread.Join(TimeSpan.FromSeconds(5)));
-        }
-
-        [Fact]
-        public static void Add_DictionaryConcurrentAccessDetection_Comparer_ReferenceTypeKey()
-        {
-            Thread customThread = new Thread(() =>
-             {
-                 Dictionary<DummyRefType, DummyRefType> dic = new Dictionary<DummyRefType, DummyRefType>(new CustomEqualityComparerDummyRefType());
-                 dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 });
-
-                 //break internal state
-                 var entriesType = dic.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                 var entriesInstance = (Array)entriesType.GetValue(dic);
-                 var field = entriesInstance.GetType().GetElementType();
-                 var entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { dic.Count });
-                 var entry = Activator.CreateInstance(field);
-                 entriesType.SetValue(dic, entryArray);
-
-                 Assert.NotNull(dic.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dic));
-                 Assert.False(dic.GetType().GetGenericArguments()[0].IsValueType);
-                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 })).TargetSite.Name);
-                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic[new DummyRefType() { Value = 1 }]).TargetSite.Name);
-                 //Remove is not resilient yet
-                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 })).TargetSite.Name);
-                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => dic.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value)).TargetSite.Name);
-             });
-            customThread.IsBackground = true;
-            customThread.Start();
-
-            //Wait max 5 seconds, could loop forever
-            Assert.True(customThread.Join(TimeSpan.FromSeconds(5)));
-        }
-    }
-
-    public class DummyRefType
-    {
-        public int Value { get; set; }
-        public override bool Equals(object obj)
-        {
-            return ((DummyRefType)obj).Equals(this.Value);
-        }
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
-        }
-    }
-
-    public class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
-    {
-        public override bool Equals(DummyRefType x, DummyRefType y)
-        {
-            return x.Value == y.Value;
-        }
-
-        public override int GetHashCode(DummyRefType obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-
-    public class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
-    {
-        public override bool Equals(int x, int y)
-        {
-            return EqualityComparer<int>.Default.Equals(x, y);
-        }
-
-        public override int GetHashCode(int obj)
-        {
-            return EqualityComparer<int>.Default.GetHashCode(obj);
+            await DictionaryConcurrentAccessDetection(dic,
+                typeof(DummyRefType).IsValueType,
+                customComparer,
+                d => d.Add(new DummyRefType() { Value = 1 }, new DummyRefType() { Value = 1 }),
+                d => { var v = d[new DummyRefType() { Value = 1 }]; },
+                d => d.Remove(new DummyRefType() { Value = 1 }),
+                d => d.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value));
         }
     }
 }
+
+public class DummyRefType
+{
+    public int Value { get; set; }
+    public override bool Equals(object obj)
+    {
+        return ((DummyRefType)obj).Equals(this.Value);
+    }
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+}
+
+public class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
+{
+    public override bool Equals(DummyRefType x, DummyRefType y)
+    {
+        return x.Value == y.Value;
+    }
+
+    public override int GetHashCode(DummyRefType obj)
+    {
+        return obj.GetHashCode();
+    }
+}
+
+public class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
+{
+    public override bool Equals(int x, int y)
+    {
+        return EqualityComparer<int>.Default.Equals(x, y);
+    }
+
+    public override int GetHashCode(int obj)
+    {
+        return EqualityComparer<int>.Default.GetHashCode(obj);
+    }
+}
+
 
