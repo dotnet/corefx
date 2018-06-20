@@ -96,10 +96,18 @@ namespace System.Net.NetworkInformation.Tests
             AssertExtensions.Throws<ArgumentException>("buffer", () => { p.Send(TestSettings.LocalHost, 1, new byte[65501]); });
         }
 
-        [Fact]
-        public void SendPingWithIPAddress()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddress(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             SendBatchPing(
                 (ping) => ping.Send(localIpAddress),
@@ -109,10 +117,17 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [Fact]
-        public async Task SendPingAsyncWithIPAddress()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public async Task SendPingAsyncWithIPAddress(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress),
@@ -122,10 +137,17 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [Fact]
-        public void SendPingWithIPAddress_AddressAsString()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddress_AddressAsString(AddressFamily addressFamily)
         {
             IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+             if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             SendBatchPing(
                 (ping) => ping.Send(localIpAddress.ToString()),
@@ -295,10 +317,18 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [Fact]
-        public void SendPingWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             SendBatchPing(
@@ -320,10 +350,17 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [Fact]
-        public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(

@@ -27,7 +27,7 @@ namespace System.Net.NetworkInformation
             {
                 PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
                     SendIcmpEchoRequestOverRawSocket(address, buffer, timeout, options) :
-                    SendWithPingUtility(address, buffer, timeout);
+                    SendWithPingUtility(address, buffer, timeout, options);
 
                 return reply;
             }
@@ -43,7 +43,7 @@ namespace System.Net.NetworkInformation
             {
                 Task<PingReply> t = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
                     SendIcmpEchoRequestOverRawSocketAsync(address, buffer, timeout, options) :
-                    SendWithPingUtilityAsync(address, buffer, timeout);
+                    SendWithPingUtilityAsync(address, buffer, timeout, options);
 
                 PingReply reply = await t.ConfigureAwait(false);
                 if (_canceled)
@@ -248,7 +248,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        private Process GetPingProcess(IPAddress address, byte[] buffer)
+        private Process GetPingProcess(IPAddress address, byte[] buffer, PingOptions options)
         {
             bool isIpv4 = address.AddressFamily == AddressFamily.InterNetwork;
             string pingExecutable = isIpv4 ? UnixCommandLinePing.Ping4UtilityPath : UnixCommandLinePing.Ping6UtilityPath;
@@ -257,16 +257,17 @@ namespace System.Net.NetworkInformation
                 throw new PlatformNotSupportedException(SR.net_ping_utility_not_found);
             }
 
-            string processArgs = UnixCommandLinePing.ConstructCommandLine(buffer.Length, address.ToString(), isIpv4);
+            string processArgs = UnixCommandLinePing.ConstructCommandLine(buffer.Length, address.ToString(), isIpv4, options?.Ttl ?? 0);
+
             ProcessStartInfo psi = new ProcessStartInfo(pingExecutable, processArgs);
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
             return new Process() { StartInfo = psi };
         }
 
-        private PingReply SendWithPingUtility(IPAddress address, byte[] buffer, int timeout)
+        private PingReply SendWithPingUtility(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            using (Process p = GetPingProcess(address, buffer))
+            using (Process p = GetPingProcess(address, buffer, options))
             {
                 p.Start();
                 if (!p.WaitForExit(timeout) || p.ExitCode == 1 || p.ExitCode == 2)
@@ -287,9 +288,9 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        private async Task<PingReply> SendWithPingUtilityAsync(IPAddress address, byte[] buffer, int timeout)
+        private async Task<PingReply> SendWithPingUtilityAsync(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            using (Process p = GetPingProcess(address, buffer))
+            using (Process p = GetPingProcess(address, buffer, options))
             {
                 var processCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 p.EnableRaisingEvents = true;

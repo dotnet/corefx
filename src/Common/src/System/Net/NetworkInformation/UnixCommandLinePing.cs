@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Net.NetworkInformation
@@ -18,7 +18,7 @@ namespace System.Net.NetworkInformation
 
         private static readonly string s_discoveredPing4UtilityPath = GetPingUtilityPath(ipv4: true);
         private static readonly string s_discoveredPing6UtilityPath = GetPingUtilityPath(ipv4: false);
-        private static readonly bool s_isOSX = Environment.OSVersion.Platform == PlatformID.MacOSX;
+        private static readonly bool s_isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         // We don't want to pick up an arbitrary or malicious ping
         // command, so that's why we do the path probing ourselves.
@@ -55,6 +55,7 @@ namespace System.Net.NetworkInformation
         /// <returns>The constructed command line arguments, which can be passed to ping or ping6.</returns>
         public static string ConstructCommandLine(int packetSize, string address, bool ipv4, int ttl = 0)
         {
+
             StringBuilder sb = new StringBuilder();
             sb.Append("-c 1"); // Just send a single ping ("count = 1")
 
