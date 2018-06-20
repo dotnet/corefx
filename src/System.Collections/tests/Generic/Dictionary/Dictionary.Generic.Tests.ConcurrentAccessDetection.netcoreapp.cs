@@ -19,8 +19,7 @@ namespace Generic.Dictionary
             {
                 //break internal state
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                object entriesInstance = (Array)entriesType.GetValue(dictionary);
-                Type field = entriesInstance.GetType().GetElementType();
+                object entriesInstance = (Array)entriesType.GetValue(dictionary);                
                 Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });                
                 entriesType.SetValue(dictionary, entryArray);
 
