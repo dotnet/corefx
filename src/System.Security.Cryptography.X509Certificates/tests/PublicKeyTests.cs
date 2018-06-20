@@ -474,7 +474,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-        
+
+#if !NO_DSA_AVAILABLE
         [Fact]
         public static void TestDSAPublicKey()
         {
@@ -524,6 +525,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(pubKey);
             }
         }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes

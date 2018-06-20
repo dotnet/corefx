@@ -195,6 +195,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+#if !NO_DSA_AVAILABLE
         [Fact]
         public static void DsaPrivateKeyProperty()
         {
@@ -216,6 +217,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.False(dsa.VerifyData(data, sig, HashAlgorithmName.SHA1), "Key verifies tampered data signature");
             }
         }
+#endif
 
         private static void Verify_ECDsaPrivateKey_WindowsPfx(ECDsa ecdsa)
         {
@@ -279,7 +281,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-        
+
+#if !NO_DSA_AVAILABLE
         [Fact]
         public static void ReadDSAPrivateKey()
         {
@@ -301,7 +304,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => pubKey.SignData(data, HashAlgorithmName.SHA1));
             }
         }
+#endif
 
+#if !NO_EPHEMERALKEYSET_AVAILABLE
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public static void EphemeralImport_HasNoKeyName()
@@ -371,6 +376,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.NotNull(key.KeyName);
             }
         }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
