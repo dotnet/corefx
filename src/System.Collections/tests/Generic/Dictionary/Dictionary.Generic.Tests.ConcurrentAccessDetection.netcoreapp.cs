@@ -45,8 +45,7 @@ namespace Generic.Dictionary
         {
             IEqualityComparer<int> customComparer = null;
 
-            Dictionary<int, int> dic =
-                comparerType == null ?
+            Dictionary<int, int> dic = comparerType == null ?
                 new Dictionary<int, int>() :
                 new Dictionary<int, int>((customComparer = (IEqualityComparer<int>)Activator.CreateInstance(comparerType)));
 
@@ -68,8 +67,7 @@ namespace Generic.Dictionary
         {
             IEqualityComparer<DummyRefType> customComparer = null;
 
-            Dictionary<DummyRefType, DummyRefType> dic =
-                comparerType == null ?
+            Dictionary<DummyRefType, DummyRefType> dic = comparerType == null ?
                 new Dictionary<DummyRefType, DummyRefType>() :
                 new Dictionary<DummyRefType, DummyRefType>((customComparer = (IEqualityComparer<DummyRefType>)Activator.CreateInstance(comparerType)));
 
