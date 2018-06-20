@@ -13,7 +13,7 @@ namespace Generic.Dictionary
 {
     public class DictionaryConcurrentAccessDetectionTests
     {
-        async static Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
+        async Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
         {
             Task task = Task.Factory.StartNew(() =>
             {
@@ -41,7 +41,7 @@ namespace Generic.Dictionary
         [Theory]
         [InlineData(null)]
         [InlineData(typeof(CustomEqualityComparerInt32ValueType))]
-        async public static Task Add_DictionaryConcurrentAccessDetection_ValueTypeKey(Type comparerType)
+        public async Task DictionaryConcurrentAccessDetection_ValueTypeKey(Type comparerType)
         {
             IEqualityComparer<int> customComparer = null;
 
@@ -64,7 +64,7 @@ namespace Generic.Dictionary
         [Theory]
         [InlineData(null)]
         [InlineData(typeof(CustomEqualityComparerDummyRefType))]
-        async public static Task Add_DictionaryConcurrentAccessDetection_ReferenceTypeKey(Type comparerType)
+        public async Task DictionaryConcurrentAccessDetection_ReferenceTypeKey(Type comparerType)
         {
             IEqualityComparer<DummyRefType> customComparer = null;
 
@@ -84,45 +84,48 @@ namespace Generic.Dictionary
                 d => d.Remove(new DummyRefType() { Value = 1 }, out DummyRefType value));
         }
     }
+
+    class DummyRefType
+    {
+        public int Value { get; set; }
+        public override bool Equals(object obj)
+        {
+            return ((DummyRefType)obj).Equals(this.Value);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+    }
+
+    class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
+    {
+        public override bool Equals(DummyRefType x, DummyRefType y)
+        {
+            return x.Value == y.Value;
+        }
+
+        public override int GetHashCode(DummyRefType obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
+    class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
+    {
+        public override bool Equals(int x, int y)
+        {
+            return EqualityComparer<int>.Default.Equals(x, y);
+        }
+
+        public override int GetHashCode(int obj)
+        {
+            return EqualityComparer<int>.Default.GetHashCode(obj);
+        }
+    }
 }
 
-public class DummyRefType
-{
-    public int Value { get; set; }
-    public override bool Equals(object obj)
-    {
-        return ((DummyRefType)obj).Equals(this.Value);
-    }
-    public override int GetHashCode()
-    {
-        return Value.GetHashCode();
-    }
-}
 
-public class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
-{
-    public override bool Equals(DummyRefType x, DummyRefType y)
-    {
-        return x.Value == y.Value;
-    }
-
-    public override int GetHashCode(DummyRefType obj)
-    {
-        return obj.GetHashCode();
-    }
-}
-
-public class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
-{
-    public override bool Equals(int x, int y)
-    {
-        return EqualityComparer<int>.Default.Equals(x, y);
-    }
-
-    public override int GetHashCode(int obj)
-    {
-        return EqualityComparer<int>.Default.GetHashCode(obj);
-    }
-}
 
 
