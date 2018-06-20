@@ -5,12 +5,14 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using Microsoft.Xunit.Performance;
+using Xunit.NetCore.Extensions;
 
 namespace System.Drawing.Tests
 {
     public class Perf_Graphics_Transforms : RemoteExecutorTestBase
     {
         [Benchmark(InnerIterationCount = 10000)]
+        [ConditionalBenchmark(typeof(Helpers), nameof(Helpers.GetGdiplusIsAvailable))]
         public void TransformPoints()
         {
             Point[] points =

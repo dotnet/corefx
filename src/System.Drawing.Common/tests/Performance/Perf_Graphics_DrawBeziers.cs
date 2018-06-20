@@ -4,12 +4,14 @@
 
 using System.Diagnostics;
 using Microsoft.Xunit.Performance;
+using Xunit.NetCore.Extensions;
 
 namespace System.Drawing.Tests
 {
     public class Perf_Graphics_DrawBeziers : RemoteExecutorTestBase
     {
         [Benchmark(InnerIterationCount = 10000)]
+        [ConditionalBenchmark(typeof(Helpers), nameof(Helpers.GetGdiplusIsAvailable))]
         public void DrawBezier_Point()
         {
             Random r = new Random(1942);
@@ -32,6 +34,7 @@ namespace System.Drawing.Tests
         }
 
         [Benchmark(InnerIterationCount = 10000)]
+        [ConditionalBenchmark(typeof(Helpers), nameof(Helpers.GetGdiplusIsAvailable))]
         public void DrawBezier_Points()
         {
             Point[] points =

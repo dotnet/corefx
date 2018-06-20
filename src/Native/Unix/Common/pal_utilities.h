@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 #include <limits>
@@ -117,11 +118,15 @@ template <typename T, size_t N>
 char(&_ArraySizeHelper(T(&array)[N]))[N];
 #define ARRAY_SIZE(array) (sizeof(_ArraySizeHelper(array)))
 
+#else // __cplusplus
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
+#endif // __cplusplus
+
 /**
  * Abstraction helper method to safely copy strings using strlcpy or strcpy_s
  * or a different safe copy method, depending on the current platform.
  */
-inline void SafeStringCopy(char* destination, size_t destinationSize, const char* source)
+inline static void SafeStringCopy(char* destination, size_t destinationSize, const char* source)
 {
 #if HAVE_STRCPY_S
     strcpy_s(destination, destinationSize, source);
@@ -131,24 +136,6 @@ inline void SafeStringCopy(char* destination, size_t destinationSize, const char
     snprintf(destination, destinationSize, "%s", source);
 #endif
 }
-
-/**
- * Overload of SafeStringCopy that takes a signed int32_t as buffer
- * size. Asserts that its positive, but defensively treats the size
- * as 0 (no-op) if it's negative.
- */
-inline void SafeStringCopy(char* destination, int32_t destinationSize, const char* source)
-{
-    assert(destinationSize >= 0);
-
-    if (destinationSize > 0)
-    {
-        size_t unsignedSize = UnsignedCast(destinationSize);
-        SafeStringCopy(destination, unsignedSize, source);
-    }
-}
-
-#endif // __cplusplus
 
 /**
 * Converts an intptr_t to a file descriptor.
@@ -186,4 +173,35 @@ static inline bool CheckInterrupted(TInt result)
     return result < 0 && errno == EINTR;
 }
 
+#else
+
+static inline bool CheckInterrupted(ssize_t result)
+{
+    return result < 0 && errno == EINTR;
+}
+
 #endif // __cplusplus
+
+inline static uint32_t Int32ToUint32(int32_t value)
+{
+    assert(value >= 0);
+    return (uint32_t)value;
+}
+
+inline static size_t Int32ToSizeT(int32_t value)
+{
+    assert(value >= 0);
+    return (size_t)value;
+}
+
+inline static int32_t Uint32ToInt32(uint32_t value)
+{
+    assert(value <= INT_MAX);
+    return (int32_t)value;
+}
+
+inline static int32_t SizeTToInt32(size_t value)
+{
+    assert(value <= INT_MAX);
+    return (int32_t)value;
+}
