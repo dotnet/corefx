@@ -21,6 +21,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
                 store.Open(OpenFlags.ReadOnly);
+                Assert.Equal("My", store.Name);
             }
         }
 
@@ -29,7 +30,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (X509Store store = new X509Store(StoreLocation.CurrentUser))
             {
-                Assert.Equal("My", store.Name);
+                Assert.Equal("MY", store.Name);
             }
         }
 
