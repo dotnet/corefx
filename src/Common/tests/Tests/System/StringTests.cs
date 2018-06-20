@@ -4638,6 +4638,254 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => s.StartsWith("H", StringComparison.OrdinalIgnoreCase + 1));
         }
 
+        [Fact]	
+        public static void ZeroLengthStartsWith_Char()	
+        {	
+            var a = new char[3];	
+	
+            string s1 = new string(a);	
+            string s2 = new string(a, 2, 0);	
+            bool b = s1.StartsWith(s2);	
+            Assert.True(b);	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            b = span.StartsWith<char>(slice);	
+            Assert.True(b);	
+        }	
+	
+        [Fact]	
+        public static void SameSpanStartsWith_Char()	
+        {	
+            string s1 = "456";	
+            bool b = s1.StartsWith(s1);	
+            Assert.True(b);	
+	
+            var span = s1.AsSpan();	
+            b = span.StartsWith<char>(span);	
+            Assert.True(b);	
+        }	
+	
+        [Fact]	
+        public static void LengthMismatchStartsWith_Char()	
+        {	
+            char[] a = { '4', '5', '6' };	
+	
+            string s1 = new string(a, 0, 2);	
+            string s2 = new string(a, 0, 3);	
+            bool b = s1.StartsWith(s2);	
+            Assert.False(b);	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            b = span.StartsWith<char>(slice);	
+            Assert.False(b);	
+        }	
+	
+        [Fact]	
+        public static void StartsWithMatch_Char()	
+        {	
+            char[] a = { '4', '5', '6' };	
+	
+            string s1 = new string(a, 0, 3);	
+            string s2 = new string(a, 0, 2);	
+            bool b = s1.StartsWith(s2);	
+            Assert.True(b);	
+	
+            var span = new ReadOnlySpan<char>(a, 0, 3);	
+            var slice = new ReadOnlySpan<char>(a, 0, 2);	
+            b = span.StartsWith<char>(slice);	
+            Assert.True(b);	
+        }	
+	
+        [Fact]	
+        public static void StartsWithMatchDifferentSpans_Char()	
+        {	
+            char[] a = { '4', '5', '6' };	
+            char[] b = { '4', '5', '6' };	
+	
+            string s1 = "456";	
+            string s2 = "456";	
+            bool c = s1.StartsWith(s2);	
+            Assert.True(c);	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            c = span.StartsWith<char>(slice);	
+            Assert.True(c);	
+        }	
+	
+        [Fact]	
+        public static void StartsWithNoMatch_Char()	
+        {	
+            for (int length = 1; length < 32; length++)	
+            {	
+                for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)	
+                {	
+                    var first = new char[length];	
+                    var second = new char[length];	
+                    for (int i = 0; i < length; i++)	
+                    {	
+                        first[i] = second[i] = (char)(i + 1);	
+                    }	
+	
+                    second[mismatchIndex] = (char)(second[mismatchIndex] + 1);	
+	
+                    string s1 = new string(first);	
+                    string s2 = new string(second);	
+                    bool b = s1.StartsWith(s2);	
+                    Assert.False(b);	
+	
+                    var firstSpan = s1.AsSpan();	
+                    var secondSpan = s2.AsSpan();	
+                    b = firstSpan.StartsWith<char>(secondSpan);	
+                    Assert.False(b);	
+                }	
+            }	
+        }	
+	
+        [Fact]	
+        public static void MakeSureNoStartsWithChecksGoOutOfRange_Char()	
+        {	
+            for (int length = 0; length < 100; length++)	
+            {	
+                var first = new char[length + 2];	
+                first[0] = '9';	
+                first[length + 1] = '9';	
+                var second = new char[length + 2];	
+                second[0] = 'a';	
+                second[length + 1] = 'a';	
+	
+                string s1 = new string(first, 1, length);	
+                string s2 = new string(second, 1, length);	
+                bool b = s1.StartsWith(s2);	
+                Assert.True(b);	
+	
+                var span1 = s1.AsSpan();	
+                var span2 = s2.AsSpan();	
+                b = span1.StartsWith<char>(span2);	
+                Assert.True(b);	
+            }	
+        }	
+	
+        [Fact]	
+        public static void ZeroLengthStartsWith_StringComparison()	
+        {	
+            var a = new char[3];	
+	
+            string s1 = new string(a);	
+            string s2 = new string(a, 2, 0);	
+            Assert.True(s1.StartsWith(s2, StringComparison.Ordinal));	
+	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
+	
+            s1 = string.Empty;	
+            Assert.True(s1.StartsWith(s2, StringComparison.Ordinal));	
+	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));	
+	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));	
+	
+            span = ReadOnlySpan<char>.Empty;	
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));	
+	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));	
+        }	
+	
+        [Fact]	
+        public static void SameSpanStartsWith_StringComparison()	
+        {	
+            string s1 = "456";	
+            Assert.True(s1.StartsWith(s1, StringComparison.Ordinal));	
+	
+            Assert.True(s1.StartsWith(s1, StringComparison.CurrentCulture));	
+            Assert.True(s1.StartsWith(s1, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s1, StringComparison.InvariantCulture));	
+            Assert.True(s1.StartsWith(s1, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s1, StringComparison.OrdinalIgnoreCase));	
+	
+            var span = s1.AsSpan();	
+            Assert.True(span.StartsWith(span, StringComparison.Ordinal));	
+	
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCulture));	
+            Assert.True(span.StartsWith(span, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCulture));	
+            Assert.True(span.StartsWith(span, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(span.StartsWith(span, StringComparison.OrdinalIgnoreCase));	
+        }	
+	
+        [Fact]	
+        public static void LengthMismatchStartsWith_StringComparison()	
+        {	
+            string value = "456";	
+	
+            string s1 = value.Substring(0, 2);	
+            string s2 = value.Substring(0, 3);	
+            Assert.False(s1.StartsWith(s2, StringComparison.Ordinal));	
+	
+            Assert.False(s1.StartsWith(s2, StringComparison.CurrentCulture));	
+            Assert.False(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.False(s1.StartsWith(s2, StringComparison.InvariantCulture));	
+            Assert.False(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.False(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            Assert.False(span.StartsWith(slice, StringComparison.Ordinal));	
+	
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCulture));	
+            Assert.False(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCulture));	
+            Assert.False(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.False(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));	
+        }	
+	
+        [Fact]	
+        public static void StartsWithMatch_StringComparison()	
+        {	
+            string value = "456";	
+	
+            string s1 = value.Substring(0, 3);	
+            string s2 = value.Substring(0, 2);	
+            Assert.True(s1.StartsWith(s2, StringComparison.Ordinal));	
+	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCulture));	
+            Assert.True(s1.StartsWith(s2, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(s1.StartsWith(s2, StringComparison.OrdinalIgnoreCase));	
+	
+            var span = s1.AsSpan();	
+            var slice = s2.AsSpan();	
+            Assert.True(span.StartsWith(slice, StringComparison.Ordinal));	
+	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.CurrentCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCulture));	
+            Assert.True(span.StartsWith(slice, StringComparison.InvariantCultureIgnoreCase));	
+            Assert.True(span.StartsWith(slice, StringComparison.OrdinalIgnoreCase));	
+        }
+
         [Theory]
         [InlineData("Hello", 0, 5, "Hello")]
         [InlineData("Hello", 0, 3, "Hel")]
