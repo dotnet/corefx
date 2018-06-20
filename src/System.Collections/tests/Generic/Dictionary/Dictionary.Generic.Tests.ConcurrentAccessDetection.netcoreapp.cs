@@ -17,9 +17,9 @@ namespace Generic.Dictionary
         {
             Task task = Task.Factory.StartNew(() =>
             {
-                //break internal state
+                // set different entries array to simulate a dictionary corrupted by concurrent access
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                object entriesInstance = (Array)entriesType.GetValue(dictionary);
+                Array entriesInstance = (Array)entriesType.GetValue(dictionary);
                 Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
                 entriesType.SetValue(dictionary, entryArray);
 
@@ -27,12 +27,12 @@ namespace Generic.Dictionary
                 Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => add(dictionary)).TargetSite.Name);
                 Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => get(dictionary)).TargetSite.Name);
-                //Remove is not resilient yet
+                // Removes are not resilient yet
                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
                 //Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
             }, TaskCreationOptions.LongRunning);
 
-            //Wait max 60 seconds, could loop forever
+            // Wait max 60 seconds, could loop forever
             Assert.True((await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(60))) == task) && task.IsCompletedSuccessfully);
         }
 
@@ -83,6 +83,8 @@ namespace Generic.Dictionary
         }
     }
 
+    // We use a custom type instead of string because string use optimized comparer https://github.com/dotnet/coreclr/blob/master/src/System.Private.CoreLib/shared/System/Collections/Generic/Dictionary.cs#L79
+    // We want to test case with _comparer = null
     class DummyRefType
     {
         public int Value { get; set; }
