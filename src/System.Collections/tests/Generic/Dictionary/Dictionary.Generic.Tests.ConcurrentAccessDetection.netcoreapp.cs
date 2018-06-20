@@ -21,8 +21,7 @@ namespace Generic.Dictionary
                 FieldInfo entriesType = dictionary.GetType().GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
                 object entriesInstance = (Array)entriesType.GetValue(dictionary);
                 Type field = entriesInstance.GetType().GetElementType();
-                Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });
-                object entry = Activator.CreateInstance(field);
+                Array entryArray = (Array)Activator.CreateInstance(entriesInstance.GetType(), new object[] { ((IDictionary)dictionary).Count });                
                 entriesType.SetValue(dictionary, entryArray);
 
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
