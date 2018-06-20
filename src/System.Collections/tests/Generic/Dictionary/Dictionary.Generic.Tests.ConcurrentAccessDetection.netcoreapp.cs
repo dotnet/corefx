@@ -13,7 +13,7 @@ namespace Generic.Dictionary
 {
     public class DictionaryConcurrentAccessDetectionTests
     {
-        async Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
+        private async Task DictionaryConcurrentAccessDetection<TKey, TValue>(Dictionary<TKey, TValue> dictionary, bool isValueType, object comparer, Action<Dictionary<TKey, TValue>> add, Action<Dictionary<TKey, TValue>> get, Action<Dictionary<TKey, TValue>> remove, Action<Dictionary<TKey, TValue>> removeOutParam)
         {
             Task task = Task.Factory.StartNew(() =>
             {
